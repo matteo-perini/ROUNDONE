@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">RoundOne</string>
+    <string name="title_activity_main">RoundOne</string>
+    <string name="package_name">com.roundone.app</string>
+    <string name="custom_url_scheme">com.roundone.app</string>
+</resources>
