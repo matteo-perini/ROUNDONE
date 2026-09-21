@@ -7,87 +7,92 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-blue-50/70 text-slate-900 min-h-screen flex flex-col justify-between relative selection:bg-indigo-600 selection:text-white">
+<body class="bg-blue-50/70 text-slate-900 min-h-screen flex flex-col justify-between relative selection:bg-indigo-600 selection:text-white pb-16">
 
-    <!-- HEADER / NAVBAR -->
-    <header class="bg-slate-900 text-white border-b border-slate-800 px-4 sm:px-6 py-3.5 sm:py-4 flex justify-between items-center shadow-md sticky top-0 z-40">
-        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-            <h1 class="text-base sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
-                🏋️‍♂️ <span class="hidden sm:inline">Area Coach</span>
-            </h1>
-            <!-- BOTTONE CHAT -->
-            <a href="chat.html" class="bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-xs">
-                💬 Chat
-            </a>
-            <!-- BOTTONE RICHIESTE CON CONTATORE -->
-            <button type="button" id="btn-open-requests" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-xs">
-                📥 Richieste (<span id="requests-count" class="font-bold underline decoration-indigo-300">0</span>)
-            </button>
-            <!-- CODICE INVITO NELL'HEADER -->
-            <div class="bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-xl text-xs font-mono font-bold text-indigo-200 flex items-center gap-1.5 shadow-xs">
-                <span id="invite-code-display" class="tracking-widest">---</span>
-                <button type="button" id="btn-copy-code" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-0.5 rounded-lg text-[10px] font-sans font-semibold transition shadow-xs" title="Copia codice negli appunti">
-                    📋 Copia
+    <!-- OVERLAY PER LA SIDEBAR -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 hidden transition-opacity duration-300"></div>
+
+    <!-- SIDEBAR LATERALE (DA DESTRA) -->
+    <aside id="sidebar-menu" class="fixed inset-y-0 right-0 w-72 bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between border-l border-indigo-100">
+        <div>
+            <!-- Intestazione Sidebar -->
+            <div class="bg-slate-900 text-white p-5 flex justify-between items-center border-b border-slate-800">
+                <div>
+                    <h3 id="sidebar-coach-name" class="font-extrabold text-sm tracking-tight text-white">Coach</h3>
+                    <p id="sidebar-gym-name" class="text-[11px] text-indigo-300 font-medium">Leoni di San Marco</p>
+                </div>
+                <button type="button" id="btn-close-sidebar" class="text-slate-400 hover:text-white text-base font-bold p-1 rounded-lg bg-slate-800 border border-slate-700 w-8 h-8 flex items-center justify-center transition-all duration-200 transform active:scale-90">✕</button>
+            </div>
+
+            <!-- Codice Invito Palestra -->
+            <div class="p-3.5 bg-indigo-50/80 border-b border-indigo-100 flex items-center justify-between text-xs">
+                <div>
+                    <span class="block text-[10px] uppercase font-bold text-indigo-900">Codice Invito Palestra</span>
+                    <span id="sidebar-invite-code" class="font-mono font-bold text-indigo-950 tracking-wider">---</span>
+                </div>
+                <button type="button" id="btn-copy-sidebar-code" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 transform active:scale-90 shadow-xs">Copia</button>
+            </div>
+
+            <!-- Voci del Menu -->
+            <nav class="p-3 space-y-1.5">
+                <button type="button" id="menu-athletes" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-950 transition-all duration-200 transform active:scale-95 text-left">
+                    <span class="text-base">👥</span> Atleti & Programmazione
                 </button>
+                <button type="button" id="menu-create-tpl" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all duration-200 transform active:scale-95 text-left">
+                    <span class="text-base">➕</span> Crea Scheda Globale
+                </button>
+                <button type="button" id="menu-saved-tpl" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all duration-200 transform active:scale-95 text-left">
+                    <span class="text-base">📂</span> Schede Globali Create
+                </button>
+                <a href="chat.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all duration-200 transform active:scale-95">
+                    <span class="text-base">💬</span> Chat con gli Atleti
+                </a>
+                <button type="button" id="menu-requests" class="w-full flex justify-between items-center px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all duration-200 transform active:scale-95 text-left">
+                    <span class="flex items-center gap-3"><span class="text-base">📥</span> Richieste Programma</span>
+                    <span id="sidebar-requests-count" class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full font-mono">0</span>
+                </button>
+                <button type="button" id="btn-enable-notifications" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-all duration-200 transform active:scale-95 text-left border border-indigo-200">
+                    <span class="text-base">🔔</span> Attiva Notifiche Push
+                </button>
+            </nav>
+        </div>
+
+        <!-- Footer Sidebar con Logout -->
+        <div class="p-4 border-t border-indigo-100 bg-slate-50">
+            <button id="btn-logout-sidebar" class="w-full bg-rose-600/10 hover:bg-rose-600/20 text-rose-700 border border-rose-200 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 transform active:scale-90 flex items-center justify-center gap-2">
+                🚪 Esci dall'Account
+            </button>
+        </div>
+    </aside>
+
+    <!-- HEADER / NAVBAR SUPERIORE -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 px-4 sm:px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-30">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-indigo-600/25 border border-indigo-500/30 flex items-center justify-center text-indigo-300 font-black text-sm shadow-inner">
+                🛡️
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 id="coach-name-display" class="text-xs sm:text-sm font-black tracking-tight text-white leading-tight truncate max-w-[150px] sm:max-w-xs">Coach</h1>
+                    <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/35 hidden sm:inline-block animate-pulse">Admin</span>
+                </div>
+                <p id="gym-name-subtitle" class="text-[11px] text-indigo-300/80 font-medium truncate max-w-[180px] sm:max-w-xs mt-0.5">Leoni di San Marco</p>
             </div>
         </div>
-        <div class="flex items-center gap-3">
-            <span id="coach-email-display" class="text-xs sm:text-sm font-medium text-slate-300 hidden md:inline"></span>
-            <button id="btn-logout" class="bg-rose-600/20 text-rose-300 border border-rose-500/30 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold hover:bg-rose-600/30 transition shadow-xs">Esci</button>
+        <div class="flex items-center gap-2">
+            <button type="button" id="btn-open-sidebar" class="bg-slate-800 hover:bg-slate-700 text-white p-2.5 rounded-xl border border-slate-700 transition-all duration-200 transform active:scale-90 shadow-md" title="Apri menu">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
         </div>
     </header>
 
     <!-- MAIN CONTAINER -->
-    <main class="flex-grow max-w-5xl w-full mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
+    <main class="flex-grow max-w-5xl w-full mx-auto p-3 sm:p-6 space-y-6 sm:space-y-8">
 
-        <!-- NOME PALESTRA PULITO -->
-        <div class="px-1">
-            <h2 id="gym-name-title" class="text-2xl sm:text-3xl font-black text-indigo-950 tracking-tight">Caricamento palestra...</h2>
-            <p class="text-xs text-indigo-800/70 font-medium mt-0.5">Pannello di controllo e programmazione atleti.</p>
-        </div>
-
-        <!-- SEZIONE 1: CREA SCHEDA SALA PESI -->
-        <div class="bg-white rounded-2xl shadow-md border border-indigo-200 overflow-hidden">
-            <div id="template-accordion-header" class="bg-indigo-100/80 hover:bg-indigo-100 px-4 sm:px-6 py-4 flex justify-between items-center cursor-pointer transition select-none">
-                <div class="flex items-center gap-2">
-                    <span class="text-sm sm:text-base font-bold text-indigo-950 flex items-center gap-2">
-                        🏋️‍♂️ Crea Scheda Globale (Database Palestra)
-                    </span>
-                </div>
-                <span id="template-accordion-arrow" class="text-xs font-bold text-indigo-900 bg-white border border-indigo-200 px-3 py-1 rounded-xl shadow-xs">▼ Apri</span>
-            </div>
-            <div id="template-accordion-body" class="p-4 sm:p-6 border-t border-indigo-100 hidden space-y-6 bg-white">
-                <form id="template-form" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-indigo-900 mb-1.5">Nome della Scheda</label>
-                        <input type="text" id="tpl-title" placeholder="Es. Forza 1, Ipertrofia A" required class="w-full px-3.5 py-2.5 bg-indigo-50/50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs sm:text-sm transition">
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-indigo-900">Esercizi</label>
-                            <button type="button" id="btn-add-exercise" class="text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold px-3 py-1 rounded-xl transition shadow-xs">+ Aggiungi</button>
-                        </div>
-                        <div id="exercises-container" class="space-y-2.5 max-h-64 overflow-y-auto pr-1"></div>
-                    </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-xs sm:text-sm shadow-md">Salva Scheda nel Database Globale</button>
-                </form>
-
-                <div class="pt-4 border-t border-indigo-100">
-                    <div id="saved-templates-accordion-header" class="bg-indigo-50/80 hover:bg-indigo-100/80 px-3.5 py-3 rounded-xl flex justify-between items-center cursor-pointer transition select-none border border-indigo-200">
-                        <span class="text-xs sm:text-sm font-bold text-indigo-950">📂 Schede Globali Salvate</span>
-                        <span id="saved-templates-accordion-arrow" class="text-xs font-bold text-indigo-900 bg-white border border-indigo-200 px-2.5 py-1 rounded-lg shadow-xs">▼ Apri</span>
-                    </div>
-                    <div id="saved-templates-accordion-body" class="hidden pt-3 space-y-2">
-                        <div id="saved-templates-list" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                            <p class="text-xs text-slate-400 italic">Caricamento schede...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SEZIONE 2: ATLETI E PROGRAMMAZIONE -->
-        <div class="bg-white rounded-2xl shadow-md border border-emerald-200 overflow-hidden flex flex-col justify-between">
+        <!-- SEZIONE 1: ATLETI E PROGRAMMAZIONE -->
+        <div class="bg-white rounded-2xl shadow-md border border-emerald-200 overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-lg">
             <div id="athletes-selection-container" class="p-4 sm:p-6 space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
                     <div>
@@ -111,16 +116,16 @@
                 <div class="flex justify-between items-center bg-emerald-100/80 p-3.5 rounded-xl border border-emerald-200">
                     <div>
                         <h4 id="selected-athlete-title" class="text-sm sm:text-base font-black text-emerald-950">Gestione Atleta</h4>
-                        <span class="text-[11px] text-emerald-800 font-semibold">Calendario MMA o Schede Personali Dirette.</span>
+                        <span class="text-[11px] text-emerald-800 font-semibold">Calendario allenamenti o Schede Personali Dirette.</span>
                     </div>
-                    <button type="button" id="btn-close-program" class="text-xs bg-white text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-xl font-bold hover:bg-emerald-50 transition shadow-xs">✕ Chiudi</button>
+                    <button type="button" id="btn-close-program" class="text-xs bg-white text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-xl font-bold hover:bg-emerald-50 transition-all duration-200 transform active:scale-90 shadow-xs">✕ Chiudi</button>
                 </div>
 
                 <div id="personal-tpl-section" class="bg-white p-4 rounded-xl border border-emerald-200 shadow-xs space-y-3">
                     <div class="flex justify-between items-center cursor-pointer select-none" id="personal-tpl-accordion-header">
                         <div>
                             <h5 class="text-xs sm:text-sm font-black text-emerald-950">🎯 Schede Personali / Dirette (Solo per questo atleta)</h5>
-                            <p class="text-[11px] text-slate-500">Ideale per atleti K1 o Sala Pesi che non usano il calendario settimanale.</p>
+                            <p class="text-[11px] text-slate-500">Ideale per atleti che non usano il calendario settimanale.</p>
                         </div>
                         <span id="personal-tpl-arrow" class="text-xs font-bold text-emerald-900 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg shadow-xs">▼ Apri</span>
                     </div>
@@ -134,14 +139,14 @@
                             <div>
                                 <div class="flex justify-between items-center mb-1">
                                     <label class="block text-[10px] font-bold uppercase tracking-wider text-emerald-900">Esercizi</label>
-                                    <button type="button" id="btn-add-personal-exercise" class="text-[10px] bg-emerald-200 hover:bg-emerald-300 text-emerald-950 font-bold px-2.5 py-1 rounded-lg transition">+ Aggiungi</button>
+                                    <button type="button" id="btn-add-personal-exercise" class="text-[10px] bg-emerald-200 hover:bg-emerald-300 text-emerald-950 font-bold px-2.5 py-1 rounded-lg transition-all duration-200 transform active:scale-90">+ Aggiungi</button>
                                 </div>
                                 <div id="personal-exercises-container" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
                             </div>
-                            <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2 rounded-xl transition text-xs shadow-sm">Salva Scheda Solo per Questo Atleta</button>
+                            <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2 rounded-xl transition-all duration-200 transform active:scale-90 text-xs shadow-sm">Salva Scheda Solo per Questo Atleta</button>
                         </form>
                         <div class="space-y-2">
-                            <h6 class="text-xs font-black text-emerald-950 uppercase tracking-wider">Schede Dirette Assegnate</h6>
+                            <h6 class="text-xs font-black text-emerald-950 uppercase tracking-wider">Schede Dirette Assegnate (Clicca per visualizzare/modificare)</h6>
                             <div id="personal-templates-list" class="space-y-2 max-h-40 overflow-y-auto pr-1">
                                 <p class="text-xs text-slate-400 italic">Nessuna scheda personale creata.</p>
                             </div>
@@ -153,9 +158,9 @@
                     <div class="bg-white p-3.5 rounded-xl border border-emerald-200 shadow-xs flex justify-between items-center">
                         <div>
                             <span class="text-xs font-bold text-emerald-950 block">Calendario Allenamenti (Settimanale)</span>
-                            <span class="text-[11px] text-slate-500">Per atleti con doppie sedute giornaliere (es. MMA).</span>
+                            <span class="text-[11px] text-slate-500">Programmazione settimanale dell'atleta.</span>
                         </div>
-                        <button type="button" id="btn-open-create-week-modal" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-md">+ Crea Settimana</button>
+                        <button type="button" id="btn-open-create-week-modal" class="bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all duration-200 transform active:scale-90 shadow-md">+ Crea Settimana</button>
                     </div>
                     <div id="weeks-accordion-container" class="space-y-3 max-h-[50vh] overflow-y-auto pr-1">
                         <p class="text-xs text-slate-400 italic">Seleziona o crea una settimana per iniziare.</p>
@@ -163,27 +168,79 @@
                 </div>
             </div>
         </div>
+
+        <!-- SEZIONE 2: CREA SCHEDA GLOBALE (TENDINA APRIBILE) -->
+        <div id="section-create-tpl" class="bg-white rounded-2xl shadow-md border border-indigo-200 overflow-hidden transition-all duration-300 hover:shadow-lg">
+            <div id="template-accordion-header" class="bg-indigo-100/80 hover:bg-indigo-100 px-4 sm:px-6 py-4 flex justify-between items-center cursor-pointer transition select-none">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm sm:text-base font-bold text-indigo-950 flex items-center gap-2">
+                        ➕ Crea Scheda Globale
+                    </span>
+                </div>
+                <span id="template-accordion-arrow" class="text-xs font-bold text-indigo-900 bg-white border border-indigo-200 px-3 py-1 rounded-xl shadow-xs">▼ Apri</span>
+            </div>
+            <div id="template-accordion-body" class="p-4 sm:p-6 border-t border-indigo-100 hidden space-y-4 bg-white">
+                <form id="template-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-indigo-900 mb-1.5">Nome della Scheda</label>
+                        <input type="text" id="tpl-title" placeholder="Es. Forza 1, Ipertrofia A" required class="w-full px-3.5 py-2.5 bg-indigo-50/50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs sm:text-sm transition">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-indigo-900">Esercizi</label>
+                            <button type="button" id="btn-add-exercise" class="text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold px-3 py-1 rounded-xl transition-all duration-200 transform active:scale-90 shadow-xs">+ Aggiungi Esercizio</button>
+                        </div>
+                        <div id="exercises-container" class="space-y-2.5 max-h-64 overflow-y-auto pr-1"></div>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition-all duration-200 transform active:scale-90 text-xs sm:text-sm shadow-md">Salva Scheda nel Database Globale</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- SEZIONE 3: SCHEDE GLOBALI CREATE / SALVATE -->
+        <div id="section-saved-tpl" class="bg-white rounded-2xl shadow-md border border-indigo-200 overflow-hidden p-4 sm:p-6 space-y-4 transition-all duration-300 hover:shadow-lg">
+            <div class="border-b border-indigo-100 pb-3">
+                <h3 class="text-base sm:text-lg font-black text-indigo-950">📂 Schede Globali Create</h3>
+                <p class="text-xs text-slate-500">Elenco di tutte le schede salvate. Clicca su una scheda per visualizzarla o modificarla.</p>
+            </div>
+            <div id="saved-templates-list" class="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+                <p class="text-xs text-slate-400 italic">Caricamento schede...</p>
+            </div>
+        </div>
+
     </main>
 
-    <!-- MODAL CUSTOM NOTIFICHE (SOSTITUISCE ALERT) -->
-    <div id="custom-alert-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-indigo-100 p-6 space-y-4 text-center">
-            <div class="text-3xl">✨</div>
-            <h4 id="custom-alert-title" class="font-black text-base text-indigo-950">Notifica</h4>
-            <p id="custom-alert-message" class="text-xs text-slate-600 leading-relaxed"></p>
-            <button type="button" id="custom-alert-ok" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Capito</button>
+    <!-- MODAL VISUALIZZA / MODIFICA SCHEDA -->
+    <div id="view-template-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-indigo-100 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-indigo-900 text-white px-5 py-4 flex justify-between items-center">
+                <h3 id="view-tpl-modal-title" class="font-black text-sm">🏋️‍♂️ Dettaglio Scheda</h3>
+                <button type="button" id="btn-close-view-tpl-modal" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded-lg transition-all duration-200 transform active:scale-90">✕</button>
+            </div>
+            <div id="view-tpl-modal-content" class="p-5 overflow-y-auto space-y-4 text-xs flex-grow bg-slate-50/50"></div>
+            <div id="view-tpl-modal-footer" class="p-4 border-t border-indigo-100 bg-white flex justify-between items-center gap-2"></div>
         </div>
     </div>
 
-    <!-- MODAL CUSTOM CONFERME (SOSTITUISCE CONFIRM) -->
+    <!-- MODAL CUSTOM NOTIFICHE -->
+    <div id="custom-alert-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-indigo-100 p-6 space-y-4 text-center transform transition-all">
+            <div class="text-3xl">✨</div>
+            <h4 id="custom-alert-title" class="font-black text-base text-indigo-950">Notifica</h4>
+            <p id="custom-alert-message" class="text-xs text-slate-600 leading-relaxed"></p>
+            <button type="button" id="custom-alert-ok" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition-all duration-200 transform active:scale-90 text-xs shadow-md">Capito</button>
+        </div>
+    </div>
+
+    <!-- MODAL CUSTOM CONFERME -->
     <div id="custom-confirm-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-indigo-100 p-6 space-y-4 text-center">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-indigo-100 p-6 space-y-4 text-center transform transition-all">
             <div class="text-3xl">⚠️</div>
             <h4 class="font-black text-base text-indigo-950">Conferma Operazione</h4>
             <p id="custom-confirm-message" class="text-xs text-slate-600 leading-relaxed"></p>
             <div class="grid grid-cols-2 gap-2 pt-2">
-                <button type="button" id="custom-confirm-cancel" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition text-xs">Annulla</button>
-                <button type="button" id="custom-confirm-yes" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Conferma</button>
+                <button type="button" id="custom-confirm-cancel" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition-all duration-200 transform active:scale-90 text-xs">Annulla</button>
+                <button type="button" id="custom-confirm-yes" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 rounded-xl transition-all duration-200 transform active:scale-90 text-xs shadow-md">Conferma</button>
             </div>
         </div>
     </div>
@@ -193,14 +250,14 @@
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
             <div class="bg-emerald-900 text-white px-4 py-3.5 border-b border-emerald-950 flex justify-between items-center">
                 <h3 class="font-bold text-sm sm:text-base">📅 Crea Nuova Settimana</h3>
-                <button type="button" id="btn-close-create-week-modal" class="text-xs font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1 rounded-xl transition">✕ Chiudi</button>
+                <button type="button" id="btn-close-create-week-modal" class="text-xs font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1 rounded-xl transition-all duration-200 transform active:scale-90">✕ Chiudi</button>
             </div>
             <div class="p-4 space-y-4 bg-slate-50">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-emerald-900 mb-1.5">Data Inizio Settimana (Lunedì)</label>
                     <input type="date" id="modal-new-week-date" class="w-full px-3.5 py-2.5 bg-white border border-emerald-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600">
                 </div>
-                <button type="button" id="btn-confirm-create-week" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2.5 rounded-xl transition text-xs sm:text-sm shadow-md">Conferma e Crea</button>
+                <button type="button" id="btn-confirm-create-week" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2.5 rounded-xl transition-all duration-200 transform active:scale-90 text-xs sm:text-sm shadow-md">Conferma e Crea</button>
             </div>
         </div>
     </div>
@@ -210,7 +267,7 @@
         <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[80vh]">
             <div class="bg-indigo-900 text-white px-4 py-3.5 border-b border-indigo-950 flex justify-between items-center">
                 <h3 class="font-bold text-sm sm:text-base">📥 Richieste di Programmazione in Attesa</h3>
-                <button type="button" id="btn-close-requests-modal" class="text-xs font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1 rounded-xl transition">✕ Chiudi</button>
+                <button type="button" id="btn-close-requests-modal" class="text-xs font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1 rounded-xl transition-all duration-200 transform active:scale-90">✕ Chiudi</button>
             </div>
             <div id="modal-requests-container" class="p-4 overflow-y-auto space-y-2.5 flex-grow bg-slate-50">
                 <p class="text-xs text-slate-400 italic text-center py-6">Nessuna richiesta in sospeso.</p>
@@ -219,15 +276,23 @@
     </div>
 
     <!-- FOOTER -->
-    <footer class="text-center py-4 text-xs text-indigo-900/60 font-medium border-t border-indigo-100 bg-white/50">
-        RoundOne &copy; 2026
+    <footer class="text-center py-4 px-4 text-xs text-indigo-900/60 font-medium border-t border-indigo-100 bg-white/50 space-y-1.5 mt-8">
+        <div class="flex justify-center items-center gap-3 text-[11px] font-bold text-indigo-900/70">
+            <a href="policy.html" class="hover:text-indigo-600 transition-colors">Privacy Policy</a>
+            <span>•</span>
+            <a href="note-legali.html" class="hover:text-indigo-600 transition-colors">Note Legali</a>
+        </div>
+        <div class="text-[11px]">
+            RoundOne &copy; 2026 — Leoni di San Marco. Tutti i diritti riservati.
+        </div>
     </footer>
 
     <!-- LOGICA FIREBASE E GESTIONE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, getDocs, query, where, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, setDoc, getDocs, query, where, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD5xFMM-kKy2-pYzcTk3MiFmXCTCe4EXEA",
@@ -241,6 +306,82 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const messaging = getMessaging(app);
+
+        // Gestione Sidebar
+        const sidebarMenu = document.getElementById('sidebar-menu');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const btnOpenSidebar = document.getElementById('btn-open-sidebar');
+        const btnCloseSidebar = document.getElementById('btn-close-sidebar');
+
+        function openSidebar() {
+            sidebarMenu.classList.remove('translate-x-full');
+            sidebarOverlay.classList.remove('hidden');
+        }
+        function closeSidebar() {
+            sidebarMenu.classList.add('translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        }
+
+        btnOpenSidebar.addEventListener('click', openSidebar);
+        btnCloseSidebar.addEventListener('click', closeSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        // Accordion per Crea Scheda Globale
+        const templateAccordionHeader = document.getElementById('template-accordion-header');
+        const templateAccordionBody = document.getElementById('template-accordion-body');
+        const templateAccordionArrow = document.getElementById('template-accordion-arrow');
+
+        templateAccordionHeader.addEventListener('click', () => {
+            templateAccordionBody.classList.toggle('hidden');
+            templateAccordionArrow.textContent = templateAccordionBody.classList.contains('hidden') ? '▼ Apri' : '▲ Chiudi';
+        });
+
+        // Collegamenti Voci Sidebar
+        document.getElementById('menu-athletes').addEventListener('click', () => {
+            closeSidebar();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        document.getElementById('menu-create-tpl').addEventListener('click', () => {
+            closeSidebar();
+            templateAccordionBody.classList.remove('hidden');
+            templateAccordionArrow.textContent = '▲ Chiudi';
+            document.getElementById('section-create-tpl').scrollIntoView({ behavior: 'smooth' });
+        });
+        document.getElementById('menu-saved-tpl').addEventListener('click', () => {
+            closeSidebar();
+            document.getElementById('section-saved-tpl').scrollIntoView({ behavior: 'smooth' });
+        });
+        document.getElementById('menu-requests').addEventListener('click', () => {
+            closeSidebar();
+            requestsModal.classList.remove('hidden');
+        });
+
+        // ATTIVAZIONE NOTIFICHE PUSH
+        const btnEnableNotifications = document.getElementById('btn-enable-notifications');
+        btnEnableNotifications.addEventListener('click', async () => {
+            closeSidebar();
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    const currentToken = await getToken(messaging, { vapidKey: "BBGalOWMJGZq_uydm4FqbvA9XPu97YtSrLQ9-39ezP_TSGF9pPkVSOG52NaV5VoAlxvc2nXai9cLJhgIAu83kRo" });
+                    if (currentToken && auth.currentUser) {
+                        await setDoc(doc(db, "users", auth.currentUser.uid), { fcmToken: currentToken }, { merge: true });
+                        showAlert("Notifiche push attivate con successo su questo dispositivo!", "Ottimo");
+                    } else {
+                        showAlert("Impossibile generare il token di notifica.", "Attenzione");
+                    }
+                } else {
+                    showAlert("Permesso per le notifiche negato dal browser.", "Permesso Negato");
+                }
+            } catch (err) {
+                showAlert("Errore attivazione notifiche: " + err.message, "Errore");
+            }
+        });
+
+        onMessage(messaging, (payload) => {
+            showAlert(`${payload.notification.title}: ${payload.notification.body}`, "Nuova Notifica");
+        });
 
         // FUNZIONI MODALI CUSTOM
         function showAlert(message, title = "Notifica") {
@@ -275,24 +416,160 @@
             });
         }
 
-        const coachEmailDisplay = document.getElementById('coach-email-display');
-        const gymNameTitle = document.getElementById('gym-name-title');
-        const inviteCodeDisplay = document.getElementById('invite-code-display');
-        const btnCopyCode = document.getElementById('btn-copy-code');
-        const btnLogout = document.getElementById('btn-logout');
-
-        const templateAccordionHeader = document.getElementById('template-accordion-header');
-        const templateAccordionBody = document.getElementById('template-accordion-body');
-        const templateAccordionArrow = document.getElementById('template-accordion-arrow');
-
-        const savedTemplatesAccordionHeader = document.getElementById('saved-templates-accordion-header');
-        const savedTemplatesAccordionBody = document.getElementById('saved-templates-accordion-body');
-        const savedTemplatesAccordionArrow = document.getElementById('saved-templates-accordion-arrow');
+        const coachNameDisplay = document.getElementById('coach-name-display');
+        const sidebarCoachName = document.getElementById('sidebar-coach-name');
+        const sidebarInviteCode = document.getElementById('sidebar-invite-code');
+        const btnCopySidebarCode = document.getElementById('btn-copy-sidebar-code');
+        const btnLogoutSidebar = document.getElementById('btn-logout-sidebar');
 
         const exercisesContainer = document.getElementById('exercises-container');
         const btnAddExercise = document.getElementById('btn-add-exercise');
         const templateForm = document.getElementById('template-form');
         const savedTemplatesList = document.getElementById('saved-templates-list');
+
+        const viewTemplateModal = document.getElementById('view-template-modal');
+        const viewTplModalTitle = document.getElementById('view-tpl-modal-title');
+        const viewTplModalContent = document.getElementById('view-tpl-modal-content');
+        const viewTplModalFooter = document.getElementById('view-tpl-modal-footer');
+        const btnCloseViewTplModal = document.getElementById('btn-close-view-tpl-modal');
+
+        btnCloseViewTplModal.addEventListener('click', () => viewTemplateModal.classList.add('hidden'));
+        viewTemplateModal.addEventListener('click', (e) => { if (e.target === viewTemplateModal) viewTemplateModal.classList.add('hidden'); });
+
+        let currentActiveTemplate = null;
+
+        function openViewTemplateModal(tpl, type = 'global', athleteId = null) {
+            currentActiveTemplate = { ...tpl, type, athleteId };
+            renderTemplateViewMode();
+            viewTemplateModal.classList.remove('hidden');
+        }
+
+        function renderTemplateViewMode() {
+            viewTplModalTitle.textContent = `🏋️‍♂️ ${currentActiveTemplate.title}`;
+            viewTplModalContent.innerHTML = '';
+
+            if (!currentActiveTemplate.exercises || currentActiveTemplate.exercises.length === 0) {
+                viewTplModalContent.innerHTML = '<p class="text-xs text-slate-400 italic py-4 text-center">Nessun esercizio configurato.</p>';
+            } else {
+                const listDiv = document.createElement('div');
+                listDiv.className = "space-y-2.5 divide-y divide-indigo-50";
+                currentActiveTemplate.exercises.forEach((ex, idx) => {
+                    const row = document.createElement('div');
+                    row.className = "pt-2 first:pt-0 text-xs space-y-0.5";
+                    row.innerHTML = `
+                        <div class="flex justify-between items-center font-bold text-slate-900">
+                            <span>${idx + 1}. ${ex.name}</span>
+                            <span class="font-mono bg-indigo-50 text-indigo-900 px-2 py-0.5 rounded border border-indigo-100">${ex.sets} serie × ${ex.reps} reps</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-[11px] text-slate-500">
+                            ${ex.load ? `<span class="font-medium text-indigo-700">🎯 Carico: ${ex.load}</span>` : ''}
+                            ${ex.notes ? `<span class="italic">💡 Note: ${ex.notes}</span>` : ''}
+                        </div>
+                    `;
+                    listDiv.appendChild(row);
+                });
+                viewTplModalContent.appendChild(listDiv);
+            }
+
+            viewTplModalFooter.innerHTML = `
+                <button type="button" id="btn-edit-tpl-mode" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl transition-all duration-200 transform active:scale-90 text-xs shadow-md">✏️ Modifica Scheda</button>
+                <button type="button" id="btn-close-view-ok" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl transition-all duration-200 transform active:scale-90 text-xs">Chiudi</button>
+            `;
+
+            document.getElementById('btn-edit-tpl-mode').addEventListener('click', renderTemplateEditMode);
+            document.getElementById('btn-close-view-ok').addEventListener('click', () => viewTemplateModal.classList.add('hidden'));
+        }
+
+        function renderTemplateEditMode() {
+            viewTplModalTitle.textContent = `✏️ Modifica: ${currentActiveTemplate.title}`;
+            viewTplModalContent.innerHTML = `
+                <div class="space-y-3">
+                    <div>
+                        <label class="block font-bold uppercase tracking-wider text-indigo-900 mb-1 text-[10px]">Titolo Scheda</label>
+                        <input type="text" id="edit-tpl-title-input" value="${currentActiveTemplate.title}" class="w-full px-3 py-2 bg-white border border-indigo-200 rounded-xl font-bold text-xs focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="block font-bold uppercase tracking-wider text-indigo-900 text-[10px]">Esercizi</label>
+                            <button type="button" id="btn-add-edit-exercise" class="text-[10px] bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold px-2.5 py-1 rounded-lg transition-all duration-200 transform active:scale-90">+ Aggiungi Esercizio</button>
+                        </div>
+                        <div id="edit-exercises-rows-container" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+            `;
+
+            const container = document.getElementById('edit-exercises-rows-container');
+
+            function addRow(name='', sets='', reps='', load='', notes='') {
+                const row = document.createElement('div');
+                row.className = "flex flex-col gap-1.5 p-2.5 bg-white border border-indigo-100 rounded-xl edit-ex-row relative";
+                row.innerHTML = `
+                    <div class="flex gap-1">
+                        <input type="text" placeholder="Nome Esercizio" value="${name}" class="edit-ex-name flex-grow px-2 py-1.5 bg-indigo-50/50 border border-indigo-200 rounded-lg text-xs font-semibold focus:outline-none">
+                        <input type="text" placeholder="Serie" value="${sets}" class="edit-ex-sets w-12 px-1 py-1.5 bg-indigo-50/50 border border-indigo-200 rounded-lg text-xs text-center font-mono">
+                        <input type="text" placeholder="Reps" value="${reps}" class="edit-ex-reps w-12 px-1 py-1.5 bg-indigo-50/50 border border-indigo-200 rounded-lg text-xs text-center font-mono">
+                        <input type="text" placeholder="Carico" value="${load}" class="edit-ex-load w-20 px-2 py-1.5 bg-indigo-50/50 border border-indigo-200 rounded-lg text-xs font-medium">
+                        <button type="button" class="btn-remove-edit-row text-rose-600 hover:text-rose-800 font-bold px-2 py-1">✕</button>
+                    </div>
+                    <input type="text" placeholder="Note (es. recupero, tecnica)" value="${notes}" class="edit-ex-notes w-full px-2 py-1 bg-indigo-50/50 border border-indigo-200 rounded-lg text-[11px]">
+                `;
+                row.querySelector('.btn-remove-edit-row').addEventListener('click', () => row.remove());
+                container.appendChild(row);
+            }
+
+            if (currentActiveTemplate.exercises && currentActiveTemplate.exercises.length > 0) {
+                currentActiveTemplate.exercises.forEach(ex => addRow(ex.name, ex.sets, ex.reps, ex.load, ex.notes));
+            } else {
+                addRow();
+            }
+
+            document.getElementById('btn-add-edit-exercise').addEventListener('click', () => addRow());
+
+            viewTplModalFooter.innerHTML = `
+                <button type="button" id="btn-cancel-edit" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl transition-all duration-200 transform active:scale-90 text-xs">Annulla</button>
+                <button type="button" id="btn-save-edited-tpl" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-xl transition-all duration-200 transform active:scale-90 text-xs shadow-md">💾 Salva Modifiche</button>
+            `;
+
+            document.getElementById('btn-cancel-edit').addEventListener('click', renderTemplateViewMode);
+            document.getElementById('btn-save-edited-tpl').addEventListener('click', async () => {
+                const newTitle = document.getElementById('edit-tpl-title-input').value.trim();
+                if (!newTitle) { showAlert("Inserisci un titolo valido.", "Attenzione"); return; }
+
+                const rows = container.querySelectorAll('.edit-ex-row');
+                let newExercises = [];
+                rows.forEach(r => {
+                    const name = r.querySelector('.edit-ex-name').value.trim();
+                    const sets = r.querySelector('.edit-ex-sets').value.trim();
+                    const reps = r.querySelector('.edit-ex-reps').value.trim();
+                    const load = r.querySelector('.edit-ex-load').value.trim();
+                    const notes = r.querySelector('.edit-ex-notes').value.trim();
+                    if (name) newExercises.push({ name, sets, reps, load, notes });
+                });
+
+                if (newExercises.length === 0) { showAlert("Aggiungi almeno un esercizio.", "Attenzione"); return; }
+
+                try {
+                    if (currentActiveTemplate.type === 'global') {
+                        await setDoc(doc(db, "gyms", currentGymId, "templates", currentActiveTemplate.id), {
+                            title: newTitle,
+                            exercises: newExercises
+                        }, { merge: true });
+                        loadTemplates();
+                    } else if (currentActiveTemplate.type === 'personal') {
+                        await setDoc(doc(db, "gyms", currentGymId, "athlete_programs", currentActiveTemplate.athleteId, "personal_templates", currentActiveTemplate.id), {
+                            title: newTitle,
+                            exercises: newExercises
+                        }, { merge: true });
+                        loadAthletePersonalTemplates();
+                    }
+
+                    showAlert("Scheda aggiornata con successo!", "Salvato");
+                    viewTemplateModal.classList.add('hidden');
+                } catch (err) {
+                    showAlert("Errore durante il salvataggio: " + err.message, "Errore");
+                }
+            });
+        }
 
         const personalTplSection = document.getElementById('personal-tpl-section');
         const personalTplAccordionHeader = document.getElementById('personal-tpl-accordion-header');
@@ -318,29 +595,18 @@
         const modalNewWeekDateInput = document.getElementById('modal-new-week-date');
         const btnConfirmCreateWeek = document.getElementById('btn-confirm-create-week');
 
-        const btnOpenRequests = document.getElementById('btn-open-requests');
         const requestsModal = document.getElementById('requests-modal');
         const btnCloseRequestsModal = document.getElementById('btn-close-requests-modal');
         const modalRequestsContainer = document.getElementById('modal-requests-container');
-        const requestsCountSpan = document.getElementById('requests-count');
+        const requestsCountSpan = document.getElementById('sidebar-requests-count');
 
         let currentGymId = null;
         let allAthletes = [];
         let gymTemplates = [];
         let selectedAthlete = null;
 
-        btnLogout.addEventListener('click', async () => {
+        btnLogoutSidebar.addEventListener('click', async () => {
             try { await signOut(auth); } catch (e) {} finally { window.location.replace('index.html'); }
-        });
-
-        templateAccordionHeader.addEventListener('click', () => {
-            templateAccordionBody.classList.toggle('hidden');
-            templateAccordionArrow.textContent = templateAccordionBody.classList.contains('hidden') ? '▼ Apri' : '▲ Chiudi';
-        });
-
-        savedTemplatesAccordionHeader.addEventListener('click', () => {
-            savedTemplatesAccordionBody.classList.toggle('hidden');
-            savedTemplatesAccordionArrow.textContent = savedTemplatesAccordionBody.classList.contains('hidden') ? '▼ Apri' : '▲ Chiudi';
         });
 
         personalTplAccordionHeader.addEventListener('click', () => {
@@ -348,8 +614,8 @@
             personalTplArrow.textContent = personalTplAccordionBody.classList.contains('hidden') ? '▼ Apri' : '▲ Chiudi';
         });
 
-        btnCopyCode.addEventListener('click', () => {
-            const codeText = inviteCodeDisplay.textContent.trim();
+        btnCopySidebarCode.addEventListener('click', () => {
+            const codeText = sidebarInviteCode.textContent.trim();
             if (codeText && codeText !== '---') {
                 navigator.clipboard.writeText(codeText).then(() => showAlert("Codice invito copiato negli appunti!", "Copia Riuscita"));
             }
@@ -361,7 +627,6 @@
         });
         btnCloseCreateWeekModal.addEventListener('click', () => createWeekModal.classList.add('hidden'));
 
-        btnOpenRequests.addEventListener('click', () => requestsModal.classList.remove('hidden'));
         btnCloseRequestsModal.addEventListener('click', () => requestsModal.classList.add('hidden'));
 
         function addExerciseRow(container, name = '', sets = '', reps = '', load = '', notes = '') {
@@ -398,11 +663,11 @@
 
                 const userData = userDoc.data();
                 currentGymId = userData.gymId;
-                coachEmailDisplay.textContent = `${userData.name} (${user.email})`;
-                gymNameTitle.textContent = userData.gymName || "Palestra";
+                coachNameDisplay.textContent = userData.name;
+                sidebarCoachName.textContent = userData.name;
 
                 const gymDoc = await getDoc(doc(db, "gyms", currentGymId));
-                if (gymDoc.exists()) inviteCodeDisplay.textContent = gymDoc.data().inviteCode || "---";
+                if (gymDoc.exists()) sidebarInviteCode.textContent = gymDoc.data().inviteCode || "---";
 
                 loadTemplates();
                 loadAthletes();
@@ -441,8 +706,8 @@
                             </div>
                         </div>
                         <div class="flex gap-2 flex-shrink-0">
-                            <button type="button" class="bg-indigo-600 text-white px-3 py-1.5 rounded-xl font-bold hover:bg-indigo-500 transition btn-fulfill shadow-xs">Gestisci</button>
-                            <button type="button" class="bg-white border border-slate-200 text-slate-600 px-2.5 py-1.5 rounded-xl hover:bg-slate-50 transition btn-dismiss shadow-xs">✕</button>
+                            <button type="button" class="bg-indigo-600 text-white px-3 py-1.5 rounded-xl font-bold hover:bg-indigo-500 transition-all duration-200 transform active:scale-90 btn-fulfill shadow-xs">Gestisci</button>
+                            <button type="button" class="bg-white border border-slate-200 text-slate-600 px-2.5 py-1.5 rounded-xl hover:bg-slate-50 transition-all duration-200 transform active:scale-90 btn-dismiss shadow-xs">✕</button>
                         </div>
                     `;
 
@@ -475,14 +740,18 @@
                 gymTemplates.push(tpl);
 
                 const div = document.createElement('div');
-                div.className = "p-3 bg-indigo-50/50 border border-indigo-200 rounded-xl text-xs flex justify-between items-center shadow-xs";
+                div.className = "p-3 bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-200 rounded-xl text-xs flex justify-between items-center shadow-xs cursor-pointer transition-all duration-200";
                 div.innerHTML = `
-                    <span class="font-bold text-indigo-950">${tpl.title}</span> 
+                    <span class="font-bold text-indigo-950 text-xs sm:text-sm">🏋️‍♂️ ${tpl.title}</span> 
                     <div class="flex items-center gap-2">
-                        <span class="text-indigo-800 font-mono bg-white px-2 py-0.5 rounded-lg border border-indigo-200">${tpl.exercises.length} es.</span>
-                        <button type="button" class="text-xs bg-white text-rose-600 border border-indigo-200 hover:bg-rose-50 font-bold px-2 py-1 rounded-lg transition delete-tpl-btn shadow-xs">🗑️</button>
+                        <button type="button" class="text-xs bg-white text-rose-600 border border-indigo-200 hover:bg-rose-50 font-bold px-2.5 py-1.5 rounded-lg transition-all duration-200 transform active:scale-90 delete-tpl-btn shadow-xs" title="Elimina scheda">🗑️</button>
                     </div>
                 `;
+
+                div.addEventListener('click', (e) => {
+                    if (e.target.closest('.delete-tpl-btn')) return;
+                    openViewTemplateModal(tpl, 'global');
+                });
 
                 div.querySelector('.delete-tpl-btn').addEventListener('click', () => {
                     showConfirm(`Eliminare la scheda globale "${tpl.title}"?`, async () => {
@@ -540,7 +809,7 @@
             displayList.forEach((athlete, index) => {
                 const displayNum = isFiltering(searchTerm) ? "" : `${index + 1}. `;
                 const div = document.createElement('div');
-                div.className = "p-3 bg-white hover:bg-emerald-900 hover:text-white border border-emerald-200 rounded-xl flex justify-between items-center cursor-pointer transition group shadow-xs";
+                div.className = "p-3 bg-white hover:bg-emerald-900 hover:text-white border border-emerald-200 rounded-xl flex justify-between items-center cursor-pointer transition-all duration-200 hover:shadow-md group shadow-xs";
                 div.innerHTML = `
                     <div class="flex items-center gap-2">
                         <span class="font-bold text-xs text-emerald-800 group-hover:text-emerald-200">${displayNum}</span>
@@ -615,14 +884,18 @@
             snapshot.forEach(docSnap => {
                 const tpl = { id: docSnap.id, ...docSnap.data() };
                 const div = document.createElement('div');
-                div.className = "p-2.5 bg-emerald-50/50 border border-emerald-200 rounded-xl text-xs flex justify-between items-center shadow-xs";
+                div.className = "p-2.5 bg-emerald-50/50 hover:bg-emerald-100/60 border border-emerald-200 rounded-xl text-xs flex justify-between items-center shadow-xs cursor-pointer transition-all duration-200";
                 div.innerHTML = `
-                    <div>
-                        <span class="font-black text-emerald-950">${tpl.title}</span>
-                        <span class="text-[10px] text-slate-500 block">${tpl.exercises.length} esercizi</span>
+                    <div class="flex-grow min-w-0">
+                        <span class="font-black text-emerald-950 truncate block">🎯 ${tpl.title}</span>
                     </div>
-                    <button type="button" class="bg-white text-rose-600 border border-emerald-200 hover:bg-rose-50 font-bold px-2 py-1 rounded-lg transition delete-ptpl-btn">🗑️</button>
+                    <button type="button" class="bg-white text-rose-600 border border-emerald-200 hover:bg-rose-50 font-bold px-2.5 py-1.5 rounded-lg transition-all duration-200 transform active:scale-90 delete-ptpl-btn" title="Elimina scheda">🗑️</button>
                 `;
+
+                div.addEventListener('click', (e) => {
+                    if (e.target.closest('.delete-ptpl-btn')) return;
+                    openViewTemplateModal(tpl, 'personal', selectedAthlete.id);
+                });
 
                 div.querySelector('.delete-ptpl-btn').addEventListener('click', () => {
                     showConfirm(`Eliminare la scheda personale "${tpl.title}"?`, async () => {
@@ -689,7 +962,7 @@
 
         function renderWeekCard(weekData) {
             const card = document.createElement('div');
-            card.className = "bg-white border border-emerald-200 rounded-xl shadow-xs overflow-hidden";
+            card.className = "bg-white border border-emerald-200 rounded-xl shadow-xs overflow-hidden transition-all duration-300 hover:shadow-md";
 
             const [y, m, d] = weekData.startDate.split('-').map(Number);
             const mondayDate = new Date(y, m - 1, d);
@@ -734,8 +1007,8 @@
                         <h5 class="font-black text-xs sm:text-sm text-emerald-950 capitalize truncate">📅 ${weekTitleStr}</h5>
                     </div>
                     <div class="flex items-center gap-1.5 flex-shrink-0">
-                        <button type="button" class="text-[11px] bg-emerald-800 text-white px-2.5 py-1 rounded-lg font-bold hover:bg-emerald-700 transition save-week-btn shadow-2xs">Salva</button>
-                        <button type="button" class="text-[11px] bg-white text-rose-600 border border-emerald-300 hover:bg-rose-50 font-bold px-2 py-1 rounded-lg transition delete-week-btn shadow-2xs" title="Elimina settimana">🗑️</button>
+                        <button type="button" class="text-[11px] bg-emerald-800 text-white px-2.5 py-1 rounded-lg font-bold hover:bg-emerald-700 transition-all duration-200 transform active:scale-90 save-week-btn shadow-2xs">Salva</button>
+                        <button type="button" class="text-[11px] bg-white text-rose-600 border border-emerald-300 hover:bg-rose-50 font-bold px-2 py-1 rounded-lg transition-all duration-200 transform active:scale-90 delete-week-btn shadow-2xs" title="Elimina settimana">🗑️</button>
                         <span class="text-[11px] font-bold text-emerald-900 bg-white border border-emerald-300 px-2 py-1 rounded-lg toggle-arrow shadow-2xs">▼</span>
                     </div>
                 </div>
@@ -746,7 +1019,7 @@
                         <input type="text" placeholder="OFF o Attività" value="${sundayInfo.activity1 || 'OFF'}" class="w-full sm:w-64 px-2.5 py-1 border border-emerald-200 rounded-lg text-[11px] bg-white focus:outline-none focus:ring-1 focus:ring-emerald-600 day-act1 text-right sm:text-left font-medium" data-day="domenica">
                     </div>
                     <div class="flex justify-end pt-1">
-                        <button type="button" class="text-xs bg-emerald-800 text-white px-4 py-2 rounded-xl font-bold hover:bg-emerald-700 transition save-week-btn shadow-sm">Salva Modifiche Settimana</button>
+                        <button type="button" class="text-xs bg-emerald-800 text-white px-4 py-2 rounded-xl font-bold hover:bg-emerald-700 transition-all duration-200 transform active:scale-90 save-week-btn shadow-sm">Salva Modifiche Settimana</button>
                     </div>
                 </div>
             `;

@@ -1,0 +1,24 @@
+// www/firebase-messaging-sw.js
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
+
+firebase.initializeApp({
+  apiKey: "AIzaSyD5xFMM-kKy2-pYzcTk3MiFmXCTCe4EXEA",
+  authDomain: "app-palestra-b0b9d.firebaseapp.com",
+  projectId: "app-palestra-b0b9d",
+  storageBucket: "app-palestra-b0b9d.firebasestorage.app",
+  messagingSenderId: "412455135240",
+  appId: "1:412455135240:web:d53bd1a83a400d5e6809bd"
+});
+
+const messaging = firebase.messaging();
+
+messaging.onBackgroundMessage((payload) => {
+  console.log('[firebase-messaging-sw.js] Messaggio ricevuto in background:', payload);
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
+    body: payload.notification.body,
+    icon: '/icon.png'
+  };
+  self.registration.showNotification(notificationTitle, notificationOptions);
+});

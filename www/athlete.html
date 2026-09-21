@@ -9,59 +9,125 @@
 </head>
 <body class="bg-blue-50/70 text-slate-900 min-h-screen flex flex-col justify-between relative selection:bg-indigo-600 selection:text-white pb-16">
 
-    <!-- HEADER / NAVBAR -->
-    <header class="bg-slate-900 text-white border-b border-slate-800 px-4 sm:px-6 py-3.5 sm:py-4 flex justify-between items-center shadow-md sticky top-0 z-40">
-        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-            <h1 class="text-base sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
-                🥊 <span class="hidden sm:inline">Area Atleta</span>
-            </h1>
-            <!-- PULSANTE CHAT -->
-            <a href="chat.html" class="bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-xs">
-                💬 Chat
-            </a>
-            <!-- PULSANTE RICHIEDI PROGRAMMA -->
-            <button type="button" id="btn-open-request-modal" class="bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-xs">
-                📝 Richiedi Programma
+    <!-- OVERLAY PER LA SIDEBAR -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 hidden transition-opacity duration-300"></div>
+
+    <!-- SIDEBAR LATERALE (DA DESTRA) -->
+    <aside id="sidebar-menu" class="fixed inset-y-0 right-0 w-72 bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between border-l border-indigo-100">
+        <div>
+            <!-- Intestazione Sidebar -->
+            <div class="bg-slate-900 text-white p-5 flex justify-between items-center border-b border-slate-800">
+                <div>
+                    <h3 id="sidebar-athlete-name" class="font-extrabold text-sm tracking-tight text-white">Atleta</h3>
+                    <p id="sidebar-gym-name" class="text-[11px] text-indigo-300 font-medium">Palestra</p>
+                </div>
+                <button type="button" id="btn-close-sidebar" class="text-slate-400 hover:text-white text-base font-bold p-1 rounded-lg bg-slate-800 border border-slate-700 w-8 h-8 flex items-center justify-center transition-all duration-200 transform active:scale-90">✕</button>
+            </div>
+
+            <!-- Codice Invito Palestra per i compagni -->
+            <div class="p-3.5 bg-indigo-50/80 border-b border-indigo-100 flex items-center justify-between text-xs">
+                <div>
+                    <span class="block text-[10px] uppercase font-bold text-indigo-900">Codice Invito Palestra</span>
+                    <span id="sidebar-invite-code" class="font-mono font-bold text-indigo-950 tracking-wider">---</span>
+                </div>
+                <button type="button" id="btn-copy-sidebar-code" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 transform active:scale-90 shadow-xs hover:shadow-md">Copia</button>
+            </div>
+
+            <!-- Voci del Menu ordinate con transizioni -->
+            <nav class="p-3 space-y-1.5">
+                <button type="button" id="menu-program" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-950 transition-all duration-200 transform active:scale-95 hover:bg-indigo-100/70 text-left">
+                    <span class="text-base">📅</span> Il Mio Programma
+                </button>
+                <button type="button" id="menu-sala-pesi" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all duration-200 transform active:scale-95 text-left">
+                    <span class="text-base">🏋️‍♂️</span> Sala Pesi & Schede
+                </button>
+                <a href="chat.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all duration-200 transform active:scale-95">
+                    <span class="text-base">💬</span> Chat con il Coach
+                </a>
+                <button type="button" id="menu-request" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all duration-200 transform active:scale-95 text-left">
+                    <span class="text-base">📝</span> Richiedi Programma
+                </button>
+                <button type="button" id="menu-timer" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all duration-200 transform active:scale-95 text-left">
+                    <span class="text-base">⏱️</span> Timer di Recupero
+                </button>
+                <button type="button" id="btn-enable-notifications" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition-all duration-200 transform active:scale-95 text-left border border-indigo-200">
+                    <span class="text-base">🔔</span> Attiva Notifiche Push
+                </button>
+            </nav>
+        </div>
+
+        <!-- Footer Sidebar con Logout in fondo -->
+        <div class="p-4 border-t border-indigo-100 bg-slate-50">
+            <button id="btn-logout" class="w-full bg-rose-600/10 hover:bg-rose-600/20 text-rose-700 border border-rose-200 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 transform active:scale-90 flex items-center justify-center gap-2">
+                🚪 Esci dall'Account
             </button>
         </div>
-        <div class="flex items-center gap-2 sm:gap-3">
-            <button type="button" id="btn-open-timer-modal" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 shadow-xs">
-                ⏱️ Timer
+    </aside>
+
+    <!-- HEADER / NAVBAR SUPERIORE ARRICCHITA CON EFFETTI -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 px-4 sm:px-6 py-4 flex justify-between items-center shadow-lg sticky top-0 z-30">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-indigo-600/25 border border-indigo-500/30 flex items-center justify-center text-indigo-300 font-black text-sm shadow-inner transition-transform duration-300 hover:scale-105">
+                ⚡
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 id="header-athlete-name" class="text-xs sm:text-sm font-black tracking-tight text-white leading-tight">Atleta</h1>
+                    <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30 hidden sm:inline-block animate-pulse">Online</span>
+                </div>
+                <p id="header-gym-subtitle" class="text-[11px] text-indigo-300/80 font-medium truncate max-w-[200px] sm:max-w-xs mt-0.5">Team Palestra</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <!-- Pulsante Menu Hamburger a Destra con animazione al tocco -->
+            <button type="button" id="btn-open-sidebar" class="bg-slate-800 hover:bg-slate-700 text-white p-2.5 rounded-xl border border-slate-700 transition-all duration-200 transform active:scale-90 shadow-md hover:shadow-indigo-500/20" title="Apri menu">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
             </button>
-            <button id="btn-logout" class="bg-rose-600/20 text-rose-300 border border-rose-500/30 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold hover:bg-rose-600/30 transition shadow-xs">Esci</button>
         </div>
     </header>
 
     <!-- MAIN CONTAINER -->
     <main class="flex-grow max-w-5xl w-full mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
-        <div class="px-1 pt-1">
-            <h2 id="athlete-welcome-title" class="text-sm font-black text-slate-900 tracking-tight">Atleta</h2>
-            <p id="gym-name-subtitle" class="text-xs text-indigo-900/70 font-semibold mt-0.5">Team Palestra: Caricamento...</p>
-        </div>
 
-        <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-md border border-indigo-100 space-y-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-indigo-100 pb-4">
+        <!-- 1. PROGRAMMAZIONE SETTIMANALE (CALENDARIO) IN ALTO -->
+        <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-md border border-indigo-100 space-y-4 transition-all duration-300 hover:shadow-lg">
+            <div class="border-b border-indigo-100 pb-3 flex justify-between items-center">
                 <div>
-                    <h3 class="text-base sm:text-lg font-black text-indigo-950">Il Mio Piano di Allenamento</h3>
-                    <p class="text-xs sm:text-sm text-slate-500">Visualizza il calendario o accedi direttamente alle tue schede.</p>
+                    <h3 class="text-base font-black text-indigo-950">📅 Il Mio Piano di Allenamento</h3>
+                    <p class="text-xs text-slate-500">Calendario e attività settimanali assegnate dal coach.</p>
                 </div>
-                <button type="button" id="btn-sala-pesi" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl transition shadow-md flex items-center justify-center gap-2">
-                    🏋️‍♂️ Sala Pesi (Le Mie Schede)
-                </button>
+                <span class="bg-indigo-50 text-indigo-700 font-bold text-[10px] px-2.5 py-1 rounded-xl border border-indigo-200 hidden sm:inline-block">Area Attiva</span>
             </div>
             <div id="athlete-weeks-container" class="space-y-3">
                 <p class="text-xs text-slate-400 italic">Caricamento programmazione in corso...</p>
             </div>
         </div>
+
+        <!-- 2. SCHEDE SALA PESI SOTTO -->
+        <div id="sala-pesi-section" class="bg-white p-5 sm:p-6 rounded-2xl shadow-md border border-emerald-100 space-y-4 transition-all duration-300 hover:shadow-lg">
+            <div class="border-b border-emerald-100 pb-3 flex justify-between items-center">
+                <div>
+                    <h3 class="text-base font-black text-emerald-950">🏋️‍♂️ Sala Pesi & Schede Dedicate</h3>
+                    <p class="text-xs text-slate-500">Le tue schede di allenamento personali e globali.</p>
+                </div>
+                <span class="bg-emerald-50 text-emerald-700 font-bold text-[10px] px-2.5 py-1 rounded-xl border border-emerald-200 hidden sm:inline-block">Schede Pronte</span>
+            </div>
+            <div id="athlete-templates-container" class="space-y-3">
+                <p class="text-xs text-slate-400 italic">Caricamento schede...</p>
+            </div>
+        </div>
+
     </main>
 
-    <!-- MODAL CUSTOM NOTIFICHE (SOSTITUISCE ALERT) -->
+    <!-- MODAL CUSTOM NOTIFICHE -->
     <div id="custom-alert-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-indigo-100 p-6 space-y-4 text-center">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-indigo-100 p-6 space-y-4 text-center transform transition-all">
             <div class="text-3xl">✨</div>
             <h4 id="custom-alert-title" class="font-black text-base text-indigo-950">Notifica</h4>
             <p id="custom-alert-message" class="text-xs text-slate-600 leading-relaxed"></p>
-            <button type="button" id="custom-alert-ok" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Capito</button>
+            <button type="button" id="custom-alert-ok" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition-all duration-200 transform active:scale-90 text-xs shadow-md hover:shadow-lg">Capito</button>
         </div>
     </div>
 
@@ -70,27 +136,14 @@
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-indigo-200 overflow-hidden flex flex-col p-6 space-y-4">
             <div class="flex justify-between items-center border-b border-indigo-100 pb-3">
                 <h3 class="font-black text-sm sm:text-base text-indigo-950">📝 Richiedi Programma al Coach</h3>
-                <button type="button" id="btn-close-request-modal" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg transition">✕</button>
+                <button type="button" id="btn-close-request-modal" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg transition-all duration-200 transform active:scale-90">✕</button>
             </div>
             <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-indigo-900 mb-1">Messaggio per il Coach</label>
-                <input type="text" id="request-message-input" maxlength="40" placeholder="Es. Fammi programma forza (max 40 caratteri)" class="w-full px-3.5 py-2.5 bg-indigo-50/50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs">
+                <input type="text" id="request-message-input" maxlength="40" placeholder="Es. Fammi programma forza (max 40 caratteri)" class="w-full px-3.5 py-2.5 bg-indigo-50/50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs transition">
                 <span class="text-[10px] text-slate-400 mt-1 block">Massimo 40 caratteri</span>
             </div>
-            <button type="button" id="btn-submit-request" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Invia Richiesta</button>
-        </div>
-    </div>
-
-    <!-- MODAL SALA PESI A TENDINA -->
-    <div id="sala-pesi-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-6">
-        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
-            <div class="bg-indigo-900 text-white px-4 py-3.5 border-b border-indigo-950 flex justify-between items-center">
-                <h3 class="font-bold text-sm sm:text-base">🏋️‍♂️ Sala Pesi - Le Tue Schede Dedicate</h3>
-                <button type="button" id="btn-close-modal" class="text-xs sm:text-sm font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 px-3 py-1 rounded-xl transition">✕ Chiudi</button>
-            </div>
-            <div id="modal-templates-container" class="p-4 overflow-y-auto space-y-3 flex-grow bg-slate-50">
-                <p class="text-xs text-slate-400 italic text-center">Nessuna scheda caricata.</p>
-            </div>
+            <button type="button" id="btn-submit-request" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition-all duration-200 transform active:scale-90 text-xs shadow-md hover:shadow-lg">Invia Richiesta</button>
         </div>
     </div>
 
@@ -99,34 +152,34 @@
         <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-indigo-200 overflow-hidden flex flex-col p-6 space-y-5">
             <div class="flex justify-between items-center border-b border-indigo-100 pb-3">
                 <h3 class="font-black text-sm sm:text-base text-indigo-950 flex items-center gap-2">⏱️ Timer Recupero Serie</h3>
-                <button type="button" id="btn-close-timer-modal" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg transition">✕</button>
+                <button type="button" id="btn-close-timer-modal" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg transition-all duration-200 transform active:scale-90">✕</button>
             </div>
             <div class="text-center">
                 <div id="timer-display" class="text-5xl font-black font-mono tracking-wider text-indigo-950 py-2">01:30</div>
                 <p id="timer-status" class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Pronto</p>
             </div>
             <div class="grid grid-cols-3 gap-2">
-                <button type="button" id="btn-start" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Avvia</button>
-                <button type="button" id="btn-pause" class="bg-amber-500 hover:bg-amber-400 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Pausa</button>
-                <button type="button" id="btn-reset" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl transition text-xs">Reset</button>
+                <button type="button" id="btn-start" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl transition-all duration-200 transform active:scale-90 text-xs shadow-md">Avvia</button>
+                <button type="button" id="btn-pause" class="bg-amber-500 hover:bg-amber-400 text-white font-bold py-2.5 rounded-xl transition-all duration-200 transform active:scale-90 text-xs shadow-md">Pausa</button>
+                <button type="button" id="btn-reset" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl transition-all duration-200 transform active:scale-90 text-xs">Reset</button>
             </div>
             <div class="space-y-1.5 pt-2 border-t border-indigo-100">
                 <label class="block text-[10px] font-bold uppercase tracking-wider text-indigo-900 text-center">Preset Rapidi</label>
                 <div class="grid grid-cols-3 gap-1.5">
-                    <button type="button" data-seconds="30" class="preset-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 py-1.5 rounded-lg text-xs font-bold transition">30s</button>
-                    <button type="button" data-seconds="45" class="preset-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 py-1.5 rounded-lg text-xs font-bold transition">45s</button>
-                    <button type="button" data-seconds="60" class="preset-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 py-1.5 rounded-lg text-xs font-bold transition">1m</button>
-                    <button type="button" data-seconds="90" class="preset-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 py-1.5 rounded-lg text-xs font-bold transition">1:30</button>
-                    <button type="button" data-seconds="120" class="preset-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 py-1.5 rounded-lg text-xs font-bold transition">2m</button>
-                    <button type="button" data-seconds="180" class="preset-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 py-1.5 rounded-lg text-xs font-bold transition">3m</button>
+                    <button type="button" data-seconds="30" class="preset-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 transform active:scale-90">30s</button>
+                    <button type="button" data-seconds="45" class="preset-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 transform active:scale-90">45s</button>
+                    <button type="button" data-seconds="60" class="preset-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 transform active:scale-90">1m</button>
+                    <button type="button" data-seconds="90" class="preset-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 transform active:scale-90">1:30</button>
+                    <button type="button" data-seconds="120" class="preset-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 transform active:scale-90">2m</button>
+                    <button type="button" data-seconds="180" class="preset-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 transform active:scale-90">3m</button>
                 </div>
             </div>
-            <button type="button" id="btn-hide-timer-modal" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Nascondi</button>
+            <button type="button" id="btn-hide-timer-modal" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition-all duration-200 transform active:scale-90 text-xs shadow-md">Nascondi</button>
         </div>
     </div>
 
     <!-- BARRA TIMER FLUTTUANTE -->
-    <div id="floating-timer-bar" class="fixed bottom-0 left-0 right-0 bg-slate-900 text-white border-t border-slate-800 px-4 py-3 hidden flex justify-between items-center shadow-2xl z-40">
+    <div id="floating-timer-bar" class="fixed bottom-0 left-0 right-0 bg-slate-900 text-white border-t border-slate-800 px-4 py-3 hidden flex justify-between items-center shadow-2xl z-45 transition-all">
         <div class="flex items-center gap-3">
             <span class="animate-pulse text-emerald-400 text-lg">⏱️</span>
             <div>
@@ -135,15 +188,22 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <button type="button" id="floating-btn-toggle" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-xl text-xs font-bold transition">Pausa</button>
-            <button type="button" id="floating-btn-open" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">Apri</button>
-            <button type="button" id="floating-btn-stop" class="bg-rose-600/30 text-rose-300 border border-rose-500/30 px-2.5 py-1.5 rounded-xl text-xs font-semibold">✕</button>
+            <button type="button" id="floating-btn-toggle" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 transform active:scale-90">Pausa</button>
+            <button type="button" id="floating-btn-open" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 transform active:scale-90">Apri</button>
+            <button type="button" id="floating-btn-stop" class="bg-rose-600/30 text-rose-300 border border-rose-500/30 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 transform active:scale-90">✕</button>
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="text-center py-4 text-xs text-indigo-900/60 font-medium border-t border-indigo-100 bg-white/50">
-        RoundOne &copy; 2026
+    <!-- FOOTER COMPATTO E PULITO CON COLLEGAMENTI DIRETTI -->
+    <footer class="text-center py-4 px-4 text-xs text-indigo-900/60 font-medium border-t border-indigo-100 bg-white/50 space-y-1.5 mt-8">
+        <div class="flex justify-center items-center gap-3 text-[11px] font-bold text-indigo-900/70">
+            <a href="policy.html" class="hover:text-indigo-600 transition-colors">Privacy Policy</a>
+            <span>•</span>
+            <a href="note-legali.html" class="hover:text-indigo-600 transition-colors">Note Legali</a>
+        </div>
+        <div class="text-[11px]">
+            RoundOne &copy; 2026 — Tutti i diritti riservati.
+        </div>
     </footer>
 
     <!-- LOGICA FIREBASE ATLETA -->
@@ -151,6 +211,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, collection, getDocs, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD5xFMM-kKy2-pYzcTk3MiFmXCTCe4EXEA",
@@ -164,6 +225,27 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const messaging = getMessaging(app);
+
+        // Gestione Sidebar (Da Destra)
+        const sidebarMenu = document.getElementById('sidebar-menu');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const btnOpenSidebar = document.getElementById('btn-open-sidebar');
+        const btnCloseSidebar = document.getElementById('btn-close-sidebar');
+
+        function openSidebar() {
+            sidebarMenu.classList.remove('translate-x-full');
+            sidebarOverlay.classList.remove('hidden');
+        }
+
+        function closeSidebar() {
+            sidebarMenu.classList.add('translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        }
+
+        btnOpenSidebar.addEventListener('click', openSidebar);
+        btnCloseSidebar.addEventListener('click', closeSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
 
         // FUNZIONE MODALE NOTIFICA CUSTOM
         function showAlert(message, title = "Notifica") {
@@ -175,23 +257,53 @@
             document.getElementById('custom-alert-modal').classList.add('hidden');
         });
 
-        const athleteWelcomeTitle = document.getElementById('athlete-welcome-title');
-        const gymNameSubtitle = document.getElementById('gym-name-subtitle');
+        // ATTIVAZIONE NOTIFICHE PUSH ATLETA
+        const btnEnableNotifications = document.getElementById('btn-enable-notifications');
+        btnEnableNotifications.addEventListener('click', async () => {
+            closeSidebar();
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    const currentToken = await getToken(messaging, { vapidKey: "BBGalOWMJGZq_uydm4FqbvA9XPu97YtSrLQ9-39ezP_TSGF9pPkVSOG52NaV5VoAlxvc2nXai9cLJhgIAu83kRo" });
+                    if (currentToken && currentUserUid) {
+                        await setDoc(doc(db, "users", currentUserUid), { fcmToken: currentToken }, { merge: true });
+                        showAlert("Notifiche push attivate con successo su questo dispositivo!", "Ottimo");
+                    } else {
+                        showAlert("Impossibile generare il token di notifica.", "Attenzione");
+                    }
+                } else {
+                    showAlert("Permesso per le notifiche negato dal browser.", "Permesso Negato");
+                }
+            } catch (err) {
+                showAlert("Errore attivazione notifiche: " + err.message, "Errore");
+            }
+        });
+
+        onMessage(messaging, (payload) => {
+            showAlert(`${payload.notification.title}: ${payload.notification.body}`, "Nuova Notifica");
+        });
+
+        const headerAthleteName = document.getElementById('header-athlete-name');
+        const headerGymSubtitle = document.getElementById('header-gym-subtitle');
+        const sidebarAthleteName = document.getElementById('sidebar-athlete-name');
+        const sidebarGymName = document.getElementById('sidebar-gym-name');
+        const sidebarInviteCode = document.getElementById('sidebar-invite-code');
+        const btnCopySidebarCode = document.getElementById('btn-copy-sidebar-code');
         const btnLogout = document.getElementById('btn-logout');
+        
         const athleteWeeksContainer = document.getElementById('athlete-weeks-container');
+        const athleteTemplatesContainer = document.getElementById('athlete-templates-container');
         
-        const btnSalaPesi = document.getElementById('btn-sala-pesi');
-        const salaPesiModal = document.getElementById('sala-pesi-modal');
-        const btnCloseModal = document.getElementById('btn-close-modal');
-        const modalTemplatesContainer = document.getElementById('modal-templates-container');
+        const menuProgram = document.getElementById('menu-program');
+        const menuSalaPesi = document.getElementById('menu-sala-pesi');
+        const menuRequest = document.getElementById('menu-request');
+        const menuTimer = document.getElementById('menu-timer');
         
-        const btnOpenRequestModal = document.getElementById('btn-open-request-modal');
         const requestModal = document.getElementById('request-modal');
         const btnCloseRequestModal = document.getElementById('btn-close-request-modal');
         const requestMessageInput = document.getElementById('request-message-input');
         const btnSubmitRequest = document.getElementById('btn-submit-request');
 
-        const btnOpenTimerModal = document.getElementById('btn-open-timer-modal');
         const timerModal = document.getElementById('timer-modal');
         const btnCloseTimerModal = document.getElementById('btn-close-timer-modal');
         const btnHideTimerModal = document.getElementById('btn-hide-timer-modal');
@@ -224,14 +336,25 @@
             try { await signOut(auth); } catch (e) {} finally { window.location.replace('index.html'); }
         });
 
-        btnSalaPesi.addEventListener('click', () => {
-            renderModalTemplates();
-            salaPesiModal.classList.remove('hidden');
+        btnCopySidebarCode.addEventListener('click', () => {
+            const code = sidebarInviteCode.textContent.trim();
+            if (code && code !== '---') {
+                navigator.clipboard.writeText(code).then(() => showAlert("Codice invito copiato negli appunti!", "Copia Riuscita"));
+            }
         });
-        btnCloseModal.addEventListener('click', () => salaPesiModal.classList.add('hidden'));
-        salaPesiModal.addEventListener('click', (e) => { if (e.target === salaPesiModal) salaPesiModal.classList.add('hidden'); });
 
-        btnOpenRequestModal.addEventListener('click', () => {
+        menuProgram.addEventListener('click', () => {
+            closeSidebar();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        menuSalaPesi.addEventListener('click', () => {
+            closeSidebar();
+            document.getElementById('sala-pesi-section').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        menuRequest.addEventListener('click', () => {
+            closeSidebar();
             requestMessageInput.value = "Fammi programma";
             requestModal.classList.remove('hidden');
         });
@@ -256,7 +379,10 @@
             }
         });
 
-        btnOpenTimerModal.addEventListener('click', () => timerModal.classList.remove('hidden'));
+        menuTimer.addEventListener('click', () => {
+            closeSidebar();
+            timerModal.classList.remove('hidden');
+        });
         btnCloseTimerModal.addEventListener('click', () => timerModal.classList.add('hidden'));
         btnHideTimerModal.addEventListener('click', () => timerModal.classList.add('hidden'));
 
@@ -348,12 +474,22 @@
 
                 currentGymId = userData.gymId;
                 currentUserName = userData.name;
-                athleteWelcomeTitle.textContent = userData.name;
-                gymNameSubtitle.textContent = `Team Palestra: ${userData.gymName || "Palestra"}`;
+                
+                headerAthleteName.textContent = userData.name;
+                sidebarAthleteName.textContent = userData.name;
+                const gymNameText = userData.gymName || "Palestra";
+                headerGymSubtitle.textContent = `Team: ${gymNameText}`;
+                sidebarGymName.textContent = gymNameText;
+
+                const gymDoc = await getDoc(doc(db, "gyms", currentGymId));
+                if (gymDoc.exists()) {
+                    sidebarInviteCode.textContent = gymDoc.data().inviteCode || "---";
+                }
 
                 await loadGymTemplates();
                 await loadPersonalTemplates();
-                loadAthleteWeeks();
+                await loadAthleteWeeks();
+                renderAthleteTemplates();
 
             } catch (error) {
                 console.error("Errore:", error);
@@ -393,13 +529,8 @@
 
                 weeksList.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 
-                if (weeksList.length === 0 && personalTemplatesList.length === 0) {
-                    athleteWeeksContainer.innerHTML = '<p class="text-xs text-slate-400 italic">Nessun programma o scheda assegnata. Clicca su "Sala Pesi" o richiedi un programma al coach.</p>';
-                    return;
-                }
-
                 if (weeksList.length === 0) {
-                    athleteWeeksContainer.innerHTML = '<p class="text-xs text-indigo-900 font-semibold">Hai delle schede personali dedicate pronte! Clicca in alto su <b>"Sala Pesi (Le Mie Schede)"</b> per visualizzarle.</p>';
+                    athleteWeeksContainer.innerHTML = '<p class="text-xs text-slate-400 italic">Nessuna settimana di calendario assegnata.</p>';
                     return;
                 }
 
@@ -411,7 +542,7 @@
             }
         }
 
-        function renderModalTemplates() {
+        function renderAthleteTemplates() {
             let cardsHtml = '';
 
             if (personalTemplatesList.length > 0) {
@@ -429,12 +560,12 @@
                     `).join('');
 
                     cardsHtml += `
-                        <div class="bg-white rounded-xl border border-emerald-200 shadow-xs overflow-hidden modal-template-card mb-3">
-                            <div class="bg-emerald-100/70 px-4 py-3 flex justify-between items-center cursor-pointer select-none modal-tpl-header hover:bg-emerald-200 transition">
+                        <div class="bg-white rounded-xl border border-emerald-200 shadow-xs overflow-hidden athlete-template-card mb-3 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+                            <div class="bg-emerald-100/70 px-4 py-3 flex justify-between items-center cursor-pointer select-none athlete-tpl-header hover:bg-emerald-200 transition">
                                 <span class="font-black text-xs sm:text-sm uppercase tracking-wider text-emerald-950">🏋️‍♂️ ${tpl.title} (Personale)</span>
-                                <span class="text-xs text-emerald-800 font-bold modal-tpl-arrow">▼ Apri</span>
+                                <span class="text-xs text-emerald-800 font-bold athlete-tpl-arrow">▼ Apri</span>
                             </div>
-                            <div class="p-3 space-y-1 modal-tpl-body hidden bg-white">${exercisesHtml}</div>
+                            <div class="p-3 space-y-1 athlete-tpl-body hidden bg-white">${exercisesHtml}</div>
                         </div>
                     `;
                 });
@@ -458,27 +589,27 @@
                     `).join('');
 
                     cardsHtml += `
-                        <div class="bg-white rounded-xl border border-indigo-100 shadow-xs overflow-hidden modal-template-card mb-3">
-                            <div class="bg-indigo-50/80 px-4 py-3 flex justify-between items-center cursor-pointer select-none modal-tpl-header hover:bg-indigo-100 transition">
+                        <div class="bg-white rounded-xl border border-indigo-100 shadow-xs overflow-hidden athlete-template-card mb-3 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+                            <div class="bg-indigo-50/80 px-4 py-3 flex justify-between items-center cursor-pointer select-none athlete-tpl-header hover:bg-indigo-100 transition">
                                 <span class="font-black text-xs sm:text-sm uppercase tracking-wider text-indigo-950">🏋️‍♂️ ${tpl.title}</span>
-                                <span class="text-xs text-indigo-700 font-bold modal-tpl-arrow">▼ Apri</span>
+                                <span class="text-xs text-indigo-700 font-bold athlete-tpl-arrow">▼ Apri</span>
                             </div>
-                            <div class="p-3 space-y-1 modal-tpl-body hidden bg-white">${exercisesHtml}</div>
+                            <div class="p-3 space-y-1 athlete-tpl-body hidden bg-white">${exercisesHtml}</div>
                         </div>
                     `;
                 });
             }
 
             if (cardsHtml === '') {
-                modalTemplatesContainer.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-6">Nessuna scheda assegnata al momento.</p>';
+                athleteTemplatesContainer.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-6">Nessuna scheda assegnata al momento.</p>';
                 return;
             }
 
-            modalTemplatesContainer.innerHTML = cardsHtml;
-            modalTemplatesContainer.querySelectorAll('.modal-template-card').forEach(card => {
-                const header = card.querySelector('.modal-tpl-header');
-                const body = card.querySelector('.modal-tpl-body');
-                const arrow = card.querySelector('.modal-tpl-arrow');
+            athleteTemplatesContainer.innerHTML = cardsHtml;
+            athleteTemplatesContainer.querySelectorAll('.athlete-template-card').forEach(card => {
+                const header = card.querySelector('.athlete-tpl-header');
+                const body = card.querySelector('.athlete-tpl-body');
+                const arrow = card.querySelector('.athlete-tpl-arrow');
                 header.addEventListener('click', () => {
                     body.classList.toggle('hidden');
                     arrow.textContent = body.classList.contains('hidden') ? '▼ Apri' : '▲ Chiudi';
@@ -488,7 +619,7 @@
 
         function renderAthleteWeekCard(weekData) {
             const card = document.createElement('div');
-            card.className = "bg-white border border-indigo-100 rounded-xl shadow-xs overflow-hidden";
+            card.className = "bg-white border border-indigo-100 rounded-xl shadow-xs overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md";
 
             const [y, m, d] = weekData.startDate.split('-').map(Number);
             const mondayDate = new Date(y, m - 1, d);
