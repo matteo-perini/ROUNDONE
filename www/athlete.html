@@ -20,12 +20,11 @@
                 💬 Chat
             </a>
             <!-- PULSANTE RICHIEDI PROGRAMMA -->
-            <button type="button" id="btn-request-program" class="bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-xs">
+            <button type="button" id="btn-open-request-modal" class="bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-xs">
                 📝 Richiedi Programma
             </button>
         </div>
         <div class="flex items-center gap-2 sm:gap-3">
-            <!-- PULSANTE TIMER APRE IL MODAL -->
             <button type="button" id="btn-open-timer-modal" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 shadow-xs">
                 ⏱️ Timer
             </button>
@@ -35,33 +34,52 @@
 
     <!-- MAIN CONTAINER -->
     <main class="flex-grow max-w-5xl w-full mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
-
-        <!-- NOME ATLETA E TEAM -->
         <div class="px-1 pt-1">
             <h2 id="athlete-welcome-title" class="text-sm font-black text-slate-900 tracking-tight">Atleta</h2>
             <p id="gym-name-subtitle" class="text-xs text-indigo-900/70 font-semibold mt-0.5">Team Palestra: Caricamento...</p>
         </div>
 
-        <!-- SEZIONE PROGRAMMA SETTIMANALE -->
         <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-md border border-indigo-100 space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-indigo-100 pb-4">
                 <div>
                     <h3 class="text-base sm:text-lg font-black text-indigo-950">Il Mio Piano di Allenamento</h3>
                     <p class="text-xs sm:text-sm text-slate-500">Visualizza il calendario o accedi direttamente alle tue schede.</p>
                 </div>
-                <!-- PULSANTE SALA PESI -->
                 <button type="button" id="btn-sala-pesi" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl transition shadow-md flex items-center justify-center gap-2">
                     🏋️‍♂️ Sala Pesi (Le Mie Schede)
                 </button>
             </div>
-
-            <!-- Container delle settimane caricate dal cloud -->
             <div id="athlete-weeks-container" class="space-y-3">
                 <p class="text-xs text-slate-400 italic">Caricamento programmazione in corso...</p>
             </div>
         </div>
-
     </main>
+
+    <!-- MODAL CUSTOM NOTIFICHE (SOSTITUISCE ALERT) -->
+    <div id="custom-alert-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-indigo-100 p-6 space-y-4 text-center">
+            <div class="text-3xl">✨</div>
+            <h4 id="custom-alert-title" class="font-black text-base text-indigo-950">Notifica</h4>
+            <p id="custom-alert-message" class="text-xs text-slate-600 leading-relaxed"></p>
+            <button type="button" id="custom-alert-ok" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Capito</button>
+        </div>
+    </div>
+
+    <!-- MODAL RICHIESTA PROGRAMMA -->
+    <div id="request-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-indigo-200 overflow-hidden flex flex-col p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-indigo-100 pb-3">
+                <h3 class="font-black text-sm sm:text-base text-indigo-950">📝 Richiedi Programma al Coach</h3>
+                <button type="button" id="btn-close-request-modal" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg transition">✕</button>
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-indigo-900 mb-1">Messaggio per il Coach</label>
+                <input type="text" id="request-message-input" maxlength="40" placeholder="Es. Fammi programma forza (max 40 caratteri)" class="w-full px-3.5 py-2.5 bg-indigo-50/50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs">
+                <span class="text-[10px] text-slate-400 mt-1 block">Massimo 40 caratteri</span>
+            </div>
+            <button type="button" id="btn-submit-request" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Invia Richiesta</button>
+        </div>
+    </div>
 
     <!-- MODAL SALA PESI A TENDINA -->
     <div id="sala-pesi-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-6">
@@ -83,21 +101,15 @@
                 <h3 class="font-black text-sm sm:text-base text-indigo-950 flex items-center gap-2">⏱️ Timer Recupero Serie</h3>
                 <button type="button" id="btn-close-timer-modal" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg transition">✕</button>
             </div>
-
-            <!-- DISPLAY GRANDE -->
             <div class="text-center">
                 <div id="timer-display" class="text-5xl font-black font-mono tracking-wider text-indigo-950 py-2">01:30</div>
                 <p id="timer-status" class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Pronto</p>
             </div>
-
-            <!-- CONTROLLI PRINCIPALI -->
             <div class="grid grid-cols-3 gap-2">
                 <button type="button" id="btn-start" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Avvia</button>
                 <button type="button" id="btn-pause" class="bg-amber-500 hover:bg-amber-400 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Pausa</button>
                 <button type="button" id="btn-reset" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl transition text-xs">Reset</button>
             </div>
-
-            <!-- PRESET RAPIDI -->
             <div class="space-y-1.5 pt-2 border-t border-indigo-100">
                 <label class="block text-[10px] font-bold uppercase tracking-wider text-indigo-900 text-center">Preset Rapidi</label>
                 <div class="grid grid-cols-3 gap-1.5">
@@ -109,7 +121,6 @@
                     <button type="button" data-seconds="180" class="preset-btn bg-indigo-50 hover:bg-indigo-100 text-indigo-950 border border-indigo-200 py-1.5 rounded-lg text-xs font-bold transition">3m</button>
                 </div>
             </div>
-
             <button type="button" id="btn-hide-timer-modal" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Nascondi</button>
         </div>
     </div>
@@ -154,6 +165,16 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // FUNZIONE MODALE NOTIFICA CUSTOM
+        function showAlert(message, title = "Notifica") {
+            document.getElementById('custom-alert-title').textContent = title;
+            document.getElementById('custom-alert-message').textContent = message;
+            document.getElementById('custom-alert-modal').classList.remove('hidden');
+        }
+        document.getElementById('custom-alert-ok').addEventListener('click', () => {
+            document.getElementById('custom-alert-modal').classList.add('hidden');
+        });
+
         const athleteWelcomeTitle = document.getElementById('athlete-welcome-title');
         const gymNameSubtitle = document.getElementById('gym-name-subtitle');
         const btnLogout = document.getElementById('btn-logout');
@@ -163,9 +184,13 @@
         const salaPesiModal = document.getElementById('sala-pesi-modal');
         const btnCloseModal = document.getElementById('btn-close-modal');
         const modalTemplatesContainer = document.getElementById('modal-templates-container');
-        const btnRequestProgram = document.getElementById('btn-request-program');
+        
+        const btnOpenRequestModal = document.getElementById('btn-open-request-modal');
+        const requestModal = document.getElementById('request-modal');
+        const btnCloseRequestModal = document.getElementById('btn-close-request-modal');
+        const requestMessageInput = document.getElementById('request-message-input');
+        const btnSubmitRequest = document.getElementById('btn-submit-request');
 
-        // Timer elements
         const btnOpenTimerModal = document.getElementById('btn-open-timer-modal');
         const timerModal = document.getElementById('timer-modal');
         const btnCloseTimerModal = document.getElementById('btn-close-timer-modal');
@@ -205,6 +230,31 @@
         });
         btnCloseModal.addEventListener('click', () => salaPesiModal.classList.add('hidden'));
         salaPesiModal.addEventListener('click', (e) => { if (e.target === salaPesiModal) salaPesiModal.classList.add('hidden'); });
+
+        btnOpenRequestModal.addEventListener('click', () => {
+            requestMessageInput.value = "Fammi programma";
+            requestModal.classList.remove('hidden');
+        });
+        btnCloseRequestModal.addEventListener('click', () => requestModal.classList.add('hidden'));
+        requestModal.addEventListener('click', (e) => { if (e.target === requestModal) requestModal.classList.add('hidden'); });
+
+        btnSubmitRequest.addEventListener('click', async () => {
+            if (!currentGymId || !currentUserUid) return;
+            const message = requestMessageInput.value.trim() || "Fammi programma";
+            try {
+                await setDoc(doc(db, "gyms", currentGymId, "requests", currentUserUid), {
+                    athleteId: currentUserUid,
+                    athleteName: currentUserName,
+                    athleteEmail: auth.currentUser.email,
+                    message: message,
+                    requestedAt: serverTimestamp()
+                });
+                showAlert("Richiesta inviata con successo al coach!", "Inviato");
+                requestModal.classList.add('hidden');
+            } catch (err) {
+                showAlert("Errore: " + err.message, "Errore");
+            }
+        });
 
         btnOpenTimerModal.addEventListener('click', () => timerModal.classList.remove('hidden'));
         btnCloseTimerModal.addEventListener('click', () => timerModal.classList.add('hidden'));
@@ -286,16 +336,6 @@
         });
         updateTimerDisplays();
 
-        btnRequestProgram.addEventListener('click', async () => {
-            if (!currentGymId || !currentUserUid) return;
-            try {
-                await setDoc(doc(db, "gyms", currentGymId, "requests", currentUserUid), {
-                    athleteId: currentUserUid, athleteName: currentUserName, athleteEmail: auth.currentUser.email, requestedAt: serverTimestamp()
-                });
-                alert("Richiesta inviata al coach!");
-            } catch (err) { alert("Errore: " + err.message); }
-        });
-
         onAuthStateChanged(auth, async (user) => {
             if (!user) { window.location.replace('index.html'); return; }
             currentUserUid = user.uid;
@@ -371,11 +411,9 @@
             }
         }
 
-        // MOSTRA SIA LE SCHEDE PERSONALI DIRETTE SIA QUELLE DEL CALENDARIO
         function renderModalTemplates() {
             let cardsHtml = '';
 
-            // 1. Schede Personali Dedicate
             if (personalTemplatesList.length > 0) {
                 cardsHtml += `<div class="text-xs font-black uppercase tracking-wider text-emerald-900 pb-1">🎯 Tue Schede Personali Dedicate</div>`;
                 personalTemplatesList.forEach(tpl => {
@@ -396,15 +434,12 @@
                                 <span class="font-black text-xs sm:text-sm uppercase tracking-wider text-emerald-950">🏋️‍♂️ ${tpl.title} (Personale)</span>
                                 <span class="text-xs text-emerald-800 font-bold modal-tpl-arrow">▼ Apri</span>
                             </div>
-                            <div class="p-3 space-y-1 modal-tpl-body hidden bg-white">
-                                ${exercisesHtml}
-                            </div>
+                            <div class="p-3 space-y-1 modal-tpl-body hidden bg-white">${exercisesHtml}</div>
                         </div>
                     `;
                 });
             }
 
-            // 2. Schede Globali da Calendario
             if (athleteAssignedTemplateIds.size > 0) {
                 cardsHtml += `<div class="text-xs font-black uppercase tracking-wider text-indigo-900 pt-2 pb-1">📅 Schede da Calendario</div>`;
                 athleteAssignedTemplateIds.forEach(tplId => {
@@ -428,9 +463,7 @@
                                 <span class="font-black text-xs sm:text-sm uppercase tracking-wider text-indigo-950">🏋️‍♂️ ${tpl.title}</span>
                                 <span class="text-xs text-indigo-700 font-bold modal-tpl-arrow">▼ Apri</span>
                             </div>
-                            <div class="p-3 space-y-1 modal-tpl-body hidden bg-white">
-                                ${exercisesHtml}
-                            </div>
+                            <div class="p-3 space-y-1 modal-tpl-body hidden bg-white">${exercisesHtml}</div>
                         </div>
                     `;
                 });
@@ -442,7 +475,6 @@
             }
 
             modalTemplatesContainer.innerHTML = cardsHtml;
-
             modalTemplatesContainer.querySelectorAll('.modal-template-card').forEach(card => {
                 const header = card.querySelector('.modal-tpl-header');
                 const body = card.querySelector('.modal-tpl-body');
@@ -462,44 +494,22 @@
             const mondayDate = new Date(y, m - 1, d);
             const sundayDate = new Date(y, m - 1, d + 6);
 
-            const startDay = mondayDate.getDate();
-            const endDay = sundayDate.getDate();
-            const year = mondayDate.getFullYear();
-
-            let weekTitleStr = '';
-            if (mondayDate.getMonth() === sundayDate.getMonth()) {
-                const monthName = mondayDate.toLocaleDateString('it-IT', { month: 'long' });
-                weekTitleStr = `Week ${startDay}-${endDay} ${monthName} ${year}`;
-            } else {
-                const startMonth = mondayDate.toLocaleDateString('it-IT', { month: 'short' });
-                const endMonth = sundayDate.toLocaleDateString('it-IT', { month: 'short' });
-                weekTitleStr = `Week ${startDay} ${startMonth} - ${endDay} ${endMonth} ${year}`;
-            }
+            let weekTitleStr = mondayDate.getMonth() === sundayDate.getMonth() 
+                ? `Week ${mondayDate.getDate()}-${sundayDate.getDate()} ${mondayDate.toLocaleDateString('it-IT', { month: 'long' })} ${mondayDate.getFullYear()}`
+                : `Week ${mondayDate.getDate()} ${mondayDate.toLocaleDateString('it-IT', { month: 'short' })} - ${sundayDate.getDate()} ${sundayDate.toLocaleDateString('it-IT', { month: 'short' })} ${sundayDate.getFullYear()}`;
 
             const daysOrder = ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
             let daysHtml = '';
 
             daysOrder.forEach(dayName => {
                 const dayInfo = weekData.days[dayName] || { activity1: '', activity2: '', templateId: '' };
-
-                let templateTitleText = '';
-                if (dayInfo.templateId && gymTemplatesMap[dayInfo.templateId]) {
-                    const tpl = gymTemplatesMap[dayInfo.templateId];
-                    templateTitleText = tpl.title.toUpperCase();
-                }
-
+                let templateTitleText = (dayInfo.templateId && gymTemplatesMap[dayInfo.templateId]) ? gymTemplatesMap[dayInfo.templateId].title.toUpperCase() : '';
                 const hasContent = dayInfo.activity1 || dayInfo.activity2 || templateTitleText;
 
                 let bulletItems = '';
-                if (dayInfo.activity1) {
-                    bulletItems += `<div class="text-[11px] text-slate-800 flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-indigo-600 rounded-full flex-shrink-0"></span><span>${dayInfo.activity1}</span></div>`;
-                }
-                if (dayInfo.activity2) {
-                    bulletItems += `<div class="text-[11px] text-slate-800 flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-indigo-600 rounded-full flex-shrink-0"></span><span>${dayInfo.activity2}</span></div>`;
-                }
-                if (templateTitleText) {
-                    bulletItems += `<div class="text-[11px] text-indigo-950 font-bold flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-indigo-600 rounded-full flex-shrink-0"></span><span>${templateTitleText}</span></div>`;
-                }
+                if (dayInfo.activity1) bulletItems += `<div class="text-[11px] text-slate-800 flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-indigo-600 rounded-full flex-shrink-0"></span><span>${dayInfo.activity1}</span></div>`;
+                if (dayInfo.activity2) bulletItems += `<div class="text-[11px] text-slate-800 flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-indigo-600 rounded-full flex-shrink-0"></span><span>${dayInfo.activity2}</span></div>`;
+                if (templateTitleText) bulletItems += `<div class="text-[11px] text-indigo-950 font-bold flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-indigo-600 rounded-full flex-shrink-0"></span><span>${templateTitleText}</span></div>`;
 
                 daysHtml += `
                     <div class="p-2.5 bg-indigo-50/40 border border-indigo-100 rounded-xl space-y-1">
@@ -510,12 +520,8 @@
             });
 
             const sundayInfo = weekData.days["domenica"] || { activity1: '', activity2: '', templateId: '' };
-            let sundayTplText = '';
-            if (sundayInfo.templateId && gymTemplatesMap[sundayInfo.templateId]) {
-                sundayTplText = gymTemplatesMap[sundayInfo.templateId].title.toUpperCase();
-            }
+            let sundayTplText = (sundayInfo.templateId && gymTemplatesMap[sundayInfo.templateId]) ? gymTemplatesMap[sundayInfo.templateId].title.toUpperCase() : '';
             const sundayHasContent = sundayInfo.activity1 || sundayInfo.activity2 || sundayTplText;
-
             let sundayExtraHtml = '';
             if (sundayInfo.activity1) sundayExtraHtml += ` · ${sundayInfo.activity1}`;
             if (sundayInfo.activity2) sundayExtraHtml += ` · ${sundayInfo.activity2}`;
@@ -523,17 +529,11 @@
 
             card.innerHTML = `
                 <div class="bg-indigo-50/70 px-4 py-3.5 flex justify-between items-center cursor-pointer select-none border-b border-indigo-100 week-header hover:bg-indigo-100/70 transition">
-                    <div>
-                        <h5 class="font-black text-sm text-indigo-950 capitalize">📅 ${weekTitleStr}</h5>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold text-indigo-900 bg-white border border-indigo-200 px-2.5 py-1 rounded-xl toggle-arrow shadow-2xs">▼ Apri</span>
-                    </div>
+                    <div><h5 class="font-black text-sm text-indigo-950 capitalize">📅 ${weekTitleStr}</h5></div>
+                    <div class="flex items-center gap-2"><span class="text-xs font-bold text-indigo-900 bg-white border border-indigo-200 px-2.5 py-1 rounded-xl toggle-arrow shadow-2xs">▼ Apri</span></div>
                 </div>
                 <div class="p-4 week-body hidden space-y-3 bg-white">
-                    <div class="grid grid-cols-3 gap-2">
-                        ${daysHtml}
-                    </div>
+                    <div class="grid grid-cols-3 gap-2">${daysHtml}</div>
                     <div class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-3 flex justify-between items-center text-xs">
                         <span class="font-black text-[10px] uppercase tracking-wider text-indigo-950">Domenica</span>
                         <span class="text-xs text-slate-600 font-medium">${sundayHasContent ? sundayExtraHtml : 'OFF'}</span>
@@ -544,7 +544,6 @@
             const header = card.querySelector('.week-header');
             const body = card.querySelector('.week-body');
             const arrow = card.querySelector('.toggle-arrow');
-
             header.addEventListener('click', () => {
                 body.classList.toggle('hidden');
                 arrow.textContent = body.classList.contains('hidden') ? '▼ Apri' : '▲ Chiudi';

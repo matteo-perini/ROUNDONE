@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="RoundOne">
 </head>
-<body class="bg-blue-50/70 text-slate-900 min-h-screen flex flex-col justify-between selection:bg-indigo-600 selection:text-white overflow-x-hidden">
+<body class="bg-blue-50/70 text-slate-900 min-h-screen flex flex-col justify-between selection:bg-indigo-600 selection:text-white overflow-x-hidden relative">
 
     <!-- HEADER / NAVBAR -->
     <header class="bg-slate-900 text-white border-b border-slate-800 px-4 sm:px-6 py-2.5 flex justify-between items-center shadow-md">
@@ -28,7 +28,7 @@
     <!-- MAIN CONTAINER -->
     <main class="flex-grow flex items-center justify-center p-2 sm:p-4">
 
-        <!-- 1. SEZIONE AUTENTICAZIONE (ACCEDI / REGISTRATI) - PIÙ COMPATTA -->
+        <!-- SEZIONE AUTENTICAZIONE (ACCEDI / REGISTRATI) -->
         <section id="auth-section" class="w-full max-w-sm sm:max-w-md bg-white p-4 sm:p-5 rounded-2xl shadow-xl border border-indigo-100">
             <div class="flex border-b border-indigo-100 mb-3">
                 <button id="tab-login" class="w-1/2 pb-2 font-bold text-center border-b-2 border-indigo-600 text-indigo-950 transition text-xs sm:text-sm">Accedi</button>
@@ -48,7 +48,7 @@
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl transition text-xs shadow-md mt-1">Accedi</button>
             </form>
 
-            <!-- FORM REGISTRAZIONE COMPATTO -->
+            <!-- FORM REGISTRAZIONE -->
             <form id="register-form" class="space-y-2.5 hidden">
                 <div>
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-indigo-900 mb-0.5">Nome e Cognome</label>
@@ -63,7 +63,6 @@
                     <input type="password" id="reg-password" required class="w-full px-3 py-1.5 bg-indigo-50/50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs transition">
                 </div>
 
-                <!-- SELETTORE TIPO DI ACCOUNT -->
                 <div>
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-indigo-900 mb-0.5">Tipo di Account</label>
                     <select id="reg-role" class="w-full px-3 py-1.5 bg-indigo-50/50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs transition">
@@ -72,19 +71,16 @@
                     </select>
                 </div>
 
-                <!-- CAMPO DINAMICO: CODICE INVITO (Per Atleti) -->
                 <div id="invite-code-container">
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-indigo-900 mb-0.5">Codice Invito Palestra</label>
                     <input type="text" id="reg-invite-code" placeholder="Es. GYM-8492" class="w-full px-3 py-1.5 bg-indigo-50/50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none uppercase text-xs transition">
                 </div>
 
-                <!-- CAMPO DINAMICO: NOME NUOVA PALESTRA (Per Coach) -->
                 <div id="gym-create-container" class="hidden">
                     <label class="block text-[11px] font-bold uppercase tracking-wider text-indigo-900 mb-0.5">Nome della Tua Palestra</label>
                     <input type="text" id="reg-gym-name" placeholder="Es. Leoni di San Marco" class="w-full px-3 py-1.5 bg-indigo-50/50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs transition">
                 </div>
 
-                <!-- ACCETTAZIONE TERMINI E PRIVACY (OBBLIGATORI) -->
                 <div class="pt-2 pb-1 space-y-2 border-t border-indigo-100 mt-2">
                     <label class="flex items-start gap-2 text-[10px] sm:text-[11px] text-indigo-800 leading-tight cursor-pointer">
                         <input type="checkbox" required class="mt-0.5 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500">
@@ -102,6 +98,16 @@
 
     </main>
 
+    <!-- MODAL CUSTOM NOTIFICHE (SOSTITUISCE ALERT) -->
+    <div id="custom-alert-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-indigo-100 p-6 space-y-4 text-center">
+            <div class="text-3xl">✨</div>
+            <h4 id="custom-alert-title" class="font-black text-base text-indigo-950">Notifica</h4>
+            <p id="custom-alert-message" class="text-xs text-slate-600 leading-relaxed"></p>
+            <button type="button" id="custom-alert-ok" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Capito</button>
+        </div>
+    </div>
+
     <!-- FOOTER -->
     <footer class="text-center py-2 text-[11px] text-indigo-900/60 font-medium border-t border-indigo-100 bg-white/50">
         RoundOne &copy; 2026
@@ -110,7 +116,7 @@
     <!-- LOGICA JAVASCRIPT E FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -126,7 +132,30 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Elementi UI
+        // FUNZIONE MODALE NOTIFICA CUSTOM CON CALLBACK OPZIONALE
+        let alertCallback = null;
+        function showAlert(message, title = "Notifica", callback = null) {
+            document.getElementById('custom-alert-title').textContent = title;
+            document.getElementById('custom-alert-message').textContent = message;
+            document.getElementById('custom-alert-modal').classList.remove('hidden');
+            alertCallback = callback;
+        }
+
+        document.getElementById('custom-alert-ok').addEventListener('click', () => {
+            document.getElementById('custom-alert-modal').classList.add('hidden');
+            if (alertCallback) {
+                alertCallback();
+                alertCallback = null;
+            }
+        });
+
+        // --- CONTROLLO PERSISTENZA LOGIN (AUTO-LOGIN) ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                await checkUserRoleAndRedirect(user.uid);
+            }
+        });
+
         const tabLogin = document.getElementById('tab-login');
         const tabRegister = document.getElementById('tab-register');
         const loginForm = document.getElementById('login-form');
@@ -136,7 +165,6 @@
         const inviteCodeContainer = document.getElementById('invite-code-container');
         const gymCreateContainer = document.getElementById('gym-create-container');
 
-        // Tab Grafiche
         tabLogin.addEventListener('click', () => {
             tabLogin.className = "w-1/2 pb-2 font-bold text-center border-b-2 border-indigo-600 text-indigo-950 transition text-xs sm:text-sm";
             tabRegister.className = "w-1/2 pb-2 font-semibold text-center text-slate-400 border-b-2 border-transparent transition text-xs sm:text-sm hover:text-slate-600";
@@ -151,7 +179,6 @@
             loginForm.classList.add('hidden');
         });
 
-        // Alterna campi registrazione (Atleta vs Coach)
         regRole.addEventListener('change', (e) => {
             if (e.target.value === 'admin') {
                 inviteCodeContainer.classList.add('hidden');
@@ -170,9 +197,11 @@
 
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                checkUserRoleAndRedirect(userCredential.user.uid);
+                showAlert("Login avvenuto con successo!", "Benvenuto", async () => {
+                    await checkUserRoleAndRedirect(userCredential.user.uid);
+                });
             } catch (error) {
-                alert("Errore durante il login: " + error.message);
+                showAlert("Errore durante il login: " + error.message, "Errore");
             }
         });
 
@@ -191,7 +220,7 @@
 
                 if (role === 'admin') {
                     gymName = document.getElementById('reg-gym-name').value;
-                    if (!gymName) { alert("Inserisci il nome della palestra"); return; }
+                    if (!gymName) { showAlert("Inserisci il nome della palestra", "Attenzione"); return; }
                     
                     gymId = "gym_" + Date.now();
                     inviteCode = "GYM-" + Math.floor(1000 + Math.random() * 9000);
@@ -203,13 +232,13 @@
                     });
                 } else {
                     inviteCode = document.getElementById('reg-invite-code').value.trim().toUpperCase();
-                    if (!inviteCode) { alert("Inserisci il codice invito della palestra"); return; }
+                    if (!inviteCode) { showAlert("Inserisci il codice invito della palestra", "Attenzione"); return; }
 
                     const gymsQuery = query(collection(db, "gyms"), where("inviteCode", "==", inviteCode));
                     const querySnapshot = await getDocs(gymsQuery);
 
                     if (querySnapshot.empty) {
-                        alert("Codice invito non valido o palestra non trovata.");
+                        showAlert("Codice invito non valido o palestra non trovata.", "Errore");
                         return;
                     }
 
@@ -230,28 +259,27 @@
                     gymName: gymName
                 });
 
-                alert("Registrazione completata con successo!");
-                checkUserRoleAndRedirect(uid);
+                showAlert("Registrazione completata con successo!", "Account Creato", async () => {
+                    await checkUserRoleAndRedirect(uid);
+                });
 
             } catch (error) {
-                alert("Errore di registrazione: " + error.message);
+                showAlert("Errore di registrazione: " + error.message, "Errore");
             }
         });
 
-        // --- CONTROLLO RUOLO E REDIRECT CORRETTO ---
         async function checkUserRoleAndRedirect(uid) {
             try {
                 const userDoc = await getDoc(doc(db, "users", uid));
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    
                     if (userData.role === 'admin') {
                         window.location.replace('admin.html');
                     } else {
                         window.location.replace('athlete.html');
                     }
                 } else {
-                    alert("Profilo utente non trovato nel database.");
+                    showAlert("Profilo utente non trovato nel database.", "Errore");
                 }
             } catch (error) {
                 console.error("Errore nel recupero del ruolo:", error);
