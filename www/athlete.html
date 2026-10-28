@@ -2,209 +2,323 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Area Atleta - RoundOne</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background-color: #0f172a;
-            /* Sfondo grigio scuro professionale con trama diagonale elegante e bagliori dinamici */
-            background-image: 
-                radial-gradient(at 10% 20%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
-                radial-gradient(at 90% 80%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
-                repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.015) 0, rgba(255, 255, 255, 0.015) 1px, transparent 0, transparent 50px);
-            background-attachment: fixed;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        neon: '#16a34a',
+                    }
+                }
+            }
         }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
     </style>
 </head>
-<body class="text-slate-100 min-h-screen flex flex-col justify-between relative selection:bg-indigo-500 selection:text-white pb-16">
+<body class="bg-gray-100 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col relative pb-20">
 
-    <!-- OVERLAY SIDEBAR -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-40 hidden transition-opacity duration-300"></div>
-
-    <!-- SIDEBAR LATERALE SQUADRATA -->
-    <aside id="sidebar-menu" class="fixed inset-y-0 right-0 w-72 bg-slate-900 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between border-l border-slate-800 rounded-none">
-        <div>
-            <div class="bg-slate-950 text-white p-5 flex justify-between items-center border-b border-slate-800 rounded-none">
-                <div>
-                    <h3 id="sidebar-athlete-name" class="font-extrabold text-sm tracking-tight text-white">Atleta</h3>
-                    <p id="sidebar-team-name" class="text-[11px] text-indigo-400 font-medium">Leoni di San Marco</p>
-                </div>
-                <button type="button" id="btn-close-sidebar" class="text-slate-400 hover:text-white text-base font-bold p-1 rounded-none bg-slate-800 border border-slate-700 w-8 h-8 flex items-center justify-center transition">✕</button>
-            </div>
-
-            <div class="p-3.5 bg-slate-950/60 border-b border-slate-800 flex items-center justify-between text-xs rounded-none">
-                <div>
-                    <span class="block text-[10px] uppercase font-bold text-slate-400">Codice Invito Palestra</span>
-                    <span id="sidebar-gym-code" class="font-mono font-bold text-indigo-400 tracking-wider">---</span>
-                </div>
-                <button type="button" id="btn-whatsapp-invite" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-none text-xs font-bold transition shadow-xs flex items-center gap-1">
-                    <span>💬</span> WhatsApp
-                </button>
-            </div>
-
-            <nav class="p-3 space-y-1.5">
-                <a href="chat.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-none text-xs font-bold text-slate-300 hover:bg-slate-800 hover:text-white transition">
-                    <span class="text-base">💬</span> Chat con il Coach
-                </a>
-            </nav>
+    <!-- TOP BAR (Minimale) -->
+    <header class="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center shadow-xs">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-neon text-white flex items-center justify-center font-black text-xs rounded-lg shadow-sm">R1</div>
+            <h1 class="text-xs font-black uppercase tracking-widest text-black">RoundOne</h1>
         </div>
-
-        <div class="p-4 border-t border-slate-800 bg-slate-950 rounded-none">
-            <button id="btn-logout-sidebar" class="w-full bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 border border-rose-900/50 py-2.5 rounded-none text-xs font-bold transition flex items-center justify-center gap-2">
-                🚪 Esci dall'Account
-            </button>
-        </div>
-    </aside>
-
-    <!-- HEADER / NAVBAR SUPERIORE SQUADRATA -->
-    <header class="bg-slate-950 text-white border-b border-slate-800 px-4 sm:px-6 py-3 shadow-lg sticky top-0 z-30 flex flex-col md:flex-row justify-between items-center gap-3 rounded-none">
-        <div class="flex justify-between items-center w-full md:w-auto">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-none bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-black text-sm shadow-inner">
-                    🥊
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 id="athlete-name-display" class="text-xs sm:text-sm font-black tracking-tight text-white leading-tight truncate max-w-[150px] sm:max-w-xs">Atleta</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-none border border-emerald-500/35 hidden sm:inline-block">Atleta</span>
-                    </div>
-                    <p id="team-name-subtitle" class="text-[11px] text-slate-400 font-medium truncate max-w-[180px] sm:max-w-xs mt-0.5">Leoni di San Marco</p>
-                </div>
-            </div>
-            <button type="button" id="btn-open-sidebar" class="md:hidden bg-slate-900 hover:bg-slate-800 text-white p-2 rounded-none border border-slate-800 transition" title="Menu">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
-        </div>
-
-        <!-- BARRA DEI TAB SUPERIORE SQUADRATA -->
-        <nav class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
-            <button type="button" data-tab="welcome" class="nav-tab px-3.5 py-1.5 rounded-none text-xs font-bold bg-indigo-600 text-white transition-all shadow-sm whitespace-nowrap flex items-center gap-1.5">
-                <span>🏠</span> Home
-            </button>
-            <button type="button" data-tab="training" class="nav-tab px-3.5 py-1.5 rounded-none text-xs font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 transition-all whitespace-nowrap flex items-center gap-1.5 border border-slate-800">
-                <span>📅</span> Il Mio Piano di Allenamento
-            </button>
-            <button type="button" data-tab="gym" class="nav-tab px-3.5 py-1.5 rounded-none text-xs font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 transition-all whitespace-nowrap flex items-center gap-1.5 border border-slate-800">
-                <span>🏋️‍♂️</span> Sala Pesi & Schede
-            </button>
-        </nav>
-
-        <div class="hidden md:flex items-center">
-            <button type="button" id="btn-open-sidebar-desktop" class="bg-slate-900 hover:bg-slate-800 text-white p-2 rounded-none border border-slate-800 transition" title="Menu Opzioni">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
+        <div class="flex items-center gap-2 text-[10px] font-bold text-gray-500 uppercase">
+            <span id="header-gym-code" class="bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-md">Cod. ---</span>
         </div>
     </header>
 
     <!-- MAIN CONTAINER -->
-    <main class="flex-grow max-w-5xl w-full mx-auto p-3 sm:p-6 space-y-6 z-10 relative">
+    <main class="flex-grow w-full max-w-3xl mx-auto p-4 pb-24 relative">
 
-        <!-- HOME PROFESSIONALE SQUADRATA -->
-        <div id="content-welcome" class="tab-content py-20 px-6 sm:px-12 rounded-none bg-slate-900/95 backdrop-blur-md shadow-2xl border border-slate-800 text-white text-center relative overflow-hidden flex flex-col items-center justify-center space-y-4">
-            <div class="w-16 h-16 rounded-none bg-indigo-600/10 border border-indigo-500/30 flex items-center justify-center text-2xl shadow-sm mb-2">
-                ⚡
-            </div>
-            <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white">Pronto per il prossimo allenamento?</h2>
-            <p class="text-xs sm:text-sm text-slate-400 max-w-md leading-relaxed font-medium">
-                Usa i pulsanti di navigazione in alto per consultare il tuo piano di allenamento settimanale o esplorare la sala pesi e le schede dedicate.
-            </p>
-            <div class="pt-6 text-[10px] text-slate-500 font-mono tracking-wider uppercase">
-                App creata da Riccio
-            </div>
-        </div>
-
-        <!-- SEZIONE 1: IL MIO PIANO DI ALLENAMENTO -->
-        <div id="content-training" class="tab-content hidden space-y-6">
-            <div class="bg-slate-900/95 backdrop-blur-md rounded-none shadow-xl border border-slate-800 overflow-hidden p-5 sm:p-6 space-y-4">
-                <div class="flex justify-between items-center bg-slate-950 p-4 rounded-none border border-slate-800">
-                    <div>
-                        <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
-                            <span>📅</span> Il Mio Piano di Allenamento
-                        </h3>
-                        <p class="text-xs text-slate-400">Calendario e attività settimanali assegnate dal coach.</p>
-                    </div>
-                    <span class="text-xs font-bold text-slate-950 bg-emerald-400 px-3 py-1 rounded-none shadow-xs">Area Attiva</span>
-                </div>
-                <div id="weeks-accordion-container" class="space-y-3">
-                    <p class="text-xs text-slate-400 italic text-center py-6">Caricamento settimane in corso...</p>
+        <!-- SEZIONE 1: HOME -->
+        <section id="section-home" class="block space-y-6">
+            <div class="relative rounded-2xl overflow-hidden shadow-md border border-gray-200 min-h-[250px] flex flex-col justify-end p-6 bg-gray-900">
+                <div class="absolute inset-0 bg-cover bg-center opacity-60" style="background-image: url('https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?q=80&w=1000&auto=format&fit=crop');"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+                
+                <div class="relative z-10 space-y-2">
+                    <span class="bg-neon text-white text-[9px] font-black tracking-widest px-2.5 py-1 rounded-md uppercase shadow-sm">Leoni di San Marco</span>
+                    <h2 class="text-2xl sm:text-3xl font-black uppercase tracking-wide text-white leading-tight">Pronto per l'allenamento?</h2>
+                    <p class="text-xs text-gray-200 font-medium max-w-md">
+                        Esplora il tuo piano settimanale o consulta la sala pesi direttamente dalla barra in basso.
+                    </p>
                 </div>
             </div>
-        </div>
-
-        <!-- SEZIONE 2: SALA PESI & SCHEDE -->
-        <div id="content-gym" class="tab-content hidden space-y-6">
-            <div class="bg-slate-900/95 backdrop-blur-md rounded-none shadow-xl border border-slate-800 overflow-hidden p-5 sm:p-6 space-y-4">
-                <div class="flex justify-between items-center bg-slate-950 p-4 rounded-none border border-slate-800">
-                    <div>
-                        <h3 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
-                            <span>🏋️‍♂️</span> Sala Pesi & Schede Dedicate
-                        </h3>
-                        <p class="text-xs text-slate-400">Le tue schede di allenamento personali e globali.</p>
-                    </div>
-                    <span class="text-xs font-bold text-slate-950 bg-indigo-400 px-3 py-1 rounded-none shadow-xs">Schede Pronte</span>
+            
+            <div class="space-y-3">
+                <div class="flex justify-between items-center px-1">
+                    <h3 class="font-black text-xs uppercase tracking-widest text-gray-500">Accesso Rapido Schede</h3>
                 </div>
                 <div id="personal-templates-list" class="space-y-3">
-                    <p class="text-xs text-slate-400 italic text-center py-6">Caricamento schede in corso...</p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 bg-white rounded-xl border border-gray-200">Caricamento schede in corso...</p>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <!-- SEZIONE 2: IL MIO PIANO -->
+        <section id="section-training" class="hidden space-y-4">
+            <div class="flex justify-between items-center bg-white border border-gray-200 p-4 rounded-2xl shadow-xs">
+                <div>
+                    <h3 class="text-sm font-black uppercase tracking-widest text-black">Il Mio Piano</h3>
+                    <p class="text-[10px] font-bold text-gray-500 uppercase mt-0.5">Calendario e attività assegnate</p>
+                </div>
+                <span class="text-[10px] font-black tracking-widest text-neon bg-green-50 border border-green-200 px-3 py-1 rounded-lg">ATTIVO</span>
+            </div>
+            <div id="weeks-accordion-container" class="space-y-4">
+                <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 bg-white rounded-2xl border border-gray-200">Caricamento settimane in corso...</p>
+            </div>
+        </section>
+
+        <!-- SEZIONE 3: SCHEDE (SALA PESI) -->
+        <section id="section-gym" class="hidden space-y-4">
+            <div class="flex justify-between items-center bg-white border border-gray-200 p-4 rounded-2xl shadow-xs">
+                <div>
+                    <h3 class="text-sm font-black uppercase tracking-widest text-black">Sala Pesi & Schede</h3>
+                    <p class="text-[10px] font-bold text-gray-500 uppercase mt-0.5">Le tue schede globali e personali</p>
+                </div>
+                <span class="text-[10px] font-black tracking-widest text-neon bg-green-50 border border-green-200 px-3 py-1 rounded-lg">DISPONIBILI</span>
+            </div>
+            <div id="gym-templates-list" class="space-y-3">
+                <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 bg-white rounded-2xl border border-gray-200">Caricamento sala pesi...</p>
+            </div>
+        </section>
+
+        <!-- SEZIONE 4: COMMUNITY -->
+        <section id="section-community" class="hidden space-y-4">
+            <div class="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center min-h-[350px] shadow-xs">
+                <div class="w-12 h-12 rounded-xl bg-green-50 text-neon flex items-center justify-center text-xl mb-3 border border-green-100">💬</div>
+                <p class="text-sm font-black uppercase tracking-widest text-black">Chat di Gruppo</p>
+                <p class="text-[10px] font-bold text-gray-500 uppercase mt-2 max-w-xs">Presto potrai comunicare direttamente con il tuo team e i compagni di allenamento.</p>
+            </div>
+        </section>
+
+        <!-- SEZIONE 5: PROFILO -->
+        <section id="section-profile" class="hidden space-y-4">
+            <div class="relative h-48 bg-slate-200 rounded-2xl overflow-hidden border border-slate-300 shadow-inner flex items-center justify-center">
+                <div class="absolute inset-0 bg-gradient-to-tr from-slate-300/50 to-transparent"></div>
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-white/80 px-3 py-1.5 rounded-lg border border-slate-300 z-10 shadow-xs">🖼️ Inserisci Foto Copertina</span>
+                
+                <button onclick="toggleModal('settings-modal')" class="absolute top-4 right-4 z-20 p-2 text-black bg-white rounded-xl shadow-md hover:bg-gray-50 transition border border-slate-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm relative pt-14">
+                <div onclick="toggleModal('edit-profile-modal')" class="w-24 h-24 bg-gray-100 rounded-full border-4 border-white absolute -top-12 left-6 flex items-center justify-center overflow-hidden shadow-md cursor-pointer relative group">
+                    <svg class="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                    <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5l13.732-13.732z"></path></svg></div>
+                </div>
+
+                <div class="space-y-2">
+                    <h2 class="text-xl sm:text-2xl font-black uppercase tracking-wide text-black leading-none" id="display-fullname">ATLETA</h2>
+                    <p class="text-gray-700 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest pt-1"><span>🇮🇹</span> <span id="display-location">Italia</span></p>
+                    <p class="text-gray-400 text-[11px] font-bold uppercase pt-1">Aggiungi una bio al tuo profilo</p>
+                    
+                    <div class="pt-4">
+                        <button onclick="toggleModal('edit-profile-modal')" class="bg-black text-white hover:bg-neon font-black uppercase tracking-widest text-[10px] px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition">
+                            MODIFICA PROFILO <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
 
     </main>
 
-    <!-- MODAL VISUALIZZA SCHEDA SQUADRATO -->
-    <div id="view-template-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 w-full max-w-lg rounded-none shadow-2xl border border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-slate-950 text-white px-5 py-4 flex justify-between items-center border-b border-slate-800 rounded-none">
-                <h3 id="view-tpl-modal-title" class="font-black text-sm text-indigo-400">🏋️‍♂️ Dettaglio Scheda</h3>
-                <button type="button" id="btn-close-view-tpl-modal" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded-none transition">✕</button>
-            </div>
-            <div id="view-tpl-modal-content" class="p-5 overflow-y-auto space-y-4 text-xs flex-grow bg-slate-900/50 text-slate-200"></div>
-            <div class="p-4 border-t border-slate-800 bg-slate-950 flex justify-end rounded-none">
-                <button type="button" id="btn-close-view-ok" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-4 py-2 rounded-none transition text-xs">Chiudi</button>
+    <!-- BOTTOM NAVIGATION BAR -->
+    <nav class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-between items-center px-1 pb-safe z-40 shadow-lg">
+        <button id="nav-btn-home" onclick="showSection('home')" class="nav-btn flex-1 flex flex-col items-center py-2 text-neon">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            <span class="text-[8px] font-black tracking-wider uppercase">Home</span>
+        </button>
+        <button id="nav-btn-training" onclick="showSection('training')" class="nav-btn flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <span class="text-[8px] font-black tracking-wider uppercase">Il Mio Piano</span>
+        </button>
+        <button id="nav-btn-gym" onclick="showSection('gym')" class="nav-btn flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <span class="text-[8px] font-black tracking-wider uppercase">Schede</span>
+        </button>
+        <button id="nav-btn-community" onclick="showSection('community')" class="nav-btn flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+            <span class="text-[8px] font-black tracking-wider uppercase">Community</span>
+        </button>
+        <button id="nav-btn-profile" onclick="showSection('profile')" class="nav-btn flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            <span class="text-[8px] font-black tracking-wider uppercase">Profilo</span>
+        </button>
+    </nav>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- MODALE IMPOSTAZIONI -->
+    <div id="settings-modal" class="fixed inset-0 bg-white z-[60] hidden overflow-y-auto pb-10">
+        <div class="sticky top-0 bg-white flex items-center p-4 border-b border-gray-200 z-10 shadow-xs">
+            <button onclick="toggleModal('settings-modal')" class="text-black p-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg></button>
+            <h2 class="flex-1 text-center text-sm font-black uppercase tracking-widest mr-8">Impostazioni</h2>
+        </div>
+        <div class="p-0 max-w-xl mx-auto">
+            <h3 class="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 border-b border-gray-200">Personale</h3>
+            <ul class="flex flex-col">
+                <li onclick="toggleModal('settings-modal'); toggleModal('edit-profile-modal');" class="flex justify-between items-center px-4 py-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition">
+                    <div class="flex items-center gap-3 text-black"><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5l13.732-13.732z"></path></svg> <span class="text-xs font-bold uppercase tracking-wide">Modifica Profilo</span></div>
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </li>
+            </ul>
+
+            <h3 class="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 border-b border-gray-200 mt-4">Informazioni</h3>
+            <ul class="flex flex-col">
+                <li onclick="toggleModal('settings-modal'); toggleModal('support-modal');" class="flex justify-between items-center px-4 py-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 text-black transition">
+                    <div class="flex items-center gap-3"><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg> <span class="text-xs font-bold uppercase tracking-wide">Assistenza & Feedback</span></div>
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </li>
+                <li>
+                    <a href="policy.html" class="flex justify-between items-center px-4 py-4 border-b border-gray-100 hover:bg-gray-50 text-black transition">
+                        <div class="flex items-center gap-3"><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> <span class="text-xs font-bold uppercase tracking-wide">Informativa sulla Privacy</span></div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </a>
+                </li>
+                <li>
+                    <a href="note-legali.html" class="flex justify-between items-center px-4 py-4 border-b border-gray-100 hover:bg-gray-50 text-black transition">
+                        <div class="flex items-center gap-3"><svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> <span class="text-xs font-bold uppercase tracking-wide">Termini e Condizioni (Note Legali)</span></div>
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="p-4 mt-6">
+                <button id="btn-logout-settings" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-3.5 rounded-xl font-bold uppercase text-xs tracking-wider flex justify-between px-6 transition">
+                    <span>Esci dall'Account</span> 🚪
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL VIDEO ESERCIZIO SQUADRATO -->
-    <div id="video-player-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
-        <div class="w-full max-w-sm flex flex-col gap-3">
+    <!-- MODALE ASSISTENZA & FEEDBACK -->
+    <div id="support-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col">
+            <div class="bg-white text-black px-5 py-4 flex justify-between items-center border-b border-gray-200">
+                <h3 class="font-black text-sm uppercase tracking-widest">💬 Assistenza & Feedback</h3>
+                <button type="button" onclick="toggleModal('support-modal')" class="text-gray-400 hover:text-black p-1">✕</button>
+            </div>
+            <div class="p-5 space-y-4 bg-gray-50">
+                <p class="text-xs text-gray-600 font-medium">Hai riscontrato un problema o vuoi inviare un messaggio al coach? Scrivi qui sotto:</p>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Il tuo messaggio</label>
+                    <textarea id="support-message" rows="4" class="w-full bg-white border border-gray-200 rounded-xl p-3 outline-none text-xs font-medium text-black" placeholder="Scrivi la tua segnalazione..."></textarea>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-200 bg-white flex justify-end gap-2">
+                <button type="button" onclick="toggleModal('support-modal')" class="bg-gray-100 text-gray-700 font-black uppercase tracking-widest px-4 py-2.5 rounded-xl text-[10px]">Annulla</button>
+                <button type="button" id="btn-send-support" class="bg-neon text-white font-black uppercase tracking-widest px-5 py-2.5 rounded-xl text-[10px] shadow-sm">Invia al Coach</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL MODIFICA PROFILO -->
+    <div id="edit-profile-modal" class="fixed inset-0 bg-white z-[70] hidden overflow-y-auto pb-10">
+        <div class="sticky top-0 bg-white flex items-center justify-between p-4 border-b border-gray-200 z-10 shadow-xs">
+            <button onclick="toggleModal('edit-profile-modal')" class="text-black p-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            <h2 class="text-sm font-black uppercase tracking-widest text-black">Modifica Profilo</h2>
+            <button onclick="saveProfileData()" class="text-neon font-black uppercase tracking-widest text-xs p-2">Salva</button>
+        </div>
+        <div class="p-6 max-w-md mx-auto">
+            <div class="flex justify-center mb-8">
+                <div class="w-24 h-24 bg-gray-100 border-2 border-gray-200 rounded-full flex flex-col items-center justify-center relative cursor-pointer shadow-sm">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span class="text-[8px] font-black uppercase mt-1 tracking-widest text-gray-500">Foto</span>
+                </div>
+            </div>
+            <form id="profile-form" class="space-y-5">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Nome</label>
+                    <input type="text" id="input-name" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 outline-none text-sm font-bold text-black" placeholder="Es. Mario">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Cognome</label>
+                    <input type="text" id="input-surname" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 outline-none text-sm font-bold text-black" placeholder="Es. Rossi">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Sesso</label>
+                    <select id="input-gender" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 outline-none text-sm font-bold text-black">
+                        <option value="Non specificare">Non specificare</option>
+                        <option value="Uomo">Uomo</option>
+                        <option value="Donna">Donna</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Email</label>
+                    <input type="email" id="input-email" class="w-full bg-gray-100 border border-gray-200 rounded-xl px-3.5 py-2.5 outline-none text-sm font-bold text-gray-400" readonly>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Posizione</label>
+                    <input type="text" id="input-location" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 outline-none text-sm font-bold text-black" placeholder="Es. Italia">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Altezza (cm)</label>
+                        <input type="number" id="input-height" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 outline-none text-sm font-bold text-black" placeholder="Es. 180">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Peso (kg)</label>
+                        <input type="number" id="input-weight" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 outline-none text-sm font-bold text-black" placeholder="Es. 75">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL VISUALIZZA SCHEDA -->
+    <div id="view-template-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-white text-black px-5 py-4 flex justify-between items-center border-b border-gray-200">
+                <h3 id="view-tpl-modal-title" class="font-black text-sm uppercase tracking-widest">🏋️‍♂️ Dettaglio Scheda</h3>
+                <button type="button" id="btn-close-view-tpl-modal" class="text-gray-400 hover:text-black p-1">✕</button>
+            </div>
+            <div id="view-tpl-modal-content" class="p-5 overflow-y-auto space-y-3 text-xs flex-grow bg-gray-50 text-slate-800"></div>
+            <div class="p-4 border-t border-gray-200 bg-white flex justify-end">
+                <button type="button" id="btn-close-view-ok" class="bg-neon text-white font-black uppercase tracking-widest px-5 py-2.5 rounded-xl text-[10px] shadow-sm">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VIDEO ESERCIZIO -->
+    <div id="video-player-modal" class="fixed inset-0 bg-black/90 z-[60] hidden flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-lg flex flex-col gap-3">
             <div class="flex justify-between items-center text-white">
-                <h3 id="video-player-title" class="font-black text-sm uppercase tracking-wider text-indigo-400">Esercizio</h3>
-                <button type="button" id="btn-close-video-modal" class="bg-white/20 hover:bg-white/30 text-white w-8 h-8 rounded-none font-bold flex justify-center items-center">✕</button>
+                <h3 id="video-player-title" class="font-black text-sm uppercase tracking-widest">Esercizio</h3>
+                <button type="button" id="btn-close-video-modal" class="bg-white/10 hover:bg-white/20 text-white w-8 h-8 rounded-xl font-bold flex justify-center items-center">✕</button>
             </div>
-            <video id="video-player-element" class="w-full rounded-none bg-black shadow-2xl border border-slate-800" controls loop playsinline preload="none"></video>
+            <video id="video-player-element" class="w-full bg-black rounded-2xl shadow-2xl border border-gray-800" controls playsinline preload="none"></video>
         </div>
     </div>
 
-    <!-- MODAL NOTIFICHE SQUADRATO -->
-    <div id="custom-alert-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-[70] hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 w-full max-w-sm rounded-none shadow-2xl border border-slate-800 p-6 space-y-4 text-center text-white">
-            <div class="text-3xl">✨</div>
-            <h4 id="custom-alert-title" class="font-black text-base text-indigo-400">Notifica</h4>
-            <p id="custom-alert-message" class="text-xs text-slate-300 leading-relaxed"></p>
-            <button type="button" id="custom-alert-ok" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-none transition text-xs shadow-md">Capito</button>
+    <!-- MODAL NOTIFICHE -->
+    <div id="custom-alert-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl border border-gray-200 p-6 space-y-4 text-center text-black">
+            <h4 id="custom-alert-title" class="font-black text-base uppercase tracking-widest">Notifica</h4>
+            <p id="custom-alert-message" class="text-xs font-medium text-gray-600 leading-relaxed"></p>
+            <button type="button" id="custom-alert-ok" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3 rounded-xl text-[10px] shadow-sm">Capito</button>
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="text-center py-4 px-4 text-xs text-slate-500 font-medium border-t border-slate-800 bg-slate-950 space-y-1.5 mt-8 z-10 relative">
-        <div class="flex justify-center items-center gap-3 text-[11px] font-bold text-slate-400">
-            <a href="policy.html" class="hover:text-indigo-400 transition-colors">Privacy Policy</a>
-            <span>•</span>
-            <a href="note-legali.html" class="hover:text-indigo-400 transition-colors">Note Legali</a>
-        </div>
-        <div class="text-[11px] text-slate-500">
-            RoundOne &copy; 2026 — Leoni di San Marco. Tutti i diritti riservati.
-        </div>
-    </footer>
-
-    <!-- SCRIPT FIREBASE E LOGICA ATLETA -->
+    <!-- SCRIPT FIREBASE E LOGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, getDocs, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD5xFMM-kKy2-pYzcTk3MiFmXCTCe4EXEA",
@@ -246,53 +360,41 @@
             return costs[s2.length];
         }
 
-        const navTabs = document.querySelectorAll('.nav-tab');
-        const tabContents = document.querySelectorAll('.tab-content');
+        window.showSection = function(sectionId) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`section-${sectionId}`).classList.remove('hidden');
 
-        function switchTab(targetName) {
-            navTabs.forEach(t => {
-                t.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
-                t.classList.add('bg-slate-900', 'text-slate-300', 'hover:bg-slate-800', 'border', 'border-slate-800');
-                if(t.getAttribute('data-tab') === targetName) {
-                    t.classList.remove('bg-slate-900', 'text-slate-300', 'hover:bg-slate-800', 'border', 'border-slate-800');
-                    t.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
-                }
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-neon');
+                btn.classList.add('text-gray-400');
             });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            const activeContent = document.getElementById(`content-${targetName}`);
-            if (activeContent) activeContent.classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-btn-${sectionId}`);
+            activeBtn.classList.remove('text-gray-400');
+            activeBtn.classList.add('text-neon');
         }
 
-        navTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                switchTab(tab.getAttribute('data-tab'));
-            });
-        });
-
-        const sidebarMenu = document.getElementById('sidebar-menu');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        const btnOpenSidebar = document.getElementById('btn-open-sidebar');
-        const btnOpenSidebarDesktop = document.getElementById('btn-open-sidebar-desktop');
-        const btnCloseSidebar = document.getElementById('btn-close-sidebar');
-
-        function openSidebar() { sidebarMenu.classList.remove('translate-x-full'); sidebarOverlay.classList.remove('hidden'); }
-        function closeSidebar() { sidebarMenu.classList.add('translate-x-full'); sidebarOverlay.classList.add('hidden'); }
-
-        btnOpenSidebar.addEventListener('click', openSidebar);
-        if(btnOpenSidebarDesktop) btnOpenSidebarDesktop.addEventListener('click', openSidebar);
-        btnCloseSidebar.addEventListener('click', closeSidebar);
-        sidebarOverlay.addEventListener('click', closeSidebar);
-
-        const btnWhatsappInvite = document.getElementById('btn-whatsapp-invite');
-        btnWhatsappInvite.addEventListener('click', () => {
-            const codeText = sidebarGymCode.textContent.trim();
-            if (codeText && codeText !== '---') {
-                const message = encodeURIComponent(`Unisciti alla nostra palestra su RoundOne! 🥊\n\nRegistrati qui: https://app-palestra-b0b9d.web.app/index.html\nInserisci questo codice invito: *${codeText}*`);
-                window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
+        window.toggleModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
             } else {
-                showAlert("Codice invito non ancora disponibile.", "Attenzione");
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
             }
-        });
+        }
+
+        window.saveProfileData = function() {
+            const name = document.getElementById('input-name').value;
+            const surname = document.getElementById('input-surname').value;
+            const location = document.getElementById('input-location').value;
+            
+            if(name || surname) document.getElementById('display-fullname').innerText = `${name} ${surname}`;
+            if(location) document.getElementById('display-location').innerText = location;
+            
+            toggleModal('edit-profile-modal');
+            showAlert('Profilo aggiornato con successo!', 'Successo');
+        }
 
         function showAlert(message, title = "Notifica") {
             document.getElementById('custom-alert-title').textContent = title;
@@ -301,13 +403,41 @@
         }
         document.getElementById('custom-alert-ok').addEventListener('click', () => document.getElementById('custom-alert-modal').classList.add('hidden'));
 
-        const athleteNameDisplay = document.getElementById('athlete-name-display');
-        const sidebarAthleteName = document.getElementById('sidebar-athlete-name');
-        const sidebarGymCode = document.getElementById('sidebar-gym-code');
-        const btnLogoutSidebar = document.getElementById('btn-logout-sidebar');
+        // Invio Feedback al Coach
+        document.getElementById('btn-send-support').addEventListener('click', async () => {
+            const msg = document.getElementById('support-message').value.trim();
+            if (!msg) {
+                alert('Inserisci un messaggio.');
+                return;
+            }
+            if (!currentGymId || !currentUserUid) return;
+
+            try {
+                await addDoc(collection(db, "gyms", currentGymId, "support_feedback"), {
+                    athleteId: currentUserUid,
+                    athleteName: document.getElementById('display-fullname').textContent,
+                    message: msg,
+                    createdAt: serverTimestamp(),
+                    status: 'unread'
+                });
+                toggleModal('support-modal');
+                document.getElementById('support-message').value = '';
+                showAlert('Segnalazione inviata con successo al coach!', 'Assistenza');
+            } catch (err) {
+                console.error("Errore invio feedback:", err);
+                alert("Errore durante l'invio.");
+            }
+        });
+
+        const headerGymCode = document.getElementById('header-gym-code');
+        const displayFullname = document.getElementById('display-fullname');
+        const inputName = document.getElementById('input-name');
+        const inputEmail = document.getElementById('input-email');
+        const btnLogoutSettings = document.getElementById('btn-logout-settings');
 
         const weeksAccordionContainer = document.getElementById('weeks-accordion-container');
         const personalTemplatesList = document.getElementById('personal-templates-list');
+        const gymTemplatesList = document.getElementById('gym-templates-list');
 
         const viewTemplateModal = document.getElementById('view-template-modal');
         const viewTplModalTitle = document.getElementById('view-tpl-modal-title');
@@ -334,13 +464,14 @@
         let globalTemplates = [];
         let gymVideos = [];
 
-        btnLogoutSidebar.addEventListener('click', async () => {
+        btnLogoutSettings.addEventListener('click', async () => {
             try { await signOut(auth); } catch(e) {} finally { window.location.replace('index.html'); }
         });
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) { window.location.replace('index.html'); return; }
             currentUserUid = user.uid;
+            inputEmail.value = user.email;
 
             try {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -351,11 +482,12 @@
 
                 const userData = userDoc.data();
                 currentGymId = userData.gymId;
-                athleteNameDisplay.textContent = userData.name;
-                sidebarAthleteName.textContent = userData.name;
+                
+                displayFullname.textContent = userData.name || "Atleta";
+                inputName.value = userData.name || "";
 
                 const gymDoc = await getDoc(doc(db, "gyms", currentGymId));
-                if (gymDoc.exists()) sidebarGymCode.textContent = gymDoc.data().inviteCode || "---";
+                if (gymDoc.exists()) headerGymCode.textContent = `Cod. ${gymDoc.data().inviteCode || "---"}`;
 
                 await loadGlobalTemplatesAndVideos();
                 await loadAthleteWeeks();
@@ -388,33 +520,45 @@
                 const snapshot = await getDocs(ref);
                 
                 personalTemplatesList.innerHTML = '';
-                
+                gymTemplatesList.innerHTML = '';
+
                 let allAvailable = [...globalTemplates];
                 snapshot.forEach(docSnap => {
                     allAvailable.push({ id: docSnap.id, ...docSnap.data(), isPersonal: true });
                 });
 
                 if (allAvailable.length === 0) {
-                    personalTemplatesList.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-6">Nessuna scheda disponibile al momento.</p>';
+                    const emptyHtml = '<p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6">Nessuna scheda disponibile.</p>';
+                    personalTemplatesList.innerHTML = emptyHtml;
+                    gymTemplatesList.innerHTML = emptyHtml;
                     return;
                 }
 
                 allAvailable.forEach(tpl => {
-                    const div = document.createElement('div');
-                    div.className = "p-3.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-none text-xs flex justify-between items-center cursor-pointer transition shadow-xs";
-                    div.innerHTML = `
-                        <div class="flex items-center gap-2">
-                            <span class="text-base">🏋️‍♂️</span>
-                            <span class="font-extrabold text-white text-sm">${tpl.title}</span>
-                            ${tpl.isPersonal ? '<span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-none font-bold">Personale</span>' : ''}
-                        </div>
-                        <span class="text-xs font-bold text-indigo-400">Apri Scheda &rarr;</span>
-                    `;
-                    div.addEventListener('click', () => openViewTemplateModal(tpl));
-                    personalTemplatesList.appendChild(div);
+                    const createCard = () => {
+                        const div = document.createElement('div');
+                        div.className = "p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center cursor-pointer transition shadow-xs hover:border-neon mb-3";
+                        div.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">${tpl.isPersonal ? '🎯' : '📄'}</span>
+                                <div>
+                                    <span class="font-black text-black text-xs uppercase tracking-wider block">${tpl.title}</span>
+                                    ${tpl.isPersonal ? '<span class="text-[9px] bg-green-50 text-neon px-2 py-0.5 mt-1 inline-block font-bold rounded-md tracking-wider uppercase border border-green-200">Personale / Riabilitazione</span>' : '<span class="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 mt-1 inline-block font-bold rounded-md tracking-wider uppercase border border-gray-200">Sala Pesi</span>'}
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-neon uppercase">Apri &rarr;</span>
+                        `;
+                        div.addEventListener('click', () => openViewTemplateModal(tpl));
+                        return div;
+                    };
+
+                    personalTemplatesList.appendChild(createCard());
+                    gymTemplatesList.appendChild(createCard());
                 });
             } catch (e) {
-                personalTemplatesList.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-6">Nessuna scheda personale trovata.</p>';
+                const errHtml = '<p class="text-[10px] text-gray-400 text-center py-6 uppercase font-bold">Errore caricamento schede.</p>';
+                personalTemplatesList.innerHTML = errHtml;
+                gymTemplatesList.innerHTML = errHtml;
             }
         }
 
@@ -423,30 +567,30 @@
             viewTplModalContent.innerHTML = '';
 
             if (!tpl.exercises || tpl.exercises.length === 0) {
-                viewTplModalContent.innerHTML = '<p class="text-xs text-slate-400 italic py-4 text-center">Nessun esercizio configurato.</p>';
+                viewTplModalContent.innerHTML = '<p class="text-xs font-bold text-gray-400 py-4 text-center uppercase">Nessun esercizio configurato.</p>';
             } else {
                 const listDiv = document.createElement('div');
-                listDiv.className = "space-y-2.5 divide-y divide-slate-800";
+                listDiv.className = "space-y-3";
                 
                 tpl.exercises.forEach((ex, idx) => {
                     const row = document.createElement('div');
-                    row.className = "pt-2.5 first:pt-0 text-xs space-y-1";
+                    row.className = "p-3.5 bg-white border border-gray-200 rounded-xl flex flex-col gap-1.5 shadow-2xs";
                     
                     let videoHtml = '';
                     const matchedVideo = gymVideos.find(v => similarity(v.name, ex.name) > 0.75);
                     if (matchedVideo) {
-                        videoHtml = `<button type="button" class="btn-play-video ml-1.5 bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 px-2 py-0.5 rounded-none transition font-bold" data-url="${matchedVideo.url}" data-name="${matchedVideo.name}">📹 Guarda Video</button>`;
+                        videoHtml = `<button type="button" class="btn-play-video ml-2 border border-green-200 bg-green-50 text-neon hover:bg-green-100 px-2.5 py-1 text-[9px] uppercase font-black rounded-lg transition" data-url="${matchedVideo.url}" data-name="${matchedVideo.name}">📹 Video</button>`;
                     }
 
                     row.innerHTML = `
-                        <div class="flex justify-between items-center font-bold text-white">
-                            <span class="flex items-center gap-1.5">${idx + 1}. ${ex.name} ${videoHtml}</span>
-                            <span class="font-mono bg-slate-800 text-indigo-300 px-2 py-0.5 rounded-none border border-slate-700">${ex.sets} serie × ${ex.reps} reps</span>
+                        <div class="flex justify-between items-start">
+                            <span class="font-black text-xs uppercase tracking-wider text-black flex items-center">${idx + 1}. ${ex.name} ${videoHtml}</span>
                         </div>
-                        <div class="flex items-center gap-3 text-[11px] text-slate-400">
-                            ${ex.load ? `<span class="font-medium text-slate-300">🎯 Carico: ${ex.load}</span>` : ''}
-                            ${ex.notes ? `<span class="italic text-slate-400">💡 Note: ${ex.notes}</span>` : ''}
+                        <div class="flex justify-between items-center mt-1">
+                            <span class="font-black text-[10px] bg-gray-100 text-gray-700 px-2 py-1 uppercase tracking-wider rounded-md">${ex.sets} set × ${ex.reps} reps</span>
+                            ${ex.load ? `<span class="font-bold text-[10px] text-gray-600 uppercase border border-gray-200 px-2 py-1 rounded-md">Carico: ${ex.load}</span>` : ''}
                         </div>
+                        ${ex.notes ? `<div class="mt-1 text-[10px] font-bold text-gray-500 uppercase border-t border-gray-100 pt-1.5">Note: ${ex.notes}</div>` : ''}
                     `;
                     listDiv.appendChild(row);
                 });
@@ -459,7 +603,7 @@
                         videoPlayerTitle.textContent = name;
                         videoPlayerElement.src = url;
                         videoPlayerModal.classList.remove('hidden');
-                        videoPlayerElement.play().catch(e => console.log("Autoplay preventito", e));
+                        videoPlayerElement.play().catch(e => console.log("Autoplay bloccato", e));
                     });
                 });
             }
@@ -475,21 +619,56 @@
                 snapshot.forEach(docSnap => weeksList.push({ id: docSnap.id, ...docSnap.data() }));
                 weeksList.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 
-                if (weeksList.length === 0) {
-                    weeksAccordionContainer.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-6">Nessun piano di allenamento assegnato dal coach.</p>';
+                const personalRef = collection(db, "gyms", currentGymId, "athlete_programs", currentUserUid, "personal_templates");
+                const personalSnap = await getDocs(personalRef);
+                let personalList = [];
+                personalSnap.forEach(docSnap => personalList.push({ id: docSnap.id, ...docSnap.data() }));
+
+                weeksAccordionContainer.innerHTML = '';
+
+                if (weeksList.length === 0 && personalList.length > 0) {
+                    weeksAccordionContainer.innerHTML = `
+                        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs space-y-3">
+                            <div class="flex items-center gap-2 text-neon font-black text-xs uppercase tracking-widest">
+                                <span>🎯</span> Scheda Assegnata dal Coach
+                            </div>
+                            <p class="text-xs text-gray-500 font-medium">Non hai un calendario settimanale attivo, ma il coach ti ha assegnato questa scheda specifica:</p>
+                        </div>
+                    `;
+                    personalList.forEach(tpl => {
+                        const div = document.createElement('div');
+                        div.className = "p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center cursor-pointer transition shadow-xs hover:border-neon mb-3";
+                        div.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">🏋️‍♂️</span>
+                                <div>
+                                    <span class="font-black text-black text-xs uppercase tracking-wider block">${tpl.title}</span>
+                                    <span class="text-[9px] bg-green-50 text-neon px-2 py-0.5 mt-1 inline-block font-bold rounded-md tracking-wider uppercase border border-green-200">Personale / Riabilitazione</span>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-neon uppercase">Apri Scheda &rarr;</span>
+                        `;
+                        div.addEventListener('click', () => openViewTemplateModal(tpl));
+                        weeksAccordionContainer.appendChild(div);
+                    });
                     return;
                 }
 
-                weeksAccordionContainer.innerHTML = '';
+                if (weeksList.length === 0) {
+                    weeksAccordionContainer.innerHTML = '<p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 bg-white rounded-2xl border border-gray-200">Nessun piano o scheda assegnata dal coach.</p>';
+                    return;
+                }
+
                 weeksList.forEach(weekData => renderWeekCard(weekData));
+
             } catch (error) {
-                weeksAccordionContainer.innerHTML = '<p class="text-xs text-rose-400 text-center py-4">Nessun programma settimanale trovato.</p>';
+                weeksAccordionContainer.innerHTML = '<p class="text-xs font-bold text-red-500 text-center py-4 uppercase">Errore caricamento piano.</p>';
             }
         }
 
         function renderWeekCard(weekData) {
             const card = document.createElement('div');
-            card.className = "bg-slate-950 border border-slate-800 rounded-none shadow-xs overflow-hidden transition";
+            card.className = "bg-white border border-gray-200 rounded-2xl shadow-xs overflow-hidden transition-all mb-4";
 
             const [y, m, d] = weekData.startDate.split('-').map(Number);
             const mondayDate = new Date(y, m - 1, d);
@@ -497,11 +676,10 @@
 
             const startDay = mondayDate.getDate();
             const endDay = sundayDate.getDate();
-            const year = mondayDate.getFullYear();
 
             let weekTitleStr = mondayDate.getMonth() === sundayDate.getMonth() 
-                ? `Week ${startDay}-${endDay} ${mondayDate.toLocaleDateString('it-IT', { month: 'long' })} ${year}`
-                : `Week ${startDay} ${mondayDate.toLocaleDateString('it-IT', { month: 'short' })} - ${endDay} ${sundayDate.toLocaleDateString('it-IT', { month: 'short' })} ${year}`;
+                ? `Settimana ${startDay}-${endDay} ${mondayDate.toLocaleDateString('it-IT', { month: 'long' })}`
+                : `Set. ${startDay} ${mondayDate.toLocaleDateString('it-IT', { month: 'short' })} - ${endDay} ${sundayDate.toLocaleDateString('it-IT', { month: 'short' })}`;
 
             let daysHtml = '';
             const daysOrder = ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
@@ -513,15 +691,15 @@
                 if (dayInfo.templateId) {
                     const found = globalTemplates.find(t => t.id === dayInfo.templateId);
                     if (found) {
-                        tplLinkHtml = `<div class="mt-1"><span class="text-xs font-extrabold text-indigo-400 hover:text-indigo-300 cursor-pointer underline decoration-indigo-500/50 btn-view-assigned-tpl transition" data-tpl-id="${found.id}">${found.title}</span></div>`;
+                        tplLinkHtml = `<div class="mt-2"><span class="text-[9px] font-black text-neon uppercase tracking-widest cursor-pointer hover:underline btn-view-assigned-tpl" data-tpl-id="${found.id}">Vedi Scheda &rarr;</span></div>`;
                     }
                 }
 
                 daysHtml += `
-                    <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-none space-y-1">
-                        <span class="font-black text-[10px] uppercase tracking-wider text-indigo-400 block border-b border-slate-800 pb-0.5 truncate">${dayName}</span>
-                        <p class="text-xs font-semibold text-white truncate">${dayInfo.activity1 || 'Riposo'}</p>
-                        ${dayInfo.activity2 ? `<p class="text-[11px] text-slate-400 truncate">${dayInfo.activity2}</p>` : ''}
+                    <div class="p-3 border border-gray-100 rounded-xl flex flex-col justify-center min-h-[90px] bg-gray-50/50">
+                        <span class="font-black text-[9px] uppercase tracking-widest text-gray-400 block mb-1 text-center border-b border-gray-200 pb-1">${dayName}</span>
+                        <p class="text-[11px] font-black text-black uppercase leading-tight text-center mt-1">${dayInfo.activity1 || 'RIPOSO'}</p>
+                        ${dayInfo.activity2 ? `<p class="text-[9px] font-bold text-gray-600 uppercase mt-1 truncate text-center">${dayInfo.activity2}</p>` : ''}
                         ${tplLinkHtml}
                     </div>
                 `;
@@ -530,15 +708,16 @@
             const sundayInfo = weekData.days["domenica"] || { activity1: 'OFF', activity2: '' };
 
             card.innerHTML = `
-                <div class="bg-slate-900 px-4 py-3 flex justify-between items-center gap-2 cursor-pointer select-none border-b border-slate-800 week-header hover:bg-slate-800 transition rounded-none">
-                    <div class="min-w-0"><h5 class="font-black text-xs sm:text-sm text-white capitalize truncate">📅 ${weekTitleStr}</h5></div>
-                    <span class="text-[11px] font-bold text-slate-950 bg-indigo-400 px-2.5 py-1 rounded-none toggle-arrow">▼ Apri</span>
+                <div class="bg-white px-4 py-3.5 flex justify-between items-center cursor-pointer select-none border-b border-gray-200 week-header transition hover:bg-gray-50">
+                    <div class="min-w-0"><h5 class="font-black text-xs sm:text-sm text-black uppercase tracking-widest truncate">${weekTitleStr}</h5></div>
+                    <span class="text-[10px] font-black tracking-widest uppercase text-neon bg-green-50 border border-green-200 px-2.5 py-1 rounded-lg toggle-arrow">▼ Apri</span>
                 </div>
-                <div class="p-4 space-y-3 week-body hidden bg-slate-950">
+                <div class="week-body hidden bg-white p-4 space-y-3">
                     <div class="grid grid-cols-3 gap-2">${daysHtml}</div>
-                    <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-none flex justify-between items-center text-xs">
-                        <span class="font-black uppercase tracking-wider text-indigo-400">Domenica</span>
-                        <span class="font-semibold text-white">${sundayInfo.activity1 || 'OFF'}</span>
+                    
+                    <div class="p-2.5 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-between gap-2 max-w-[200px] mx-auto">
+                        <span class="font-black text-[9px] uppercase tracking-widest text-gray-500">Domenica</span>
+                        <span class="font-black text-[10px] text-black uppercase">${sundayInfo.activity1 || 'OFF'}</span>
                     </div>
                 </div>
             `;

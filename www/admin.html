@@ -2,389 +2,428 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pannello Coach - RoundOne</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Sfondo principale con un unico grande logo in trasparenza (watermark) */
-        body {
-            background-color: #f1f5f9;
-            background-image: url('logo.png');
-            background-repeat: no-repeat;
-            background-position: center 55%;
-            background-size: 350px; /* Logo grande centrale */
-            background-attachment: fixed;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        neon: '#16a34a', 
+                    }
+                }
+            }
         }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
     </style>
 </head>
-<body class="text-slate-900 min-h-screen flex flex-col justify-between relative selection:bg-indigo-600 selection:text-white pb-16">
+<body class="bg-gray-50 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col relative pb-20">
 
-    <!-- OVERLAY PER LA SIDEBAR -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 hidden transition-opacity duration-300"></div>
-
-    <!-- SIDEBAR LATERALE (SQUADRATA) -->
-    <aside id="sidebar-menu" class="fixed inset-y-0 right-0 w-72 bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between border-l border-indigo-100 rounded-none">
-        <div>
-            <div class="bg-slate-900 text-white p-5 flex justify-between items-center border-b border-slate-800 rounded-none">
-                <div>
-                    <h3 id="sidebar-coach-name" class="font-extrabold text-sm tracking-tight text-white">Coach</h3>
-                    <p id="sidebar-gym-name" class="text-[11px] text-indigo-300 font-medium">Leoni di San Marco</p>
-                </div>
-                <button type="button" id="btn-close-sidebar" class="text-slate-400 hover:text-white text-base font-bold p-1 rounded-none bg-slate-800 border border-slate-700 w-8 h-8 flex items-center justify-center transition">✕</button>
-            </div>
-
-            <div class="p-3.5 bg-indigo-50/80 border-b border-indigo-100 flex items-center justify-between text-xs rounded-none">
-                <div>
-                    <span class="block text-[10px] uppercase font-bold text-indigo-900">Codice Invito Palestra</span>
-                    <span id="sidebar-invite-code" class="font-mono font-bold text-indigo-950 tracking-wider">---</span>
-                </div>
-                <button type="button" id="btn-whatsapp-invite" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-none text-xs font-bold transition shadow-xs flex items-center gap-1">
-                    <span>💬</span> WhatsApp
-                </button>
-            </div>
-
-            <nav class="p-3 space-y-1.5">
-                <a href="chat.html" class="flex items-center gap-3 px-3.5 py-2.5 rounded-none text-xs font-bold text-slate-700 hover:bg-slate-100 transition">
-                    <span class="text-base">💬</span> Chat con gli Atleti
-                </a>
-                <button type="button" id="menu-requests" class="w-full flex justify-between items-center px-3.5 py-2.5 rounded-none text-xs font-bold text-slate-700 hover:bg-slate-100 transition text-left">
-                    <span class="flex items-center gap-3"><span class="text-base">📥</span> Richieste Programma</span>
-                    <span id="sidebar-requests-count" class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-none font-mono">0</span>
-                </button>
-            </nav>
+    <!-- TOP BAR (Minimale) -->
+    <header class="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center shadow-xs">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-black text-white flex items-center justify-center font-black text-xs rounded-lg shadow-sm">R1</div>
+            <h1 class="text-xs font-black uppercase tracking-widest text-black">Pannello Coach</h1>
         </div>
-
-        <div class="p-4 border-t border-indigo-100 bg-slate-50 rounded-none">
-            <button id="btn-logout-sidebar" class="w-full bg-rose-600/10 hover:bg-rose-600/20 text-rose-700 border border-rose-200 py-2.5 rounded-none text-xs font-bold transition flex items-center justify-center gap-2">
-                🚪 Esci dall'Account
-            </button>
-        </div>
-    </aside>
-
-    <!-- HEADER / NAVBAR SUPERIORE (SQUADRATA) -->
-    <header class="bg-slate-900 text-white border-b border-slate-800 px-4 sm:px-6 py-3 shadow-lg sticky top-0 z-30 flex flex-col md:flex-row justify-between items-center gap-3 rounded-none">
-        <div class="flex justify-between items-center w-full md:w-auto">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-none bg-indigo-600/25 border border-indigo-500/30 flex items-center justify-center text-indigo-300 font-black text-sm shadow-inner">
-                    🛡️
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 id="coach-name-display" class="text-xs sm:text-sm font-black tracking-tight text-white leading-tight truncate max-w-[150px] sm:max-w-xs">Coach</h1>
-                        <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-none border border-emerald-500/35 hidden sm:inline-block">Admin</span>
-                    </div>
-                    <p id="gym-name-subtitle" class="text-[11px] text-indigo-300/80 font-medium truncate max-w-[180px] sm:max-w-xs mt-0.5">Leoni di San Marco</p>
-                </div>
-            </div>
-            <button type="button" id="btn-open-sidebar" class="md:hidden bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-none border border-slate-700 transition" title="Menu">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
-        </div>
-
-        <!-- BARRA DEI TAB SQUADRATA -->
-        <nav class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
-            <button type="button" data-tab="welcome" class="nav-tab px-3 py-1.5 rounded-none text-xs font-bold bg-indigo-600 text-white transition-all shadow-sm whitespace-nowrap flex items-center gap-1.5">
-                <span>🏠</span> Home
-            </button>
-            <button type="button" data-tab="athletes" class="nav-tab px-3 py-1.5 rounded-none text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all whitespace-nowrap flex items-center gap-1.5">
-                <span>👥</span> Atleti & Programmazione
-            </button>
-            <button type="button" data-tab="create-tpl" class="nav-tab px-3 py-1.5 rounded-none text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all whitespace-nowrap flex items-center gap-1.5">
-                <span>➕</span> Crea Scheda
-            </button>
-            <button type="button" data-tab="saved-tpl" class="nav-tab px-3 py-1.5 rounded-none text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all whitespace-nowrap flex items-center gap-1.5">
-                <span>📂</span> Schede Create
-            </button>
-            <button type="button" data-tab="video-library" class="nav-tab px-3 py-1.5 rounded-none text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all whitespace-nowrap flex items-center gap-1.5">
-                <span>📹</span> Libreria Video
-            </button>
-        </nav>
-
-        <div class="hidden md:flex items-center">
-            <button type="button" id="btn-open-sidebar-desktop" class="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-none border border-slate-700 transition" title="Menu Opzioni">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
+        <div class="flex items-center gap-2 text-[10px] font-bold text-gray-500 uppercase">
+            <span class="bg-green-50 text-neon border border-green-200 px-2 py-0.5 rounded-md">Admin</span>
+            <span id="header-gym-code" class="bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-md">Cod. ---</span>
         </div>
     </header>
 
     <!-- MAIN CONTAINER -->
-    <main class="flex-grow max-w-5xl w-full mx-auto p-3 sm:p-6 space-y-6 z-10 relative">
+    <main class="flex-grow w-full max-w-4xl mx-auto p-4 pb-24 relative space-y-6">
 
-        <!-- HOME: RIQUADRO BLU SQUADRATO -->
-        <div id="content-welcome" class="tab-content py-16 px-6 rounded-none bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white text-center border border-indigo-500/20 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center space-y-4">
-            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <!-- ================= SEZIONE 1: HOME ================= -->
+        <section id="section-home" class="block space-y-6">
+            <div class="relative rounded-2xl overflow-hidden shadow-md border border-gray-200 min-h-[250px] flex flex-col justify-end p-6 bg-gray-900">
+                <div class="absolute inset-0 bg-cover bg-center opacity-60" style="background-image: url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1000&auto=format&fit=crop');"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
+                
+                <div class="relative z-10 space-y-2">
+                    <span class="bg-neon text-white text-[9px] font-black tracking-widest px-2.5 py-1 rounded-md uppercase shadow-sm">Dashboard Coach</span>
+                    <h2 class="text-2xl sm:text-3xl font-black uppercase tracking-wide text-white leading-tight">Benvenuto, <span id="welcome-coach-name">Coach</span></h2>
+                    <p class="text-xs text-gray-200 font-medium max-w-md">
+                        Gestisci i tuoi atleti, assegna schede, crea mesocicli e monitora i feedback direttamente da qui.
+                    </p>
+                </div>
+            </div>
             
-            <div class="relative z-10 mb-2">
-                <img src="logo-app.png" alt="Logo App" onerror="this.src='logo.png'" class="w-24 h-24 object-contain mx-auto rounded-none shadow-lg border border-indigo-500/30 bg-slate-900/80 p-2">
+            <div class="grid grid-cols-2 gap-4">
+                <div onclick="showSection('athletes')" class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col items-center justify-center cursor-pointer hover:border-neon transition text-center">
+                    <span class="text-3xl mb-2">👥</span>
+                    <h3 class="font-black text-xs uppercase tracking-widest text-black">Atleti</h3>
+                    <p class="text-[9px] font-bold text-gray-400 uppercase mt-1">Gestisci Piani</p>
+                </div>
+                <div onclick="showSection('templates')" class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col items-center justify-center cursor-pointer hover:border-neon transition text-center">
+                    <span class="text-3xl mb-2">🏋️‍♂️</span>
+                    <h3 class="font-black text-xs uppercase tracking-widest text-black">Schede</h3>
+                    <p class="text-[9px] font-bold text-gray-400 uppercase mt-1">Libreria Esercizi</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SEZIONE 2: ATLETI E PROGRAMMAZIONE ================= -->
+        <section id="section-athletes" class="hidden space-y-4">
+            <div class="flex justify-between items-center bg-white border border-gray-200 p-4 rounded-2xl shadow-xs">
+                <div>
+                    <h3 class="text-sm font-black uppercase tracking-widest text-black">Team & Atleti</h3>
+                    <p class="text-[10px] font-bold text-gray-500 uppercase mt-0.5">Seleziona per programmare</p>
+                </div>
             </div>
 
-            <div class="relative z-10 space-y-1">
-                <h2 class="text-xl sm:text-2xl font-black tracking-tight">Benvenuto nel Pannello Coach</h2>
-                <p class="text-xs sm:text-sm text-indigo-200/80 max-w-md mx-auto">Seleziona una categoria dal menu in alto per gestire gli atleti, creare schede o caricare i video tecnici.</p>
+            <!-- Lista Atleti -->
+            <div id="athletes-selection-container" class="space-y-4">
+                <input type="text" id="athlete-search" placeholder="Cerca atleta per nome..." class="w-full px-4 py-3.5 bg-white border border-gray-200 rounded-xl text-xs sm:text-sm font-bold text-black outline-none focus:border-neon focus:ring-1 focus:ring-neon transition shadow-sm">
+                <div id="athletes-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1">
+                    <p class="text-xs font-bold text-gray-400 uppercase text-center py-6 w-full col-span-2">Caricamento atleti in corso...</p>
+                </div>
             </div>
-        </div>
 
-        <!-- SEZIONE 1: ATLETI & PROGRAMMAZIONE -->
-        <div id="content-athletes" class="tab-content hidden space-y-6">
-            <div class="bg-white rounded-none shadow-sm border border-emerald-200 overflow-hidden flex flex-col justify-between">
-                <div id="athletes-selection-container" class="p-4 sm:p-6 space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-emerald-50/80 p-4 rounded-none border border-emerald-100">
+            <!-- Gestione Singolo Atleta -->
+            <div id="athlete-program-section" class="hidden space-y-4">
+                <div class="flex justify-between items-center bg-gray-100 p-3 rounded-xl border border-gray-200">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center font-black text-xs shadow-inner overflow-hidden" id="selected-athlete-avatar">👤</div>
                         <div>
-                            <h3 class="text-base sm:text-lg font-black text-emerald-950">👥 Atleti e Programmazione</h3>
-                            <p class="text-xs text-emerald-800/80">Cerca un atleta per gestire la programmazione.</p>
-                        </div>
-                        <div class="w-full sm:w-64">
-                            <input type="text" id="athlete-search" placeholder="Cerca atleta per nome..." class="w-full px-3.5 py-2 bg-white border border-emerald-300 rounded-none text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 transition shadow-xs">
+                            <h4 id="selected-athlete-title" class="text-xs font-black uppercase tracking-widest text-black leading-tight">Nome Atleta</h4>
+                            <span class="text-[9px] font-bold text-gray-500 uppercase">Gestione Piano</span>
                         </div>
                     </div>
-                    <div class="space-y-2">
-                        <div id="athletes-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                            <p class="text-xs text-slate-400 italic">Caricamento atleti...</p>
-                        </div>
-                        <div id="athletes-footer-info" class="text-right text-[11px] font-bold text-emerald-900/70 pt-1 px-1"></div>
+                    <button type="button" id="btn-close-program" class="text-[10px] font-black uppercase tracking-widest bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm hover:bg-gray-50">Indietro</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" id="btn-open-gym-modal" class="bg-black hover:bg-gray-800 text-white text-[10px] font-black uppercase tracking-widest py-3 rounded-xl transition shadow-sm">+ Sala Pesi</button>
+                    <button type="button" id="btn-open-create-week-modal" class="bg-neon hover:bg-green-500 text-white text-[10px] font-black uppercase tracking-widest py-3 rounded-xl transition shadow-sm">+ Crea Settimana</button>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs space-y-3">
+                    <h6 class="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">🎯 Schede Specifiche Assegnate</h6>
+                    <div id="personal-templates-list" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase py-2">Nessuna scheda creata.</p>
                     </div>
                 </div>
 
-                <div id="athlete-program-section" class="hidden p-3 sm:p-6 space-y-4 bg-emerald-50/40">
-                    <div class="flex justify-between items-center bg-emerald-100/90 p-3.5 rounded-none border border-emerald-200">
-                        <div>
-                            <h4 id="selected-athlete-title" class="text-sm sm:text-base font-black text-emerald-950">Gestione Atleta</h4>
-                            <span class="text-[11px] text-emerald-800 font-semibold">Calendario Allenamenti / Sala Pesi.</span>
-                        </div>
-                        <button type="button" id="btn-close-program" class="text-xs bg-white text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-none font-bold hover:bg-emerald-50 transition shadow-xs">✕ Chiudi</button>
-                    </div>
-
-                    <!-- CALENDARIO SETTIMANALE & BOTTONI RAPIDI -->
-                    <div class="space-y-3 pt-2">
-                        <div class="bg-white p-3.5 rounded-none border border-emerald-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                            <div>
-                                <span class="text-xs font-bold text-emerald-950 block">Calendario Allenamenti / Sala Pesi</span>
-                            </div>
-                            <div class="flex items-center gap-2 w-full sm:w-auto">
-                                <button type="button" id="btn-open-gym-modal" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3.5 py-2.5 rounded-none transition shadow-md whitespace-nowrap">+ Sala Pesi</button>
-                                <button type="button" id="btn-open-create-week-modal" class="flex-1 sm:flex-none bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold px-3.5 py-2.5 rounded-none transition shadow-md whitespace-nowrap">+ Crea Settimana</button>
-                            </div>
-                        </div>
-                        
-                        <!-- ELENCO SCHEDE SALA PESI ASSEGNATE -->
-                        <div class="bg-white p-4 rounded-none border border-emerald-200 shadow-xs space-y-2">
-                            <h6 class="text-xs font-black text-emerald-950 uppercase tracking-wider">🏋️‍♂️ Schede Sala Pesi Assegnate</h6>
-                            <div id="personal-templates-list" class="space-y-2 max-h-40 overflow-y-auto pr-1">
-                                <p class="text-xs text-slate-400 italic">Nessuna scheda sala pesi creata.</p>
-                            </div>
-                        </div>
-
-                        <div id="weeks-accordion-container" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
-                            <p class="text-xs text-slate-400 italic">Seleziona o crea una settimana per iniziare.</p>
-                        </div>
-                    </div>
+                <div id="weeks-accordion-container" class="space-y-4 max-h-[60vh] overflow-y-auto pr-1 pb-10">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 bg-white rounded-2xl border border-gray-200">Seleziona un atleta per iniziare.</p>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- SEZIONE 2: CREA SCHEDA GLOBALE -->
-        <div id="content-create-tpl" class="tab-content hidden space-y-6">
-            <div class="bg-white rounded-none shadow-sm border border-indigo-200 overflow-hidden p-5 sm:p-8 space-y-4">
-                <div class="border-b border-indigo-100 pb-3">
-                    <h3 class="text-base sm:text-lg font-black text-indigo-950">➕ Crea Nuova Scheda Globale</h3>
-                    <p class="text-xs text-slate-500">Crea modelli di allenamento riutilizzabili per la tua palestra.</p>
-                </div>
+        <!-- ================= SEZIONE 3: SCHEDE E LIBRERIA GLOBALE ================= -->
+        <section id="section-templates" class="hidden space-y-4">
+            <div class="flex bg-gray-200/50 p-1 rounded-xl shadow-inner border border-gray-200">
+                <button id="tab-btn-create-tpl" class="flex-1 py-2 text-[10px] font-black uppercase tracking-widest bg-white text-black rounded-lg shadow-sm transition">Crea Nuova</button>
+                <button id="tab-btn-saved-tpl" class="flex-1 py-2 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-black rounded-lg transition">Archivio</button>
+            </div>
+
+            <div id="view-create-tpl" class="bg-white rounded-2xl shadow-xs border border-gray-200 p-5 space-y-4 block">
+                <h3 class="text-sm font-black uppercase tracking-widest text-black border-b border-gray-100 pb-3">➕ Crea Scheda Globale</h3>
                 <form id="template-form" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-indigo-900 mb-1.5">Nome della Scheda</label>
-                        <input type="text" id="tpl-title" placeholder="Es. Forza 1, Ipertrofia A" required class="w-full px-3.5 py-2.5 bg-indigo-50/50 border border-indigo-200 rounded-none focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs sm:text-sm transition">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Nome Scheda</label>
+                        <input type="text" id="tpl-title" placeholder="Es. Forza 1, Ipertrofia A" required class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none text-sm font-bold text-black focus:border-neon">
                     </div>
                     <div>
                         <div class="flex justify-between items-center mb-2">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-indigo-900">Esercizi</label>
-                            <button type="button" id="btn-add-exercise" class="text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold px-3 py-1 rounded-none transition shadow-xs">+ Aggiungi Esercizio</button>
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400">Esercizi</label>
+                            <button type="button" id="btn-add-exercise" class="text-[9px] bg-gray-100 hover:bg-gray-200 text-black font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg transition">+ Aggiungi</button>
                         </div>
-                        <div id="exercises-container" class="space-y-2.5 max-h-72 overflow-y-auto pr-1"></div>
+                        <div id="exercises-container" class="space-y-3 max-h-[50vh] overflow-y-auto pr-1"></div>
                     </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-none transition text-xs sm:text-sm shadow-md">Salva Scheda nel Database Globale</button>
+                    <button type="submit" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3 rounded-xl text-xs shadow-sm">Salva Scheda Globale</button>
                 </form>
             </div>
-        </div>
 
-        <!-- SEZIONE 3: SCHEDE GLOBALI CREATE -->
-        <div id="content-saved-tpl" class="tab-content hidden space-y-6">
-            <div class="bg-white rounded-none shadow-sm border border-indigo-200 overflow-hidden p-5 sm:p-8 space-y-4">
-                <div class="border-b border-indigo-100 pb-3">
-                    <h3 class="text-base sm:text-lg font-black text-indigo-950">📂 Schede Globali Create</h3>
-                    <p class="text-xs text-slate-500">Elenco di tutte le schede salvate pronte per essere assegnate.</p>
-                </div>
-                <div id="saved-templates-list" class="space-y-2.5 max-h-[60vh] overflow-y-auto pr-1">
-                    <p class="text-xs text-slate-400 italic">Caricamento schede...</p>
+            <div id="view-saved-tpl" class="bg-white rounded-2xl shadow-xs border border-gray-200 p-5 space-y-4 hidden">
+                <h3 class="text-sm font-black uppercase tracking-widest text-black border-b border-gray-100 pb-3">📂 Archivio Schede</h3>
+                <div id="saved-templates-list" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6">Caricamento schede in corso...</p>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- SEZIONE 4: LIBRERIA VIDEO ESERCIZI -->
-        <div id="content-video-library" class="tab-content hidden space-y-6">
-            <div class="bg-slate-900 rounded-none shadow-sm border border-slate-700 overflow-hidden p-5 sm:p-8 space-y-6 text-white">
-                <div class="border-b border-slate-700 pb-3">
-                    <h3 class="text-base sm:text-lg font-black text-white">📹 Libreria Video Esercizi</h3>
-                    <p class="text-xs text-slate-400 mt-1">Carica brevi clip (3-5 secondi) per mostrare la tecnica corretta.</p>
+        <!-- ================= SEZIONE 4: LIBRERIA VIDEO ================= -->
+        <section id="section-video" class="hidden space-y-4">
+            <div class="bg-white rounded-2xl shadow-xs border border-gray-200 p-5 space-y-5">
+                <div>
+                    <h3 class="text-sm font-black uppercase tracking-widest text-black">📹 Libreria Video</h3>
+                    <p class="text-[10px] font-bold text-gray-500 uppercase mt-0.5">Carica clip per l'esecuzione (qualsiasi formato/dimensione)</p>
                 </div>
                 
-                <form id="video-upload-form" class="space-y-3 bg-slate-800 p-4 rounded-none border border-slate-700">
+                <form id="video-upload-form" class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1">Nome Esercizio</label>
-                        <input type="text" id="video-ex-name" placeholder="Es. Clean and Jerk" required class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-none text-xs text-white focus:outline-none">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Nome Esercizio</label>
+                        <input type="text" id="video-ex-name" placeholder="Es. Clean and Jerk" required class="w-full px-3.5 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-black outline-none focus:border-neon">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1">Seleziona Video (max 5-10 sec)</label>
-                        <input type="file" id="video-file-input" accept="video/*" required class="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-none text-xs text-white file:mr-4 file:py-1 file:px-3 file:rounded-none file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Seleziona Video</label>
+                        <input type="file" id="video-file-input" required class="w-full text-[10px] font-bold text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-black file:text-white hover:file:bg-gray-800">
                     </div>
-                    <button type="submit" id="btn-upload-video" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-none transition text-xs shadow-md mt-2">Carica Video nella Libreria</button>
+                    <button type="submit" id="btn-upload-video" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3 rounded-xl text-xs shadow-sm mt-2">Carica Video</button>
                 </form>
 
-                <div class="pt-2">
-                    <h6 class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Video Caricati</h6>
-                    <div id="video-list-container" class="space-y-2 max-h-56 overflow-y-auto pr-1">
-                        <p class="text-xs text-slate-500 italic">Nessun video caricato.</p>
+                <div class="pt-3 border-t border-gray-100">
+                    <h6 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3">Video Caricati</h6>
+                    <div id="video-list-container" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-4">Nessun video caricato.</p>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <!-- ================= SEZIONE 5: PROFILO & IMPOSTAZIONI & ANAGRAFICA ATLETI ================= -->
+        <section id="section-profile" class="hidden space-y-4">
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm text-center relative pt-10">
+                <button type="button" id="btn-open-settings-modal" class="absolute top-4 right-4 text-gray-400 hover:text-black bg-gray-50 p-2 rounded-xl border border-gray-200 transition">⚙️</button>
+                
+                <div class="w-20 h-20 bg-gray-100 rounded-full border-4 border-white absolute -top-10 left-1/2 transform -translate-x-1/2 flex items-center justify-center shadow-md">
+                    <span class="text-3xl">🛡️</span>
+                </div>
+                <h2 class="text-xl font-black uppercase tracking-wide text-black mt-2" id="profile-coach-name">Coach</h2>
+                <p class="text-[10px] font-bold text-gray-500 uppercase mt-1 bg-gray-50 inline-block px-3 py-1 rounded-lg border border-gray-100">Codice Palestra: <span id="profile-gym-code" class="text-neon font-black">---</span></p>
+                
+                <div class="mt-4">
+                    <button type="button" id="btn-open-athletes-registry" class="w-full bg-black hover:bg-gray-800 text-white py-3 rounded-xl font-black uppercase tracking-widest text-[10px] transition shadow-sm">📋 Anagrafica Atleti Team</button>
+                </div>
+
+                <div class="mt-4 border-t border-gray-100 pt-4">
+                    <button id="btn-logout" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] transition">Esci dall'Account 🚪</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col max-h-[50vh]">
+                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="text-sm font-black uppercase tracking-widest text-black">💬 Feedback Atleti</h3>
+                    <span id="feedback-badge" class="bg-neon text-white text-[9px] font-black px-2 py-0.5 rounded-md hidden">Nuovi</span>
+                </div>
+                <div id="feedback-list-container" class="p-4 overflow-y-auto space-y-3 bg-white flex-grow">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6">Nessun messaggio.</p>
+                </div>
+            </div>
+        </section>
 
     </main>
 
-    <!-- MODAL CREA SCHEDA SALA PESI -->
-    <div id="gym-workout-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-none shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
-            <div class="bg-indigo-900 text-white px-5 py-4 flex justify-between items-center rounded-none">
-                <h3 class="font-bold text-sm sm:text-base">🏋️‍♂️ Aggiungi Scheda Sala Pesi</h3>
-                <button type="button" id="btn-close-gym-modal" class="text-xs font-bold bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded-none transition">✕</button>
+    <!-- BOTTOM NAVIGATION BAR (Esattamente 5 Tasti: Home, Atleti, Schede, Video, Profilo) -->
+    <nav class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-between items-center px-1 pb-safe z-40 shadow-lg">
+        <button id="nav-btn-home" onclick="showSection('home')" class="nav-btn flex-1 flex flex-col items-center py-2 text-neon">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+            <span class="text-[8px] font-black tracking-wider uppercase">Home</span>
+        </button>
+        <button id="nav-btn-athletes" onclick="showSection('athletes')" class="nav-btn flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <span class="text-[8px] font-black tracking-wider uppercase">Atleti</span>
+        </button>
+        <button id="nav-btn-templates" onclick="showSection('templates')" class="nav-btn flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <span class="text-[8px] font-black tracking-wider uppercase">Schede</span>
+        </button>
+        <button id="nav-btn-video" onclick="showSection('video')" class="nav-btn flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <span class="text-[8px] font-black tracking-wider uppercase">Video</span>
+        </button>
+        <button id="nav-btn-profile" onclick="showSection('profile')" class="nav-btn flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black relative">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            <span class="text-[8px] font-black tracking-wider uppercase">Profilo</span>
+            <span id="nav-feedback-dot" class="absolute top-1 right-3 w-2 h-2 bg-rose-500 rounded-full hidden"></span>
+        </button>
+    </nav>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- MODAL IMPOSTAZIONI COACH -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="bg-white text-black px-5 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="font-black text-sm uppercase tracking-widest">⚙️ Impostazioni Coach</h3>
+                <button type="button" id="btn-close-settings-modal" class="text-gray-400 hover:text-black p-1">✕</button>
             </div>
-            <form id="gym-workout-form" class="p-5 space-y-4 overflow-y-auto flex-grow bg-slate-50">
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-indigo-900 mb-1">Titolo / Nome Scheda</label>
-                    <input type="text" id="gym-tpl-title" placeholder="Es. Sala Pesi - Giorno A" required class="w-full px-3.5 py-2 bg-white border border-indigo-200 rounded-none text-xs sm:text-sm focus:outline-none">
-                </div>
-                <div>
-                    <div class="flex justify-between items-center mb-1.5">
-                        <label class="block text-xs font-bold uppercase tracking-wider text-indigo-900">Esercizi</label>
-                        <button type="button" id="btn-add-gym-exercise" class="text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold px-2.5 py-1 rounded-none transition">+ Aggiungi Esercizio</button>
+            <div class="p-5 space-y-6 overflow-y-auto flex-grow bg-gray-50 text-xs">
+                <form id="settings-form" class="space-y-4 bg-white p-4 rounded-xl border border-gray-200">
+                    <h4 class="font-black uppercase tracking-wider text-black border-b border-gray-100 pb-2">Profilo Personale</h4>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Nome</label>
+                        <input type="text" id="settings-coach-name" required class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-black outline-none focus:border-neon">
                     </div>
-                    <div id="gym-exercises-container" class="space-y-2.5 max-h-56 overflow-y-auto pr-1"></div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Cognome</label>
+                        <input type="text" id="settings-coach-surname" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-black outline-none focus:border-neon" placeholder="Inserisci cognome">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Nazione</label>
+                        <input type="text" id="settings-coach-country" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-black outline-none focus:border-neon" placeholder="Es. Italia">
+                    </div>
+                    <button type="submit" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3 rounded-xl shadow-md text-[10px]">Salva Modifiche</button>
+                </form>
+
+                <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-3">
+                    <h4 class="font-black uppercase tracking-wider text-black border-b border-gray-100 pb-2">Informazioni & Legali</h4>
+                    
+                    <!-- Informazioni App con la scritta personalizzata -->
+                    <button type="button" onclick="showAlert('RoundOne Coach Panel - Tutti i diritti riservati - Creata da Matteo Perini & Riccio.', 'Informazioni App')" class="w-full text-left font-bold text-gray-700 hover:text-black py-1.5 flex justify-between items-center">
+                        <span>ℹ️ Informazioni App</span> <span class="text-gray-400">&rarr;</span>
+                    </button>
+                    
+                    <!-- Collegato a policy.html -->
+                    <a href="policy.html" class="w-full text-left font-bold text-gray-700 hover:text-black py-1.5 flex justify-between items-center border-t border-gray-100 pt-2 block">
+                        <span>🔒 Privacy Policy</span> <span class="text-gray-400">&rarr;</span>
+                    </a>
+                    
+                    <!-- Collegato a note-legali.html (Termini e Condizioni / Note Legali) -->
+                    <a href="note-legali.html" class="w-full text-left font-bold text-gray-700 hover:text-black py-1.5 flex justify-between items-center border-t border-gray-100 pt-2 block">
+                        <span>📄 Termini di Servizio & Note Legali</span> <span class="text-gray-400">&rarr;</span>
+                    </a>
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-none transition text-xs shadow-md">Salva Scheda Sala Pesi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ANAGRAFICA ATLETI -->
+    <div id="registry-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="bg-white text-black px-5 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="font-black text-sm uppercase tracking-widest">📋 Anagrafica Atleti Team</h3>
+                <button type="button" id="btn-close-registry-modal" class="text-gray-400 hover:text-black p-1">✕</button>
+            </div>
+            <div class="p-4 bg-gray-50 border-b border-gray-200">
+                <input type="text" id="registry-search" placeholder="Cerca atleta per nome o email..." class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold focus:outline-none focus:border-neon">
+            </div>
+            <div id="registry-list-container" class="p-4 overflow-y-auto space-y-3 flex-grow bg-white">
+                <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6">Caricamento anagrafiche...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CREA SCHEDA SALA PESI -->
+    <div id="gym-workout-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="bg-white text-black px-5 py-4 flex justify-between items-center border-b border-gray-200">
+                <h3 class="font-black text-sm uppercase tracking-widest">🏋️‍♂️ Assegna Scheda</h3>
+                <button type="button" id="btn-close-gym-modal" class="text-gray-400 hover:text-black font-bold p-1">✕</button>
+            </div>
+            
+            <div class="p-3 bg-gray-50 border-b border-gray-200">
+                <div class="flex bg-gray-200/50 p-1 rounded-xl shadow-inner border border-gray-200">
+                    <button id="btn-mode-create-personal" class="flex-1 py-1.5 text-[9px] font-black uppercase tracking-widest bg-white text-black rounded-lg shadow-sm transition">Crea da zero</button>
+                    <button id="btn-mode-import-global" class="flex-1 py-1.5 text-[9px] font-black uppercase tracking-widest text-gray-500 hover:text-black rounded-lg transition">Scegli da Archivio</button>
+                </div>
+            </div>
+
+            <form id="gym-workout-form" class="p-5 space-y-4 overflow-y-auto flex-grow bg-white block">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Nome Scheda Personale</label>
+                    <input type="text" id="gym-tpl-title" placeholder="Es. Riabilitazione Spalla" required class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-black focus:outline-none focus:border-neon">
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400">Esercizi</label>
+                        <button type="button" id="btn-add-gym-exercise" class="text-[9px] bg-gray-100 hover:bg-gray-200 text-black font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg transition">+ Aggiungi</button>
+                    </div>
+                    <div id="gym-exercises-container" class="space-y-3 max-h-56 overflow-y-auto pr-1"></div>
+                </div>
+                <button type="submit" class="w-full bg-black text-white hover:bg-gray-800 font-black uppercase tracking-widest py-3 rounded-xl text-xs shadow-sm">Salva Scheda per Atleta</button>
             </form>
-        </div>
-    </div>
 
-    <!-- MODAL POPUP SELEZIONE SCHEDA CON RICERCA -->
-    <div id="select-template-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-none shadow-2xl border border-indigo-100 overflow-hidden flex flex-col max-h-[80vh]">
-            <div class="bg-indigo-900 text-white px-5 py-4 flex justify-between items-center rounded-none">
-                <h3 class="font-black text-sm">🔍 Seleziona Scheda da Assegnare</h3>
-                <button type="button" id="btn-close-select-tpl-modal" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded-none transition">✕</button>
-            </div>
-            <div class="p-4 bg-slate-50 border-b border-indigo-100">
-                <input type="text" id="modal-tpl-search" placeholder="Cerca scheda (es. Potenza, Ipertrofia)..." class="w-full px-3.5 py-2.5 bg-white border border-indigo-300 rounded-none text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 shadow-xs">
-            </div>
-            <div id="modal-tpl-list-container" class="p-4 overflow-y-auto space-y-2 flex-grow bg-white">
-                <p class="text-xs text-slate-400 italic text-center py-4">Caricamento schede...</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL VISUALIZZA / MODIFICA SCHEDA -->
-    <div id="view-template-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-none shadow-2xl border border-indigo-100 overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-indigo-900 text-white px-5 py-4 flex justify-between items-center rounded-none">
-                <h3 id="view-tpl-modal-title" class="font-black text-sm">🏋️‍♂️ Dettaglio Scheda</h3>
-                <button type="button" id="btn-close-view-tpl-modal" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded-none transition">✕</button>
-            </div>
-            <div id="view-tpl-modal-content" class="p-5 overflow-y-auto space-y-4 text-xs flex-grow bg-slate-50/50"></div>
-            <div id="view-tpl-modal-footer" class="p-4 border-t border-indigo-100 bg-white flex justify-between items-center gap-2 rounded-none"></div>
-        </div>
-    </div>
-
-    <!-- MODAL RIPRODUZIONE VIDEO -->
-    <div id="video-player-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
-        <div class="w-full max-w-sm flex flex-col gap-3">
-            <div class="flex justify-between items-center text-white">
-                <h3 id="video-player-title" class="font-black text-sm uppercase tracking-wider">Esercizio</h3>
-                <button type="button" id="btn-close-video-modal" class="bg-white/25 hover:bg-white/40 text-white w-8 h-8 rounded-none font-bold flex justify-center items-center">✕</button>
-            </div>
-            <video id="video-player-element" class="w-full rounded-none bg-black shadow-2xl border border-slate-700" controls loop playsinline preload="none"></video>
-        </div>
-    </div>
-
-    <!-- MODAL NOTIFICHE -->
-    <div id="custom-alert-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[70] hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-none shadow-2xl border border-indigo-100 p-6 space-y-4 text-center">
-            <div class="text-3xl">✨</div>
-            <h4 id="custom-alert-title" class="font-black text-base text-indigo-950">Notifica</h4>
-            <p id="custom-alert-message" class="text-xs text-slate-600 leading-relaxed"></p>
-            <button type="button" id="custom-alert-ok" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-none transition text-xs shadow-md">Capito</button>
-        </div>
-    </div>
-
-    <!-- MODAL CONFERME -->
-    <div id="custom-confirm-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[70] hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-none shadow-2xl border border-indigo-100 p-6 space-y-4 text-center">
-            <div class="text-3xl">⚠️</div>
-            <h4 class="font-black text-base text-indigo-950">Conferma Operazione</h4>
-            <p id="custom-confirm-message" class="text-xs text-slate-600 leading-relaxed"></p>
-            <div class="grid grid-cols-2 gap-2 pt-2">
-                <button type="button" id="custom-confirm-cancel" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-none transition text-xs">Annulla</button>
-                <button type="button" id="custom-confirm-yes" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 rounded-none transition text-xs shadow-md">Conferma</button>
+            <div id="view-import-global" class="p-5 space-y-4 overflow-y-auto flex-grow bg-gray-50 hidden">
+                <input type="text" id="import-tpl-search" placeholder="Cerca tra le schede globali create..." class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold focus:outline-none focus:border-neon">
+                <div id="import-tpl-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
             </div>
         </div>
     </div>
 
     <!-- MODAL CREA SETTIMANA -->
-    <div id="create-week-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-none shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
-            <div class="bg-emerald-900 text-white px-4 py-3.5 border-b border-emerald-950 flex justify-between items-center rounded-none">
-                <h3 class="font-bold text-sm sm:text-base">📅 Crea Nuova Settimana</h3>
-                <button type="button" id="btn-close-create-week-modal" class="text-xs font-bold bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded-none transition">✕</button>
+    <div id="create-week-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col">
+            <div class="bg-white text-black px-5 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="font-black text-sm uppercase tracking-widest">📅 Crea Settimana</h3>
+                <button type="button" id="btn-close-create-week-modal" class="text-gray-400 hover:text-black p-1">✕</button>
             </div>
-            <div class="p-4 space-y-4 bg-slate-50">
+            <div class="p-5 space-y-4 bg-gray-50">
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-emerald-900 mb-1.5">Data Inizio Settimana (Lunedì)</label>
-                    <input type="date" id="modal-new-week-date" class="w-full px-3.5 py-2.5 bg-white border border-emerald-200 rounded-none text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Data Inizio (Lunedì)</label>
+                    <input type="date" id="modal-new-week-date" class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-black focus:outline-none focus:border-neon">
                 </div>
-                <button type="button" id="btn-confirm-create-week" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-2.5 rounded-none transition text-xs sm:text-sm shadow-md">Conferma e Crea</button>
+                <button type="button" id="btn-confirm-create-week" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3 rounded-xl shadow-md">Genera Calendario</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL RICHIESTE -->
-    <div id="requests-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-none shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[80vh]">
-            <div class="bg-indigo-900 text-white px-4 py-3.5 border-b border-indigo-950 flex justify-between items-center rounded-none">
-                <h3 class="font-bold text-sm sm:text-base">📥 Richieste di Programmazione in Attesa</h3>
-                <button type="button" id="btn-close-requests-modal" class="text-xs font-bold bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded-none transition">✕</button>
+    <!-- MODAL POPUP SELEZIONE SCHEDA CON RICERCA -->
+    <div id="select-template-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col max-h-[80vh]">
+            <div class="bg-white text-black px-5 py-4 flex justify-between items-center border-b border-gray-200">
+                <h3 class="font-black text-sm uppercase tracking-widest">🔍 Assegna Scheda</h3>
+                <button type="button" id="btn-close-select-tpl-modal" class="text-gray-400 hover:text-black p-1">✕</button>
             </div>
-            <div id="modal-requests-container" class="p-4 overflow-y-auto space-y-2.5 flex-grow bg-slate-50">
-                <p class="text-xs text-slate-400 italic text-center py-6">Nessuna richiesta in sospeso.</p>
+            <div class="p-4 bg-gray-50 border-b border-gray-200">
+                <input type="text" id="modal-tpl-search" placeholder="Cerca scheda..." class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold focus:outline-none focus:border-neon">
+            </div>
+            <div id="modal-tpl-list-container" class="p-4 overflow-y-auto space-y-2 flex-grow bg-white">
+                <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-4">Caricamento schede...</p>
             </div>
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="text-center py-4 px-4 text-xs text-indigo-900/60 font-medium border-t border-indigo-100 bg-white/50 space-y-1.5 mt-8 z-10 relative">
-        <div class="flex justify-center items-center gap-3 text-[11px] font-bold text-indigo-900/70">
-            <a href="policy.html" class="hover:text-indigo-600 transition-colors">Privacy Policy</a>
-            <span>•</span>
-            <a href="note-legali.html" class="hover:text-indigo-600 transition-colors">Note Legali</a>
+    <!-- MODAL VISUALIZZA / MODIFICA SCHEDA -->
+    <div id="view-template-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-white text-black px-5 py-4 flex justify-between items-center border-b border-gray-200">
+                <h3 id="view-tpl-modal-title" class="font-black text-sm uppercase tracking-widest">🏋️‍♂️ Dettaglio Scheda</h3>
+                <button type="button" id="btn-close-view-tpl-modal" class="text-gray-400 hover:text-black p-1">✕</button>
+            </div>
+            <div id="view-tpl-modal-content" class="p-5 overflow-y-auto space-y-4 text-xs flex-grow bg-gray-50"></div>
+            <div id="view-tpl-modal-footer" class="p-4 border-t border-gray-200 bg-white flex justify-between items-center gap-2"></div>
         </div>
-        <div class="text-[11px]">
-            App creata da Riccio &copy; 2026 — Tutti i diritti riservati.
+    </div>
+
+    <!-- MODAL RIPRODUZIONE VIDEO -->
+    <div id="video-player-modal" class="fixed inset-0 bg-black/90 z-[70] hidden flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-lg flex flex-col gap-3">
+            <div class="flex justify-between items-center text-white">
+                <h3 id="video-player-title" class="font-black text-sm uppercase tracking-widest">Esercizio</h3>
+                <button type="button" id="btn-close-video-modal" class="bg-white/10 hover:bg-white/20 text-white w-8 h-8 rounded-xl font-bold flex justify-center items-center">✕</button>
+            </div>
+            <video id="video-player-element" class="w-full bg-black rounded-2xl shadow-2xl border border-gray-800" controls playsinline preload="none"></video>
         </div>
-    </footer>
+    </div>
+
+    <!-- MODAL NOTIFICHE -->
+    <div id="custom-alert-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl border border-gray-200 p-6 space-y-4 text-center text-black">
+            <h4 id="custom-alert-title" class="font-black text-base uppercase tracking-widest">Notifica</h4>
+            <p id="custom-alert-message" class="text-xs font-medium text-gray-600 leading-relaxed"></p>
+            <button type="button" id="custom-alert-ok" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3 rounded-xl text-[10px] shadow-sm">Capito</button>
+        </div>
+    </div>
+
+    <!-- MODAL CONFERME -->
+    <div id="custom-confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl border border-gray-200 p-6 space-y-4 text-center">
+            <h4 class="font-black text-base uppercase tracking-widest text-black">Conferma</h4>
+            <p id="custom-confirm-message" class="text-xs font-medium text-gray-600 leading-relaxed"></p>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button type="button" id="custom-confirm-cancel" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-black uppercase tracking-widest py-3 rounded-xl text-[10px]">Annulla</button>
+                <button type="button" id="custom-confirm-yes" class="bg-red-500 hover:bg-red-600 text-white font-black uppercase tracking-widest py-3 rounded-xl text-[10px] shadow-md">Conferma</button>
+            </div>
+        </div>
+    </div>
 
     <!-- SCRIPT LOGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, setDoc, getDocs, query, where, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, query, where, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
@@ -399,7 +438,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const messaging = getMessaging(app);
         const storage = getStorage(app);
 
         function similarity(s1, s2) {
@@ -418,8 +456,7 @@
                     if (i == 0) costs[j] = j;
                     else if (j > 0) {
                         let newValue = costs[j - 1];
-                        if (s1.charAt(i - 1) != s2.charAt(j - 1))
-                            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                        if (s1.charAt(i - 1) != s2.charAt(j - 1)) newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
                         costs[j - 1] = lastValue;
                         lastValue = newValue;
                     }
@@ -429,46 +466,7 @@
             return costs[s2.length];
         }
 
-        const navTabs = document.querySelectorAll('.nav-tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        function switchTab(targetName) {
-            navTabs.forEach(t => {
-                t.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
-                t.classList.add('bg-slate-800', 'text-slate-300', 'hover:bg-slate-700');
-                if(t.getAttribute('data-tab') === targetName) {
-                    t.classList.remove('bg-slate-800', 'text-slate-300', 'hover:bg-slate-700');
-                    t.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
-                }
-            });
-            tabContents.forEach(c => c.classList.add('hidden'));
-            const activeContent = document.getElementById(`content-${targetName}`);
-            if (activeContent) activeContent.classList.remove('hidden');
-        }
-
-        navTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                switchTab(tab.getAttribute('data-tab'));
-            });
-        });
-
-        const sidebarMenu = document.getElementById('sidebar-menu');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        const btnOpenSidebar = document.getElementById('btn-open-sidebar');
-        const btnOpenSidebarDesktop = document.getElementById('btn-open-sidebar-desktop');
-        const btnCloseSidebar = document.getElementById('btn-close-sidebar');
-
-        function openSidebar() { sidebarMenu.classList.remove('translate-x-full'); sidebarOverlay.classList.remove('hidden'); }
-        function closeSidebar() { sidebarMenu.classList.add('translate-x-full'); sidebarOverlay.classList.add('hidden'); }
-
-        btnOpenSidebar.addEventListener('click', openSidebar);
-        if(btnOpenSidebarDesktop) btnOpenSidebarDesktop.addEventListener('click', openSidebar);
-        btnCloseSidebar.addEventListener('click', closeSidebar);
-        sidebarOverlay.addEventListener('click', closeSidebar);
-
-        document.getElementById('menu-requests').addEventListener('click', () => { closeSidebar(); requestsModal.classList.remove('hidden'); });
-
-        function showAlert(message, title = "Notifica") {
+        window.showAlert = function(message, title = "Notifica") {
             document.getElementById('custom-alert-title').textContent = title;
             document.getElementById('custom-alert-message').textContent = message;
             document.getElementById('custom-alert-modal').classList.remove('hidden');
@@ -492,393 +490,55 @@
             newCancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
         }
 
-        const coachNameDisplay = document.getElementById('coach-name-display');
-        const sidebarCoachName = document.getElementById('sidebar-coach-name');
-        const sidebarInviteCode = document.getElementById('sidebar-invite-code');
-        const btnWhatsappInvite = document.getElementById('btn-whatsapp-invite');
-        const btnLogoutSidebar = document.getElementById('btn-logout-sidebar');
+        window.showSection = function(sectionId) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`section-${sectionId}`).classList.remove('hidden');
 
-        const exercisesContainer = document.getElementById('exercises-container');
-        const btnAddExercise = document.getElementById('btn-add-exercise');
-        const templateForm = document.getElementById('template-form');
-        const savedTemplatesList = document.getElementById('saved-templates-list');
-
-        const viewTemplateModal = document.getElementById('view-template-modal');
-        const viewTplModalTitle = document.getElementById('view-tpl-modal-title');
-        const viewTplModalContent = document.getElementById('view-tpl-modal-content');
-        const viewTplModalFooter = document.getElementById('view-tpl-modal-footer');
-        const btnCloseViewTplModal = document.getElementById('btn-close-view-tpl-modal');
-
-        const videoPlayerModal = document.getElementById('video-player-modal');
-        const videoPlayerElement = document.getElementById('video-player-element');
-        const videoPlayerTitle = document.getElementById('video-player-title');
-        const btnCloseVideoModal = document.getElementById('btn-close-video-modal');
-
-        const selectTemplateModal = document.getElementById('select-template-modal');
-        const btnCloseSelectTplModal = document.getElementById('btn-close-select-tpl-modal');
-        const modalTplSearch = document.getElementById('modal-tpl-search');
-        const modalTplListContainer = document.getElementById('modal-tpl-list-container');
-        let activeSelectCallback = null;
-
-        btnCloseSelectTplModal.addEventListener('click', () => selectTemplateModal.classList.add('hidden'));
-        selectTemplateModal.addEventListener('click', (e) => { if(e.target === selectTemplateModal) selectTemplateModal.classList.add('hidden'); });
-
-        function openSelectTemplateModal(onSelect) {
-            activeSelectCallback = onSelect;
-            modalTplSearch.value = '';
-            renderModalTplList('');
-            selectTemplateModal.classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-neon');
+                btn.classList.add('text-gray-400');
+            });
+            const activeBtn = document.getElementById(`nav-btn-${sectionId}`);
+            activeBtn.classList.remove('text-gray-400');
+            activeBtn.classList.add('text-neon');
         }
 
-        modalTplSearch.addEventListener('input', (e) => {
-            renderModalTplList(e.target.value.toLowerCase().trim());
+        const btnCreateTpl = document.getElementById('tab-btn-create-tpl');
+        const btnSavedTpl = document.getElementById('tab-btn-saved-tpl');
+        const viewCreateTpl = document.getElementById('view-create-tpl');
+        const viewSavedTpl = document.getElementById('view-saved-tpl');
+
+        btnCreateTpl.addEventListener('click', () => {
+            btnCreateTpl.classList.replace('text-gray-500', 'text-black');
+            btnCreateTpl.classList.add('bg-white', 'shadow-sm');
+            btnSavedTpl.classList.replace('text-black', 'text-gray-500');
+            btnSavedTpl.classList.remove('bg-white', 'shadow-sm');
+            viewCreateTpl.classList.remove('hidden');
+            viewSavedTpl.classList.add('hidden');
+        });
+        btnSavedTpl.addEventListener('click', () => {
+            btnSavedTpl.classList.replace('text-gray-500', 'text-black');
+            btnSavedTpl.classList.add('bg-white', 'shadow-sm');
+            btnCreateTpl.classList.replace('text-black', 'text-gray-500');
+            btnCreateTpl.classList.remove('bg-white', 'shadow-sm');
+            viewSavedTpl.classList.remove('hidden');
+            viewCreateTpl.classList.add('hidden');
         });
 
-        function renderModalTplList(filter) {
-            modalTplListContainer.innerHTML = '';
-            const filtered = gymTemplates.filter(t => t.title.toLowerCase().includes(filter));
-            
-            if (filtered.length === 0) {
-                modalTplListContainer.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-4">Nessuna scheda trovata.</p>';
-                return;
-            }
-
-            const noneDiv = document.createElement('div');
-            noneDiv.className = "p-3 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-none text-xs font-bold text-rose-700 cursor-pointer transition flex justify-between items-center";
-            noneDiv.innerHTML = `<span>❌ Nessuna Scheda (-- Rimuovi --)</span>`;
-            noneDiv.addEventListener('click', () => {
-                selectTemplateModal.classList.add('hidden');
-                if(activeSelectCallback) activeSelectCallback("", "-- Scheda --");
-            });
-            modalTplListContainer.appendChild(noneDiv);
-
-            filtered.forEach(tpl => {
-                const div = document.createElement('div');
-                div.className = "p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-none text-xs font-bold text-slate-900 cursor-pointer transition flex justify-between items-center shadow-xs";
-                div.innerHTML = `<span>🏋️‍♂️ ${tpl.title}</span> <span class="text-indigo-600">Seleziona &rarr;</span>`;
-                div.addEventListener('click', () => {
-                    selectTemplateModal.classList.add('hidden');
-                    if(activeSelectCallback) activeSelectCallback(tpl.id, tpl.title);
-                });
-                modalTplListContainer.appendChild(div);
-            });
-        }
-
-        btnCloseVideoModal.addEventListener('click', () => {
-            videoPlayerElement.pause();
-            videoPlayerElement.src = '';
-            videoPlayerModal.classList.add('hidden');
-        });
-
-        btnCloseViewTplModal.addEventListener('click', () => viewTemplateModal.classList.add('hidden'));
-        viewTemplateModal.addEventListener('click', (e) => { if (e.target === viewTemplateModal) viewTemplateModal.classList.add('hidden'); });
-
-        let currentActiveTemplate = null;
+        let currentGymId = null;
+        let currentUserUid = null;
+        let allAthletes = [];
+        let selectedAthlete = null;
         let gymTemplates = [];
         let gymVideos = []; 
 
-        function openViewTemplateModal(tpl, type = 'global', athleteId = null) {
-            currentActiveTemplate = { ...tpl, type, athleteId };
-            renderTemplateViewMode();
-            viewTemplateModal.classList.remove('hidden');
-        }
-
-        function renderTemplateViewMode() {
-            viewTplModalTitle.textContent = `🏋️‍♂️ ${currentActiveTemplate.title}`;
-            viewTplModalContent.innerHTML = '';
-
-            if (!currentActiveTemplate.exercises || currentActiveTemplate.exercises.length === 0) {
-                viewTplModalContent.innerHTML = '<p class="text-xs text-slate-400 italic py-4 text-center">Nessun esercizio configurato.</p>';
-            } else {
-                const listDiv = document.createElement('div');
-                listDiv.className = "space-y-2.5 divide-y divide-indigo-50";
-                
-                currentActiveTemplate.exercises.forEach((ex, idx) => {
-                    const row = document.createElement('div');
-                    row.className = "pt-2 first:pt-0 text-xs space-y-0.5";
-                    
-                    let videoHtml = '';
-                    const matchedVideo = gymVideos.find(v => similarity(v.name, ex.name) > 0.75);
-                    if (matchedVideo) {
-                        videoHtml = `<button type="button" class="btn-play-video ml-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 p-1 rounded-none transition shadow-xs" data-url="${matchedVideo.url}" data-name="${matchedVideo.name}" title="Guarda Video Esercizio">📹</button>`;
-                    }
-
-                    row.innerHTML = `
-                        <div class="flex justify-between items-center font-bold text-slate-900">
-                            <span class="flex items-center">${idx + 1}. ${ex.name} ${videoHtml}</span>
-                            <span class="font-mono bg-indigo-50 text-indigo-900 px-2 py-0.5 rounded-none border border-indigo-100">${ex.sets} serie × ${ex.reps} reps</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-[11px] text-slate-500">
-                            ${ex.load ? `<span class="font-medium text-indigo-700">🎯 Carico: ${ex.load}</span>` : ''}
-                            ${ex.notes ? `<span class="italic">💡 Note: ${ex.notes}</span>` : ''}
-                        </div>
-                    `;
-                    listDiv.appendChild(row);
-                });
-                viewTplModalContent.appendChild(listDiv);
-
-                viewTplModalContent.querySelectorAll('.btn-play-video').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const url = e.currentTarget.getAttribute('data-url');
-                        const name = e.currentTarget.getAttribute('data-name');
-                        videoPlayerTitle.textContent = name;
-                        videoPlayerElement.src = url;
-                        videoPlayerModal.classList.remove('hidden');
-                        videoPlayerElement.play().catch(e => console.log("Autoplay preventito", e));
-                    });
-                });
-            }
-
-            viewTplModalFooter.innerHTML = `
-                <button type="button" id="btn-edit-tpl-mode" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-none transition text-xs shadow-md">✏️ Modifica Scheda</button>
-                <button type="button" id="btn-close-view-ok" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-none transition text-xs">Chiudi</button>
-            `;
-
-            document.getElementById('btn-edit-tpl-mode').addEventListener('click', renderTemplateEditMode);
-            document.getElementById('btn-close-view-ok').addEventListener('click', () => viewTemplateModal.classList.add('hidden'));
-        }
-
-        function renderTemplateEditMode() {
-            viewTplModalTitle.textContent = `✏️ Modifica: ${currentActiveTemplate.title}`;
-            viewTplModalContent.innerHTML = `
-                <div class="space-y-3">
-                    <div>
-                        <label class="block font-bold uppercase tracking-wider text-indigo-900 mb-1 text-[10px]">Titolo Scheda</label>
-                        <input type="text" id="edit-tpl-title-input" value="${currentActiveTemplate.title}" class="w-full px-3 py-2 bg-white border border-indigo-200 rounded-none font-bold text-xs focus:outline-none focus:ring-2 focus:ring-indigo-600">
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-1.5">
-                            <label class="block font-bold uppercase tracking-wider text-indigo-900 text-[10px]">Esercizi</label>
-                            <button type="button" id="btn-add-edit-exercise" class="text-[10px] bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold px-2.5 py-1 rounded-none transition">+ Aggiungi Esercizio</button>
-                        </div>
-                        <div id="edit-exercises-rows-container" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
-                    </div>
-                </div>
-            `;
-
-            const container = document.getElementById('edit-exercises-rows-container');
-
-            function addRow(name='', sets='', reps='', load='', notes='') {
-                const row = document.createElement('div');
-                row.className = "flex flex-col gap-1.5 p-2.5 bg-white border border-indigo-100 rounded-none edit-ex-row relative";
-                row.innerHTML = `
-                    <div class="flex gap-1">
-                        <input type="text" placeholder="Nome Esercizio" value="${name}" class="edit-ex-name flex-grow px-2 py-1.5 bg-indigo-50/50 border border-indigo-200 rounded-none text-xs font-semibold focus:outline-none">
-                        <input type="text" placeholder="Serie" value="${sets}" class="edit-ex-sets w-12 px-1 py-1.5 bg-indigo-50/50 border border-indigo-200 rounded-none text-xs text-center font-mono">
-                        <input type="text" placeholder="Reps" value="${reps}" class="edit-ex-reps w-12 px-1 py-1.5 bg-indigo-50/50 border border-indigo-200 rounded-none text-xs text-center font-mono">
-                        <input type="text" placeholder="Carico" value="${load}" class="edit-ex-load w-20 px-2 py-1.5 bg-indigo-50/50 border border-indigo-200 rounded-none text-xs font-medium">
-                        <button type="button" class="btn-remove-edit-row text-rose-600 hover:text-rose-800 font-bold px-2 py-1">✕</button>
-                    </div>
-                    <input type="text" placeholder="Note (es. recupero, tecnica)" value="${notes}" class="edit-ex-notes w-full px-2 py-1 bg-indigo-50/50 border border-indigo-200 rounded-none text-[11px]">
-                `;
-                row.querySelector('.btn-remove-edit-row').addEventListener('click', () => row.remove());
-                container.appendChild(row);
-            }
-
-            if (currentActiveTemplate.exercises && currentActiveTemplate.exercises.length > 0) {
-                currentActiveTemplate.exercises.forEach(ex => addRow(ex.name, ex.sets, ex.reps, ex.load, ex.notes));
-            } else {
-                addRow();
-            }
-
-            document.getElementById('btn-add-edit-exercise').addEventListener('click', () => addRow());
-
-            viewTplModalFooter.innerHTML = `
-                <button type="button" id="btn-cancel-edit" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-none transition text-xs">Annulla</button>
-                <button type="button" id="btn-save-edited-tpl" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 rounded-none transition text-xs shadow-md">💾 Salva Modifiche</button>
-            `;
-
-            document.getElementById('btn-cancel-edit').addEventListener('click', renderTemplateViewMode);
-            document.getElementById('btn-save-edited-tpl').addEventListener('click', async () => {
-                const newTitle = document.getElementById('edit-tpl-title-input').value.trim();
-                if (!newTitle) { showAlert("Inserisci un titolo valido.", "Attenzione"); return; }
-
-                const rows = container.querySelectorAll('.edit-ex-row');
-                let newExercises = [];
-                rows.forEach(r => {
-                    const name = r.querySelector('.edit-ex-name').value.trim();
-                    const sets = r.querySelector('.edit-ex-sets').value.trim();
-                    const reps = r.querySelector('.edit-ex-reps').value.trim();
-                    const load = r.querySelector('.edit-ex-load').value.trim();
-                    const notes = r.querySelector('.edit-ex-notes').value.trim();
-                    if (name) newExercises.push({ name, sets, reps, load, notes });
-                });
-
-                if (newExercises.length === 0) { showAlert("Aggiungi almeno un esercizio.", "Attenzione"); return; }
-
-                try {
-                    if (currentActiveTemplate.type === 'global') {
-                        await setDoc(doc(db, "gyms", currentGymId, "templates", currentActiveTemplate.id), {
-                            title: newTitle,
-                            exercises: newExercises
-                        }, { merge: true });
-                        loadTemplates();
-                    } else if (currentActiveTemplate.type === 'personal') {
-                        await setDoc(doc(db, "gyms", currentGymId, "athlete_programs", currentActiveTemplate.athleteId, "personal_templates", currentActiveTemplate.id), {
-                            title: newTitle,
-                            exercises: newExercises
-                        }, { merge: true });
-                        loadAthletePersonalTemplates();
-                    }
-
-                    showAlert("Scheda aggiornata con successo!", "Salvato");
-                    viewTemplateModal.classList.add('hidden');
-                } catch (err) {
-                    showAlert("Errore durante il salvataggio: " + err.message, "Errore");
-                }
-            });
-        }
-
-        const athleteSearch = document.getElementById('athlete-search');
-        const athletesList = document.getElementById('athletes-list');
-        const athletesFooterInfo = document.getElementById('athletes-footer-info');
-        const athletesSelectionContainer = document.getElementById('athletes-selection-container');
-        const athleteProgramSection = document.getElementById('athlete-program-section');
-        const selectedAthleteTitle = document.getElementById('selected-athlete-title');
-        const btnCloseProgram = document.getElementById('btn-close-program');
-        const weeksAccordionContainer = document.getElementById('weeks-accordion-container');
-        const personalTemplatesList = document.getElementById('personal-templates-list');
-
-        const createWeekModal = document.getElementById('create-week-modal');
-        const btnOpenCreateWeekModal = document.getElementById('btn-open-create-week-modal');
-        const btnCloseCreateWeekModal = document.getElementById('btn-close-create-week-modal');
-        const modalNewWeekDateInput = document.getElementById('modal-new-week-date');
-        const btnConfirmCreateWeek = document.getElementById('btn-confirm-create-week');
-
-        const gymWorkoutModal = document.getElementById('gym-workout-modal');
-        const btnOpenGymModal = document.getElementById('btn-open-gym-modal');
-        const btnCloseGymModal = document.getElementById('btn-close-gym-modal');
-        const gymWorkoutForm = document.getElementById('gym-workout-form');
-        const gymExercisesContainer = document.getElementById('gym-exercises-container');
-        const btnAddgymExercise = document.getElementById('btn-add-gym-exercise');
-
-        const requestsModal = document.getElementById('requests-modal');
-        const btnCloseRequestsModal = document.getElementById('btn-close-requests-modal');
-        const modalRequestsContainer = document.getElementById('modal-requests-container');
-        const requestsCountSpan = document.getElementById('sidebar-requests-count');
-
-        let currentGymId = null;
-        let allAthletes = [];
-        let selectedAthlete = null;
-
-        btnLogoutSidebar.addEventListener('click', async () => {
+        document.getElementById('btn-logout').addEventListener('click', async () => {
             try { await signOut(auth); } catch (e) {} finally { window.location.replace('index.html'); }
         });
 
-        btnWhatsappInvite.addEventListener('click', () => {
-            const codeText = sidebarInviteCode.textContent.trim();
-            if (codeText && codeText !== '---') {
-                const message = encodeURIComponent(`Unisciti alla nostra palestra su RoundOne! 🥊\n\nRegistrati qui: https://app-palestra-b0b9d.web.app/index.html\nInserisci questo codice invito: *${codeText}*`);
-                window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
-            } else {
-                showAlert("Codice invito non ancora disponibile.", "Attenzione");
-            }
-        });
-
-        btnOpenCreateWeekModal.addEventListener('click', () => {
-            modalNewWeekDateInput.value = new Date().toISOString().split('T')[0];
-            createWeekModal.classList.remove('hidden');
-        });
-        btnCloseCreateWeekModal.addEventListener('click', () => createWeekModal.classList.add('hidden'));
-
-        btnOpenGymModal.addEventListener('click', () => {
-            document.getElementById('gym-tpl-title').value = '';
-            gymExercisesContainer.innerHTML = '';
-            addExerciseRow(gymExercisesContainer);
-            gymWorkoutModal.classList.remove('hidden');
-        });
-        btnCloseGymModal.addEventListener('click', () => gymWorkoutModal.classList.add('hidden'));
-
-        btnCloseRequestsModal.addEventListener('click', () => requestsModal.classList.add('hidden'));
-
-        btnConfirmCreateWeek.addEventListener('click', async () => {
-            const startDate = modalNewWeekDateInput.value;
-            if (!startDate || !selectedAthlete || !currentGymId) {
-                showAlert("Seleziona una data valida.", "Attenzione");
-                return;
-            }
-
-            const weekId = `week_${startDate}`;
-            const defaultDays = {};
-            const daysOrder = ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
-            
-            daysOrder.forEach(day => {
-                defaultDays[day] = { activity1: "Allenamento", activity2: "", templateId: "" };
-            });
-            defaultDays["domenica"] = { activity1: "OFF", activity2: "", templateId: "" };
-
-            try {
-                await setDoc(doc(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "weeks", weekId), {
-                    startDate: startDate,
-                    days: defaultDays,
-                    createdAt: new Date()
-                });
-                createWeekModal.classList.add('hidden');
-                showAlert("Nuova settimana creata con successo!", "Successo");
-                loadAthleteWeeks();
-            } catch (err) {
-                showAlert("Errore durante la creazione: " + err.message, "Errore");
-            }
-        });
-
-        // SALVATAGGIO SCHEDA SALA PESI PERSONALE
-        gymWorkoutForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!selectedAthlete || !currentGymId) return;
-
-            const title = document.getElementById('gym-tpl-title').value.trim();
-            const exercises = Array.from(gymExercisesContainer.querySelectorAll('div.p-3')).map(row => ({
-                name: row.querySelector('.exercise-name').value.trim(),
-                sets: row.querySelector('.exercise-sets').value.trim(),
-                reps: row.querySelector('.exercise-reps').value.trim(),
-                load: row.querySelector('.exercise-load').value.trim(),
-                notes: row.querySelector('.exercise-notes').value.trim()
-            })).filter(ex => ex.name);
-
-            if (!title || exercises.length === 0) {
-                showAlert("Inserisci un titolo e almeno un esercizio.", "Attenzione");
-                return;
-            }
-
-            try {
-                const ref = collection(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "personal_templates");
-                await addDoc(ref, {
-                    title: title,
-                    exercises: exercises,
-                    createdAt: new Date()
-                });
-                gymWorkoutModal.classList.add('hidden');
-                showAlert("Scheda sala pesi salvata con successo!", "Successo");
-                loadAthletePersonalTemplates();
-            } catch (err) {
-                showAlert("Errore durante il salvataggio: " + err.message, "Errore");
-            }
-        });
-
-        function addExerciseRow(container, name = '', sets = '', reps = '', load = '', notes = '') {
-            const div = document.createElement('div');
-            div.className = "p-3 bg-indigo-50/40 border border-indigo-100 rounded-none text-xs space-y-2 relative";
-            div.innerHTML = `
-                <div class="flex gap-1.5 flex-wrap sm:flex-nowrap">
-                    <input type="text" placeholder="Nome Esercizio" value="${name}" required class="exercise-name w-full sm:flex-grow px-2.5 py-1.5 bg-white border border-indigo-200 rounded-none focus:outline-none">
-                    <input type="text" placeholder="Serie" value="${sets}" required class="exercise-sets w-14 px-1 py-1.5 bg-white border border-indigo-200 rounded-none text-center font-mono">
-                    <input type="text" placeholder="Reps" value="${reps}" required class="exercise-reps w-14 px-1 py-1.5 bg-white border border-indigo-200 rounded-none text-center font-mono">
-                    <input type="text" placeholder="Carico / %" value="${load}" class="exercise-load w-full sm:w-32 px-2.5 py-1.5 bg-white border border-indigo-200 rounded-none text-center font-medium">
-                </div>
-                <input type="text" placeholder="Note (es. recupero)" value="${notes}" class="exercise-notes w-full px-2 py-1 bg-white border border-indigo-200 rounded-none">
-                <button type="button" class="btn-remove-exercise absolute top-2 right-2 text-rose-500 font-bold px-1.5 py-0.5 rounded-none bg-white border border-rose-200 shadow-xs">✕</button>
-            `;
-            div.querySelector('.btn-remove-exercise').addEventListener('click', () => div.remove());
-            container.appendChild(div);
-        }
-
-        addExerciseRow(exercisesContainer);
-        btnAddExercise.addEventListener('click', () => addExerciseRow(exercisesContainer));
-        addExerciseRow(gymExercisesContainer);
-        btnAddgymExercise.addEventListener('click', () => addExerciseRow(gymExercisesContainer));
-
         onAuthStateChanged(auth, async (user) => {
             if (!user) { window.location.replace('index.html'); return; }
+            currentUserUid = user.uid;
 
             try {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -889,198 +549,149 @@
 
                 const userData = userDoc.data();
                 currentGymId = userData.gymId;
-                coachNameDisplay.textContent = userData.name;
-                sidebarCoachName.textContent = userData.name;
+                
+                document.getElementById('welcome-coach-name').textContent = userData.name || 'Coach';
+                document.getElementById('profile-coach-name').textContent = `${userData.name || 'Coach'} ${userData.surname || ''}`.trim();
+                
+                document.getElementById('settings-coach-name').value = userData.name || '';
+                document.getElementById('settings-coach-surname').value = userData.surname || '';
+                document.getElementById('settings-coach-country').value = userData.country || '';
 
                 const gymDoc = await getDoc(doc(db, "gyms", currentGymId));
-                if (gymDoc.exists()) sidebarInviteCode.textContent = gymDoc.data().inviteCode || "---";
+                if (gymDoc.exists()) {
+                    const code = gymDoc.data().inviteCode || "---";
+                    document.getElementById('header-gym-code').textContent = `Cod. ${code}`;
+                    document.getElementById('profile-gym-code').textContent = code;
+                }
 
                 loadTemplates();
                 loadAthletes();
                 loadLibraryVideos();
-                initRequestsListener();
+                initFeedbackListener();
 
             } catch (error) {
                 console.error("Errore inizializzazione:", error);
             }
         });
 
-        // VIDEO LIBRERIA
-        const videoUploadForm = document.getElementById('video-upload-form');
-        const videoListContainer = document.getElementById('video-list-container');
-        const btnUploadVideo = document.getElementById('btn-upload-video');
-        const videoExNameInput = document.getElementById('video-ex-name');
-        const videoFileInput = document.getElementById('video-file-input');
+        // Gestione Impostazioni Coach (Salvataggio Nome, Cognome, Nazione)
+        const settingsModal = document.getElementById('settings-modal');
+        document.getElementById('btn-open-settings-modal').addEventListener('click', () => settingsModal.classList.remove('hidden'));
+        document.getElementById('btn-close-settings-modal').addEventListener('click', () => settingsModal.classList.add('hidden'));
 
-        async function loadLibraryVideos() {
-            if (!currentGymId) return;
-            const q = query(collection(db, "gyms", currentGymId, "exercise_videos"));
-            const snapshot = await getDocs(q);
-            gymVideos = [];
-            videoListContainer.innerHTML = snapshot.empty ? '<p class="text-xs text-slate-500 italic">Nessun video caricato.</p>' : '';
-            
-            snapshot.forEach((docSnap) => {
-                const videoObj = { id: docSnap.id, ...docSnap.data() };
-                gymVideos.push(videoObj);
-                
-                const div = document.createElement('div');
-                div.className = "p-2 bg-slate-800 border border-slate-600 rounded-none text-xs flex justify-between items-center";
-                div.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="text-indigo-400">📹</span>
-                        <span class="font-bold text-slate-200">${videoObj.name}</span>
-                    </div>
-                    <button type="button" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1 btn-delete-video" title="Elimina">🗑️</button>
-                `;
-
-                div.querySelector('.btn-delete-video').addEventListener('click', () => {
-                    showConfirm(`Eliminare il video di "${videoObj.name}"?`, async () => {
-                        try {
-                            const sRef = storageRef(storage, videoObj.storagePath);
-                            await deleteObject(sRef);
-                            await deleteDoc(doc(db, "gyms", currentGymId, "exercise_videos", videoObj.id));
-                            showAlert("Video eliminato.", "Fatto");
-                            loadLibraryVideos();
-                        } catch (err) {
-                            showAlert("Errore: " + err.message, "Errore");
-                        }
-                    });
-                });
-                videoListContainer.appendChild(div);
-            });
-        }
-
-        videoUploadForm.addEventListener('submit', async (e) => {
+        document.getElementById('settings-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentGymId) return;
+            const name = document.getElementById('settings-coach-name').value.trim();
+            const surname = document.getElementById('settings-coach-surname').value.trim();
+            const country = document.getElementById('settings-coach-country').value.trim();
+            if(!name) return;
 
-            const file = videoFileInput.files[0];
-            const exName = videoExNameInput.value.trim();
-            if (!file || !exName) return;
+            try {
+                await setDoc(doc(db, "users", currentUserUid), { name, surname, country }, { merge: true });
+                document.getElementById('welcome-coach-name').textContent = name;
+                document.getElementById('profile-coach-name').textContent = `${name} ${surname}`.trim();
+                settingsModal.classList.add('hidden');
+                showAlert("Impostazioni salvate con successo!", "Successo");
+            } catch(err) {
+                showAlert("Errore durante il salvataggio.", "Errore");
+            }
+        });
 
-            if (file.size > 5 * 1024 * 1024) { 
-                showAlert("Il file è troppo grande! Massimo 5MB.", "Errore");
+        // Gestione Anagrafica Atleti Modal
+        const registryModal = document.getElementById('registry-modal');
+        document.getElementById('btn-open-athletes-registry').addEventListener('click', () => {
+            renderRegistryList('');
+            registryModal.classList.remove('hidden');
+        });
+        document.getElementById('btn-close-registry-modal').addEventListener('click', () => registryModal.classList.add('hidden'));
+        document.getElementById('registry-search').addEventListener('input', (e) => renderRegistryList(e.target.value.toLowerCase().trim()));
+
+        function renderRegistryList(filter) {
+            const container = document.getElementById('registry-list-container');
+            container.innerHTML = '';
+            const filtered = allAthletes.filter(a => (a.name && a.name.toLowerCase().includes(filter)) || (a.email && a.email.toLowerCase().includes(filter)));
+
+            if(filtered.length === 0) {
+                container.innerHTML = '<p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6">Nessun atleta trovato.</p>';
                 return;
             }
 
-            btnUploadVideo.disabled = true;
-            btnUploadVideo.textContent = "Caricamento... attendi ⏳";
+            filtered.forEach(athlete => {
+                const div = document.createElement('div');
+                div.className = "p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-2 text-xs";
+                div.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                        <span class="font-black text-black uppercase tracking-widest">${athlete.name || 'Senza Nome'}</span>
+                        <span class="text-[10px] font-bold text-gray-500">${athlete.email || 'Nessuna Email'}</span>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] font-bold text-gray-600 uppercase">
+                        <div>Altezza: <span class="text-black">${athlete.height ? athlete.height + ' cm' : 'N.D.'}</span></div>
+                        <div>Peso: <span class="text-black">${athlete.weight ? athlete.weight + ' kg' : 'N.D.'}</span></div>
+                        <div>Età/Info: <span class="text-black">${athlete.age || 'N.D.'}</span></div>
+                        <div>ID: <span class="text-gray-400 truncate">${athlete.id.substring(0,6)}...</span></div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
 
-            try {
-                const storagePath = `gyms/${currentGymId}/videos/${Date.now()}_${file.name}`;
-                const sRef = storageRef(storage, storagePath);
-                await uploadBytes(sRef, file);
-                const url = await getDownloadURL(sRef);
-                
-                await addDoc(collection(db, "gyms", currentGymId, "exercise_videos"), {
-                    name: exName, url, storagePath, createdAt: new Date()
-                });
-
-                showAlert(`Video per "${exName}" caricato con successo!`, "Successo");
-                videoUploadForm.reset();
-                loadLibraryVideos();
-            } catch (err) {
-                showAlert("Errore: " + err.message, "Errore");
-            } finally {
-                btnUploadVideo.disabled = false;
-                btnUploadVideo.textContent = "Carica Video nella Libreria";
-            }
-        });
-
-        function initRequestsListener() {
+        function initFeedbackListener() {
             if (!currentGymId) return;
-            const requestsRef = collection(db, "gyms", currentGymId, "requests");
+            const feedbackRef = collection(db, "gyms", currentGymId, "support_feedback");
+            const container = document.getElementById('feedback-list-container');
+            const badge1 = document.getElementById('feedback-badge');
+            const badge2 = document.getElementById('nav-feedback-dot');
 
-            onSnapshot(requestsRef, (snapshot) => {
-                requestsCountSpan.textContent = snapshot.size;
-                modalRequestsContainer.innerHTML = '';
-
+            onSnapshot(feedbackRef, (snapshot) => {
+                container.innerHTML = '';
                 if (snapshot.empty) {
-                    modalRequestsContainer.innerHTML = '<p class="text-xs text-slate-400 italic text-center py-6">Nessuna richiesta in sospeso.</p>';
+                    container.innerHTML = '<p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6">Nessun messaggio ricevuto.</p>';
+                    badge1.classList.add('hidden');
+                    badge2.classList.add('hidden');
                     return;
                 }
 
+                badge1.classList.remove('hidden');
+                badge2.classList.remove('hidden');
+
                 snapshot.forEach(docSnap => {
-                    const req = docSnap.data();
+                    const fb = docSnap.data();
+                    const fbId = docSnap.id;
+                    const dateStr = fb.createdAt ? fb.createdAt.toDate().toLocaleDateString('it-IT') : 'Recente';
+                    const athleteName = fb.athleteName || 'Atleta Sconosciuto';
+
                     const div = document.createElement('div');
-                    div.className = "p-3 bg-white border border-slate-200 rounded-none text-xs flex justify-between items-center shadow-xs gap-3";
+                    div.className = "p-4 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-2";
                     div.innerHTML = `
-                        <div class="min-w-0 flex-grow">
-                            <span class="font-extrabold text-slate-900 text-sm">${req.athleteName}</span>
-                            <div class="mt-1 bg-indigo-50/60 p-2 rounded-none text-indigo-950 font-medium">💬 "${req.message || 'Fammi programma'}"</div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="font-black text-xs uppercase tracking-widest text-black">${athleteName}</span>
+                                <span class="block text-[9px] font-bold text-gray-400">${dateStr}</span>
+                            </div>
+                            <button type="button" class="btn-delete-fb text-red-500 bg-red-50 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-red-100 transition">Elimina</button>
                         </div>
-                        <div class="flex gap-2">
-                            <button type="button" class="bg-indigo-600 text-white px-3 py-1.5 rounded-none font-bold btn-fulfill">Gestisci</button>
-                            <button type="button" class="bg-white border text-slate-600 px-2.5 py-1.5 rounded-none btn-dismiss">✕</button>
-                        </div>
+                        <p class="text-xs text-gray-600 font-medium bg-gray-50 p-3 rounded-xl border border-gray-100">${fb.message}</p>
                     `;
-                    div.querySelector('.btn-fulfill').addEventListener('click', () => {
-                        const athleteObj = allAthletes.find(a => a.id === req.athleteId) || { id: req.athleteId, name: req.athleteName, email: req.athleteEmail };
-                        requestsModal.classList.add('hidden');
-                        switchTab('athletes');
-                        openAthleteMesocycle(athleteObj);
+                    
+                    div.querySelector('.btn-delete-fb').addEventListener('click', () => {
+                        showConfirm("Eliminare questo messaggio?", async () => {
+                            await deleteDoc(doc(db, "gyms", currentGymId, "support_feedback", fbId));
+                        });
                     });
-                    div.querySelector('.btn-dismiss').addEventListener('click', async () => {
-                        await deleteDoc(doc(db, "gyms", currentGymId, "requests", req.athleteId));
-                    });
-                    modalRequestsContainer.appendChild(div);
+                    
+                    container.appendChild(div);
                 });
             });
         }
 
-        async function loadTemplates() {
-            if (!currentGymId) return;
-            const q = query(collection(db, "gyms", currentGymId, "templates"));
-            const snapshot = await getDocs(q);
-            gymTemplates = [];
-            savedTemplatesList.innerHTML = snapshot.empty ? '<p class="text-xs text-slate-400 italic">Nessuna scheda globale.</p>' : '';
-            
-            snapshot.forEach((docSnap) => {
-                const tpl = { id: docSnap.id, ...docSnap.data() };
-                gymTemplates.push(tpl);
-
-                const div = document.createElement('div');
-                div.className = "p-3 bg-indigo-50/50 hover:bg-indigo-100/60 border border-indigo-200 rounded-none text-xs flex justify-between items-center cursor-pointer transition";
-                div.innerHTML = `
-                    <span class="font-bold text-indigo-950 text-xs sm:text-sm">🏋️‍♂️ ${tpl.title}</span> 
-                    <button type="button" class="text-xs bg-white text-rose-600 border border-indigo-200 hover:bg-rose-50 font-bold px-2.5 py-1.5 rounded-none delete-tpl-btn" title="Elimina">🗑️</button>
-                `;
-
-                div.addEventListener('click', (e) => {
-                    if (e.target.closest('.delete-tpl-btn')) return;
-                    openViewTemplateModal(tpl, 'global');
-                });
-
-                div.querySelector('.delete-tpl-btn').addEventListener('click', () => {
-                    showConfirm(`Eliminare la scheda globale "${tpl.title}"?`, async () => {
-                        await deleteDoc(doc(db, "gyms", currentGymId, "templates", tpl.id));
-                        loadTemplates();
-                    });
-                });
-
-                savedTemplatesList.appendChild(div);
-            });
-        }
-
-        templateForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const title = document.getElementById('tpl-title').value.trim();
-            const exercises = Array.from(exercisesContainer.querySelectorAll('div.p-3')).map(row => ({
-                name: row.querySelector('.exercise-name').value.trim(),
-                sets: row.querySelector('.exercise-sets').value.trim(),
-                reps: row.querySelector('.exercise-reps').value.trim(),
-                load: row.querySelector('.exercise-load').value.trim(),
-                notes: row.querySelector('.exercise-notes').value.trim()
-            }));
-
-            await addDoc(collection(db, "gyms", currentGymId, "templates"), { title, exercises, createdAt: new Date() });
-            showAlert("Scheda globale salvata correttamente!", "Successo");
-            templateForm.reset();
-            exercisesContainer.innerHTML = '';
-            addExerciseRow(exercisesContainer);
-            loadTemplates();
-        });
-
+        const athleteSearch = document.getElementById('athlete-search');
+        const athletesList = document.getElementById('athletes-list');
+        const athletesSelectionContainer = document.getElementById('athletes-selection-container');
+        const athleteProgramSection = document.getElementById('athlete-program-section');
+        const selectedAthleteTitle = document.getElementById('selected-athlete-title');
+        const selectedAthleteAvatar = document.getElementById('selected-athlete-avatar');
+        const btnCloseProgram = document.getElementById('btn-close-program');
+        
         async function loadAthletes() {
             if (!currentGymId) return;
             const q = query(collection(db, "users"), where("gymId", "==", currentGymId));
@@ -1095,34 +706,29 @@
 
         function renderAthletes(athletes, searchTerm = "") {
             athletesList.innerHTML = '';
-            const totalCount = athletes.length;
-            if (totalCount === 0) {
-                athletesList.innerHTML = '<p class="text-xs text-slate-400 italic col-span-2">Nessun atleta trovato.</p>';
-                athletesFooterInfo.textContent = `Totale atleti: 0`;
+            if (athletes.length === 0) {
+                athletesList.innerHTML = '<p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 w-full col-span-2">Nessun atleta trovato.</p>';
                 return;
             }
 
-            let displayList = isFiltering(searchTerm) ? athletes : athletes.slice(0, 4);
+            athletes.forEach((athlete) => {
+                const avatarHtml = athlete.photoURL 
+                    ? `<img src="${athlete.photoURL}" class="w-full h-full object-cover">`
+                    : `<span class="text-gray-500">👤</span>`;
 
-            displayList.forEach((athlete, index) => {
-                const displayNum = isFiltering(searchTerm) ? "" : `${index + 1}. `;
                 const div = document.createElement('div');
-                div.className = "p-3 bg-white hover:bg-emerald-900 hover:text-white border border-emerald-200 rounded-none flex justify-between items-center cursor-pointer transition group shadow-xs";
+                div.className = "p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center cursor-pointer transition shadow-xs hover:border-neon";
                 div.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="font-bold text-xs text-emerald-800 group-hover:text-emerald-200">${displayNum}</span>
-                        <h5 class="font-extrabold text-xs sm:text-sm text-slate-900 group-hover:text-white">${athlete.name}</h5>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center font-black text-xs shadow-inner overflow-hidden">${avatarHtml}</div>
+                        <h5 class="font-black text-xs uppercase tracking-widest text-black">${athlete.name}</h5>
                     </div>
-                    <span class="text-[11px] bg-emerald-100 text-emerald-900 group-hover:bg-emerald-800 group-hover:text-white border border-emerald-300 px-2.5 py-1 rounded-none font-bold">Gestisci &rarr;</span>
+                    <span class="text-[9px] bg-green-50 text-neon border border-green-200 px-2.5 py-1.5 rounded-lg font-black uppercase tracking-widest">Gestisci &rarr;</span>
                 `;
                 div.addEventListener('click', () => openAthleteMesocycle(athlete));
                 athletesList.appendChild(div);
             });
-
-            athletesFooterInfo.textContent = !isFiltering(searchTerm) && totalCount > 4 ? `... e altri ${totalCount - 4} atleti (Totale: ${totalCount})` : `Visualizzati ${displayList.length} di ${totalCount} atleti.`;
         }
-
-        function isFiltering(term) { return term.trim().length > 0; }
 
         athleteSearch.addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase().trim();
@@ -1130,12 +736,16 @@
             renderAthletes(filtered, term);
         });
 
-        async function openAthleteMesocycle(athlete) {
+        function openAthleteMesocycle(athlete) {
             selectedAthlete = athlete;
-            selectedAthleteTitle.textContent = `Gestione Atleta: ${athlete.name}`;
+            selectedAthleteTitle.textContent = athlete.name;
+            
+            selectedAthleteAvatar.innerHTML = athlete.photoURL 
+                ? `<img src="${athlete.photoURL}" class="w-full h-full object-cover">`
+                : `👤`;
+
             athletesSelectionContainer.classList.add('hidden');
             athleteProgramSection.classList.remove('hidden');
-
             loadAthleteWeeks();
             loadAthletePersonalTemplates();
         }
@@ -1146,41 +756,172 @@
             selectedAthlete = null;
         });
 
+        const weeksAccordionContainer = document.getElementById('weeks-accordion-container');
+        const personalTemplatesList = document.getElementById('personal-templates-list');
+        const createWeekModal = document.getElementById('create-week-modal');
+        const gymWorkoutModal = document.getElementById('gym-workout-modal');
+        
+        const btnModeCreate = document.getElementById('btn-mode-create-personal');
+        const btnModeImport = document.getElementById('btn-mode-import-global');
+        const formCreateTpl = document.getElementById('gym-workout-form');
+        const viewImportGlobal = document.getElementById('view-import-global');
+
+        btnModeCreate.addEventListener('click', () => {
+            btnModeCreate.classList.replace('text-gray-500', 'text-black');
+            btnModeCreate.classList.add('bg-white', 'shadow-sm');
+            btnModeImport.classList.replace('text-black', 'text-gray-500');
+            btnModeImport.classList.remove('bg-white', 'shadow-sm');
+            formCreateTpl.classList.remove('hidden');
+            viewImportGlobal.classList.add('hidden');
+        });
+
+        btnModeImport.addEventListener('click', () => {
+            btnModeImport.classList.replace('text-gray-500', 'text-black');
+            btnModeImport.classList.add('bg-white', 'shadow-sm');
+            btnModeCreate.classList.replace('text-black', 'text-gray-500');
+            btnModeCreate.classList.remove('bg-white', 'shadow-sm');
+            viewImportGlobal.classList.remove('hidden');
+            formCreateTpl.classList.add('hidden');
+            renderImportTplList('');
+        });
+
+        document.getElementById('import-tpl-search').addEventListener('input', (e) => renderImportTplList(e.target.value.toLowerCase().trim()));
+
+        function renderImportTplList(filter) {
+            const listContainer = document.getElementById('import-tpl-list');
+            listContainer.innerHTML = '';
+            const filtered = gymTemplates.filter(t => t.title.toLowerCase().includes(filter));
+            
+            if (filtered.length === 0) {
+                listContainer.innerHTML = '<p class="text-[10px] font-bold text-gray-400 uppercase text-center py-4">Nessuna scheda globale trovata.</p>';
+                return;
+            }
+
+            filtered.forEach(tpl => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-white border border-gray-200 hover:border-neon rounded-xl text-[10px] font-black uppercase tracking-widest text-black cursor-pointer transition flex justify-between shadow-xs";
+                div.innerHTML = `<span>🏋️‍♂️ ${tpl.title}</span> <span class="text-neon bg-green-50 px-2 py-1 rounded-md">Seleziona</span>`;
+                div.addEventListener('click', () => importTemplateToForm(tpl));
+                listContainer.appendChild(div);
+            });
+        }
+
+        function importTemplateToForm(tpl) {
+            document.getElementById('gym-tpl-title').value = tpl.title;
+            const container = document.getElementById('gym-exercises-container');
+            container.innerHTML = '';
+            
+            if(tpl.exercises) {
+                tpl.exercises.forEach(ex => {
+                    addExerciseRow(container, false);
+                    const lastRow = container.lastElementChild;
+                    lastRow.querySelector('.ex-name').value = ex.name || '';
+                    lastRow.querySelector('.ex-sets').value = ex.sets || '';
+                    lastRow.querySelector('.ex-reps').value = ex.reps || '';
+                    lastRow.querySelector('.ex-load').value = ex.load || '';
+                    lastRow.querySelector('.ex-notes').value = ex.notes || '';
+                });
+            } else {
+                addExerciseRow(container, false);
+            }
+            
+            btnModeCreate.click();
+            showAlert(`Scheda "${tpl.title}" importata con successo. Puoi modificarla prima di salvarla!`, "Importata");
+        }
+
+        document.getElementById('btn-open-create-week-modal').addEventListener('click', () => {
+            document.getElementById('modal-new-week-date').value = new Date().toISOString().split('T')[0];
+            createWeekModal.classList.remove('hidden');
+        });
+        document.getElementById('btn-close-create-week-modal').addEventListener('click', () => createWeekModal.classList.add('hidden'));
+
+        document.getElementById('btn-confirm-create-week').addEventListener('click', async () => {
+            const startDate = document.getElementById('modal-new-week-date').value;
+            if (!startDate || !selectedAthlete || !currentGymId) { showAlert("Seleziona una data valida.", "Attenzione"); return; }
+
+            const weekId = `week_${startDate}`;
+            const defaultDays = {};
+            const daysOrder = ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
+            
+            daysOrder.forEach(day => { defaultDays[day] = { activity1: "", activity2: "", templateId: "" }; });
+            defaultDays["domenica"] = { activity1: "OFF", activity2: "", templateId: "" };
+
+            try {
+                await setDoc(doc(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "weeks", weekId), {
+                    startDate: startDate, days: defaultDays, createdAt: new Date()
+                });
+                createWeekModal.classList.add('hidden');
+                showAlert("Nuova settimana creata con successo!", "Successo");
+                loadAthleteWeeks();
+            } catch (err) { showAlert("Errore durante la creazione.", "Errore"); }
+        });
+
+        document.getElementById('btn-open-gym-modal').addEventListener('click', () => {
+            document.getElementById('gym-tpl-title').value = '';
+            document.getElementById('gym-exercises-container').innerHTML = '';
+            addExerciseRow(document.getElementById('gym-exercises-container'), false);
+            btnModeCreate.click();
+            gymWorkoutModal.classList.remove('hidden');
+        });
+        document.getElementById('btn-close-gym-modal').addEventListener('click', () => gymWorkoutModal.classList.add('hidden'));
+
+        document.getElementById('gym-workout-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!selectedAthlete || !currentGymId) return;
+
+            const title = document.getElementById('gym-tpl-title').value.trim();
+            const exercises = Array.from(document.getElementById('gym-exercises-container').querySelectorAll('.ex-row')).map(row => ({
+                name: row.querySelector('.ex-name').value.trim(),
+                sets: row.querySelector('.ex-sets').value.trim(),
+                reps: row.querySelector('.ex-reps').value.trim(),
+                load: row.querySelector('.ex-load').value.trim(),
+                notes: row.querySelector('.ex-notes').value.trim()
+            })).filter(ex => ex.name);
+
+            if (!title || exercises.length === 0) { showAlert("Inserisci titolo e almeno un esercizio.", "Attenzione"); return; }
+
+            try {
+                const ref = collection(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "personal_templates");
+                await addDoc(ref, { title, exercises, createdAt: new Date() });
+                gymWorkoutModal.classList.add('hidden');
+                showAlert("Scheda salvata nel piano dell'atleta!", "Successo");
+                loadAthletePersonalTemplates();
+            } catch (err) { showAlert("Errore salvataggio.", "Errore"); }
+        });
+
         async function loadAthletePersonalTemplates() {
             if (!selectedAthlete || !currentGymId) return;
             const ref = collection(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "personal_templates");
             const snapshot = await getDocs(ref);
-            personalTemplatesList.innerHTML = snapshot.empty ? '<p class="text-xs text-slate-400 italic">Nessuna scheda sala pesi creata.</p>' : '';
+            personalTemplatesList.innerHTML = snapshot.empty ? '<p class="text-[10px] font-bold text-gray-400 uppercase py-2">Nessuna scheda creata.</p>' : '';
 
             snapshot.forEach(docSnap => {
                 const tpl = { id: docSnap.id, ...docSnap.data() };
                 const div = document.createElement('div');
-                div.className = "p-2.5 bg-emerald-50/50 hover:bg-emerald-100/60 border border-emerald-200 rounded-none text-xs flex justify-between items-center cursor-pointer transition";
+                div.className = "p-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl flex justify-between items-center cursor-pointer transition shadow-2xs";
                 div.innerHTML = `
-                    <div class="flex-grow min-w-0"><span class="font-black text-emerald-950 truncate block">🏋️‍♂️ ${tpl.title}</span></div>
-                    <button type="button" class="bg-white text-rose-600 border border-emerald-200 hover:bg-rose-50 font-bold px-2.5 py-1.5 rounded-none delete-ptpl-btn" title="Elimina">🗑️</button>
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <span class="font-black text-[10px] text-black uppercase tracking-widest truncate">🏋️‍♂️ ${tpl.title}</span>
+                    </div>
+                    <button type="button" class="text-[9px] bg-white text-red-600 border border-red-200 hover:bg-red-50 font-black uppercase tracking-widest px-2 py-1 rounded-lg shadow-sm delete-ptpl-btn">Elimina</button>
                 `;
-
                 div.addEventListener('click', (e) => {
                     if (e.target.closest('.delete-ptpl-btn')) return;
                     openViewTemplateModal(tpl, 'personal', selectedAthlete.id);
                 });
-
                 div.querySelector('.delete-ptpl-btn').addEventListener('click', () => {
-                    showConfirm(`Eliminare la scheda sala pesi "${tpl.title}"?`, async () => {
+                    showConfirm(`Eliminare "${tpl.title}"?`, async () => {
                         await deleteDoc(doc(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "personal_templates", tpl.id));
                         loadAthletePersonalTemplates();
                     });
                 });
-
                 personalTemplatesList.appendChild(div);
             });
         }
 
         async function loadAthleteWeeks() {
             if (!selectedAthlete || !currentGymId) return;
-            weeksAccordionContainer.innerHTML = '<p class="text-xs text-slate-400 italic">Caricamento settimane...</p>';
-
+            weeksAccordionContainer.innerHTML = '<p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6">Caricamento settimane...</p>';
             try {
                 const weeksRef = collection(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "weeks");
                 const snapshot = await getDocs(weeksRef);
@@ -1189,55 +930,43 @@
                 weeksList.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 
                 if (weeksList.length === 0) {
-                    weeksAccordionContainer.innerHTML = '<p class="text-xs text-slate-400 italic">Nessuna settimana di calendario per questo atleta.</p>';
+                    weeksAccordionContainer.innerHTML = '<p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 bg-gray-50 rounded-2xl border border-gray-200">Nessuna settimana creata.</p>';
                     return;
                 }
-
                 weeksAccordionContainer.innerHTML = '';
                 weeksList.forEach(weekData => renderWeekCard(weekData));
-            } catch (error) {
-                weeksAccordionContainer.innerHTML = '<p class="text-xs text-rose-500">Errore caricamento settimane.</p>';
-            }
+            } catch (error) { weeksAccordionContainer.innerHTML = '<p class="text-xs text-red-500">Errore.</p>'; }
         }
 
         function renderWeekCard(weekData) {
             const card = document.createElement('div');
-            card.className = "bg-white border border-emerald-200 rounded-none shadow-xs overflow-hidden transition";
+            card.className = "bg-white border border-gray-200 rounded-2xl shadow-xs overflow-hidden mb-4";
 
             const [y, m, d] = weekData.startDate.split('-').map(Number);
             const mondayDate = new Date(y, m - 1, d);
             const sundayDate = new Date(y, m - 1, d + 6);
-
-            const startDay = mondayDate.getDate();
-            const endDay = sundayDate.getDate();
-            const year = mondayDate.getFullYear();
-
             let weekTitleStr = mondayDate.getMonth() === sundayDate.getMonth() 
-                ? `Week ${startDay}-${endDay} ${mondayDate.toLocaleDateString('it-IT', { month: 'long' })} ${year}`
-                : `Week ${startDay} ${mondayDate.toLocaleDateString('it-IT', { month: 'short' })} - ${endDay} ${sundayDate.toLocaleDateString('it-IT', { month: 'short' })} ${year}`;
+                ? `Week ${mondayDate.getDate()}-${sundayDate.getDate()} ${mondayDate.toLocaleDateString('it-IT', { month: 'short' })}`
+                : `Week ${mondayDate.getDate()} ${mondayDate.toLocaleDateString('it-IT', { month: 'short' })} - ${sundayDate.getDate()} ${sundayDate.toLocaleDateString('it-IT', { month: 'short' })}`;
 
             let daysHtml = '';
             const daysOrder = ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato"];
 
             daysOrder.forEach(dayName => {
                 const dayInfo = weekData.days[dayName] || { activity1: '', activity2: '', templateId: '' };
-                
-                let tplTitle = "-- Scheda --";
+                let tplTitle = "Nessuna Scheda";
                 if (dayInfo.templateId) {
                     const found = gymTemplates.find(t => t.id === dayInfo.templateId);
                     if (found) tplTitle = found.title;
                 }
-
                 daysHtml += `
-                    <div class="p-2 bg-emerald-50/40 border border-emerald-100 rounded-none space-y-1.5">
-                        <span class="font-black text-[10px] uppercase tracking-wider text-emerald-950 block border-b border-emerald-200 pb-0.5 truncate">${dayName}</span>
-                        <input type="text" placeholder="Attività 1" value="${dayInfo.activity1 || ''}" class="w-full px-2 py-1 border border-emerald-200 rounded-none text-[11px] bg-white day-act1" data-day="${dayName}">
-                        <input type="text" placeholder="Attività 2" value="${dayInfo.activity2 || ''}" class="w-full px-2 py-1 border border-emerald-200 rounded-none text-[11px] bg-white day-act2" data-day="${dayName}">
-                        
-                        <div class="relative">
-                            <button type="button" class="btn-open-tpl-modal w-full px-2 py-1 bg-white border border-emerald-200 hover:bg-emerald-50 rounded-none text-[11px] font-medium text-left truncate flex justify-between items-center transition" data-day="${dayName}">
-                                <span class="truncate tpl-label">${tplTitle}</span>
-                                <span class="text-[10px] text-indigo-600">🔍</span>
+                    <div class="p-1.5 sm:p-2.5 bg-gray-50 border border-gray-100 rounded-xl space-y-1.5">
+                        <span class="font-black text-[8px] sm:text-[9px] uppercase tracking-widest text-gray-500 block border-b border-gray-200 pb-1 text-center">${dayName}</span>
+                        <input type="text" placeholder="Attività 1" value="${dayInfo.activity1 || ''}" class="w-full px-1.5 py-1.5 border border-gray-200 rounded-md text-[9px] font-bold text-black outline-none focus:border-neon bg-white day-act1 text-center" data-day="${dayName}">
+                        <input type="text" placeholder="Attività 2" value="${dayInfo.activity2 || ''}" class="w-full px-1.5 py-1.5 border border-gray-200 rounded-md text-[9px] font-bold text-black outline-none focus:border-neon bg-white day-act2 text-center" data-day="${dayName}">
+                        <div class="relative mt-1">
+                            <button type="button" class="btn-open-tpl-modal w-full px-1.5 py-1.5 bg-white border border-gray-200 hover:border-neon rounded-md text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-center truncate transition" data-day="${dayName}">
+                                <span class="truncate tpl-label block ${dayInfo.templateId ? 'text-neon' : 'text-gray-400'}">${tplTitle}</span>
                             </button>
                             <input type="hidden" class="day-tpl" data-day="${dayName}" value="${dayInfo.templateId || ''}">
                         </div>
@@ -1248,45 +977,37 @@
             const sundayInfo = weekData.days["domenica"] || { activity1: 'OFF', activity2: '', templateId: '' };
 
             card.innerHTML = `
-                <div class="bg-emerald-100/70 px-3 py-2.5 sm:px-4 sm:py-3 flex justify-between items-center gap-2 cursor-pointer select-none border-b border-emerald-200 week-header hover:bg-emerald-200/70 transition rounded-none">
-                    <div class="min-w-0"><h5 class="font-black text-xs sm:text-sm text-emerald-950 capitalize truncate">📅 ${weekTitleStr}</h5></div>
-                    <div class="flex items-center gap-1.5 flex-shrink-0">
-                        <button type="button" class="text-[11px] bg-emerald-800 text-white px-2.5 py-1 rounded-none font-bold save-week-btn">Salva</button>
-                        <button type="button" class="text-[11px] bg-white text-rose-600 border border-emerald-300 font-bold px-2 py-1 rounded-none delete-week-btn" title="Elimina">🗑️</button>
-                        <span class="text-[11px] font-bold text-emerald-900 bg-white border border-emerald-300 px-2 py-1 rounded-none toggle-arrow">▼</span>
+                <div class="bg-gray-100 px-4 py-3 flex justify-between items-center cursor-pointer border-b border-gray-200 week-header">
+                    <h5 class="font-black text-xs uppercase tracking-widest text-black">📅 ${weekTitleStr}</h5>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="text-[9px] bg-neon text-white px-2.5 py-1.5 rounded-lg font-black uppercase tracking-widest save-week-btn shadow-sm">Salva</button>
+                        <button type="button" class="text-[9px] bg-white text-red-500 border border-gray-200 font-black uppercase tracking-widest px-2 py-1.5 rounded-lg delete-week-btn shadow-sm">Elimina</button>
                     </div>
                 </div>
                 <div class="p-3 sm:p-4 space-y-3 week-body hidden bg-white">
-                    <div class="grid grid-cols-3 gap-1.5 sm:gap-2.5">${daysHtml}</div>
-                    <div class="p-2.5 bg-emerald-50/50 border border-emerald-100 rounded-none flex justify-between items-center gap-3">
-                        <span class="font-black text-[10px] uppercase tracking-wider text-emerald-950 whitespace-nowrap">Domenica</span>
-                        <input type="text" placeholder="OFF o Attività" value="${sundayInfo.activity1 || 'OFF'}" class="w-full sm:w-64 px-2.5 py-1 border border-emerald-200 rounded-none text-[11px] bg-white day-act1 font-medium" data-day="domenica">
-                    </div>
-                    <div class="flex justify-end pt-1">
-                        <button type="button" class="text-xs bg-emerald-800 text-white px-4 py-2 rounded-none font-bold save-week-btn shadow-sm">Salva Modifiche Settimana</button>
+                    <div class="grid grid-cols-3 gap-1.5 sm:gap-2">${daysHtml}</div>
+                    
+                    <div class="p-2 bg-gray-50 border border-gray-100 rounded-xl flex items-center justify-between gap-2 mt-3 max-w-[150px] mx-auto">
+                        <span class="font-black text-[9px] uppercase tracking-widest text-gray-500">Domenica</span>
+                        <input type="text" placeholder="OFF" value="${sundayInfo.activity1 || 'OFF'}" class="w-16 px-2 py-1 border border-gray-200 rounded-md text-[9px] font-bold text-black outline-none bg-white day-act1 text-center" data-day="domenica">
                     </div>
                 </div>
             `;
 
-            const header = card.querySelector('.week-header');
-            const body = card.querySelector('.week-body');
-            const arrow = card.querySelector('.toggle-arrow');
-
-            header.addEventListener('click', (e) => {
+            card.querySelector('.week-header').addEventListener('click', (e) => {
                 if (e.target.closest('button')) return;
-                body.classList.toggle('hidden');
-                arrow.textContent = body.classList.contains('hidden') ? '▼' : '▲';
+                card.querySelector('.week-body').classList.toggle('hidden');
             });
 
             card.querySelectorAll('.btn-open-tpl-modal').forEach(btn => {
-                btn.addEventListener('click', (e) => {
+                btn.addEventListener('click', () => {
                     const dayBox = btn.closest('div.relative');
                     const hiddenInput = dayBox.querySelector('.day-tpl');
                     const labelSpan = btn.querySelector('.tpl-label');
-
                     openSelectTemplateModal((selectedId, selectedTitle) => {
                         hiddenInput.value = selectedId;
                         labelSpan.textContent = selectedTitle;
+                        labelSpan.className = `truncate tpl-label block ${selectedId ? 'text-neon' : 'text-gray-400'}`;
                     });
                 });
             });
@@ -1297,39 +1018,335 @@
                     daysOrder.forEach(dayName => {
                         updatedDays[dayName] = {
                             activity1: card.querySelector(`.day-act1[data-day="${dayName}"]`).value.trim(),
-                            activity2: card.querySelector(`.day-act2[data-day="${dayName}"]`) ? card.querySelector(`.day-act2[data-day="${dayName}"]`).value.trim() : "",
-                            templateId: card.querySelector(`.day-tpl[data-day="${dayName}"]`) ? card.querySelector(`.day-tpl[data-day="${dayName}"]`).value : ""
+                            activity2: card.querySelector(`.day-act2[data-day="${dayName}"]`).value.trim(),
+                            templateId: card.querySelector(`.day-tpl[data-day="${dayName}"]`).value
                         };
                     });
                     updatedDays["domenica"] = {
                         activity1: card.querySelector('.day-act1[data-day="domenica"]').value.trim(),
-                        activity2: "",
-                        templateId: ""
+                        activity2: "", templateId: ""
                     };
-
                     try {
                         await setDoc(doc(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "weeks", weekData.id), {
-                            startDate: weekData.startDate,
-                            days: updatedDays,
-                            updatedAt: new Date()
+                            startDate: weekData.startDate, days: updatedDays, updatedAt: new Date()
                         }, { merge: true });
-                        showAlert("Settimana salvata con successo!", "Successo");
-                    } catch (err) {
-                        showAlert("Errore salvataggio: " + err.message, "Errore");
-                    }
+                        showAlert("Settimana salvata!", "Successo");
+                    } catch (err) { showAlert("Errore.", "Errore"); }
                 });
             });
 
             card.querySelector('.delete-week-btn').addEventListener('click', () => {
-                showConfirm("Vuoi davvero eliminare questa settimana?", async () => {
+                showConfirm("Eliminare questa settimana?", async () => {
                     await deleteDoc(doc(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "weeks", weekData.id));
-                    showAlert("Settimana eliminata.", "Eliminazione");
                     loadAthleteWeeks();
                 });
             });
 
             weeksAccordionContainer.appendChild(card);
         }
+
+        const selectTemplateModal = document.getElementById('select-template-modal');
+        const modalTplListContainer = document.getElementById('modal-tpl-list-container');
+        let activeSelectCallback = null;
+
+        document.getElementById('btn-close-select-tpl-modal').addEventListener('click', () => selectTemplateModal.classList.add('hidden'));
+        
+        function openSelectTemplateModal(onSelect) {
+            activeSelectCallback = onSelect;
+            document.getElementById('modal-tpl-search').value = '';
+            renderModalTplList('');
+            selectTemplateModal.classList.remove('hidden');
+        }
+        document.getElementById('modal-tpl-search').addEventListener('input', (e) => renderModalTplList(e.target.value.toLowerCase().trim()));
+
+        function renderModalTplList(filter) {
+            modalTplListContainer.innerHTML = '';
+            const filtered = gymTemplates.filter(t => t.title.toLowerCase().includes(filter));
+            
+            const noneDiv = document.createElement('div');
+            noneDiv.className = "p-3 bg-gray-50 border border-gray-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-500 cursor-pointer hover:bg-gray-100 transition mb-2";
+            noneDiv.innerHTML = `❌ Nessuna Scheda`;
+            noneDiv.addEventListener('click', () => {
+                selectTemplateModal.classList.add('hidden');
+                if(activeSelectCallback) activeSelectCallback("", "Nessuna Scheda");
+            });
+            modalTplListContainer.appendChild(noneDiv);
+
+            filtered.forEach(tpl => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-white border border-gray-200 hover:border-neon rounded-xl text-[10px] font-black uppercase tracking-widest text-black cursor-pointer transition flex justify-between shadow-xs mb-2";
+                div.innerHTML = `<span>🏋️‍♂️ ${tpl.title}</span> <span class="text-neon">Seleziona</span>`;
+                div.addEventListener('click', () => {
+                    selectTemplateModal.classList.add('hidden');
+                    if(activeSelectCallback) activeSelectCallback(tpl.id, tpl.title);
+                });
+                modalTplListContainer.appendChild(div);
+            });
+        }
+
+        const exercisesContainer = document.getElementById('exercises-container');
+        const savedTemplatesList = document.getElementById('saved-templates-list');
+        const viewTemplateModal = document.getElementById('view-template-modal');
+        const viewTplModalContent = document.getElementById('view-tpl-modal-content');
+        const viewTplModalFooter = document.getElementById('view-tpl-modal-footer');
+        let currentActiveTemplate = null;
+
+        document.getElementById('btn-close-view-tpl-modal').addEventListener('click', () => viewTemplateModal.classList.add('hidden'));
+
+        function addExerciseRow(container, isGlobal = true) {
+            const div = document.createElement('div');
+            div.className = "p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs space-y-2 relative ex-row shadow-2xs";
+            div.innerHTML = `
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <input type="text" placeholder="Nome Esercizio" required class="ex-name col-span-2 px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-neon font-bold text-black">
+                    <input type="text" placeholder="Serie (es. 4)" required class="ex-sets px-3 py-2 bg-white border border-gray-200 rounded-lg text-center font-bold outline-none">
+                    <input type="text" placeholder="Reps (es. 10)" required class="ex-reps px-3 py-2 bg-white border border-gray-200 rounded-lg text-center font-bold outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" placeholder="Carico (es. 75%)" class="ex-load px-3 py-2 bg-white border border-gray-200 rounded-lg text-center font-bold outline-none">
+                    <input type="text" placeholder="Note (es. recupero 90s)" class="ex-notes px-3 py-2 bg-white border border-gray-200 rounded-lg outline-none text-[10px] font-bold">
+                </div>
+                <button type="button" class="btn-remove-exercise absolute top-2 right-2 text-gray-400 hover:text-red-500 font-bold p-1 bg-white rounded-md border border-gray-200 shadow-sm">✕</button>
+            `;
+            div.querySelector('.btn-remove-exercise').addEventListener('click', () => div.remove());
+            container.appendChild(div);
+        }
+
+        addExerciseRow(exercisesContainer, true);
+        document.getElementById('btn-add-exercise').addEventListener('click', () => addExerciseRow(exercisesContainer, true));
+        document.getElementById('btn-add-gym-exercise').addEventListener('click', () => addExerciseRow(document.getElementById('gym-exercises-container'), false));
+
+        document.getElementById('template-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('tpl-title').value.trim();
+            const exercises = Array.from(exercisesContainer.querySelectorAll('.ex-row')).map(row => ({
+                name: row.querySelector('.ex-name').value.trim(),
+                sets: row.querySelector('.ex-sets').value.trim(),
+                reps: row.querySelector('.ex-reps').value.trim(),
+                load: row.querySelector('.ex-load').value.trim(),
+                notes: row.querySelector('.ex-notes').value.trim()
+            }));
+            await addDoc(collection(db, "gyms", currentGymId, "templates"), { title, exercises, createdAt: new Date() });
+            showAlert("Scheda globale salvata!", "Successo");
+            document.getElementById('template-form').reset();
+            exercisesContainer.innerHTML = '';
+            addExerciseRow(exercisesContainer, true);
+            loadTemplates();
+        });
+
+        async function loadTemplates() {
+            if (!currentGymId) return;
+            const q = query(collection(db, "gyms", currentGymId, "templates"));
+            const snapshot = await getDocs(q);
+            gymTemplates = [];
+            savedTemplatesList.innerHTML = snapshot.empty ? '<p class="text-[10px] font-bold text-gray-400 uppercase py-6 text-center">Nessuna scheda creata.</p>' : '';
+            
+            snapshot.forEach((docSnap) => {
+                const tpl = { id: docSnap.id, ...docSnap.data() };
+                gymTemplates.push(tpl);
+                const div = document.createElement('div');
+                div.className = "p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl flex justify-between items-center cursor-pointer transition shadow-2xs";
+                div.innerHTML = `
+                    <span class="font-black text-xs uppercase tracking-widest text-black">🏋️‍♂️ ${tpl.title}</span> 
+                    <button type="button" class="text-[9px] font-black uppercase tracking-widest bg-white text-red-600 border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm delete-tpl-btn">Elimina</button>
+                `;
+                div.addEventListener('click', (e) => {
+                    if (e.target.closest('.delete-tpl-btn')) return;
+                    openViewTemplateModal(tpl, 'global');
+                });
+                div.querySelector('.delete-tpl-btn').addEventListener('click', () => {
+                    showConfirm(`Eliminare "${tpl.title}"?`, async () => {
+                        await deleteDoc(doc(db, "gyms", currentGymId, "templates", tpl.id));
+                        loadTemplates();
+                    });
+                });
+                savedTemplatesList.appendChild(div);
+            });
+        }
+
+        function openViewTemplateModal(tpl, type = 'global', athleteId = null) {
+            currentActiveTemplate = { ...tpl, type, athleteId };
+            renderTemplateViewMode();
+            viewTemplateModal.classList.remove('hidden');
+        }
+
+        function renderTemplateViewMode() {
+            document.getElementById('view-tpl-modal-title').textContent = `🏋️‍♂️ ${currentActiveTemplate.title}`;
+            viewTplModalContent.innerHTML = '';
+            if (!currentActiveTemplate.exercises || currentActiveTemplate.exercises.length === 0) {
+                viewTplModalContent.innerHTML = '<p class="text-[10px] font-bold text-gray-400 uppercase py-4 text-center">Nessun esercizio.</p>';
+            } else {
+                const listDiv = document.createElement('div');
+                listDiv.className = "space-y-3";
+                currentActiveTemplate.exercises.forEach((ex, idx) => {
+                    const row = document.createElement('div');
+                    row.className = "p-3.5 bg-white border border-gray-200 rounded-xl flex flex-col gap-1.5 shadow-2xs";
+                    
+                    let videoHtml = '';
+                    const matchedVideo = gymVideos.find(v => similarity(v.name, ex.name) > 0.75);
+                    if (matchedVideo) {
+                        videoHtml = `<button type="button" class="btn-play-video ml-2 border border-green-200 bg-green-50 text-neon px-2 py-0.5 text-[9px] uppercase font-black rounded-md transition" data-url="${matchedVideo.url}" data-name="${matchedVideo.name}">📹 Play</button>`;
+                    }
+
+                    row.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <span class="font-black text-xs uppercase tracking-wider text-black flex items-center">${idx + 1}. ${ex.name} ${videoHtml}</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-1">
+                            <span class="font-black text-[10px] bg-gray-100 text-gray-700 px-2 py-1 uppercase tracking-wider rounded-md">${ex.sets} serie × ${ex.reps} reps</span>
+                            ${ex.load ? `<span class="font-bold text-[10px] text-gray-600 uppercase border border-gray-200 px-2 py-1 rounded-md">Carico: ${ex.load}</span>` : ''}
+                        </div>
+                        ${ex.notes ? `<div class="mt-1 text-[10px] font-bold text-gray-500 uppercase border-t border-gray-100 pt-1.5">Note: ${ex.notes}</div>` : ''}
+                    `;
+                    listDiv.appendChild(row);
+                });
+                viewTplModalContent.appendChild(listDiv);
+
+                viewTplModalContent.querySelectorAll('.btn-play-video').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const url = e.currentTarget.getAttribute('data-url');
+                        document.getElementById('video-player-title').textContent = e.currentTarget.getAttribute('data-name');
+                        const vid = document.getElementById('video-player-element');
+                        vid.src = url;
+                        document.getElementById('video-player-modal').classList.remove('hidden');
+                        vid.play().catch(e => console.log(e));
+                    });
+                });
+            }
+            viewTplModalFooter.innerHTML = `
+                <button type="button" id="btn-edit-tpl-mode" class="bg-black hover:bg-gray-800 text-white font-black uppercase tracking-widest px-4 py-2.5 rounded-xl text-[10px] shadow-sm">Modifica</button>
+                <button type="button" id="btn-close-view-ok" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-black uppercase tracking-widest px-4 py-2.5 rounded-xl text-[10px]">Chiudi</button>
+            `;
+            document.getElementById('btn-edit-tpl-mode').addEventListener('click', renderTemplateEditMode);
+            document.getElementById('btn-close-view-ok').addEventListener('click', () => viewTemplateModal.classList.add('hidden'));
+        }
+
+        function renderTemplateEditMode() {
+            document.getElementById('view-tpl-modal-title').textContent = `✏️ Modifica Scheda`;
+            viewTplModalContent.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Nome Scheda</label>
+                        <input type="text" id="edit-tpl-title-input" value="${currentActiveTemplate.title}" class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-black focus:outline-none focus:border-neon">
+                    </div>
+                    <div id="edit-exercises-rows-container" class="space-y-3 max-h-60 overflow-y-auto pr-1"></div>
+                    <button type="button" id="btn-add-edit-exercise" class="w-full text-[10px] bg-gray-100 text-black font-black uppercase tracking-widest px-3 py-2 rounded-xl transition">+ Aggiungi Esercizio</button>
+                </div>
+            `;
+            const container = document.getElementById('edit-exercises-rows-container');
+            if (currentActiveTemplate.exercises) {
+                currentActiveTemplate.exercises.forEach(ex => {
+                    const div = document.createElement('div');
+                    div.className = "p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs space-y-2 relative edit-ex-row shadow-2xs";
+                    div.innerHTML = `
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <input type="text" value="${ex.name}" class="edit-ex-name col-span-2 px-2 py-1.5 bg-white border border-gray-200 rounded-lg font-bold text-black outline-none focus:border-neon">
+                            <input type="text" value="${ex.sets}" class="edit-ex-sets px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-center font-bold outline-none">
+                            <input type="text" value="${ex.reps}" class="edit-ex-reps px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-center font-bold outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" value="${ex.load || ''}" class="edit-ex-load px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-center font-bold outline-none">
+                            <input type="text" value="${ex.notes || ''}" class="edit-ex-notes px-2 py-1.5 bg-white border border-gray-200 rounded-lg font-bold text-[10px] outline-none">
+                        </div>
+                        <button type="button" class="btn-remove-edit-row absolute top-2 right-2 text-gray-400 hover:text-red-500 font-bold p-1 bg-white rounded-md border border-gray-200 shadow-sm">✕</button>
+                    `;
+                    div.querySelector('.btn-remove-edit-row').addEventListener('click', () => div.remove());
+                    container.appendChild(div);
+                });
+            }
+            document.getElementById('btn-add-edit-exercise').addEventListener('click', () => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs space-y-2 relative edit-ex-row shadow-2xs";
+                div.innerHTML = `
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2"><input type="text" placeholder="Nome" class="edit-ex-name col-span-2 px-2 py-1.5 bg-white border border-gray-200 rounded-lg font-bold text-black outline-none focus:border-neon"><input type="text" placeholder="Serie" class="edit-ex-sets px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-center font-bold outline-none"><input type="text" placeholder="Reps" class="edit-ex-reps px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-center font-bold outline-none"></div>
+                    <div class="grid grid-cols-2 gap-2"><input type="text" placeholder="Carico" class="edit-ex-load px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-center font-bold outline-none"><input type="text" placeholder="Note" class="edit-ex-notes px-2 py-1.5 bg-white border border-gray-200 rounded-lg font-bold text-[10px] outline-none"></div>
+                    <button type="button" class="btn-remove-edit-row absolute top-2 right-2 text-gray-400 hover:text-red-500 font-bold p-1 bg-white rounded-md border border-gray-200 shadow-sm">✕</button>
+                `;
+                div.querySelector('.btn-remove-edit-row').addEventListener('click', () => div.remove());
+                container.appendChild(div);
+            });
+
+            viewTplModalFooter.innerHTML = `
+                <button type="button" id="btn-save-edited-tpl" class="bg-neon text-white font-black uppercase tracking-widest px-5 py-2.5 rounded-xl text-[10px] shadow-sm">Salva</button>
+                <button type="button" id="btn-cancel-edit" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-black uppercase tracking-widest px-4 py-2.5 rounded-xl text-[10px]">Annulla</button>
+            `;
+            document.getElementById('btn-cancel-edit').addEventListener('click', renderTemplateViewMode);
+            document.getElementById('btn-save-edited-tpl').addEventListener('click', async () => {
+                const title = document.getElementById('edit-tpl-title-input').value.trim();
+                if (!title) return showAlert("Inserisci titolo.");
+                const exercises = Array.from(container.querySelectorAll('.edit-ex-row')).map(r => ({
+                    name: r.querySelector('.edit-ex-name').value.trim(), sets: r.querySelector('.edit-ex-sets').value.trim(), reps: r.querySelector('.edit-ex-reps').value.trim(),
+                    load: r.querySelector('.edit-ex-load').value.trim(), notes: r.querySelector('.edit-ex-notes').value.trim()
+                })).filter(ex => ex.name);
+                
+                try {
+                    if (currentActiveTemplate.type === 'global') {
+                        await setDoc(doc(db, "gyms", currentGymId, "templates", currentActiveTemplate.id), { title, exercises }, { merge: true });
+                        loadTemplates();
+                    } else {
+                        await setDoc(doc(db, "gyms", currentGymId, "athlete_programs", currentActiveTemplate.athleteId, "personal_templates", currentActiveTemplate.id), { title, exercises }, { merge: true });
+                        loadAthletePersonalTemplates();
+                    }
+                    showAlert("Modifiche salvate!");
+                    viewTemplateModal.classList.add('hidden');
+                } catch (e) { showAlert("Errore salvataggio."); }
+            });
+        }
+
+        const videoListContainer = document.getElementById('video-list-container');
+        document.getElementById('btn-close-video-modal').addEventListener('click', () => {
+            const vid = document.getElementById('video-player-element');
+            vid.pause(); vid.src = '';
+            document.getElementById('video-player-modal').classList.add('hidden');
+        });
+
+        async function loadLibraryVideos() {
+            if (!currentGymId) return;
+            const q = query(collection(db, "gyms", currentGymId, "exercise_videos"));
+            const snapshot = await getDocs(q);
+            gymVideos = [];
+            videoListContainer.innerHTML = snapshot.empty ? '<p class="text-[10px] font-bold text-gray-400 uppercase text-center py-4">Nessun video caricato.</p>' : '';
+            snapshot.forEach((docSnap) => {
+                const v = { id: docSnap.id, ...docSnap.data() };
+                gymVideos.push(v);
+                const div = document.createElement('div');
+                div.className = "p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs flex justify-between items-center shadow-2xs";
+                div.innerHTML = `
+                    <div class="flex items-center gap-2"><span class="text-neon">📹</span><span class="font-black uppercase tracking-widest text-black text-[10px]">${v.name}</span></div>
+                    <button type="button" class="text-red-500 bg-white border border-red-200 font-black uppercase tracking-widest px-2 py-1 rounded-lg text-[9px] hover:bg-red-50 btn-delete-video">Elimina</button>
+                `;
+                div.querySelector('.btn-delete-video').addEventListener('click', () => {
+                    showConfirm(`Eliminare video "${v.name}"?`, async () => {
+                        await deleteObject(storageRef(storage, v.storagePath));
+                        await deleteDoc(doc(db, "gyms", currentGymId, "exercise_videos", v.id));
+                        loadLibraryVideos();
+                    });
+                });
+                videoListContainer.appendChild(div);
+            });
+        }
+
+        document.getElementById('video-upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = document.getElementById('video-file-input').files[0];
+            const name = document.getElementById('video-ex-name').value.trim();
+            const btn = document.getElementById('btn-upload-video');
+            if (!file || !name) return;
+
+            btn.disabled = true; btn.textContent = "Caricamento...";
+            try {
+                const path = `gyms/${currentGymId}/videos/${Date.now()}_${file.name}`;
+                const sRef = storageRef(storage, path);
+                await uploadBytes(sRef, file);
+                const url = await getDownloadURL(sRef);
+                await addDoc(collection(db, "gyms", currentGymId, "exercise_videos"), { name, url, storagePath: path, createdAt: new Date() });
+                showAlert("Video caricato con successo!");
+                document.getElementById('video-upload-form').reset();
+                loadLibraryVideos();
+            } catch (err) { showAlert("Errore durante il caricamento."); }
+            finally { btn.disabled = false; btn.textContent = "Carica Video"; }
+        });
+
     </script>
 </body>
 </html>
