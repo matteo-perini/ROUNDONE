@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoundOne - Accedi o Registrati</title>
+    <title>Lion Fit - Accedi o Registrati</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="apple-touch-icon" href="LOGO-APP.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="RoundOne">
+    <meta name="apple-mobile-web-app-title" content="Lion Fit">
 </head>
 <body class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-600 selection:text-white overflow-x-hidden relative">
 
     <!-- HEADER MINIMALE -->
     <header class="px-6 py-4 flex justify-between items-center border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md">
         <h1 class="text-base font-black tracking-tight text-white flex items-center gap-2">
-            🥊 <span class="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">RoundOne</span>
+            🦁 <span class="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Lion Fit</span>
         </h1>
     </header>
 
@@ -110,7 +110,7 @@
 
     <!-- FOOTER -->
     <footer class="text-center py-3 text-[11px] text-slate-500 font-medium border-t border-slate-800/80 bg-slate-900/50 backdrop-blur-md">
-        RoundOne &copy; 2026
+        Lion Fit &copy; 2026
     </footer>
 
     <!-- SCRIPT JAVASCRIPT -->
@@ -145,8 +145,11 @@
             if (alertCallback) { alertCallback(); alertCallback = null; }
         });
 
+        let isAuthenticating = false;
         onAuthStateChanged(auth, async (user) => {
-            if (user) { await checkUserRoleAndRedirect(user.uid); }
+            if (user && !isAuthenticating) { 
+                await checkUserRoleAndRedirect(user.uid); 
+            }
         });
 
         const tabLogin = document.getElementById('tab-login');
@@ -183,6 +186,7 @@
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            isAuthenticating = true;
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
 
@@ -192,12 +196,14 @@
                     await checkUserRoleAndRedirect(userCredential.user.uid);
                 });
             } catch (error) {
+                isAuthenticating = false;
                 showAlert("Errore durante il login: " + error.message, "Errore");
             }
         });
 
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            isAuthenticating = true;
             const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
@@ -210,7 +216,11 @@
 
                 if (role === 'admin') {
                     gymName = document.getElementById('reg-gym-name').value;
-                    if (!gymName) { showAlert("Inserisci il nome della palestra", "Attenzione"); return; }
+                    if (!gymName) { 
+                        isAuthenticating = false;
+                        showAlert("Inserisci il nome della palestra", "Attenzione"); 
+                        return; 
+                    }
                     
                     gymId = "gym_" + Date.now();
                     inviteCode = "GYM-" + Math.floor(1000 + Math.random() * 9000);
@@ -222,12 +232,17 @@
                     });
                 } else {
                     inviteCode = document.getElementById('reg-invite-code').value.trim().toUpperCase();
-                    if (!inviteCode) { showAlert("Inserisci il codice invito della palestra", "Attenzione"); return; }
+                    if (!inviteCode) { 
+                        isAuthenticating = false;
+                        showAlert("Inserisci il codice invito della palestra", "Attenzione"); 
+                        return; 
+                    }
 
                     const gymsQuery = query(collection(db, "gyms"), where("inviteCode", "==", inviteCode));
                     const querySnapshot = await getDocs(gymsQuery);
 
                     if (querySnapshot.empty) {
+                        isAuthenticating = false;
                         showAlert("Codice invito non valido o palestra non trovata.", "Errore");
                         return;
                     }
@@ -254,13 +269,19 @@
                 });
 
             } catch (error) {
+                isAuthenticating = false;
                 showAlert("Errore di registrazione: " + error.message, "Errore");
             }
         });
 
         async function checkUserRoleAndRedirect(uid) {
             try {
-                const userDoc = await getDoc(doc(db, "users", uid));
+                let userDoc = await getDoc(doc(db, "users", uid));
+                if (!userDoc.exists()) {
+                    await new Promise(resolve => setTimeout(resolve, 600));
+                    userDoc = await getDoc(doc(db, "users", uid));
+                }
+
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     if (userData.role === 'admin') {
@@ -269,9 +290,11 @@
                         window.location.replace('athlete.html');
                     }
                 } else {
+                    isAuthenticating = false;
                     showAlert("Profilo utente non trovato nel database.", "Errore");
                 }
             } catch (error) {
+                isAuthenticating = false;
                 console.error("Errore nel recupero del ruolo:", error);
             }
         }
