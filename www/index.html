@@ -2,118 +2,152 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lion Fit - Accedi o Registrati</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Lion Fit 🦁 - Accedi o Registrati</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="apple-touch-icon" href="LOGO-APP.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Lion Fit">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        neon: '#16a34a',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+      :root { color-scheme: light; }
+      html { -webkit-text-size-adjust: 100%; }
+      input, select { font-size: 16px !important; min-height: 46px; }
+      button { min-height: 44px; touch-action: manipulation; }
+      :focus-visible { outline: 3px solid #16a34a; outline-offset: 3px; }
+      #auth-section { box-shadow: 0 18px 55px rgba(22,101,52,.09), 0 2px 10px rgba(15,23,42,.04); }
+      body { background-image: radial-gradient(ellipse 80% 45% at 50% 20%, rgba(187,247,208,.32), transparent 70%); }
+      @media (max-width: 420px) { #auth-section { padding: 20px; } }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-600 selection:text-white overflow-x-hidden relative">
+<body class="bg-gray-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-neon selection:text-white overflow-x-hidden relative">
 
     <!-- HEADER MINIMALE -->
-    <header class="px-6 py-4 flex justify-between items-center border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md">
-        <h1 class="text-base font-black tracking-tight text-white flex items-center gap-2">
-            🦁 <span class="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Lion Fit</span>
-        </h1>
+    <header class="px-6 py-4 flex justify-between items-center border-b border-gray-200 bg-white/95 backdrop-blur-md">
+        <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-neon text-white flex items-center justify-center font-black text-sm rounded-xl shadow-sm">🦁</div>
+            <div>
+                <h1 class="text-sm font-black uppercase tracking-widest text-slate-900">LION FIT</h1>
+                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Area Accesso</p>
+            </div>
+        </div>
+        <span class="text-[11px] font-black uppercase tracking-widest text-green-700 bg-green-50 border border-green-200 px-3 py-1 rounded-lg">v2.0</span>
     </header>
 
     <!-- MAIN CONTAINER CENTRATO -->
-    <main class="flex-grow flex flex-col items-center justify-center p-4 sm:p-6">
+    <main class="flex-grow flex flex-col items-center justify-center p-4 sm:p-6 my-auto">
 
         <!-- BRANDING INTRODUTTIVO -->
-        <div class="text-center mb-6 space-y-1">
-            <h2 class="text-2xl sm:text-3xl font-black tracking-tight text-white">Gestione e Programmi</h2>
-            <p class="text-xs sm:text-sm text-slate-400">Accedi alla tua area riservata o unisciti alla tua palestra.</p>
+        <div class="text-center mb-6 space-y-1.5">
+            <h2 class="text-2xl sm:text-3xl font-black tracking-tight uppercase text-slate-900">Gestione & Programmi</h2>
+            <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Accedi al tuo piano o registrati con la tua palestra</p>
         </div>
 
-        <!-- SEZIONE AUTH (CARD) -->
-        <section id="auth-section" class="w-full max-w-sm sm:max-w-md bg-white text-slate-900 p-5 sm:p-6 rounded-3xl shadow-2xl border border-indigo-100">
-            <div class="flex border-b border-slate-100 mb-4">
-                <button id="tab-login" class="w-1/2 pb-2.5 font-bold text-center border-b-2 border-indigo-600 text-indigo-950 transition text-xs sm:text-sm">Accedi</button>
-                <button id="tab-register" class="w-1/2 pb-2.5 font-semibold text-center text-slate-400 border-b-2 border-transparent transition text-xs sm:text-sm hover:text-slate-600">Registrati</button>
+        <!-- SEZIONE AUTH (CARD SCHEDA) -->
+        <section id="auth-section" class="w-full max-w-sm sm:max-w-md bg-white text-slate-900 p-6 rounded-3xl border border-gray-200">
+            <!-- TAB SWITCHER -->
+            <div class="flex border-b border-gray-200 mb-5">
+                <button type="button" id="tab-login" class="w-1/2 pb-3 font-black text-center border-b-2 border-neon text-black transition uppercase text-sm tracking-wider">Accedi</button>
+                <button type="button" id="tab-register" class="w-1/2 pb-3 font-bold text-center text-gray-400 border-b-2 border-transparent transition uppercase text-sm tracking-wider hover:text-black">Registrati</button>
             </div>
 
             <!-- FORM ACCEDI -->
-            <form id="login-form" class="space-y-3.5">
+            <form id="login-form" class="space-y-4">
                 <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-indigo-950 mb-1">Email</label>
-                    <input type="email" id="login-email" required class="w-full px-3.5 py-2.5 bg-indigo-50/40 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs transition">
+                    <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Email</label>
+                    <input type="email" id="login-email" required placeholder="la-tua-email@esempio.it" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-indigo-950 mb-1">Password</label>
-                    <input type="password" id="login-password" required class="w-full px-3.5 py-2.5 bg-indigo-50/40 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs transition">
+                    <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition text-xs shadow-md mt-2">Accedi</button>
+                <button type="submit" id="btn-login-submit" class="w-full bg-neon hover:bg-green-700 text-white font-black uppercase tracking-widest py-3.5 rounded-xl transition text-sm shadow-md mt-2 flex justify-center items-center gap-2">
+                    <span>Accedi</span> &rarr;
+                </button>
             </form>
 
             <!-- FORM REGISTRAZIONE -->
-            <form id="register-form" class="space-y-3 hidden">
+            <form id="register-form" class="space-y-3.5 hidden">
                 <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-indigo-950 mb-0.5">Nome e Cognome</label>
-                    <input type="text" id="reg-name" required class="w-full px-3 py-2 bg-indigo-50/40 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs transition">
+                    <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Nome e Cognome</label>
+                    <input type="text" id="reg-name" required placeholder="Es. Mario Rossi" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-indigo-950 mb-0.5">Email</label>
-                    <input type="email" id="reg-email" required class="w-full px-3 py-2 bg-indigo-50/40 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs transition">
+                    <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Email</label>
+                    <input type="email" id="reg-email" required placeholder="la-tua-email@esempio.it" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-indigo-950 mb-0.5">Password</label>
-                    <input type="password" id="reg-password" required class="w-full px-3 py-2 bg-indigo-50/40 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs transition">
+                    <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Password</label>
+                    <input type="password" id="reg-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-indigo-950 mb-0.5">Tipo di Account</label>
-                    <select id="reg-role" class="w-full px-3 py-2 bg-indigo-50/40 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs transition">
+                    <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Tipo di Account</label>
+                    <select id="reg-role" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
                         <option value="athlete">Atleta (Iscriviti a una palestra)</option>
                         <option value="admin">Coach / Amministratore (Crea palestra)</option>
                     </select>
                 </div>
 
                 <div id="invite-code-container">
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-indigo-950 mb-0.5">Codice Invito Palestra</label>
-                    <input type="text" id="reg-invite-code" placeholder="Es. GYM-8492" class="w-full px-3 py-2 bg-indigo-50/40 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none uppercase text-xs transition">
+                    <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Codice Invito Palestra</label>
+                    <input type="text" id="reg-invite-code" placeholder="Es. GYM-8492" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none uppercase text-sm font-bold text-black transition">
                 </div>
 
                 <div id="gym-create-container" class="hidden">
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-indigo-950 mb-0.5">Nome della Tua Palestra</label>
-                    <input type="text" id="reg-gym-name" placeholder="Es. Leoni di San Marco" class="w-full px-3 py-2 bg-indigo-50/40 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white focus:outline-none text-xs transition">
+                    <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Nome della Tua Palestra</label>
+                    <input type="text" id="reg-gym-name" placeholder="Es. Leoni di San Marco" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
                 </div>
 
-                <div class="pt-2 pb-1 space-y-1.5 border-t border-slate-100 mt-1">
-                    <label class="flex items-start gap-2 text-[10px] text-slate-600 leading-tight cursor-pointer">
-                        <input type="checkbox" required class="mt-0.5 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500">
-                        <span>Accetto le <a href="note-legali.html" target="_blank" class="font-bold text-indigo-600 underline">Note Legali e Termini d'Uso</a>.</span>
+                <div class="pt-2 pb-1 space-y-2 border-t border-gray-100 mt-2">
+                    <label class="flex items-start gap-2 text-[11px] text-gray-600 font-medium leading-tight cursor-pointer">
+                        <input type="checkbox" required class="mt-0.5 rounded border-gray-300 text-neon focus:ring-neon">
+                        <span>Accetto le <a href="note-legali.html" target="_blank" class="font-bold text-black underline hover:text-neon">Note Legali e Termini d'Uso</a>.</span>
                     </label>
-                    <label class="flex items-start gap-2 text-[10px] text-slate-600 leading-tight cursor-pointer">
-                        <input type="checkbox" required class="mt-0.5 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500">
-                        <span>Acconsento alla <a href="policy.html" target="_blank" class="font-bold text-indigo-600 underline">Privacy Policy</a>.</span>
+                    <label class="flex items-start gap-2 text-[11px] text-gray-600 font-medium leading-tight cursor-pointer">
+                        <input type="checkbox" required class="mt-0.5 rounded border-gray-300 text-neon focus:ring-neon">
+                        <span>Acconsento alla <a href="policy.html" target="_blank" class="font-bold text-black underline hover:text-neon">Privacy Policy</a>.</span>
                     </label>
                 </div>
 
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md mt-1">Crea Account</button>
+                <button type="submit" id="btn-register-submit" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3.5 rounded-xl transition text-sm shadow-md mt-1 hover:bg-green-700">
+                    Crea Account
+                </button>
             </form>
         </section>
     </main>
 
     <!-- MODAL CUSTOM NOTIFICHE -->
-    <div id="custom-alert-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white text-slate-900 w-full max-w-sm rounded-2xl shadow-2xl border border-indigo-100 p-6 space-y-4 text-center">
-            <div class="text-3xl">✨</div>
-            <h4 id="custom-alert-title" class="font-black text-base text-indigo-950">Notifica</h4>
-            <p id="custom-alert-message" class="text-xs text-slate-600 leading-relaxed"></p>
-            <button type="button" id="custom-alert-ok" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-xs shadow-md">Capito</button>
+    <div id="custom-alert-modal" class="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white text-black w-full max-w-sm rounded-2xl shadow-2xl border border-gray-200 p-6 space-y-4 text-center">
+            <div class="w-10 h-10 bg-green-50 text-neon rounded-xl border border-green-200 flex items-center justify-center text-lg font-black mx-auto">🦁</div>
+            <h4 id="custom-alert-title" class="font-black text-sm uppercase tracking-widest text-black">Notifica</h4>
+            <p id="custom-alert-message" class="text-sm font-medium text-gray-600 leading-relaxed"></p>
+            <button type="button" id="custom-alert-ok" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3 rounded-xl transition text-[11px] shadow-sm">Capito</button>
         </div>
     </div>
 
     <!-- FOOTER -->
-    <footer class="text-center py-3 text-[11px] text-slate-500 font-medium border-t border-slate-800/80 bg-slate-900/50 backdrop-blur-md">
-        Lion Fit &copy; 2026
+    <footer class="text-center py-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest border-t border-gray-200 bg-white/95 backdrop-blur-md">
+        Lion Fit &copy; 2026 · Tutti i diritti riservati
     </footer>
 
-    <!-- SCRIPT JAVASCRIPT -->
+    <!-- SCRIPT JAVASCRIPT LOGICA AUTENTICAZIONE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -146,8 +180,22 @@
         });
 
         let isAuthenticating = false;
+        let redirectInProgress = false;
+        // Evita che un profilo non valido rimbalzi all'infinito tra login e dashboard.
+        const params = new URLSearchParams(window.location.search);
+        const accessError = params.get('accessError');
+        const blockAutoRedirect = Boolean(accessError);
+        if (accessError) {
+            history.replaceState(null, '', 'index.html');
+            setTimeout(() => showAlert(
+                accessError === 'role' ? 'Questo account non ha il ruolo richiesto per aprire la pagina. Verifica il profilo nella raccolta users di Firestore.' :
+                accessError === 'profile' ? 'Profilo non trovato in Firestore. L’account Firebase esiste, ma manca il documento users associato.' :
+                'Impossibile verificare il profilo. Controlla la connessione e i permessi Firestore.',
+                'Accesso da verificare'
+            ), 100);
+        }
         onAuthStateChanged(auth, async (user) => {
-            if (user && !isAuthenticating) { 
+            if (user && !isAuthenticating && !blockAutoRedirect) { 
                 await checkUserRoleAndRedirect(user.uid); 
             }
         });
@@ -161,15 +209,15 @@
         const gymCreateContainer = document.getElementById('gym-create-container');
 
         tabLogin.addEventListener('click', () => {
-            tabLogin.className = "w-1/2 pb-2.5 font-bold text-center border-b-2 border-indigo-600 text-indigo-950 transition text-xs sm:text-sm";
-            tabRegister.className = "w-1/2 pb-2.5 font-semibold text-center text-slate-400 border-b-2 border-transparent transition text-xs sm:text-sm hover:text-slate-600";
+            tabLogin.className = "w-1/2 pb-3 font-black text-center border-b-2 border-neon text-black transition uppercase text-sm tracking-wider";
+            tabRegister.className = "w-1/2 pb-3 font-bold text-center text-gray-400 border-b-2 border-transparent transition uppercase text-sm tracking-wider hover:text-black";
             loginForm.classList.remove('hidden');
             registerForm.classList.add('hidden');
         });
 
         tabRegister.addEventListener('click', () => {
-            tabRegister.className = "w-1/2 pb-2.5 font-bold text-center border-b-2 border-indigo-600 text-indigo-950 transition text-xs sm:text-sm";
-            tabLogin.className = "w-1/2 pb-2.5 font-semibold text-center text-slate-400 border-b-2 border-transparent transition text-xs sm:text-sm hover:text-slate-600";
+            tabRegister.className = "w-1/2 pb-3 font-black text-center border-b-2 border-neon text-black transition uppercase text-sm tracking-wider";
+            tabLogin.className = "w-1/2 pb-3 font-bold text-center text-gray-400 border-b-2 border-transparent transition uppercase text-sm tracking-wider hover:text-black";
             registerForm.classList.remove('hidden');
             loginForm.classList.add('hidden');
         });
@@ -187,7 +235,7 @@
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             isAuthenticating = true;
-            const email = document.getElementById('login-email').value;
+            const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
 
             try {
@@ -197,15 +245,19 @@
                 });
             } catch (error) {
                 isAuthenticating = false;
-                showAlert("Errore durante il login: " + error.message, "Errore");
+                let errorMsg = "Credenziali non valide o errore di connessione.";
+                if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorMsg = "Email o password errate. Riprova.";
+                }
+                showAlert(errorMsg, "Errore Accesso");
             }
         });
 
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             isAuthenticating = true;
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
             const password = document.getElementById('reg-password').value;
             const role = regRole.value;
 
@@ -215,7 +267,7 @@
                 let inviteCode = "";
 
                 if (role === 'admin') {
-                    gymName = document.getElementById('reg-gym-name').value;
+                    gymName = document.getElementById('reg-gym-name').value.trim();
                     if (!gymName) { 
                         isAuthenticating = false;
                         showAlert("Inserisci il nome della palestra", "Attenzione"); 
@@ -243,7 +295,7 @@
 
                     if (querySnapshot.empty) {
                         isAuthenticating = false;
-                        showAlert("Codice invito non valido o palestra non trovata.", "Errore");
+                        showAlert("Codice invito non valido o palestra non trovata.", "Errore Invito");
                         return;
                     }
 
@@ -270,11 +322,19 @@
 
             } catch (error) {
                 isAuthenticating = false;
-                showAlert("Errore di registrazione: " + error.message, "Errore");
+                let errorMsg = error.message;
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg = "Questa email risulta già registrata. Prova ad accedere.";
+                } else if (error.code === 'auth/weak-password') {
+                    errorMsg = "La password deve contenere almeno 6 caratteri.";
+                }
+                showAlert("Errore di registrazione: " + errorMsg, "Errore");
             }
         });
 
         async function checkUserRoleAndRedirect(uid) {
+            if (redirectInProgress) return;
+            redirectInProgress = true;
             try {
                 let userDoc = await getDoc(doc(db, "users", uid));
                 if (!userDoc.exists()) {
@@ -286,16 +346,23 @@
                     const userData = userDoc.data();
                     if (userData.role === 'admin') {
                         window.location.replace('admin.html');
-                    } else {
+                    } else if (userData.role === 'athlete') {
                         window.location.replace('athlete.html');
+                    } else {
+                        redirectInProgress = false;
+                        isAuthenticating = false;
+                        showAlert('Il profilo ha un ruolo non riconosciuto. Verifica il campo role in Firestore.', 'Ruolo non valido');
                     }
                 } else {
+                    redirectInProgress = false;
                     isAuthenticating = false;
-                    showAlert("Profilo utente non trovato nel database.", "Errore");
+                    showAlert('Profilo utente non trovato in Firestore. Non eliminare l’account: verifica il documento users/' + uid, 'Profilo mancante');
                 }
             } catch (error) {
+                redirectInProgress = false;
                 isAuthenticating = false;
                 console.error("Errore nel recupero del ruolo:", error);
+                showAlert('Impossibile verificare il profilo: ' + (error.code || error.message || 'errore sconosciuto'), 'Errore Firestore');
             }
         }
     </script>
