@@ -33,6 +33,13 @@
       #auth-section { box-shadow: 0 18px 55px rgba(22,101,52,.09), 0 2px 10px rgba(15,23,42,.04); }
       body { background-image: radial-gradient(ellipse 80% 45% at 50% 20%, rgba(187,247,208,.32), transparent 70%); }
       @media (max-width: 420px) { #auth-section { padding: 20px; } }
+      /* Lion Fit: keep login below the Android status bar / camera cutout. */
+      html.lf-native { --lf-login-safe-top: max(env(safe-area-inset-top, 0px), 28px); }
+      html.lf-native body { padding-top: var(--lf-login-safe-top); min-height: 100dvh; box-sizing: border-box; }
+      html.lf-native header { position: relative; z-index: 1; }
+      html.lf-native main { min-height: 0; }
+      html.lf-native { background: #f9fafb; }
+
     </style>
 </head>
 <body class="bg-gray-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-neon selection:text-white overflow-x-hidden relative">
@@ -76,6 +83,13 @@
                     <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Password</label>
                     <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
                 </div>
+                <label class="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50/70 px-3.5 py-3 cursor-pointer">
+                    <input type="checkbox" id="login-remember" checked class="mt-0.5 h-4 w-4 shrink-0 accent-green-700" aria-describedby="login-remember-help">
+                    <span class="flex-1 text-left">
+                        <span class="block text-sm font-bold text-slate-900">Mantieni l'accesso</span>
+                        <span id="login-remember-help" class="block text-xs text-gray-600 mt-0.5">Se disattivi la spunta, l'accesso non resterà memorizzato in modo permanente su questo dispositivo.</span>
+                    </span>
+                </label>
                 <button type="submit" id="btn-login-submit" class="w-full bg-neon hover:bg-green-700 text-white font-black uppercase tracking-widest py-3.5 rounded-xl transition text-sm shadow-md mt-2 flex justify-center items-center gap-2">
                     <span>Accedi</span> &rarr;
                 </button>
@@ -125,6 +139,13 @@
                     </label>
                 </div>
 
+                <label class="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50/70 px-3.5 py-3 cursor-pointer">
+                    <input type="checkbox" id="reg-remember" checked class="mt-0.5 h-4 w-4 shrink-0 accent-green-700" aria-describedby="reg-remember-help">
+                    <span class="flex-1 text-left">
+                        <span class="block text-sm font-bold text-slate-900">Mantieni l'accesso</span>
+                        <span id="reg-remember-help" class="block text-xs text-gray-600 mt-0.5">Se disattivi la spunta, l'accesso non resterà memorizzato in modo permanente su questo dispositivo.</span>
+                    </span>
+                </label>
                 <button type="submit" id="btn-register-submit" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3.5 rounded-xl transition text-sm shadow-md mt-1 hover:bg-green-700">
                     Crea Account
                 </button>
@@ -150,7 +171,7 @@
     <!-- SCRIPT JAVASCRIPT LOGICA AUTENTICAZIONE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -239,6 +260,9 @@
             const password = document.getElementById('login-password').value;
 
             try {
+                // Applica la preferenza prima dell'autenticazione (nessuna password salvata manualmente).
+                await setPersistence(auth, document.getElementById('login-remember').checked
+                    ? browserLocalPersistence : browserSessionPersistence);
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 showAlert("Login avvenuto con successo!", "Benvenuto", async () => {
                     await checkUserRoleAndRedirect(userCredential.user.uid);
@@ -305,6 +329,8 @@
                     });
                 }
 
+                await setPersistence(auth, document.getElementById('reg-remember').checked
+                    ? browserLocalPersistence : browserSessionPersistence);
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const uid = userCredential.user.uid;
 
@@ -366,5 +392,20 @@
             }
         }
     </script>
+<script>
+/* Android-only login safe area; browser layout remains unchanged. */
+(function () {
+  const cap = window.Capacitor;
+  const native = !!(cap && (cap.isNativePlatform?.() || cap.getPlatform?.() === 'android'));
+  if (!native) return;
+  document.documentElement.classList.add('lf-native');
+  try {
+    const statusBar = cap.Plugins?.StatusBar;
+    if (statusBar?.setOverlaysWebView) {
+      Promise.resolve(statusBar.setOverlaysWebView({ overlay: false })).catch(() => {});
+    }
+  } catch (e) { /* CSS safe-area fallback remains active */ }
+})();
+</script>
 </body>
 </html>

@@ -108,6 +108,21 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
 #weeks-badges-bar button, #weeks-circles-nav button { border-width:2px; }
 @media(max-width:420px) { .lf-day-card { padding:11px !important; } }
 
+
+/* Lion Fit v9: aree sicure Android e icone monocromatiche */
+html.lf-native { --lf-status-top: max(env(safe-area-inset-top, 0px), 28px); }
+html.lf-native body { padding-top: var(--lf-status-top); }
+html.lf-native [id$="-modal"].fixed.inset-0 { padding-top: var(--lf-status-top) !important; }
+html.lf-native #settings-modal > .sticky { padding-top: 12px; }
+html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bottom, 0px), 14px); }
+.lf-quick-icon { background:#f3f4f6 !important; color:#111827 !important; }
+.lf-quick-icon svg { width:21px; height:21px; stroke:currentColor; }
+#section-home .lf-mono-home { background:#f3f4f6 !important; color:#111827 !important; border-color:#d1d5db !important; }
+#section-home .lf-mono-home svg { width:21px;height:21px;stroke:currentColor; }
+#lf-exit-dialog { position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:18px; background:rgba(0,0,0,.72); }
+#lf-exit-dialog.lf-visible { display:flex; }
+#lf-exit-dialog .lf-exit-panel { background:white; color:#111827; border-radius:20px; max-width:360px; width:100%; padding:24px; box-shadow:0 25px 70px rgba(0,0,0,.25); }
+#lf-exit-dialog button { min-height:44px; border-radius:12px; font-weight:800; }
 </style>
 </head>
 <body class="bg-gray-100 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col relative pb-20">
@@ -132,10 +147,10 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
         <!-- SEZIONE 1: HOME (DASHBOARD PERSONALE ATLETA) -->
         <section id="section-home" class="block space-y-5">
             <!-- Collegamenti rapidi: usano la navigazione esistente, senza alterare Firebase -->
-            <div class="lf-quick-panel bg-white rounded-2xl border border-green-100 p-4 shadow-sm"><div class="lf-quick-title">Accesso rapido</div><div class="lf-quick-actions"><button type="button" class="lf-quick-action" onclick="showSection('training')"><span class="lf-quick-icon" aria-hidden="true">📅</span><span>Il mio piano</span></button>
-<button type="button" class="lf-quick-action" onclick="showSection('gym')"><span class="lf-quick-icon" aria-hidden="true">🏋️</span><span>La mia palestra</span></button>
-<button type="button" class="lf-quick-action" onclick="showSection('library')"><span class="lf-quick-icon" aria-hidden="true">🎬</span><span>Vedi esercizi</span></button>
-<button type="button" class="lf-quick-action" onclick="showSection('profile')"><span class="lf-quick-icon" aria-hidden="true">👤</span><span>Il mio profilo</span></button></div></div>
+            <div class="lf-quick-panel bg-white rounded-2xl border border-green-100 p-4 shadow-sm"><div class="lf-quick-title">Accesso rapido</div><div class="lf-quick-actions"><button type="button" class="lf-quick-action" onclick="showSection('training')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span><span>Il mio piano</span></button>
+<button type="button" class="lf-quick-action" onclick="showSection('gym')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/></svg></span><span>La mia palestra</span></button>
+<button type="button" class="lf-quick-action" onclick="showSection('library')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a9 9 0 0 0-9-2v15a9 9 0 0 1 9 2 9 9 0 0 1 9-2V4a9 9 0 0 0-9 2zm0 0v15"/></svg></span><span>Vedi esercizi</span></button>
+<button type="button" class="lf-quick-action" onclick="showSection('profile')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Il mio profilo</span></button></div></div>
 
             <!-- Saluto Atleta -->
             <div class="flex justify-between items-center px-1">
@@ -147,7 +162,7 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                     <p class="text-xs font-bold text-gray-500 mt-0.5">Ecco il tuo allenamento di oggi</p>
                 </div>
                 <div class="w-10 h-10 rounded-2xl bg-gray-900 text-white flex items-center justify-center font-black text-lg shadow-sm">
-                    🏋️‍♂️
+                    <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/></svg>
                 </div>
             </div>
 
@@ -179,7 +194,7 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
             <!-- Accessi Rapidi -->
             <div class="grid grid-cols-2 gap-3 pt-1">
                 <div onclick="showSection('training')" class="bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-xs hover:border-neon cursor-pointer transition flex flex-col justify-between space-y-3">
-                    <div class="w-8 h-8 rounded-xl bg-green-50 text-neon flex items-center justify-center text-sm font-black border border-green-100">📅</div>
+                    <div class="lf-mono-home w-8 h-8 rounded-xl bg-gray-100 text-black flex items-center justify-center text-sm font-black border border-gray-200"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></div>
                     <div>
                         <h4 class="font-black text-xs uppercase tracking-wider text-black">Il mio piano</h4>
                         <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Tutte le settimane</p>
@@ -187,7 +202,7 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                 </div>
 
                 <div onclick="showSection('library')" class="bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-xs hover:border-neon cursor-pointer transition flex flex-col justify-between space-y-3">
-                    <div class="w-8 h-8 rounded-xl bg-gray-100 text-black flex items-center justify-center text-sm font-black border border-gray-200">📖</div>
+                    <div class="lf-mono-home w-8 h-8 rounded-xl bg-gray-100 text-black flex items-center justify-center text-sm font-black border border-gray-200"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a9 9 0 0 0-9-2v15a9 9 0 0 1 9 2 9 9 0 0 1 9-2V4a9 9 0 0 0-9 2zm0 0v15"/></svg></div>
                     <div>
                         <h4 class="font-black text-xs uppercase tracking-wider text-black">Libreria</h4>
                         <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Esplora gli esercizi</p>
@@ -241,7 +256,17 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                 </div>
                 <span class="text-[10px] font-black tracking-widest text-neon bg-green-50 border border-green-200 px-3 py-1 rounded-lg">DISPONIBILI</span>
             </div>
-            <div id="gym-templates-list" class="space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
+              <div class="rounded-2xl bg-white border border-green-200 p-3">
+                <h4 class="text-sm font-black text-green-800 uppercase mb-3">Schede personali</h4>
+                <div id="lf18-personal-gym-list" class="space-y-2"></div>
+              </div>
+              <div class="rounded-2xl bg-white border border-gray-200 p-3">
+                <h4 class="text-sm font-black text-gray-900 uppercase mb-3">Schede globali</h4>
+                <div id="lf18-global-gym-list" class="space-y-2"></div>
+              </div>
+            </div>
+            <div id="gym-templates-list" class="hidden">
                 <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 bg-white rounded-2xl border border-gray-200">Caricamento schede in corso...</p>
             </div>
         </section>
@@ -258,7 +283,7 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-                    <input type="text" id="library-search-input" placeholder="Cerca esercizio (es. Bench Press)..." class="sm:col-span-2 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-black outline-none focus:border-neon">
+                    <input type="text" id="library-search-input" placeholder="Cerca in italiano o inglese (es. panca, bench)..." class="sm:col-span-2 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-black outline-none focus:border-neon">
                     <select id="library-muscle-filter" class="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-700 outline-none focus:border-neon">
                         <option value="">Tutti i Muscoli</option>
                         <option value="chest">Petto (Chest)</option>
@@ -272,6 +297,7 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                 </div>
             </div>
 
+            <p class="text-[11px] leading-relaxed text-gray-600 bg-green-50 border border-green-200 rounded-xl px-3 py-2">Ricerca IT + EN: nomi e sinonimi, con tolleranza ai piccoli errori. I nomi italiani sono mostrati dove disponibili; l’inglese originale resta sempre accessibile. SVG collegati per ID.</p>
             <div id="library-grid-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[70vh] overflow-y-auto pr-1">
                 <p class="text-xs font-bold text-gray-400 uppercase text-center py-8 col-span-3">Caricamento catalogo in corso...</p>
             </div>
@@ -382,7 +408,7 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
     <div id="exercise-detail-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[80] hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-white text-black px-5 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 id="ex-detail-title" class="font-black text-sm uppercase tracking-widest truncate">Nome Esercizio</h3>
+                <div class="min-w-0"><h3 id="ex-detail-title" class="font-black text-sm uppercase tracking-widest">Nome Esercizio</h3><p id="ex-detail-english" class="text-[10px] font-medium text-gray-500"></p></div>
                 <button type="button" id="btn-close-ex-modal" aria-label="Chiudi dettaglio esercizio" class="text-gray-400 hover:text-black font-bold p-1 text-base">✕</button>
             </div>
             
@@ -398,11 +424,11 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                 </div>
 
                 <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
-                    <h4 class="font-black text-[10px] uppercase tracking-widest text-black border-b border-gray-100 pb-1.5">Esecuzione Corretta</h4>
+                    <div class="flex gap-2 justify-between items-center border-b border-gray-100 pb-2"><h4 class="font-black text-[10px] uppercase tracking-widest text-black">Esecuzione corretta</h4><button type="button" id="lf-translate-exercise" class="bg-green-50 text-green-800 border border-green-200 px-3 py-2 rounded-lg font-black text-[11px]">Traduci in italiano</button></div><p id="lf-translation-status" role="status" class="text-[10px] text-gray-500 hidden"></p>
                     <ol id="ex-instructions-list" class="list-decimal list-inside space-y-1.5 text-gray-600 font-medium text-[11px] leading-relaxed"></ol>
                 </div>
                 
-                <p class="text-[8px] text-gray-400 text-center uppercase font-bold">Catalog Powered by Flow Exercise Dataset / Gym visual</p>
+                <p class="text-[8px] text-gray-400 text-center uppercase font-bold">Catalog Powered by Flow Exercise Dataset / Gym visual</p><p class="text-[8px] text-gray-400 text-center">Testi italiani: Hasan Emir Yıldırım · licenza MIT · <a class="underline" href="./exercise-library/data/LICENSE-TRANSLATIONS-MIT.txt" target="_blank" rel="noopener noreferrer">Licenza</a></p>
             </div>
         </div>
     </div>
@@ -598,15 +624,6 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
             }
         });
 
-        // Gestione Tasto Indietro Nativo Android
-        window.addEventListener('popstate', () => {
-            const visibleModals = document.querySelectorAll('.fixed:not(.hidden)');
-            if (visibleModals.length > 0) {
-                visibleModals.forEach(modal => modal.classList.add('hidden'));
-                document.body.style.overflow = 'auto';
-            }
-        });
-
         function similarity(s1, s2) {
             let longer = s1.toLowerCase().replace(/\s+/g, '');
             let shorter = s2.toLowerCase().replace(/\s+/g, '');
@@ -662,6 +679,7 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                 document.body.style.overflow = 'hidden';
                 history.pushState({ modalOpen: modalId }, "");
             } else {
+                if(modalId === 'exercise-detail-modal') { window.lf18ExerciseSession=(window.lf18ExerciseSession||0)+1; if (animInterval) {clearInterval(animInterval); animInterval=null;} }
                 modal.classList.add('hidden');
                 document.body.style.overflow = 'auto';
             }
@@ -673,12 +691,44 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
         let globalTemplates = [];
         let gymVideos = [];
         let catalogExercises = [];
+        // LION FIT v10: catalogo italiano statico per ID. Nessun testo viene richiesto a servizi online
+        // quando è presente exercises-it.json. Gli SVG usano i percorsi inglesi originali.
+        let lionItEntries = {};
+        function lionAttachItalian(ex) {
+            const it = lionItEntries[String(ex.id)];
+            if (!it || lionExerciseKey(it.name_en) !== lionExerciseKey(ex.name)) return ex;
+            return {
+                ...ex,
+                name_it: typeof it.name_it === 'string' ? it.name_it : '',
+                aliases_it: Array.isArray(it.aliases_it) ? it.aliases_it : [],
+                instructions_it: Array.isArray(it.instructions_it) ? it.instructions_it : [],
+                lfNameStatus: it.translationStatus || 'pending'
+            };
+        }
+        async function lionLoadItalianOverlay() {
+            try {
+                const response = await fetch('./exercise-library/data/exercises-it.json');
+                if (!response.ok) return;
+                const data = await response.json();
+                if (data && data.entries && typeof data.entries === 'object') lionItEntries = data.entries;
+            } catch (error) {
+                // Compatibilità v9: il catalogo inglese resta funzionante senza il file IT.
+                console.warn('Lion Fit: dizionario italiano non disponibile, uso catalogo originale.');
+            }
+        }
+        function lionEnrich(ex) {
+            const localized = normalizeFlowExercise(lionAttachItalian(ex));
+            localized._lfSearchNames = [localized.name,localized.name_it,...(localized.aliases_it || [])]
+                .filter(Boolean).map(lionExerciseKey).filter(Boolean);
+            return localized;
+        }
+
         let teamMembersList = [];
         let userPhotoBase64 = null;
         let animInterval = null;
 
         let athleteWeeksList = [];
-        let activeWeekIndex = 0;
+        let activeWeekIndex = -1;
 
         const headerGymCode = document.getElementById('header-gym-code');
         const displayFullname = document.getElementById('display-fullname');
@@ -973,7 +1023,7 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
         function lionExerciseSimilarity(a,b) {
             if (a===b) return 1;
             if (!a || !b) return 0;
-            const distinctive=['incline','decline','flat','seated','standing','single','left','right','reverse','wide','close','smith','dumbbell','barbell','cable','machine','assisted','band'];
+            const distinctive=['incline','decline','flat','seated','standing','single','left','right','reverse','wide','close','smith','dumbbell','barbell','cable','machine','assisted','band','bilanciere','manubri','manubrio','cavi','elastico','inclinato','inclinata','declinato','declinata','seduto','seduta','inverso','assistito','assistita'];
             const aa=new Set(a.split(' ')),bb=new Set(b.split(' '));
             if (distinctive.some(t=>aa.has(t)!==bb.has(t))) return 0;
             const prev=Array.from({length:b.length+1},(_,i)=>i);
@@ -991,23 +1041,34 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
             return Math.max(edit,edit*.65+token*.35);
         }
         function lionExerciseCandidates(name, exerciseId, limit=3) {
-            if(exerciseId) {
-                const found=catalogExercises.find(ex=>String(ex.id)===String(exerciseId));
-                if(found) return [{ex:found,score:1}];
+            // Un ID già salvato nella scheda prevale su qualunque nome o traduzione.
+            if (exerciseId) {
+                const idMatch = catalogExercises.find(ex => String(ex.id) === String(exerciseId));
+                if (idMatch) return [{ex:idMatch,score:1}];
             }
-            const key=lionExerciseKey(name), translated=lionTranslateName(name);
-            if(key.length<3 || !catalogExercises.length) return [];
-            const results=catalogExercises.map(ex=>{
-                const target=lionExerciseKey(ex.name);
-                return {ex,score:Math.max(lionExerciseSimilarity(key,target),lionExerciseSimilarity(translated,target))};
-            }).filter(item=>item.score>=0.72).sort((a,b)=>b.score-a.score);
-            return results.slice(0,limit);
+            const key = lionExerciseKey(name), translated = lionTranslateName(name);
+            if (key.length < 3 || !catalogExercises.length) return [];
+            const queries = [...new Set([key,translated].filter(q=>q.length>=3))];
+            return catalogExercises.map(ex => {
+                const targets = ex._lfSearchNames || [lionExerciseKey(ex.name)];
+                let score = 0;
+                for (const q of queries) for (const target of targets) {
+                    if (q === target) score = 1;
+                    else if (q.length >= 8 && target.startsWith(q + ' ')) score = Math.max(score,0.83);
+                    else score = Math.max(score,lionExerciseSimilarity(q,target));
+                    if (score === 1) break;
+                }
+                return {ex,score};
+            }).filter(item=>item.score>=0.77)
+              .sort((a,b)=>b.score-a.score || String(a.ex.id).localeCompare(String(b.ex.id)))
+              .slice(0,limit);
         }
         function lionFindExercise(name,exerciseId) {
             const candidates=lionExerciseCandidates(name,exerciseId,2);
             if(!candidates.length) return null;
             const best=candidates[0],second=candidates[1];
-            return best.score>=0.85 && (!second || best.score-second.score>=0.04) ? best.ex : null;
+            // Due candidati troppo simili NON si associano automaticamente.
+            return best.score>=0.88 && (!second || best.score-second.score>=0.06) ? best.ex : null;
         }
 
         // LION FIT - Adattatore Flow Exercise Dataset (animation.frames / sequence).
@@ -1069,12 +1130,13 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
         async function loadExerciseCatalog() {
             try {
                 // Tentativo fetch del JSON locale della libreria esercizi
+                await lionLoadItalianOverlay();
                 const response = await fetch('./exercise-library/data/exercises.json');
                 if (response.ok) {
                     const data = await response.json();
                     let rawExercises = Array.isArray(data) ? data : (data.exercises || []);
                     
-                    catalogExercises = rawExercises.map(normalizeFlowExercise);
+                    catalogExercises = rawExercises.map(lionEnrich);
                 } else {
                     throw new Error("Fallback su Firebase");
                 }
@@ -1085,7 +1147,7 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                     catalogExercises = [];
                     snapshot.forEach(docSnap => {
                         const d = docSnap.data();
-                        catalogExercises.push(normalizeFlowExercise({ id: docSnap.id, ...d }));
+                        catalogExercises.push(lionEnrich({ id: docSnap.id, ...d }));
                     });
                 } catch (e) {
                     catalogExercises = [];
@@ -1096,7 +1158,46 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
             renderLibraryGrid(catalogExercises);
         }
 
-        function renderLibraryGrid(list) {
+        // LION FIT V11: ricerca bilingue con ranking, senza cambiare gli ID degli SVG.
+        // Questo ranking e' SOLO per l'elenco dei risultati; non associa automaticamente esercizi alle schede.
+        function lionLibrarySearch(term, muscle) {
+            const query = lionExerciseKey(term);
+            const translated = query ? lionTranslateName(term) : '';
+            const queries = [...new Set([query, translated].filter(Boolean))];
+            const matchesMuscle = ex => !muscle ||
+                (ex.bodyPart || '').toLowerCase().includes(muscle) ||
+                (ex.target || '').toLowerCase().includes(muscle);
+            if (!query) return catalogExercises.filter(matchesMuscle);
+            const scored = [];
+            for (const ex of catalogExercises) {
+                if (!matchesMuscle(ex)) continue;
+                const names = ex._lfSearchNames || [lionExerciseKey(ex.name)];
+                let score = 0;
+                for (const q of queries) {
+                    if (q.length < 2) continue;
+                    for (const name of names) {
+                        if (!name) continue;
+                        if (name === q) score = Math.max(score, 100);
+                        else if (name.startsWith(q + ' ')) score = Math.max(score, 92);
+                        else if (name.includes(q)) score = Math.max(score, 82);
+                        else {
+                            const parts = q.split(' ').filter(Boolean);
+                            if (parts.length > 1 && parts.every(part => name.split(' ').some(word => word.startsWith(part)))) score = Math.max(score, 74);
+                            // Piccoli errori di battitura: proponi risultati, non collegamenti automatici.
+                            if (q.length >= 5 && Math.abs(name.length - q.length) <= 8) {
+                                const similar = lionExerciseSimilarity(q, name);
+                                if (similar >= 0.82) score = Math.max(score, Math.round(similar * 68));
+                            }
+                        }
+                    }
+                }
+                if (score > 0) scored.push({ex,score});
+            }
+            scored.sort((a,b) => b.score-a.score || String(a.ex.name).localeCompare(String(b.ex.name)));
+            return scored.map(item => item.ex);
+        }
+
+        function renderLibraryGrid(list, visibleCount=100) {
             const container = document.getElementById('library-grid-container');
             container.innerHTML = '';
 
@@ -1105,7 +1206,7 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                 return;
             }
 
-            list.forEach(ex => {
+            list.slice(0,visibleCount).forEach(ex => {
                 const card = document.createElement('div');
                 card.className = "bg-white p-3 rounded-2xl border border-gray-200 shadow-2xs hover:border-neon cursor-pointer transition flex flex-col justify-between space-y-2";
                 
@@ -1119,31 +1220,52 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                 previewBox.appendChild(img);
                 const info = document.createElement('div');
                 const title = document.createElement('h4');
-                title.className = 'font-black text-[10px] uppercase tracking-widest text-black truncate';
-                title.textContent = ex.name;
+                title.className = 'font-black text-[11px] leading-snug text-black break-words';
+                title.textContent = ex.name_it || ex.name;
+                title.title = ex.name_it ? ex.name_it + ' · ' + ex.name : ex.name;
+                const subtitle = document.createElement('span');
+                subtitle.className = 'block text-[10px] font-medium leading-snug text-gray-600 break-words';
+                subtitle.textContent = ex.name_it ? 'EN · ' + ex.name : 'EN · Nome originale';
                 const target = document.createElement('span');
                 target.className = 'text-[8px] font-bold text-gray-500 uppercase';
                 target.textContent = ex.target || 'Generale';
-                info.append(title, target);
+                info.append(title, subtitle, target);
                 card.append(previewBox, info);
 
                 card.addEventListener('click', () => openExerciseDetailModal(ex));
                 container.appendChild(card);
             });
+            if (list.length > visibleCount) {
+                const more = document.createElement('button');
+                more.type='button';more.className='col-span-full bg-white border border-green-200 text-green-800 font-bold rounded-xl p-3';
+                more.textContent=`Mostra altri esercizi (${visibleCount}/${list.length})`;
+                more.onclick=()=>{const scroll=container.scrollTop;renderLibraryGrid(list,visibleCount+100);container.scrollTop=scroll;};
+                container.appendChild(more);
+            }
             startLionPreviews(container);
         }
 
-        window.openExerciseDetailModal = function(ex) {
+        window.openExerciseDetailModal = async function(ex) {
             if (animInterval) clearInterval(animInterval);
 
-            document.getElementById('ex-detail-title').textContent = ex.name;
+            document.getElementById('ex-detail-title').textContent = ex.name_it || ex.name;
+            document.getElementById('ex-detail-english').textContent = ex.name_it ? ex.name : '';
             document.getElementById('ex-target-badge').textContent = `Target: ${ex.target || 'Generale'}`;
             document.getElementById('ex-equip-badge').textContent = `Attrezzo: ${ex.equipment || 'Corpo Libero'}`;
             
+            window.lfOriginalExerciseInstructions = Array.isArray(ex.instructions) ? [...ex.instructions] : [];
+            window.lfOfflineInstructionSteps = Array.isArray(ex.instructions_it) ? [...ex.instructions_it] : [];
+            window.lfInstructionsTranslated = window.lfOfflineInstructionSteps.length > 0;
+            const translateBtn = document.getElementById('lf-translate-exercise');
+            translateBtn.textContent = window.lfInstructionsTranslated ? 'Mostra originale inglese' : 'Traduci in italiano';
+            translateBtn.disabled = false;
+            document.getElementById('lf-translation-status').classList.toggle('hidden', !window.lfInstructionsTranslated);
+            document.getElementById('lf-translation-status').textContent = window.lfInstructionsTranslated ? 'Italiano offline · nessuna connessione richiesta' : '';
             const instructionsList = document.getElementById('ex-instructions-list');
             instructionsList.innerHTML = '';
-            if (ex.instructions && ex.instructions.length > 0) {
-                ex.instructions.forEach(step => {
+            const displaySteps = window.lfOfflineInstructionSteps.length ? window.lfOfflineInstructionSteps : ex.instructions;
+            if (Array.isArray(displaySteps) && displaySteps.length > 0) {
+                displaySteps.forEach(step => {
                     const li = document.createElement('li');
                     li.textContent = step;
                     instructionsList.appendChild(li);
@@ -1155,21 +1277,42 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
             const imgElem = document.getElementById('ex-anim-frame');
             const badge = document.getElementById('ex-anim-badge');
 
-            if (ex.hasAnimation && ex.svgUrls && ex.svgUrls.length > 0) {
+            toggleModal('exercise-detail-modal');
+            // V18: precache delle sequenze SVG prima della riproduzione, come nella V16 Admin.
+            window.lf18ExerciseSession = (window.lf18ExerciseSession || 0) + 1;
+            const currentSession = window.lf18ExerciseSession;
+            const frames = ex.svgUrls || [];
+            const sequence = (ex.animationSequence || frames.map((_,i)=>i)).filter(i => Number.isInteger(i) && i >= 0 && i < frames.length);
+            if (sequence.length > 1) {
                 badge.classList.remove('hidden');
-                const sequence = ex.animationSequence || ex.svgUrls.map((_, i) => i);
-                let sequenceIndex = 0;
-                imgElem.src = ex.svgUrls[sequence[0]];
-                animInterval = setInterval(() => {
-                    sequenceIndex = (sequenceIndex + 1) % sequence.length;
-                    imgElem.src = ex.svgUrls[sequence[sequenceIndex]];
-                }, ex.frameDurationMs || 180);
+                badge.textContent = 'CARICAMENTO SVG...';
+                imgElem.src = frames[sequence[0]];
+                const uniqueFrames = [...new Set(sequence.map(i=>frames[i]))];
+                const loaded = await Promise.all(uniqueFrames.map(src => new Promise(resolve => {
+                    const image = new Image();
+                    image.onload = () => resolve(src);
+                    image.onerror = () => resolve(null);
+                    image.src = src;
+                })));
+                if (currentSession !== window.lf18ExerciseSession) return;
+                const ready = new Set(loaded.filter(Boolean));
+                const validSequence = sequence.filter(i => ready.has(frames[i]));
+                if (validSequence.length > 1) {
+                    badge.textContent = 'SVG ANIMATO';
+                    let pos = 0;
+                    animInterval = setInterval(() => {
+                        if (document.hidden || currentSession !== window.lf18ExerciseSession) return;
+                        pos = (pos+1)%validSequence.length;
+                        imgElem.src = frames[validSequence[pos]];
+                    },Math.max(120,ex.frameDurationMs||180));
+                } else {
+                    badge.textContent='ANTEPRIMA STATICA';
+                }
             } else {
                 badge.classList.add('hidden');
-                imgElem.src = ex.staticUrl || (ex.svgUrls && ex.svgUrls.length > 0 ? ex.svgUrls[0] : "https://via.placeholder.com/300x300.png?text=Preview+Non+Disponibile");
+                imgElem.src = ex.staticUrl || frames[0] || '';
             }
 
-            toggleModal('exercise-detail-modal');
         }
 
         document.getElementById('btn-close-ex-modal').addEventListener('click', () => {
@@ -1183,18 +1326,15 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
         const libMuscleFilter = document.getElementById('library-muscle-filter');
 
         function filterLibrary() {
-            const term = libSearchInput.value.toLowerCase().trim();
-            const muscle = libMuscleFilter.value.toLowerCase();
-
-            const filtered = catalogExercises.filter(ex => {
-                const matchName = ex.name.toLowerCase().includes(term);
-                const matchMuscle = !muscle || (ex.bodyPart && ex.bodyPart.toLowerCase().includes(muscle)) || (ex.target && ex.target.toLowerCase().includes(muscle));
-                return matchName && matchMuscle;
-            });
+            const filtered = lionLibrarySearch(libSearchInput.value, libMuscleFilter.value.toLowerCase());
             renderLibraryGrid(filtered);
         }
 
-        libSearchInput.addEventListener('input', filterLibrary);
+        let lionLibrarySearchTimer = null;
+        libSearchInput.addEventListener('input', () => {
+            clearTimeout(lionLibrarySearchTimer);
+            lionLibrarySearchTimer = setTimeout(filterLibrary, 130);
+        });
         libMuscleFilter.addEventListener('change', filterLibrary);
 
         // TEAM / COMMUNITY ROSTER
@@ -1303,6 +1443,8 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                 let allAvailableTemplates = [...globalTemplates, ...personalList];
 
                 if (allAvailableTemplates.length === 0) {
+                    for (const id of ['lf18-personal-gym-list','lf18-global-gym-list'])
+                        document.getElementById(id).innerHTML='<p class="text-sm text-gray-500 p-3">Nessuna scheda disponibile.</p>';
                     gymTemplatesList.innerHTML = `
                         <div class="bg-white border border-gray-200 rounded-2xl p-6 text-center space-y-2 shadow-2xs">
                             <div class="w-12 h-12 bg-gray-100 text-gray-400 rounded-2xl flex items-center justify-center mx-auto text-xl border border-gray-200">📋</div>
@@ -1312,6 +1454,10 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                         </div>
                     `;
                 } else {
+                    const personalHost = document.getElementById('lf18-personal-gym-list');
+                    const globalHost = document.getElementById('lf18-global-gym-list');
+                    personalHost.innerHTML = '';
+                    globalHost.innerHTML = '';
                     allAvailableTemplates.forEach(tpl => {
                         const div = document.createElement('div');
                         div.className = "p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center cursor-pointer transition shadow-xs hover:border-neon mb-3";
@@ -1331,14 +1477,22 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                             <span class="text-xs font-bold text-neon uppercase">Apri &rarr;</span>
                         `;
                         div.addEventListener('click', () => openViewTemplateModal(tpl));
-                        gymTemplatesList.appendChild(div);
+                        (tpl.isPersonal ? personalHost : globalHost).appendChild(div);
                     });
+                    for (const host of [personalHost,globalHost]) if (!host.children.length) {
+                        const msg = document.createElement('p');
+                        msg.className='text-sm text-gray-500 p-3';
+                        msg.textContent='Nessuna scheda disponibile in questa categoria.';
+                        host.appendChild(msg);
+                    }
                 }
 
             } catch (e) {
                 const errHtml = '<p class="text-[10px] text-gray-400 text-center py-6 uppercase font-bold">Errore caricamento schede.</p>';
                 personalTemplatesList.innerHTML = errHtml;
                 gymTemplatesList.innerHTML = errHtml;
+                document.getElementById('lf18-personal-gym-list').innerHTML=errHtml;
+                document.getElementById('lf18-global-gym-list').innerHTML=errHtml;
             }
         }
 
@@ -1481,7 +1635,7 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
                 }
 
                 renderWeekCirclesNav();
-                selectWeek(0);
+                document.getElementById('active-week-container').innerHTML = '<p class="text-sm text-gray-600 bg-white border border-gray-200 rounded-xl p-4">Tocca il numero di una settimana per aprirla. Toccalo di nuovo per chiuderla.</p>';
                 updateHomeDashboardForToday(athleteWeeksList[0]);
 
             } catch (error) {
@@ -1564,6 +1718,12 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
         }
 
         function selectWeek(index) {
+            if (activeWeekIndex === index) {
+                activeWeekIndex = -1;
+                renderWeekCirclesNav();
+                document.getElementById('active-week-container').innerHTML = '<p class="text-sm text-gray-600 bg-white border border-gray-200 rounded-xl p-4">Settimana chiusa. Tocca un numero per riaprirla.</p>';
+                return;
+            }
             activeWeekIndex = index;
             renderWeekCirclesNav();
 
@@ -1713,5 +1873,128 @@ section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3p
             toggleModal('day-detail-modal');
         }
     </script>
+
+<script>
+/* Traduzione volontaria: usa MyMemory (servizio esterno) solo quando si preme il pulsante.
+   I testi inviati al servizio possono contenere indicazioni del catalogo. Non inviare dati personali. */
+(function(){
+  const cache = new Map();
+  document.getElementById('lf-translate-exercise').addEventListener('click',async()=>{
+    const btn=document.getElementById('lf-translate-exercise');
+    const status=document.getElementById('lf-translation-status');
+    const list=document.getElementById('ex-instructions-list');
+    const original=window.lfOriginalExerciseInstructions || [];
+    const offline = window.lfOfflineInstructionSteps || [];
+    if (offline.length) {
+      const steps=window.lfInstructionsTranslated ? original : offline;
+      list.replaceChildren(...steps.map(step=>{const li=document.createElement('li');li.textContent=step;return li;}));
+      window.lfInstructionsTranslated = !window.lfInstructionsTranslated;
+      btn.textContent=window.lfInstructionsTranslated?'Mostra originale inglese':'Mostra italiano (offline)';
+      status.textContent=window.lfInstructionsTranslated?'Italiano offline · nessuna connessione richiesta':'';
+      status.classList.toggle('hidden',!window.lfInstructionsTranslated);
+      return;
+    }
+    if(window.lfInstructionsTranslated){
+      list.replaceChildren(...original.map(step=>{const li=document.createElement('li');li.textContent=step;return li;}));
+      window.lfInstructionsTranslated=false;btn.textContent='Traduci in italiano';status.classList.add('hidden');return;
+    }
+    if(!original.length){status.textContent='Nessuna istruzione disponibile.';status.classList.remove('hidden');return;}
+    btn.disabled=true;btn.textContent='Traduzione…';status.textContent='Traduzione online in corso. Verifica sempre il significato tecnico.';status.classList.remove('hidden');
+    try{
+      const translated=[];
+      for(const step of original){
+        if(cache.has(step)){translated.push(cache.get(step));continue;}
+        // Richiesta individuale: la API gratuita ha limiti di lunghezza e frequenza.
+        const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(step.slice(0,450))+'&langpair=en|it';
+        const response=await fetch(url,{signal:AbortSignal.timeout(10000)});
+        if(!response.ok)throw new Error('Servizio temporaneamente non disponibile');
+        const json=await response.json();
+        const translatedText=json.responseData?.translatedText;
+        if(!translatedText || json.responseStatus!==200)throw new Error('Traduzione non disponibile');
+        const clean=document.createElement('textarea');clean.innerHTML=translatedText;
+        const result=clean.value || translatedText;
+        cache.set(step,result);translated.push(result);
+      }
+      // Evita che una risposta vecchia sovrascriva la scheda di un altro esercizio.
+      if(window.lfOriginalExerciseInstructions!==original){return;}
+      list.replaceChildren(...translated.map(step=>{const li=document.createElement('li');li.textContent=step;return li;}));
+      window.lfInstructionsTranslated=true;btn.textContent='Mostra originale inglese';
+      status.textContent='Traduzione automatica: potrebbe contenere errori nei termini tecnici.';
+    }catch(error){
+      btn.textContent='Riprova traduzione';
+      status.textContent='Traduzione online non riuscita. Le istruzioni originali restano disponibili.';
+      console.warn('Lion Fit traduzione:',error);
+    }finally{btn.disabled=false;}
+  });
+})();
+</script>
+
+<script>
+/* Lion Fit: tasto indietro Android, navigazione sezioni e conferma uscita. */
+(function () {
+    const native = !!(window.Capacitor && (window.Capacitor.isNativePlatform?.() || window.Capacitor.getPlatform?.() === 'android'));
+    if (native) {
+        document.documentElement.classList.add('lf-native');
+        // Dove il plugin StatusBar e' disponibile evita sovrapposizioni WebView.
+        window.Capacitor.Plugins?.StatusBar?.setOverlaysWebView?.({overlay:false}).catch(()=>{});
+    }
+    let current = 'home', stack = [], lastBack = 0, suppressTrack = false;
+    const exitDialog = document.createElement('div');
+    exitDialog.id = 'lf-exit-dialog';
+    exitDialog.setAttribute('role','dialog');
+    exitDialog.setAttribute('aria-modal','true');
+    exitDialog.setAttribute('aria-label','Conferma chiusura Lion Fit');
+    exitDialog.innerHTML = '<div class="lf-exit-panel"><h3 style="font-size:19px;font-weight:900;margin-bottom:10px">Chiudere Lion Fit?</h3><p style="color:#475569;margin-bottom:18px">Sei sicuro di voler chiudere l’app?</p><div style="display:flex;gap:10px"><button type="button" id="lf-exit-no" style="flex:1;background:#f1f5f9;color:#111827">Annulla</button><button type="button" id="lf-exit-yes" style="flex:1;background:#16a34a;color:white">Esci</button></div></div>';
+    document.body.appendChild(exitDialog);
+    document.getElementById('lf-exit-no').addEventListener('click',()=>exitDialog.classList.remove('lf-visible'));
+    document.getElementById('lf-exit-yes').addEventListener('click',()=>{
+        exitDialog.classList.remove('lf-visible');
+        const capApp = window.Capacitor?.Plugins?.App;
+        if (native && capApp?.exitApp) capApp.exitApp();
+        else window.location.assign('index.html');
+    });
+    function activeSection() {
+        const el = [...document.querySelectorAll('main > section[id^="section-"]')].find(e=>!e.classList.contains('hidden'));
+        return el?.id.replace(/^section-/, '') || current;
+    }
+    function back() {
+        if (exitDialog.classList.contains('lf-visible')) {exitDialog.classList.remove('lf-visible');return;}
+        const visible = [...document.querySelectorAll('[id$="-modal"].fixed')].filter(el=>!el.classList.contains('hidden') && getComputedStyle(el).display!=='none');
+        if (visible.length) {
+            const top = visible[visible.length-1];
+            if (top.id === 'exercise-detail-modal') document.getElementById('btn-close-ex-modal')?.click();
+            else { top.classList.add('hidden'); document.body.style.overflow='auto'; }
+            return;
+        }
+        if (stack.length) {
+            const previous=stack.pop(); suppressTrack=true;
+            window.showSection?.(previous); current=previous; suppressTrack=false;
+            return;
+        }
+        if (activeSection() !== 'home' && document.getElementById('section-home')) {
+            suppressTrack=true;window.showSection?.('home');current='home';suppressTrack=false;return;
+        }
+        const now=Date.now();
+        if (now-lastBack<2300) { exitDialog.classList.add('lf-visible');lastBack=0; }
+        else { lastBack=now; const toast=document.getElementById('lf-back-toast') || document.createElement('div'); toast.id='lf-back-toast';toast.textContent='Premi ancora Indietro per uscire';toast.style.cssText='position:fixed;bottom:95px;left:50%;transform:translateX(-50%);background:#111827;color:white;padding:10px 16px;border-radius:12px;z-index:190;white-space:nowrap;font-size:12px;font-weight:700';document.body.appendChild(toast);setTimeout(()=>toast.remove(),1900); }
+    }
+    document.addEventListener('DOMContentLoaded',()=>{
+        const original=window.showSection;
+        if (typeof original==='function') {
+            current=activeSection();
+            window.showSection=function(id,...args) {
+                if(!suppressTrack && id!==current) { stack.push(current); if(stack.length>25)stack.shift(); }
+                const result=original.call(this,id,...args);current=id;return result;
+            };
+        }
+        // Un unico stato sentinella permette al tasto indietro web di tornare nella UI.
+        history.pushState({lionFitBackGuard:true},'',location.href);
+        window.addEventListener('popstate',()=>{back();history.pushState({lionFitBackGuard:true},'',location.href);});
+        document.addEventListener('keydown',e=>{if(e.key==='Escape' && !e.repeat){e.preventDefault();back();}});
+        const capApp=window.Capacitor?.Plugins?.App;
+        if (native && capApp?.addListener) capApp.addListener('backButton',()=>back());
+    });
+})();
+</script>
 </body>
 </html>

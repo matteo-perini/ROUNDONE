@@ -1,0 +1,1102 @@
+{
+  "schema": "lion-fit-v12-cleanup-1",
+  "changes": [
+    {
+      "id": "0007",
+      "name_en": "alternate lateral pulldown",
+      "name_it": "Lat pulldown alternato",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0011",
+      "name_en": "assisted hanging knee raise",
+      "name_it": "Sollevamento delle ginocchia alla sbarra assistito",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1708",
+      "name_en": "assisted lying calves stretch",
+      "name_it": "Stretching assistito dei polpacci da sdraiato",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1709",
+      "name_en": "assisted lying glutes stretch",
+      "name_it": "Stretching assistito dei glutei da sdraiato",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0015",
+      "name_en": "assisted parallel close grip pull-up",
+      "name_it": "Trazioni assistite a presa stretta parallela",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1758",
+      "name_en": "assisted sit-up",
+      "name_it": "Sit-up assistito",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1431",
+      "name_en": "assisted standing chin-up",
+      "name_it": "Trazioni supine assistite in piedi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1432",
+      "name_en": "assisted standing pull-up",
+      "name_it": "Trazioni assistite in piedi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1314",
+      "name_en": "back extension on exercise ball",
+      "name_it": "Estensioni della schiena su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "3297",
+      "name_en": "back lever",
+      "name_it": "Back lever",
+      "aliases_it": [
+        "leva dorsale",
+        "back lever ginnastica"
+      ],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0970",
+      "name_en": "band assisted pull-up",
+      "name_it": "Trazioni assistite con elastico",
+      "aliases_it": [
+        "trazioni assistite elastico",
+        "trazioni con banda elastica"
+      ],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "3117",
+      "name_en": "band fixed back close grip pulldown",
+      "name_it": "Lat pulldown a presa stretta con elastico fissato dietro",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "3116",
+      "name_en": "band fixed back underhand pulldown",
+      "name_it": "Lat pulldown a presa supina con elastico fissato dietro",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0977",
+      "name_en": "band front lateral raise",
+      "name_it": "Alzate laterali in avanti con elastico",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0978",
+      "name_en": "band front raise",
+      "name_it": "Alzate frontali con elastico",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0983",
+      "name_en": "band kneeling one arm pulldown",
+      "name_it": "Lat pulldown a un braccio in ginocchio con elastico",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0984",
+      "name_en": "band lying hip internal rotation",
+      "name_it": "Rotazione interna dell’anca da sdraiato con elastico",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1002",
+      "name_en": "band lying straight leg raise",
+      "name_it": "Sollevamento della gamba tesa da sdraiato con elastico",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0992",
+      "name_en": "band push sit-up",
+      "name_it": "Sit-up con spinta contro elastico",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0996",
+      "name_en": "band seated hip internal rotation",
+      "name_it": "Rotazione interna dell’anca da seduto con elastico",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1011",
+      "name_en": "band seated twist",
+      "name_it": "Rotazioni del busto da seduto con elastico",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0998",
+      "name_en": "band side triceps extension",
+      "name_it": "Estensioni laterali dei tricipiti con elastico",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1003",
+      "name_en": "band squat row",
+      "name_it": "Squat con rematore con elastico",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1010",
+      "name_en": "band straight leg deadlift",
+      "name_it": "Stacco a gambe tese con elastico",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1013",
+      "name_en": "band underhand pulldown",
+      "name_it": "Lat pulldown a presa supina con elastico",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1016",
+      "name_en": "band wrist curl",
+      "name_it": "Flessioni dei polsi con elastico",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0024",
+      "name_en": "barbell bench front squat",
+      "name_it": "Front squat al bilanciere verso panca",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0026",
+      "name_en": "barbell bench squat",
+      "name_it": "Squat con bilanciere verso panca",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0039",
+      "name_en": "barbell front chest squat",
+      "name_it": "Front squat con bilanciere al petto",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0041",
+      "name_en": "barbell front raise",
+      "name_it": "Alzate frontali con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1409",
+      "name_en": "barbell glute bridge",
+      "name_it": "Ponte glutei con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0044",
+      "name_en": "barbell good morning",
+      "name_it": "Good morning con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0053",
+      "name_en": "barbell jump squat",
+      "name_it": "Jump squat con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1410",
+      "name_en": "barbell lateral lunge",
+      "name_it": "Affondi laterali con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0057",
+      "name_en": "barbell lying extension",
+      "name_it": "Estensioni da sdraiato con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0065",
+      "name_en": "barbell one arm floor press",
+      "name_it": "Floor press a un braccio con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0066",
+      "name_en": "barbell one arm side deadlift",
+      "name_it": "Stacco laterale a un braccio con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0071",
+      "name_en": "barbell press sit-up",
+      "name_it": "Sit-up con distensione del bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0078",
+      "name_en": "barbell rear lunge",
+      "name_it": "Affondi indietro con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0118",
+      "name_en": "barbell reverse grip bent over row",
+      "name_it": "Rematore a busto flesso con bilanciere a presa supina",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1256",
+      "name_en": "barbell reverse grip decline bench press",
+      "name_it": "Distensioni su panca declinata con bilanciere a presa inversa",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1257",
+      "name_en": "barbell reverse grip incline bench press",
+      "name_it": "Distensioni su panca inclinata con bilanciere a presa inversa",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1317",
+      "name_en": "barbell reverse grip incline bench row",
+      "name_it": "Rematore su panca inclinata con bilanciere a presa inversa",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0091",
+      "name_en": "barbell seated overhead press",
+      "name_it": "Distensioni sopra la testa con bilanciere da seduto",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0094",
+      "name_en": "barbell seated twist",
+      "name_it": "Rotazioni del busto da seduto con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0102",
+      "name_en": "barbell squat (on knees)",
+      "name_it": "Squat in ginocchio con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0104",
+      "name_en": "barbell standing back wrist curl",
+      "name_it": "Flessioni dei polsi dietro la schiena con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0116",
+      "name_en": "barbell straight leg deadlift",
+      "name_it": "Stacco a gambe tese con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0126",
+      "name_en": "barbell wrist curl",
+      "name_it": "Flessioni dei polsi con bilanciere",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0129",
+      "name_en": "bench dip (knees bent)",
+      "name_it": "Dip su panca a ginocchia piegate",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1399",
+      "name_en": "bench dip on floor",
+      "name_it": "Dip a terra con appoggio sulla panca",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "3639",
+      "name_en": "bent knee lying twist (male)",
+      "name_it": "Rotazioni del busto da sdraiato a ginocchia piegate",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0140",
+      "name_en": "biceps pull-up",
+      "name_it": "Trazioni alla sbarra per bicipiti",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0157",
+      "name_en": "cable deadlift",
+      "name_it": "Stacco da terra ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0162",
+      "name_en": "cable front raise",
+      "name_it": "Alzate frontali ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0164",
+      "name_en": "cable front shoulder raise",
+      "name_it": "Alzate frontali per le spalle ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0170",
+      "name_en": "cable incline fly (on stability ball)",
+      "name_it": "Croci su fitball con cavi inclinati",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0172",
+      "name_en": "cable incline pushdown",
+      "name_it": "Spinte verso il basso su panca inclinata ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1262",
+      "name_en": "cable one arm decline chest fly",
+      "name_it": "Croci per il petto a un braccio su panca declinata ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1263",
+      "name_en": "cable one arm fly on exercise ball",
+      "name_it": "Croci a un braccio ai cavi su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1264",
+      "name_en": "cable one arm incline fly on exercise ball",
+      "name_it": "Croci inclinate a un braccio ai cavi su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1265",
+      "name_en": "cable one arm incline press",
+      "name_it": "Spinta inclinata a un braccio ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1266",
+      "name_en": "cable one arm incline press on exercise ball",
+      "name_it": "Spinta inclinata a un braccio ai cavi su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0191",
+      "name_en": "cable one arm lateral bent-over",
+      "name_it": "Alzata laterale a un braccio ai cavi a busto flesso",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1267",
+      "name_en": "cable one arm press on exercise ball",
+      "name_it": "Spinta a un braccio ai cavi su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1268",
+      "name_en": "cable press on exercise ball",
+      "name_it": "Spinta ai cavi su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0201",
+      "name_en": "cable pushdown",
+      "name_it": "Spinte verso il basso ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1322",
+      "name_en": "cable rope extension incline bench row",
+      "name_it": "Rematore su panca inclinata con corda ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1323",
+      "name_en": "cable rope seated row",
+      "name_it": "Rematore da seduto ai cavi con corda",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0216",
+      "name_en": "cable seated shoulder internal rotation",
+      "name_it": "Rotazione interna della spalla da seduto ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "2399",
+      "name_en": "cable seated twist",
+      "name_it": "Rotazioni del busto da seduto ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0223",
+      "name_en": "cable side crunch",
+      "name_it": "Crunch laterale ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0224",
+      "name_en": "cable standing back wrist curl",
+      "name_it": "Flessioni dei polsi dietro la schiena ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0229",
+      "name_en": "cable standing inner curl",
+      "name_it": "Curl ai cavi con braccia verso l’interno",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0232",
+      "name_en": "cable standing pulldown (with rope)",
+      "name_it": "Lat pulldown in piedi ai cavi con corda",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0235",
+      "name_en": "cable standing shoulder external rotation",
+      "name_it": "Rotazione esterna della spalla ai cavi in piedi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0238",
+      "name_en": "cable straight arm pulldown",
+      "name_it": "Pulldown a braccia tese ai cavi",
+      "aliases_it": [
+        "pulldown braccia tese",
+        "pull down braccia tese"
+      ],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0237",
+      "name_en": "cable straight arm pulldown (with rope)",
+      "name_it": "Pulldown a braccia tese ai cavi con corda",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0239",
+      "name_en": "cable straight back seated row",
+      "name_it": "Rematore da seduto ai cavi a schiena dritta",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0243",
+      "name_en": "cable twist",
+      "name_it": "Rotazioni del busto ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1324",
+      "name_en": "cable upper row",
+      "name_it": "Rematore alto ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1325",
+      "name_en": "cable wide grip rear pulldown behind neck",
+      "name_it": "Lat pulldown dietro la nuca a presa larga ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0247",
+      "name_en": "cable wrist curl",
+      "name_it": "Flessioni dei polsi ai cavi",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1378",
+      "name_en": "calf stretch with rope",
+      "name_it": "Stretching dei polpacci con corda",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1271",
+      "name_en": "chest and front of shoulder stretch",
+      "name_it": "Stretching del petto e della parte anteriore della spalla",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0251",
+      "name_en": "chest dip",
+      "name_it": "Dip per pettorali",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1272",
+      "name_en": "chest stretch with exercise ball",
+      "name_it": "Stretching del petto su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1327",
+      "name_en": "close grip chin-up",
+      "name_it": "Trazioni supine a presa stretta",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0271",
+      "name_en": "crunch (on stability ball)",
+      "name_it": "Crunch su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0277",
+      "name_en": "decline crunch",
+      "name_it": "Crunch su panca declinata",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0279",
+      "name_en": "decline push-up",
+      "name_it": "Piegamenti con piedi rialzati",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0282",
+      "name_en": "decline sit-up",
+      "name_it": "Sit-up su panca declinata",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0286",
+      "name_en": "dumbbell alternate side press",
+      "name_it": "Spinte laterali alternate con manubri",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0290",
+      "name_en": "dumbbell bench seated press",
+      "name_it": "Distensioni con manubri da seduto su panca",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0291",
+      "name_en": "dumbbell bench squat",
+      "name_it": "Squat con manubri verso panca",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1655",
+      "name_en": "dumbbell biceps curl squat",
+      "name_it": "Squat con curl per bicipiti con manubri",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1731",
+      "name_en": "dumbbell close grip press",
+      "name_it": "Distensioni a presa stretta con manubri",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0307",
+      "name_en": "dumbbell decline twist fly",
+      "name_it": "Croci con rotazione su panca declinata con manubri",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0310",
+      "name_en": "dumbbell front raise",
+      "name_it": "Alzate frontali con manubri",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1277",
+      "name_en": "dumbbell fly on exercise ball",
+      "name_it": "Croci con manubri su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0322",
+      "name_en": "dumbbell incline inner biceps curl",
+      "name_it": "Curl per bicipiti a presa interna su panca inclinata con manubri",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1278",
+      "name_en": "dumbbell incline fly on exercise ball",
+      "name_it": "Croci inclinate con manubri su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1279",
+      "name_en": "dumbbell incline one arm fly",
+      "name_it": "Croci a un braccio su panca inclinata con manubri",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1280",
+      "name_en": "dumbbell incline one arm fly on exercise ball",
+      "name_it": "Croci inclinate a un braccio con manubrio su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1281",
+      "name_en": "dumbbell incline one arm press",
+      "name_it": "Distensioni inclinate a un braccio con manubrio",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1282",
+      "name_en": "dumbbell incline one arm press on exercise ball",
+      "name_it": "Distensioni inclinate a un braccio con manubrio su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1283",
+      "name_en": "dumbbell incline press on exercise ball",
+      "name_it": "Distensioni inclinate con manubri su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0325",
+      "name_en": "dumbbell incline raise",
+      "name_it": "Alzate su panca inclinata con manubri",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0328",
+      "name_en": "dumbbell incline shoulder raise",
+      "name_it": "Sollevamento delle spalle su panca inclinata con manubri",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0335",
+      "name_en": "dumbbell lateral to front raise",
+      "name_it": "Alzate laterali e frontali con manubri",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0863",
+      "name_en": "dumbbell lying external shoulder rotation",
+      "name_it": "Rotazione esterna della spalla da sdraiato con manubrio",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0343",
+      "name_en": "dumbbell lying one arm press",
+      "name_it": "Distensioni a un braccio da sdraiato con manubrio",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0352",
+      "name_en": "dumbbell neutral grip bench press",
+      "name_it": "Distensioni con manubri a presa neutra su panca",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1285",
+      "name_en": "dumbbell one arm bench fly",
+      "name_it": "Croci a un braccio su panca con manubrio",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0292",
+      "name_en": "dumbbell one arm bent-over row",
+      "name_it": "Rematore a un braccio a busto flesso con manubrio",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1286",
+      "name_en": "dumbbell one arm chest fly on exercise ball",
+      "name_it": "Croci per il petto a un braccio su fitball con manubrio",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1287",
+      "name_en": "dumbbell one arm decline chest press",
+      "name_it": "Distensioni per il petto a un braccio su panca declinata con manubrio",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1288",
+      "name_en": "dumbbell one arm fly on exercise ball",
+      "name_it": "Croci a un braccio con manubrio su fitball",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "1289",
+      "name_en": "dumbbell one arm incline chest press",
+      "name_it": "Distensioni per il petto a un braccio su panca inclinata con manubrio",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0356",
+      "name_en": "dumbbell one arm lateral raise with support",
+      "name_it": "Alzate laterali a un braccio con appoggio e manubrio",
+      "aliases_it": [],
+      "source": "curated_from_csv"
+    },
+    {
+      "id": "0025",
+      "name_en": "barbell bench press",
+      "aliases_it": [
+        "panca piana",
+        "panca piana bilanciere",
+        "distensioni panca piana",
+        "bench press"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0032",
+      "name_en": "barbell deadlift",
+      "aliases_it": [
+        "stacco da terra",
+        "stacchi da terra",
+        "deadlift bilanciere"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0085",
+      "name_en": "barbell romanian deadlift",
+      "aliases_it": [
+        "stacco rumeno",
+        "stacchi rumeni",
+        "romanian deadlift",
+        "rdl bilanciere"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0117",
+      "name_en": "barbell sumo deadlift",
+      "aliases_it": [
+        "stacco sumo",
+        "sumo deadlift"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0042",
+      "name_en": "barbell front squat",
+      "aliases_it": [
+        "front squat",
+        "squat frontale"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0043",
+      "name_en": "barbell full squat",
+      "aliases_it": [
+        "back squat completo",
+        "squat con bilanciere"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0047",
+      "name_en": "barbell incline bench press",
+      "aliases_it": [
+        "panca inclinata bilanciere",
+        "distensioni panca inclinata"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0033",
+      "name_en": "barbell decline bench press",
+      "aliases_it": [
+        "panca declinata bilanciere"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0289",
+      "name_en": "dumbbell bench press",
+      "aliases_it": [
+        "panca piana manubri",
+        "distensioni su panca con manubri"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0314",
+      "name_en": "dumbbell incline bench press",
+      "aliases_it": [
+        "panca inclinata manubri",
+        "distensioni inclinate con manubri"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0334",
+      "name_en": "dumbbell lateral raise",
+      "aliases_it": [
+        "alzate laterali",
+        "alzate laterali manubri"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0313",
+      "name_en": "dumbbell hammer curl",
+      "aliases_it": [
+        "curl a martello",
+        "hammer curl manubri"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "1760",
+      "name_en": "dumbbell goblet squat",
+      "aliases_it": [
+        "goblet squat",
+        "squat a calice",
+        "squat con manubrio al petto"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0336",
+      "name_en": "dumbbell lunge",
+      "aliases_it": [
+        "affondi manubri",
+        "affondo con manubri"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0293",
+      "name_en": "dumbbell bent over row",
+      "aliases_it": [
+        "rematore manubri a busto flesso"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "1004",
+      "name_en": "band squat",
+      "aliases_it": [
+        "squat elastico",
+        "squat con banda elastica"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0997",
+      "name_en": "band shoulder press",
+      "aliases_it": [
+        "shoulder press elastico",
+        "spinte spalle elastico"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0178",
+      "name_en": "cable lateral raise",
+      "aliases_it": [
+        "alzate laterali cavi",
+        "alzata laterale cavo"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0861",
+      "name_en": "cable seated row",
+      "aliases_it": [
+        "rematore ai cavi da seduto",
+        "pulley basso"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0175",
+      "name_en": "cable kneeling crunch",
+      "aliases_it": [
+        "crunch ai cavi in ginocchio",
+        "crunch al cavo alto"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0241",
+      "name_en": "cable triceps pushdown (v-bar)",
+      "aliases_it": [
+        "pushdown tricipiti barra v",
+        "tricipiti al cavo con barra v"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "1326",
+      "name_en": "chin-up",
+      "aliases_it": [
+        "trazioni presa supina",
+        "chin up"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "3294",
+      "name_en": "archer push up",
+      "aliases_it": [
+        "piegamenti arciere",
+        "push up arciere"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "3293",
+      "name_en": "archer pull up",
+      "aliases_it": [
+        "trazioni arciere",
+        "pull up arciere"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0128",
+      "name_en": "battling ropes",
+      "aliases_it": [
+        "corde navali",
+        "battle rope",
+        "onde con corde"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "3360",
+      "name_en": "bear crawl",
+      "aliases_it": [
+        "camminata orso",
+        "bear crawl"
+      ],
+      "source": "curated_alias"
+    },
+    {
+      "id": "0283",
+      "name_en": "diamond push-up",
+      "aliases_it": [
+        "piegamenti a diamante",
+        "push up diamante"
+      ],
+      "source": "curated_alias"
+    }
+  ]
+}
