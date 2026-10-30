@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <!-- Lion Fit Beta 0.27.4 — Motion UI, compatibile con la PWA iPhone -->
+    <!-- Lion Fit Beta 0.28 — Motion UI, compatibile con la PWA iPhone -->
     <link rel="stylesheet" href="./lionfit-motion-0274-fix.css">
     <script defer src="./lionfit-motion-0274-fix.js"></script>
     <!-- Lion Fit · iPhone web app (Beta 0.26.1) -->
@@ -16,6 +16,7 @@
     <link rel="icon" type="image/png" href="LOGO-APP.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Lion Fit - Pannello Coach 🦁</title>
+    <meta name="application-name" content="Lion Fit">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -262,6 +263,10 @@ html[data-lion-theme="dark"] .lf276-ss-note{background:#163d31!important;color:#
 html[data-lion-theme="dark"] #lf-bulk-delete-modal .lf-bulk-week-item{background:#17362c!important;color:#fff!important;border-color:#66a383!important}
 html[data-lion-theme="dark"] #lf-bulk-delete-modal .lf-bulk-week-item span{color:#fff!important}
 
+  /* Beta 0.28: inviti e dashboard più compatti, senza toccare la logica */
+  #lf28-athlete-email, #lf28-emailjs-service, #lf28-emailjs-public, #lf28-emailjs-template{max-width:100%}
+  #section-coaches .grid > div {min-width:0}
+  #lf28-send-athlete-email:disabled, #lf24-create-athlete-invite:disabled{opacity:.6;cursor:wait}
 </style>
 <style>
 /* LION FIT V26.0 — tema scuro professionale, predefinito chiaro */
@@ -668,7 +673,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
 
         <div class="p-4 border-t border-gray-200 space-y-3">
             <button data-lf-theme-toggle class="lf26-theme-btn w-full" aria-label="Cambia tema">🌙 Tema scuro</button>
-            <div class="lf26-version">LION FIT · BETA 0.27.6</div>
+            <div class="lf26-version">LION FIT · BETA 0.28</div>
             <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-1">
                 <span class="text-[9px] font-black uppercase text-gray-500 block">Codice Invito Palestra</span>
                 <span id="side-gym-code" class="text-xs font-black text-neon tracking-widest block">Cod. ---</span>
@@ -695,7 +700,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
 
         <!-- ================= SEZIONE 1: HOME / DASHBOARD ================= -->
         <section id="section-home" class="block space-y-5">
-            <div class="flex justify-end"><span class="lf26-version">Beta 0.27.4</span></div>
+            <div class="flex justify-end"><span class="lf26-version">Beta 0.28</span></div>
             <div class="lf14-welcome">
                 <div class="lf14-welcome-top"><span class="lf14-eyebrow">LION FIT · PANNELLO COACH</span><span class="lf14-status"><span></span> Panoramica palestra</span></div>
                 <h2>Benvenuto, <span id="welcome-coach-name">Coach</span></h2>
@@ -703,7 +708,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
             </div>
             <div class="lf14-section-heading"><div><h3>Da dove vuoi iniziare?</h3><p>Le operazioni principali sempre a portata di mano</p></div></div>
             <div class="lf14-navgrid"><button type="button" onclick="showSection('athletes')" class="lf14-navcard"><span class="lf14-navicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 21v-2a6 6 0 0 1 12 0v2M17 11a3 3 0 1 0-1-5M17 16a5 5 0 0 1 4 5"/></svg></span><span class="lf14-navcopy"><strong>Gestione atleti</strong><small>Programmi e assegnazioni</small></span><span class="lf14-chevron" aria-hidden="true">›</span></button>
-<button type="button" onclick="showSection('templates')" class="lf14-navcard"><span class="lf14-navicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8v8M7 6v12M17 6v12M20 8v8M7 12h10"/></svg></span><span class="lf14-navcopy"><strong>Archivio schede</strong><small>Crea e consulta le schede</small></span><span class="lf14-chevron" aria-hidden="true">›</span></button>
+<button type="button" onclick="document.getElementById('lf24-open-athlete-invites').click()" class="lf14-navcard"><span class="lf14-navicon">✉</span><span class="lf14-navcopy"><strong>Invita atleta</strong><small>Invia email o copia link</small></span><span class="lf14-chevron" aria-hidden="true">›</span></button>
 <button type="button" onclick="showSection('library')" class="lf14-navcard"><span class="lf14-navicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6C9 4 6 4 3 6v13c3-2 6-2 9 0 3-2 6-2 9 0V6c-3-2-6-2-9 0ZM12 6v13"/></svg></span><span class="lf14-navcopy"><strong>Libreria esercizi</strong><small>Ricerca italiano e inglese</small></span><span class="lf14-chevron" aria-hidden="true">›</span></button>
 <button type="button" onclick="showSection('profile')" class="lf14-navcard"><span class="lf14-navicon"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5h4l.6 2.7c.65.22 1.25.57 1.78 1l2.6-.93 2 3.46-2.05 1.8c.13.65.13 1.3 0 1.95l2.05 1.8-2 3.46-2.6-.93c-.53.43-1.13.78-1.78 1L14 21.5h-4l-.6-2.7a7.6 7.6 0 0 1-1.78-1l-2.6.93-2-3.46 2.05-1.8a7.6 7.6 0 0 1 0-1.95l-2.05-1.8 2-3.46 2.6.93c.53-.43 1.13-.78 1.78-1L10 2.5Z"/><circle cx="12" cy="12" r="3.1"/></svg></span><span class="lf14-navcopy"><strong>Palestra e profilo</strong><small>Impostazioni e inviti</small></span><span class="lf14-chevron" aria-hidden="true">›</span></button></div>
             <div class="lf14-section-heading lf14-stats-heading"><div><h3>La tua palestra</h3><p>Riepilogo sintetico</p></div></div>
@@ -776,8 +781,12 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
                 <!-- SCHEDE DI PREPARAZIONE ATLETICA ASSEGNATE -->
                 <div class="bg-gray-50 border border-gray-200 p-3 sm:p-4 rounded-2xl space-y-2 sm:space-y-3">
                     <h6 class="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2"><svg class="lf-mono-icon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20 M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12 M12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/></svg> Schede personali assegnate</h6>
-                    <button type="button" id="lf277-protect-legacy-sheets" class="w-full rounded-xl bg-green-50 border border-green-300 p-2 text-xs font-bold text-green-900">🛡 Salva le vecchie schede nell'ARCHIVIO dell'atleta</button>
-                    <p class="text-[10px] text-gray-600">Usa una volta dopo aver pubblicato le regole. Non modifica né duplica le schede originali.</p>
+                    <details class="rounded-xl bg-white border border-gray-200 p-3">
+                      <summary class="cursor-pointer text-xs font-black text-gray-700">⚙ Manutenzione schede esistenti</summary>
+                      <p class="text-[10px] text-gray-600 mt-2 mb-2">Da usare solo per le schede vecchie, dopo aver verificato le regole. Le nuove schede vengono archiviate durante l’assegnazione.</p>
+                      <button type="button" id="lf277-protect-legacy-sheets" class="w-full rounded-xl bg-green-50 border border-green-300 p-2 text-xs font-bold text-green-900">🛡 Salva le vecchie schede nell'ARCHIVIO dell'atleta</button>
+                      <button type="button" id="lf24-migrate-week-sheets" class="w-full mt-2 text-xs font-bold text-green-800 bg-green-50 border border-green-200 rounded-lg px-2.5 py-2" title="Crea copie personali delle schede già collegate alle settimane">Allinea schede delle settimane (manutenzione)</button>
+                    </details>
                     <div id="personal-templates-list" class="space-y-2 max-h-48 overflow-y-auto pr-1">
                         <p class="text-[10px] text-gray-400 font-bold uppercase py-2">Nessuna scheda presente.</p>
                     </div>
@@ -787,7 +796,6 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
                 <div class="bg-gray-50 border border-gray-200 p-3 sm:p-5 rounded-2xl space-y-3 sm:space-y-4">
                     <div class="flex justify-between items-center">
                         <h4 class="font-black text-xs sm:text-sm text-black uppercase tracking-widest">Programma attuale</h4>
-                        <button type="button" id="lf24-migrate-week-sheets" class="text-[10px] font-bold text-green-800 bg-green-50 border border-green-200 rounded-lg px-2.5 py-2" title="Crea copie personali delle schede già collegate alle settimane">Allinea schede delle settimane</button>
                         <span id="program-weeks-count-badge" class="text-[9px] sm:text-[10px] font-black bg-white border border-gray-200 text-gray-700 px-2 sm:px-3 py-1 rounded-xl uppercase shadow-2xs">
                             0 settimane
                         </span>
@@ -950,7 +958,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
 
 
         <!-- Lion Fit V23 - stesso Admin per titolare e collaboratori -->
-        <section id="section-coaches" class="hidden space-y-5 max-w-3xl mx-auto">
+        <section id="section-coaches" class="hidden space-y-5 max-w-7xl mx-auto">
           <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
             <div class="flex items-center justify-between gap-3 flex-wrap">
               <div><h2 class="font-black uppercase tracking-wider text-lg">Coach della palestra</h2>
@@ -959,14 +967,39 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
             </div>
             <div id="lf23-role-info" class="mt-4 rounded-xl border border-green-200 bg-green-50 p-3 text-xs font-medium text-gray-800">Controllo permessi in corso...</div>
           </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:items-start">
           <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
             <h3 class="font-black uppercase tracking-wide text-sm">Coach presenti nella palestra</h3>
             <div id="lf23-coach-list" class="mt-3 space-y-2 text-sm text-gray-600">Caricamento...</div>
           </div>
           <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4" id="lf24-athlete-invites">
             <h3 class="font-black uppercase tracking-wider text-sm">Invita un atleta</h3>
-            <p class="text-xs text-gray-600">Genera un collegamento monouso, valido 7 giorni. Invia un link diverso a ogni nuovo atleta. Il vecchio GYM-XXXX non permette piu' l'iscrizione.</p>
-            <button type="button" id="lf24-create-athlete-invite" class="bg-neon text-white rounded-xl px-5 py-3 font-black text-xs uppercase">+ Genera invito atleta</button>
+            <p class="text-xs text-gray-600">L’invito è personale, vale 7 giorni e si usa una sola volta. Inserisci l’email per inviarlo direttamente, oppure genera e copia il link. Il vecchio codice GYM-XXXX non iscrive più nuovi atleti.</p>
+            <div class="lf28-invite-actions">
+              <label for="lf28-athlete-email" class="block text-xs font-black text-gray-700">Email dell’atleta (solo per l’invio automatico)</label>
+              <input type="email" id="lf28-athlete-email" inputmode="email" autocomplete="email" placeholder="atleta@esempio.it" class="w-full min-w-0 border border-gray-300 bg-white text-gray-900 rounded-xl px-3.5 py-3 text-sm" />
+              <div class="flex flex-wrap gap-2">
+                <button type="button" id="lf28-send-athlete-email" class="bg-neon text-white rounded-xl px-4 py-3 font-black text-xs uppercase">✉ Invia codice invito</button>
+                <button type="button" id="lf24-create-athlete-invite" class="bg-white text-green-900 border border-green-300 rounded-xl px-4 py-3 font-black text-xs uppercase">+ Genera link</button>
+              </div>
+              <p id="lf28-mail-status" role="status" aria-live="polite" class="text-xs font-medium text-gray-600">Puoi generare un link anche senza email. L’invio usa EmailJS.</p>
+            </div>
+            <div class="rounded-xl border border-amber-300 bg-amber-50 p-3 space-y-2">
+              <p class="font-black text-xs text-amber-900">Prima di invitare: verifica il sito pubblico</p>
+              <p class="text-xs text-amber-900">Apri la registrazione dal browser esterno e verifica che si carichi prima di inviare un invito. La spunta HTTPS di GitHub non sostituisce questa prova.</p>
+              <a id="lf28-test-public-site" href="https://www.lionfit.it/www/index.html" target="_blank" rel="noopener noreferrer" class="inline-flex rounded-lg bg-white border border-amber-400 px-3 py-2 text-xs font-black text-amber-900">↗ Apri registrazione pubblica</a>
+              <label class="flex items-start gap-2 text-xs font-bold text-amber-900"><input id="lf28-public-site-ok" type="checkbox" class="mt-0.5 shrink-0" /> Ho verificato che si apre correttamente dal browser esterno.</label>
+            </div>
+            <details class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs">
+              <summary class="cursor-pointer font-black text-gray-800">⚙ Impostazioni invio email</summary>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                <label class="font-bold text-gray-700">Service ID<input id="lf28-emailjs-service" type="text" placeholder="service_..." class="w-full mt-1 rounded-lg border border-gray-300 p-2 text-gray-900" autocomplete="off" /></label>
+                <label class="font-bold text-gray-700">Public Key<input id="lf28-emailjs-public" type="text" placeholder="Public Key EmailJS" class="w-full mt-1 rounded-lg border border-gray-300 p-2 text-gray-900" autocomplete="off" /></label>
+                <label class="font-bold text-gray-700 sm:col-span-2">Template ID<input id="lf28-emailjs-template" type="text" value="template_a27mk9g" class="w-full mt-1 rounded-lg border border-gray-300 p-2 text-gray-900" autocomplete="off" /></label>
+              </div>
+              <button type="button" id="lf28-save-emailjs" class="mt-3 rounded-lg bg-gray-800 text-white px-4 py-2 font-black">Salva configurazione EmailJS</button>
+              <p class="mt-2 text-gray-600">Se i due ID pubblici sono presenti in lionfit-emailjs-config.js, la configurazione vale per tutti i coach sul sito. Altrimenti puoi inserire Service ID e Public Key qui e salvarli solo su questo dispositivo. Mai inserire Private Key o password.</p>
+            </details>
             <div id="lf24-athlete-invite-result" class="hidden bg-green-50 border border-green-200 rounded-xl p-3 space-y-2">
               <label for="lf24-athlete-invite-link" class="block font-bold text-xs text-green-900">Collegamento da condividere privatamente</label>
               <input id="lf24-athlete-invite-link" type="text" readonly class="w-full bg-white border border-green-200 rounded-lg p-2 text-xs" />
@@ -991,6 +1024,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
             <h4 class="font-black text-xs uppercase tracking-wider">Inviti recenti</h4>
             <div id="lf23-invites-list" class="space-y-2 text-sm text-gray-600">Nessun invito.</div>
           </div>
+          </div><!-- Fine griglia coach/inviti -->
         </section>
 
         <!-- V26.0: Cestino reversibile per schede e settimane, solo Coach -->
@@ -1014,13 +1048,13 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
             <span class="text-[8px] font-black tracking-wider uppercase mt-0.5">Atleti</span>
         </button>
-        <button id="nav-btn-templates" onclick="showSection('templates')" class="nav-btn flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-            <span class="text-[8px] font-black tracking-wider uppercase mt-0.5">Schede</span>
-        </button>
         <button id="nav-btn-library" onclick="showSection('library')" class="nav-btn flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+            <span class="text-[8px] font-black tracking-wider uppercase mt-0.5">Esercizi</span>
+        </button>
+        <button id="nav-btn-archive" onclick="showSection('templates')" class="nav-btn flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-            <span class="text-[8px] font-black tracking-wider uppercase mt-0.5">Libreria</span>
+            <span class="text-[8px] font-black tracking-wider uppercase mt-0.5">Archivio</span>
         </button>
         <button id="nav-btn-profile" onclick="showSection('profile')" class="nav-btn flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black relative">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -1281,6 +1315,9 @@ Martedì	Forza	...
         </div>
     </div>
 
+    <div id="lf28-toast" role="status" aria-live="polite" class="fixed bottom-24 md:bottom-6 right-4 z-[120] hidden rounded-xl bg-gray-900 text-white shadow-lg border border-green-700 px-4 py-3 text-xs font-bold max-w-xs pointer-events-none"></div>
+    <!-- ID pubblici EmailJS: configurazione condivisa da GitHub Pages, nessuna chiave privata. -->
+    <script src="lionfit-emailjs-config.js"></script>
     <!-- SCRIPT LOGICA LION FIT ADMIN -->
 
 <!-- LION FIT V15: dettaglio esercizio della libreria coach -->
@@ -1318,6 +1355,13 @@ Martedì	Forza	...
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        let lf28ToastTimer;
+        function lf28Toast(message){
+            const el=document.getElementById('lf28-toast');
+            el.textContent=message;el.classList.remove('hidden');
+            clearTimeout(lf28ToastTimer);
+            lf28ToastTimer=setTimeout(()=>el.classList.add('hidden'),2800);
+        }
 
         enableIndexedDbPersistence(db).catch(() => {});
 
@@ -1350,7 +1394,7 @@ Martedì	Forza	...
                 btn.classList.remove('text-neon');
                 btn.classList.add('text-gray-400');
             });
-            const activeBtn = document.getElementById(`nav-btn-${sectionId}`);
+            const activeBtn = document.getElementById(sectionId==='templates' ? 'nav-btn-archive' : `nav-btn-${sectionId}`);
             if (activeBtn) {
                 activeBtn.classList.remove('text-gray-400');
                 activeBtn.classList.add('text-neon');
@@ -1665,6 +1709,12 @@ Martedì	Forza	...
             if (owner) await lf23LoadInvites();
             await lf24LoadAthleteInvites();
         }
+        // Beta 0.28: gli inviti devono puntare SEMPRE al sito, mai al WebView dell'APK.
+        // /www/index.html e' il login pubblico. La pagina alla radice ora
+        // preserva i parametri, ma il link diretto evita reindirizzamenti inutili.
+        const LF28_PUBLIC_BASE = 'https://www.lionfit.it/www/';
+        const LF28_ANDROID_RELEASE = 'https://github.com/matteo-perini/ROUNDONE/releases/latest/download/LionFit.apk';
+        function lf28PublicUrl(page) { return new URL(page, LF28_PUBLIC_BASE).href; }
         // La UI mostra soltanto inviti validi: link già consumati/revocati spariscono anche dal riquadro copia.
         function lf261CleanInvitePreview(allInvites,linkInputId,resultId,tokenQueryKey){
             const field=document.getElementById(linkInputId);
@@ -1731,7 +1781,7 @@ Martedì	Forza	...
                     status:'pending',createdBy:currentUserUid,
                     createdAt:serverTimestamp(),expiresAt:Timestamp.fromDate(new Date(Date.now()+7*86400000))
                 });
-                const link=new URL('index.html',location.href);
+                const link=new URL(lf28PublicUrl('index.html'));
                 link.searchParams.set('coachInvite',token);
                 link.searchParams.set('gym',currentGymId);
                 const field=document.getElementById('lf23-invite-link');field.value=link.href;
@@ -1790,25 +1840,148 @@ Martedì	Forza	...
             lf23OpenCoachManagement();
             document.getElementById('lf24-athlete-invites').scrollIntoView({behavior:'smooth',block:'start'});
         });
-        document.getElementById('lf24-create-athlete-invite').addEventListener('click',async e=>{
-            const btn=e.currentTarget; if(!currentGymId||!currentUserUid)return;
-            btn.disabled=true;
-            try {
-                const b=new Uint8Array(24);crypto.getRandomValues(b);
-                const token=Array.from(b,v=>v.toString(16).padStart(2,'0')).join('');
-                await setDoc(doc(db,'gyms',currentGymId,'athlete_invites',token),{
-                    gymId:currentGymId,gymName:lf23GymName,status:'pending',createdBy:currentUserUid,
-                    createdAt:serverTimestamp(),expiresAt:Timestamp.fromDate(new Date(Date.now()+7*86400000))
-                });
-                const url=new URL('index.html',location.href);
-                url.searchParams.set('gym',currentGymId);
-                url.searchParams.set('athleteInvite',token);
-                document.getElementById('lf24-athlete-invite-link').value=url.href;
-                document.getElementById('lf24-local-athlete-link-warning').classList.toggle('hidden', !['localhost','127.0.0.1'].includes(url.hostname));
+        // Inviti atleta: la generazione Firestore rimane monouso e valida 7 giorni.
+        // L'invio email e' un passaggio successivo: se fallisce non cancelliamo il token.
+        const lf28MailStorageKey='lionfit-emailjs-public-config-v1';
+        const lf28PendingKey='lionfit-unsent-invite-session-v1';
+        let lf28LastUnsentInvite=null;
+        try {
+            const previous=JSON.parse(sessionStorage.getItem(lf28PendingKey)||'null');
+            if(previous && previous.email && previous.link && Date.now()-(previous.createdAt||0)<7*86400000 &&
+                new URL(previous.link).origin==='https://www.lionfit.it' &&
+                new URL(previous.link).pathname==='/www/index.html' &&
+                new URL(previous.link).searchParams.has('athleteInvite')) {
+                lf28LastUnsentInvite=previous;
+                document.getElementById('lf24-athlete-invite-link').value=previous.link;
                 document.getElementById('lf24-athlete-invite-result').classList.remove('hidden');
-                await lf24LoadAthleteInvites();
-            }catch(err){showAlert('Invito non creato: '+(err.code||err.message),'Errore Firebase')}
+            } else sessionStorage.removeItem(lf28PendingKey);
+        } catch(err){console.warn('Invito sospeso non recuperabile',err);}
+        if(lf28LastUnsentInvite) {
+            document.getElementById('lf28-athlete-email').value=lf28LastUnsentInvite.email;
+            document.getElementById('lf28-mail-status').textContent='È stato recuperato un invito non inviato: al prossimo tentativo ne verificheremo la validità prima di riutilizzarlo.';
+        }
+        function lf28MailStatus(message,kind='info'){
+            const el=document.getElementById('lf28-mail-status');
+            if(!el)return;
+            el.textContent=message;
+            el.classList.toggle('text-red-700',kind==='error');
+            el.classList.toggle('text-green-800',kind==='success');
+        }
+        function lf28GetEmailConfig(){
+            return {
+                service_id:document.getElementById('lf28-emailjs-service').value.trim(),
+                template_id:document.getElementById('lf28-emailjs-template').value.trim(),
+                user_id:document.getElementById('lf28-emailjs-public').value.trim()
+            };
+        }
+        try {
+            const stored=JSON.parse(localStorage.getItem(lf28MailStorageKey)||'{}');
+            const shared=window.LIONFIT_EMAILJS_PUBLIC||{};
+            document.getElementById('lf28-emailjs-service').value=shared.serviceId||stored.service_id||'';
+            document.getElementById('lf28-emailjs-public').value=shared.publicKey||stored.user_id||'';
+            document.getElementById('lf28-emailjs-template').value=shared.templateId||stored.template_id||'template_a27mk9g';
+        } catch(err) { console.warn('Configurazione emailjs locale non letta',err); }
+        document.getElementById('lf28-save-emailjs').addEventListener('click',()=>{
+            const cfg=lf28GetEmailConfig();
+            if(!cfg.service_id||!cfg.user_id||!cfg.template_id)
+                return lf28MailStatus('Compila Service ID, Public Key e Template ID prima di salvare.', 'error');
+            try {
+                localStorage.setItem(lf28MailStorageKey,JSON.stringify(cfg));
+                lf28MailStatus('Configurazione EmailJS salvata su questo dispositivo.', 'success');
+            } catch(err) { lf28MailStatus('Impossibile salvare la configurazione su questo dispositivo.', 'error'); }
+        });
+        // Prima di reinviare un token salvato dopo un errore, controlla che sia
+        // ancora valido, non usato/revocato e della palestra del coach attuale.
+        async function lf28CanRetryInvite(link){
+            if(!currentGymId || !currentUserUid) return false;
+            let url;
+            try { url=new URL(link); } catch(_) { return false; }
+            if(url.origin!=='https://www.lionfit.it' || url.pathname!=='/www/index.html'
+                || url.searchParams.get('gym')!==currentGymId) return false;
+            const token=url.searchParams.get('athleteInvite');
+            if(!token || !/^[a-f0-9]{48}$/i.test(token)) return false;
+            const snapshot=await getDoc(doc(db,'gyms',currentGymId,'athlete_invites',token));
+            if(!snapshot.exists()) return false;
+            const invite=snapshot.data();
+            const expiry=invite.expiresAt?.toDate?.();
+            return invite.status==='pending' && invite.gymId===currentGymId
+                && Boolean(expiry && expiry.getTime()>Date.now());
+        }
+        async function lf28CreateAthleteInvite(){
+            if(!currentGymId||!currentUserUid)throw new Error('Devi essere autenticato come coach della palestra.');
+            const b=new Uint8Array(24);crypto.getRandomValues(b);
+            const token=Array.from(b,v=>v.toString(16).padStart(2,'0')).join('');
+            await setDoc(doc(db,'gyms',currentGymId,'athlete_invites',token),{
+                gymId:currentGymId,gymName:lf23GymName,status:'pending',createdBy:currentUserUid,
+                createdAt:serverTimestamp(),expiresAt:Timestamp.fromDate(new Date(Date.now()+7*86400000))
+            });
+            const url=new URL(lf28PublicUrl('index.html'));
+            url.searchParams.set('gym',currentGymId);
+            url.searchParams.set('athleteInvite',token);
+            document.getElementById('lf24-athlete-invite-link').value=url.href;
+            document.getElementById('lf24-local-athlete-link-warning').classList.add('hidden');
+            document.getElementById('lf24-athlete-invite-result').classList.remove('hidden');
+            await lf24LoadAthleteInvites().catch(err=>console.warn('Lista inviti non aggiornata',err));
+            return url.href;
+        }
+        document.getElementById('lf24-create-athlete-invite').addEventListener('click',async e=>{
+            const btn=e.currentTarget;btn.disabled=true;
+            try {
+                const link=await lf28CreateAthleteInvite();
+                lf28LastUnsentInvite=null;
+                sessionStorage.removeItem(lf28PendingKey);
+                lf28MailStatus('Link generato. Prima di condividerlo controlla che la pagina web si apra sul telefono.');
+            } catch(err) {showAlert('Invito non creato: '+(err.code||err.message),'Errore Firebase');}
             finally{btn.disabled=false;}
+        });
+        async function lf28SendInviteEmail(email,inviteLink){
+            const cfg=lf28GetEmailConfig();
+            if(!cfg.service_id||!cfg.user_id||!cfg.template_id)throw new Error('Configura prima Service ID, Public Key e Template ID di EmailJS.');
+            const payload={...cfg,template_params:{
+                to_email:email,invite_link:inviteLink,
+                apk_link:LF28_ANDROID_RELEASE,ios_guide_link:lf28PublicUrl('ios.html')
+            }};
+            const response=await fetch('https://api.emailjs.com/api/v1.0/email/send',{
+                method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+            });
+            if(!response.ok){
+                const details=(await response.text().catch(()=>'' )).slice(0,240);
+                throw new Error('EmailJS HTTP '+response.status+(details?' – '+details:''));
+            }
+        }
+        document.getElementById('lf28-send-athlete-email').addEventListener('click',async e=>{
+            const btn=e.currentTarget;
+            const input=document.getElementById('lf28-athlete-email');
+            const email=input.value.trim().toLowerCase();
+            if(!email||!input.checkValidity())return lf28MailStatus('Inserisci un indirizzo email valido.', 'error');
+            if(!document.getElementById('lf28-public-site-ok').checked)
+                return lf28MailStatus('Apri prima il sito pubblico e conferma che la pagina di registrazione si carica.', 'error');
+            const cfg=lf28GetEmailConfig();
+            if(!cfg.service_id||!cfg.user_id||!cfg.template_id)
+                return lf28MailStatus('Configura EmailJS (Service ID, Public Key, Template ID) per questo dispositivo.', 'error');
+            btn.disabled=true;btn.textContent='Invio in corso…';
+            try{
+                // Se un invio fallisce, il nuovo tentativo usa lo STESSO token.
+                let inviteLink;
+                if(lf28LastUnsentInvite?.email===email &&
+                   await lf28CanRetryInvite(lf28LastUnsentInvite.link)) {
+                    inviteLink=lf28LastUnsentInvite.link;
+                } else {
+                    lf28LastUnsentInvite=null;
+                    sessionStorage.removeItem(lf28PendingKey);
+                    inviteLink=await lf28CreateAthleteInvite();
+                }
+                lf28LastUnsentInvite={email,link:inviteLink,gymId:currentGymId,createdAt:Date.now()};
+                sessionStorage.setItem(lf28PendingKey,JSON.stringify(lf28LastUnsentInvite));
+                await lf28SendInviteEmail(email,inviteLink);
+                lf28LastUnsentInvite=null;
+                sessionStorage.removeItem(lf28PendingKey);
+                lf28MailStatus('Richiesta email accettata da EmailJS per '+email+'. Verifica la ricezione nella casella dell’atleta.','success');
+                input.value='';
+            }catch(err){
+                console.error('Invio email invito',err);
+                lf28MailStatus((lf28LastUnsentInvite ? 'Invito creato, ma email NON confermata: ' : 'Invito NON completato: ')+(err.message||err)+(lf28LastUnsentInvite ? '. Puoi copiare il link o ritentare senza crearne un altro.' : '. Nessuna email confermata.'),'error');
+            }finally{btn.disabled=false;btn.textContent='✉ Invia codice invito';}
         });
         document.getElementById('lf24-copy-athlete-invite').addEventListener('click',async()=>{
             const field=document.getElementById('lf24-athlete-invite-link');
@@ -3192,7 +3365,7 @@ Martedì	Forza	...
                 await updateDoc(weekRef, { [`days.${linkDay}.${fieldName}`]: templateId, updatedAt: serverTimestamp() });
                 toggleModal('select-template-modal');
                 await loadAthleteWeeksProgram(); // conserva settimana aperta e bozze non salvate
-                showAlert(`Scheda ${targetLinkingSlot} ${templateId ? 'collegata' : 'rimossa'} per ${linkDay.toUpperCase()}. Puoi continuare nella stessa settimana.`, 'Modifica salvata');
+                lf28Toast('Scheda '+targetLinkingSlot+(templateId?' collegata':' rimossa')+' · '+linkDay.toUpperCase()+' · salvato');
             } catch (err) {
                 console.error('Collegamento scheda al giorno fallito', err);
                 showAlert('Collegamento NON salvato: ' + (err.code || err.message || 'controlla la connessione') + '. Nessun giorno è stato cambiato nell’editor.', 'Errore collegamento');

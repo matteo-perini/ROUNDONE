@@ -1,9 +1,22 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="it" translate="no">
 <head>
-    <meta http-equiv="refresh" content="0; url=./www/index.html">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lion Fit — Accesso</title>
+<meta name="robots" content="noindex">
+<script>
+/* Il sito e' pubblicato nella cartella /www/. Non perdere i parametri degli inviti. */
+(function () {
+  var destination = new URL('./www/index.html', window.location.href);
+  destination.search = window.location.search;
+  destination.hash = window.location.hash;
+  window.location.replace(destination.href);
+}());
+</script>
 </head>
 <body>
-    <script>window.location.href = "./www/index.html";</script>
+<p>Reindirizzamento a <a href="./www/index.html" translate="no">Lion Fit</a>...</p>
+<noscript>JavaScript è necessario per mantenere il codice d'invito. Apri il link ricevuto direttamente sul tuo dispositivo.</noscript>
 </body>
 </html>
