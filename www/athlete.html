@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+    <!-- Lion Fit Beta 0.27.4 — Motion UI, compatibile con la PWA iPhone -->
+    <link rel="stylesheet" href="./lionfit-motion-0274-fix.css">
+    <script defer src="./lionfit-motion-0274-fix.js"></script>
     <!-- Lion Fit · iPhone web app (Beta 0.26.1) -->
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
@@ -506,7 +509,7 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
         </div>
     </header>
 
-    <div class="lf26-version pt-1">LION FIT · BETA 0.26.1</div>
+    <div class="lf26-version pt-1">LION FIT · BETA 0.27.2</div>
     <!-- MAIN CONTAINER -->
     <main class="flex-grow w-full max-w-3xl mx-auto p-4 pb-24 relative">
 
@@ -1038,6 +1041,7 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
                 activeBtn.classList.remove('text-gray-400');
                 activeBtn.classList.add('text-neon');
             }
+            window.lfMotionEnter?.(sectionId);
         }
 
         window.toggleModal = function(modalId) {

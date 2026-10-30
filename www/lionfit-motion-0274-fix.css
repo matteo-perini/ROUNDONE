@@ -1,0 +1,37 @@
+/* Lion Fit Beta 0.27.4 — Page Assembly Spring */
+/* I movimenti principali sono gestiti da lionfit-motion.js tramite Web Animations API. */
+:root { --lionfit-spring-duration: 1250ms; }
+button:not(:disabled), [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+button:not(:disabled):active, [role="button"]:active { filter: brightness(1.13); }
+@media(hover:hover) and (pointer:fine) { button:not(:disabled):hover { filter: brightness(1.05); } }
+button:focus-visible, [role="button"]:focus-visible { outline: 2px solid #10b981; outline-offset: 3px; }
+/* Conferma animata per salvataggi riusciti, senza cambiare la semantica del popup originale. */
+#custom-alert-modal.lf27-success .lf27-checkmark {
+ display:grid; animation: lf27-check-enter 440ms cubic-bezier(.2,1.4,.3,1) both;
+}
+.lf27-checkmark {
+ display:none; width:52px; height:52px; place-items:center; margin:0 auto 8px;
+ border-radius:50%; color:#047857; background:#d1fae5; border:1px solid #6ee7b7;
+}
+.lf27-checkmark svg { width:31px; height:31px; stroke:currentColor; }
+#custom-alert-modal.lf27-success .lf27-checkmark path {
+ stroke-dasharray:38; stroke-dashoffset:38;
+ animation:lf27-draw-check 410ms ease-out 170ms forwards;
+}
+@keyframes lf27-check-enter {
+ from { opacity:0; transform:scale(.55) rotate(-12deg); }
+ 70% { opacity:1; transform:scale(1.12) rotate(3deg); }
+ to { opacity:1; transform:scale(1) rotate(0); }
+}
+@keyframes lf27-draw-check { to { stroke-dashoffset:0; } }
+@media print {
+ .lf27-checkmark { display:none!important; }
+}
+@media (prefers-reduced-motion:reduce) {
+ button:not(:disabled), [role="button"] { transition:none!important; }
+ #custom-alert-modal.lf27-success .lf27-checkmark,
+ #custom-alert-modal.lf27-success .lf27-checkmark path { animation:none!important; stroke-dashoffset:0!important; }
+}

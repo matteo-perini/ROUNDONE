@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+    <!-- Lion Fit Beta 0.27.4 — Motion UI, compatibile con la PWA iPhone -->
+    <link rel="stylesheet" href="./lionfit-motion-0274-fix.css">
+    <script defer src="./lionfit-motion-0274-fix.js"></script>
     <!-- Lion Fit · iPhone web app (Beta 0.26.1) -->
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
@@ -625,7 +628,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
 
         <div class="p-4 border-t border-gray-200 space-y-3">
             <button data-lf-theme-toggle class="lf26-theme-btn w-full" aria-label="Cambia tema">🌙 Tema scuro</button>
-            <div class="lf26-version">LION FIT · BETA 0.26.1</div>
+            <div class="lf26-version">LION FIT · BETA 0.27.2</div>
             <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-1">
                 <span class="text-[9px] font-black uppercase text-gray-500 block">Codice Invito Palestra</span>
                 <span id="side-gym-code" class="text-xs font-black text-neon tracking-widest block">Cod. ---</span>
@@ -652,7 +655,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
 
         <!-- ================= SEZIONE 1: HOME / DASHBOARD ================= -->
         <section id="section-home" class="block space-y-5">
-            <div class="flex justify-end"><span class="lf26-version">Beta 0.26.1</span></div>
+            <div class="flex justify-end"><span class="lf26-version">Beta 0.27.4</span></div>
             <div class="lf14-welcome">
                 <div class="lf14-welcome-top"><span class="lf14-eyebrow">LION FIT · PANNELLO COACH</span><span class="lf14-status"><span></span> Panoramica palestra</span></div>
                 <h2>Benvenuto, <span id="welcome-coach-name">Coach</span></h2>
@@ -1309,6 +1312,7 @@ Martedì	Forza	...
                 activeBtn.classList.remove('text-gray-400');
                 activeBtn.classList.add('text-neon');
             }
+            window.lfMotionEnter?.(sectionId);
         }
 
         window.toggleModal = function(modalId) {
@@ -1321,6 +1325,7 @@ Martedì	Forza	...
             document.getElementById('custom-alert-title').textContent = title;
             document.getElementById('custom-alert-message').textContent = message;
             document.getElementById('custom-alert-modal').classList.remove('hidden');
+            window.lfMotionNotice?.(title, message);
         }
         document.getElementById('custom-alert-ok').addEventListener('click', () => document.getElementById('custom-alert-modal').classList.add('hidden'));
 
