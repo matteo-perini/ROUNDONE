@@ -128,10 +128,35 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
 #lf-exit-dialog .lf-exit-panel { background:white; color:#111827; border-radius:20px; max-width:360px; width:100%; padding:24px; box-shadow:0 25px 70px rgba(0,0,0,.25); }
 #lf-exit-dialog button { min-height:44px; border-radius:12px; font-weight:800; }
 
-/* V25.6: schede compatte, due colonne anche su smartphone */
+/* V25.7: schede compatte, due colonne anche su smartphone */
 #plan-assigned-list > button, #plan-independent-list > button { min-width:0; overflow-wrap:anywhere; }
 #plan-assigned-list > button:focus-visible, #plan-independent-list > button:focus-visible { outline:2px solid #16a34a; outline-offset:2px; }
 @media(max-width:360px) { #plan-assigned-list > button, #plan-independent-list > button { padding:10px !important; } }
+/* V25.7 - Schede più leggibili e senza informazioni duplicate */
+#plan-assigned-list .lf-training-sheet-card,
+#plan-independent-list .lf-training-sheet-card {
+    border:2px solid #a6cdb6 !important;
+    border-radius:17px;
+    box-shadow:0 3px 12px rgba(19,74,41,.065);
+    min-height:132px;
+    padding:14px;
+    gap:10px;
+    background:#fff;
+}
+#plan-independent-list .lf-training-sheet-card { border-color:#cad5cf !important; }
+#plan-assigned-list .lf-training-sheet-card:hover,
+#plan-independent-list .lf-training-sheet-card:hover { border-color:#16a34a !important; box-shadow:0 5px 16px rgba(22,101,52,.12); }
+.lf-training-sheet-card .lf-sheet-title { font-size:17px; line-height:1.22; font-weight:900; letter-spacing:.015em; }
+.lf-training-sheet-card .lf-sheet-status { font-size:10.5px; line-height:1.4; max-width:100%; white-space:normal; text-wrap:pretty; }
+.lf-training-sheet-card .lf-sheet-days { font-size:11px; line-height:1.35; }
+.lf-training-sheet-card .lf-sheet-open { font-size:11px; margin-top:auto; padding-top:5px; }
+@media(max-width:400px) {
+    #plan-assigned-list .lf-training-sheet-card,
+    #plan-independent-list .lf-training-sheet-card { padding:11px !important; min-height:122px; gap:9px; }
+    .lf-training-sheet-card .lf-sheet-title { font-size:15px; }
+    .lf-training-sheet-card .lf-sheet-status { font-size:10px; }
+}
+
 </style>
 </head>
 <body class="bg-gray-100 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col relative pb-20">
@@ -220,7 +245,7 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
             </div>
         </section>
 
-        <!-- LION FIT ATHLETE V25.6 - IL MIO PIANO: schede sincronizzate con la settimana -->
+        <!-- LION FIT ATHLETE V25.7 - IL MIO PIANO: schede sincronizzate con la settimana -->
         <section id="section-training" class="hidden space-y-4">
             <div class="flex justify-between items-center gap-3 bg-white border border-gray-200 p-4 rounded-2xl shadow-xs">
                 <div>
@@ -241,14 +266,14 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
                 <div id="weeks-circles-nav" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1" aria-label="Seleziona settimana del programma">
                     <p class="text-[10px] font-bold text-gray-400 uppercase">Caricamento settimane...</p>
                 </div>
-                <p class="text-[11px] leading-relaxed text-gray-500 px-1">Le schede e il calendario si aggiornano insieme quando cambi settimana.</p>
+                
             </div>
 
             <div id="plan-assigned-section" class="space-y-3">
                 <div class="flex justify-between items-center px-1 gap-3">
                     <div class="min-w-0">
-                        <h4 id="plan-sheets-heading" class="font-black text-xs uppercase tracking-wider text-black">Le mie schede assegnate</h4>
-                        <p id="plan-sheets-week-hint" class="text-[11px] text-gray-500 mt-1">Schede pronte da aprire.</p>
+                        <h4 id="plan-sheets-heading" class="font-black text-base sm:text-lg uppercase tracking-wide text-black">Le mie schede assegnate</h4>
+                        <p id="plan-sheets-week-hint" class="text-[11px] font-semibold text-gray-500 mt-0.5">Schede pronte da aprire.</p>
                     </div>
                     <span id="plan-sheets-count-badge" class="text-[10px] font-black text-neon bg-green-50 border border-green-200 px-2.5 py-1 rounded-lg shrink-0">0 schede</span>
                 </div>
@@ -261,8 +286,8 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
             <!-- Schede assegnate direttamente, mai collegate a un giorno programmato. -->
             <div id="plan-independent-section" class="hidden space-y-3">
                 <div class="px-1">
-                    <h4 class="font-black text-xs uppercase tracking-wider text-black">Altre schede assegnate</h4>
-                    <p class="text-[11px] text-gray-500 mt-1">Schede disponibili senza un giorno fissato dal coach.</p>
+                    <h4 class="font-black text-sm uppercase tracking-wide text-black">Schede senza giorno</h4>
+                    <p class="text-[11px] text-gray-500 mt-1">Assegnate dal coach, senza una data programmata.</p>
                 </div>
                 <div id="plan-independent-list" class="grid grid-cols-2 gap-2 sm:gap-3"></div>
                 <button id="plan-independent-more-btn" type="button" class="hidden w-full min-h-[42px] rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-black text-gray-700 hover:bg-gray-50"></button>
@@ -1502,28 +1527,40 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
         function lfCardForAssignedTemplate(tpl, programmedDays = [], weekNumber = null) {
             const card = document.createElement('button');
             card.type = 'button';
-            card.className = 'w-full min-w-0 min-h-[146px] p-3 sm:p-4 bg-white border border-gray-200 rounded-2xl flex flex-col items-start text-left transition shadow-xs hover:border-neon focus-visible:border-neon gap-2';
+            card.className = 'lf-training-sheet-card w-full min-w-0 bg-white flex flex-col items-start text-left transition focus-visible:border-neon';
             const title = document.createElement('strong');
-            title.className = 'font-black text-black text-[12px] sm:text-sm uppercase tracking-wide leading-snug break-words';
+            title.className = 'lf-sheet-title text-black uppercase break-words';
             title.textContent = tpl.title || 'Scheda di allenamento';
             const label = document.createElement('span');
-            label.className = programmedDays.length
-                ? 'text-[10px] bg-green-50 text-green-800 px-2 py-1 font-black rounded-md uppercase border border-green-200 leading-snug'
-                : 'text-[10px] bg-gray-100 text-gray-700 px-2 py-1 font-black rounded-md uppercase border border-gray-200 leading-snug';
-            label.textContent = programmedDays.length ? `Nel programma · sett. ${weekNumber}` : 'Assegnata dal coach';
-            const info = document.createElement('p');
-            info.className = 'text-[11px] sm:text-xs font-semibold text-gray-600 leading-relaxed break-words';
-            if (programmedDays.length) {
-                info.textContent = `Da svolgere: ${programmedDays.map(day => day[0].toUpperCase() + day.slice(1)).join(', ')}.`;
+            label.className = 'lf-sheet-status px-2.5 py-1.5 font-extrabold rounded-lg border ' + (
+                programmedDays.length
+                    ? 'bg-green-50 text-green-900 border-green-200'
+                    : 'bg-gray-100 text-gray-700 border-gray-200'
+            );
+            // Per un giorno mostriamo direttamente il giorno. Con molti giorni evitiamo targhette chilometriche.
+            const daysShort = { 'lunedì':'lun', 'martedì':'mar', 'mercoledì':'mer', 'giovedì':'gio', 'venerdì':'ven', 'sabato':'sab', 'domenica':'dom' };
+            if (programmedDays.length === 1) {
+                label.textContent = `In programma: ${programmedDays[0]}`;
+            } else if (programmedDays.length === 2) {
+                label.textContent = `In programma: ${programmedDays.join(' e ')}`;
+            } else if (programmedDays.length > 2) {
+                label.textContent = `In programma: ${programmedDays.length} giorni`;
             } else {
-                info.textContent = athleteWeeksLoadFailed
-                    ? 'Giorni non disponibili: impossibile leggere la programmazione.'
-                    : 'Nessun giorno programmato dal coach.';
+                label.textContent = 'Senza giorno programmato';
+            }
+            const info = document.createElement('p');
+            info.className = 'lf-sheet-days text-gray-600 font-semibold break-words';
+            if (programmedDays.length > 2) {
+                info.textContent = programmedDays.map(day => daysShort[day] || day).join(' · ');
+            } else if (!programmedDays.length && athleteWeeksLoadFailed) {
+                info.textContent = 'Calendario non disponibile';
             }
             const action = document.createElement('span');
-            action.className = 'text-[11px] font-black text-green-700 uppercase mt-auto pt-1';
+            action.className = 'lf-sheet-open font-black text-green-800 uppercase';
             action.textContent = 'Apri scheda ›';
-            card.append(title, label, info, action);
+            card.append(title, label);
+            if (info.textContent) card.append(info);
+            card.append(action);
             card.addEventListener('click', () => openViewTemplateModal(tpl));
             return card;
         }
@@ -1589,13 +1626,13 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
                 ? all.map(tpl => ({ tpl, days: [], weekNumber: null }))
                 : Array.from(assignedThisWeek.values());
             planSheetsHeading.textContent = noReliableWeek
-                ? 'Le mie schede assegnate'
-                : `Schede della settimana ${activeWeekIndex + 1}`;
+                ? 'Le mie schede'
+                : 'Schede in programma';
             planSheetsWeekHint.textContent = noReliableWeek
                 ? (athleteWeeksLoadFailed
-                    ? 'La programmazione non è disponibile; puoi comunque aprire le tue schede.'
-                    : 'Schede assegnate dal coach, disponibili per il tuo allenamento.')
-                : `Settimana ${activeWeekIndex + 1}${lfWeekDateRange(currentWeek?.startDate) ? ' · ' + lfWeekDateRange(currentWeek.startDate) : ''} · Una scheda per ogni allenamento diverso.`;
+                    ? 'Calendario non disponibile'
+                    : 'Assegnate dal coach')
+                : (lfWeekDateRange(currentWeek?.startDate) || 'Settimana selezionata');
             planSheetsCountBadge.textContent = `${weeklyEntries.length} ${weeklyEntries.length === 1 ? 'scheda' : 'schede'}`;
             planAssignedSection.classList.remove('hidden');
             lfRenderCardCollection(planAssignedList, weeklyEntries, planSheetsMoreBtn, showAllWeekSheets, all.length, true);
