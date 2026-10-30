@@ -174,6 +174,23 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
 #weeks-badges-bar button[aria-pressed="true"] {background:#15803d!important;color:white!important;}
 .lf-bulk-week-item {display:flex;align-items:center;gap:8px;border:1px solid #d1d5db;padding:9px;border-radius:10px;background:#fff;font-size:12px;font-weight:700;}
 .lf-bulk-week-item input {height:18px;width:18px;accent-color:#16a34a;}
+/* LF 0.27.5: selettori settimane leggibili in entrambe le modalità. */
+#lf-bulk-delete-modal .lf-bulk-week-item,
+#duplicate-week-modal .lf-bulk-week-item {color:#172b26!important;background:#f8fafc!important;border:1px solid #9caaa5!important;cursor:pointer;min-height:48px}
+#lf-bulk-delete-modal .lf-bulk-week-item span,
+#duplicate-week-modal .lf-bulk-week-item span {color:#172b26!important;font-weight:800!important;line-height:1.4}
+#lf-bulk-delete-modal .lf-bulk-week-item:has(input:checked),
+#duplicate-week-modal .lf-bulk-week-item:has(input:checked) {background:#dff7e8!important;border-color:#16a34a!important}
+#lf-bulk-delete-modal .lf-bulk-week-item input,
+#duplicate-week-modal .lf-bulk-week-item input {height:20px;width:20px;flex-shrink:0;accent-color:#16a34a}
+html[data-lion-theme="dark"] #lf-bulk-delete-modal .lf-bulk-week-item,
+html[data-lion-theme="dark"] #duplicate-week-modal .lf-bulk-week-item {background:#142620!important;border-color:#456456!important;color:#f0fff5!important}
+html[data-lion-theme="dark"] #lf-bulk-delete-modal .lf-bulk-week-item span,
+html[data-lion-theme="dark"] #duplicate-week-modal .lf-bulk-week-item span {color:#f0fff5!important}
+html[data-lion-theme="dark"] #lf-bulk-delete-modal .lf-bulk-week-item:has(input:checked),
+html[data-lion-theme="dark"] #duplicate-week-modal .lf-bulk-week-item:has(input:checked) {background:#214532!important;border-color:#78d79a!important}
+#duplicate-week-list {overflow-y:auto;max-height:260px;display:flex;flex-direction:column;gap:8px}
+
 #section-templates #view-create-tpl {max-width:1100px;margin-inline:auto;}
 #section-templates #view-create-tpl input {min-height:42px;}
 @media(max-width:420px){#active-week-editor-container > .grid{grid-template-columns:repeat(1,minmax(0,1fr))!important;}}
@@ -222,6 +239,29 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
 .lf20-share-btn:hover{background:#dcfce7}
 @media(max-width:600px){.lf20-action{flex-direction:column;gap:8px;padding:11px;min-height:108px}.lf20-action-icon{width:32px;height:32px}.lf20-action-text strong{font-size:13px;line-height:1.3}.lf20-action-text small{font-size:10px}}
 @media(max-width:355px){.lf20-actions{gap:7px}.lf20-action{padding:9px}.lf20-action-text strong{font-size:12px}.lf20-action-text small{font-size:9px}}
+
+/* Beta 0.27.6 — Superset A1/A2 nelle schede, senza librerie aggiuntive. */
+.lf276-ss-control{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin-top:9px;border-top:1px dashed #b7cac0;padding-top:9px}
+.lf276-ss-control label{font-size:11px;font-weight:800;color:#195339;flex:1 1 170px}
+.lf276-ss-control select,.lf276-ss-control input{display:block;margin-top:4px;width:100%;min-height:40px;border:1px solid #a8c4b6;background:#fff;border-radius:9px;padding:7px;color:#123c2b;font-size:12px}
+.lf276-ss-help{font-size:10px;color:#526c60;line-height:1.45;margin:5px 0 0}
+.lf276-ss-card{border:2px solid #1da879!important;border-left:5px solid #16a34a!important;background:linear-gradient(95deg,#e9f8ef,#fff)!important}
+.lf276-ss-badge{display:inline-flex;align-items:center;background:#126a49;color:#fff;border-radius:7px;padding:4px 7px;font-size:10px;font-weight:900;margin:3px 6px 4px 0;letter-spacing:.03em}
+.lf276-ss-note{font-size:11px;font-weight:800;color:#136444;background:#e0f5e9;padding:6px 8px;border-radius:8px;margin:5px 0}
+html[data-lion-theme="dark"] .lf276-ss-control{border-top-color:#456d62}
+html[data-lion-theme="dark"] .lf276-ss-control label,html[data-lion-theme="dark"] .lf276-ss-help{color:#b7ebd4!important}
+html[data-lion-theme="dark"] .lf276-ss-control select,html[data-lion-theme="dark"] .lf276-ss-control input{background:#132a29!important;color:#f5fff9!important;border-color:#5e8b77!important}
+html[data-lion-theme="dark"] .lf276-ss-card{background:#183c33!important;border-color:#2cc98a!important}
+html[data-lion-theme="dark"] .lf276-ss-badge{background:#1a9369!important;color:#fff!important}
+html[data-lion-theme="dark"] .lf276-ss-note{background:#163d31!important;color:#b6f6d0!important}
+
+
+/* Correzione contrasto confermata: caselle leggibili sia nel tema chiaro che scuro. */
+#lf-bulk-delete-modal .lf-bulk-week-item{color:#18352b!important}
+#lf-bulk-delete-modal .lf-bulk-week-item span{color:inherit!important}
+html[data-lion-theme="dark"] #lf-bulk-delete-modal .lf-bulk-week-item{background:#17362c!important;color:#fff!important;border-color:#66a383!important}
+html[data-lion-theme="dark"] #lf-bulk-delete-modal .lf-bulk-week-item span{color:#fff!important}
+
 </style>
 <style>
 /* LION FIT V26.0 — tema scuro professionale, predefinito chiaro */
@@ -481,7 +521,7 @@ html[data-lion-theme="dark"] :is(button,a,[role="button"]):focus-visible {
   outline-offset:3px;
 }
 
-/* Archivio schede condivise: distinguere pannello, schede e azioni. */
+/* Archivio schede: distinguere pannello, schede e azioni. */
 html[data-lion-theme="dark"] #view-saved-tpl {
   background:#131B28!important;
   border:1.5px solid #445569!important;
@@ -605,7 +645,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
             </button>
             <button onclick="showSection('templates')" id="side-nav-templates" class="side-nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider text-gray-500 hover:text-black hover:bg-gray-100 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                <span>Schede condivise</span>
+                <span>Archivio schede</span>
             </button>
             <button onclick="showSection('library')" id="side-nav-library" class="side-nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider text-gray-500 hover:text-black hover:bg-gray-100 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
@@ -628,7 +668,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
 
         <div class="p-4 border-t border-gray-200 space-y-3">
             <button data-lf-theme-toggle class="lf26-theme-btn w-full" aria-label="Cambia tema">🌙 Tema scuro</button>
-            <div class="lf26-version">LION FIT · BETA 0.27.2</div>
+            <div class="lf26-version">LION FIT · BETA 0.27.6</div>
             <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-1">
                 <span class="text-[9px] font-black uppercase text-gray-500 block">Codice Invito Palestra</span>
                 <span id="side-gym-code" class="text-xs font-black text-neon tracking-widest block">Cod. ---</span>
@@ -663,13 +703,13 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
             </div>
             <div class="lf14-section-heading"><div><h3>Da dove vuoi iniziare?</h3><p>Le operazioni principali sempre a portata di mano</p></div></div>
             <div class="lf14-navgrid"><button type="button" onclick="showSection('athletes')" class="lf14-navcard"><span class="lf14-navicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 21v-2a6 6 0 0 1 12 0v2M17 11a3 3 0 1 0-1-5M17 16a5 5 0 0 1 4 5"/></svg></span><span class="lf14-navcopy"><strong>Gestione atleti</strong><small>Programmi e assegnazioni</small></span><span class="lf14-chevron" aria-hidden="true">›</span></button>
-<button type="button" onclick="showSection('templates')" class="lf14-navcard"><span class="lf14-navicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8v8M7 6v12M17 6v12M20 8v8M7 12h10"/></svg></span><span class="lf14-navcopy"><strong>Schede condivise</strong><small>Crea e consulta le schede</small></span><span class="lf14-chevron" aria-hidden="true">›</span></button>
+<button type="button" onclick="showSection('templates')" class="lf14-navcard"><span class="lf14-navicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8v8M7 6v12M17 6v12M20 8v8M7 12h10"/></svg></span><span class="lf14-navcopy"><strong>Archivio schede</strong><small>Crea e consulta le schede</small></span><span class="lf14-chevron" aria-hidden="true">›</span></button>
 <button type="button" onclick="showSection('library')" class="lf14-navcard"><span class="lf14-navicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6C9 4 6 4 3 6v13c3-2 6-2 9 0 3-2 6-2 9 0V6c-3-2-6-2-9 0ZM12 6v13"/></svg></span><span class="lf14-navcopy"><strong>Libreria esercizi</strong><small>Ricerca italiano e inglese</small></span><span class="lf14-chevron" aria-hidden="true">›</span></button>
 <button type="button" onclick="showSection('profile')" class="lf14-navcard"><span class="lf14-navicon"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5h4l.6 2.7c.65.22 1.25.57 1.78 1l2.6-.93 2 3.46-2.05 1.8c.13.65.13 1.3 0 1.95l2.05 1.8-2 3.46-2.6-.93c-.53.43-1.13.78-1.78 1L14 21.5h-4l-.6-2.7a7.6 7.6 0 0 1-1.78-1l-2.6.93-2-3.46 2.05-1.8a7.6 7.6 0 0 1 0-1.95l-2.05-1.8 2-3.46 2.6.93c.53-.43 1.13-.78 1.78-1L10 2.5Z"/><circle cx="12" cy="12" r="3.1"/></svg></span><span class="lf14-navcopy"><strong>Palestra e profilo</strong><small>Impostazioni e inviti</small></span><span class="lf14-chevron" aria-hidden="true">›</span></button></div>
             <div class="lf14-section-heading lf14-stats-heading"><div><h3>La tua palestra</h3><p>Riepilogo sintetico</p></div></div>
             <div class="lf14-stats">
                 <div class="lf14-stat"><span>Atleti iscritti</span><strong id="stat-total-athletes">0</strong><small>Account nella palestra</small></div>
-                <div class="lf14-stat"><span>Schede create</span><strong id="stat-total-templates">0</strong><small>Archivio schede condivise</small></div>
+                <div class="lf14-stat"><span>Schede create</span><strong id="stat-total-templates">0</strong><small>Archivio schede</small></div>
                 <div class="lf14-stat lf14-invite"><span>Inviti atleti</span><strong id="stat-invite-code">---</strong><small>Da condividere con gli atleti</small></div>
             </div>
         </section>
@@ -725,7 +765,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
                     </button>
                     <button type="button" id="lf20-assign-shared" class="lf20-action">
                         <span class="lf20-action-icon"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="14" height="16" rx="2"/><path d="M4 8v12a2 2 0 0 0 2 2h11M9 8h8M9 12h8M9 16h5"/></svg></span>
-                        <span class="lf20-action-text"><strong>Assegna scheda condivisa</strong><small>Scegli dall'archivio</small></span>
+                        <span class="lf20-action-text"><strong>Assegna scheda dell’archivio</strong><small>Scegli dall'archivio</small></span>
                     </button>
                     <button type="button" onclick="toggleModal('import-week-modal')" class="lf20-action">
                         <span class="lf20-action-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16M15 4v16"/></svg></span>
@@ -736,6 +776,8 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
                 <!-- SCHEDE DI PREPARAZIONE ATLETICA ASSEGNATE -->
                 <div class="bg-gray-50 border border-gray-200 p-3 sm:p-4 rounded-2xl space-y-2 sm:space-y-3">
                     <h6 class="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2"><svg class="lf-mono-icon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20 M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12 M12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/></svg> Schede personali assegnate</h6>
+                    <button type="button" id="lf277-protect-legacy-sheets" class="w-full rounded-xl bg-green-50 border border-green-300 p-2 text-xs font-bold text-green-900">🛡 Salva le vecchie schede nell'ARCHIVIO dell'atleta</button>
+                    <p class="text-[10px] text-gray-600">Usa una volta dopo aver pubblicato le regole. Non modifica né duplica le schede originali.</p>
                     <div id="personal-templates-list" class="space-y-2 max-h-48 overflow-y-auto pr-1">
                         <p class="text-[10px] text-gray-400 font-bold uppercase py-2">Nessuna scheda presente.</p>
                     </div>
@@ -775,31 +817,31 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
         <section id="section-templates" class="hidden space-y-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white border border-gray-200 p-4 rounded-2xl shadow-xs gap-3 sm:gap-0">
                 <div>
-                    <h3 class="text-sm font-black uppercase tracking-widest text-black">Schede condivise</h3>
+                    <h3 class="text-sm font-black uppercase tracking-widest text-black">Archivio schede</h3>
                     <p class="text-[10px] font-bold text-gray-500 uppercase mt-0.5">Crea schede riutilizzabili e assegnale ai tuoi atleti</p>
                 </div>
-                <button id="tab-btn-create-tpl" type="button" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-black bg-green-700 hover:bg-green-800 text-white rounded-xl transition shadow-sm" aria-label="Crea nuova scheda condivisa">
+                <button id="tab-btn-create-tpl" type="button" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-black bg-green-700 hover:bg-green-800 text-white rounded-xl transition shadow-sm" aria-label="Crea nuova scheda dell’archivio">
                     <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                    Crea nuova scheda condivisa
+                    Crea nuova scheda dell’archivio
                 </button>
             </div>
 
             <!-- TAB 1: CREA SCHEDA GLOBALE -->
             <div id="view-create-tpl" class="bg-white border border-gray-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 shadow-xs hidden">
                 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-3">
-                    <h3 class="text-xs sm:text-sm font-black uppercase tracking-widest text-black"><svg class="lf-mono-icon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14 M5 12h14"/></svg> Crea nuova scheda condivisa</h3>
+                    <h3 class="text-xs sm:text-sm font-black uppercase tracking-widest text-black"><svg class="lf-mono-icon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14 M5 12h14"/></svg> Crea nuova scheda dell’archivio</h3>
                     <button id="tab-btn-saved-tpl" type="button" class="inline-flex items-center justify-center border border-gray-300 rounded-lg px-3 py-2 text-xs font-bold text-gray-800 hover:bg-gray-100">← Torna all'archivio</button>
                 </div>
                 <!-- V25.1: ritorno guidato alla settimana quando la scheda nasce durante la programmazione. -->
                 <div id="lf26-week-context" class="hidden rounded-xl border border-green-300 bg-green-50 p-3 sm:p-4 space-y-2">
                     <p id="lf26-week-context-text" class="text-xs sm:text-sm font-bold text-green-950"></p>
-                    <p class="text-xs text-green-900">Salvando, la scheda entra nell'archivio condiviso, viene copiata per questo atleta e collegata automaticamente al giorno scelto. Anche le attività già compilate della settimana saranno conservate.</p>
+                    <p class="text-xs text-green-900">Salvando, la scheda entra nell'archivio schede, viene copiata per questo atleta e collegata automaticamente al giorno scelto. Anche le attività già compilate della settimana saranno conservate.</p>
                     <button id="lf26-cancel-week-flow" type="button" class="rounded-lg border border-green-500 bg-white px-3 py-2 text-xs font-bold text-green-900">← Torna alla settimana senza creare</button>
                 </div>
                 <div id="lf17-edit-status" class="hidden bg-green-50 border border-green-300 rounded-xl p-3 flex-wrap gap-2 items-center justify-between"><span id="lf17-edit-label" class="font-bold text-sm text-green-900"></span><button id="lf17-cancel-edit" type="button" class="border border-green-600 text-green-800 px-3 py-2 rounded-lg font-bold text-xs">Annulla modifica</button></div>
                 <form id="template-form" class="space-y-4">
                     <div>
-                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Nome scheda (archivio condiviso)</label>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Nome scheda (archivio schede)</label>
                         <input type="text" id="tpl-title" placeholder="Es. Potenza Esplosiva 1, Ipertrofia A" required class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none text-xs font-bold text-black focus:border-neon">
                     </div>
                     <div>
@@ -807,10 +849,10 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
                             <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400">Esercizi</label>
                             <button type="button" id="btn-add-exercise" class="text-[9px] bg-green-50 text-neon border border-green-200 font-black uppercase tracking-widest px-2.5 py-1.5 rounded-lg transition">+ Aggiungi Esercizio</button>
                         </div>
-                        <p class="lf14-editor-help">Cerca un esercizio in italiano o inglese. Se riconosciuto, vedrai l’anteprima SVG. Puoi comunque scrivere esercizi personalizzati.</p>
+                        <p class="lf14-editor-help">Cerca un esercizio in italiano o inglese. Per creare un <strong>SUPERSET</strong>, aggiungi due esercizi uno dopo l’altro e, nel secondo, scegli «In superset con il precedente». Il recupero si svolge dopo il secondo esercizio.</p>
                         <div id="exercises-container" class="space-y-3 max-h-[58vh] overflow-y-auto pr-1"></div>
                     </div>
-                    <button type="submit" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3.5 rounded-xl text-[10px] sm:text-xs shadow-sm">Salva nelle Schede condivise</button>
+                    <button type="submit" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3.5 rounded-xl text-[10px] sm:text-xs shadow-sm">Salva nell’Archivio schede</button>
                 </form>
             </div>
 
@@ -818,12 +860,12 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
             <div id="view-saved-tpl" class="bg-white border border-gray-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 shadow-xs">
                 <!-- V25.4: dall'editor si può tornare all'archivio senza perdere la bozza della settimana. -->
                 <div id="lf26-archive-week-context" class="hidden rounded-xl border border-green-300 bg-green-50 p-3 sm:p-4 space-y-2">
-                    <p class="text-xs sm:text-sm font-bold text-green-950">Sei nell'archivio delle schede condivise. La scheda che stavi creando non è stata salvata.</p>
+                    <p class="text-xs sm:text-sm font-bold text-green-950">Sei nell’Archivio schede. La scheda che stavi creando non è stata salvata.</p>
                     <p id="lf26-archive-week-context-text" class="text-xs text-green-900"></p>
                     <button id="lf26-archive-return-week" type="button" class="rounded-lg border border-green-500 bg-white px-3 py-2 text-xs font-bold text-green-900">← Torna alla settimana dell'atleta</button>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between border-b border-gray-200 pb-3">
-                    <div><h3 class="text-sm font-black uppercase tracking-widest text-black">Archivio schede condivise</h3><p id="lf17-archive-count" class="text-xs text-gray-500 mt-1">Le tue schede riutilizzabili</p></div>
+                    <div><h3 class="text-sm font-black uppercase tracking-widest text-black">Archivio schede</h3><p id="lf17-archive-count" class="text-xs text-gray-500 mt-1">Le tue schede riutilizzabili</p></div>
                     <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                         <input id="lf17-archive-search" type="search" placeholder="Cerca una scheda..." aria-label="Cerca schede per nome o esercizio" class="w-full sm:w-60 rounded-xl border border-gray-300 bg-gray-50 p-3 text-sm text-gray-900 focus:border-green-600 outline-none">
                         <select id="lf17-archive-sort" aria-label="Ordina schede" class="rounded-xl border border-gray-300 bg-white p-3 text-sm"><option value="recent">Più recenti</option><option value="az">Nome A–Z</option><option value="size">Più esercizi</option></select>
@@ -955,7 +997,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
         <section id="section-trash" class="hidden space-y-5">
           <div class="lf26-trash-hero rounded-2xl border p-5 sm:p-6 space-y-2">
             <div class="flex flex-wrap items-center justify-between gap-3"><div><p class="text-[10px] font-black uppercase tracking-widest text-green-700">GESTIONE SICURA</p><h2 class="text-2xl font-black tracking-tight">Cestino</h2></div><button type="button" onclick="lf26LoadTrash()" class="lf26-theme-btn">↻ Aggiorna elenco</button></div>
-            <p class="text-sm lf26-trash-meta">Schede condivise, schede assegnate e settimane eliminate. Puoi ripristinarle senza perdere gli esercizi e le attività.</p>
+            <p class="text-sm lf26-trash-meta">Archivio schede, schede assegnate e settimane eliminate. Puoi ripristinarle senza perdere gli esercizi e le attività.</p>
             <p class="text-xs lf26-trash-meta">Le schede cestinate non sono più mostrate agli atleti. Se una scheda personale è collegata a una settimana, spostarla nel Cestino può rendere temporaneamente non disponibile quel collegamento. Ripristinala per riattivarlo.</p>
           </div>
           <div id="lf26-trash-list" class="grid grid-cols-1 lg:grid-cols-2 gap-3"><p class="text-sm text-gray-500">Apri il Cestino per visualizzare gli elementi eliminati.</p></div>
@@ -1063,7 +1105,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
                 </div>
                 <label class="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-3 cursor-pointer">
                     <input id="lf20-also-shared" type="checkbox" class="mt-0.5 h-4 w-4 accent-green-600 shrink-0">
-                    <span class="text-xs leading-relaxed"><strong class="block text-green-900">Salva anche nelle Schede condivise</strong><span class="block text-green-800/80 mt-1">Crea una copia riutilizzabile per altri atleti. La scheda personale resta indipendente.</span></span>
+                    <span class="text-xs leading-relaxed"><strong class="block text-green-900">Salva anche nell’Archivio schede</strong><span class="block text-green-800/80 mt-1">Crea una copia riutilizzabile per altri atleti. La scheda personale resta indipendente.</span></span>
                 </label>
                 <button type="submit" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3 sm:py-3.5 rounded-xl text-[10px] sm:text-xs shadow-sm">Crea e assegna scheda personale</button>
             </form>
@@ -1130,9 +1172,10 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
                 <button type="button" onclick="toggleModal('duplicate-week-modal')" class="text-gray-400 hover:text-black p-1">✕</button>
             </div>
             <div class="space-y-3 text-[10px] sm:text-xs">
-                <p id="dup-source-label" class="font-bold text-gray-700">Copia contenuti da: Settimana ...</p>
+                <p id="dup-source-label" class="font-bold text-gray-700">Seleziona la settimana da copiare:</p>
+                <div id="duplicate-week-list" role="radiogroup" aria-label="Settimana da duplicare"></div>
                 <div>
-                    <label class="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Data Inizio Nuova (Lunedì)</label>
+                    <label class="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Data inizio della nuova settimana</label>
                     <input type="date" id="dup-target-date" class="w-full bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl p-2.5 sm:p-3 text-[10px] sm:text-xs font-bold text-black outline-none focus:border-neon">
                 </div>
             </div>
@@ -1144,7 +1187,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
     <div id="gym-workout-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-gray-200 text-black w-full max-w-lg rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center border-b border-gray-100 pb-2 sm:pb-3 shrink-0">
-                <h3 class="font-black text-xs sm:text-sm uppercase tracking-widest text-black">Assegna scheda condivisa</h3>
+                <h3 class="font-black text-xs sm:text-sm uppercase tracking-widest text-black">Assegna scheda dell’archivio</h3>
                 <button type="button" onclick="toggleModal('gym-workout-modal')" class="text-gray-400 hover:text-black p-1">✕</button>
             </div>
             <div id="assign-template-options-list" class="space-y-2 overflow-y-auto flex-grow pr-1 text-[10px] sm:text-xs">
@@ -1183,7 +1226,7 @@ Martedì	Forza	...
       </div>
     </div>
     <div id="lf-bulk-delete-modal" class="fixed inset-0 bg-black/60 z-[90] hidden flex items-center justify-center p-4">
-      <div class="bg-white w-full max-w-md rounded-3xl p-5 space-y-4 max-h-[85dvh] overflow-y-auto">
+      <div class="bg-white text-black border border-gray-300 w-full max-w-md rounded-3xl p-5 space-y-4 max-h-[85dvh] overflow-y-auto">
         <h3 class="font-black text-lg">Elimina più settimane</h3>
         <p class="text-xs text-gray-600">Seleziona le settimane da spostare nel Cestino. Potrai ripristinarle.</p>
         <div id="lf-bulk-week-list" class="space-y-2"></div>
@@ -1261,7 +1304,7 @@ Martedì	Forza	...
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, where, deleteDoc, onSnapshot, enableIndexedDbPersistence, serverTimestamp, Timestamp, deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, where, deleteDoc, onSnapshot, enableIndexedDbPersistence, serverTimestamp, Timestamp, deleteField, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD5xFMM-kKy2-pYzcTk3MiFmXCTCe4EXEA",
@@ -1353,6 +1396,7 @@ Martedì	Forza	...
         let allAthletes = [];
         let selectedAthlete = null;
         let gymTemplates = [];
+        let lf275TrashedSharedIds = new Set();
         // Beta 0.26.1: Cestino recuperabile, cancellazione definitiva riservata al titolare anche nelle regole Firestore.
         async function lf26MoveToTrash(reference) {
             if(!currentGymId || !currentUserUid) throw new Error('Sessione non valida.');
@@ -1361,6 +1405,19 @@ Martedì	Forza	...
             if(existing.data().deletedAt) throw new Error('Elemento già presente nel Cestino.');
             await updateDoc(reference,{deletedAt:serverTimestamp(),deletedBy:currentUserUid});
         }
+        async function lf275FindActiveWeekLinks(athleteId, templateId) {
+            if (!athleteId || !currentGymId) return [];
+            const snap=await getDocs(collection(db,'gyms',currentGymId,'athlete_programs',athleteId,'weeks'));
+            const found=[];
+            snap.docs.forEach(w=>{
+                const data=w.data();
+                if(data.deletedAt) return;
+                const days=Object.entries(data.days||{}).filter(([,day])=>[day?.templateId,day?.templateId2].some(id=>String(id||'')===String(templateId)));
+                days.forEach(([day])=>found.push(`${data.startDate||'settimana senza data'} · ${day}`));
+            });
+            return found;
+        }
+
         window.lf26OpenTrash = async function(){
             if(lfWeekDirty && !confirm('Hai modifiche non salvate. Aprire comunque il Cestino?')) return;
             showSection('trash');
@@ -1380,7 +1437,7 @@ Martedì	Forza	...
                     });
                 }catch(err){issues.push(`${label}: ${err.code||err.message}`);}
             }
-            await append(['gyms',currentGymId,'templates'],'shared','Scheda condivisa');
+            await append(['gyms',currentGymId,'templates'],'shared','Scheda dall’archivio');
             // Nessuna collectionGroup: leggiamo solo atleti della palestra con gli stessi permessi del coach.
             let roster=allAthletes||[];
             if(!roster.length){
@@ -1402,8 +1459,36 @@ Martedì	Forza	...
                 const when=document.createElement('p');when.className='lf26-trash-meta text-xs';when.textContent=item.when?'Spostata il '+item.when.toLocaleString('it-IT'):'Elemento eliminato';
                 const actions=document.createElement('div');actions.className='flex flex-wrap gap-2';
                 const restore=document.createElement('button');restore.type='button';restore.className='lf26-theme-btn';restore.textContent='↩ Ripristina';
-                restore.onclick=async()=>{restore.disabled=true;try{await updateDoc(item.ref,{deletedAt:deleteField(),deletedBy:deleteField()});await lf26LoadTrash();await loadTemplates();await loadDashboardStats();if(selectedAthlete?.id===item.athleteId){await loadAthleteWeeksProgram();await loadAthletePersonalTemplates();}}
-                  catch(err){restore.disabled=false;showAlert('Ripristino non riuscito: '+(err.code||err.message),'Errore');}};
+                restore.onclick=async()=>{
+                    restore.disabled=true;
+                    let restored=false;
+                    try {
+                        const current=await getDoc(item.ref);
+                        if(!current.exists()) throw new Error('Documento non trovato: potrebbe essere stato eliminato definitivamente.');
+                        if(!current.data().deletedAt) throw new Error('La scheda è già attiva. Aggiorna il Cestino.');
+                        // updateDoc, MAI addDoc: il riferimento e l'ID restano immutati.
+                        await updateDoc(item.ref,{deletedAt:deleteField(),deletedBy:deleteField()});
+                        restored=true;
+                        const check=await getDoc(item.ref);
+                        if(!check.exists() || check.data().deletedAt) throw new Error('Ripristino non verificato. Aggiorna i dati prima di riprovare.');
+                        await lf26LoadTrash();
+                        await loadTemplates();
+                        await loadDashboardStats();
+                        if(selectedAthlete?.id===item.athleteId){
+                            await loadAthleteWeeksProgram();
+                            await loadAthletePersonalTemplates();
+                        }
+                        showAlert(item.kind==='personal'
+                            ? 'Scheda personale ripristinata con lo stesso ID. Se era collegata a una settimana, torna disponibile in quel giorno. L’atleta deve aggiornare la pagina per vederla.'
+                            : item.kind==='shared'
+                            ? 'Scheda ripristinata nell’Archivio schede con lo stesso ID: è di nuovo selezionabile e assegnabile.'
+                            : 'Settimana ripristinata con le attività e i collegamenti precedenti.', 'Ripristino completato');
+                    }catch(err){
+                        console.error('Ripristino Cestino',err);
+                        showAlert((restored?'La scheda è stata ripristinata, ma non è stato possibile aggiornare tutte le schermate: ':'Ripristino non riuscito: ')+(err.code||err.message),'Verifica Cestino');
+                        restore.disabled=false;
+                    }
+                };
                 const purge=document.createElement('button');purge.type='button';purge.className='lf26-theme-btn';purge.textContent='Elimina definitivamente';purge.style.color='#e87c89';
                 purge.onclick=async()=>{
                     if(lf23CurrentRole!=='owner'){
@@ -1430,7 +1515,14 @@ Martedì	Forza	...
                         showAlert('Eliminazione definitiva non riuscita: '+(err.code||err.message),'Errore');
                     }finally{purge.disabled=false;}
                 };
-                actions.append(restore);if(lf23CurrentRole==='owner')actions.append(purge);card.append(badge,title,when,actions);host.appendChild(card);
+                actions.append(restore);
+                if(lf23CurrentRole==='owner' && item.kind!=='personal') actions.append(purge);
+                if(item.kind==='personal'){
+                    const notice=document.createElement('p');notice.className='lf26-trash-meta text-xs';
+                    notice.textContent='Il Cestino consente il ripristino. Le copie già salvate in ARCHIVIO rimangono consultabili indipendentemente da questa scheda.';
+                    card.appendChild(notice);
+                }
+                card.append(badge,title,when,actions);host.appendChild(card);
             });
         };
 
@@ -1471,7 +1563,8 @@ Martedì	Forza	...
         let activeWeekIndex = -1;
         let lfWeekDirty = false;
         let targetLinkingDayName = null;
-        // V25.1: collegamento temporaneo tra editor di schede condivise e giorno del programma.
+        let targetLinkingSlot = 1;
+        // V25.1: collegamento temporaneo tra editor di schede dell’archivio e giorno del programma.
         let lf26PendingWeekTemplate = null;
         let editingPersonalTemplateId = null;
         let currentPhotoBase64 = "";
@@ -1723,21 +1816,74 @@ Martedì	Forza	...
             catch{field.select();showAlert('Seleziona e copia il collegamento.','Copia manuale')}
         });
 
-        // V24: copia una scheda condivisa nell'area personale dell'atleta,
-        // prima di collegarla alla settimana. L'atleta NON legge /templates.
-        async function lf24EnsurePersonalWeekTemplate(athleteId,templateId){
-            if(!athleteId||!templateId)return false;
-            const ref=doc(db,'gyms',currentGymId,'athlete_programs',athleteId,'personal_templates',templateId);
-            const existing=await getDoc(ref);
-            if(existing.exists())return false;
-            const tpl=gymTemplates.find(t=>t.id===templateId);
-            if(!tpl)throw new Error('Scheda '+templateId+' non presente nell’archivio condiviso.');
-            await setDoc(ref,{
-                title:tpl.title||'Scheda assegnata',exercises:tpl.exercises||[],sourceSharedTemplateId:templateId,
-                createdAt:serverTimestamp()
+        // Beta 0.27.7: ogni scheda ricevuta viene conservata in archive_templates.
+        // L'archivio contiene solo titolo + esercizi, senza giorni o settimane.
+        function lf277ArchivePayload(templateId, data) {
+            const title=String(data?.title || '');
+            const exercises=data?.exercises;
+            if(!title.trim() || title.length>200 || !Array.isArray(exercises) || !exercises.length || exercises.length>250)
+                throw new Error('La scheda deve avere un titolo valido e da 1 a 250 esercizi per poter essere archiviata.');
+            return {sourceTemplateId:String(templateId),title,
+                exercises:exercises.map(ex=>({...ex})),archiveVersion:1,
+                archivedAt:serverTimestamp(),archivedBy:currentUserUid};
+        }
+        function lf277ArchiveRef(athleteId,templateId) {
+            return doc(db,'gyms',currentGymId,'athlete_programs',athleteId,'archive_templates',String(templateId));
+        }
+        async function lf277EnsureProtectedCopy(athleteId,templateId,personalData) {
+            // Le copie gia' presenti non vengono mai sovrascritte.
+            const archiveRef=lf277ArchiveRef(athleteId,templateId);
+            if((await getDoc(archiveRef)).exists())return false;
+            const personalRef=doc(db,'gyms',currentGymId,'athlete_programs',athleteId,'personal_templates',String(templateId));
+            const actual=personalData || (await getDoc(personalRef)).data();
+            if(!actual)throw new Error('La scheda personale originale non esiste.');
+            await setDoc(archiveRef,lf277ArchivePayload(templateId,actual));
+            return true;
+        }
+        async function lf277CreatePersonalWithArchive(athleteId,personalRef,personalData) {
+            // Commit atomico: nessuna nuova scheda assegnata senza il relativo archivio.
+            const archiveRef=lf277ArchiveRef(athleteId,personalRef.id);
+            const existing=await getDoc(archiveRef);
+            const batch=writeBatch(db);
+            batch.set(personalRef,{...personalData,createdAt:serverTimestamp()});
+            if(!existing.exists())batch.set(archiveRef,lf277ArchivePayload(personalRef.id,personalData));
+            await batch.commit();
+        }
+
+        // Beta 0.27.5: collegamenti stabili. Una scheda condivisa viene copiata
+        // nell'area personale con lo STESSO ID, così settimane e assegnazioni coincidono.
+        // Una copia cestinata non viene rimpiazzata: deve essere ripristinata,
+        // conservando l'ID e gli esercizi eventualmente personalizzati.
+        async function lf275AssignSharedToPersonal(athleteId, tpl) {
+            if(!athleteId || !tpl?.id || !currentGymId) throw new Error('Seleziona un atleta e una scheda valida.');
+            const personalRef=doc(db,'gyms',currentGymId,'athlete_programs',athleteId,'personal_templates',tpl.id);
+            const personalSnap=await getDoc(personalRef);
+            if(personalSnap.exists()) {
+                if(personalSnap.data().deletedAt) {
+                    throw new Error('La copia personale è nel Cestino: ripristinala per riattivare anche i collegamenti settimanali. Non verrà creata una copia duplicata.');
+                }
+                await lf277EnsureProtectedCopy(athleteId,tpl.id,personalSnap.data());
+                return false; // Scheda già presente: solo eventuale copia storica mancante.
+            }
+            const sharedRef = doc(db,'gyms',currentGymId,'templates',tpl.id);
+            const sharedSnap = await getDoc(sharedRef);
+            if(!sharedSnap.exists() || sharedSnap.data().deletedAt) {
+                throw new Error('Questa scheda non è più attiva nell’Archivio schede. Ripristinala dal Cestino prima di riutilizzarla.');
+            }
+            const source=sharedSnap.data();
+            await lf277CreatePersonalWithArchive(athleteId,personalRef,{
+                title:source.title||'Scheda assegnata',
+                exercises:(source.exercises||[]).map(ex=>({...ex})),
+                sourceSharedTemplateId:tpl.id
             });
             return true;
         }
+        async function lf24EnsurePersonalWeekTemplate(athleteId,templateId){
+            if(!athleteId || !templateId) return false;
+            // Evita la creazione fittizia di schede in assenza dell'originale attivo.
+            return lf275AssignSharedToPersonal(athleteId,{id:String(templateId)});
+        }
+
         document.getElementById('lf24-migrate-week-sheets').addEventListener('click',async e=>{
             if(!selectedAthlete)return;
             const btn=e.currentTarget;btn.disabled=true;
@@ -1747,6 +1893,7 @@ Martedì	Forza	...
                 for(const week of athleteWeeksList){
                     for(const day of Object.values(week.days||{})){
                         if(day?.templateId)ids.add(day.templateId);
+                        if(day?.templateId2)ids.add(day.templateId2);
                     }
                 }
                 for(const id of ids){if(await lf24EnsurePersonalWeekTemplate(selectedAthlete.id,id))count++;}
@@ -1993,33 +2140,73 @@ Martedì	Forza	...
             }
         });
 
+        // Beta 0.27.5: ricordiamo la settimana per ID, non per indice (l'ordinamento puo' cambiare).
+        let lfLoadedWeeksAthleteId = null;
+        let lfPreferredWeekIdOnReload = null;
+        function lfKeepWeekAfterRemoving(removed) {
+            const removedSet = new Set(removed);
+            const survivors = athleteWeeksList.filter(w => !removedSet.has(w.id));
+            if (!survivors.length) { lfPreferredWeekIdOnReload = null; return; }
+            const currentId = athleteWeeksList[activeWeekIndex]?.id;
+            if (currentId && !removedSet.has(currentId)) {
+                lfPreferredWeekIdOnReload = currentId;
+                return;
+            }
+            const closestIndex = Math.min(Math.max(activeWeekIndex,0),survivors.length-1);
+            lfPreferredWeekIdOnReload = survivors[closestIndex].id;
+        }
         async function loadAthleteWeeksProgram() {
             if (!selectedAthlete || !currentGymId) return;
+            const athleteIdAtStart = selectedAthlete.id;
+            const gymIdAtStart = currentGymId;
             const container = document.getElementById('active-week-editor-container');
             const badgesBar = document.getElementById('weeks-badges-bar');
             const weeksCountBadge = document.getElementById('program-weeks-count-badge');
-
+            const sameAthlete = lfLoadedWeeksAthleteId === athleteIdAtStart;
             try {
-                const weeksRef = collection(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "weeks");
+                const weeksRef = collection(db, "gyms", gymIdAtStart, "athlete_programs", athleteIdAtStart, "weeks");
                 const snapshot = await getDocs(weeksRef);
-                
-                athleteWeeksList = [];
-                snapshot.forEach(d => {if(!d.data().deletedAt) athleteWeeksList.push({ id: d.id, ...d.data() });});
-                athleteWeeksList.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-
+                // Evita che una risposta lenta mostri il programma di un altro atleta.
+                if (!selectedAthlete || selectedAthlete.id !== athleteIdAtStart || currentGymId !== gymIdAtStart) return;
+                const openWeekId = lfPreferredWeekIdOnReload || (sameAthlete && activeWeekIndex >= 0
+                    ? athleteWeeksList[activeWeekIndex]?.id : null);
+                lfPreferredWeekIdOnReload = null;
+                const draft = openWeekId && lfWeekDirty ? lf26CaptureWeekDraft(athleteWeeksList[activeWeekIndex]) : null;
+                const wasDirty = Boolean(draft && lfWeekDirty);
+                const freshWeeks = [];
+                snapshot.forEach(d => {if(!d.data().deletedAt) freshWeeks.push({ id: d.id, ...d.data() });});
+                freshWeeks.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+                athleteWeeksList = freshWeeks;
+                lfLoadedWeeksAthleteId = athleteIdAtStart;
                 weeksCountBadge.textContent = `${athleteWeeksList.length} settimane`;
-
-                if (athleteWeeksList.length === 0) {
-                    badgesBar.innerHTML = '<p class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase">Nessuna settimana presente.</p>';
-                    container.innerHTML = '<p class="text-[10px] sm:text-xs font-bold text-gray-400 text-center py-6">Clicca su "+ Nuovo programma" per generare le settimane.</p>';
-                    return;
-                }
-
-                activeWeekIndex = -1;
+                activeWeekIndex = openWeekId ? athleteWeeksList.findIndex(w => w.id === openWeekId) : -1;
                 renderWeekBadgesBar();
-                container.innerHTML = '<p class="text-xs font-bold text-gray-500 bg-white border border-gray-200 rounded-xl p-4">Seleziona una settimana per vedere e modificare i 7 giorni.</p>';
-                document.getElementById('lf-close-week').classList.add('hidden');
-            } catch (err) {}
+                if (activeWeekIndex >= 0) {
+                    renderSelectedWeekDaysEditor(activeWeekIndex);
+                    if (wasDirty) {
+                        for (const day of lf26DaysOrder) {
+                            const values = draft[day] || {};
+                            const first = document.getElementById(`input-act1-${day}`);
+                            const second = document.getElementById(`input-act2-${day}`);
+                            if (first) first.value = values.activity1 ?? '';
+                            if (second) second.value = values.activity2 ?? '';
+                        }
+                        lfWeekDirty = true;
+                    }
+                } else {
+                    lfWeekDirty = false;
+                    container.innerHTML = athleteWeeksList.length
+                        ? '<p class="text-xs font-bold text-gray-500 bg-white border border-gray-200 rounded-xl p-4">Seleziona una settimana per vedere e modificare i 7 giorni.</p>'
+                        : '<p class="text-[10px] sm:text-xs font-bold text-gray-400 text-center py-6">Clicca su "+ Nuovo programma" per generare le settimane.</p>';
+                    document.getElementById('lf-close-week').classList.add('hidden');
+                }
+                if (!athleteWeeksList.length) {
+                    badgesBar.innerHTML = '<p class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase">Nessuna settimana presente.</p>';
+                }
+            } catch (err) {
+                console.error('Errore caricamento settimane', err);
+                showAlert('Non riesco a ricaricare le settimane: ' + (err.code || err.message || 'controlla la connessione'), 'Caricamento non riuscito');
+            }
         }
 
         function renderWeekBadgesBar() {
@@ -2087,6 +2274,17 @@ Martedì	Forza	...
                 if (dayInfo.templateId) {
                     const matchedTpl = gymTemplates.find(t => t.id === dayInfo.templateId);
                     if (matchedTpl) linkedTemplateTitle = `🏋️‍♂️ ${matchedTpl.title}`;
+                    else linkedTemplateTitle = lf275TrashedSharedIds.has(String(dayInfo.templateId))
+                        ? '♻ Scheda nell’archivio cestinata · ripristinala'
+                        : '⚠ Scheda non disponibile nell’archivio';
+                }
+
+                let linkedTemplateTitle2 = 'Nessuna seconda scheda';
+                if (dayInfo.templateId2) {
+                    const tpl2 = gymTemplates.find(t => t.id === dayInfo.templateId2);
+                    linkedTemplateTitle2 = tpl2 ? `🏋️‍♂️ ${tpl2.title}` :
+                        lf275TrashedSharedIds.has(String(dayInfo.templateId2))
+                        ? '♻ Scheda nel Cestino · ripristinala' : '⚠ Scheda non disponibile';
                 }
 
                 dayCard.innerHTML = `
@@ -2104,12 +2302,20 @@ Martedì	Forza	...
 
                     <div class="pt-1 sm:pt-2 border-t border-gray-200 space-y-0.5 sm:space-y-1">
                         <div class="flex items-center justify-between gap-1">
-                            <span class="block text-[10px] font-black uppercase text-gray-500 truncate">Scheda condivisa</span>
-                            <button type="button" onclick="lf26StartSharedFromWeek('${dayName}')" class="text-[10px] font-bold text-green-800 hover:text-green-950 border border-green-200 bg-green-50 rounded-md px-2 py-1" title="Crea una scheda condivisa e collegala a ${dayName}">+ Crea</button>
+                            <span class="block text-[10px] font-black uppercase text-gray-500 truncate">Scheda 1 dall’archivio</span>
+                            <button type="button" onclick="lf26StartSharedFromWeek('${dayName}')" class="text-[10px] font-bold text-green-800 hover:text-green-950 border border-green-200 bg-green-50 rounded-md px-2 py-1" title="Crea una scheda dell’archivio e collegala a ${dayName}">+ Crea</button>
                         </div>
-                        <button type="button" onclick="openLinkDayTemplateModal('${dayName}')" class="w-full bg-white hover:border-neon border border-gray-200 p-2.5 rounded-xl text-left min-h-[42px] text-xs sm:text-sm font-bold text-neon flex items-center justify-between min-w-0">
+                        <button type="button" onclick="openLinkDayTemplateModal('${dayName}',1)" class="w-full bg-white hover:border-neon border border-gray-200 p-2.5 rounded-xl text-left min-h-[42px] text-xs sm:text-sm font-bold text-neon flex items-center justify-between min-w-0">
                             <span class="truncate pr-1">${linkedTemplateTitle}</span>
                             <span class="text-gray-400 text-[10px] sm:text-xs leading-none shrink-0">+</span>
+                        </button>
+                        <div class="flex items-center justify-between gap-1 pt-2">
+                            <span class="block text-[10px] font-black uppercase text-gray-500">Scheda 2 (facoltativa)</span>
+                            <button type="button" onclick="lf26StartSharedFromWeek('${dayName}',2)" class="text-[10px] font-bold text-green-800 border border-green-200 bg-green-50 rounded-md px-2 py-1" title="Crea la seconda scheda per ${dayName}">+ Crea</button>
+                        </div>
+                        <button type="button" onclick="openLinkDayTemplateModal('${dayName}',2)" class="w-full bg-white hover:border-neon border border-gray-200 p-2.5 rounded-xl text-left min-h-[42px] text-xs sm:text-sm font-bold text-neon flex items-center justify-between min-w-0">
+                            <span class="truncate pr-1">${linkedTemplateTitle2}</span>
+                            <span class="text-gray-400 shrink-0">+</span>
                         </button>
                     </div>
                 `;
@@ -2138,13 +2344,13 @@ Martedì	Forza	...
                     const weekStartDate = new Date(y, m - 1, d + (w * 7));
                     const mondayIso = weekStartDate.toISOString().split('T')[0];
                     const daysData = {
-                        "lunedì": { activity1: "", activity2: "", templateId: "" },
-                        "martedì": { activity1: "", activity2: "", templateId: "" },
-                        "mercoledì": { activity1: "", activity2: "", templateId: "" },
-                        "giovedì": { activity1: "", activity2: "", templateId: "" },
-                        "venerdì": { activity1: "", activity2: "", templateId: "" },
-                        "sabato": { activity1: "", activity2: "", templateId: "" },
-                        "domenica": { activity1: "OFF", activity2: "", templateId: "" }
+                        "lunedì": { activity1: "", activity2: "", templateId: "", templateId2: "" },
+                        "martedì": { activity1: "", activity2: "", templateId: "", templateId2: "" },
+                        "mercoledì": { activity1: "", activity2: "", templateId: "", templateId2: "" },
+                        "giovedì": { activity1: "", activity2: "", templateId: "", templateId2: "" },
+                        "venerdì": { activity1: "", activity2: "", templateId: "", templateId2: "" },
+                        "sabato": { activity1: "", activity2: "", templateId: "", templateId2: "" },
+                        "domenica": { activity1: "OFF", activity2: "", templateId: "", templateId2: "" }
                     };
                     await addDoc(weeksRef, { programTitle: title, weekIndex: w + 1, totalWeeks: weeksCount, startDate: mondayIso, days: daysData, createdAt: serverTimestamp() });
                 }
@@ -2152,58 +2358,137 @@ Martedì	Forza	...
                 toggleModal('fighter-program-modal');
                 showAlert(`Programma Fighter generato con successo!`, "Successo");
                 await loadAthleteWeeksProgram();
-            } catch (err) {}
+            } catch (err) {
+                console.error('Creazione settimane fallita', err);
+                showAlert('Creazione programma non completata: ' + (err.code || err.message || 'controlla la connessione') + '. Verifica le settimane già presenti prima di riprovare.', 'Creazione incompleta');
+            }
         });
 
+        let lfWeekSavePending = false;
         window.saveWeekDaysChanges = async function(weekDocId) {
-            if (!selectedAthlete || !currentGymId) return;
+            if (!selectedAthlete || !currentGymId || lfWeekSavePending) return;
             const daysOrder = ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica"];
-            const updatedDays = {};
-            const currentWeekData = athleteWeeksList.find(w => w.id === weekDocId);
-
-            daysOrder.forEach(dayName => {
-                const act1 = document.getElementById(`input-act1-${dayName}`) ? document.getElementById(`input-act1-${dayName}`).value.trim() : '';
-                const act2 = document.getElementById(`input-act2-${dayName}`) ? document.getElementById(`input-act2-${dayName}`).value.trim() : '';
-                const existingTplId = (currentWeekData && currentWeekData.days && currentWeekData.days[dayName]) ? currentWeekData.days[dayName].templateId : "";
-                updatedDays[dayName] = { activity1: act1, activity2: act2, templateId: existingTplId || "" };
-            });
-
+            const valuesToSave = {};
+            for (const dayName of daysOrder) {
+                const act1 = document.getElementById(`input-act1-${dayName}`);
+                const act2 = document.getElementById(`input-act2-${dayName}`);
+                if (!act1 || !act2) {
+                    showAlert('La settimana non è più aperta. Riaprila prima di salvare.', 'Salvataggio interrotto');
+                    return;
+                }
+                // Aggiorna solo le attivita': non sovrascrive templateId o altri campi del giorno.
+                valuesToSave[`days.${dayName}.activity1`] = act1.value.trim();
+                valuesToSave[`days.${dayName}.activity2`] = act2.value.trim();
+            }
+            const targetAthlete = selectedAthlete.id;
+            const targetGym = currentGymId;
+            lfWeekSavePending = true;
             try {
-                const weekRef = doc(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "weeks", weekDocId);
-                await updateDoc(weekRef, { days: updatedDays, updatedAt: serverTimestamp() });
-                lfWeekDirty = false;
-                showAlert("Settimana salvata con successo!", "Successo");
+                const weekRef = doc(db, "gyms", targetGym, "athlete_programs", targetAthlete, "weeks", weekDocId);
+                await updateDoc(weekRef, { ...valuesToSave, updatedAt: serverTimestamp() });
+                // Se il coach continua a digitare durante il salvataggio, non perdere le nuove modifiche.
+                const editedDuringSave = daysOrder.some(dayName =>
+                    (document.getElementById(`input-act1-${dayName}`)?.value.trim() ?? '') !== valuesToSave[`days.${dayName}.activity1`] ||
+                    (document.getElementById(`input-act2-${dayName}`)?.value.trim() ?? '') !== valuesToSave[`days.${dayName}.activity2`]
+                );
+                lfWeekDirty = editedDuringSave;
                 await loadAthleteWeeksProgram();
-            } catch (e) {}
-        }
+                showAlert(editedDuringSave
+                    ? 'Salvataggio completato. Hai però apportato altre modifiche mentre salvavo: premi nuovamente Salva per confermarle.'
+                    : 'Attività della settimana salvate. Puoi continuare a lavorare sui sette giorni.', 'Salvataggio riuscito');
+            } catch (err) {
+                console.error('Salvataggio settimana fallito', err);
+                lfWeekDirty = true;
+                showAlert('Settimana NON salvata: ' + (err.code || err.message || 'controlla la connessione') + '. Le modifiche restano aperte.', 'Errore di salvataggio');
+            } finally {
+                lfWeekSavePending = false;
+            }
+        };
 
+        // Beta 0.27.5: duplicazione con selezione esplicita della settimana sorgente.
+        // Nessuna azione su Firestore prima della conferma.
         window.openDuplicateWeekModal = function(weekDocId) {
-            const targetWeek = athleteWeeksList.find(w => w.id === weekDocId);
-            if (!targetWeek) return;
-            document.getElementById('dup-source-label').textContent = `Copia contenuti da: Settimana del ${targetWeek.startDate}`;
-            document.getElementById('dup-target-date').value = new Date().toISOString().split('T')[0];
-            toggleModal('duplicate-week-modal');
-        }
+            if (!selectedAthlete || !athleteWeeksList.length) return;
+            if (lfWeekDirty) {
+                showAlert('Salva prima le modifiche della settimana aperta: così non perderai la bozza durante la duplicazione.', 'Modifiche non salvate');
+                return;
+            }
+            const list = document.getElementById('duplicate-week-list');
+            list.replaceChildren();
+            const selectedId = athleteWeeksList.some(w=>w.id===weekDocId)
+                ? weekDocId : athleteWeeksList[activeWeekIndex]?.id || athleteWeeksList[0].id;
+            athleteWeeksList.forEach((w,i)=>{
+                const label = document.createElement('label');
+                label.className = 'lf-bulk-week-item';
+                const input = document.createElement('input');
+                input.type='radio'; input.name='lf-duplicate-week-source'; input.value=w.id;
+                input.checked=w.id===selectedId;
+                const title=document.createElement('span');
+                title.textContent=`Settimana ${i+1} · ${w.startDate || 'senza data'} · ${w.programTitle || 'Programma'}`;
+                label.append(input,title); list.appendChild(label);
+            });
+            const latest = athleteWeeksList.map(w=>w.startDate).filter(v=>/^\d{4}-\d{2}-\d{2}$/.test(v)).sort().at(-1);
+            if(latest){
+                const dt = new Date(latest+'T12:00:00Z');
+                dt.setUTCDate(dt.getUTCDate()+7);
+                document.getElementById('dup-target-date').value=dt.toISOString().slice(0,10);
+            } else {
+                const dt=new Date(); dt.setDate(dt.getDate()+((8-dt.getDay())%7 || 7));
+                document.getElementById('dup-target-date').value=[dt.getFullYear(),String(dt.getMonth()+1).padStart(2,'0'),String(dt.getDate()).padStart(2,'0')].join('-');
+            }
+            document.getElementById('dup-source-label').textContent='Seleziona la settimana da duplicare:';
+            document.getElementById('duplicate-week-modal').classList.remove('hidden');
+        };
 
+        let lfDuplicateWeekPending = false;
         document.getElementById('btn-confirm-duplicate-week').addEventListener('click', async () => {
+            if (lfDuplicateWeekPending) return;
+            const sourceId = document.querySelector('input[name="lf-duplicate-week-source"]:checked')?.value;
+            const sourceWeek = athleteWeeksList.find(w=>w.id===sourceId);
             const targetDateStr = document.getElementById('dup-target-date').value;
-            const currentWeekData = athleteWeeksList[activeWeekIndex];
-            if (!targetDateStr || !currentWeekData || !selectedAthlete || !currentGymId) return;
-
+            if (!sourceWeek || !selectedAthlete || !currentGymId || !/^\d{4}-\d{2}-\d{2}$/.test(targetDateStr||'')) {
+                showAlert('Seleziona la settimana sorgente e una data valida.', 'Duplicazione incompleta');return;
+            }
+            const date = new Date(targetDateStr+'T12:00:00Z');
+            if (isNaN(date.getTime()) || date.toISOString().slice(0,10)!==targetDateStr) {
+                showAlert('Inserisci una data di inizio valida.', 'Data non valida');return;
+            }
+            if (athleteWeeksList.some(w=>w.startDate===targetDateStr)) {
+                showAlert('Esiste già una settimana con questa data di inizio. Scegli un lunedì libero.', 'Settimana già presente');return;
+            }
+            if (lfWeekDirty) {showAlert('Salva prima le modifiche aperte.', 'Modifiche non salvate');return;}
+            const btn=document.getElementById('btn-confirm-duplicate-week');
+            lfDuplicateWeekPending=true;btn.disabled=true;
             try {
-                const weeksRef = collection(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "weeks");
-                await addDoc(weeksRef, { programTitle: `${currentWeekData.programTitle || 'Programma'} (Copia)`, startDate: targetDateStr, days: currentWeekData.days, createdAt: serverTimestamp() });
-                toggleModal('duplicate-week-modal');
-                showAlert("Settimana duplicata con successo!", "Successo");
+                const athleteId=selectedAthlete.id, gymId=currentGymId;
+                const weeksRef = collection(db, 'gyms', gymId, 'athlete_programs', athleteId, 'weeks');
+                // Manteniamo entrambi i templateId (vecchio e nuovo), senza riscrivere gli originali.
+                const days = JSON.parse(JSON.stringify(sourceWeek.days || {}));
+                const newRef = await addDoc(weeksRef, {
+                    programTitle: `${sourceWeek.programTitle || 'Programma'} (Copia)`,
+                    startDate: targetDateStr, days, createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+                lfPreferredWeekIdOnReload=newRef.id;
+                document.getElementById('duplicate-week-modal').classList.add('hidden');
                 await loadAthleteWeeksProgram();
-            } catch(e) {}
+                showAlert('Settimana copiata. La nuova settimana è aperta e puoi modificarla.', 'Duplicazione riuscita');
+            } catch(err) {
+                console.error('Duplicazione settimana fallita',err);
+                showAlert('Duplicazione non riuscita: '+(err.code||err.message||'controlla la connessione'),'Errore');
+            } finally {lfDuplicateWeekPending=false;btn.disabled=false;}
         });
 
         window.deleteCurrentWeek = async function(weekDocId) {
             if (!selectedAthlete || !currentGymId) return;
+            if(lfWeekDirty){showAlert('Salva le modifiche prima di eliminare una settimana.', 'Modifiche non salvate');return;}
             showConfirm("Spostare questa settimana nel Cestino? Potrai ripristinarla.", async () => {
-                try {await lf26MoveToTrash(doc(db, 'gyms', currentGymId, 'athlete_programs', selectedAthlete.id, 'weeks', weekDocId));await loadAthleteWeeksProgram();}
-                catch(err){showAlert('Impossibile spostare la settimana nel Cestino: '+(err.code||err.message),'Errore');}
+                try {
+                    await lf26MoveToTrash(doc(db,'gyms',currentGymId,'athlete_programs',selectedAthlete.id,'weeks',weekDocId));
+                    lfKeepWeekAfterRemoving([weekDocId]);
+                    await loadAthleteWeeksProgram();
+                    showAlert('Settimana nel Cestino. La programmazione rimane aperta.', 'Eliminazione riuscita');
+                }catch(err){showAlert('Impossibile spostare la settimana nel Cestino: '+(err.code||err.message),'Errore');}
             });
         }
 
@@ -2236,6 +2521,7 @@ Martedì	Forza	...
                 try {
                     const gymId=currentGymId, uid=selectedAthlete.id;
                     for (const id of ids) await lf26MoveToTrash(doc(db,'gyms',gymId,'athlete_programs',uid,'weeks',id));
+                    lfKeepWeekAfterRemoving(ids);
                     await loadAthleteWeeksProgram();
                     showAlert(`Spostate nel Cestino ${ids.length} settimane.`, 'Operazione completata');
                 } catch(err){console.error(err);showAlert('Eliminazione incompleta: ricarica il programma e verifica le settimane rimaste.','Errore');}
@@ -2446,10 +2732,40 @@ Martedì	Forza	...
                     <label>Carico / intensità<input type="text" placeholder="60 kg o 75%" value="${esc(exData?.load)}" class="ex-load"></label>
                     <label>Recupero / note<input type="text" placeholder="90 sec · tecnica" value="${esc(exData?.notes)}" class="ex-notes"></label>
                 </div>
+                <div class="lf276-ss-control">
+                  <label>Modalità di esecuzione
+                    <select class="lf276-ss-connect" aria-label="Modalità esercizio">
+                      <option value="single">Esercizio normale</option>
+                      <option value="previous" ${exData?.supersetWithPrevious ? 'selected' : ''}>🔗 In superset con il precedente</option>
+                    </select>
+                  </label>
+                  <label class="lf276-ss-rest-wrap" style="display:none">Recupero DOPO la coppia
+                    <input class="lf276-ss-rest" type="text" placeholder="Es. 90 secondi" value="${esc(exData?.supersetRest)}">
+                  </label>
+                </div>
+                <p class="lf276-ss-help">Per un superset: esegui entrambi gli esercizi consecutivamente. Recupera solo dopo il secondo.</p>
                 <div class="lf14-exmatch" hidden><img alt="Anteprima esercizio"><span><strong></strong><small></small></span></div>
                 <button type="button" class="btn-remove-exercise absolute top-2 right-2 text-gray-600 hover:text-red-600 font-bold p-1.5" aria-label="Rimuovi esercizio">✕</button>
             `;
-            const refreshIndexes = () => container.querySelectorAll('.lf14-exindex').forEach((node,i)=>node.textContent=String(i+1).padStart(2,'0'));
+            const refreshIndexes = () => {
+                const rows=Array.from(container.querySelectorAll('.ex-row'));
+                rows.forEach((row,i)=>{
+                    row.querySelector('.lf14-exindex').textContent=String(i+1).padStart(2,'0');
+                    const select=row.querySelector('.lf276-ss-connect');
+                    const prev=rows[i-1]?.querySelector('.lf276-ss-connect');
+                    // Ogni superset contiene esattamente due esercizi consecutivi.
+                    const canPair=i>0 && prev?.value !== 'previous';
+                    select.querySelector('option[value="previous"]').disabled=!canPair;
+                    if(!canPair && select.value==='previous')select.value='single';
+                    row.querySelector('.lf276-ss-rest-wrap').style.display=select.value==='previous'?'block':'none';
+                    row.classList.toggle('lf276-ss-card',select.value==='previous' || rows[i+1]?.querySelector('.lf276-ss-connect')?.value==='previous');
+                });
+            };
+            const ssChoice=div.querySelector('.lf276-ss-connect');
+            ssChoice.addEventListener('change',()=>{
+                if(ssChoice.value==='previous' && !container.querySelector('.ex-row'))ssChoice.value='single';
+                refreshIndexes();
+            });
             const preview = div.querySelector('.lf14-exmatch');
             const input = div.querySelector('.ex-name');
             if (exData?.exerciseId && exData?.name) {
@@ -2475,6 +2791,42 @@ Martedì	Forza	...
             if (exData?.name) updatePreview();
         }
 
+        // Beta 0.27.6: una sola lettura per editor condiviso, scheda personale e modifica.
+        function lf276ReadExerciseRows(container){
+            const rows=Array.from(container.querySelectorAll('.ex-row'));
+            const exercises=rows.map((row,i)=>({
+                name:row.querySelector('.ex-name').value.trim(),
+                exerciseId:lionExerciseRowId(row),
+                sets:row.querySelector('.ex-sets').value.trim(),
+                reps:row.querySelector('.ex-reps').value.trim(),
+                load:row.querySelector('.ex-load').value.trim(),
+                notes:row.querySelector('.ex-notes').value.trim(),
+                supersetWithPrevious:row.querySelector('.lf276-ss-connect')?.value==='previous',
+                supersetRest:row.querySelector('.lf276-ss-connect')?.value==='previous'
+                    ? (row.querySelector('.lf276-ss-rest')?.value.trim()||'') : ''
+            })).filter(ex=>ex.name);
+            for(let i=0;i<exercises.length;i++) {
+                if(exercises[i].supersetWithPrevious && (i===0 || exercises[i-1].supersetWithPrevious)){
+                    throw new Error('Superset non valido: ogni coppia deve avere due esercizi consecutivi. Controlla la modalità degli esercizi.');
+                }
+            }
+            return exercises;
+        }
+        function lf276SupersetInfo(exercises,index){
+            const ex=exercises[index]||{};
+            const second=ex.supersetWithPrevious===true;
+            const first=!second && exercises[index+1]?.supersetWithPrevious===true;
+            if(!first&&!second)return null;
+            let pair=0;
+            for(let i=0;i<exercises.length;i++){
+                if(exercises[i]?.supersetWithPrevious) {
+                    if(i===index||i-1===index)return {label: second ? 'SUPERSET' : 'ESERCIZIO',second,rest:second?(ex.supersetRest||''):'',first:!second};
+                    pair++;
+                }
+            }
+            return null;
+        }
+
         // V20: i due percorsi esistenti sono accessibili direttamente dalle azioni dell'atleta.
         document.getElementById('lf20-create-personal').addEventListener('click', () => {
             if (!selectedAthlete) return;
@@ -2497,14 +2849,8 @@ Martedì	Forza	...
             e.preventDefault();
             if (!selectedAthlete || !currentGymId) return;
             const title = document.getElementById('custom-tpl-title').value.trim();
-            const exercises = Array.from(customExContainer.querySelectorAll('.ex-row')).map(row => ({
-                name: row.querySelector('.ex-name').value.trim(),
-                exerciseId: lionExerciseRowId(row),
-                sets: row.querySelector('.ex-sets').value.trim(),
-                reps: row.querySelector('.ex-reps').value.trim(),
-                load: row.querySelector('.ex-load').value.trim(),
-                notes: row.querySelector('.ex-notes').value.trim()
-            })).filter(ex => ex.name);
+            let exercises;
+            try{ exercises=lf276ReadExerciseRows(customExContainer); }catch(err){showAlert(err.message,'Controlla i superset');return;}
 
             if (!title || exercises.length === 0) return;
 
@@ -2513,8 +2859,8 @@ Martedì	Forza	...
             const alsoShared = document.getElementById('lf20-also-shared').checked;
             submitBtn.disabled = true;
             try {
-                const personalRef = collection(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "personal_templates");
-                await addDoc(personalRef, { title, exercises, createdAt: serverTimestamp() });
+                const personalRef = doc(collection(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "personal_templates"));
+                await lf277CreatePersonalWithArchive(selectedAthlete.id,personalRef,{title,exercises});
                 let sharedCopySaved = !alsoShared;
                 if (alsoShared) {
                     try {
@@ -2530,8 +2876,8 @@ Martedì	Forza	...
                 document.getElementById('custom-athlete-tpl-form').reset();
                 await loadAthletePersonalTemplates();
                 showAlert(sharedCopySaved
-                    ? (alsoShared ? 'Scheda assegnata all’atleta e copiata nelle Schede condivise.' : 'Scheda personale creata e assegnata all’atleta!')
-                    : 'Scheda personale assegnata correttamente, ma NON copiata nelle Schede condivise. Puoi riprovare dalla scheda personale.',
+                    ? (alsoShared ? 'Scheda assegnata all’atleta e copiata nell’Archivio schede.' : 'Scheda personale creata e assegnata all’atleta!')
+                    : 'Scheda personale assegnata correttamente, ma NON copiata nell’Archivio schede. Puoi riprovare dalla scheda personale.',
                     sharedCopySaved ? 'Successo' : 'Attenzione');
             } catch(err) { console.error('Errore salvataggio scheda personale', err); showAlert('Non è stato possibile salvare la scheda personale. Controlla la connessione e i permessi.', 'Errore'); }
             finally { submitBtn.disabled = false; }
@@ -2542,7 +2888,7 @@ Martedì	Forza	...
             container.innerHTML = '';
 
             if (gymTemplates.length === 0) {
-                container.innerHTML = '<p class="text-[10px] sm:text-xs text-gray-400 uppercase font-bold text-center py-4">Nessuna scheda condivisa in archivio.</p>';
+                container.innerHTML = '<p class="text-[10px] sm:text-xs text-gray-400 uppercase font-bold text-center py-4">Nessuna scheda dell’archivio in archivio.</p>';
             } else {
                 gymTemplates.forEach(tpl => {
                     const div = document.createElement('div');
@@ -2556,17 +2902,41 @@ Martedì	Forza	...
                     `;
                     div.addEventListener('click', async () => {
                         try {
-                            const personalRef = collection(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "personal_templates");
-                            await addDoc(personalRef, { title: tpl.title, exercises: tpl.exercises || [], createdAt: serverTimestamp() });
+                            const created=await lf275AssignSharedToPersonal(selectedAthlete.id,tpl);
                             toggleModal('gym-workout-modal');
-                            showAlert("Scheda condivisa assegnata come copia personale, senza modificare l’originale.", "Successo");
+                            showAlert(created
+                                ? 'Scheda assegnata con lo stesso ID dell’archivio: è utilizzabile anche nelle settimane.'
+                                : 'Questa scheda era già assegnata all’atleta. Nessuna copia duplicata creata.',
+                                'Assegnazione verificata');
                             await loadAthletePersonalTemplates();
-                        } catch(e) {}
+                        } catch(e) {showAlert('Assegnazione non riuscita: '+(e.message||e.code),'Verifica scheda');}
                     });
                     container.appendChild(div);
                 });
             }
         }
+
+        // Migrazione conservativa: tutte le schede personali esistenti, anche nel Cestino.
+        // Il coach avvia esplicitamente la procedura, che non elimina mai nulla.
+        document.getElementById('lf277-protect-legacy-sheets').addEventListener('click', async (event)=>{
+            const athleteId=selectedAthlete?.id;
+            if(!currentGymId || !athleteId)return;
+            const btn=event.currentTarget;
+            btn.disabled=true;btn.textContent='Protezione schede in corso...';
+            let created=0,already=0,failed=0;
+            try {
+                const list=await getDocs(collection(db,'gyms',currentGymId,'athlete_programs',athleteId,'personal_templates'));
+                for(const item of list.docs) {
+                    try {
+                        if(await lf277EnsureProtectedCopy(athleteId,item.id,item.data()))created++;
+                        else already++;
+                    }catch(err){failed++;console.error('Archivio '+item.id,err);}
+                }
+                showAlert(`Archivio atleta: ${created} nuove copie protette, ${already} già esistenti, ${failed} non riuscite. Le schede originali non sono state modificate.${failed?' Controlla la Console per i dettagli.':''}`,
+                    failed?'Protezione incompleta':'Protezione completata');
+            }catch(err){showAlert('Non è stato possibile leggere le schede: '+(err.code||err.message),'Errore Archivio');}
+            finally{btn.disabled=false;btn.textContent='🛡 Salva le vecchie schede nell\'ARCHIVIO dell\'atleta';}
+        });
 
         async function loadAthletePersonalTemplates() {
             if (!selectedAthlete || !currentGymId) return;
@@ -2592,10 +2962,10 @@ Martedì	Forza	...
                 share.type = 'button';
                 share.className = 'lf20-share-btn';
                 share.textContent = 'Copia nelle condivise';
-                share.setAttribute('aria-label', 'Copia ' + (tpl.title || 'la scheda') + ' nelle Schede condivise');
+                share.setAttribute('aria-label', 'Copia ' + (tpl.title || 'la scheda') + ' nell’Archivio schede');
                 share.addEventListener('click', () => {
                     // Nessuna modifica alla scheda personale originale.
-                    showConfirm(`Copiare "${tpl.title || 'questa scheda'}" nell'archivio Schede condivise?`, async () => {
+                    showConfirm(`Copiare "${tpl.title || 'questa scheda'}" nell’Archivio schede?`, async () => {
                         share.disabled = true;
                         try {
                             await addDoc(collection(db, 'gyms', currentGymId, 'templates'), {
@@ -2605,8 +2975,8 @@ Martedì	Forza	...
                             });
                             await loadTemplates();
                             await loadDashboardStats();
-                            showAlert('Copia salvata nelle Schede condivise. La scheda personale non è stata modificata.', 'Scheda copiata');
-                        } catch(err) { console.error('Errore copia condivisa', err); showAlert('Impossibile copiare nelle Schede condivise. Controlla i permessi Firebase.', 'Errore'); }
+                            showAlert('Copia salvata nell’Archivio schede. La scheda personale non è stata modificata.', 'Scheda copiata');
+                        } catch(err) { console.error('Errore copia condivisa', err); showAlert('Impossibile copiare nell’Archivio schede. Controlla i permessi Firebase.', 'Errore'); }
                         finally { share.disabled = false; }
                     });
                 });
@@ -2614,11 +2984,24 @@ Martedì	Forza	...
                 del.type = 'button';
                 del.className = 'text-[9px] text-red-600 hover:bg-red-50 border border-red-200 font-black uppercase px-2 py-1.5 rounded-lg shrink-0';
                 del.textContent = 'Elimina';
-                del.addEventListener('click', () => {
-                    showConfirm(`Spostare "${tpl.title}" nel Cestino?`, async () => {
-                        try {await lf26MoveToTrash(doc(db, 'gyms', currentGymId, 'athlete_programs', selectedAthlete.id, 'personal_templates', tpl.id));await loadAthletePersonalTemplates();}
-                        catch(err){showAlert('Impossibile spostare la scheda nel Cestino: '+(err.code||err.message),'Errore');}
-                    });
+                del.addEventListener('click', async () => {
+                    const athleteId=selectedAthlete?.id;
+                    if(!athleteId) return;
+                    del.disabled=true;
+                    try {
+                        const links=await lf275FindActiveWeekLinks(athleteId,tpl.id);
+                        const warning=links.length
+                            ? `ATTENZIONE: "${tpl.title}" è collegata a ${links.length} giorno/i (${links.slice(0,4).join('; ')}). Nel Cestino non sarà visibile all’atleta; ripristinandola tornerà utilizzabile negli stessi giorni. Vuoi continuare?`
+                            : `Spostare "${tpl.title}" nel Cestino? Potrai ripristinarla senza cambiarne l'ID.`;
+                        showConfirm(warning, async () => {
+                            try {
+                                await lf26MoveToTrash(doc(db,'gyms',currentGymId,'athlete_programs',athleteId,'personal_templates',tpl.id));
+                                await loadAthletePersonalTemplates();
+                                showAlert('Scheda spostata nel Cestino. Nessun collegamento alle settimane è stato cancellato: al ripristino tornerà utilizzabile.','Scheda archiviata nel Cestino');
+                            }catch(err){showAlert('Impossibile spostare la scheda nel Cestino: '+(err.code||err.message),'Errore');}
+                        });
+                    }catch(err){showAlert('Impossibile verificare i collegamenti: eliminazione annullata. '+(err.code||err.message),'Errore');}
+                    finally{del.disabled=false;}
                 });
                 actions.append(share, del);
                 div.append(label, actions);
@@ -2643,14 +3026,8 @@ Martedì	Forza	...
             
             const title = document.getElementById('edit-tpl-title').value.trim();
             const container = document.getElementById('edit-exercises-container');
-            const exercises = Array.from(container.querySelectorAll('.ex-row')).map(row => ({
-                name: row.querySelector('.ex-name').value.trim(),
-                exerciseId: lionExerciseRowId(row),
-                sets: row.querySelector('.ex-sets').value.trim(),
-                reps: row.querySelector('.ex-reps').value.trim(),
-                load: row.querySelector('.ex-load').value.trim(),
-                notes: row.querySelector('.ex-notes').value.trim()
-            })).filter(ex => ex.name);
+            let exercises;
+            try{ exercises=lf276ReadExerciseRows(container); }catch(err){showAlert(err.message,'Controlla i superset');return;}
 
             if (!title || exercises.length === 0) return;
 
@@ -2701,7 +3078,7 @@ Martedì	Forza	...
             }
             document.getElementById('active-week-editor-container')?.scrollIntoView({behavior:'smooth',block:'start'});
         }
-        window.lf26StartSharedFromWeek = function(dayName) {
+        window.lf26StartSharedFromWeek = function(dayName,slot=1) {
             const week = athleteWeeksList[activeWeekIndex];
             if (!selectedAthlete || !currentGymId || !week) {
                 showAlert('Apri prima una settimana della programmazione.','Seleziona settimana');
@@ -2711,7 +3088,7 @@ Martedì	Forza	...
             lf26PendingWeekTemplate = {
                 gymId: currentGymId, athleteId: selectedAthlete.id,
                 athleteName: selectedAthlete.name || selectedAthlete.email || 'Atleta',
-                weekId: week.id, weekNumber: activeWeekIndex + 1, day: dayName, draft, wasDirty: lfWeekDirty
+                weekId: week.id, weekNumber: activeWeekIndex + 1, day: dayName, slot, draft, wasDirty: lfWeekDirty
             };
             document.getElementById('select-template-modal').classList.add('hidden');
             showSection('templates');
@@ -2744,32 +3121,39 @@ Martedì	Forza	...
             const weekRef = doc(db,'gyms',ctx.gymId,'athlete_programs',ctx.athleteId,'weeks',ctx.weekId);
             const weekSnap = await getDoc(weekRef);
             if (!weekSnap.exists()) throw new Error('La settimana originale non esiste più.');
-            const days = { ...(weekSnap.data().days || {}) };
-            for (const day of lf26DaysOrder) {
-                days[day] = { ...(days[day] || {}), ...ctx.draft[day] };
+            const updatedFields = { updatedAt:serverTimestamp(),
+                [`days.${ctx.day}.${ctx.slot === 2 ? 'templateId2' : 'templateId'}`]:templateId };
+            // Aggiorna le attività della bozza solo quando ce ne sono di non salvate;
+            // la scheda linkata non riscrive il resto dell'oggetto days.
+            if(ctx.wasDirty){
+                for (const day of lf26DaysOrder) {
+                    updatedFields[`days.${day}.activity1`] = ctx.draft[day]?.activity1 ?? '';
+                    updatedFields[`days.${day}.activity2`] = ctx.draft[day]?.activity2 ?? '';
+                }
             }
-            days[ctx.day] = { ...(days[ctx.day] || {}), templateId };
-            await updateDoc(weekRef, { days, updatedAt:serverTimestamp() });
+            await updateDoc(weekRef, updatedFields);
             lfWeekDirty = false;
             await loadAthleteWeeksProgram();
             await loadAthletePersonalTemplates();
             lf26ReturnToWeek(ctx.weekId);
         }
-        window.openLinkDayTemplateModal = function(dayName) {
+        window.openLinkDayTemplateModal = function(dayName,slot=1) {
             targetLinkingDayName = dayName;
+            targetLinkingSlot = slot === 2 ? 2 : 1;
+            document.querySelector('#select-template-modal h3')?.replaceChildren(document.createTextNode(`Collega Scheda ${targetLinkingSlot} · ${dayName.toUpperCase()}`));
             const container = document.getElementById('modal-tpl-list-container');
             container.innerHTML = '';
 
             const noneDiv = document.createElement('div');
             noneDiv.className = "p-2.5 sm:p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-500 cursor-pointer hover:bg-gray-100 transition mb-2 text-[10px] sm:text-xs";
-            noneDiv.innerHTML = `❌ Rimuovi Scheda Collegata`;
+            noneDiv.textContent = `❌ Rimuovi scheda ${targetLinkingSlot}`;
             noneDiv.addEventListener('click', () => linkTemplateToDayConfirm(""));
             container.appendChild(noneDiv);
 
             if (gymTemplates.length === 0) {
                 const p = document.createElement('p');
                 p.className = "text-[10px] sm:text-xs text-gray-400 uppercase font-bold text-center py-4";
-                p.textContent = "Nessuna scheda condivisa. Creane una in 'Schede condivise'.";
+                p.textContent = "Nessuna scheda dell’archivio. Creane una in 'Archivio schede'.";
                 container.appendChild(p);
             } else {
                 gymTemplates.forEach(tpl => {
@@ -2789,8 +3173,8 @@ Martedì	Forza	...
             const createButton = document.createElement('button');
             createButton.type = 'button';
             createButton.className = 'w-full mt-2 rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-left text-sm font-black text-green-900 hover:bg-green-100';
-            createButton.textContent = '+ Crea nuova scheda condivisa e collega al giorno';
-            createButton.addEventListener('click', () => lf26StartSharedFromWeek(dayName));
+            createButton.textContent = '+ Crea nuova scheda dell’archivio e collega al giorno';
+            createButton.addEventListener('click', () => lf26StartSharedFromWeek(dayName,targetLinkingSlot));
             container.appendChild(createButton);
             toggleModal('select-template-modal');
         }
@@ -2799,19 +3183,20 @@ Martedì	Forza	...
             if (!selectedAthlete || !currentGymId || !targetLinkingDayName) return;
             const currentWeekData = athleteWeeksList[activeWeekIndex];
             if (!currentWeekData) return;
-
+            const linkDay = targetLinkingDayName;
             try {
-                if(templateId) await lf24EnsurePersonalWeekTemplate(selectedAthlete.id,templateId);
-                const daysObj = currentWeekData.days || {};
-                if (!daysObj[targetLinkingDayName]) daysObj[targetLinkingDayName] = { activity1: '', activity2: '', templateId: '' };
-                daysObj[targetLinkingDayName].templateId = templateId;
-
+                if (templateId) await lf24EnsurePersonalWeekTemplate(selectedAthlete.id, templateId);
                 const weekRef = doc(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "weeks", currentWeekData.id);
-                await updateDoc(weekRef, { days: daysObj });
+                // Field path mirato: non sovrascrive attivita' e schede degli altri giorni.
+                const fieldName = targetLinkingSlot === 2 ? 'templateId2' : 'templateId';
+                await updateDoc(weekRef, { [`days.${linkDay}.${fieldName}`]: templateId, updatedAt: serverTimestamp() });
                 toggleModal('select-template-modal');
-                showAlert(`Scheda aggiornata con successo per ${targetLinkingDayName.toUpperCase()}!`, "Successo");
-                await loadAthleteWeeksProgram();
-            } catch(e) {}
+                await loadAthleteWeeksProgram(); // conserva settimana aperta e bozze non salvate
+                showAlert(`Scheda ${targetLinkingSlot} ${templateId ? 'collegata' : 'rimossa'} per ${linkDay.toUpperCase()}. Puoi continuare nella stessa settimana.`, 'Modifica salvata');
+            } catch (err) {
+                console.error('Collegamento scheda al giorno fallito', err);
+                showAlert('Collegamento NON salvato: ' + (err.code || err.message || 'controlla la connessione') + '. Nessun giorno è stato cambiato nell’editor.', 'Errore collegamento');
+            }
         }
 
         const btnCreateTpl = document.getElementById('tab-btn-create-tpl');
@@ -2819,7 +3204,7 @@ Martedì	Forza	...
         const viewCreateTpl = document.getElementById('view-create-tpl');
         const viewSavedTpl = document.getElementById('view-saved-tpl');
 
-        // V21: nell'area Schede condivise si apre sempre l'archivio.
+        // V21: nell'area Archivio schede si apre sempre l'archivio.
         // I pulsanti sono di navigazione, senza toccare i percorsi Firebase.
         function lf21ShowTemplateView(view) {
             const editing = view === 'create';
@@ -2834,7 +3219,7 @@ Martedì	Forza	...
             lf21ShowTemplateView('create');
         });
         btnSavedTpl.addEventListener('click', () => {
-            // V25.4: "Torna all'archivio" apre davvero Schede condivise.
+            // V25.4: "Torna all'archivio" apre davvero Archivio schede.
             // Se arriviamo da una settimana, conserviamo la bozza in memoria
             // e offriamo il ritorno al programma dal banner dell'archivio.
             lf17ResetEditor();
@@ -2854,7 +3239,7 @@ Martedì	Forza	...
             document.getElementById('template-form').reset();
             exercisesContainer.innerHTML = '';
             addExerciseRowToContainerWithValues(exercisesContainer);
-            document.querySelector('#template-form button[type="submit"]').textContent = 'Salva nelle Schede condivise';
+            document.querySelector('#template-form button[type="submit"]').textContent = 'Salva nell’Archivio schede';
         }
         document.getElementById('lf17-cancel-edit').addEventListener('click', lf17ResetEditor);
         function lf17OpenEdit(tpl) {
@@ -2872,14 +3257,8 @@ Martedì	Forza	...
         document.getElementById('template-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const title = document.getElementById('tpl-title').value.trim();
-            const exercises = Array.from(exercisesContainer.querySelectorAll('.ex-row')).map(row => ({
-                name: row.querySelector('.ex-name').value.trim(),
-                exerciseId: lionExerciseRowId(row),
-                sets: row.querySelector('.ex-sets').value.trim(),
-                reps: row.querySelector('.ex-reps').value.trim(),
-                load: row.querySelector('.ex-load').value.trim(),
-                notes: row.querySelector('.ex-notes').value.trim()
-            })).filter(ex => ex.name);
+            let exercises;
+            try{ exercises=lf276ReadExerciseRows(exercisesContainer); }catch(err){showAlert(err.message,'Controlla i superset');return;}
 
             if (!title || exercises.length === 0) return;
 
@@ -2895,23 +3274,23 @@ Martedì	Forza	...
                 }
                 await loadTemplates();
                 await loadDashboardStats();
-                // La scheda condivisa esiste già. Se il collegamento fallisse, non verrà eliminata.
+                // La scheda dell’archivio esiste già. Se il collegamento fallisse, non verrà eliminata.
                 const pending = createdRef ? lf26PendingWeekTemplate : null;
                 if (pending) {
                     lf26PendingWeekTemplate = null;
                     lf26UpdateContextBanner();
                     try {
                         await lf26AutoLinkAfterCreate(createdRef.id, pending);
-                        showAlert(`Scheda «${title}» salvata nelle Schede condivise e collegata a ${pending.day.toUpperCase()} della settimana ${pending.weekNumber}.`, 'Scheda collegata');
+                        showAlert(`Scheda «${title}» salvata nell’Archivio schede e collegata a ${pending.day.toUpperCase()} della settimana ${pending.weekNumber}.`, 'Scheda collegata');
                     } catch(linkError) {
                         lf17ResetEditor();
                         lf21ShowTemplateView('saved');
-                        showAlert(`La scheda «${title}» è stata salvata nell'archivio condiviso, ma NON collegata alla settimana: ${linkError.message || linkError.code}. Puoi tornare al programma e selezionarla manualmente.`, 'Collegamento da completare');
+                        showAlert(`La scheda «${title}» è stata salvata nell'archivio schede, ma NON collegata alla settimana: ${linkError.message || linkError.code}. Puoi tornare al programma e selezionarla manualmente.`, 'Collegamento da completare');
                     }
                 } else {
                     lf17ResetEditor();
                     lf21ShowTemplateView('saved');
-                    showAlert(wasEditingShared ? 'Modifiche salvate nelle Schede condivise.' : 'Scheda salvata nelle Schede condivise.', 'Successo');
+                    showAlert(wasEditingShared ? 'Modifiche salvate nell’Archivio schede.' : 'Scheda salvata nell’Archivio schede.', 'Successo');
                 }
             } catch(e) {
                 showAlert('Impossibile salvare la scheda: '+(e.message || e.code || 'controlla i permessi Firebase.'),'Errore di salvataggio');
@@ -2945,7 +3324,7 @@ Martedì	Forza	...
             document.getElementById('lf17-archive-count').textContent = `${rows.length} schede visualizzate su ${gymTemplates.length}`;
             if(!rows.length) {
                 const empty=document.createElement('p');empty.className='col-span-full text-sm text-gray-500 p-6 text-center bg-gray-50 border rounded-xl';
-                empty.textContent=gymTemplates.length ? 'Nessuna scheda corrisponde alla ricerca.' : 'Archivio vuoto. Premi «Crea nuova scheda condivisa» per iniziare.';
+                empty.textContent=gymTemplates.length ? 'Nessuna scheda corrisponde alla ricerca.' : 'Archivio vuoto. Premi «Crea nuova scheda dell’archivio» per iniziare.';
                 list.appendChild(empty);return;
             }
             rows.forEach(tpl=>{
@@ -2963,9 +3342,13 @@ Martedì	Forza	...
                     lf17Btn('Modifica','pencil',()=>lf17OpenEdit(tpl)),
                     lf17Btn('Duplica','copy',()=>lf17Duplicate(tpl)),
                     lf17Btn('Assegna','users',()=>lf17ShowAssign(tpl)),
-                    lf17Btn('Nel Cestino','trash',()=>showConfirm(`Spostare la scheda "${tpl.title}" nel Cestino?`,async()=>{
-                        try { await lf26MoveToTrash(doc(db,'gyms',currentGymId,'templates',tpl.id)); await loadTemplates(); await loadDashboardStats(); }
-                        catch(err) {showAlert('Eliminazione non riuscita. Riprova.','Errore');}
+                    lf17Btn('Nel Cestino','trash',()=>showConfirm(`Spostare "${tpl.title}" nel Cestino dell’Archivio schede? Non sarà più selezionabile per nuove assegnazioni. Le copie personali già ricevute dagli atleti NON verranno cancellate. Ripristinandola sarà di nuovo utilizzabile.`,async()=>{
+                        try {
+                            await lf26MoveToTrash(doc(db,'gyms',currentGymId,'templates',tpl.id));
+                            await loadTemplates();await loadDashboardStats();
+                            if(selectedAthlete) await loadAthleteWeeksProgram();
+                            showAlert('Scheda rimossa dall’Archivio attivo e spostata nel Cestino. Le copie personali sono conservate.','Scheda nel Cestino');
+                        }catch(err) {showAlert('Eliminazione non riuscita: '+(err.code||err.message),'Errore');}
                     }),'text-red-700 border-red-200')
                 );
                 card.appendChild(actions);list.appendChild(card);
@@ -2978,7 +3361,7 @@ Martedì	Forza	...
                     exercises:(tpl.exercises||[]).map(ex=>({...ex})),
                     createdAt:serverTimestamp()
                 });
-                await loadTemplates();await loadDashboardStats();showAlert('Copia creata nelle Schede condivise.','Scheda duplicata');
+                await loadTemplates();await loadDashboardStats();showAlert('Copia creata nell’Archivio schede.','Scheda duplicata');
             } catch(err) {showAlert('Non sono riuscito a duplicare la scheda.','Errore');}
         }
         function lf17ShowAssign(tpl) {
@@ -2993,12 +3376,14 @@ Martedì	Forza	...
                 if(!athleteId){showAlert('Scegli prima un atleta.','Attenzione');return;}
                 const btn=document.getElementById('lf17-assign-submit');btn.disabled=true;
                 try {
-                    await addDoc(collection(db,'gyms',currentGymId,'athlete_programs',athleteId,'personal_templates'),{
-                        title:tpl.title,exercises:(tpl.exercises||[]).map(ex=>({...ex})),createdAt:serverTimestamp()
-                    });
-                    modal.classList.add('hidden');showAlert('Scheda copiata tra le schede personali dell’atleta. Non sono state modificate le settimane.','Assegnazione completata');
+                    const created=await lf275AssignSharedToPersonal(athleteId,tpl);
+                    modal.classList.add('hidden');
+                    showAlert(created
+                        ? 'Scheda assegnata con il suo ID originale. Potrai collegarla ai giorni del programma.'
+                        : 'La scheda era già presente tra quelle personali: non è stata duplicata.',
+                        'Assegnazione completata');
                     if(selectedAthlete?.id===athleteId) await loadAthletePersonalTemplates();
-                } catch(err) {showAlert('Assegnazione non riuscita. Controlla i permessi Firebase.','Errore');}
+                } catch(err) {showAlert('Assegnazione non riuscita: '+(err.message||err.code),'Errore');}
                 finally {btn.disabled=false;}
             };
         }
@@ -3006,6 +3391,7 @@ Martedì	Forza	...
             if (!currentGymId) return;
             try {
                 const snapshot=await getDocs(query(collection(db,'gyms',currentGymId,'templates')));
+                lf275TrashedSharedIds=new Set(snapshot.docs.filter(s=>!!s.data().deletedAt).map(s=>String(s.id)));
                 gymTemplates=snapshot.docs.filter(s=>!s.data().deletedAt).map(s=>({id:s.id,...s.data()}));
                 lf17RenderArchive();
             } catch(err) {document.getElementById('lf17-archive-count').textContent='Errore nel caricamento delle schede';}
@@ -3046,6 +3432,17 @@ Martedì	Forza	...
                         </div>
                         ${ex.notes ? `<div class="text-[8px] sm:text-[9px] font-bold text-gray-500 border-t border-gray-100 pt-1">Note: ${ex.notes}</div>` : ''}
                     `;
+                    const superset=lf276SupersetInfo(currentActiveTemplate.exercises,idx);
+                    if(superset){
+                        row.classList.add('lf276-ss-card');
+                        const badge=document.createElement('span');badge.className='lf276-ss-badge';badge.textContent=superset.label;
+                        row.prepend(badge);
+                        const info=document.createElement('p'); info.className='lf276-ss-note';
+                        info.textContent=superset.second
+                            ? `Dopo il superset: ${superset.rest ? 'recupero '+superset.rest : 'recupero secondo indicazioni del coach'}`
+                            : 'Esegui subito il superset, senza recupero intermedio';
+                        row.appendChild(info);
+                    }
                     const match = lionFindExercise(ex.name, ex.exerciseId);
                     if (match) {
                         const label=document.createElement('div');
@@ -3709,6 +4106,15 @@ window.lf26PrintSheet = function (sheet, context) {
     const number=page.createElement('td'); number.className='num';number.textContent=String(i+1);
     const name=page.createElement('td');
     const strong=page.createElement('strong');strong.textContent=exercise.name||'Esercizio';name.append(strong);
+    const isSecond=exercise.supersetWithPrevious===true;
+    const isFirst=!isSecond && exercises[i+1]?.supersetWithPrevious===true;
+    if(isSecond||isFirst){
+      const pairNo=exercises.slice(0,isSecond?i:i+1).filter(x=>x.supersetWithPrevious===true).length;
+      const label=page.createElement('small');
+      label.style.fontWeight='900';label.style.color='#126a49';
+      label.textContent=(isSecond?'SUPERSET':'ESERCIZIO')+' · '+(isSecond?(exercise.supersetRest?'Recupero dopo: '+exercise.supersetRest:'Recupero dopo la coppia'):'Segue subito l’esercizio successivo');
+      name.append(label);
+    }
     if(exercise.notes){const note=page.createElement('small');note.textContent=String(exercise.notes);name.append(note);}
     tr.append(number,name);
     [exercise.sets,exercise.reps,exercise.load].forEach(value=>{
@@ -3726,5 +4132,34 @@ window.lf26PrintSheet = function (sheet, context) {
 };
 </script>
 
+
+<script>
+/* Lion Fit Beta 0.27.5 - ripristino scroll dopo modali e navigazione. */
+(() => {
+  const modalSelector = '[id$="-modal"].fixed, #settings-modal, #edit-profile-modal';
+  const modals = Array.from(document.querySelectorAll(modalSelector));
+  const visible = el => !el.classList.contains('hidden') && getComputedStyle(el).display !== 'none';
+  let queued = false;
+  function sync() {
+    queued = false;
+    const blocked = modals.some(visible);
+    const expected = blocked ? 'hidden' : '';
+    if (document.body.style.overflow !== expected) document.body.style.overflow = expected;
+    // Alcuni browser mobili mantengono l'overflow inline anche su html.
+    if (!blocked && document.documentElement.style.overflow === 'hidden') document.documentElement.style.overflow = '';
+  }
+  function schedule() {
+    if (!queued) { queued = true; queueMicrotask(sync); }
+  }
+  const observer = new MutationObserver(schedule);
+  modals.forEach(el => observer.observe(el, {attributes:true,attributeFilter:['class','style']}));
+  observer.observe(document.body, {attributes:true,attributeFilter:['style']});
+  window.addEventListener('pageshow',schedule);
+  window.addEventListener('focus',schedule);
+  document.addEventListener('visibilitychange',schedule);
+  window.lf275SyncScroll = schedule;
+  schedule();
+})();
+</script>
 </body>
 </html>

@@ -167,6 +167,22 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
     .lf-training-sheet-card .lf-sheet-status { font-size:10px; }
 }
 
+
+/* Beta 0.27.6 — Superset A1/A2 nelle schede, senza librerie aggiuntive. */
+.lf276-ss-control{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin-top:9px;border-top:1px dashed #b7cac0;padding-top:9px}
+.lf276-ss-control label{font-size:11px;font-weight:800;color:#195339;flex:1 1 170px}
+.lf276-ss-control select,.lf276-ss-control input{display:block;margin-top:4px;width:100%;min-height:40px;border:1px solid #a8c4b6;background:#fff;border-radius:9px;padding:7px;color:#123c2b;font-size:12px}
+.lf276-ss-help{font-size:10px;color:#526c60;line-height:1.45;margin:5px 0 0}
+.lf276-ss-card{border:2px solid #1da879!important;border-left:5px solid #16a34a!important;background:linear-gradient(95deg,#e9f8ef,#fff)!important}
+.lf276-ss-badge{display:inline-flex;align-items:center;background:#126a49;color:#fff;border-radius:7px;padding:4px 7px;font-size:10px;font-weight:900;margin:3px 6px 4px 0;letter-spacing:.03em}
+.lf276-ss-note{font-size:11px;font-weight:800;color:#136444;background:#e0f5e9;padding:6px 8px;border-radius:8px;margin:5px 0}
+html[data-lion-theme="dark"] .lf276-ss-control{border-top-color:#456d62}
+html[data-lion-theme="dark"] .lf276-ss-control label,html[data-lion-theme="dark"] .lf276-ss-help{color:#b7ebd4!important}
+html[data-lion-theme="dark"] .lf276-ss-control select,html[data-lion-theme="dark"] .lf276-ss-control input{background:#132a29!important;color:#f5fff9!important;border-color:#5e8b77!important}
+html[data-lion-theme="dark"] .lf276-ss-card{background:#183c33!important;border-color:#2cc98a!important}
+html[data-lion-theme="dark"] .lf276-ss-badge{background:#1a9369!important;color:#fff!important}
+html[data-lion-theme="dark"] .lf276-ss-note{background:#163d31!important;color:#b6f6d0!important}
+
 </style>
 <style>
 /* LION FIT V26.0 — tema scuro professionale, predefinito chiaro */
@@ -490,6 +506,20 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
   background:#243449!important;
 }
 
+
+/* Beta 0.27.6 — contrasto archivio storico nel tema scuro */
+html[data-lion-theme="dark"] #section-archive details,
+html[data-lion-theme="dark"] #section-archive #lf276-archived-sheets button{
+ background:#19342d!important;border-color:#4a8b71!important;color:#edfef4!important;
+}
+html[data-lion-theme="dark"] #section-archive details strong,
+html[data-lion-theme="dark"] #section-archive details summary,
+html[data-lion-theme="dark"] #section-archive #lf276-archived-sheets button strong{color:#f4fff7!important}
+html[data-lion-theme="dark"] #section-archive #lf276-archived-sheets button small,
+html[data-lion-theme="dark"] #section-archive details div,
+html[data-lion-theme="dark"] #section-archive details button{color:#a1f4c9!important}
+html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321a!important;color:#ffebad!important;border-color:#806d3a!important}
+
 </style>
 </head>
 <body class="bg-gray-100 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col relative pb-20">
@@ -509,7 +539,7 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
         </div>
     </header>
 
-    <div class="lf26-version pt-1">LION FIT · BETA 0.27.2</div>
+    <div class="lf26-version pt-1">LION FIT · BETA 0.27.6</div>
     <!-- MAIN CONTAINER -->
     <main class="flex-grow w-full max-w-3xl mx-auto p-4 pb-24 relative">
 
@@ -518,6 +548,7 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
             <!-- Collegamenti rapidi: usano la navigazione esistente, senza alterare Firebase -->
             <div class="lf-quick-panel bg-white rounded-2xl border border-green-100 p-4 shadow-sm"><div class="lf-quick-title">Accesso rapido</div><div class="lf-quick-actions"><button type="button" class="lf-quick-action" onclick="showSection('training')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span><span>Il mio piano</span></button>
 <button type="button" class="lf-quick-action" onclick="showSection('library')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a9 9 0 0 0-9-2v15a9 9 0 0 1 9 2 9 9 0 0 1 9-2V4a9 9 0 0 0-9 2zm0 0v15"/></svg></span><span>Vedi esercizi</span></button>
+<button type="button" class="lf-quick-action" onclick="showSection('archive')"><span class="lf-quick-icon" aria-hidden="true">▤</span><span>ARCHIVIO</span></button>
 <button type="button" class="lf-quick-action" onclick="showSection('profile')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Il mio profilo</span></button>
 <button type="button" class="lf-quick-action" onclick="showSection('community')" aria-label="Apri il Team e visualizza gli atleti della tua palestra"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2"/><path d="M17 5a3 3 0 0 1 0 6M21 20v-2a6 6 0 0 0-4-5.65"/></svg></span><span class="lf-quick-team-label"><span>Team</span><span id="lf-team-shortcut-count" class="lf-quick-team-count">Atleti iscritti</span></span></button></div></div>
 
@@ -587,6 +618,7 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
                     <h3 class="text-sm font-black uppercase tracking-widest text-black">Il Mio Piano</h3>
                     <p class="text-[10px] font-bold text-gray-500 uppercase mt-0.5">Schede e programmi assegnati dal tuo coach</p>
                 </div>
+                <button type="button" onclick="showSection('archive')" class="text-xs font-black px-3 py-2 bg-green-50 border border-green-300 text-green-900 rounded-xl">ARCHIVIO</button>
                 <span id="plan-total-count-badge" class="text-[10px] font-black tracking-widest text-gray-700 bg-gray-100 border border-gray-200 px-3 py-1 rounded-xl uppercase shrink-0">
                     Caricamento...
                 </span>
@@ -637,6 +669,22 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
                 <div id="active-week-container" class="space-y-4">
                     <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 bg-white rounded-2xl border border-gray-200">Seleziona una settimana per visualizzare le attività.</p>
                 </div>
+            </div>
+        </section>
+
+        <!-- Beta 0.27.6 — Archivio personale delle sole schede, NON delle settimane. -->
+        <section id="section-archive" class="hidden space-y-4">
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-2 shadow-sm">
+                <div class="flex items-center justify-between gap-2">
+                    <h3 class="font-black uppercase text-base text-black">ARCHIVIO</h3>
+                    <button type="button" id="lf276-archive-reload" class="bg-green-50 text-green-900 border border-green-200 rounded-lg p-2 text-xs font-black">↻ Aggiorna</button>
+                </div>
+                <p class="text-xs text-gray-600">Qui ritrovi soltanto le tue schede di allenamento ricevute dal coach: pesistica, forza, potenza, ipertrofia, mobilità e altre schede, anche quando non sono più collegate a un giorno del Piano.</p>
+                <p id="lf277-archive-status" class="text-[11px] text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-2">Le copie protette sono conservate separatamente dalle schede attive. Quelle precedenti all'aggiornamento vanno messe al sicuro dal coach.</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
+                <h4 class="font-black text-sm text-black">Le mie schede di allenamento</h4>
+                <div id="lf276-archived-sheets" class="grid grid-cols-1 sm:grid-cols-2 gap-2"><p class="text-xs text-gray-500">Caricamento...</p></div>
             </div>
         </section>
 
@@ -1134,6 +1182,7 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
         const planIndependentSection = document.getElementById('plan-independent-section');
         const planIndependentList = document.getElementById('plan-independent-list');
         const planIndependentMoreBtn = document.getElementById('plan-independent-more-btn');
+        let lf276ArchiveAllSheets = null;
         let assignedPersonalTemplates = null;
         let showAllWeekSheets = false;
         let showAllIndependentSheets = false;
@@ -1920,7 +1969,7 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
             const wanted = String(templateId);
             const matches = [];
             athleteWeeksList.forEach((week, index) => {
-                const days = lfWeekDayOrder.filter(day => String(week.days?.[day]?.templateId || '') === wanted);
+                const days = lfWeekDayOrder.filter(day => [week.days?.[day]?.templateId, week.days?.[day]?.templateId2].some(id=>String(id||'')===wanted));
                 if (days.length) matches.push({
                     weekNumber: index + 1,
                     days,
@@ -2014,18 +2063,18 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
             const assignedThisWeek = new Map();
             if (currentWeek) {
                 lfWeekDayOrder.forEach(day => {
-                    const id = String(currentWeek.days?.[day]?.templateId || '');
-                    if (!id || !byId.has(id)) return;
-                    if (!assignedThisWeek.has(id)) {
-                        assignedThisWeek.set(id, { tpl: byId.get(id), days: [], weekNumber: activeWeekIndex + 1 });
+                    for(const id of [currentWeek.days?.[day]?.templateId,currentWeek.days?.[day]?.templateId2].map(v=>String(v||'')).filter(Boolean)) {
+                        if (!byId.has(id)) continue;
+                        if (!assignedThisWeek.has(id)) assignedThisWeek.set(id,{tpl:byId.get(id),days:[],weekNumber:activeWeekIndex+1});
+                        if(!assignedThisWeek.get(id).days.includes(day)) assignedThisWeek.get(id).days.push(day);
                     }
-                    assignedThisWeek.get(id).days.push(day);
                 });
             }
             const scheduledElsewhere = new Set();
             athleteWeeksList.forEach(week => lfWeekDayOrder.forEach(day => {
-                const id = String(week.days?.[day]?.templateId || '');
-                if (id) scheduledElsewhere.add(id);
+                for(const id of [week.days?.[day]?.templateId,week.days?.[day]?.templateId2]) {
+                    if (id) scheduledElsewhere.add(String(id));
+                }
             }));
             const independent = all.filter(tpl => !scheduledElsewhere.has(String(tpl.id)))
                 .map(tpl => ({ tpl, days: [], weekNumber: null }));
@@ -2066,6 +2115,31 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
             lfRenderAssignedSheets();
         });
 
+        async function lf277LoadProtectedArchive(personalDocs){
+            const current=(personalDocs||[]).map(snap=>({id:snap.id,...snap.data(),isPersonal:true,_lf277Protected:false}));
+            const status=document.getElementById('lf277-archive-status');
+            try {
+                const path=collection(db,'gyms',currentGymId,'athlete_programs',currentUserUid,'archive_templates');
+                const archived=await getDocs(path);
+                const byId=new Map(current.map(t=>[String(t.id),t]));
+                archived.forEach(snap=>{
+                    const d=snap.data();
+                    byId.set(String(snap.id),{id:snap.id,title:d.title,exercises:d.exercises||[],
+                        createdAt:d.archivedAt,isPersonal:true,_lf277Protected:true});
+                });
+                lf276ArchiveAllSheets=Array.from(byId.values());
+                const remaining=lf276ArchiveAllSheets.filter(t=>!t._lf277Protected).length;
+                if(status)status.textContent=remaining
+                    ? `${archived.size} copie protette. ${remaining} schede precedenti non ancora protette: chiedi al coach di usare “Salva le vecchie schede nell'ARCHIVIO”.`
+                    : 'Le tue schede sono conservate in copie protette, indipendenti dalle settimane e dal Cestino.';
+            } catch(err) {
+                console.warn('Archivio protetto non accessibile:',err);
+                lf276ArchiveAllSheets=current;
+                if(status)status.textContent='Archivio protetto non disponibile: le schede mostrate provengono dalle copie personali, che possono ancora essere rimosse. Verifica le regole Firebase.';
+            }
+            lf276RenderArchive();
+        }
+
         async function loadAthleteTemplates() {
             if (!currentUserUid || !currentGymId) return;
             try {
@@ -2073,6 +2147,7 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
                 const snapshot = await getDocs(ref);
                 const personalList = [];
                 snapshot.forEach(snap => {if(!snap.data().deletedAt)personalList.push({ id: snap.id, ...snap.data(), isPersonal: true });});
+                await lf277LoadProtectedArchive(snapshot.docs);
                 personalList.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'it'));
                 assignedPersonalTemplates = personalList;
                 lfRenderAssignedSheets();
@@ -2094,12 +2169,50 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
             } catch (e) {
                 console.error('Errore caricamento schede personali:', e);
                 assignedPersonalTemplates = null;
+                lf276ArchiveAllSheets=null;
+                const archiveHost=document.getElementById('lf276-archived-sheets');
+                if(archiveHost)archiveHost.textContent='Impossibile caricare le schede personali. Aggiorna e riprova.';
                 planAssignedSection.classList.remove('hidden');
                 planAssignedList.innerHTML = '<p class="col-span-2 text-xs font-bold text-red-600 text-center p-4">Impossibile caricare le schede assegnate.</p>';
                 planSheetsCountBadge.textContent = 'Errore';
                 planTotalCountBadge.textContent = 'Caricamento incompleto';
             }
         }
+
+        // Archivio atleta: copie protette di sole schede, mai settimane.
+        // Prima della migrazione mostra anche le vecchie schede, marcate come non protette.
+        function lf276RenderArchive(){
+            const sheetsHost=document.getElementById('lf276-archived-sheets');
+            if(!sheetsHost||lf276ArchiveAllSheets===null)return;
+            sheetsHost.replaceChildren();
+            const sheets=[...lf276ArchiveAllSheets].sort((x,y)=>(x.title||'').localeCompare(y.title||'','it'));
+            if(!sheets.length){
+                const p=document.createElement('p');
+                p.className='text-xs text-gray-600';
+                p.textContent='Non hai ancora ricevuto schede di allenamento.';
+                sheetsHost.append(p);
+                return;
+            }
+            sheets.forEach(tpl=>{
+                const button=document.createElement('button');
+                button.type='button';
+                button.className='rounded-xl text-left border border-green-200 bg-green-50 p-3';
+                const title=document.createElement('strong');
+                title.className='block text-black text-sm break-words';
+                title.textContent=tpl.title||'Scheda senza titolo';
+                const label=document.createElement('small');
+                label.className='block text-green-900 mt-1';
+                label.textContent=tpl._lf277Protected?'Copia protetta · consultabile':
+                    (tpl.deletedAt?'Scheda nel Cestino · da proteggere':'Scheda ricevuta · da proteggere');
+                button.append(title,label);
+                button.addEventListener('click',()=>openViewTemplateModal(tpl));
+                sheetsHost.append(button);
+            });
+        }
+        document.getElementById('lf276-archive-reload').addEventListener('click',async()=>{
+            await Promise.all([loadAthleteTemplates(),loadAthleteWeeks()]);
+            lf276RenderArchive();
+        });
 
         // V24: le settimane leggono soltanto le schede personali. Il coach
         // deve allineare i vecchi collegamenti dalla Gestione atleta Admin.
@@ -2110,11 +2223,25 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
             for(const w of athleteWeeksList){
                 for(const d of Object.values(w.days||{})){
                     if(d?.templateId && !known.has(String(d.templateId)))missing.add(d.templateId);
+                    if(d?.templateId2 && !known.has(String(d.templateId2)))missing.add(d.templateId2);
                 }
             }
             if(missing.size) console.warn('Schede settimanali da allineare dal coach:',missing.size);
         }
 
+        function lf276SupersetAt(exercises,index){
+            const second=exercises[index]?.supersetWithPrevious===true;
+            const first=!second && exercises[index+1]?.supersetWithPrevious===true;
+            if(!first&&!second)return null;
+            let pair=0;
+            for(let i=0;i<exercises.length;i++){
+                if(exercises[i]?.supersetWithPrevious){
+                    if(i===index||i-1===index)return {label: second ? 'SUPERSET' : 'ESERCIZIO',second,rest:second?(exercises[index].supersetRest||''):''};
+                    pair++;
+                }
+            }
+            return null;
+        }
         function openViewTemplateModal(tpl) {
             window.lf26SelectedSheet=tpl;
             viewTplModalTitle.textContent = `🏋️‍♂️ ${tpl.title}`;
@@ -2158,6 +2285,17 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
                         </div>
                         ${ex.notes ? `<div class="mt-1 text-[10px] font-bold text-gray-500 uppercase border-t border-gray-100 pt-1.5">Note: ${ex.notes}</div>` : ''}
                     `;
+                    const superset=lf276SupersetAt(tpl.exercises,idx);
+                    if(superset){
+                        row.classList.add('lf276-ss-card');
+                        const badge=document.createElement('div');badge.className='lf276-ss-badge';badge.textContent=superset.label;
+                        row.prepend(badge);
+                        const info=document.createElement('div');info.className='lf276-ss-note';
+                        info.textContent=superset.second
+                          ? 'Dopo il superset: '+(superset.rest?'recupera '+superset.rest:'recupero secondo il coach')
+                          : 'Passa subito al superset senza recuperare';
+                        row.appendChild(info);
+                    }
                     if (catalogMatch) {
                         const thumb=document.createElement('img');
                         thumb.className='w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-lg bg-slate-800 border border-slate-700 shrink-0 cursor-pointer';
@@ -2208,6 +2346,7 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
                 athleteWeeksList = [];
                 athleteWeeksLoadFailed = false;
                 snapshot.forEach(docSnap => {if(!docSnap.data().deletedAt)athleteWeeksList.push({ id: docSnap.id, ...docSnap.data() });});
+                lf276RenderArchive();
                 athleteWeeksList.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 
                 weeksBadge.textContent = `${athleteWeeksList.length} Settimane`;
@@ -2293,8 +2432,8 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
                 todayTitle.textContent = activityTitle;
                 todaySubtitle.textContent = dayInfo.activity2 || "Visualizza gli esercizi e le indicazioni del coach.";
                 
-                if (dayInfo.templateId) {
-                    const tpl = globalTemplates.find(t => t.id === dayInfo.templateId);
+                if (dayInfo.templateId || dayInfo.templateId2) {
+                    const tpl = globalTemplates.find(t => t.id === (dayInfo.templateId || dayInfo.templateId2));
                     if (tpl) {
                         todayBtn.innerHTML = `<span>Apri allenamento</span> &rarr;`;
                         todayBtn.onclick = () => openViewTemplateModal(tpl);
@@ -2376,19 +2515,25 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
                     if (matchedTpl) linkedTplName = matchedTpl.title;
                 }
 
-                let cardStyle = "lf-day-card bg-white p-3 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between cursor-pointer hover:border-neon transition relative overflow-hidden h-[120px] ";
+                let linkedTplName2 = "";
+                if (dayInfo.templateId2) {
+                    const matchedTpl2 = globalTemplates.find(t=>t.id===dayInfo.templateId2);
+                    if(matchedTpl2) linkedTplName2=matchedTpl2.title;
+                }
+                let cardStyle = "lf-day-card bg-white p-3 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between cursor-pointer hover:border-neon transition relative overflow-hidden min-h-[142px] ";
                 if (isToday) cardStyle += "ring-2 ring-neon ";
 
                 const isSunday = dayName === 'domenica';
                 const gridSpanClass = isSunday ? "col-span-3 sm:col-span-1" : "";
 
                 daysHtml += `
-                    <div class="${cardStyle} ${gridSpanClass} btn-open-day-modal" data-day="${dayName}" data-act1="${act1}" data-act2="${act2}" data-tpl="${dayInfo.templateId || ''}">
+                    <div class="${cardStyle} ${gridSpanClass} btn-open-day-modal" data-day="${dayName}" data-act1="${act1}" data-act2="${act2}" data-tpl="${dayInfo.templateId || ''}" data-tpl2="${dayInfo.templateId2 || ''}">
                         <div class="space-y-0.5 overflow-hidden">
                             <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block">${dayName}</span>
                             <h4 class="font-black text-[11px] text-black uppercase tracking-tight truncate">${act1}</h4>
                             ${act2 ? `<p class="font-black text-[11px] text-black uppercase tracking-tight truncate">${act2}</p>` : ''}
                             ${linkedTplName ? `<p class="font-black text-[11px] text-neon uppercase tracking-tight truncate">${linkedTplName}</p>` : ''}
+                            ${linkedTplName2 ? `<p class="font-black text-[11px] text-neon uppercase tracking-tight truncate">${linkedTplName2}</p>` : ''}
                         </div>
                         <div class="pt-1 border-t border-gray-100 flex justify-between items-center text-[8px] font-black uppercase text-gray-400 mt-auto">
                             <span>Dettagli</span>
@@ -2416,74 +2561,48 @@ html[data-lion-theme="dark"] #community-roster-list > div:hover {
                     const act1 = el.getAttribute('data-act1');
                     const act2 = el.getAttribute('data-act2');
                     const tplId = el.getAttribute('data-tpl');
+                    const tplId2 = el.getAttribute('data-tpl2');
 
-                    openDayDetailModal(day, act1, act2, tplId);
+                    openDayDetailModal(day, act1, act2, tplId, tplId2);
                 });
             });
 
             container.appendChild(card);
         }
 
-        function openDayDetailModal(dayName, act1, act2, tplId) {
-            document.getElementById('day-modal-title').textContent = dayName.toUpperCase();
-            const body = document.getElementById('day-modal-body');
-            body.innerHTML = '';
-
-            const isRest = act1 === 'RIPOSO' || act1 === 'OFF' || !act1;
-
-            if (isRest && !tplId) {
-                body.innerHTML = `
-                    <div class="bg-white border border-gray-200 rounded-xl p-5 text-center space-y-2">
-                        <span class="text-3xl">🌙</span>
-                        <h4 class="font-black text-sm uppercase text-black">Giorno di Riposo</h4>
-                        <p class="text-gray-500 text-[11px] font-medium">Nessun allenamento previsto. Dedicati al recupero fisico e alla mobilità.</p>
-                    </div>
-                `;
-            } else {
-                let tplBtnHtml = '';
-                if (tplId) {
-                    const tpl = globalTemplates.find(t => t.id === tplId);
-                    if (tpl) {
-                        tplBtnHtml = `
-                            <button type="button" id="btn-open-modal-scheda" class="w-full mt-3 bg-neon text-white font-black uppercase tracking-wider py-3 rounded-xl text-xs shadow-xs flex items-center justify-center gap-2">
-                                <span>Apri Scheda Assegnata</span> &rarr;
-                            </button>
-                        `;
-                    }
+        function openDayDetailModal(dayName, act1, act2, tplId, tplId2='') {
+            document.getElementById('day-modal-title').textContent=dayName.toUpperCase();
+            const body=document.getElementById('day-modal-body');
+            body.replaceChildren();
+            const validIds=[tplId,tplId2].filter(Boolean);
+            const isRest=['RIPOSO','OFF',''].includes(String(act1||'').toUpperCase());
+            if(isRest && !validIds.length){
+                const p=document.createElement('div');
+                p.className='bg-white border border-gray-200 rounded-xl p-5 text-center space-y-2';
+                p.innerHTML='<span class="text-3xl">🌙</span><h4 class="font-black text-sm uppercase text-black">Giorno di Riposo</h4><p class="text-gray-500 text-[11px] font-medium">Nessun allenamento previsto. Dedicati al recupero fisico e alla mobilità.</p>';
+                body.appendChild(p);
+            }else{
+                const wrap=document.createElement('div');
+                wrap.className='bg-white border border-gray-200 rounded-xl p-4 space-y-3 shadow-2xs';
+                const title=document.createElement('h4');
+                title.className='text-neon font-black text-xs uppercase border-b border-gray-100 pb-2';
+                title.textContent='Programma del giorno';wrap.appendChild(title);
+                for(const text of [act1,act2].filter(Boolean)){
+                    const p=document.createElement('p');p.className='font-black text-sm text-black uppercase';p.textContent=text;wrap.appendChild(p);
                 }
-
-                let linkedTplName = "";
-                if (tplId) {
-                    const tpl = globalTemplates.find(t => t.id === tplId);
-                    if (tpl) linkedTplName = tpl.title;
-                }
-
-                body.innerHTML = `
-                    <div class="bg-white border border-gray-200 rounded-xl p-4 space-y-3 shadow-2xs">
-                        <div class="flex items-center gap-2 text-neon font-black text-xs uppercase tracking-widest border-b border-gray-100 pb-2">
-                            <span>🏋️‍♂️</span> Programma del Giorno
-                        </div>
-                        <div class="space-y-1.5">
-                            <p class="font-black text-black text-sm uppercase">${act1}</p>
-                            ${act2 ? `<p class="font-black text-sm text-black uppercase">${act2}</p>` : ''}
-                            ${linkedTplName ? `<p class="font-black text-sm text-neon uppercase">${linkedTplName}</p>` : ''}
-                        </div>
-                        ${tplBtnHtml}
-                    </div>
-                `;
-
-                setTimeout(() => {
-                    const btnScheda = document.getElementById('btn-open-modal-scheda');
-                    if (btnScheda) {
-                        btnScheda.addEventListener('click', () => {
-                            toggleModal('day-detail-modal');
-                            const tpl = globalTemplates.find(t => t.id === tplId);
-                            if (tpl) openViewTemplateModal(tpl);
-                        });
-                    }
-                }, 100);
+                validIds.forEach((id,index)=>{
+                    const tpl=globalTemplates.find(t=>String(t.id)===String(id));
+                    if(!tpl) return;
+                    const label=document.createElement('p');label.className='font-black text-sm text-neon uppercase';label.textContent=`Scheda ${index+1}: ${tpl.title||'Allenamento'}`;
+                    wrap.appendChild(label);
+                    const button=document.createElement('button');
+                    button.type='button';button.className='w-full mt-2 bg-neon text-white font-black uppercase tracking-wider py-3 rounded-xl text-xs';
+                    button.textContent=`Apri scheda ${index+1}`;
+                    button.addEventListener('click',()=>{toggleModal('day-detail-modal');openViewTemplateModal(tpl);});
+                    wrap.appendChild(button);
+                });
+                body.appendChild(wrap);
             }
-
             toggleModal('day-detail-modal');
         }
     </script>
@@ -2664,6 +2783,15 @@ window.lf26PrintSheet = function (sheet, context) {
     const number=page.createElement('td'); number.className='num';number.textContent=String(i+1);
     const name=page.createElement('td');
     const strong=page.createElement('strong');strong.textContent=exercise.name||'Esercizio';name.append(strong);
+    const isSecond=exercise.supersetWithPrevious===true;
+    const isFirst=!isSecond && exercises[i+1]?.supersetWithPrevious===true;
+    if(isSecond||isFirst){
+      const pairNo=exercises.slice(0,isSecond?i:i+1).filter(x=>x.supersetWithPrevious===true).length;
+      const label=page.createElement('small');
+      label.style.fontWeight='900';label.style.color='#126a49';
+      label.textContent=(isSecond?'SUPERSET':'ESERCIZIO')+' · '+(isSecond?(exercise.supersetRest?'Recupero dopo: '+exercise.supersetRest:'Recupero dopo la coppia'):'Segue subito l’esercizio successivo');
+      name.append(label);
+    }
     if(exercise.notes){const note=page.createElement('small');note.textContent=String(exercise.notes);name.append(note);}
     tr.append(number,name);
     [exercise.sets,exercise.reps,exercise.load].forEach(value=>{
@@ -2681,5 +2809,34 @@ window.lf26PrintSheet = function (sheet, context) {
 };
 </script>
 
+
+<script>
+/* Lion Fit Beta 0.27.5 - ripristino scroll dopo modali e navigazione. */
+(() => {
+  const modalSelector = '[id$="-modal"].fixed, #settings-modal, #edit-profile-modal';
+  const modals = Array.from(document.querySelectorAll(modalSelector));
+  const visible = el => !el.classList.contains('hidden') && getComputedStyle(el).display !== 'none';
+  let queued = false;
+  function sync() {
+    queued = false;
+    const blocked = modals.some(visible);
+    const expected = blocked ? 'hidden' : '';
+    if (document.body.style.overflow !== expected) document.body.style.overflow = expected;
+    // Alcuni browser mobili mantengono l'overflow inline anche su html.
+    if (!blocked && document.documentElement.style.overflow === 'hidden') document.documentElement.style.overflow = '';
+  }
+  function schedule() {
+    if (!queued) { queued = true; queueMicrotask(sync); }
+  }
+  const observer = new MutationObserver(schedule);
+  modals.forEach(el => observer.observe(el, {attributes:true,attributeFilter:['class','style']}));
+  observer.observe(document.body, {attributes:true,attributeFilter:['style']});
+  window.addEventListener('pageshow',schedule);
+  window.addEventListener('focus',schedule);
+  document.addEventListener('visibilitychange',schedule);
+  window.lf275SyncScroll = schedule;
+  schedule();
+})();
+</script>
 </body>
 </html>
