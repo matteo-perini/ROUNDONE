@@ -3413,6 +3413,7 @@ Martedì	Forza	...
             exercisesContainer.innerHTML = '';
             addExerciseRowToContainerWithValues(exercisesContainer);
             document.querySelector('#template-form button[type="submit"]').textContent = 'Salva nell’Archivio schede';
+            document.getElementById('lf17-cancel-edit').textContent = 'Annulla modifica';
         }
         document.getElementById('lf17-cancel-edit').addEventListener('click', lf17ResetEditor);
         function lf17OpenEdit(tpl) {
@@ -3527,15 +3528,29 @@ Martedì	Forza	...
                 card.appendChild(actions);list.appendChild(card);
             });
         }
-        async function lf17Duplicate(tpl) {
-            try {
-                await addDoc(collection(db,'gyms',currentGymId,'templates'),{
-                    title:(tpl.title||'Scheda')+' (copia)',
-                    exercises:(tpl.exercises||[]).map(ex=>({...ex})),
-                    createdAt:serverTimestamp()
-                });
-                await loadTemplates();await loadDashboardStats();showAlert('Copia creata nell’Archivio schede.','Scheda duplicata');
-            } catch(err) {showAlert('Non sono riuscito a duplicare la scheda.','Errore');}
+        // Beta 0.28.2: Duplica apre immediatamente la copia nell'editor.
+        // Non scrivere nulla su Firebase fino a "Salva copia": Annulla non crea doppioni.
+        // L'ID resta nullo in fase di copia, quindi il salvataggio usa addDoc
+        // (ID nuovo) e non updateDoc (che modificherebbe l'originale).
+        function lf17Duplicate(tpl) {
+            if (!tpl || !Array.isArray(tpl.exercises)) {
+                showAlert('Impossibile aprire questa scheda per la duplicazione.', 'Errore');
+                return;
+            }
+            lf26PendingWeekTemplate = null; // Non collegare copie a una settimana aperta per errore.
+            lf26UpdateContextBanner();
+            lf17ResetEditor();
+            document.getElementById('tpl-title').value = (tpl.title || 'Scheda') + ' (copia)';
+            exercisesContainer.replaceChildren();
+            tpl.exercises.forEach(ex => addExerciseRowToContainerWithValues(exercisesContainer, ex));
+            if (!tpl.exercises.length) addExerciseRowToContainerWithValues(exercisesContainer);
+            document.getElementById('lf17-edit-label').textContent =
+                'Copia di «' + (tpl.title || 'Scheda') + '» — modifica i dati e salva come nuova scheda. L’originale resta invariata.';
+            document.getElementById('lf17-edit-status').classList.remove('hidden');
+            document.getElementById('lf17-cancel-edit').textContent = 'Annulla copia';
+            document.querySelector('#template-form button[type="submit"]').textContent = 'Salva copia nell’Archivio schede';
+            lf21ShowTemplateView('create');
+            document.getElementById('view-create-tpl').scrollIntoView({behavior:'smooth',block:'start'});
         }
         function lf17ShowAssign(tpl) {
             const modal=document.getElementById('lf17-assign-modal');
