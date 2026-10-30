@@ -2,6 +2,8 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="LOGO-APP.png">
+    <link rel="apple-touch-icon" href="LOGO-APP.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Area Atleta - LION FIT 🦁</title>
     <!-- Tailwind CSS CDN -->
@@ -69,6 +71,8 @@
         .lf-quick-action:active { transform:scale(.98); }
         .lf-quick-icon { display:grid; place-items:center; flex-shrink:0; width:36px; height:36px; border-radius:12px; background:#f0fdf4; color:#15803d; font-size:18px; }
         .lf-quick-title { font-size:11px; letter-spacing:.07em; font-weight:900; color:#64748b; text-transform:uppercase; margin-bottom:10px; }
+        .lf-quick-team-label { display:flex; flex-direction:column; min-width:0; gap:3px; }
+        .lf-quick-team-count { font-size:10px; font-weight:700; color:#64748b; white-space:normal; line-height:1.2; }
         @media(min-width:640px) { .lf-quick-actions { grid-template-columns:repeat(4,minmax(0,1fr)); } }
         @media(max-width:767px) {
           .nav-btn[aria-current="page"] { background:#f0fdf4; border-radius:13px; }
@@ -130,7 +134,7 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
     <!-- TOP BAR -->
     <header class="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center shadow-xs">
         <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 bg-neon text-white flex items-center justify-center font-black text-sm rounded-xl shadow-sm">🦁</div>
+            <div class="w-8 h-8 bg-white border border-green-100 flex items-center justify-center font-black text-sm rounded-xl shadow-sm overflow-hidden"><img src="LOGO-APP.png" alt="Logo Lion Fit" class="w-full h-full object-contain" onerror="this.classList.add('hidden');this.nextElementSibling.classList.remove('hidden')"><span class="hidden text-green-700" aria-hidden="true">🦁</span></div>
             <div>
                 <h1 class="text-xs font-black uppercase tracking-widest text-black">LION FIT</h1>
                 <p class="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Area Atleta</p>
@@ -148,9 +152,9 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
         <section id="section-home" class="block space-y-5">
             <!-- Collegamenti rapidi: usano la navigazione esistente, senza alterare Firebase -->
             <div class="lf-quick-panel bg-white rounded-2xl border border-green-100 p-4 shadow-sm"><div class="lf-quick-title">Accesso rapido</div><div class="lf-quick-actions"><button type="button" class="lf-quick-action" onclick="showSection('training')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span><span>Il mio piano</span></button>
-<button type="button" class="lf-quick-action" onclick="showSection('gym')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/></svg></span><span>La mia palestra</span></button>
 <button type="button" class="lf-quick-action" onclick="showSection('library')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a9 9 0 0 0-9-2v15a9 9 0 0 1 9 2 9 9 0 0 1 9-2V4a9 9 0 0 0-9 2zm0 0v15"/></svg></span><span>Vedi esercizi</span></button>
-<button type="button" class="lf-quick-action" onclick="showSection('profile')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Il mio profilo</span></button></div></div>
+<button type="button" class="lf-quick-action" onclick="showSection('profile')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Il mio profilo</span></button>
+<button type="button" class="lf-quick-action" onclick="showSection('community')" aria-label="Apri il Team e visualizza gli atleti della tua palestra"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2"/><path d="M17 5a3 3 0 0 1 0 6M21 20v-2a6 6 0 0 0-4-5.65"/></svg></span><span class="lf-quick-team-label"><span>Team</span><span id="lf-team-shortcut-count" class="lf-quick-team-count">Atleti iscritti</span></span></button></div></div>
 
             <!-- Saluto Atleta -->
             <div class="flex justify-between items-center px-1">
@@ -159,7 +163,7 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
                     <h2 class="text-2xl font-black text-black tracking-tight flex items-center gap-2">
                         Ciao, <span id="home-user-name">Atleta</span>! 👋
                     </h2>
-                    <p class="text-xs font-bold text-gray-500 mt-0.5">Ecco il tuo allenamento di oggi</p>
+                    <p class="text-xs font-bold text-gray-500 mt-0.5">Le tue schede e i tuoi allenamenti in un unico posto</p>
                 </div>
                 <div class="w-10 h-10 rounded-2xl bg-gray-900 text-white flex items-center justify-center font-black text-lg shadow-sm">
                     <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/></svg>
@@ -197,7 +201,7 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
                     <div class="lf-mono-home w-8 h-8 rounded-xl bg-gray-100 text-black flex items-center justify-center text-sm font-black border border-gray-200"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></div>
                     <div>
                         <h4 class="font-black text-xs uppercase tracking-wider text-black">Il mio piano</h4>
-                        <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Tutte le settimane</p>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Schede e settimane</p>
                     </div>
                 </div>
 
@@ -209,65 +213,46 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
                     </div>
                 </div>
             </div>
-
-            <!-- Anteprima Schede Personali (Solo Personali sulla Home) -->
-            <div class="space-y-3 pt-2">
-                <div class="flex justify-between items-center px-1">
-                    <h3 class="font-black text-xs uppercase tracking-widest text-gray-500">Schede Personali / Riabilitazione</h3>
-                </div>
-                <div id="personal-templates-list" class="space-y-3">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 bg-white rounded-xl border border-gray-200">Caricamento schede in corso...</p>
-                </div>
-            </div>
         </section>
 
-        <!-- SEZIONE 2: IL MIO PIANO -->
+        <!-- LION FIT ATHLETE V21 - SEZIONE 2: IL MIO PIANO UNIFICATO: schede assegnate e programmazione -->
         <section id="section-training" class="hidden space-y-4">
-            <div class="flex justify-between items-center bg-white border border-gray-200 p-4 rounded-2xl shadow-xs">
+            <div class="flex justify-between items-center gap-3 bg-white border border-gray-200 p-4 rounded-2xl shadow-xs">
                 <div>
                     <h3 class="text-sm font-black uppercase tracking-widest text-black">Il Mio Piano</h3>
-                    <p class="text-[10px] font-bold text-gray-500 uppercase mt-0.5">Programma di allenamento</p>
+                    <p class="text-[10px] font-bold text-gray-500 uppercase mt-0.5">Schede e programmi assegnati dal tuo coach</p>
                 </div>
-                <span id="weeks-total-count-badge" class="text-[10px] font-black tracking-widest text-gray-700 bg-gray-100 border border-gray-200 px-3 py-1 rounded-xl uppercase">
-                    0 Settimane
+                <span id="plan-total-count-badge" class="text-[10px] font-black tracking-widest text-gray-700 bg-gray-100 border border-gray-200 px-3 py-1 rounded-xl uppercase shrink-0">
+                    Caricamento...
                 </span>
             </div>
 
-            <!-- Barra Rettangoli Arrotondati Compatti -->
-            <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-xs space-y-2.5">
-                <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block px-1">Seleziona una settimana</span>
-                <div id="weeks-circles-nav" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase">Caricamento settimane...</p>
+            <!-- Le schede assegnate sono sempre qui, anche con settimane già programmate. -->
+            <div id="plan-assigned-section" class="space-y-3">
+                <div class="flex justify-between items-center px-1 gap-3">
+                    <h4 class="font-black text-xs uppercase tracking-wider text-black">Le mie schede assegnate</h4>
+                    <span id="plan-sheets-count-badge" class="text-[10px] font-black text-neon bg-green-50 border border-green-200 px-2.5 py-1 rounded-lg shrink-0">0 schede</span>
+                </div>
+                <div id="plan-assigned-list" class="space-y-2">
+                    <p class="text-xs text-gray-500 bg-white border border-gray-200 rounded-xl p-4 text-center">Caricamento schede assegnate...</p>
                 </div>
             </div>
 
-            <!-- Contenitore Settimana Attiva -->
-            <div id="active-week-container" class="space-y-4">
-                <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 bg-white rounded-2xl border border-gray-200">Seleziona una settimana per visualizzare le attività.</p>
-            </div>
-        </section>
-
-        <!-- SEZIONE 3: SCHEDE (GLOBALI + PERSONALI) -->
-        <section id="section-gym" class="hidden space-y-4">
-            <div class="flex justify-between items-center bg-white border border-gray-200 p-4 rounded-2xl shadow-xs">
-                <div>
-                    <h3 class="text-sm font-black uppercase tracking-widest text-black">Schede Palestra & Personali</h3>
-                    <p class="text-[10px] font-bold text-gray-500 uppercase mt-0.5">Programmi globali e dedicati</p>
+            <!-- Programmazione visibile SOLO se ci sono settimane. Nessuna sezione vuota per chi fa solo pesistica. -->
+            <div id="plan-weeks-section" class="hidden space-y-3">
+                <div class="flex justify-between items-center gap-3 px-1">
+                    <h4 class="font-black text-xs uppercase tracking-wider text-black">Programmazione settimanale</h4>
+                    <span id="weeks-total-count-badge" class="text-[10px] font-black tracking-widest text-gray-700 bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-lg uppercase shrink-0">0 Settimane</span>
                 </div>
-                <span class="text-[10px] font-black tracking-widest text-neon bg-green-50 border border-green-200 px-3 py-1 rounded-lg">DISPONIBILI</span>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-start">
-              <div class="rounded-2xl bg-white border border-green-200 p-3">
-                <h4 class="text-sm font-black text-green-800 uppercase mb-3">Schede personali</h4>
-                <div id="lf18-personal-gym-list" class="space-y-2"></div>
-              </div>
-              <div class="rounded-2xl bg-white border border-gray-200 p-3">
-                <h4 class="text-sm font-black text-gray-900 uppercase mb-3">Schede globali</h4>
-                <div id="lf18-global-gym-list" class="space-y-2"></div>
-              </div>
-            </div>
-            <div id="gym-templates-list" class="hidden">
-                <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 bg-white rounded-2xl border border-gray-200">Caricamento schede in corso...</p>
+                <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-xs space-y-2.5">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 block px-1">Seleziona una settimana</span>
+                    <div id="weeks-circles-nav" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">Caricamento settimane...</p>
+                    </div>
+                </div>
+                <div id="active-week-container" class="space-y-4">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 bg-white rounded-2xl border border-gray-200">Seleziona una settimana per visualizzare le attività.</p>
+                </div>
             </div>
         </section>
 
@@ -311,7 +296,10 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
                         <h3 class="text-sm font-black uppercase tracking-widest text-black">Lion Fit Team</h3>
                         <p class="text-[10px] font-bold text-gray-500 uppercase mt-0.5">Atleti della tua palestra</p>
                     </div>
-                    <span id="community-count-badge" class="text-[10px] font-black text-gray-600 bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-lg">0 membri</span>
+                    <div class="flex gap-2 items-center flex-wrap justify-end">
+                      <button type="button" id="lf242-team-refresh" class="text-[10px] font-bold text-green-800 bg-green-50 border border-green-200 px-2.5 py-1.5 rounded-lg">↻ Aggiorna</button>
+                      <span id="community-count-badge" class="text-[10px] font-black text-gray-600 bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-lg">0 membri</span>
+                    </div>
                 </div>
 
                 <div>
@@ -366,10 +354,6 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
         <button id="nav-btn-training" onclick="showSection('training')" class="nav-btn min-w-[55px] flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
             <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             <span class="text-[8px] font-black tracking-wider uppercase">Piano</span>
-        </button>
-        <button id="nav-btn-gym" onclick="showSection('gym')" class="nav-btn min-w-[55px] flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
-            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-            <span class="text-[8px] font-black tracking-wider uppercase">Schede</span>
         </button>
         <button id="nav-btn-library" onclick="showSection('library')" class="nav-btn min-w-[55px] flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
             <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
@@ -598,7 +582,7 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { 
-            getFirestore, doc, getDoc, updateDoc, collection, addDoc, getDocs, query, where, serverTimestamp, 
+            getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, where, serverTimestamp, 
             enableIndexedDbPersistence 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -652,6 +636,8 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
         }
 
         window.showSection = function(sectionId) {
+            // Compatibilita' con vecchi collegamenti alla sezione Schede eliminata.
+            if (sectionId === 'gym') sectionId = 'training';
             document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
             document.getElementById(`section-${sectionId}`).classList.remove('hidden');
             // Evidenzia la scheda attiva anche per le tecnologie assistive.
@@ -748,8 +734,11 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
         const inputWeight = document.getElementById('input-weight');
         const btnLogoutSettings = document.getElementById('btn-logout-settings');
 
-        const personalTemplatesList = document.getElementById('personal-templates-list');
-        const gymTemplatesList = document.getElementById('gym-templates-list');
+        const planAssignedList = document.getElementById('plan-assigned-list');
+        const planAssignedSection = document.getElementById('plan-assigned-section');
+        const planSheetsCountBadge = document.getElementById('plan-sheets-count-badge');
+        const planTotalCountBadge = document.getElementById('plan-total-count-badge');
+        const planWeeksSection = document.getElementById('plan-weeks-section');
 
         const viewTemplateModal = document.getElementById('view-template-modal');
         const viewTplModalTitle = document.getElementById('view-tpl-modal-title');
@@ -870,11 +859,17 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
             };
 
             if (userPhotoBase64) {
-                updatePayload.photoUrl = userPhotoBase64;
+                updatePayload.photoURL = userPhotoBase64;
             }
 
             try {
                 await updateDoc(doc(db, "users", currentUserUid), updatePayload);
+                try {
+                    await lf24SyncPublicTeam({
+                        name:updatePayload.name,surname:updatePayload.surname,bio:updatePayload.bio,
+                        photoURL:userPhotoBase64||''
+                    });
+                }catch(e){console.warn('Team pubblico non aggiornato',e)}
 
                 const fullDisplay = `${name} ${surname}`.trim() || "ATLETA";
                 displayFullname.textContent = fullDisplay;
@@ -913,6 +908,8 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
 
                 const userData = userDoc.data();
                 currentGymId = userData.gymId;
+                try {await lf24SyncPublicTeam(userData)}
+                catch(e){console.warn('Profilo Team non sincronizzato',e)}
 
                 const fullNameStr = `${userData.name || ''} ${userData.surname || ''}`.trim() || "ATLETA";
                 displayFullname.textContent = fullNameStr;
@@ -928,11 +925,11 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
                 inputWeight.value = userData.weight || "";
                 inputGender.value = userData.gender || "Non specificare";
 
-                if (userData.photoUrl) {
-                    avatarPreviewImg.src = userData.photoUrl;
+                if (userData.photoUrl || userData.photoURL) {
+                    avatarPreviewImg.src = userData.photoUrl || userData.photoURL;
                     avatarPreviewImg.classList.remove('hidden');
                     avatarPlaceholderIcon.classList.add('hidden');
-                    editAvatarImg.src = userData.photoUrl;
+                    editAvatarImg.src = userData.photoUrl || userData.photoURL;
                     editAvatarImg.classList.remove('hidden');
                     editAvatarIconBox.classList.add('hidden');
                 }
@@ -954,9 +951,9 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
         async function loadGlobalTemplatesAndVideos() {
             if (!currentGymId) return;
             try {
-                const tplSnap = await getDocs(query(collection(db, "gyms", currentGymId, "templates")));
+                // Non scaricare l'archivio delle schede condivise: esclusivo dei coach.
+                // Le sole schede collegate alle settimane vengono caricate per ID in loadAthleteWeeks.
                 globalTemplates = [];
-                tplSnap.forEach(d => globalTemplates.push({ id: d.id, ...d.data() }));
 
                 const vidSnap = await getDocs(query(collection(db, "gyms", currentGymId, "exercise_videos")));
                 gymVideos = [];
@@ -1337,55 +1334,89 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
         });
         libMuscleFilter.addEventListener('change', filterLibrary);
 
+        // V24: il profilo pubblico contiene solo campi sicuri da mostrare ai compagni.
+        let lf24TeamPhoto = '';
+        async function lf24SyncPublicTeam(info){
+            if(!currentUserUid||!currentGymId)return;
+            lf24TeamPhoto = info.photoURL || info.photoUrl || lf24TeamPhoto;
+            const ref=doc(db,'team_public',currentUserUid);
+            const payload={
+                gymId:currentGymId,role:'athlete',name:String(info.name||'Atleta').slice(0,90),
+                surname:String(info.surname||'').trim().slice(0,1),bio:String(info.bio||'').slice(0,200),
+                photoURL:lf24TeamPhoto
+            };
+            await setDoc(ref,payload,{merge:true});
+        }
+
         // TEAM / COMMUNITY ROSTER
         async function loadCommunityRoster() {
             if (!currentGymId) return;
             try {
-                const q = query(collection(db, "users"), where("gymId", "==", currentGymId), where("role", "==", "athlete"));
+                // Firestore V3: il Team usa solo profili pubblici, mai la raccolta privata users.
+                const q = query(collection(db,'team_public'),where('gymId','==',currentGymId),where('role','==','athlete'));
                 const snap = await getDocs(q);
                 teamMembersList = [];
                 snap.forEach(d => teamMembersList.push({ id: d.id, ...d.data() }));
 
                 document.getElementById('community-count-badge').textContent = `${teamMembersList.length} membri`;
+                const teamShortcutCount = document.getElementById('lf-team-shortcut-count');
+                if (teamShortcutCount) teamShortcutCount.textContent = `${teamMembersList.length} atlet${teamMembersList.length === 1 ? 'a' : 'i'} iscritt${teamMembersList.length === 1 ? 'o' : 'i'}`;
                 renderCommunityList(teamMembersList);
 
             } catch(e) {
                 console.warn("Errore caricamento community:", e);
-                document.getElementById('community-roster-list').innerHTML = '<p class="text-xs font-bold text-gray-400 uppercase text-center py-6">Errore caricamento team.</p>';
+                const denied = e && (e.code === 'permission-denied' || String(e.message||'').includes('insufficient permissions'));
+                document.getElementById('community-roster-list').textContent = denied
+                    ? 'Permesso Firebase mancante: serve la regola per team_public. Non è un problema di connessione.'
+                    : 'Non riesco a caricare gli iscritti. Controlla la connessione e riprova.';
+                const teamShortcutCount = document.getElementById('lf-team-shortcut-count');
+                if (teamShortcutCount) teamShortcutCount.textContent = 'Elenco non disponibile';
             }
         }
+
+        document.getElementById('lf242-team-refresh').addEventListener('click', loadCommunityRoster);
 
         function renderCommunityList(list) {
             const rosterList = document.getElementById('community-roster-list');
             rosterList.innerHTML = '';
 
             if (list.length === 0) {
-                rosterList.innerHTML = '<p class="text-xs font-bold text-gray-400 uppercase text-center py-6">Nessun atleta trovato.</p>';
+                rosterList.innerHTML = '<p class="text-xs font-bold text-gray-500 text-center py-6">Nessun profilo Team disponibile. Il coach può premere «Aggiorna elenco Team» in Gestione atleti per pubblicare i profili degli iscritti.</p>';
                 return;
             }
 
             list.forEach(u => {
                 const item = document.createElement('div');
-                item.className = "p-3.5 bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-between hover:border-neon cursor-pointer transition shadow-2xs";
+                item.className = "p-3.5 bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-between hover:border-neon transition shadow-2xs";
                 
-                const avatarHtml = u.photoUrl 
-                    ? `<img src="${u.photoUrl}" class="w-11 h-11 rounded-full object-cover border-2 border-white shadow-xs">`
-                    : `<div class="w-11 h-11 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center font-black text-sm border border-gray-300">🦁</div>`;
-
-                const shortName = `${u.name || 'Atleta'} ${u.surname ? u.surname.charAt(0) + '.' : ''}`;
-                const roleSport = u.bio || 'Sala pesi · Atleta';
-
-                item.innerHTML = `
-                    <div class="flex items-center gap-3 min-w-0">
-                        ${avatarHtml}
-                        <div class="min-w-0">
-                            <h4 class="font-black text-xs text-black uppercase tracking-wide truncate">${shortName}</h4>
-                            <p class="text-[10px] font-bold text-gray-500 uppercase mt-0.5 truncate">${roleSport}</p>
-                        </div>
-                    </div>
-                    <span class="text-gray-400 text-sm font-bold pl-2">&rsaquo;</span>
-                `;
-
+                const avatarWrap = document.createElement('div');
+                avatarWrap.className = 'shrink-0';
+                const photoUrl = typeof (u.photoURL||u.photoUrl) === 'string' ? (u.photoURL||u.photoUrl).trim() : '';
+                if (photoUrl && (/^https:\/\//i.test(photoUrl) || /^data:image\/(?:png|jpe?g|webp|gif);base64,/i.test(photoUrl))) {
+                    const img = document.createElement('img');
+                    img.src = photoUrl;
+                    img.alt = 'Foto profilo atleta';
+                    img.className = 'w-11 h-11 rounded-full object-cover border-2 border-white shadow-xs';
+                    avatarWrap.appendChild(img);
+                } else {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'w-11 h-11 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center font-black text-sm border border-gray-300';
+                    placeholder.textContent = '🦁';
+                    avatarWrap.appendChild(placeholder);
+                }
+                const info = document.createElement('div');
+                info.className = 'min-w-0';
+                const displayName = document.createElement('h4');
+                displayName.className = 'font-black text-xs text-black uppercase tracking-wide truncate';
+                displayName.textContent = `${u.name || 'Atleta'} ${u.surname ? String(u.surname).charAt(0) + '.' : ''}`;
+                const displayBio = document.createElement('p');
+                displayBio.className = 'text-[10px] font-bold text-gray-500 uppercase mt-0.5 truncate';
+                displayBio.textContent = u.bio || 'Atleta della palestra';
+                info.append(displayName,displayBio);
+                const details = document.createElement('div');
+                details.className = 'flex items-center gap-3 min-w-0';
+                details.append(avatarWrap,info);
+                item.appendChild(details);
                 rosterList.appendChild(item);
             });
         }
@@ -1400,100 +1431,91 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
             renderCommunityList(filtered);
         });
 
-        // CARICAMENTO SEPARATO: HOME (SOLO PERSONALI) VS SEZIONE SCHEDE (GLOBALI + PERSONALI)
+        // LION FIT: tutte le schede personali assegnate compaiono nel Mio Piano,
+        // indipendentemente dall'esistenza di una programmazione settimanale.
         async function loadAthleteTemplates() {
             if (!currentUserUid || !currentGymId) return;
             try {
-                const ref = collection(db, "gyms", currentGymId, "athlete_programs", currentUserUid, "personal_templates");
+                const ref = collection(db, 'gyms', currentGymId, 'athlete_programs', currentUserUid, 'personal_templates');
                 const snapshot = await getDocs(ref);
-                
-                let personalList = [];
-                snapshot.forEach(docSnap => personalList.push({ id: docSnap.id, ...docSnap.data(), isPersonal: true }));
+                const personalList = [];
+                snapshot.forEach(snap => personalList.push({ id: snap.id, ...snap.data(), isPersonal: true }));
+                personalList.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'it'));
 
-                personalTemplatesList.innerHTML = '';
-                if (personalList.length === 0) {
-                    personalTemplatesList.innerHTML = `
-                        <div class="bg-white border border-gray-200 rounded-2xl p-6 text-center space-y-2 shadow-2xs">
-                            <div class="w-12 h-12 bg-gray-100 text-gray-400 rounded-2xl flex items-center justify-center mx-auto text-xl border border-gray-200">📋</div>
-                            <p class="text-xs font-bold text-gray-600 max-w-xs mx-auto leading-relaxed">
-                                Nessuna scheda personale dedicata al momento.
-                            </p>
-                        </div>
-                    `;
-                } else {
-                    personalList.forEach(tpl => {
-                        const div = document.createElement('div');
-                        div.className = "p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center cursor-pointer transition shadow-xs hover:border-neon mb-3";
-                        div.innerHTML = `
-                            <div class="flex items-center gap-3">
-                                <span class="text-xl">🎯</span>
-                                <div>
-                                    <span class="font-black text-black text-xs uppercase tracking-wider block">${tpl.title}</span>
-                                    <span class="text-[9px] bg-green-50 text-neon px-2 py-0.5 mt-1 inline-block font-bold rounded-md tracking-wider uppercase border border-green-200">Personale / Riabilitazione</span>
-                                </div>
-                            </div>
-                            <span class="text-xs font-bold text-neon uppercase">Apri &rarr;</span>
-                        `;
-                        div.addEventListener('click', () => openViewTemplateModal(tpl));
-                        personalTemplatesList.appendChild(div);
-                    });
+                planAssignedList.replaceChildren();
+                planSheetsCountBadge.textContent = `${personalList.length} ${personalList.length === 1 ? 'scheda' : 'schede'}`;
+                const weeksCount = athleteWeeksList.length;
+                planTotalCountBadge.textContent = [
+                    personalList.length ? `${personalList.length} ${personalList.length === 1 ? 'scheda' : 'schede'}` : '',
+                    weeksCount ? `${weeksCount} ${weeksCount === 1 ? 'settimana' : 'settimane'}` : ''
+                ].filter(Boolean).join(' · ') || 'Nessun allenamento';
+
+                // Evitiamo una sezione inutilmente vuota per chi ha soltanto settimane.
+                planAssignedSection.classList.toggle('hidden', !personalList.length && weeksCount > 0);
+                if (!personalList.length) {
+                    const msg = document.createElement('p');
+                    msg.className = 'text-sm text-gray-500 bg-white border border-gray-200 rounded-xl p-4 text-center';
+                    msg.textContent = 'Nessuna scheda o programma assegnato dal coach al momento.';
+                    planAssignedList.appendChild(msg);
+                    return;
                 }
 
-                gymTemplatesList.innerHTML = '';
-                let allAvailableTemplates = [...globalTemplates, ...personalList];
-
-                if (allAvailableTemplates.length === 0) {
-                    for (const id of ['lf18-personal-gym-list','lf18-global-gym-list'])
-                        document.getElementById(id).innerHTML='<p class="text-sm text-gray-500 p-3">Nessuna scheda disponibile.</p>';
-                    gymTemplatesList.innerHTML = `
-                        <div class="bg-white border border-gray-200 rounded-2xl p-6 text-center space-y-2 shadow-2xs">
-                            <div class="w-12 h-12 bg-gray-100 text-gray-400 rounded-2xl flex items-center justify-center mx-auto text-xl border border-gray-200">📋</div>
-                            <p class="text-xs font-bold text-gray-600 max-w-xs mx-auto leading-relaxed">
-                                Nessuna scheda disponibile al momento.
-                            </p>
-                        </div>
-                    `;
-                } else {
-                    const personalHost = document.getElementById('lf18-personal-gym-list');
-                    const globalHost = document.getElementById('lf18-global-gym-list');
-                    personalHost.innerHTML = '';
-                    globalHost.innerHTML = '';
-                    allAvailableTemplates.forEach(tpl => {
-                        const div = document.createElement('div');
-                        div.className = "p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center cursor-pointer transition shadow-xs hover:border-neon mb-3";
-                        
-                        const badgeHtml = tpl.isPersonal 
-                            ? '<span class="text-[9px] bg-green-50 text-neon px-2 py-0.5 mt-1 inline-block font-bold rounded-md tracking-wider uppercase border border-green-200">Personale / Riabilitazione</span>'
-                            : '<span class="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 mt-1 inline-block font-bold rounded-md tracking-wider uppercase border border-gray-200">Sala Pesi / Globale</span>';
-
-                        div.innerHTML = `
-                            <div class="flex items-center gap-3">
-                                <span class="text-xl">${tpl.isPersonal ? '🎯' : '📄'}</span>
-                                <div>
-                                    <span class="font-black text-black text-xs uppercase tracking-wider block">${tpl.title}</span>
-                                    ${badgeHtml}
-                                </div>
-                            </div>
-                            <span class="text-xs font-bold text-neon uppercase">Apri &rarr;</span>
-                        `;
-                        div.addEventListener('click', () => openViewTemplateModal(tpl));
-                        (tpl.isPersonal ? personalHost : globalHost).appendChild(div);
-                    });
-                    for (const host of [personalHost,globalHost]) if (!host.children.length) {
-                        const msg = document.createElement('p');
-                        msg.className='text-sm text-gray-500 p-3';
-                        msg.textContent='Nessuna scheda disponibile in questa categoria.';
-                        host.appendChild(msg);
-                    }
+                for (const tpl of personalList) {
+                    const card = document.createElement('button');
+                    card.type = 'button';
+                    card.className = 'w-full p-4 bg-white border border-gray-200 rounded-xl flex justify-between items-center text-left transition shadow-xs hover:border-neon gap-3';
+                    const left = document.createElement('span');
+                    left.className = 'min-w-0';
+                    const title = document.createElement('strong');
+                    title.className = 'font-black text-black text-sm uppercase tracking-wider block break-words';
+                    title.textContent = tpl.title || 'Scheda di allenamento';
+                    const label = document.createElement('small');
+                    label.className = 'text-[9px] bg-green-50 text-neon px-2 py-0.5 mt-1 inline-block font-bold rounded-md tracking-wider uppercase border border-green-200';
+                    label.textContent = 'Assegnata dal coach';
+                    left.append(title, label);
+                    const action = document.createElement('span');
+                    action.className = 'text-xs font-bold text-neon uppercase shrink-0';
+                    action.textContent = 'Apri ›';
+                    card.append(left, action);
+                    card.addEventListener('click', () => openViewTemplateModal(tpl));
+                    planAssignedList.appendChild(card);
                 }
 
+                // Un atleta che riceve solo schede (es. bodybuilding) trova subito il suo allenamento.
+                if (!weeksCount) {
+                    const todayWeekNum = document.getElementById('home-today-week-num');
+                    const todayTitle = document.getElementById('home-today-title');
+                    const todaySubtitle = document.getElementById('home-today-subtitle');
+                    const todayBtn = document.getElementById('home-today-btn');
+                    todayWeekNum.textContent = 'Schede assegnate';
+                    todayTitle.textContent = personalList.length === 1
+                        ? (personalList[0].title || 'La tua scheda di allenamento')
+                        : `${personalList.length} schede disponibili`;
+                    todaySubtitle.textContent = 'Il coach ha preparato le tue schede. Le trovi nel Mio Piano.';
+                    todayBtn.innerHTML = '<span>Apri il mio piano</span> &rarr;';
+                    todayBtn.onclick = () => showSection('training');
+                }
             } catch (e) {
-                const errHtml = '<p class="text-[10px] text-gray-400 text-center py-6 uppercase font-bold">Errore caricamento schede.</p>';
-                personalTemplatesList.innerHTML = errHtml;
-                gymTemplatesList.innerHTML = errHtml;
-                document.getElementById('lf18-personal-gym-list').innerHTML=errHtml;
-                document.getElementById('lf18-global-gym-list').innerHTML=errHtml;
+                console.error('Errore caricamento schede personali:', e);
+                planAssignedSection.classList.remove('hidden');
+                planAssignedList.innerHTML = '<p class="text-xs font-bold text-red-600 text-center p-4">Impossibile caricare le schede assegnate.</p>';
+                planSheetsCountBadge.textContent = 'Errore';
+                planTotalCountBadge.textContent = 'Caricamento incompleto';
             }
+        }
+
+        // V24: le settimane leggono soltanto le schede personali. Il coach
+        // deve allineare i vecchi collegamenti dalla Gestione atleta Admin.
+        async function loadLinkedWeekTemplates(personalList){
+            globalTemplates=personalList.map(t=>({...t,isPersonal:true}));
+            const known=new Set(globalTemplates.map(t=>String(t.id)));
+            const missing=new Set();
+            for(const w of athleteWeeksList){
+                for(const d of Object.values(w.days||{})){
+                    if(d?.templateId && !known.has(String(d.templateId)))missing.add(d.templateId);
+                }
+            }
+            if(missing.size) console.warn('Schede settimanali da allineare dal coach:',missing.size);
         }
 
         function openViewTemplateModal(tpl) {
@@ -1595,52 +1617,27 @@ html.lf-native nav.fixed.bottom-0 { padding-bottom: max(env(safe-area-inset-bott
                 const personalSnap = await getDocs(personalRef);
                 let personalList = [];
                 personalSnap.forEach(docSnap => personalList.push({ id: docSnap.id, ...docSnap.data() }));
+                await loadLinkedWeekTemplates(personalList);
 
-                if (athleteWeeksList.length === 0 && personalList.length > 0) {
-                    circlesNav.innerHTML = '<span class="text-[10px] font-bold text-gray-400 uppercase">Scheda Diretta</span>';
-                    weekContainer.innerHTML = `
-                        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs space-y-3">
-                            <div class="flex items-center gap-2 text-neon font-black text-xs uppercase tracking-widest">
-                                <span>🎯</span> Scheda Assegnata dal Coach
-                            </div>
-                            <p class="text-xs text-gray-500 font-medium">Non hai un piano settimanale attivo, ma il coach ti ha assegnato questa scheda specifica:</p>
-                        </div>
-                    `;
-                    personalList.forEach(tpl => {
-                        const div = document.createElement('div');
-                        div.className = "p-4 bg-white border border-gray-200 rounded-2xl flex justify-between items-center cursor-pointer transition shadow-xs hover:border-neon mb-3";
-                        div.innerHTML = `
-                            <div class="flex items-center gap-3">
-                                <span class="text-xl">🏋️‍♂️</span>
-                                <div>
-                                    <span class="font-black text-black text-xs uppercase tracking-wider block">${tpl.title}</span>
-                                    <span class="text-[9px] bg-green-50 text-neon px-2 py-0.5 mt-1 inline-block font-bold rounded-md tracking-wider uppercase border border-green-200">Personale / Riabilitazione</span>
-                                </div>
-                            </div>
-                            <span class="text-xs font-bold text-neon uppercase">Apri Scheda &rarr;</span>
-                        `;
-                        div.addEventListener('click', () => openViewTemplateModal(tpl));
-                        weekContainer.appendChild(div);
-                    });
-
-                    updateHomeDashboardForToday(null);
-                    return;
-                }
-
+                // Se non ci sono settimane, il piano mostra comunque le schede assegnate.
+                // La sezione delle settimane non occupa spazio per chi usa solo schede.
                 if (athleteWeeksList.length === 0) {
-                    circlesNav.innerHTML = '<span class="text-[10px] font-bold text-gray-400 uppercase">Nessuna settimana</span>';
-                    weekContainer.innerHTML = '<p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6 bg-white rounded-2xl border border-gray-200">Nessun piano o scheda assegnata dal coach.</p>';
+                    planWeeksSection.classList.add('hidden');
+                    circlesNav.replaceChildren();
+                    weekContainer.replaceChildren();
                     updateHomeDashboardForToday(null);
                     return;
                 }
 
+                planWeeksSection.classList.remove('hidden');
                 renderWeekCirclesNav();
                 document.getElementById('active-week-container').innerHTML = '<p class="text-sm text-gray-600 bg-white border border-gray-200 rounded-xl p-4">Tocca il numero di una settimana per aprirla. Toccalo di nuovo per chiuderla.</p>';
                 updateHomeDashboardForToday(athleteWeeksList[0]);
 
             } catch (error) {
                 console.error("Errore caricamento settimane:", error);
-                weekContainer.innerHTML = '<p class="text-xs font-bold text-red-500 text-center py-4 uppercase">Errore caricamento piano.</p>';
+                planWeeksSection.classList.remove('hidden');
+                weekContainer.innerHTML = '<p class="text-xs font-bold text-red-500 text-center py-4 uppercase">Errore caricamento della programmazione settimanale. Le schede assegnate possono comunque essere consultate sopra.</p>';
             }
         }
 

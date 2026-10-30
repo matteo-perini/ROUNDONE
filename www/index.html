@@ -2,6 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="LOGO-APP.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Lion Fit 🦁 - Accedi o Registrati</title>
     <!-- Tailwind CSS CDN -->
@@ -27,12 +28,19 @@
     <style>
       :root { color-scheme: light; }
       html { -webkit-text-size-adjust: 100%; }
-      input, select { font-size: 16px !important; min-height: 46px; }
+      input:not([type="checkbox"]), select { font-size: 16px !important; min-height: 44px; }
       button { min-height: 44px; touch-action: manipulation; }
       :focus-visible { outline: 3px solid #16a34a; outline-offset: 3px; }
       #auth-section { box-shadow: 0 18px 55px rgba(22,101,52,.09), 0 2px 10px rgba(15,23,42,.04); }
       body { background-image: radial-gradient(ellipse 80% 45% at 50% 20%, rgba(187,247,208,.32), transparent 70%); }
-      @media (max-width: 420px) { #auth-section { padding: 20px; } }
+      /* V24.1: auth card more compact while keeping mobile controls accessible. */
+      @media (max-width: 420px) { #auth-section { padding: 16px; } }
+      #register-form input[type="checkbox"], #login-form input[type="checkbox"] { min-height: 0; width: 17px; height: 17px; flex: 0 0 17px; }
+      #register-form input:not([type="checkbox"]), #register-form select { padding-top: 8px; padding-bottom: 8px; }
+      #register-form label[for] { margin-bottom: 3px; }
+      #register-form details summary { cursor: pointer; }
+      #register-form details[open] summary { margin-bottom: 8px; }
+      @media (max-width: 350px) { #lf24-consent-grid { gap: 6px; } #lf24-consent-grid label { font-size: 10px; } }
       /* Lion Fit: keep login below the Android status bar / camera cutout. */
       html.lf-native { --lf-login-safe-top: max(env(safe-area-inset-top, 0px), 28px); }
       html.lf-native body { padding-top: var(--lf-login-safe-top); min-height: 100dvh; box-sizing: border-box; }
@@ -45,36 +53,36 @@
 <body class="bg-gray-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-neon selection:text-white overflow-x-hidden relative">
 
     <!-- HEADER MINIMALE -->
-    <header class="px-6 py-4 flex justify-between items-center border-b border-gray-200 bg-white/95 backdrop-blur-md">
+    <header class="px-4 py-3 flex justify-between items-center border-b border-gray-200 bg-white/95 backdrop-blur-md">
         <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 bg-neon text-white flex items-center justify-center font-black text-sm rounded-xl shadow-sm">🦁</div>
+            <div class="w-8 h-8 bg-white border border-green-100 flex items-center justify-center font-black text-sm rounded-xl shadow-sm overflow-hidden"><img src="LOGO-APP.png" alt="Logo Lion Fit" class="w-full h-full object-contain" onerror="this.classList.add('hidden');this.nextElementSibling.classList.remove('hidden')"><span class="hidden text-green-700" aria-hidden="true">🦁</span></div>
             <div>
                 <h1 class="text-sm font-black uppercase tracking-widest text-slate-900">LION FIT</h1>
                 <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Area Accesso</p>
             </div>
         </div>
-        <span class="text-[11px] font-black uppercase tracking-widest text-green-700 bg-green-50 border border-green-200 px-3 py-1 rounded-lg">v2.0</span>
+        <span class="text-[11px] font-black uppercase tracking-widest text-green-700 bg-green-50 border border-green-200 px-3 py-1 rounded-lg">V24.1</span>
     </header>
 
     <!-- MAIN CONTAINER CENTRATO -->
-    <main class="flex-grow flex flex-col items-center justify-center p-4 sm:p-6 my-auto">
+    <main class="flex-grow flex flex-col items-center justify-center p-3 sm:p-5 my-auto">
 
         <!-- BRANDING INTRODUTTIVO -->
-        <div class="text-center mb-6 space-y-1.5">
-            <h2 class="text-2xl sm:text-3xl font-black tracking-tight uppercase text-slate-900">Gestione & Programmi</h2>
-            <p class="text-sm font-bold text-gray-500 uppercase tracking-wider">Accedi al tuo piano o registrati con la tua palestra</p>
+        <div class="text-center mb-3 space-y-1">
+            <h2 class="text-xl sm:text-2xl font-black tracking-tight uppercase text-slate-900">Gestione & Programmi</h2>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Accedi al tuo piano o registrati con la tua palestra</p>
         </div>
 
         <!-- SEZIONE AUTH (CARD SCHEDA) -->
-        <section id="auth-section" class="w-full max-w-sm sm:max-w-md bg-white text-slate-900 p-6 rounded-3xl border border-gray-200">
+        <section id="auth-section" class="w-full max-w-sm sm:max-w-md bg-white text-slate-900 p-4 sm:p-5 rounded-2xl border border-gray-200">
             <!-- TAB SWITCHER -->
-            <div class="flex border-b border-gray-200 mb-5">
+            <div class="flex border-b border-gray-200 mb-3">
                 <button type="button" id="tab-login" class="w-1/2 pb-3 font-black text-center border-b-2 border-neon text-black transition uppercase text-sm tracking-wider">Accedi</button>
                 <button type="button" id="tab-register" class="w-1/2 pb-3 font-bold text-center text-gray-400 border-b-2 border-transparent transition uppercase text-sm tracking-wider hover:text-black">Registrati</button>
             </div>
 
             <!-- FORM ACCEDI -->
-            <form id="login-form" class="space-y-4">
+            <form id="login-form" class="space-y-3">
                 <div>
                     <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Email</label>
                     <input type="email" id="login-email" required placeholder="la-tua-email@esempio.it" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
@@ -83,11 +91,11 @@
                     <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Password</label>
                     <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
                 </div>
-                <label class="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50/70 px-3.5 py-3 cursor-pointer">
-                    <input type="checkbox" id="login-remember" checked class="mt-0.5 h-4 w-4 shrink-0 accent-green-700" aria-describedby="login-remember-help">
+                <label class="flex items-start gap-2.5 rounded-lg border border-green-200 bg-green-50/70 px-3 py-2 cursor-pointer">
+                    <input type="checkbox" id="login-remember" checked class="mt-0.5 shrink-0 accent-green-700" aria-describedby="login-remember-help">
                     <span class="flex-1 text-left">
                         <span class="block text-sm font-bold text-slate-900">Mantieni l'accesso</span>
-                        <span id="login-remember-help" class="block text-xs text-gray-600 mt-0.5">Se disattivi la spunta, l'accesso non resterà memorizzato in modo permanente su questo dispositivo.</span>
+                        <span id="login-remember-help" class="block text-xs text-gray-600 mt-0.5">Disattivala per una sessione temporanea.</span>
                     </span>
                 </label>
                 <button type="submit" id="btn-login-submit" class="w-full bg-neon hover:bg-green-700 text-white font-black uppercase tracking-widest py-3.5 rounded-xl transition text-sm shadow-md mt-2 flex justify-center items-center gap-2">
@@ -96,7 +104,7 @@
             </form>
 
             <!-- FORM REGISTRAZIONE -->
-            <form id="register-form" class="space-y-3.5 hidden">
+            <form id="register-form" class="space-y-2.5 hidden">
                 <div>
                     <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Nome e Cognome</label>
                     <input type="text" id="reg-name" required placeholder="Es. Mario Rossi" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
@@ -114,39 +122,69 @@
                     <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Tipo di Account</label>
                     <select id="reg-role" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
                         <option value="athlete">Atleta (Iscriviti a una palestra)</option>
-                        <option value="admin">Coach / Amministratore (Crea palestra)</option>
+                        <option value="admin">Coach titolare (Crea palestra)</option>
+                        <option value="coach_invited">Coach invitato (Palestra esistente)</option>
                     </select>
                 </div>
 
-                <div id="invite-code-container">
-                    <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Codice Invito Palestra</label>
-                    <input type="text" id="reg-invite-code" placeholder="Es. GYM-8492" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none uppercase text-sm font-bold text-black transition">
+                <div id="invite-code-container" class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                    <p id="lf24-athlete-invite-ready" class="hidden text-xs font-bold text-green-800">✓ Invito personale caricato dal link ricevuto.</p>
+                    <p id="lf24-athlete-invite-tip" class="text-xs text-gray-600">Apri il link personale inviato dal coach. Hai solo i codici? Inseriscili qui sotto.</p>
+                    <details id="lf24-manual-athlete-invite" class="mt-1.5">
+                      <summary class="text-xs font-bold text-green-700">Inserisci codice manualmente</summary>
+                      <div class="space-y-2 mt-2">
+                    <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1" for="reg-invite-code">Codice personale atleta (monouso)</label>
+                    <input type="text" id="reg-invite-code" placeholder="Codice lungo ricevuto dal coach" autocomplete="off" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
+                    <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1 mt-2" for="reg-athlete-gym">ID palestra (compilato dal collegamento)</label>
+                    <input type="text" id="reg-athlete-gym" placeholder="gym_..." autocomplete="off" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-black">
+                      </div>
+                    </details>
                 </div>
 
+                <div id="coach-invite-container" class="hidden rounded-lg border border-green-200 bg-green-50 px-3 py-2">
+                    <p id="lf24-coach-invite-ready" class="hidden text-xs font-bold text-green-800">✓ Invito coach caricato dal collegamento personale.</p>
+                    <p id="lf24-coach-invite-tip" class="text-xs text-gray-600">Apri il collegamento ricevuto dal titolare. L'email deve essere quella invitata.</p>
+                    <details id="lf24-manual-coach-invite" class="mt-1.5">
+                      <summary class="text-xs font-bold text-green-700">Inserisci codice manualmente</summary>
+                      <div class="space-y-2 mt-2">
+                    <label class="block text-[11px] font-black uppercase tracking-widest text-green-800" for="reg-coach-invite">Codice speciale coach</label>
+                    <input type="text" id="reg-coach-invite" placeholder="Codice ricevuto dal titolare" autocomplete="off" class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-black" />
+                    <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500" for="reg-coach-gym">ID palestra nell'invito</label>
+                    <input type="text" id="reg-coach-gym" placeholder="gym_..." autocomplete="off" class="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-black" />
+                      </div>
+                    </details>
+                </div>
+
+                <div id="lf24-verify-box" class="hidden rounded-xl border border-amber-300 bg-amber-50 p-4 space-y-2" role="status">
+                    <p class="font-black text-sm text-amber-950">Verifica l'email per diventare coach</p>
+                    <p class="text-xs text-amber-900">Ti abbiamo inviato un collegamento all'email invitata. Aprilo, torna qui e premi il pulsante sotto. Non creare un secondo account.</p>
+                    <button type="button" id="lf24-check-email" class="w-full rounded-lg bg-green-700 text-white font-black py-3 text-xs uppercase">Ho verificato l'email: completa registrazione</button>
+                    <button type="button" id="lf24-resend-email" class="w-full rounded-lg border border-amber-300 bg-white text-amber-900 font-bold py-2 text-xs">Invia nuovamente l'email</button>
+                </div>
                 <div id="gym-create-container" class="hidden">
                     <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Nome della Tua Palestra</label>
                     <input type="text" id="reg-gym-name" placeholder="Es. Leoni di San Marco" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
                 </div>
 
-                <div class="pt-2 pb-1 space-y-2 border-t border-gray-100 mt-2">
-                    <label class="flex items-start gap-2 text-[11px] text-gray-600 font-medium leading-tight cursor-pointer">
-                        <input type="checkbox" required class="mt-0.5 rounded border-gray-300 text-neon focus:ring-neon">
-                        <span>Accetto le <a href="note-legali.html" target="_blank" class="font-bold text-black underline hover:text-neon">Note Legali e Termini d'Uso</a>.</span>
+                <div id="lf24-consent-grid" class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 mt-1">
+                    <label class="flex items-start gap-1.5 rounded-lg bg-gray-50 border border-gray-200 px-2 py-2 text-[11px] text-gray-700 font-medium leading-snug cursor-pointer">
+                        <input type="checkbox" required class="mt-0.5 shrink-0 accent-green-700" aria-label="Accetto i termini d'uso">
+                        <span>Accetto i <a href="note-legali.html" target="_blank" rel="noopener noreferrer" class="font-bold text-black underline hover:text-neon">Termini d'uso</a>.</span>
                     </label>
-                    <label class="flex items-start gap-2 text-[11px] text-gray-600 font-medium leading-tight cursor-pointer">
-                        <input type="checkbox" required class="mt-0.5 rounded border-gray-300 text-neon focus:ring-neon">
-                        <span>Acconsento alla <a href="policy.html" target="_blank" class="font-bold text-black underline hover:text-neon">Privacy Policy</a>.</span>
+                    <label class="flex items-start gap-1.5 rounded-lg bg-gray-50 border border-gray-200 px-2 py-2 text-[11px] text-gray-700 font-medium leading-snug cursor-pointer">
+                        <input type="checkbox" required class="mt-0.5 shrink-0 accent-green-700" aria-label="Acconsento alla privacy policy">
+                        <span>Acconsento alla <a href="policy.html" target="_blank" rel="noopener noreferrer" class="font-bold text-black underline hover:text-neon">Privacy Policy</a>.</span>
                     </label>
                 </div>
 
-                <label class="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50/70 px-3.5 py-3 cursor-pointer">
-                    <input type="checkbox" id="reg-remember" checked class="mt-0.5 h-4 w-4 shrink-0 accent-green-700" aria-describedby="reg-remember-help">
+                <label class="flex items-start gap-2.5 rounded-lg border border-green-200 bg-green-50/70 px-3 py-2 cursor-pointer">
+                    <input type="checkbox" id="reg-remember" checked class="mt-0.5 shrink-0 accent-green-700" aria-describedby="reg-remember-help">
                     <span class="flex-1 text-left">
                         <span class="block text-sm font-bold text-slate-900">Mantieni l'accesso</span>
-                        <span id="reg-remember-help" class="block text-xs text-gray-600 mt-0.5">Se disattivi la spunta, l'accesso non resterà memorizzato in modo permanente su questo dispositivo.</span>
+                        <span id="reg-remember-help" class="block text-xs text-gray-600 mt-0.5">Disattivala per una sessione temporanea.</span>
                     </span>
                 </label>
-                <button type="submit" id="btn-register-submit" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3.5 rounded-xl transition text-sm shadow-md mt-1 hover:bg-green-700">
+                <button type="submit" id="btn-register-submit" class="w-full bg-neon text-white font-black uppercase tracking-widest py-2.5 rounded-lg transition text-sm shadow-md mt-1 hover:bg-green-700">
                     Crea Account
                 </button>
             </form>
@@ -156,7 +194,7 @@
     <!-- MODAL CUSTOM NOTIFICHE -->
     <div id="custom-alert-modal" class="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-black w-full max-w-sm rounded-2xl shadow-2xl border border-gray-200 p-6 space-y-4 text-center">
-            <div class="w-10 h-10 bg-green-50 text-neon rounded-xl border border-green-200 flex items-center justify-center text-lg font-black mx-auto">🦁</div>
+            <div class="w-10 h-10 bg-white rounded-xl border border-green-200 flex items-center justify-center overflow-hidden mx-auto"><img src="LOGO-APP.png" alt="Logo Lion Fit" class="w-full h-full object-contain" onerror="this.classList.add('hidden');this.nextElementSibling.classList.remove('hidden')"><span class="hidden text-lg" aria-hidden="true">🦁</span></div>
             <h4 id="custom-alert-title" class="font-black text-sm uppercase tracking-widest text-black">Notifica</h4>
             <p id="custom-alert-message" class="text-sm font-medium text-gray-600 leading-relaxed"></p>
             <button type="button" id="custom-alert-ok" class="w-full bg-neon text-white font-black uppercase tracking-widest py-3 rounded-xl transition text-[11px] shadow-sm">Capito</button>
@@ -171,8 +209,8 @@
     <!-- SCRIPT JAVASCRIPT LOGICA AUTENTICAZIONE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence, browserSessionPersistence, sendEmailVerification, reload, getIdToken, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD5xFMM-kKy2-pYzcTk3MiFmXCTCe4EXEA",
@@ -216,8 +254,12 @@
             ), 100);
         }
         onAuthStateChanged(auth, async (user) => {
-            if (user && !isAuthenticating && !blockAutoRedirect) { 
-                await checkUserRoleAndRedirect(user.uid); 
+            if (user && !isAuthenticating && !blockAutoRedirect) {
+                if (lf24Pending()) {
+                    lf24ShowEmailPanel();
+                    return;
+                }
+                await checkUserRoleAndRedirect(user.uid);
             }
         });
 
@@ -228,6 +270,50 @@
         const regRole = document.getElementById('reg-role');
         const inviteCodeContainer = document.getElementById('invite-code-container');
         const gymCreateContainer = document.getElementById('gym-create-container');
+        const coachInviteContainer = document.getElementById('coach-invite-container');
+        const coachInviteParams = new URLSearchParams(window.location.search);
+        const invitedToken = coachInviteParams.get('coachInvite');
+        const invitedGym = coachInviteParams.get('gym');
+        const invitedAthlete = coachInviteParams.get('athleteInvite');
+        const lf24PENDING_KEY = 'lf24_pending_coach_registration';
+        const lf24TokenRegex = /^[0-9a-f]{48}$/;
+        const lf24GymRegex = /^gym_[a-zA-Z0-9_-]+$/;
+        let lf24Finalizing = false;
+        function lf24Pending(){try{return JSON.parse(sessionStorage.getItem(lf24PENDING_KEY)||'null')}catch{return null}}
+        function lf24ShowEmailPanel(){
+            tabRegister.click();
+            regRole.value='coach_invited';
+            updateSignupRoleUI();
+            document.getElementById('lf24-verify-box').classList.remove('hidden');
+        }
+        function updateSignupRoleUI(){
+            inviteCodeContainer.classList.toggle('hidden',regRole.value !== 'athlete');
+            gymCreateContainer.classList.toggle('hidden',regRole.value !== 'admin');
+            coachInviteContainer.classList.toggle('hidden',regRole.value !== 'coach_invited');
+        }
+        if (invitedToken && invitedGym) {
+            document.getElementById('reg-coach-invite').value=invitedToken;
+            document.getElementById('reg-coach-gym').value=invitedGym;
+            document.getElementById('lf24-coach-invite-ready').classList.remove('hidden');
+            document.getElementById('lf24-coach-invite-tip').classList.add('hidden');
+            regRole.value='coach_invited';
+            tabRegister.className = 'w-1/2 pb-3 font-black text-center border-b-2 border-neon text-black transition uppercase text-sm tracking-wider';
+            tabLogin.className = 'w-1/2 pb-3 font-bold text-center text-gray-400 border-b-2 border-transparent transition uppercase text-sm tracking-wider hover:text-black';
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+        }
+        if (invitedAthlete && invitedGym) {
+            document.getElementById('reg-invite-code').value=invitedAthlete;
+            document.getElementById('reg-athlete-gym').value=invitedGym;
+            document.getElementById('lf24-athlete-invite-ready').classList.remove('hidden');
+            document.getElementById('lf24-athlete-invite-tip').classList.add('hidden');
+            regRole.value='athlete';
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+            tabRegister.className='w-1/2 pb-3 font-black text-center border-b-2 border-neon text-black transition uppercase text-sm tracking-wider';
+            tabLogin.className='w-1/2 pb-3 font-bold text-center text-gray-400 border-b-2 border-transparent transition uppercase text-sm tracking-wider hover:text-black';
+        }
+        updateSignupRoleUI();
 
         tabLogin.addEventListener('click', () => {
             tabLogin.className = "w-1/2 pb-3 font-black text-center border-b-2 border-neon text-black transition uppercase text-sm tracking-wider";
@@ -243,15 +329,7 @@
             loginForm.classList.add('hidden');
         });
 
-        regRole.addEventListener('change', (e) => {
-            if (e.target.value === 'admin') {
-                inviteCodeContainer.classList.add('hidden');
-                gymCreateContainer.classList.remove('hidden');
-            } else {
-                inviteCodeContainer.classList.remove('hidden');
-                gymCreateContainer.classList.add('hidden');
-            }
-        });
+        regRole.addEventListener('change', updateSignupRoleUI);
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -264,9 +342,12 @@
                 await setPersistence(auth, document.getElementById('login-remember').checked
                     ? browserLocalPersistence : browserSessionPersistence);
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                showAlert("Login avvenuto con successo!", "Benvenuto", async () => {
-                    await checkUserRoleAndRedirect(userCredential.user.uid);
-                });
+                if(lf24Pending()) {
+                    lf24ShowEmailPanel();
+                    showAlert('Se stai completando un invito coach, verifica l’email e premi «Ho verificato l’email».','Completa invito');
+                } else {
+                    showAlert('Login avvenuto con successo!','Benvenuto',async()=>checkUserRoleAndRedirect(userCredential.user.uid));
+                }
             } catch (error) {
                 isAuthenticating = false;
                 let errorMsg = "Credenziali non valide o errore di connessione.";
@@ -277,85 +358,124 @@
             }
         });
 
+        // V24: completamento coach SOLO dopo verifica email Firebase. Invito e profilo
+        // vengono scritti insieme, le Security Rules V3 controllano getAfter().
+        async function lf24FinishCoach(user){
+            const pending=lf24Pending();
+            if(!pending) throw new Error('Collegamento coach non disponibile. Riapri il link d’invito sullo stesso browser.');
+            if(lf24Finalizing) return;
+            lf24Finalizing=true;
+            try {
+                await reload(user);
+                await getIdToken(user,true);
+                if(!user.emailVerified) {
+                    lf24ShowEmailPanel();
+                    throw new Error('Email non ancora verificata. Apri il link ricevuto e riprova.');
+                }
+                if(user.email?.toLowerCase() !== pending.email || !lf24TokenRegex.test(pending.token) || !lf24GymRegex.test(pending.gymId)) {
+                    throw new Error('Email o invito non corrispondenti.');
+                }
+                const ref=doc(db,'gyms',pending.gymId,'coach_invites',pending.token);
+                const snap=await getDoc(ref);
+                if(!snap.exists()) throw new Error('Invito coach assente o non valido.');
+                const inv=snap.data();
+                if(inv.status!=='pending' || inv.email!==pending.email || inv.gymId!==pending.gymId || inv.expiresAt?.toMillis()<Date.now())
+                    throw new Error('Invito coach già usato, revocato o scaduto.');
+                const batch=writeBatch(db);
+                batch.set(doc(db,'users',user.uid),{
+                    name:pending.name,email:pending.email,role:'admin',coachRole:'collaborator',
+                    gymId:pending.gymId,gymName:inv.gymName,coachInviteId:pending.token
+                });
+                batch.update(ref,{status:'claimed',claimedBy:user.uid,claimedAt:serverTimestamp()});
+                await batch.commit();
+                sessionStorage.removeItem(lf24PENDING_KEY);
+                document.getElementById('lf24-verify-box').classList.add('hidden');
+                showAlert('Email verificata e invito accettato. Ora puoi aprire il pannello coach.','Coach attivato',()=>checkUserRoleAndRedirect(user.uid));
+            } finally { lf24Finalizing=false; }
+        }
+        document.getElementById('lf24-check-email').addEventListener('click',async()=>{
+            const user=auth.currentUser;
+            if(!user) return showAlert('Accedi con la stessa email invitata e riapri il collegamento.','Accesso necessario');
+            try{await lf24FinishCoach(user)}catch(e){showAlert(e.message,'Verifica email')}
+        });
+        document.getElementById('lf24-resend-email').addEventListener('click',async()=>{
+            if(!auth.currentUser) return showAlert('Prima accedi con la tua email.');
+            try{await sendEmailVerification(auth.currentUser);showAlert('Messaggio di verifica inviato. Controlla anche lo spam.','Email inviata')}
+            catch(e){showAlert(e.message||'Invio non riuscito.','Errore')}
+        });
+
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            isAuthenticating = true;
-            const name = document.getElementById('reg-name').value.trim();
-            const email = document.getElementById('reg-email').value.trim();
-            const password = document.getElementById('reg-password').value;
-            const role = regRole.value;
-
+            if(isAuthenticating) return;
+            isAuthenticating=true;
+            const name=document.getElementById('reg-name').value.trim();
+            const email=document.getElementById('reg-email').value.trim().toLowerCase();
+            const password=document.getElementById('reg-password').value;
+            const role=regRole.value;
             try {
-                let gymId = "";
-                let gymName = "";
-                let inviteCode = "";
+                let gymId='',gymName='',token='';
+                if(role==='admin'){
+                    gymName=document.getElementById('reg-gym-name').value.trim();
+                    if(!gymName) throw new Error('Inserisci il nome della palestra.');
+                }else if(role==='athlete'){
+                    token=document.getElementById('reg-invite-code').value.trim().toLowerCase();
+                    gymId=document.getElementById('reg-athlete-gym').value.trim();
+                    if(!lf24TokenRegex.test(token)||!lf24GymRegex.test(gymId)) throw new Error('Serve un link atleta personale completo generato dal coach.');
+                    // Lettura per ID esatto, senza poter elencare le palestre.
+                    const invitation=await getDoc(doc(db,'gyms',gymId,'athlete_invites',token));
+                    if(!invitation.exists()) throw new Error('Invito atleta inesistente.');
+                    const inv=invitation.data();
+                    if(inv.status!=='pending'||inv.gymId!==gymId||!inv.expiresAt||inv.expiresAt.toMillis()<=Date.now())
+                        throw new Error('Invito atleta già usato, revocato o scaduto.');
+                    gymName=inv.gymName;
+                }else if(role==='coach_invited'){
+                    token=document.getElementById('reg-coach-invite').value.trim().toLowerCase();
+                    gymId=document.getElementById('reg-coach-gym').value.trim();
+                    if(!lf24TokenRegex.test(token)||!lf24GymRegex.test(gymId)) throw new Error('Serve il collegamento personale completo del coach titolare.');
+                    // Prima della verifica non si legge l'invito: la regola Firestore lo protegge.
+                    // Nome ed email sono conservati solo per completare la registrazione dopo verifica.
+                }else throw new Error('Tipo di account non riconosciuto.');
 
-                if (role === 'admin') {
-                    gymName = document.getElementById('reg-gym-name').value.trim();
-                    if (!gymName) { 
-                        isAuthenticating = false;
-                        showAlert("Inserisci il nome della palestra", "Attenzione"); 
-                        return; 
-                    }
-                    
-                    gymId = "gym_" + Date.now();
-                    inviteCode = "GYM-" + Math.floor(1000 + Math.random() * 9000);
-
-                    await setDoc(doc(db, "gyms", gymId), {
-                        name: gymName,
-                        inviteCode: inviteCode,
-                        createdAt: new Date()
+                await setPersistence(auth,document.getElementById('reg-remember').checked?browserLocalPersistence:browserSessionPersistence);
+                const credential=await createUserWithEmailAndPassword(auth,email,password);
+                const user=credential.user,uid=user.uid;
+                if(role==='admin'){
+                    gymId='gym_'+uid;
+                    // V25: creare palestra e profilo titolare IN UN SOLO BATCH.
+                    // Le regole V25 verificano il nuovo documento palestra con getAfter().
+                    const ownerBatch=writeBatch(db);
+                    ownerBatch.set(doc(db,'gyms',gymId),{
+                        name:gymName,inviteCode:'INVITI_MONOUSO',ownerUid:uid,createdAt:serverTimestamp()
                     });
-                } else {
-                    inviteCode = document.getElementById('reg-invite-code').value.trim().toUpperCase();
-                    if (!inviteCode) { 
-                        isAuthenticating = false;
-                        showAlert("Inserisci il codice invito della palestra", "Attenzione"); 
-                        return; 
-                    }
-
-                    const gymsQuery = query(collection(db, "gyms"), where("inviteCode", "==", inviteCode));
-                    const querySnapshot = await getDocs(gymsQuery);
-
-                    if (querySnapshot.empty) {
-                        isAuthenticating = false;
-                        showAlert("Codice invito non valido o palestra non trovata.", "Errore Invito");
-                        return;
-                    }
-
-                    querySnapshot.forEach((docSnap) => {
-                        gymId = docSnap.id;
-                        gymName = docSnap.data().name;
+                    ownerBatch.set(doc(db,'users',uid),{
+                        name,email,role:'admin',coachRole:'owner',gymId,gymName
                     });
+                    await ownerBatch.commit();
+                    showAlert('Palestra creata. Ora puoi invitare gli atleti dal pannello Coach della palestra.','Benvenuto',()=>checkUserRoleAndRedirect(uid));
+                }else if(role==='athlete'){
+                    // Registrazione atomica: profilo creato SOLO se il token viene consumato.
+                    const inviteRef=doc(db,'gyms',gymId,'athlete_invites',token);
+                    const batch=writeBatch(db);
+                    batch.set(doc(db,'users',uid),{name,email,role:'athlete',gymId,gymName,athleteInviteId:token});
+                    batch.update(inviteRef,{status:'claimed',claimedBy:uid,claimedAt:serverTimestamp()});
+                    await batch.commit();
+                    // Profilo visibile al Team senza email, peso o campi privati.
+                    try {await setDoc(doc(db,'team_public',uid),{gymId,role:'athlete',name,surname:'',bio:'',photoURL:''});}
+                    catch(err){console.warn('Team pubblico non sincronizzato',err)}
+                    showAlert('Registrazione completata! Le tue schede saranno visibili nel Mio Piano.','Benvenuto',()=>checkUserRoleAndRedirect(uid));
+                }else{
+                    sessionStorage.setItem(lf24PENDING_KEY,JSON.stringify({name,email,token,gymId}));
+                    await sendEmailVerification(user);
+                    lf24ShowEmailPanel();
+                    showAlert('Ti abbiamo inviato un’email di verifica. Apri il link, torna qui e premi «Ho verificato l’email».','Verifica richiesta');
                 }
-
-                await setPersistence(auth, document.getElementById('reg-remember').checked
-                    ? browserLocalPersistence : browserSessionPersistence);
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const uid = userCredential.user.uid;
-
-                await setDoc(doc(db, "users", uid), {
-                    name: name,
-                    email: email,
-                    role: role,
-                    gymId: gymId,
-                    gymName: gymName
-                });
-
-                showAlert("Registrazione completata con successo!", "Account Creato", async () => {
-                    await checkUserRoleAndRedirect(uid);
-                });
-
-            } catch (error) {
-                isAuthenticating = false;
-                let errorMsg = error.message;
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMsg = "Questa email risulta già registrata. Prova ad accedere.";
-                } else if (error.code === 'auth/weak-password') {
-                    errorMsg = "La password deve contenere almeno 6 caratteri.";
-                }
-                showAlert("Errore di registrazione: " + errorMsg, "Errore");
-            }
+            }catch(error){
+                console.error('Registrazione Lion Fit',error);
+                let msg=error.message||'Errore durante la registrazione.';
+                if(error.code==='auth/email-already-in-use')msg='Email già registrata. Utilizza Accedi con quell’account.';
+                if(error.code==='auth/weak-password')msg='Scegli una password di almeno 6 caratteri.';
+                showAlert(msg,'Registrazione non completata');
+            }finally {isAuthenticating=false;}
         });
 
         async function checkUserRoleAndRedirect(uid) {
