@@ -539,7 +539,7 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
         </div>
     </header>
 
-    <div class="lf26-version pt-1">LION FIT · BETA 0.27.6</div>
+    <div class="lf26-version pt-1">LION FIT · BETA 0.28</div>
     <!-- MAIN CONTAINER -->
     <main class="flex-grow w-full max-w-3xl mx-auto p-4 pb-24 relative">
 
@@ -547,8 +547,6 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
         <section id="section-home" class="block space-y-5">
             <!-- Collegamenti rapidi: usano la navigazione esistente, senza alterare Firebase -->
             <div class="lf-quick-panel bg-white rounded-2xl border border-green-100 p-4 shadow-sm"><div class="lf-quick-title">Accesso rapido</div><div class="lf-quick-actions"><button type="button" class="lf-quick-action" onclick="showSection('training')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span><span>Il mio piano</span></button>
-<button type="button" class="lf-quick-action" onclick="showSection('library')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a9 9 0 0 0-9-2v15a9 9 0 0 1 9 2 9 9 0 0 1 9-2V4a9 9 0 0 0-9 2zm0 0v15"/></svg></span><span>Vedi esercizi</span></button>
-<button type="button" class="lf-quick-action" onclick="showSection('archive')"><span class="lf-quick-icon" aria-hidden="true">▤</span><span>ARCHIVIO</span></button>
 <button type="button" class="lf-quick-action" onclick="showSection('profile')"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span>Il mio profilo</span></button>
 <button type="button" class="lf-quick-action" onclick="showSection('community')" aria-label="Apri il Team e visualizza gli atleti della tua palestra"><span class="lf-quick-icon" aria-hidden="true"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2"/><path d="M17 5a3 3 0 0 1 0 6M21 20v-2a6 6 0 0 0-4-5.65"/></svg></span><span class="lf-quick-team-label"><span>Team</span><span id="lf-team-shortcut-count" class="lf-quick-team-count">Atleti iscritti</span></span></button></div></div>
 
@@ -593,19 +591,11 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
 
             <!-- Accessi Rapidi -->
             <div class="grid grid-cols-2 gap-3 pt-1">
-                <div onclick="showSection('training')" class="bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-xs hover:border-neon cursor-pointer transition flex flex-col justify-between space-y-3">
+                <div onclick="showSection('training')" class="col-span-2 bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-xs hover:border-neon cursor-pointer transition flex flex-col justify-between space-y-3">
                     <div class="lf-mono-home w-8 h-8 rounded-xl bg-gray-100 text-black flex items-center justify-center text-sm font-black border border-gray-200"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></div>
                     <div>
                         <h4 class="font-black text-xs uppercase tracking-wider text-black">Il mio piano</h4>
                         <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Schede e settimane</p>
-                    </div>
-                </div>
-
-                <div onclick="showSection('library')" class="bg-white p-4 rounded-2xl border-2 border-gray-200 shadow-xs hover:border-neon cursor-pointer transition flex flex-col justify-between space-y-3">
-                    <div class="lf-mono-home w-8 h-8 rounded-xl bg-gray-100 text-black flex items-center justify-center text-sm font-black border border-gray-200"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6a9 9 0 0 0-9-2v15a9 9 0 0 1 9 2 9 9 0 0 1 9-2V4a9 9 0 0 0-9 2zm0 0v15"/></svg></div>
-                    <div>
-                        <h4 class="font-black text-xs uppercase tracking-wider text-black">Libreria</h4>
-                        <p class="text-[9px] font-bold text-gray-400 uppercase mt-0.5">Esplora gli esercizi</p>
                     </div>
                 </div>
             </div>
@@ -618,7 +608,6 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
                     <h3 class="text-sm font-black uppercase tracking-widest text-black">Il Mio Piano</h3>
                     <p class="text-[10px] font-bold text-gray-500 uppercase mt-0.5">Schede e programmi assegnati dal tuo coach</p>
                 </div>
-                <button type="button" onclick="showSection('archive')" class="text-xs font-black px-3 py-2 bg-green-50 border border-green-300 text-green-900 rounded-xl">ARCHIVIO</button>
                 <span id="plan-total-count-badge" class="text-[10px] font-black tracking-widest text-gray-700 bg-gray-100 border border-gray-200 px-3 py-1 rounded-xl uppercase shrink-0">
                     Caricamento...
                 </span>
@@ -787,9 +776,9 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
             <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
             <span class="text-[8px] font-black tracking-wider uppercase">Piano</span>
         </button>
-        <button id="nav-btn-library" onclick="showSection('library')" class="nav-btn min-w-[55px] flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
-            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-            <span class="text-[8px] font-black tracking-wider uppercase">Libreria</span>
+        <button id="nav-btn-archive" onclick="showSection('archive')" class="nav-btn min-w-[55px] flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="4" rx="1" stroke-width="2"></rect><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8v12h14V8M10 12h4"></path></svg>
+            <span class="text-[8px] font-black tracking-wider uppercase">Archivio</span>
         </button>
         <button id="nav-btn-community" onclick="showSection('community')" class="nav-btn min-w-[55px] flex-1 flex flex-col items-center py-2 text-gray-400 hover:text-black">
             <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
@@ -1965,6 +1954,71 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
             const format = date => date.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }).replace(/\./g, '');
             return `${format(start)} – ${format(end)}`;
         }
+        // Beta 0.28.1: firma semantica della scheda, NON l'ID documento Firestore.
+        // Mantiene ordine degli esercizi e tutti i dati tecnici (serie, ripetizioni,
+        // carichi, note, superset...). Ignora solo identificativi e metadati generati
+        // copiando/salvando una scheda. Non cancella mai dati dal database.
+        const lf281ExerciseMetaKeys = new Set([
+            'id','_id','uuid','uid','clientid','localid','rowid',
+            'createdat','updatedat','deletedat','archivedat','timestamp',
+            'copiedfrom','sourceid','sourceexerciseid','sortindex',
+            'lastmodified','modifiedat'
+        ]);
+        function lf281CanonValue(value) {
+            if (value == null) return '';
+            if (typeof value === 'string') return value.trim().replace(/\s+/g,' ').normalize('NFKC').toLocaleLowerCase('it');
+            if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+            if (Array.isArray(value)) return value.map(lf281CanonValue);
+            if (typeof value === 'object') {
+                const out = {};
+                for(const key of Object.keys(value).sort()) {
+                    if (lf281ExerciseMetaKeys.has(key.toLowerCase())) continue;
+                    const v = lf281CanonValue(value[key]);
+                    if (v !== '' && v !== null && !(Array.isArray(v) && !v.length)) out[key] = v;
+                }
+                return out;
+            }
+            return String(value);
+        }
+        // Il suffisso automatico aggiunto da "Duplica" non cambia l'allenamento.
+        // Manteniamo invece tutte le altre parole del titolo; esercizi e parametri
+        // tecnici restano nel confronto integrale qui sotto.
+        function lf282ComparableTitle(title) {
+            let result=lf281CanonValue(title||'');
+            let prior;
+            do {
+                prior=result;
+                result=result.replace(/\s*\(\s*(?:copia|copy)(?:\s*[#-]?\s*\d+)?\s*\)\s*$/iu,'').trim();
+            } while(result!==prior);
+            return result;
+        }
+        function lf281TemplateSignature(tpl) {
+            const exercises = Array.isArray(tpl?.exercises) ? tpl.exercises : [];
+            return JSON.stringify({
+                title:lf282ComparableTitle(tpl?.title||''),
+                exercises:exercises.map(ex => {
+                    const normalized = lf281CanonValue(ex);
+                    if (!normalized || typeof normalized !== 'object' || Array.isArray(normalized)) return normalized;
+                    // Valori che il lettore della scheda considera impliciti.
+                    if (!('sets' in normalized)) normalized.sets = '3';
+                    if (!('reps' in normalized)) normalized.reps = '10';
+                    if (!('supersetWithPrevious' in normalized)) normalized.supersetWithPrevious = 'false';
+                    // Campi non tecnici: l'identità di catalogo non è la definizione dell'allenamento.
+                    if (normalized.name && normalized.exerciseId) delete normalized.exerciseId;
+                    return Object.fromEntries(Object.keys(normalized).sort().map(k=>[k,normalized[k]]));
+                })
+            });
+        }
+        function lf281UniqueTemplates(templates) {
+            const bySignature = new Map();
+            for (const tpl of templates||[]) {
+                const key=lf281TemplateSignature(tpl);
+                const prior=bySignature.get(key);
+                if (!prior || (tpl._lf277Protected && !prior._lf277Protected)) bySignature.set(key,tpl);
+            }
+            return [...bySignature.values()];
+        }
+
         function lfGetTemplateScheduling(templateId) {
             const wanted = String(templateId);
             const matches = [];
@@ -2051,56 +2105,59 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
         function lfRenderAssignedSheets() {
             if (assignedPersonalTemplates === null) return;
             const all = assignedPersonalTemplates;
+            const distinct = lf281UniqueTemplates(all);
             const weeksCount = athleteWeeksList.length;
             const currentWeek = activeWeekIndex >= 0 ? athleteWeeksList[activeWeekIndex] : null;
+            // Conteggio di schede DIVERSE, non di assegnazioni/copie documentali.
             planTotalCountBadge.textContent = [
-                all.length ? `${all.length} ${all.length === 1 ? 'scheda' : 'schede'}` : '',
+                distinct.length ? `${distinct.length} ${distinct.length === 1 ? 'scheda' : 'schede'}` : '',
                 weeksCount ? `${weeksCount} ${weeksCount === 1 ? 'settimana' : 'settimane'}` : ''
             ].filter(Boolean).join(' · ') || 'Nessun allenamento';
 
-            // Il backup delle schede assegnate è un elenco per ID, non per numero di giorni.
-            const byId = new Map(all.map(tpl => [String(tpl.id), tpl]));
+            // Un ID diverso può contenere ESATTAMENTE lo stesso allenamento.
+            // Accorpiamo la card, NON le attività dei giorni del calendario.
+            const byId = new Map(all.map(tpl=>[String(tpl.id),tpl]));
             const assignedThisWeek = new Map();
             if (currentWeek) {
                 lfWeekDayOrder.forEach(day => {
                     for(const id of [currentWeek.days?.[day]?.templateId,currentWeek.days?.[day]?.templateId2].map(v=>String(v||'')).filter(Boolean)) {
-                        if (!byId.has(id)) continue;
-                        if (!assignedThisWeek.has(id)) assignedThisWeek.set(id,{tpl:byId.get(id),days:[],weekNumber:activeWeekIndex+1});
-                        if(!assignedThisWeek.get(id).days.includes(day)) assignedThisWeek.get(id).days.push(day);
+                        const tpl=byId.get(id);
+                        if (!tpl) continue;
+                        const key=lf281TemplateSignature(tpl);
+                        if(!assignedThisWeek.has(key)) assignedThisWeek.set(key,{tpl,days:[],weekNumber:activeWeekIndex+1});
+                        const entry=assignedThisWeek.get(key);
+                        if(!entry.days.includes(day)) entry.days.push(day);
                     }
                 });
             }
-            const scheduledElsewhere = new Set();
-            athleteWeeksList.forEach(week => lfWeekDayOrder.forEach(day => {
+            const scheduledSignatures = new Set();
+            athleteWeeksList.forEach(week=>lfWeekDayOrder.forEach(day=>{
                 for(const id of [week.days?.[day]?.templateId,week.days?.[day]?.templateId2]) {
-                    if (id) scheduledElsewhere.add(String(id));
+                    const tpl=byId.get(String(id||''));
+                    if(tpl)scheduledSignatures.add(lf281TemplateSignature(tpl));
                 }
             }));
-            const independent = all.filter(tpl => !scheduledElsewhere.has(String(tpl.id)))
-                .map(tpl => ({ tpl, days: [], weekNumber: null }));
+            const independent = distinct
+                .filter(tpl=>!scheduledSignatures.has(lf281TemplateSignature(tpl)))
+                .map(tpl=>({tpl,days:[],weekNumber:null}));
 
-            // Senza settimane mostriamo tutte le schede in un'unica griglia.
-            // Se le settimane non si caricano, mostriamo comunque le schede, senza inventare giorni.
+            // Se il calendario non si carica non inventiamo date né cancelliamo schede.
             const noReliableWeek = !weeksCount || athleteWeeksLoadFailed;
             const weeklyEntries = noReliableWeek
-                ? all.map(tpl => ({ tpl, days: [], weekNumber: null }))
-                : Array.from(assignedThisWeek.values());
-            planSheetsHeading.textContent = noReliableWeek
-                ? 'Le mie schede'
-                : 'Schede in programma';
+                ? distinct.map(tpl=>({tpl,days:[],weekNumber:null}))
+                : [...assignedThisWeek.values()];
+            planSheetsHeading.textContent = noReliableWeek ? 'Le mie schede' : 'Schede in programma';
             planSheetsWeekHint.textContent = noReliableWeek
-                ? (athleteWeeksLoadFailed
-                    ? 'Calendario non disponibile'
-                    : 'Assegnate dal coach')
+                ? (athleteWeeksLoadFailed ? 'Calendario non disponibile' : 'Assegnate dal coach')
                 : (lfWeekDateRange(currentWeek?.startDate) || 'Settimana selezionata');
-            planSheetsCountBadge.textContent = `${weeklyEntries.length} ${weeklyEntries.length === 1 ? 'scheda' : 'schede'}`;
+            planSheetsCountBadge.textContent = `${weeklyEntries.length} ${weeklyEntries.length === 1 ? 'scheda diversa' : 'schede diverse'}`;
             planAssignedSection.classList.remove('hidden');
-            lfRenderCardCollection(planAssignedList, weeklyEntries, planSheetsMoreBtn, showAllWeekSheets, all.length, true);
+            lfRenderCardCollection(planAssignedList,weeklyEntries,planSheetsMoreBtn,showAllWeekSheets,distinct.length,true);
 
-            planIndependentSection.classList.toggle('hidden', noReliableWeek || independent.length === 0);
-            if (!noReliableWeek && independent.length) {
-                lfRenderCardCollection(planIndependentList, independent, planIndependentMoreBtn, showAllIndependentSheets, independent.length, false);
-            } else {
+            planIndependentSection.classList.toggle('hidden',noReliableWeek || independent.length===0);
+            if(!noReliableWeek && independent.length){
+                lfRenderCardCollection(planIndependentList,independent,planIndependentMoreBtn,showAllIndependentSheets,independent.length,false);
+            }else{
                 planIndependentList.replaceChildren();
                 planIndependentMoreBtn.classList.add('hidden');
             }
@@ -2128,10 +2185,12 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
                         createdAt:d.archivedAt,isPersonal:true,_lf277Protected:true});
                 });
                 lf276ArchiveAllSheets=Array.from(byId.values());
-                const remaining=lf276ArchiveAllSheets.filter(t=>!t._lf277Protected).length;
+                const uniqueArchive=lf281UniqueTemplates(lf276ArchiveAllSheets);
+                const protectedCount=uniqueArchive.filter(t=>t._lf277Protected).length;
+                const remaining=uniqueArchive.length-protectedCount;
                 if(status)status.textContent=remaining
-                    ? `${archived.size} copie protette. ${remaining} schede precedenti non ancora protette: chiedi al coach di usare “Salva le vecchie schede nell'ARCHIVIO”.`
-                    : 'Le tue schede sono conservate in copie protette, indipendenti dalle settimane e dal Cestino.';
+                    ? `${protectedCount} schede diverse protette. ${remaining} schede diverse ancora da proteggere: chiedi al coach di usare “Salva le vecchie schede nell'ARCHIVIO”. Le copie identiche sono riunite nella visualizzazione.`
+                    : 'Le tue schede diverse sono conservate in copie protette, indipendenti dalle settimane e dal Cestino.';
             } catch(err) {
                 console.warn('Archivio protetto non accessibile:',err);
                 lf276ArchiveAllSheets=current;
@@ -2159,9 +2218,9 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
                     const todaySubtitle = document.getElementById('home-today-subtitle');
                     const todayBtn = document.getElementById('home-today-btn');
                     todayWeekNum.textContent = 'Schede assegnate';
-                    todayTitle.textContent = personalList.length === 1
-                        ? (personalList[0].title || 'La tua scheda di allenamento')
-                        : `${personalList.length} schede disponibili`;
+                    todayTitle.textContent = lf281UniqueTemplates(personalList).length === 1
+                        ? (lf281UniqueTemplates(personalList)[0].title || 'La tua scheda di allenamento')
+                        : `${lf281UniqueTemplates(personalList).length} schede diverse disponibili`;
                     todaySubtitle.textContent = 'Il coach ha preparato le tue schede. Le trovi nel Mio Piano.';
                     todayBtn.innerHTML = '<span>Apri il mio piano</span> &rarr;';
                     todayBtn.onclick = () => showSection('training');
@@ -2185,7 +2244,11 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
             const sheetsHost=document.getElementById('lf276-archived-sheets');
             if(!sheetsHost||lf276ArchiveAllSheets===null)return;
             sheetsHost.replaceChildren();
-            const sheets=[...lf276ArchiveAllSheets].sort((x,y)=>(x.title||'').localeCompare(y.title||'','it'));
+            // Una scheda per contenuto tecnico identico, indipendentemente dall'ID
+            // Firestore o dalla posizione (Cestino, personale, copia protetta).
+            // Le schede con differenze negli esercizi NON vengono unite.
+            const sheets=lf281UniqueTemplates(lf276ArchiveAllSheets)
+                .sort((a,b)=>(a.title||'').localeCompare(b.title||'','it'));
             if(!sheets.length){
                 const p=document.createElement('p');
                 p.className='text-xs text-gray-600';
@@ -2205,6 +2268,7 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
                 label.textContent=tpl._lf277Protected?'Copia protetta · consultabile':
                     (tpl.deletedAt?'Scheda nel Cestino · da proteggere':'Scheda ricevuta · da proteggere');
                 button.append(title,label);
+
                 button.addEventListener('click',()=>openViewTemplateModal(tpl));
                 sheetsHost.append(button);
             });
