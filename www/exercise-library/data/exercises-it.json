@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.2.1",
-  "locale": "it-IT",
+  "locale": "it",
   "sourceCatalog": "exercises.json",
   "description": "Traduzioni italiane offline importate dal catalogo multilingua, verificate per ID + nome inglese. I nomi italiani generati automaticamente restano da revisionare.",
   "exerciseCount": 1324,
@@ -291,7 +291,10 @@
     "1160": {
       "name_en": "burpee",
       "name_it": "Burpee",
-      "aliases_it": [],
+      "aliases_it": [
+        "burpees",
+        "burpee"
+      ],
       "instructions_it": [
         "Inizia in posizione eretta, con i piedi alla larghezza delle spalle.",
         "Abbassa il corpo in posizione accovacciata piegando le ginocchia e appoggiando le mani sul pavimento davanti a te.",
@@ -765,7 +768,7 @@
     },
     "1284": {
       "name_en": "dumbbell lying pullover on exercise ball",
-      "name_it": null,
+      "name_it": "Pullover con manubrio su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica e rotola in avanti finché la parte superiore della schiena non si appoggia sulla palla.",
@@ -774,7 +777,7 @@
         "Fermati un attimo, poi solleva il manubrio di nuovo alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1285": {
       "name_en": "dumbbell one arm bench fly",
@@ -849,7 +852,7 @@
     },
     "1290": {
       "name_en": "dumbbell one arm press on exercise ball",
-      "name_it": "Con manubrio a un braccio spinta su con fitball",
+      "name_it": "Spinta a un braccio con manubrio su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica con i piedi piatti a terra e le ginocchia piegate a 90 gradi.",
@@ -858,11 +861,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente il manubrio alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi passa all'altro braccio."
       ],
-      "translationStatus": "generated_unreviewed"
+      "translationStatus": "draft_v26_1"
     },
     "1291": {
       "name_en": "dumbbell one arm pullover on exercise ball",
-      "name_it": null,
+      "name_it": "Pullover a un braccio con manubrio su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica con i piedi piatti a terra e le ginocchia piegate a 90 gradi.",
@@ -871,11 +874,11 @@
         "Fermati un attimo, poi solleva il manubrio di nuovo alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1292": {
       "name_en": "dumbbell one leg fly on exercise ball",
-      "name_it": "Con manubrio a una gamba croce su con fitball",
+      "name_it": "Croci con manubri su fitball con una gamba sollevata",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica con un manubrio in ogni mano, i palmi rivolti uno verso l'altro.",
@@ -885,11 +888,11 @@
         "Fermati un attimo in basso, poi stringi i muscoli del petto per riportare i manubri alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia gamba e ripeti."
       ],
-      "translationStatus": "generated_unreviewed"
+      "translationStatus": "draft_v26_1"
     },
     "1293": {
       "name_en": "dumbbell press on exercise ball",
-      "name_it": "Con manubrio spinta su con fitball",
+      "name_it": "Spinte con manubri su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica con i piedi piatti a terra e manubri in ciascuna mano, appoggiati sulle cosce.",
@@ -899,7 +902,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "generated_unreviewed"
+      "translationStatus": "draft_v26_1"
     },
     "1294": {
       "name_en": "dumbbell pullover hip extension on exercise ball",
@@ -919,7 +922,7 @@
     },
     "1295": {
       "name_en": "dumbbell pullover on exercise ball",
-      "name_it": null,
+      "name_it": "Pullover con manubrio su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica e tieni un manubrio con entrambe le mani sopra il petto, le braccia distese.",
@@ -927,11 +930,11 @@
         "Fermati un attimo, poi solleva il manubrio di nuovo alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1296": {
       "name_en": "exercise ball pike push up",
-      "name_it": null,
+      "name_it": "Piegamenti in verticale a V su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Inizia in una posizione push-up con le mani sul pavimento e gli stinchi appoggiati sulla palla stabilizzante.",
@@ -941,7 +944,7 @@
         "Spingi attraverso le mani ed estendi le braccia per tornare alla posizione di partenza.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1297": {
       "name_en": "isometric chest squeeze",
@@ -1064,7 +1067,7 @@
     },
     "1306": {
       "name_en": "plyo push up",
-      "name_it": null,
+      "name_it": "Piegamenti pliometrici",
       "aliases_it": [],
       "instructions_it": [
         "Inizia in una posizione di plancia alta con le mani leggermente più larghe della larghezza delle spalle.",
@@ -1073,11 +1076,11 @@
         "Atterra dolcemente con le mani nella posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1307": {
       "name_en": "push up on bosu ball",
-      "name_it": null,
+      "name_it": "Piegamenti sulle braccia su Bosu",
       "aliases_it": [],
       "instructions_it": [
         "Posiziona la palla bosu a terra con il lato piatto rivolto verso l'alto.",
@@ -1086,7 +1089,7 @@
         "Spingiti indietro fino alla posizione di partenza estendendo le braccia.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1308": {
       "name_en": "smith wide grip bench press",
@@ -1120,7 +1123,7 @@
     },
     "1310": {
       "name_en": "weighted drop push up",
-      "name_it": null,
+      "name_it": "Piegamenti pliometrici in caduta con sovraccarico",
       "aliases_it": [],
       "instructions_it": [
         "Inizia in una posizione di plancia alta con le mani leggermente più larghe della larghezza delle spalle e i piedi uniti.",
@@ -1131,7 +1134,7 @@
         "Ripeti il ​​movimento di push-up, abbassandoti e riprendendoti con le mani nella posizione più stretta.",
         "Continua ad alternare le posizioni delle mani più larghe e più strette per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1311": {
       "name_en": "wide hand push up",
@@ -1232,7 +1235,7 @@
     },
     "1319": {
       "name_en": "cable palm rotational row",
-      "name_it": null,
+      "name_it": "Rematore al cavo con rotazione dei palmi",
       "aliases_it": [],
       "instructions_it": [
         "Attacca un manico a una macchina per cavi all'altezza della vita.",
@@ -1244,11 +1247,11 @@
         "Rilascio lentamente la maniglia alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1320": {
       "name_en": "cable rope crossover seated row",
-      "name_it": null,
+      "name_it": "Rematore ai cavi da seduti con corda incrociata",
       "aliases_it": [],
       "instructions_it": [
         "Siediti sul vogatore con i piedi piatti sui poggiapiedi e le ginocchia leggermente piegate.",
@@ -1258,11 +1261,11 @@
         "Fermati un attimo al picco del movimento, poi rilassa lentamente la tensione e torna alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1321": {
       "name_en": "cable rope elevated seated row",
-      "name_it": null,
+      "name_it": "Rematore ai cavi da seduti con corda sollevata",
       "aliases_it": [],
       "instructions_it": [
         "Siediti sul sedile rialzato rivolto verso la macchina a cavo.",
@@ -1273,7 +1276,7 @@
         "Rilascia lentamente la tensione e estendi le braccia fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1322": {
       "name_en": "cable rope extension incline bench row",
@@ -1337,7 +1340,10 @@
     "1326": {
       "name_en": "chin-up",
       "name_it": "Trazioni presa supina",
-      "aliases_it": [],
+      "aliases_it": [
+        "trazioni presa supina",
+        "chin up"
+      ],
       "instructions_it": [
         "Appenditi a una barra per trazioni con i palmi rivolti verso di te e le mani distanti alla larghezza delle spalle.",
         "Attiva il core e tira il corpo verso la barra, iniziando con il petto.",
@@ -1363,7 +1369,7 @@
     },
     "1328": {
       "name_en": "dumbbell lying rear delt row",
-      "name_it": null,
+      "name_it": "Rematore per deltoidi posteriori con manubri da sdraiati",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati a faccia in giù su una panca piatta con un manubrio in ogni mano, i palmi rivolti verso l'interno.",
@@ -1372,7 +1378,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1329": {
       "name_en": "dumbbell palm rotational bent over row",
@@ -1440,7 +1446,7 @@
     },
     "1333": {
       "name_en": "exercise ball back extension with arms extended",
-      "name_it": null,
+      "name_it": "Estensioni della schiena su fitball con braccia tese",
       "aliases_it": [],
       "instructions_it": [
         "Metti la palla di stabilità a terra e sdraiati a faccia in giù sopra di essa, con i fianchi appoggiati sulla palla e i piedi contro un muro per stabilità.",
@@ -1449,11 +1455,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente la parte superiore del corpo fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1334": {
       "name_en": "exercise ball back extension with hands behind head",
-      "name_it": null,
+      "name_it": "Estensioni della schiena su fitball con mani dietro la testa",
       "aliases_it": [],
       "instructions_it": [
         "Metti la palla di stabilità a terra e sdraiati a faccia in giù sopra di essa con i fianchi appoggiati sulla palla.",
@@ -1463,7 +1469,7 @@
         "Fermati un attimo all'inizio del movimento, poi abbassa lentamente la parte superiore del corpo fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1335": {
       "name_en": "exercise ball back extension with knees off ground",
@@ -1508,7 +1514,7 @@
     },
     "1339": {
       "name_en": "exercise ball lat stretch",
-      "name_it": null,
+      "name_it": "Stretching dei dorsali su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla stabilizzata con i piedi appoggiati a terra e la schiena dritta.",
@@ -1517,11 +1523,11 @@
         "Mantieni l'allungamento per 20-30 secondi, quindi torna alla posizione di partenza.",
         "Ripeti dall'altra parte."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1341": {
       "name_en": "exercise ball lower back stretch (pyramid)",
-      "name_it": null,
+      "name_it": "Stretching lombare su fitball (posizione a piramide)",
       "aliases_it": [],
       "instructions_it": [
         "Siediti sulla palla di stabilità con i piedi appoggiati a terra e le ginocchia piegate con un angolo di 90 gradi.",
@@ -1531,7 +1537,7 @@
         "Mantieni la posizione per alcuni secondi, quindi torna lentamente alla posizione di partenza.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1342": {
       "name_en": "exercise ball lying side lat stretch",
@@ -1548,7 +1554,7 @@
     },
     "1343": {
       "name_en": "exercise ball prone leg raise",
-      "name_it": null,
+      "name_it": "Sollevamento delle gambe da proni su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati a faccia in giù su un tappetino con le gambe distese e le dita dei piedi appoggiate sulla palla stabilizzante.",
@@ -1557,7 +1563,7 @@
         "Fai una pausa per un momento in alto, quindi abbassa lentamente le gambe fino alla posizione di partenza.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1344": {
       "name_en": "ez bar reverse grip bent over row",
@@ -1894,7 +1900,7 @@
     },
     "1369": {
       "name_en": "band two legs calf raise - (band under both legs) v. 2",
-      "name_it": null,
+      "name_it": "Sollevamenti sui polpacci con elastico sotto entrambi i piedi (variante 2)",
       "aliases_it": [],
       "instructions_it": [
         "Stare con i piedi alla larghezza delle spalle e posizionare una fascia di resistenza sotto entrambi i piedi.",
@@ -1903,7 +1909,7 @@
         "Fai una pausa per un momento in alto, quindi abbassa lentamente i talloni nella posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1370": {
       "name_en": "barbell floor calf raise",
@@ -2070,7 +2076,7 @@
     },
     "1382": {
       "name_en": "exercise ball on the wall calf raise",
-      "name_it": null,
+      "name_it": "Sollevamenti sui polpacci contro il muro con fitball",
       "aliases_it": [],
       "instructions_it": [
         "Mettiti con la schiena contro un muro e posiziona una palla da ginnastica tra la parte bassa della schiena e il muro.",
@@ -2080,7 +2086,7 @@
         "Fai una pausa per un momento in alto, quindi abbassa lentamente i talloni nella posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1383": {
       "name_en": "hack calf raise",
@@ -2458,7 +2464,7 @@
     },
     "1414": {
       "name_en": "dumbbell one arm reverse preacher curl",
-      "name_it": null,
+      "name_it": "Curl inverso a un braccio con manubrio su panca Scott",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panca da predicatore con il petto appoggiato al cuscinetto e il braccio esteso oltre il bordo della panca, tenendo un manubrio con una presa sotto.",
@@ -2467,7 +2473,7 @@
         "Stringi i bicipiti nella parte alta del movimento, poi abbassa lentamente il manubrio fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1415": {
       "name_en": "dumbbell one arm seated neutral wrist curl",
@@ -2556,7 +2562,7 @@
     },
     "1421": {
       "name_en": "modified push up to lower arms",
-      "name_it": null,
+      "name_it": "Piegamenti sugli avambracci modificati",
       "aliases_it": [],
       "instructions_it": [
         "Inizia in una posizione push-up con le mani direttamente sotto le spalle e il corpo in linea retta.",
@@ -2565,7 +2571,7 @@
         "Fai una pausa per un momento, quindi spingi attraverso i palmi delle mani per riportare gli avambracci nella posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1422": {
       "name_en": "pelvic tilt into bridge",
@@ -2787,7 +2793,7 @@
     },
     "1437": {
       "name_en": "dumbbell finger curls",
-      "name_it": null,
+      "name_it": "Curl per le dita con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panca o una sedia con i piedi piatti a terra e la schiena dritta.",
@@ -2795,7 +2801,7 @@
         "Lascia che il manubrio scorra verso le punte delle dita, poi ripiegalo flettendo le dita.",
         "Ripeti per il numero desiderato di ripetizioni, poi passa all'altra mano."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1438": {
       "name_en": "kettlebell seated two arm military press",
@@ -2825,7 +2831,7 @@
     },
     "1441": {
       "name_en": "dumbbell over bench one arm reverse wrist curl",
-      "name_it": null,
+      "name_it": "Curl inverso dei polsi a un braccio oltre la panca",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina con i piedi piatti a terra e tieni un manubrio in una mano, con il palmo rivolto verso il basso.",
@@ -2834,7 +2840,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente il manubrio fino alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi passa all'altro braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1451": {
       "name_en": "lever seated dip",
@@ -2890,7 +2896,7 @@
     },
     "1458": {
       "name_en": "ez barbell seated curls",
-      "name_it": null,
+      "name_it": "Curl da seduti con bilanciere EZ",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panca con i piedi appoggiati a terra e la schiena dritta.",
@@ -2901,7 +2907,7 @@
         "Inspira e abbassa lentamente il bilanciere ez nella posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1459": {
       "name_en": "dumbbell romanian deadlift",
@@ -3006,7 +3012,7 @@
     },
     "1467": {
       "name_en": "push-up on lower arms",
-      "name_it": "Piegamenti sulle braccia su inferiore braccia",
+      "name_it": "Piegamenti sugli avambracci",
       "aliases_it": [],
       "instructions_it": [
         "Inizia in una posizione di plancia con gli avambracci a terra e i gomiti direttamente sotto le spalle.",
@@ -3015,11 +3021,11 @@
         "Fai una pausa per un momento in basso, quindi spingiti indietro fino alla posizione di partenza.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "generated_unreviewed"
+      "translationStatus": "draft_v26_1"
     },
     "1468": {
       "name_en": "crab twist toe touch",
-      "name_it": null,
+      "name_it": "Tocco delle punte dei piedi con torsione da posizione del granchio",
       "aliases_it": [],
       "instructions_it": [
         "Inizia seduto a terra con le ginocchia piegate e i piedi appoggiati sul pavimento.",
@@ -3028,7 +3034,7 @@
         "Torna alla posizione di partenza e ripeti dall'altra parte.",
         "Continua ad alternare i lati per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1471": {
       "name_en": "inchworm",
@@ -3210,7 +3216,7 @@
     },
     "1548": {
       "name_en": "chair leg extended stretch",
-      "name_it": null,
+      "name_it": "Stretching della gamba distesa su sedia",
       "aliases_it": [],
       "instructions_it": [
         "Siediti sul bordo di una sedia con la schiena dritta e i piedi piatti a terra.",
@@ -3219,11 +3225,11 @@
         "Mantieni questa posizione per 20-30 secondi.",
         "Cambia gamba e ripeti lo stretching."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1559": {
       "name_en": "exercise ball hip flexor stretch",
-      "name_it": null,
+      "name_it": "Stretching dei flessori dell’anca con fitball",
       "aliases_it": [],
       "instructions_it": [
         "Posiziona la palla di stabilità a terra e inginocchiati davanti ad essa.",
@@ -3232,7 +3238,7 @@
         "Inclinati in avanti, spingendo i fianchi verso la palla di stabilità, finché non senti un allungamento nel flessore dell'anca destra.",
         "Mantieni la posizione per 20-30 secondi, poi cambia lato e ripeti."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1560": {
       "name_en": "exercise ball seated hamstring stretch",
@@ -3394,7 +3400,7 @@
     },
     "1617": {
       "name_en": "dumbbell decline one arm hammer press",
-      "name_it": null,
+      "name_it": "Spinta a martello con un manubrio su panca declinata",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati su una panchina con un manubrio in una mano, appoggiato sul petto.",
@@ -3403,7 +3409,7 @@
         "Riporta il manubrio alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1618": {
       "name_en": "dumbbell incline hammer press on exercise ball",
@@ -3422,7 +3428,7 @@
     },
     "1619": {
       "name_en": "dumbbell incline one arm hammer press",
-      "name_it": null,
+      "name_it": "Spinta a martello a un braccio con manubrio su panca inclinata",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina inclinata con un manubrio in una mano, appoggiato sulla coscia.",
@@ -3432,7 +3438,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente il manubrio fino alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1620": {
       "name_en": "dumbbell incline one arm hammer press on exercise ball",
@@ -3450,7 +3456,7 @@
     },
     "1621": {
       "name_en": "dumbbell one arm hammer press on exercise ball",
-      "name_it": null,
+      "name_it": "Spinta a martello a un braccio con manubrio su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica con i piedi piatti a terra e la schiena dritta.",
@@ -3460,7 +3466,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente il manubrio alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1622": {
       "name_en": "dumbbell one arm reverse grip press",
@@ -3478,7 +3484,7 @@
     },
     "1623": {
       "name_en": "dumbbell palms in incline bench press",
-      "name_it": null,
+      "name_it": "Distensioni con manubri su panca inclinata a presa neutra",
       "aliases_it": [],
       "instructions_it": [
         "Installa una panca inclinata con un angolo di 45 gradi.",
@@ -3489,7 +3495,7 @@
         "Fermati un attimo in fondo, poi riporta i manubri alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1624": {
       "name_en": "dumbbell reverse bench press",
@@ -3700,7 +3706,7 @@
     },
     "1638": {
       "name_en": "cable pulldown bicep curl",
-      "name_it": null,
+      "name_it": "Lat pulldown ai cavi con curl per bicipiti",
       "aliases_it": [],
       "instructions_it": [
         "Fissa una barra dritta alla macchina a cavo con la massima regolazione.",
@@ -3712,11 +3718,11 @@
         "Inspira e riporta lentamente la barra alla posizione iniziale, estendendo completamente le braccia.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1639": {
       "name_en": "cable rope hammer preacher curl",
-      "name_it": null,
+      "name_it": "Curl a martello ai cavi su panca Scott con corda",
       "aliases_it": [],
       "instructions_it": [
         "Attacca un attacco di corda a una macchina a cavo a carrucole bassa.",
@@ -3728,11 +3734,11 @@
         "Inspira e abbassa lentamente la corda fino alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1640": {
       "name_en": "cable rope one arm hammer preacher curl",
-      "name_it": null,
+      "name_it": "Curl a martello a un braccio ai cavi su panca Scott con corda",
       "aliases_it": [],
       "instructions_it": [
         "Attacca una maniglia di corda a una macchina a cavo a carrucole bassa.",
@@ -3744,7 +3750,7 @@
         "Stringi i bicipiti nella parte alta del movimento, poi abbassa lentamente il manico della corda fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1641": {
       "name_en": "cable seated curl",
@@ -3791,7 +3797,7 @@
     },
     "1644": {
       "name_en": "cable squatting curl",
-      "name_it": null,
+      "name_it": "Curl ai cavi in posizione di squat",
       "aliases_it": [],
       "instructions_it": [
         "Attacca una maniglia del cavo alla posizione più bassa di una macchina a cavi.",
@@ -3803,11 +3809,11 @@
         "Abbassa lentamente la maniglia del cavo fino alla posizione iniziale, estendendo completamente le braccia.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1645": {
       "name_en": "cable two arm curl on incline bench",
-      "name_it": null,
+      "name_it": "Curl a due braccia ai cavi su panca inclinata",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panca inclinata con la schiena appoggiata al pad e i piedi piatti a terra.",
@@ -3817,11 +3823,11 @@
         "Inspira e abbassa lentamente le maniglie fino alla posizione iniziale, estendendo completamente le braccia.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1646": {
       "name_en": "dumbbell alternate hammer preacher curl",
-      "name_it": null,
+      "name_it": "Curl a martello alternato con manubri su panca Scott",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panca da predicatore con un manubrio in ogni mano, i palmi rivolti verso il busto e le braccia completamente distese.",
@@ -3831,11 +3837,11 @@
         "Inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero consigliato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1647": {
       "name_en": "dumbbell alternate preacher curl",
-      "name_it": null,
+      "name_it": "Curl alternato con manubri su panca Scott",
       "aliases_it": [],
       "instructions_it": [
         "Seduta su una panca da predicatore con un manubrio in ogni mano, i palmi rivolti verso l'alto.",
@@ -3846,7 +3852,7 @@
         "Ripeti il movimento con il braccio sinistro.",
         "Continuare ad alternare le braccia per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1648": {
       "name_en": "dumbbell alternate seated hammer curl",
@@ -3878,7 +3884,7 @@
     },
     "1650": {
       "name_en": "dumbbell alternating seated bicep curl on exercise ball",
-      "name_it": null,
+      "name_it": "Curl alternato per bicipiti da seduto su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica con i piedi piatti a terra e la schiena dritta.",
@@ -3888,7 +3894,7 @@
         "Ripeti il curl con l'altro braccio.",
         "Continua a alternare i ricci per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1651": {
       "name_en": "dumbbell bicep curl lunge with bowling motion",
@@ -3936,7 +3942,7 @@
     },
     "1654": {
       "name_en": "dumbbell biceps curl reverse",
-      "name_it": null,
+      "name_it": "Curl inverso per bicipiti con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con un manubrio in ogni mano, palmi rivolti verso il basso e braccia completamente distese.",
@@ -3946,7 +3952,7 @@
         "Inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1655": {
       "name_en": "dumbbell biceps curl squat",
@@ -3978,7 +3984,7 @@
     },
     "1657": {
       "name_en": "dumbbell cross body hammer curl v. 2",
-      "name_it": null,
+      "name_it": "Curl a martello incrociato con manubri, variante 2",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con un manubrio in ogni mano, palmi rivolti verso il corpo.",
@@ -3988,7 +3994,7 @@
         "Inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1658": {
       "name_en": "dumbbell lunge with bicep curl",
@@ -4006,7 +4012,7 @@
     },
     "1659": {
       "name_en": "dumbbell hammer curl on exercise ball",
-      "name_it": null,
+      "name_it": "Curl a martello con manubri su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica con i piedi piatti a terra e la schiena dritta.",
@@ -4017,11 +4023,11 @@
         "Inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1660": {
       "name_en": "dumbbell kneeling bicep curl exercise ball",
-      "name_it": null,
+      "name_it": "Curl bicipiti in ginocchio con manubrio e fitball",
       "aliases_it": [],
       "instructions_it": [
         "Inginocchiati sul pavimento con una palla da ginnastica davanti a te.",
@@ -4032,11 +4038,11 @@
         "Inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1661": {
       "name_en": "dumbbell lying supine biceps curl",
-      "name_it": null,
+      "name_it": "Curl per bicipiti da supini con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati disteso su una panca con la schiena e la testa sostenute, e i piedi piatti a terra.",
@@ -4047,7 +4053,7 @@
         "Inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1662": {
       "name_en": "dumbbell lying wide curl",
@@ -4065,7 +4071,7 @@
     },
     "1663": {
       "name_en": "dumbbell one arm hammer preacher curl",
-      "name_it": null,
+      "name_it": "Curl a martello a un braccio con manubrio su panca Scott",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panca da predicatore con un manubrio in una mano e il braccio superiore appoggiato al cuscinetto.",
@@ -4075,11 +4081,11 @@
         "Inspira e abbassa lentamente il manubrio alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1664": {
       "name_en": "dumbbell high curl",
-      "name_it": null,
+      "name_it": "Curl alto con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con un manubrio in ciascuna mano, palmi rivolti in avanti.",
@@ -4087,11 +4093,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1665": {
       "name_en": "dumbbell one arm prone curl",
-      "name_it": null,
+      "name_it": "Curl a un braccio da proni con manubrio",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati a faccia in giù su una panca piatta con un manubrio in una mano, il palmo rivolto verso il basso.",
@@ -4100,11 +4106,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente il manubrio fino alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1666": {
       "name_en": "dumbbell one arm prone hammer curl",
-      "name_it": null,
+      "name_it": "Curl a martello a un braccio da proni con manubrio",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati a faccia in giù su una panca piatta con un manubrio in una mano, il palmo rivolto verso il corpo e il braccio completamente esteso.",
@@ -4112,11 +4118,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente il manubrio alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1667": {
       "name_en": "dumbbell one arm reverse spider curl",
-      "name_it": null,
+      "name_it": "Curl spider inverso a un braccio con manubrio",
       "aliases_it": [],
       "instructions_it": [
         "Alzati dritto con un manubrio in una mano, il palmo rivolto verso il basso e il braccio completamente teso.",
@@ -4124,11 +4130,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente il manubrio alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1668": {
       "name_en": "dumbbell one arm seated bicep curl on exercise ball",
-      "name_it": null,
+      "name_it": "Curl bicipiti a un braccio da seduti su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica con i piedi piatti a terra e la schiena dritta.",
@@ -4137,7 +4143,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente il manubrio alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1669": {
       "name_en": "dumbbell one arm seated hammer curl",
@@ -4185,7 +4191,7 @@
     },
     "1672": {
       "name_en": "dumbbell one arm zottman preacher curl",
-      "name_it": null,
+      "name_it": "Curl Zottman a un braccio su panca Scott",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panca da curl preacher e tieni un manubrio in una mano con una presa sotto.",
@@ -4195,11 +4201,11 @@
         "Abbassa lentamente il manubrio fino alla posizione di partenza, ruotando il polso di nuovo alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1673": {
       "name_en": "dumbbell preacher curl over exercise ball",
-      "name_it": null,
+      "name_it": "Curl su panca Scott con fitball e manubri",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica con i piedi piatti a terra e la schiena dritta.",
@@ -4208,11 +4214,11 @@
         "Fermati un attimo in cima, poi inspira e abbassa lentamente il manubrio alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1674": {
       "name_en": "dumbbell prone incline hammer curl",
-      "name_it": null,
+      "name_it": "Curl a martello da proni su panca inclinata con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Regola la panca con un'inclinazione di 45 gradi.",
@@ -4224,11 +4230,11 @@
         "Inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1675": {
       "name_en": "dumbbell reverse spider curl",
-      "name_it": null,
+      "name_it": "Curl spider inverso con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con un manubrio in ogni mano, palmi rivolti verso il corpo e braccia completamente distese.",
@@ -4238,7 +4244,7 @@
         "Inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1676": {
       "name_en": "dumbbell seated alternate hammer curl on exercise ball",
@@ -4258,7 +4264,7 @@
     },
     "1677": {
       "name_en": "dumbbell seated bicep curl",
-      "name_it": null,
+      "name_it": "Curl bicipiti da seduti con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina con i piedi piatti a terra e tieni un manubrio in ciascuna mano, palmi rivolti verso l'alto.",
@@ -4267,7 +4273,7 @@
         "Fermati un attimo in cima, poi inspira e abbassa lentamente i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1678": {
       "name_en": "dumbbell seated hammer curl",
@@ -4439,7 +4445,7 @@
     },
     "1701": {
       "name_en": "medicine ball close grip push up",
-      "name_it": "Con palla medica presa stretta piegamenti sulle braccia",
+      "name_it": "Piegamenti a presa stretta con palla medica",
       "aliases_it": [],
       "instructions_it": [
         "Inizia in una posizione di plancia alta con le mani sulla palla medica, alla larghezza delle spalle.",
@@ -4447,7 +4453,7 @@
         "Spingiti indietro fino alla posizione di partenza, estendendo completamente le braccia.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "generated_unreviewed"
+      "translationStatus": "draft_v26_1"
     },
     "1705": {
       "name_en": "squat on bosu ball",
@@ -4573,7 +4579,7 @@
     },
     "1717": {
       "name_en": "cable squat row (with rope attachment)",
-      "name_it": null,
+      "name_it": "Squat con rematore ai cavi con corda",
       "aliases_it": [],
       "instructions_it": [
         "Attacca una corda a una macchina per cavi all'altezza della vita.",
@@ -4585,7 +4591,7 @@
         "Fermati un attimo all'inizio del movimento, poi lascia lentamente la corda e riporta le braccia alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1718": {
       "name_en": "barbell seated close grip behind neck triceps extension",
@@ -4617,7 +4623,7 @@
     },
     "1720": {
       "name_en": "barbell lying back of the head tricep extension",
-      "name_it": null,
+      "name_it": "Estensioni tricipiti con bilanciere dietro la testa da sdraiati",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati su una panca con i piedi appoggiati a terra e la testa all'estremità della panca.",
@@ -4626,7 +4632,7 @@
         "Fai una pausa per un momento, quindi allunga le braccia fino alla posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1721": {
       "name_en": "barbell reverse grip skullcrusher",
@@ -4674,7 +4680,7 @@
     },
     "1724": {
       "name_en": "cable rope high pulley overhead tricep extension",
-      "name_it": null,
+      "name_it": "Estensioni dei tricipiti sopra la testa al cavo alto con corda",
       "aliases_it": [],
       "instructions_it": [
         "Attacca una corda a una carrucola alta e regola il peso di conseguenza.",
@@ -4685,11 +4691,11 @@
         "Fermati un attimo, poi riporta le braccia alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1725": {
       "name_en": "cable rope incline tricep extension",
-      "name_it": null,
+      "name_it": "Estensioni dei tricipiti su panca inclinata ai cavi con corda",
       "aliases_it": [],
       "instructions_it": [
         "Attacca una corda a una carrucola alta e regola la panca inclinata in un angolo confortevole.",
@@ -4700,11 +4706,11 @@
         "Fermati un attimo, poi riporta le braccia alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1726": {
       "name_en": "cable rope lying on floor tricep extension",
-      "name_it": null,
+      "name_it": "Estensioni dei tricipiti ai cavi con corda da sdraiati a terra",
       "aliases_it": [],
       "instructions_it": [
         "Attacca una corda a una macchina per cavi e impostala nella posizione più bassa.",
@@ -4714,11 +4720,11 @@
         "Fermati un attimo, poi rialza le braccia fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1727": {
       "name_en": "cable standing reverse grip one arm overhead tricep extension",
-      "name_it": null,
+      "name_it": "Estensione del tricipite sopra la testa a un braccio ai cavi a presa inversa",
       "aliases_it": [],
       "instructions_it": [
         "Stai rivolto di spalle alla macchina a cavo con i piedi alla larghezza delle spalle.",
@@ -4727,11 +4733,11 @@
         "Fermati un attimo in basso, poi riporta il braccio alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1728": {
       "name_en": "cable two arm tricep kickback",
-      "name_it": null,
+      "name_it": "Kickback per tricipiti ai cavi con entrambe le braccia",
       "aliases_it": [],
       "instructions_it": [
         "Stai in piedi con i piedi alla larghezza delle spalle e le ginocchia leggermente piegate.",
@@ -4740,7 +4746,7 @@
         "Fermati un attimo, poi torna lentamente alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1729": {
       "name_en": "dumbbell lying alternate extension",
@@ -4800,7 +4806,7 @@
     },
     "1733": {
       "name_en": "dumbbell incline two arm extension",
-      "name_it": null,
+      "name_it": "Estensione dei tricipiti a due braccia su panca inclinata con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panca inclinata con un manubrio in ogni mano, appoggiato sulle cosce.",
@@ -4809,11 +4815,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1734": {
       "name_en": "dumbbell kickbacks on exercise ball",
-      "name_it": null,
+      "name_it": "Kickback per tricipiti con manubri su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica con i piedi piatti a terra e la schiena dritta.",
@@ -4822,7 +4828,7 @@
         "Fermati un attimo, poi abbassa lentamente i manubri alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1735": {
       "name_en": "dumbbell lying single extension",
@@ -4838,7 +4844,7 @@
     },
     "1736": {
       "name_en": "dumbbell one arm french press on exercise ball",
-      "name_it": null,
+      "name_it": "French press a un braccio con manubrio su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica con i piedi piatti a terra e la schiena dritta.",
@@ -4847,7 +4853,7 @@
         "Abbassa lentamente il manubrio fino alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1737": {
       "name_en": "dumbbell seated bent over triceps extension",
@@ -4877,7 +4883,7 @@
     },
     "1739": {
       "name_en": "dumbbell standing alternating tricep kickback",
-      "name_it": null,
+      "name_it": "Kickback per tricipiti alternato in piedi con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Stai con i piedi a larghezza delle spalle, tenendo un manubrio in ciascuna mano.",
@@ -4886,7 +4892,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri alla posizione iniziale.",
         "Ripeti con l'altro braccio, alternando i lati ad ogni ripetizione."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1740": {
       "name_en": "dumbbell standing bent over one arm triceps extension",
@@ -4903,7 +4909,7 @@
     },
     "1741": {
       "name_en": "dumbbell standing bent over two arm triceps extension",
-      "name_it": null,
+      "name_it": "Estensioni tricipiti in piedi a busto flesso con due manubri",
       "aliases_it": [],
       "instructions_it": [
         "Stai con i piedi distanti alla larghezza delle spalle e tieni un manubrio in ciascuna mano.",
@@ -4912,7 +4918,7 @@
         "Abbassa lentamente i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1742": {
       "name_en": "dumbbell tricep kickback with stork stance",
@@ -4930,7 +4936,7 @@
     },
     "1743": {
       "name_en": "dumbbell twisting bench press",
-      "name_it": null,
+      "name_it": "Distensioni con manubri su panca con rotazione",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati disteso su una panca con i piedi piatti a terra e la schiena premuta contro la panca.",
@@ -4942,7 +4948,7 @@
         "Mentre premi i manubri verso l'alto, ruota i polsi verso la posizione iniziale con i palmi rivolti lontano.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1744": {
       "name_en": "exercise ball dip",
@@ -4972,7 +4978,7 @@
     },
     "1746": {
       "name_en": "exercise ball supine triceps extension",
-      "name_it": null,
+      "name_it": "Estensioni dei tricipiti da supini su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla da ginnastica con i piedi appoggiati a terra e le ginocchia piegate con un angolo di 90 gradi.",
@@ -4981,11 +4987,11 @@
         "Fai una pausa per un momento, quindi solleva nuovamente il manubrio nella posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1747": {
       "name_en": "ez bar french press on exercise ball",
-      "name_it": null,
+      "name_it": "French press con bilanciere EZ su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Sedersi su una palla da ginnastica e tenere un bilanciere EZ con una presa prona.",
@@ -4994,11 +5000,11 @@
         "Fai una pausa per un momento, quindi allunga le braccia fino alla posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1748": {
       "name_en": "ez bar lying close grip triceps extension behind head",
-      "name_it": null,
+      "name_it": "Estensioni dei tricipiti da sdraiati con bilanciere EZ a presa stretta dietro la testa",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati su una panca con i piedi appoggiati a terra e la testa all'estremità della panca.",
@@ -5007,11 +5013,11 @@
         "Fai una pausa per un momento, quindi allunga le braccia fino alla posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1749": {
       "name_en": "ez bar standing french press",
-      "name_it": null,
+      "name_it": "French press in piedi con bilanciere EZ",
       "aliases_it": [],
       "instructions_it": [
         "Stare con i piedi alla larghezza delle spalle e tenere il bilanciere ez con una presa prona.",
@@ -5020,7 +5026,7 @@
         "Fai una pausa per un momento, quindi stendi le braccia nella posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1750": {
       "name_en": "medicine ball supine chest throw",
@@ -5221,7 +5227,7 @@
     },
     "1765": {
       "name_en": "dumbbell upright row (back pov)",
-      "name_it": null,
+      "name_it": "Tirate al mento con manubri (vista posteriore)",
       "aliases_it": [],
       "instructions_it": [
         "Stai con i piedi a larghezza delle spalle, tenendo un manubrio in ogni mano con una presa sopra la testa.",
@@ -5231,7 +5237,7 @@
         "Fermati un attimo in cima, poi inspira e abbassa lentamente i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "1766": {
       "name_en": "self assisted inverse leg curl",
@@ -5384,7 +5390,7 @@
     },
     "2136": {
       "name_en": "dumbbell cuban press v. 2",
-      "name_it": null,
+      "name_it": "Cuban press con manubri, variante 2",
       "aliases_it": [],
       "instructions_it": [
         "Stai con i piedi a larghezza delle spalle, tenendo un manubrio in ogni mano all'altezza delle spalle con i palmi rivolti verso il basso.",
@@ -5393,7 +5399,7 @@
         "Abbassa i manubri fino all'altezza delle spalle, ruotando i polsi di nuovo alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "2137": {
       "name_en": "dumbbell arnold press",
@@ -5469,7 +5475,7 @@
     },
     "2143": {
       "name_en": "dumbbell standing around world",
-      "name_it": null,
+      "name_it": "Around the world in piedi con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Stai con i piedi distanti alla larghezza delle spalle e tieni un manubrio in ciascuna mano.",
@@ -5478,7 +5484,7 @@
         "Continua il movimento circolare, riportando i manubri giù alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "2144": {
       "name_en": "cable seated chest press",
@@ -5741,7 +5747,7 @@
     },
     "2292": {
       "name_en": "dumbbell rear delt raise",
-      "name_it": null,
+      "name_it": "Alzate per deltoidi posteriori con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Stai in piedi con i piedi alla larghezza delle spalle e tieni un manubrio in ogni mano, palmi rivolti verso il corpo.",
@@ -5750,7 +5756,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente le braccia fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "2293": {
       "name_en": "dumbbell standing zottman preacher curl",
@@ -5768,7 +5774,7 @@
     },
     "2294": {
       "name_en": "dumbbell zottman preacher curl",
-      "name_it": null,
+      "name_it": "Curl Zottman su panca Scott con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panca da predicatore con un manubrio in ogni mano, i palmi rivolti verso l'alto e i gomiti appoggiati sul cuscinetto.",
@@ -5777,7 +5783,7 @@
         "Abbassa lentamente i manubri fino alla posizione di partenza, ruotando i polsi di nuovo alla posizione iniziale mentre lo fai.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "2297": {
       "name_en": "stability ball crunch (full range hands behind head)",
@@ -6139,7 +6145,7 @@
     },
     "2401": {
       "name_en": "dumbbell biceps curl (with arm blaster)",
-      "name_it": null,
+      "name_it": "Curl per bicipiti con manubri e supporto braccia",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con un manubrio in ciascuna mano, palmi rivolti in avanti.",
@@ -6150,11 +6156,11 @@
         "Inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "2402": {
       "name_en": "dumbbell hammer curls (with arm blaster)",
-      "name_it": null,
+      "name_it": "Curl a martello con manubri e supporto braccia",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con un manubrio in ogni mano, i palmi rivolti verso il busto.",
@@ -6166,11 +6172,11 @@
         "Poi, inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero consigliato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "2403": {
       "name_en": "dumbbell alternate biceps curl (with arm blaster)",
-      "name_it": null,
+      "name_it": "Curl alternato per bicipiti con manubri e supporto braccia",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con i piedi alla larghezza delle spalle e tieni un manubrio in ciascuna mano, palmi rivolti in avanti.",
@@ -6182,7 +6188,7 @@
         "Ripeti il movimento con il braccio opposto.",
         "Continuare ad alternare le braccia per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "2404": {
       "name_en": "ez-bar biceps curl (with arm blaster)",
@@ -6200,7 +6206,7 @@
     },
     "2405": {
       "name_en": "cable triceps pushdown (v-bar) (with arm blaster)",
-      "name_it": null,
+      "name_it": "Pushdown per tricipiti ai cavi con barra a V e supporto braccia",
       "aliases_it": [],
       "instructions_it": [
         "Collega un attacco a V-bar alla macchina a cavo al massimo dei punti.",
@@ -6212,11 +6218,11 @@
         "Inspira mentre riporti lentamente la V-bar alla posizione di partenza, mantenendo il controllo.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "2406": {
       "name_en": "cable reverse grip triceps pushdown (sz-bar) (with arm blaster)",
-      "name_it": null,
+      "name_it": "Pushdown tricipiti ai cavi a presa inversa con barra SZ e supporto braccia",
       "aliases_it": [],
       "instructions_it": [
         "Fissa una barra dritta alla macchina a cavo con la massima regolazione.",
@@ -6227,7 +6233,7 @@
         "Fermati un attimo in basso, poi riporta lentamente la barra alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "2407": {
       "name_en": "barbell biceps curl (with arm blaster)",
@@ -6345,7 +6351,7 @@
     },
     "2470": {
       "name_en": "dumbbell lying on floor rear delt raise",
-      "name_it": null,
+      "name_it": "Alzate per deltoidi posteriori con manubri da sdraiati a terra",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati a faccia in giù sul pavimento con un manubrio in ciascuna mano, i palmi rivolti l'uno verso l'altro.",
@@ -6354,7 +6360,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente le braccia fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "2567": {
       "name_en": "seated piriformis stretch",
@@ -6577,7 +6583,7 @@
     },
     "2805": {
       "name_en": "dumbbell single leg deadlift with stepbox support",
-      "name_it": null,
+      "name_it": "Stacco a una gamba con manubrio e appoggio sullo step",
       "aliases_it": [],
       "instructions_it": [
         "Stai in piedi con i piedi alla larghezza dei fianchi, tenendo un manubrio nella mano destra.",
@@ -6587,7 +6593,7 @@
         "Abbassa il manubrio finché non senti uno stiramento al muscolo femorale destro, poi torna alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia lato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "2808": {
       "name_en": "dumbbell sumo pull through",
@@ -6689,7 +6695,7 @@
     },
     "3010": {
       "name_en": "ez bar lying bent arms pullover",
-      "name_it": null,
+      "name_it": "Pullover a gomiti flessi da sdraiati con bilanciere EZ",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati su una panca con la testa da un lato e i piedi sul pavimento.",
@@ -6699,11 +6705,11 @@
         "Fare una pausa per un momento, quindi riportare il bilanciere nella posizione iniziale invertendo il movimento dell'arco.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "3011": {
       "name_en": "incline scapula push up",
-      "name_it": null,
+      "name_it": "Piegamenti inclinati con movimento delle scapole",
       "aliases_it": [],
       "instructions_it": [
         "Installa una panca inclinata con un angolo di 45 gradi.",
@@ -6714,7 +6720,7 @@
         "Spingi attraverso i palmi delle mani per estendere le braccia e tornare alla posizione di partenza.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "3012": {
       "name_en": "scapula dips",
@@ -8070,7 +8076,7 @@
     },
     "3548": {
       "name_en": "dumbbell single arm overhead carry",
-      "name_it": null,
+      "name_it": "Camminata con manubrio sopra la testa a un braccio",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con i piedi divaricati alla larghezza delle spalle, tenendo un manubrio in una mano.",
@@ -8079,7 +8085,7 @@
         "Continua a camminare per la distanza o il tempo desiderato.",
         "Cambia mano e ripeti l'esercizio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "3552": {
       "name_en": "quick feet v. 2",
@@ -8095,7 +8101,7 @@
     },
     "3560": {
       "name_en": "dumbbell standing alternate hammer curl and press",
-      "name_it": null,
+      "name_it": "Curl a martello alternato e spinta sopra la testa con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con un manubrio in ogni mano, palmi rivolti verso il corpo.",
@@ -8110,7 +8116,7 @@
         "Ripeti la pressione con la mano sinistra.",
         "Continua ad alternare tra ricci e presse per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "3561": {
       "name_en": "glute bridge march",
@@ -8172,7 +8178,7 @@
     },
     "3635": {
       "name_en": "dumbbell contralateral forward lunge",
-      "name_it": null,
+      "name_it": "Affondo in avanti controlaterale con manubrio",
       "aliases_it": [],
       "instructions_it": [
         "Stai con i piedi a larghezza delle spalle, tenendo un manubrio in ciascuna mano.",
@@ -8182,7 +8188,7 @@
         "Ripeti con la gamba sinistra.",
         "Alterna le gambe per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "3636": {
       "name_en": "high knee against wall",
@@ -8504,7 +8510,7 @@
     },
     "3697": {
       "name_en": "cable kneeling rear delt row (with rope) (male)",
-      "name_it": null,
+      "name_it": "Rematore al cavo in ginocchio per deltoidi posteriori con corda",
       "aliases_it": [],
       "instructions_it": [
         "Attacca una maniglia di corda a una carrucola a cavo bassa e inginocchiati rivolto verso la macchina.",
@@ -8514,7 +8520,7 @@
         "Rilascia lentamente la tensione e torna alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "3698": {
       "name_en": "inchworm v. 2",
@@ -8612,7 +8618,7 @@
     },
     "3888": {
       "name_en": "dumbbell one arm snatch",
-      "name_it": null,
+      "name_it": "Strappo con manubrio a un braccio",
       "aliases_it": [],
       "instructions_it": [
         "Stai con i piedi a larghezza delle spalle, tenendo un manubrio in una mano con una presa sopra la mano.",
@@ -8624,11 +8630,11 @@
         "Abbassa il manubrio di nuovo alla posizione di partenza in modo controllato.",
         "Ripeti per il numero desiderato di ripetizioni, poi passa all'altro braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "5201": {
       "name_en": "dumbbell waiter biceps curl",
-      "name_it": null,
+      "name_it": "Curl bicipiti waiter con manubrio",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con un manubrio in ciascuna mano, palmi rivolti in avanti.",
@@ -8637,7 +8643,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0001": {
       "name_en": "3/4 sit-up",
@@ -8744,7 +8750,7 @@
     },
     "0012": {
       "name_en": "assisted lying leg raise with lateral throw down",
-      "name_it": null,
+      "name_it": "Sollevamento delle gambe da sdraiati assistito con spinta laterale verso il basso",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati sulla schiena con le gambe distese e le braccia lungo i fianchi.",
@@ -8755,11 +8761,11 @@
         "Ripeti il ​​movimento dall'altro lato.",
         "Continua ad alternare i lati per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0013": {
       "name_en": "assisted lying leg raise with throw down",
-      "name_it": null,
+      "name_it": "Sollevamento delle gambe da sdraiati assistito con spinta verso il basso",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati sulla schiena con le gambe distese e le braccia lungo i fianchi.",
@@ -8771,11 +8777,11 @@
         "Solleva le gambe fino alla posizione di partenza.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0014": {
       "name_en": "assisted motion russian twist",
-      "name_it": null,
+      "name_it": "Russian twist assistito",
       "aliases_it": [],
       "instructions_it": [
         "Sedersi a terra con le ginocchia piegate e i piedi appoggiati sul pavimento.",
@@ -8785,7 +8791,7 @@
         "Fai una pausa per un momento, quindi ruota il busto verso sinistra, portando la palla medica verso il lato sinistro del corpo.",
         "Continua ad alternare i lati per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0015": {
       "name_en": "assisted parallel close grip pull-up",
@@ -8804,7 +8810,7 @@
     },
     "0016": {
       "name_en": "assisted prone hamstring",
-      "name_it": null,
+      "name_it": "Stretching assistito degli ischiocrurali da proni",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati a faccia in giù su un tappetino o una panca con le gambe completamente distese.",
@@ -8813,7 +8819,7 @@
         "Fai una pausa per un momento in alto, quindi abbassa lentamente le gambe fino alla posizione di partenza.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0017": {
       "name_en": "assisted pull-up",
@@ -8916,7 +8922,7 @@
     },
     "0971": {
       "name_en": "band assisted wheel rollerout",
-      "name_it": null,
+      "name_it": "Ab wheel rollout con assistenza dell’elastico",
       "aliases_it": [],
       "instructions_it": [
         "Inginocchiarsi sul pavimento e tenere le maniglie della fascia con entrambe le mani, con i palmi rivolti verso il basso.",
@@ -8925,7 +8931,7 @@
         "Fermati un attimo nel punto più lontano, quindi ruota lentamente la ruota verso le ginocchia per tornare alla posizione di partenza.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0980": {
       "name_en": "band bent-over hip extension",
@@ -9105,7 +9111,7 @@
     },
     "0987": {
       "name_en": "band one arm single leg split squat",
-      "name_it": null,
+      "name_it": "Split squat a una gamba con elastico e un braccio",
       "aliases_it": [],
       "instructions_it": [
         "Stare con i piedi alla larghezza dei fianchi e posizionare una fascia di resistenza attorno alle caviglie.",
@@ -9115,7 +9121,7 @@
         "Spingi attraverso il tallone per tornare alla posizione di partenza.",
         "Ripeti per il numero di ripetizioni desiderato, quindi cambia gamba."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0988": {
       "name_en": "band one arm standing low row",
@@ -9423,7 +9429,8 @@
         "stacchi da terra",
         "stacco classico",
         "deadlift bilanciere",
-        "stacco da terra"
+        "stacco da terra",
+        "deadlift"
       ],
       "instructions_it": [
         "Stai con i piedi alla larghezza delle spalle e il bilanciere a terra davanti a te.",
@@ -9465,7 +9472,7 @@
     },
     "0035": {
       "name_en": "barbell decline close grip to skull press",
-      "name_it": null,
+      "name_it": "Distensioni con bilanciere su panca declinata a presa stretta verso la fronte",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati su una panca declinata con la testa più bassa dei piedi e tieni un bilanciere con una presa salda.",
@@ -9473,7 +9480,7 @@
         "Fai una pausa per un momento, quindi estendi le braccia per riportare il bilanciere nella posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0036": {
       "name_en": "barbell decline wide-grip press",
@@ -10316,7 +10323,7 @@
     },
     "0096": {
       "name_en": "barbell side bent v. 2",
-      "name_it": null,
+      "name_it": "Flessione laterale del busto con bilanciere, variante 2",
       "aliases_it": [],
       "instructions_it": [
         "Stai con i piedi a larghezza delle spalle e tieni un bilanciere con entrambe le mani, palmi rivolti verso il basso.",
@@ -10326,7 +10333,7 @@
         "Ripeti il movimento sul lato sinistro.",
         "Continua ad alternare i lati per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0098": {
       "name_en": "barbell side split squat",
@@ -10808,7 +10815,7 @@
     },
     "0137": {
       "name_en": "body-up",
-      "name_it": null,
+      "name_it": "Sollevamento del corpo sugli avambracci",
       "aliases_it": [],
       "instructions_it": [
         "Inizia posizionando le mani su una superficie rialzata, come una panca o barre parallele, con i palmi rivolti verso il basso e le dita puntate in avanti.",
@@ -10817,7 +10824,7 @@
         "Fermati un attimo, poi spingi attraverso i palmi per raddrizzare le braccia e sollevare di nuovo il corpo alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0138": {
       "name_en": "bottoms-up",
@@ -10908,7 +10915,7 @@
     },
     "0152": {
       "name_en": "cable concentration extension (on knee)",
-      "name_it": null,
+      "name_it": "Estensione di concentrazione ai cavi con gomito appoggiato al ginocchio",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panca o una sedia con le ginocchia piegate e i piedi piatti a terra.",
@@ -10917,11 +10924,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente il braccio fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia lato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0153": {
       "name_en": "cable cross-over lateral pulldown",
-      "name_it": null,
+      "name_it": "Lat pulldown laterale incrociato ai cavi",
       "aliases_it": [],
       "instructions_it": [
         "Fissa una maniglia per cavo su ciascun lato di una macchina a cavo all'altezza delle spalle.",
@@ -10932,7 +10939,7 @@
         "Fermati un attimo alla fine del movimento, poi torna lentamente alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0154": {
       "name_en": "cable cross-over revers fly",
@@ -10950,7 +10957,7 @@
     },
     "0155": {
       "name_en": "cable cross-over variation",
-      "name_it": null,
+      "name_it": "Croci ai cavi (variante)",
       "aliases_it": [],
       "instructions_it": [
         "Regola le carrucole a cavo all'altezza del petto.",
@@ -10961,7 +10968,7 @@
         "Fermati un attimo, poi lentamente riporta le braccia alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0868": {
       "name_en": "cable curl",
@@ -11198,7 +11205,7 @@
     },
     "0174": {
       "name_en": "cable judo flip",
-      "name_it": null,
+      "name_it": "Proiezione stile judo ai cavi",
       "aliases_it": [],
       "instructions_it": [
         "Stai di fronte alla macchina per cavi con i piedi a larghezza delle spalle.",
@@ -11210,7 +11217,7 @@
         "Ripeti il movimento dal lato opposto.",
         "Continua ad alternare i lati per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0860": {
       "name_en": "cable kickback",
@@ -11339,7 +11346,7 @@
     },
     "0184": {
       "name_en": "cable lying extension pullover (with rope attachment)",
-      "name_it": null,
+      "name_it": "Pullover con estensione ai cavi da sdraiati con corda",
       "aliases_it": [],
       "instructions_it": [
         "Attacca una corda a una macchina per cavi e posiziona la carrucola nella posizione più alta.",
@@ -11349,7 +11356,7 @@
         "Fermati un attimo in fondo, poi solleva lentamente la corda fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0185": {
       "name_en": "cable lying fly",
@@ -11449,7 +11456,7 @@
     },
     "0193": {
       "name_en": "cable one arm straight back high row (kneeling)",
-      "name_it": null,
+      "name_it": "Rematore alto ai cavi a un braccio da inginocchiati",
       "aliases_it": [],
       "instructions_it": [
         "Attacca un manico a una macchina per cavi all'altezza della vita.",
@@ -11461,7 +11468,7 @@
         "Ripeti per il numero desiderato di ripetizioni.",
         "Cambia lato e ripeti l'esercizio con l'altro braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0194": {
       "name_en": "cable overhead triceps extension (rope attachment)",
@@ -11522,7 +11529,7 @@
     },
     "0197": {
       "name_en": "cable pulldown (pro lat bar)",
-      "name_it": null,
+      "name_it": "Lat pulldown ai cavi con barra Pro Lat",
       "aliases_it": [],
       "instructions_it": [
         "Regola l'altezza del sedile in modo che le cosce siano parallele al suolo e i piedi piatti sul pavimento.",
@@ -11532,7 +11539,7 @@
         "Fermati un attimo in fondo al movimento, poi rilasci lentamente la barra fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0201": {
       "name_en": "cable pushdown",
@@ -11711,7 +11718,7 @@
     },
     "0208": {
       "name_en": "cable reverse-grip straight back seated high row",
-      "name_it": null,
+      "name_it": "Rematore alto ai cavi da seduti a presa inversa",
       "aliases_it": [],
       "instructions_it": [
         "Siediti sul sedile rivolto verso la macchina a cavo con i piedi piatti sul pavimento.",
@@ -11721,7 +11728,7 @@
         "Fermati un attimo al picco della contrazione, poi riporta lentamente il cavo alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0211": {
       "name_en": "cable russian twists (on stability ball)",
@@ -11921,7 +11928,7 @@
     },
     "0225": {
       "name_en": "cable standing cross-over high reverse fly",
-      "name_it": null,
+      "name_it": "Croci inverse ai cavi in piedi",
       "aliases_it": [],
       "instructions_it": [
         "Fissa una maniglia a D su ciascun lato di una macchina a cavo all'altezza della spalla.",
@@ -11932,7 +11939,7 @@
         "Fermati un attimo al picco del movimento, poi torna lentamente alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0226": {
       "name_en": "cable standing crunch",
@@ -12096,7 +12103,7 @@
     },
     "0236": {
       "name_en": "cable standing twist row (v-bar)",
-      "name_it": null,
+      "name_it": "Rematore ai cavi con torsione in piedi e barra a V",
       "aliases_it": [],
       "instructions_it": [
         "Attacca un attacco a V-bar a una macchina a cavo all'altezza del petto.",
@@ -12110,7 +12117,7 @@
         "Rilascia lentamente la tensione e torna alla posizione iniziale, slacciando il busto.",
         "Ripeti il movimento per il numero desiderato di ripetizioni, alternando la direzione della torsione ad ogni ripetizione."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0238": {
       "name_en": "cable straight arm pulldown",
@@ -12160,7 +12167,7 @@
     },
     "0240": {
       "name_en": "cable supine reverse fly",
-      "name_it": null,
+      "name_it": "Croci inverse ai cavi da supini",
       "aliases_it": [],
       "instructions_it": [
         "Fissa una maniglia a D a una macchina a cavo a carrucole bassa e sdraiati a faccia in giù su una panca piatta.",
@@ -12169,7 +12176,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente le braccia fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0241": {
       "name_en": "cable triceps pushdown (v-bar)",
@@ -12192,7 +12199,7 @@
     },
     "0242": {
       "name_en": "cable tuck reverse crunch",
-      "name_it": null,
+      "name_it": "Reverse crunch con ginocchia raccolte ai cavi",
       "aliases_it": [],
       "instructions_it": [
         "Attacca un cavo a una carrucola bassa e sdraiati su un tappeto rivolto verso l'alto.",
@@ -12202,7 +12209,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente gambe e fianchi fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0243": {
       "name_en": "cable twist",
@@ -12294,7 +12301,7 @@
     },
     "0248": {
       "name_en": "cambered bar lying row",
-      "name_it": null,
+      "name_it": "Rematore da sdraiati con bilanciere sagomato",
       "aliases_it": [],
       "instructions_it": [
         "Appoggia un bilanciere sul pavimento e sdraiati a faccia in giù su una panca con il petto appena fuori dal bordo.",
@@ -12303,7 +12310,7 @@
         "Tira il bilanciere verso il petto, stringendo le scapole insieme.",
         "Abbassa il bilanciere fino alla posizione iniziale e ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0251": {
       "name_en": "chest dip",
@@ -12332,7 +12339,7 @@
     },
     "0257": {
       "name_en": "circles knee stretch",
-      "name_it": null,
+      "name_it": "Stretching del ginocchio con movimenti circolari",
       "aliases_it": [],
       "instructions_it": [
         "Stai in piedi con i piedi alla larghezza delle spalle e le mani sui fianchi.",
@@ -12340,11 +12347,11 @@
         "Tenendo le ginocchia piegate, ruotate le ginocchia in un movimento circolare, prima in senso orario e poi in senso antiorario.",
         "Esegui il movimento per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0258": {
       "name_en": "clock push-up",
-      "name_it": null,
+      "name_it": "Piegamenti sulle braccia a orologio",
       "aliases_it": [],
       "instructions_it": [
         "Inizia in posizione di plank alta con le mani direttamente sotto le spalle e il corpo in linea retta.",
@@ -12354,7 +12361,7 @@
         "Ripeti il piegamenti, questa volta ruotando il corpo verso destra e estendendo il braccio destro di lato.",
         "Continua ad alternare i lati ad ogni ripetizione."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0259": {
       "name_en": "close-grip push-up",
@@ -12370,7 +12377,7 @@
     },
     "0260": {
       "name_en": "cocoons",
-      "name_it": null,
+      "name_it": "Chiusure addominali a bozzolo",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati sulla schiena con le ginocchia piegate e i piedi piatti a terra.",
@@ -12379,7 +12386,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente la parte superiore del corpo fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0262": {
       "name_en": "cross body crunch",
@@ -12771,7 +12778,7 @@
     },
     "0303": {
       "name_en": "dumbbell decline hammer press",
-      "name_it": null,
+      "name_it": "Spinte a martello con manubri su panca declinata",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati su una panca inclinata con i piedi ben saldati e la testa più bassa dei fianchi.",
@@ -12780,7 +12787,7 @@
         "Riporta i manubri alla posizione iniziale, estendendo completamente le braccia.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0305": {
       "name_en": "dumbbell decline shrug",
@@ -12798,7 +12805,7 @@
     },
     "0304": {
       "name_en": "dumbbell decline shrug v. 2",
-      "name_it": null,
+      "name_it": "Scrollate di spalle con manubri su panca declinata, variante 2",
       "aliases_it": [],
       "instructions_it": [
         "Installare una panca di declino con un angolo di 45 gradi.",
@@ -12808,7 +12815,7 @@
         "Tieni la contrazione per una breve pausa, poi abbassa i manubri alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0306": {
       "name_en": "dumbbell decline triceps extension",
@@ -12864,7 +12871,7 @@
     },
     "0309": {
       "name_en": "dumbbell front raise v. 2",
-      "name_it": null,
+      "name_it": "Alzate frontali con manubri, variante 2",
       "aliases_it": [],
       "instructions_it": [
         "Stai con i piedi a larghezza delle spalle, tenendo un manubrio in ogni mano con i palmi rivolti verso le cosce.",
@@ -12873,7 +12880,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0311": {
       "name_en": "dumbbell full can lateral raise",
@@ -12909,7 +12916,7 @@
     },
     "0312": {
       "name_en": "dumbbell hammer curl v. 2",
-      "name_it": null,
+      "name_it": "Curl a martello con manubri, variante 2",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con un manubrio in ogni mano, i palmi rivolti verso il busto.",
@@ -12921,7 +12928,7 @@
         "Poi, inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero consigliato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0314": {
       "name_en": "dumbbell incline bench press",
@@ -12956,7 +12963,7 @@
     },
     "0316": {
       "name_en": "dumbbell incline breeding",
-      "name_it": null,
+      "name_it": "Respirazione con manubri su panca inclinata",
       "aliases_it": [],
       "instructions_it": [
         "Installa una panca inclinata con un angolo di 45 gradi.",
@@ -12967,7 +12974,7 @@
         "Fermati un attimo in fondo, poi spingi di nuovo i manubri fino alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0318": {
       "name_en": "dumbbell incline curl",
@@ -12986,7 +12993,7 @@
     },
     "0317": {
       "name_en": "dumbbell incline curl v. 2",
-      "name_it": null,
+      "name_it": "Curl con manubri su panca inclinata, variante 2",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina inclinata con un manubrio in ogni mano, palmi rivolti in avanti e braccia completamente distese.",
@@ -12996,7 +13003,7 @@
         "Inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0319": {
       "name_en": "dumbbell incline fly",
@@ -13167,7 +13174,7 @@
     },
     "0331": {
       "name_en": "dumbbell incline twisted flyes",
-      "name_it": null,
+      "name_it": "Croci con manubri su panca inclinata con rotazione",
       "aliases_it": [],
       "instructions_it": [
         "Imposta una panca inclinata a 45 gradi e siediti sopra con un manubrio in ogni mano, palmi rivolti l'uno verso l'altro.",
@@ -13177,7 +13184,7 @@
         "Inverti il movimento e riporta i manubri nella posizione iniziale, stringendo i muscoli del petto in alto.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0332": {
       "name_en": "dumbbell iron cross",
@@ -13210,7 +13217,8 @@
       "name_it": "Alzate laterali con manubri",
       "aliases_it": [
         "alzate laterali",
-        "alzate laterali manubri"
+        "alzate laterali manubri",
+        "lateral raise"
       ],
       "instructions_it": [
         "Stai in piedi con i piedi alla larghezza delle spalle e tieni un manubrio in ogni mano, palmi rivolti verso il corpo.",
@@ -13307,7 +13315,7 @@
     },
     "0340": {
       "name_en": "dumbbell lying hammer press",
-      "name_it": null,
+      "name_it": "Spinta a martello con manubri da sdraiati",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati su una panca con un manubrio in ogni mano, palmi rivolti e braccia allungate verso l'alto.",
@@ -13315,7 +13323,7 @@
         "Riporta i manubri alla posizione iniziale, estendendo completamente le braccia.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0341": {
       "name_en": "dumbbell lying one arm deltoid rear",
@@ -13359,7 +13367,7 @@
     },
     "0344": {
       "name_en": "dumbbell lying one arm pronated triceps extension",
-      "name_it": null,
+      "name_it": "Estensione del tricipite da sdraiati a un braccio con presa prona e manubrio",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati disteso su una panca con la schiena e la testa sostenute, e i piedi piatti a terra.",
@@ -13368,7 +13376,7 @@
         "Fermati un attimo in basso, poi rialza il braccio fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0345": {
       "name_en": "dumbbell lying one arm rear lateral raise",
@@ -13384,7 +13392,7 @@
     },
     "0346": {
       "name_en": "dumbbell lying one arm supinated triceps extension",
-      "name_it": null,
+      "name_it": "Estensione del tricipite da sdraiati a un braccio con presa supina e manubrio",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati disteso su una panca con la schiena e la testa sostenute, e i piedi piatti a terra.",
@@ -13393,7 +13401,7 @@
         "Fermati un attimo in basso, poi rialza il braccio fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0347": {
       "name_en": "dumbbell lying pronation",
@@ -13490,7 +13498,7 @@
     },
     "0353": {
       "name_en": "dumbbell one arm concentration curl (on stability ball)",
-      "name_it": null,
+      "name_it": "Curl di concentrazione a un braccio con manubrio su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla di stabilità con i piedi piatti a terra e le ginocchia piegate a 90 gradi.",
@@ -13500,7 +13508,7 @@
         "Fermati un attimo all'inizio del movimento, poi inspira e abbassa lentamente il manubrio fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio e ripeti."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0354": {
       "name_en": "dumbbell one arm kickback",
@@ -13561,7 +13569,7 @@
     },
     "0359": {
       "name_en": "dumbbell one arm reverse fly (with support)",
-      "name_it": null,
+      "name_it": "Croci inverse a un braccio con manubrio e supporto",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina con i piedi piatti a terra e la schiena dritta.",
@@ -13571,7 +13579,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente il braccio fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0361": {
       "name_en": "dumbbell one arm shoulder press",
@@ -13587,7 +13595,7 @@
     },
     "0360": {
       "name_en": "dumbbell one arm shoulder press v. 2",
-      "name_it": null,
+      "name_it": "Shoulder press a un braccio con manubrio (variante 2)",
       "aliases_it": [],
       "instructions_it": [
         "Stai in piedi con i piedi alla larghezza delle spalle e tieni un manubrio con una mano all'altezza delle spalle, palmo rivolto in avanti.",
@@ -13595,7 +13603,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente il manubrio all'altezza delle spalle.",
         "Ripeti per il numero desiderato di ripetizioni, poi passa all'altro braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0362": {
       "name_en": "dumbbell one arm triceps extension (on bench)",
@@ -13639,7 +13647,7 @@
     },
     "0365": {
       "name_en": "dumbbell over bench neutral wrist curl",
-      "name_it": null,
+      "name_it": "Curl dei polsi a presa neutra con manubri oltre la panca",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina con i piedi piatti a terra e tieni un manubrio in ciascuna mano, palmi rivolti verso l'alto.",
@@ -13648,11 +13656,11 @@
         "Fermati un attimo in cima, poi inspira e abbassa lentamente i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0366": {
       "name_en": "dumbbell over bench one arm neutral wrist curl",
-      "name_it": null,
+      "name_it": "Curl dei polsi a presa neutra a un braccio oltre la panca",
       "aliases_it": [],
       "instructions_it": [
         "Seduta su una panchina con un manubrio in una mano e il braccio esteso sopra la panca, il palmo rivolto verso l'alto.",
@@ -13660,11 +13668,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente il manubrio alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0367": {
       "name_en": "dumbbell over bench one arm wrist curl",
-      "name_it": null,
+      "name_it": "Curl dei polsi a un braccio oltre la panca",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina con i piedi piatti a terra e tieni un manubrio in una mano, con il palmo rivolto verso il basso.",
@@ -13673,11 +13681,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente il manubrio fino alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi passa all'altro braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0368": {
       "name_en": "dumbbell over bench revers wrist curl",
-      "name_it": null,
+      "name_it": "Curl inverso dei polsi oltre la panca con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina con i piedi piatti a terra e tieni un manubrio in ciascuna mano, con i palmi rivolti verso il basso.",
@@ -13686,11 +13694,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0369": {
       "name_en": "dumbbell over bench wrist curl",
-      "name_it": null,
+      "name_it": "Curl dei polsi oltre la panca con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina con gli avambracci appoggiati sulla panca e i palmi rivolti verso l'alto, tenendo un manubrio in ogni mano.",
@@ -13699,7 +13707,7 @@
         "Fermati un attimo, poi abbassa lentamente i polsi fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0370": {
       "name_en": "dumbbell peacher hammer curl",
@@ -13928,7 +13936,7 @@
     },
     "0386": {
       "name_en": "dumbbell rotation reverse fly",
-      "name_it": null,
+      "name_it": "Croci inverse con manubri e rotazione",
       "aliases_it": [],
       "instructions_it": [
         "Stai con i piedi alla larghezza delle spalle e tieni un manubrio in ogni mano, con i palmi rivolti verso l'interno.",
@@ -13938,7 +13946,7 @@
         "Abbassa lentamente le braccia fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0387": {
       "name_en": "dumbbell seated alternate front raise",
@@ -13983,7 +13991,7 @@
     },
     "0390": {
       "name_en": "dumbbell seated biceps curl (on stability ball)",
-      "name_it": "Con manubrio da seduto curl per i bicipiti su con fitball",
+      "name_it": "Curl bicipiti con manubri da seduti su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla stabile con i piedi piatti a terra e la schiena dritta.",
@@ -13994,7 +14002,7 @@
         "Inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "generated_unreviewed"
+      "translationStatus": "draft_v26_1"
     },
     "0391": {
       "name_en": "dumbbell seated curl",
@@ -14064,7 +14072,7 @@
     },
     "0395": {
       "name_en": "dumbbell seated lateral raise v. 2",
-      "name_it": null,
+      "name_it": "Alzate laterali da seduti con manubri (variante 2)",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina con i piedi piatti a terra e un manubrio in ogni mano, appoggiato sulle cosce.",
@@ -14073,11 +14081,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0397": {
       "name_en": "dumbbell seated neutral wrist curl",
-      "name_it": null,
+      "name_it": "Curl dei polsi a presa neutra da seduti con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina con i piedi piatti a terra e tieni un manubrio in ogni mano, palmi rivolti uno verso l'altro.",
@@ -14086,7 +14094,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0398": {
       "name_en": "dumbbell seated one arm kickback",
@@ -14130,7 +14138,7 @@
     },
     "0401": {
       "name_en": "dumbbell seated palms up wrist curl",
-      "name_it": null,
+      "name_it": "Curl dei polsi a presa supina da seduti con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina con i piedi piatti a terra e tieni un manubrio in ciascuna mano, palmi rivolti verso l'alto.",
@@ -14139,11 +14147,11 @@
         "Fermati un attimo, poi abbassa di nuovo i polsi alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0402": {
       "name_en": "dumbbell seated preacher curl",
-      "name_it": null,
+      "name_it": "Curl con manubri su panca Scott da seduti",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panca da preacher curl con i piedi piatti sul pavimento.",
@@ -14152,7 +14160,7 @@
         "Fermati un attimo in cima, poi inspira e abbassa lentamente il manubrio fino alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0403": {
       "name_en": "dumbbell seated revers grip concentration curl",
@@ -14186,7 +14194,7 @@
     },
     "0404": {
       "name_en": "dumbbell seated shoulder press (parallel grip)",
-      "name_it": null,
+      "name_it": "Shoulder press da seduti con manubri a presa neutra",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina con un manubrio in ciascuna mano, i palmi rivolti verso l'interno.",
@@ -14195,7 +14203,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri all'altezza delle spalle.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0406": {
       "name_en": "dumbbell shrug",
@@ -14212,7 +14220,7 @@
     },
     "0407": {
       "name_en": "dumbbell side bend",
-      "name_it": null,
+      "name_it": "Flessioni laterali del busto con manubrio",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con i piedi alla larghezza delle spalle e tieni un manubrio in una mano, lasciandolo pendere lungo il fianco.",
@@ -14220,7 +14228,7 @@
         "Fermati un attimo, poi torna lentamente alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia lato e ripeti."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0408": {
       "name_en": "dumbbell side lying one hand raise",
@@ -14250,7 +14258,7 @@
     },
     "0410": {
       "name_en": "dumbbell single leg split squat",
-      "name_it": null,
+      "name_it": "Split squat su una gamba con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Stai con i piedi a larghezza delle spalle, tenendo un manubrio in ciascuna mano.",
@@ -14259,7 +14267,7 @@
         "Continua ad abbassare finché la coscia anteriore non è parallela al terreno, poi spingi attraverso il tallone anteriore per tornare alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia gamba e ripeti."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0411": {
       "name_en": "dumbbell single leg squat",
@@ -14344,7 +14352,7 @@
     },
     "0418": {
       "name_en": "dumbbell standing concentration curl",
-      "name_it": null,
+      "name_it": "Curl di concentrazione in piedi con manubrio",
       "aliases_it": [],
       "instructions_it": [
         "Stai in piedi con i piedi alla larghezza delle spalle e tieni un manubrio in una mano, con il braccio completamente esteso e il palmo rivolto verso l'interno.",
@@ -14355,11 +14363,11 @@
         "Inspira e abbassa lentamente il manubrio alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0419": {
       "name_en": "dumbbell standing front raise above head",
-      "name_it": null,
+      "name_it": "Alzate frontali sopra la testa in piedi con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Stai con i piedi a larghezza delle spalle, tenendo un manubrio in ogni mano con una presa sopra la testa.",
@@ -14367,7 +14375,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0420": {
       "name_en": "dumbbell standing kickback",
@@ -14384,7 +14392,7 @@
     },
     "0421": {
       "name_en": "dumbbell standing one arm concentration curl",
-      "name_it": null,
+      "name_it": "Curl di concentrazione a un braccio in piedi con manubrio",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con i piedi divaricati alla larghezza delle spalle e tieni un manubrio con una mano, palmo rivolto verso l'alto.",
@@ -14395,7 +14403,7 @@
         "Inspira e abbassa lentamente il manubrio alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0422": {
       "name_en": "dumbbell standing one arm curl (over incline bench)",
@@ -14426,7 +14434,7 @@
     },
     "0424": {
       "name_en": "dumbbell standing one arm palm in press",
-      "name_it": null,
+      "name_it": "Spinte in piedi a un braccio con manubrio a presa neutra",
       "aliases_it": [],
       "instructions_it": [
         "Stai in piedi con i piedi a larghezza delle spalle, tenendo un manubrio in una mano all'altezza delle spalle con il palmo rivolto verso l'interno.",
@@ -14435,7 +14443,7 @@
         "Fermati un attimo in cima, poi abbassa lentamente il manubrio alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni, poi passa all'altro braccio."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0425": {
       "name_en": "dumbbell standing one arm reverse curl",
@@ -14464,7 +14472,7 @@
     },
     "0427": {
       "name_en": "dumbbell standing palms in press",
-      "name_it": null,
+      "name_it": "Spinte in piedi con manubri a presa neutra",
       "aliases_it": [],
       "instructions_it": [
         "Stai con i piedi a larghezza delle spalle, tenendo un manubrio in ogni mano all'altezza delle spalle con i palmi rivolti verso l'interno.",
@@ -14472,11 +14480,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0428": {
       "name_en": "dumbbell standing preacher curl",
-      "name_it": null,
+      "name_it": "Curl su panca Scott in piedi con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Stai in piedi dritti con i piedi alla larghezza delle spalle e tieni un manubrio in ogni mano, palmi rivolti in avanti.",
@@ -14487,7 +14495,7 @@
         "Inspira e inizia lentamente ad abbassare i manubri fino alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0429": {
       "name_en": "dumbbell standing reverse curl",
@@ -14517,7 +14525,7 @@
     },
     "0431": {
       "name_en": "dumbbell step-up",
-      "name_it": null,
+      "name_it": "Step-up con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Mettiti davanti a una panchina o mettiti un passo con un manubrio in ciascuna mano, i palmi rivolti verso il corpo.",
@@ -14527,7 +14535,7 @@
         "Fai un passo giù con il piede sinistro, seguito dal destro, tornando alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni, poi cambia gamba."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0432": {
       "name_en": "dumbbell stiff leg deadlift",
@@ -14543,7 +14551,7 @@
     },
     "0433": {
       "name_en": "dumbbell straight arm pullover",
-      "name_it": null,
+      "name_it": "Pullover a braccia tese con manubrio",
       "aliases_it": [],
       "instructions_it": [
         "Sdraiati disteso su una panchina con la testa a un'estremità e i piedi ben piantati a terra.",
@@ -14552,7 +14560,7 @@
         "Fermati un attimo, poi solleva il manubrio di nuovo alla posizione di partenza.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0434": {
       "name_en": "dumbbell straight leg deadlift",
@@ -14569,7 +14577,7 @@
     },
     "0436": {
       "name_en": "dumbbell tate press",
-      "name_it": null,
+      "name_it": "Tate press con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina piatta con un manubrio in ogni mano, i palmi rivolti l'uno verso l'altro.",
@@ -14577,7 +14585,7 @@
         "Premi i manubri finché le braccia non sono completamente estese, poi abbassali fino all'altezza delle spalle.",
         "Ruota i polsi di nuovo alla posizione iniziale e ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0437": {
       "name_en": "dumbbell upright row",
@@ -14594,7 +14602,7 @@
     },
     "0864": {
       "name_en": "dumbbell upright shoulder external rotation",
-      "name_it": null,
+      "name_it": "Rotazione esterna delle spalle in piedi con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Stai in piedi con i piedi alla larghezza delle spalle e tieni un manubrio in ciascuna mano con i palmi rivolti verso il corpo.",
@@ -14603,11 +14611,11 @@
         "Fermati un attimo in cima, poi abbassa lentamente i manubri alla posizione iniziale.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0438": {
       "name_en": "dumbbell w-press",
-      "name_it": null,
+      "name_it": "W-press con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panchina con un manubrio in ciascuna mano, i palmi rivolti in avanti.",
@@ -14616,11 +14624,11 @@
         "Abbassa i manubri fino all'altezza delle spalle.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0439": {
       "name_en": "dumbbell zottman curl",
-      "name_it": null,
+      "name_it": "Curl Zottman con manubri",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con un manubrio in ogni mano, palmi rivolti verso il corpo.",
@@ -14630,7 +14638,7 @@
         "Abbassa lentamente i manubri fino alla posizione iniziale, ruotando i palmi verso il corpo.",
         "Ripeti per il numero desiderato di ripetizioni."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0443": {
       "name_en": "elbow-to-knee",
@@ -14661,7 +14669,7 @@
     },
     "0446": {
       "name_en": "ez barbell close-grip curl",
-      "name_it": null,
+      "name_it": "Curl con bilanciere EZ a presa stretta",
       "aliases_it": [],
       "instructions_it": [
         "Stai dritto con i piedi alla larghezza delle spalle e tieni il bilanciere ez con una presa subdola, le mani alla larghezza delle spalle.",
@@ -14670,7 +14678,7 @@
         "Fermati per un momento in alto, quindi abbassa lentamente il bilanciere nella posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0447": {
       "name_en": "ez barbell curl",
@@ -14743,7 +14751,7 @@
     },
     "0452": {
       "name_en": "ez barbell reverse grip preacher curl",
-      "name_it": null,
+      "name_it": "Curl inverso su panca Scott con bilanciere EZ",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una panca da predicatore con il petto contro il cuscino e i piedi appoggiati sul pavimento.",
@@ -14753,7 +14761,7 @@
         "Fermati per un momento in alto, quindi inspira e abbassa lentamente il bilanciere nella posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0453": {
       "name_en": "ez barbell seated triceps extension",
@@ -15050,7 +15058,7 @@
     },
     "0492": {
       "name_en": "incline push up depth jump",
-      "name_it": null,
+      "name_it": "Piegamenti inclinati con salto in profondità",
       "aliases_it": [],
       "instructions_it": [
         "Trova una superficie rialzata, come una panca o un gradino, e posiziona le mani sul bordo alla larghezza delle spalle.",
@@ -15060,7 +15068,7 @@
         "Salta dal bordo della superficie, atterrando dolcemente con le ginocchia leggermente piegate.",
         "Ripeti il ​​push-up e il salto in profondità per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0493": {
       "name_en": "incline push-up",
@@ -16645,7 +16653,7 @@
     },
     "0650": {
       "name_en": "pull-in (on stability ball)",
-      "name_it": "Trazione in su con fitball",
+      "name_it": "Raccolta delle ginocchia su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Inizia sedendoti sulla palla di stabilità con i piedi appoggiati a terra e le ginocchia piegate con un angolo di 90 gradi.",
@@ -16654,7 +16662,7 @@
         "Fai una pausa per un momento nella parte superiore del movimento, quindi estendi lentamente le gambe fino alla posizione iniziale.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "generated_unreviewed"
+      "translationStatus": "draft_v26_1"
     },
     "0652": {
       "name_en": "pull-up",
@@ -16662,7 +16670,8 @@
       "aliases_it": [
         "trazioni alla sbarra",
         "pull up",
-        "trazioni presa prona"
+        "trazioni presa prona",
+        "trazioni"
       ],
       "instructions_it": [
         "Appendi a una barra per trazioni con i palmi delle mani rivolti lontano da te e le braccia completamente distese.",
@@ -16676,7 +16685,12 @@
     "0662": {
       "name_en": "push-up",
       "name_it": "Piegamenti sulle braccia",
-      "aliases_it": [],
+      "aliases_it": [
+        "flessioni",
+        "piegamenti",
+        "push up",
+        "piegamenti sulle braccia"
+      ],
       "instructions_it": [
         "Inizia in una posizione di plancia alta con le mani leggermente più larghe della larghezza delle spalle e i piedi uniti.",
         "Coinvolgi il core e abbassa il corpo verso terra piegando i gomiti, mantenendo il corpo in linea retta.",
@@ -16687,7 +16701,7 @@
     },
     "0653": {
       "name_en": "push-up (bosu ball)",
-      "name_it": null,
+      "name_it": "Piegamenti sulle braccia su Bosu",
       "aliases_it": [],
       "instructions_it": [
         "Posiziona la palla bosu a terra con il lato piatto rivolto verso l'alto.",
@@ -16696,11 +16710,11 @@
         "Spingiti indietro fino alla posizione di partenza estendendo le braccia.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0655": {
       "name_en": "push-up (on stability ball)",
-      "name_it": "Piegamenti sulle braccia su con fitball",
+      "name_it": "Piegamenti sulle braccia su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Posiziona la palla di stabilità a terra e posizionati a faccia in giù con le mani sulla palla, alla larghezza delle spalle.",
@@ -16709,11 +16723,11 @@
         "Fai una pausa per un momento in basso, quindi ritorna alla posizione di partenza raddrizzando le braccia.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "generated_unreviewed"
+      "translationStatus": "draft_v26_1"
     },
     "0656": {
       "name_en": "push-up (on stability ball)",
-      "name_it": "Piegamenti sulle braccia su con fitball",
+      "name_it": "Piegamenti sulle braccia su fitball",
       "aliases_it": [],
       "instructions_it": [
         "Posiziona la palla di stabilità a terra e posizionati a faccia in giù con le mani sulla palla, alla larghezza delle spalle.",
@@ -16722,7 +16736,7 @@
         "Fai una pausa per un momento in basso, quindi ritorna alla posizione di partenza raddrizzando le braccia.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "generated_unreviewed"
+      "translationStatus": "draft_v26_1"
     },
     "0659": {
       "name_en": "push-up (wall)",
@@ -16740,7 +16754,7 @@
     },
     "0658": {
       "name_en": "push-up (wall) v. 2",
-      "name_it": null,
+      "name_it": "Piegamenti al muro, variante 2",
       "aliases_it": [],
       "instructions_it": [
         "Mettiti di fronte a un muro, a circa un braccio di distanza.",
@@ -16751,11 +16765,11 @@
         "Fai una pausa per un momento, quindi ritorna alla posizione di partenza.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0660": {
       "name_en": "push-up close-grip off dumbbell",
-      "name_it": null,
+      "name_it": "Piegamenti a presa stretta con appoggio su manubrio",
       "aliases_it": [],
       "instructions_it": [
         "Inizia in una posizione push-up con le mani ravvicinate, direttamente sotto le spalle.",
@@ -16764,11 +16778,11 @@
         "Spingi attraverso i palmi delle mani per estendere le braccia e tornare alla posizione di partenza.",
         "Ripetere per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0661": {
       "name_en": "push-up inside leg kick",
-      "name_it": null,
+      "name_it": "Piegamenti con calcio interno della gamba",
       "aliases_it": [],
       "instructions_it": [
         "Inizia in una posizione push-up con le mani leggermente più larghe della larghezza delle spalle e i piedi uniti.",
@@ -16777,7 +16791,7 @@
         "Abbassa di nuovo la gamba e ripeti il ​​push-up, quindi passa all'altra gamba.",
         "Continua ad alternare i calci delle gambe ad ogni ripetizione di push-up."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0663": {
       "name_en": "push-up medicine ball",
@@ -16793,7 +16807,7 @@
     },
     "0664": {
       "name_en": "push-up to side plank",
-      "name_it": "Piegamenti sulle braccia a laterale plank",
+      "name_it": "Piegamento sulle braccia con passaggio a plank laterale",
       "aliases_it": [],
       "instructions_it": [
         "Inizia in una posizione push-up con le mani alla larghezza delle spalle e il corpo in linea retta.",
@@ -16804,7 +16818,7 @@
         "Ripeti il ​​push-up e il plank laterale sul lato opposto.",
         "Continua ad alternare i lati per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "generated_unreviewed"
+      "translationStatus": "draft_v26_1"
     },
     "0666": {
       "name_en": "raise single arm push-up",
@@ -17829,7 +17843,7 @@
     },
     "0778": {
       "name_en": "spider crawl push up",
-      "name_it": null,
+      "name_it": "Piegamenti sulle braccia con avanzamento a ragno",
       "aliases_it": [],
       "instructions_it": [
         "Inizia in una posizione push-up con le mani leggermente più larghe della larghezza delle spalle e i piedi uniti.",
@@ -17838,7 +17852,7 @@
         "Spingi indietro fino alla posizione iniziale e ripeti con il ginocchio sinistro verso il gomito sinistro.",
         "Continua ad alternare i lati per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "pending"
+      "translationStatus": "draft_v26_1"
     },
     "0786": {
       "name_en": "squat jerk",
@@ -18302,7 +18316,7 @@
     },
     "0849": {
       "name_en": "weighted seated twist (on stability ball)",
-      "name_it": "Con sovraccarico da seduto torsione su con fitball",
+      "name_it": "Torsioni del busto da seduti su fitball con sovraccarico",
       "aliases_it": [],
       "instructions_it": [
         "Siediti su una palla stabilizzante con i piedi appoggiati a terra e le ginocchia piegate con un angolo di 90 gradi.",
@@ -18312,7 +18326,7 @@
         "Ripeti la rotazione sull'altro lato.",
         "Continua ad alternare i lati per il numero di ripetizioni desiderato."
       ],
-      "translationStatus": "generated_unreviewed"
+      "translationStatus": "draft_v26_1"
     },
     "0850": {
       "name_en": "weighted side bend (on stability ball)",

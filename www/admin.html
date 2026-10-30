@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+    <!-- Lion Fit · iPhone web app (Beta 0.26.1) -->
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Lion Fit">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#080d13">
+
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="LOGO-APP.png">
-    <link rel="apple-touch-icon" href="LOGO-APP.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Lion Fit - Pannello Coach 🦁</title>
     <!-- Tailwind CSS CDN -->
@@ -98,13 +105,13 @@ section[id^="section-"] input:focus,
 section[id^="section-"] textarea:focus,
 section[id^="section-"] select:focus { border-color:#16a34a; box-shadow:0 0 0 3px rgba(22,163,74,.13); outline:none; }
 /* Profilo Lion Fit: banner nero per far risaltare il logo originale */
-#section-profile > div:first-child { border-color:#bfd6c7; box-shadow:0 8px 25px rgba(17,24,39,.12); }
-#section-profile > div:first-child > div:first-child { background:#080b0a; border-bottom:3px solid #16a34a; }
+#section-profile > div.bg-white:first-child { border-color:#bfd6c7; box-shadow:0 8px 25px rgba(17,24,39,.12); }
+#section-profile > div.bg-white:first-child > div:first-child { background:#080b0a; border-bottom:3px solid #16a34a; }
 /* Pulsante impostazioni sempre visibile sul banner nero */
-#section-profile > div:first-child > div:first-child > button { background:#ffffff !important; color:#111827 !important; border:2px solid #e5e7eb !important; box-shadow:0 2px 12px rgba(0,0,0,.30); }
-#section-profile > div:first-child > div:first-child > button .lf-mono-icon { color:#111827 !important; width:23px; height:23px; stroke-width:2.1; }
-#section-profile > div:first-child > div:first-child > button:hover { background:#dcfce7 !important; border-color:#16a34a !important; }
-#section-profile > div:first-child > div:first-child > button:focus-visible { outline:3px solid #22c55e; outline-offset:3px; }
+#section-profile > div.bg-white:first-child > div:first-child > button { background:#ffffff !important; color:#111827 !important; border:2px solid #e5e7eb !important; box-shadow:0 2px 12px rgba(0,0,0,.30); }
+#section-profile > div.bg-white:first-child > div:first-child > button .lf-mono-icon { color:#111827 !important; width:23px; height:23px; stroke-width:2.1; }
+#section-profile > div.bg-white:first-child > div:first-child > button:hover { background:#dcfce7 !important; border-color:#16a34a !important; }
+#section-profile > div.bg-white:first-child > div:first-child > button:focus-visible { outline:3px solid #22c55e; outline-offset:3px; }
 #section-profile button { min-height:42px; }
 @media(max-width:767px) { section[id^="section-"] .rounded-2xl { border-width:1.5px; } }
 
@@ -284,6 +291,288 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
   window.addEventListener('storage',event=>{if(event.key===storageKey)apply(event.newValue==='dark'?'dark':'light');});
 })();
 </script>
+    <!-- Carattere del marchio, con fallback sportivo locale in caso di assenza rete. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+
+<style id="lf261-visual-system">
+/* LION FIT BETA 0.26.1 — Midnight / Onyx / Emerald design system */
+.lf261-brand{
+  display:inline-block; font-family:'Barlow Condensed',Impact,'Arial Narrow',sans-serif!important;
+  font-size:clamp(18px,1.55vw,24px)!important; font-weight:900!important;
+  line-height:.92!important; letter-spacing:.075em!important; font-style:italic;
+  text-transform:uppercase; transform:skew(-3deg); white-space:nowrap;
+}
+.lf261-brand .lf261-fit{color:#16864F}
+.lf261-brand-role{font-family:'Barlow Condensed',Impact,sans-serif;font-style:italic;letter-spacing:.04em;font-size:.68em;color:#6b7280;margin-left:3px}
+.lf26-version{letter-spacing:.08em!important;font-size:10px!important;font-weight:750!important}
+html[data-lion-theme="dark"]{
+  color-scheme:dark;
+  --lf-green:#60E5A2;--lf-ink:#EEF4FB;--lf-soft:#151D2B;
+  --lf-outline:#303C4C;--lf-panel:#151C28;--lf-mint:#152B28;--lf-forest:#83EDB8;
+  --lf261-page:#090D14;--lf261-side:#0F1520;--lf261-card:#171F2C;
+  --lf261-field:#0D1521;--lf261-line:#303A49;--lf261-muted:#A6B6C6;
+}
+html[data-lion-theme="dark"] body.bg-gray-50, html[data-lion-theme="dark"] body.bg-gray-100{background:#090D14!important;background-image:radial-gradient(ellipse 90% 44% at 60% -5%,rgba(23,55,75,.25),transparent 70%)!important}
+html[data-lion-theme="dark"] body{background:#090D14!important;background-image:radial-gradient(ellipse 90% 44% at 60% -5%,rgba(23,55,75,.25),transparent 70%)!important;color:#E9F1F8!important}
+html[data-lion-theme="dark"] header,
+html[data-lion-theme="dark"] aside,
+html[data-lion-theme="dark"] nav.fixed.bottom-0{background:#0F1520!important;border-color:#2C3544!important;color:#E9F1F8!important}
+html[data-lion-theme="dark"] .bg-white,
+html[data-lion-theme="dark"] .bg-white\/95,
+html[data-lion-theme="dark"] .bg-white\/90,
+html[data-lion-theme="dark"] .bg-white\/80,
+html[data-lion-theme="dark"] .bg-white\/70{background-color:#171F2C!important}
+html[data-lion-theme="dark"] .bg-gray-50,
+html[data-lion-theme="dark"] .bg-gray-100,
+html[data-lion-theme="dark"] .bg-slate-50,
+html[data-lion-theme="dark"] .bg-gray-200{background-color:#1B2431!important}
+html[data-lion-theme="dark"] .bg-green-50,
+html[data-lion-theme="dark"] .bg-green-50\/70,
+html[data-lion-theme="dark"] .bg-green-100,
+html[data-lion-theme="dark"] .bg-emerald-50{background-color:#162C27!important}
+html[data-lion-theme="dark"] .bg-gray-900{background:#0F1724!important}
+html[data-lion-theme="dark"] .text-black,
+html[data-lion-theme="dark"] .text-gray-900,
+html[data-lion-theme="dark"] .text-gray-800,
+html[data-lion-theme="dark"] .text-gray-700,
+html[data-lion-theme="dark"] .text-slate-900,
+html[data-lion-theme="dark"] .text-slate-800{color:#F2F6FC!important}
+html[data-lion-theme="dark"] .text-gray-600,
+html[data-lion-theme="dark"] .text-gray-500,
+html[data-lion-theme="dark"] .text-gray-400,
+html[data-lion-theme="dark"] .text-slate-600,
+html[data-lion-theme="dark"] .text-slate-500{color:#A6B6C6!important}
+html[data-lion-theme="dark"] .text-neon,
+html[data-lion-theme="dark"] .text-green-700,
+html[data-lion-theme="dark"] .text-green-800,
+html[data-lion-theme="dark"] .text-green-900{color:#78EAAE!important}
+html[data-lion-theme="dark"] .border,
+html[data-lion-theme="dark"] .border-gray-100,
+html[data-lion-theme="dark"] .border-gray-200,
+html[data-lion-theme="dark"] .border-gray-300,
+html[data-lion-theme="dark"] .border-green-100,
+html[data-lion-theme="dark"] .border-green-200{border-color:#303A49!important}
+html[data-lion-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+html[data-lion-theme="dark"] select,
+html[data-lion-theme="dark"] textarea{background:#0D1521!important;color:#F2F6FC!important;border-color:#374659!important;accent-color:#42C98A}
+html[data-lion-theme="dark"] input::placeholder,
+html[data-lion-theme="dark"] textarea::placeholder{color:#8C9EAF!important}
+html[data-lion-theme="dark"] option{background:#151D29;color:#F2F6FC}
+html[data-lion-theme="dark"] .lf14-navcard,
+html[data-lion-theme="dark"] .lf14-stat,
+html[data-lion-theme="dark"] .lf-quick-action,
+html[data-lion-theme="dark"] .lf20-action,
+html[data-lion-theme="dark"] .lf14-exrow,
+html[data-lion-theme="dark"] .lf-training-sheet-card,
+html[data-lion-theme="dark"] .lf26-trash-card,
+html[data-lion-theme="dark"] .lf-day-card,
+html[data-lion-theme="dark"] #auth-section{background:#171F2C!important;border-color:#333F50!important;color:#F2F6FC!important;box-shadow:0 8px 22px rgba(0,0,0,.19)!important}
+html[data-lion-theme="dark"] .lf14-welcome,
+html[data-lion-theme="dark"] .lf26-trash-hero{background:linear-gradient(120deg,#111B2A 0%,#0B1220 65%,#122C28 100%)!important;border:1px solid #30473F!important;color:#F2F6FC!important}
+html[data-lion-theme="dark"] .lf14-navicon,
+html[data-lion-theme="dark"] .lf-quick-icon,
+html[data-lion-theme="dark"] .lf20-action-icon{background:#202C3A!important;color:#89F0BB!important}
+html[data-lion-theme="dark"] .lf14-navcopy strong,
+html[data-lion-theme="dark"] .lf20-action-text strong,
+html[data-lion-theme="dark"] .lf14-stat strong,
+html[data-lion-theme="dark"] .lf14-section-heading h3,
+html[data-lion-theme="dark"] .lf14-exhead strong,
+html[data-lion-theme="dark"] .lf-training-sheet-card .lf-sheet-title{color:#F2F6FC!important}
+html[data-lion-theme="dark"] .lf26-trash-meta{color:#AFBDCC!important}
+html[data-lion-theme="dark"] .side-nav-btn[aria-current="page"],
+html[data-lion-theme="dark"] .nav-btn[aria-current="page"]{background:#162E29!important;color:#83EFB7!important;border-color:#315E4B!important}
+html[data-lion-theme="dark"] .lf14-navcard:hover,
+html[data-lion-theme="dark"] .lf-quick-action:hover,
+html[data-lion-theme="dark"] .lf20-action:hover{background:#222D3B!important;border-color:#3B8C68!important}
+html[data-lion-theme="dark"] .lf26-theme-btn{background:#162231!important;color:#D6F7E6!important;border-color:#3D6557!important}
+html[data-lion-theme="dark"] .lf26-version{color:#91A8BB!important}
+html[data-lion-theme="dark"] .lf261-brand{color:#F7FAFF!important}
+html[data-lion-theme="dark"] .lf261-brand .lf261-fit{color:#66E3A4!important}
+html[data-lion-theme="dark"] .lf261-brand-role{color:#A0AEBE!important}
+html[data-lion-theme="dark"] .bg-neon{background-color:#14834F!important;color:white!important}
+html[data-lion-theme="dark"] .bg-neon:hover{background-color:#199A60!important}
+html[data-lion-theme="dark"] #active-week-editor-container > .grid,
+html[data-lion-theme="dark"] #active-week-container > div{background:#151F2C!important}
+html[data-lion-theme="dark"] #section-profile > div:first-child > div:first-child{background:#090D14!important}
+html[data-lion-theme="dark"] .lf26-trash-card:hover{border-color:#409C75!important}
+html[data-lion-theme="dark"] :focus-visible{outline:2px solid #6BE7AC!important;outline-offset:2px}
+@media(max-width:480px){.lf261-brand{font-size:18px!important;letter-spacing:.045em!important}}
+@media print{html[data-lion-theme="dark"]{color-scheme:light!important}}
+</style>
+
+<style id="lf261-dark-contrast-fix">
+/* Lion Fit Beta 0.26.1 - Patch contrasto. Nessuna modifica al tema chiaro. */
+html[data-lion-theme="dark"] .side-nav-btn,
+html[data-lion-theme="dark"] .nav-btn {
+  color:#C1CFDF!important;
+  background-color:transparent!important;
+}
+html[data-lion-theme="dark"] .side-nav-btn:hover:not([aria-current="page"]),
+html[data-lion-theme="dark"] .side-nav-btn:focus-visible:not([aria-current="page"]),
+html[data-lion-theme="dark"] .nav-btn:hover:not([aria-current="page"]),
+html[data-lion-theme="dark"] .nav-btn:focus-visible:not([aria-current="page"]) {
+  background-color:#202C3C!important;
+  color:#F7FAFF!important;
+  border-color:#34465A!important;
+}
+html[data-lion-theme="dark"] .side-nav-btn[aria-current="page"],
+html[data-lion-theme="dark"] .nav-btn[aria-current="page"],
+html[data-lion-theme="dark"] .side-nav-btn[aria-current="page"]:hover,
+html[data-lion-theme="dark"] .nav-btn[aria-current="page"]:hover {
+  background-color:#18362F!important;
+  color:#98F5C4!important;
+  border-color:#39795E!important;
+}
+html[data-lion-theme="dark"] button[class*="hover:bg-gray-100"]:hover:not(.side-nav-btn):not(.nav-btn),
+html[data-lion-theme="dark"] button[class*="hover:bg-gray-100"]:focus-visible:not(.side-nav-btn):not(.nav-btn) {
+  background-color:#243144!important;
+  color:#F4F8FD!important;
+}
+html[data-lion-theme="dark"] button[class*="hover:bg-green-50"]:hover:not(.side-nav-btn):not(.nav-btn),
+html[data-lion-theme="dark"] button[class*="hover:bg-green-100"]:hover:not(.side-nav-btn):not(.nav-btn) {
+  background-color:#1B3A30!important;
+  color:#B8FFDA!important;
+}
+/* Card Team/Atleta: la vecchia regola #athletes-list imponeva uno sfondo bianco. */
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item {
+  background-color:#171F2D!important;
+  color:#F2F7FD!important;
+  border-color:#344253!important;
+}
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item:hover,
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item:focus-visible,
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item:focus-within {
+  background-color:#213044!important;
+  color:#FFFFFF!important;
+  border-color:#4AAE82!important;
+}
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item h5 {
+  color:#F5F9FF!important;
+}
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item p {
+  color:#AEBFD2!important;
+}
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item > span {
+  color:#81EAB2!important;
+}
+</style>
+
+<style id="lf261-premium-card-contrast">
+
+/* ==============================================================
+   LION FIT BETA 0.26.1 — Midnight Cards, contrasto migliorato
+   Esclusivamente tema scuro: il tema chiaro resta invariato.
+   ============================================================== */
+html[data-lion-theme="dark"] {
+  --lf261-card-bg:#1B2634;
+  --lf261-card-edge:#516378;
+  --lf261-card-hover:#233244;
+  --lf261-action-bg:#223044;
+  --lf261-action-edge:#53677E;
+  --lf261-emerald:#8EF1BB;
+}
+html[data-lion-theme="dark"] :is(button,a,[role="button"]):focus-visible {
+  outline:2px solid #8EF1BB!important;
+  outline-offset:3px;
+}
+
+/* Archivio schede condivise: distinguere pannello, schede e azioni. */
+html[data-lion-theme="dark"] #view-saved-tpl {
+  background:#131B28!important;
+  border:1.5px solid #445569!important;
+  box-shadow:0 14px 38px rgba(0,0,0,.22)!important;
+}
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-card {
+  background:linear-gradient(145deg,#202D3D 0%,#1A2534 100%)!important;
+  border:1.5px solid #597084!important;
+  color:#F3F8FF!important;
+  box-shadow:0 5px 15px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.035)!important;
+  transition:background .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease;
+}
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-card:hover,
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-card:focus-within {
+  background:linear-gradient(145deg,#27394A,#1D2D3D)!important;
+  border-color:#6ACDA0!important;
+  box-shadow:0 7px 19px rgba(0,0,0,.30),0 0 0 1px rgba(102,209,156,.18)!important;
+}
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-card h4 {
+  color:#FFFFFF!important;
+  font-size:15px;
+  letter-spacing:.015em;
+}
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-card p.text-gray-500 {
+  color:#AABDD1!important;
+}
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-card p.text-gray-600 {
+  color:#D3DFEB!important;
+}
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-actions {
+  border-color:#4B5D71!important;
+  gap:8px;
+}
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-action {
+  min-height:39px;
+  background:#223044!important;
+  border:1.5px solid #5B7088!important;
+  color:#F2F7FF!important;
+  border-radius:10px;
+  font-weight:800;
+  box-shadow:0 1px 3px rgba(0,0,0,.18);
+  transition:background .16s ease,border-color .16s ease,transform .16s ease;
+}
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-action:hover,
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-action:focus-visible {
+  background:#344861!important;
+  color:#FFFFFF!important;
+  border-color:#8EA9C5!important;
+}
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-action[data-lf-action="Assegna"] {
+  background:#194333!important;
+  border-color:#3E9B73!important;
+  color:#AEF5D0!important;
+}
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-action[data-lf-action="Assegna"]:hover,
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-action[data-lf-action="Assegna"]:focus-visible {
+  background:#245D47!important;
+  border-color:#83EAB4!important;
+  color:#FFFFFF!important;
+}
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-action[data-lf-action="Nel Cestino"] {
+  background:#322832!important;
+  border-color:#765766!important;
+  color:#FFC6CB!important;
+}
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-action[data-lf-action="Nel Cestino"]:hover,
+html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-action[data-lf-action="Nel Cestino"]:focus-visible {
+  background:#513441!important;
+  border-color:#D68B9A!important;
+  color:#FFF0F1!important;
+}
+/* Coerenza per altre card di gestione e pulsanti secondari. */
+html[data-lion-theme="dark"] #section-templates #view-create-tpl,
+html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
+  border-color:#506278!important;
+}
+@media (max-width:480px) {
+  html[data-lion-theme="dark"] #saved-templates-list .lf261-archive-action {flex:1 1 auto;}
+}
+
+</style>
+
+<style>
+/* LION FIT BETA 0.26.1 - Suggerimenti SMART nell'editor schede, indipendenti da datalist. */
+#lf-smart-suggestions {position:fixed;z-index:9999;display:none;box-sizing:border-box;background:#111c2c;color:#f4f8ff;border:1px solid #547164;border-radius:13px;box-shadow:0 16px 50px rgba(0,0,0,.48);overflow-y:auto;overscroll-behavior:contain;padding:5px;max-height:min(350px,55vh);font-family:inherit}
+#lf-smart-suggestions[hidden] {display:none!important}
+#lf-smart-suggestions .lf-smart-result {appearance:none;display:flex;align-items:center;width:100%;min-height:52px;padding:8px 11px;margin:0;border:0;border-radius:9px;background:transparent;color:#f4f8ff;text-align:left;cursor:pointer;gap:8px;font-size:13px;line-height:1.35}
+#lf-smart-suggestions .lf-smart-result:hover,#lf-smart-suggestions .lf-smart-result[aria-selected="true"] {background:#234537;color:#fff}
+#lf-smart-suggestions .lf-smart-result strong{display:block;font-weight:800;white-space:normal}
+#lf-smart-suggestions .lf-smart-result small{display:block;color:#bdd0c9;font-weight:500;font-size:11px;margin-top:2px;white-space:normal}
+#lf-smart-suggestions .lf-smart-rank{flex:none;min-width:25px;align-self:center;color:#b3c8bc;font-weight:800;text-align:center}
+#lf-smart-suggestions .lf-smart-top{color:#86efac}
+#lf-smart-suggestions .lf-smart-empty{font-size:12px;padding:11px;color:#d9e7df}
+</style>
 </head>
 <body class="bg-gray-50 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col md:flex-row relative overflow-x-hidden">
 
@@ -291,14 +580,13 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
     <input type="file" id="hidden-avatar-file-input" accept="image/*" class="hidden">
 
     <!-- ELENCO AUTOCOMPLETAMENTO ESERCIZI (NASCOSTO) -->
-    <datalist id="lib-exercises"></datalist>
 
     <!-- DESKTOP SIDEBAR MENU -->
     <aside class="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-white border-r border-gray-200 z-50">
         <div class="p-5 border-b border-gray-200 flex items-center gap-3">
             <div class="w-9 h-9 bg-white border border-green-100 flex items-center justify-center font-black text-base rounded-xl shadow-md overflow-hidden"><img src="LOGO-APP.png" alt="Logo Lion Fit" class="w-full h-full object-contain" onerror="this.classList.add('hidden');this.nextElementSibling.classList.remove('hidden')"><span class="hidden text-green-700" aria-hidden="true">🦁</span></div>
             <div>
-                <h1 class="text-sm font-black uppercase tracking-widest text-black">LION FIT</h1>
+                <h1 class="text-sm font-black uppercase tracking-widest text-black"><span class="lf261-brand">LION <span class="lf261-fit">FIT</span></span></h1>
                 <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Area Coach / Admin</p>
             </div>
         </div>
@@ -320,10 +608,6 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                 <span>Libreria Esercizi</span>
             </button>
-            <button type="button" id="btn-open-athletes-registry" class="side-nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider text-gray-500 hover:text-black hover:bg-gray-100 transition" title="Apri anagrafica atleti team">
-                <svg class="w-5 h-5 shrink-0" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 3v3h6V3 M8 11h8 M8 15h8"/></svg>
-                <span>Anagrafica Atleti Team</span>
-            </button>
             <button type="button" id="side-nav-trash" onclick="lf26OpenTrash()" class="side-nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider text-gray-500 hover:text-black hover:bg-gray-100 transition" title="Apri il Cestino">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
                 <span>Cestino</span>
@@ -341,7 +625,7 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
 
         <div class="p-4 border-t border-gray-200 space-y-3">
             <button data-lf-theme-toggle class="lf26-theme-btn w-full" aria-label="Cambia tema">🌙 Tema scuro</button>
-            <div class="lf26-version">LION FIT · V26.0</div>
+            <div class="lf26-version">LION FIT · BETA 0.26.1</div>
             <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-1">
                 <span class="text-[9px] font-black uppercase text-gray-500 block">Codice Invito Palestra</span>
                 <span id="side-gym-code" class="text-xs font-black text-neon tracking-widest block">Cod. ---</span>
@@ -354,7 +638,7 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
         <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 bg-white border border-green-100 flex items-center justify-center font-black text-sm rounded-xl shadow-xs overflow-hidden"><img src="LOGO-APP.png" alt="Logo Lion Fit" class="w-full h-full object-contain" onerror="this.classList.add('hidden');this.nextElementSibling.classList.remove('hidden')"><span class="hidden text-green-700" aria-hidden="true">🦁</span></div>
             <div>
-                <h1 class="text-xs font-black uppercase tracking-widest text-black truncate">LION FIT COACH</h1>
+                <h1 class="text-xs font-black uppercase tracking-widest text-black truncate"><span class="lf261-brand">LION <span class="lf261-fit">FIT</span></span> <span class="lf261-brand-role">COACH</span></h1>
                 <p class="text-[8px] font-bold text-gray-500 uppercase tracking-wider">Pannello Admin</p>
             </div>
         </div>
@@ -368,7 +652,7 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
 
         <!-- ================= SEZIONE 1: HOME / DASHBOARD ================= -->
         <section id="section-home" class="block space-y-5">
-            <div class="flex justify-end gap-2"><button type="button" onclick="lf26OpenTrash()" class="lf26-theme-btn">♻ Cestino</button><span class="lf26-version self-center">V26.0</span></div>
+            <div class="flex justify-end"><span class="lf26-version">Beta 0.26.1</span></div>
             <div class="lf14-welcome">
                 <div class="lf14-welcome-top"><span class="lf14-eyebrow">LION FIT · PANNELLO COACH</span><span class="lf14-status"><span></span> Panoramica palestra</span></div>
                 <h2>Benvenuto, <span id="welcome-coach-name">Coach</span></h2>
@@ -594,8 +878,6 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
 
         <!-- ================= SEZIONE 5: PROFILO & IMPOSTAZIONI ================= -->
         <section id="section-profile" class="hidden space-y-6 max-w-2xl mx-auto">
-          <div class="flex justify-end"><button type="button" class="lf26-theme-btn" onclick="lf26OpenTrash()">♻ Apri Cestino</button></div>
-          <div class="flex justify-end"><button type="button" class="lf26-theme-btn" onclick="lf26OpenTrash()">♻ Apri Cestino</button></div>
             <div class="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm relative">
                 <div class="h-36 sm:h-40 bg-black flex items-center justify-center relative overflow-hidden px-4">
                     <img src="LOGO-APP.png" alt="Lion Fit Logo" class="h-24 sm:h-28 object-contain opacity-95 hover:opacity-100 transition" onerror="this.src='LOGOAPP.png'">
@@ -671,7 +953,7 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
           <div class="lf26-trash-hero rounded-2xl border p-5 sm:p-6 space-y-2">
             <div class="flex flex-wrap items-center justify-between gap-3"><div><p class="text-[10px] font-black uppercase tracking-widest text-green-700">GESTIONE SICURA</p><h2 class="text-2xl font-black tracking-tight">Cestino</h2></div><button type="button" onclick="lf26LoadTrash()" class="lf26-theme-btn">↻ Aggiorna elenco</button></div>
             <p class="text-sm lf26-trash-meta">Schede condivise, schede assegnate e settimane eliminate. Puoi ripristinarle senza perdere gli esercizi e le attività.</p>
-            <p class="text-xs lf26-trash-meta">Le schede cestinate non sono più mostrate agli atleti. Le schede collegate ad altri programmi restano integre finché non vengono eliminate singolarmente.</p>
+            <p class="text-xs lf26-trash-meta">Le schede cestinate non sono più mostrate agli atleti. Se una scheda personale è collegata a una settimana, spostarla nel Cestino può rendere temporaneamente non disponibile quel collegamento. Ripristinala per riattivarlo.</p>
           </div>
           <div id="lf26-trash-list" class="grid grid-cols-1 lg:grid-cols-2 gap-3"><p class="text-sm text-gray-500">Apri il Cestino per visualizzare gli elementi eliminati.</p></div>
         </section>
@@ -711,7 +993,7 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
       </div>
       <div class="max-w-xl mx-auto">
         <p class="bg-gray-50 border-b border-gray-200 px-5 py-3 mt-3 text-xs tracking-wider font-black text-gray-500 uppercase">Personale</p>
-        <div class="lf18-settings-rows"><button type="button" id="btn-open-edit-profile-submodal"  class="w-full flex items-center justify-between gap-3 py-4 px-5 text-left border-b border-gray-100 hover:bg-gray-50 transition"><span class="flex items-center gap-3 text-sm font-bold text-gray-900 uppercase"><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9 M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z"/></svg>Modifica profilo</span><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></div><div class="md:hidden px-5 pt-3"><button type="button" id="btn-open-athletes-registry-mobile" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-left flex gap-3 items-center font-bold text-xs uppercase text-gray-800"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 3v3h6V3 M8 11h8 M8 15h8"/></svg>Anagrafica Atleti Team</button></div><p class="bg-gray-50 border-y border-gray-200 px-5 py-3 mt-4 text-xs tracking-wider font-black text-gray-500 uppercase">Informazioni</p><div class="lf18-settings-rows"><button type="button"  onclick="toggleModal('settings-modal'); toggleModal('feedback-modal');" class="w-full flex items-center justify-between gap-3 py-4 px-5 text-left border-b border-gray-100 hover:bg-gray-50 transition"><span class="flex items-center gap-3 text-sm font-bold text-gray-900 uppercase"><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8A8.5 8.5 0 0 1 12.5 20a8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8A8.5 8.5 0 0 1 12.5 3h.5a8.5 8.5 0 0 1 8 8v.5Z"/></svg>Assistenza & feedback</span><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button><button type="button"  onclick="window.location.href='policy.html'" class="w-full flex items-center justify-between gap-3 py-4 px-5 text-left border-b border-gray-100 hover:bg-gray-50 transition"><span class="flex items-center gap-3 text-sm font-bold text-gray-900 uppercase"><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V7a7 7 0 0 1 14 0v4 M5 11h14v10H5z"/></svg>Informativa sulla privacy</span><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button><button type="button"  onclick="window.location.href='note-legali.html'" class="w-full flex items-center justify-between gap-3 py-4 px-5 text-left border-b border-gray-100 hover:bg-gray-50 transition"><span class="flex items-center gap-3 text-sm font-bold text-gray-900 uppercase"><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z M14 2v6h6 M9 13h8 M9 17h8"/></svg>Termini e condizioni</span><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></div><div class="p-5 mt-7"><button id="btn-logout" class="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-xl p-4 flex justify-between items-center font-black uppercase text-sm">Esci dall'account <span aria-hidden="true">⇥</span></button></div>
+        <div class="lf18-settings-rows"><button type="button" id="btn-open-edit-profile-submodal"  class="w-full flex items-center justify-between gap-3 py-4 px-5 text-left border-b border-gray-100 hover:bg-gray-50 transition"><span class="flex items-center gap-3 text-sm font-bold text-gray-900 uppercase"><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9 M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5Z"/></svg>Modifica profilo</span><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></div><p class="bg-gray-50 border-y border-gray-200 px-5 py-3 mt-4 text-xs tracking-wider font-black text-gray-500 uppercase">Informazioni</p><div class="lf18-settings-rows"><button type="button"  onclick="toggleModal('settings-modal'); toggleModal('feedback-modal');" class="w-full flex items-center justify-between gap-3 py-4 px-5 text-left border-b border-gray-100 hover:bg-gray-50 transition"><span class="flex items-center gap-3 text-sm font-bold text-gray-900 uppercase"><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8A8.5 8.5 0 0 1 12.5 20a8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8A8.5 8.5 0 0 1 12.5 3h.5a8.5 8.5 0 0 1 8 8v.5Z"/></svg>Assistenza & feedback</span><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button><button type="button"  onclick="window.location.href='policy.html'" class="w-full flex items-center justify-between gap-3 py-4 px-5 text-left border-b border-gray-100 hover:bg-gray-50 transition"><span class="flex items-center gap-3 text-sm font-bold text-gray-900 uppercase"><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11V7a7 7 0 0 1 14 0v4 M5 11h14v10H5z"/></svg>Informativa sulla privacy</span><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button><button type="button"  onclick="window.location.href='note-legali.html'" class="w-full flex items-center justify-between gap-3 py-4 px-5 text-left border-b border-gray-100 hover:bg-gray-50 transition"><span class="flex items-center gap-3 text-sm font-bold text-gray-900 uppercase"><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z M14 2v6h6 M9 13h8 M9 17h8"/></svg>Termini e condizioni</span><svg aria-hidden="true" class="w-5 h-5 text-gray-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button></div><div class="p-5 mt-7"><button id="btn-logout" class="w-full bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-xl p-4 flex justify-between items-center font-black uppercase text-sm">Esci dall'account <span aria-hidden="true">⇥</span></button></div>
       </div>
     </div>
 
@@ -855,20 +1137,6 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
         </div>
     </div>
 
-    <!-- MODAL ANAGRAFICA ATLETI -->
-    <div id="registry-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white border border-gray-200 text-black w-full max-w-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center border-b border-gray-100 pb-2 sm:pb-3">
-                <h3 class="font-black text-xs sm:text-sm uppercase tracking-widest text-black"><svg class="lf-mono-icon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2 M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2 M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2 M9 13h6 M9 17h6"/></svg> Anagrafica Atleti</h3>
-                <button type="button" onclick="toggleModal('registry-modal')" class="text-gray-400 hover:text-black p-1">✕</button>
-            </div>
-            <input type="text" id="registry-search" placeholder="Cerca atleta per nome o email..." class="bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl p-2.5 sm:p-3 text-[10px] sm:text-xs font-bold text-black outline-none focus:border-neon shrink-0">
-            <div id="registry-list-container" class="space-y-2 sm:space-y-3 overflow-y-auto flex-grow pr-1">
-                <p class="text-[10px] font-bold text-gray-400 uppercase text-center py-6">Caricamento anagrafiche...</p>
-            </div>
-        </div>
-    </div>
-
     <!-- MODAL SELEZIONE SCHEDA ESISTENTE -->
     <div id="gym-workout-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-gray-200 text-black w-full max-w-lg rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
@@ -914,9 +1182,9 @@ Martedì	Forza	...
     <div id="lf-bulk-delete-modal" class="fixed inset-0 bg-black/60 z-[90] hidden flex items-center justify-center p-4">
       <div class="bg-white w-full max-w-md rounded-3xl p-5 space-y-4 max-h-[85dvh] overflow-y-auto">
         <h3 class="font-black text-lg">Elimina più settimane</h3>
-        <p class="text-xs text-gray-600">Seleziona le settimane da cancellare. Non saranno recuperabili dall'app.</p>
+        <p class="text-xs text-gray-600">Seleziona le settimane da spostare nel Cestino. Potrai ripristinarle.</p>
         <div id="lf-bulk-week-list" class="space-y-2"></div>
-        <div class="flex gap-2"><button id="lf-cancel-bulk-delete" class="flex-1 py-3 bg-gray-100 rounded-xl font-bold text-xs">Annulla</button><button id="lf-confirm-bulk-delete" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold text-xs">Elimina selezionate</button></div>
+        <div class="flex gap-2"><button id="lf-cancel-bulk-delete" class="flex-1 py-3 bg-gray-100 rounded-xl font-bold text-xs">Annulla</button><button id="lf-confirm-bulk-delete" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold text-xs">Sposta nel Cestino</button></div>
       </div>
     </div>
 
@@ -1080,14 +1348,18 @@ Martedì	Forza	...
         let allAthletes = [];
         let selectedAthlete = null;
         let gymTemplates = [];
-        // V26.0: soft delete, conservazione dati, ripristino solo coach.
+        // Beta 0.26.1: Cestino recuperabile, cancellazione definitiva riservata al titolare anche nelle regole Firestore.
         async function lf26MoveToTrash(reference) {
             if(!currentGymId || !currentUserUid) throw new Error('Sessione non valida.');
+            const existing=await getDoc(reference);
+            if(!existing.exists()) throw new Error('Elemento non trovato. Ricarica l’elenco.');
+            if(existing.data().deletedAt) throw new Error('Elemento già presente nel Cestino.');
             await updateDoc(reference,{deletedAt:serverTimestamp(),deletedBy:currentUserUid});
         }
         window.lf26OpenTrash = async function(){
             if(lfWeekDirty && !confirm('Hai modifiche non salvate. Aprire comunque il Cestino?')) return;
-            showSection('trash');await lf26LoadTrash();
+            showSection('trash');
+            try { await lf26LoadTrash(); } catch(e) { console.error('Caricamento Cestino',e);showAlert('Impossibile aprire il Cestino: '+(e.code||e.message),'Errore'); }
         };
         window.lf26LoadTrash = async function(){
             const host=document.getElementById('lf26-trash-list');
@@ -1129,12 +1401,29 @@ Martedì	Forza	...
                   catch(err){restore.disabled=false;showAlert('Ripristino non riuscito: '+(err.code||err.message),'Errore');}};
                 const purge=document.createElement('button');purge.type='button';purge.className='lf26-theme-btn';purge.textContent='Elimina definitivamente';purge.style.color='#e87c89';
                 purge.onclick=async()=>{
-                    if(lf23CurrentRole!=='owner'){showAlert('Solo il titolare può usare la cancellazione definitiva da questa schermata.','Accesso riservato');return;}
-                    const answer=prompt('Eliminazione irreversibile di «'+item.title+'». Digita ELIMINA per confermare.');
-                    if(answer!=='ELIMINA')return;
+                    if(lf23CurrentRole!=='owner'){
+                        showAlert('Solo il titolare può eliminare definitivamente.','Accesso riservato'); return;
+                    }
                     purge.disabled=true;
-                    try{await deleteDoc(item.ref);await lf26LoadTrash();}
-                    catch(err){purge.disabled=false;showAlert('Eliminazione definitiva non riuscita: '+(err.code||err.message),'Errore');}
+                    try {
+                        const latest=await getDoc(item.ref);
+                        if(!latest.exists() || !latest.data().deletedAt){
+                            showAlert('L’elemento non è più nel Cestino. Aggiorno l’elenco.','Verifica necessaria');
+                            await lf26LoadTrash();return;
+                        }
+                        const answer=prompt('Eliminazione irreversibile di «'+item.title+'». Digita ELIMINA per confermare.');
+                        if(answer!=='ELIMINA')return;
+                        await deleteDoc(item.ref);
+                        await lf26LoadTrash();
+                        await loadTemplates();
+                        await loadDashboardStats();
+                        if(selectedAthlete?.id===item.athleteId){
+                            await loadAthleteWeeksProgram(); await loadAthletePersonalTemplates();
+                        }
+                    }catch(err){
+                        console.error('Eliminazione definitiva',err);
+                        showAlert('Eliminazione definitiva non riuscita: '+(err.code||err.message),'Errore');
+                    }finally{purge.disabled=false;}
                 };
                 actions.append(restore);if(lf23CurrentRole==='owner')actions.append(purge);card.append(badge,title,when,actions);host.appendChild(card);
             });
@@ -1278,12 +1567,25 @@ Martedì	Forza	...
             if (owner) await lf23LoadInvites();
             await lf24LoadAthleteInvites();
         }
+        // La UI mostra soltanto inviti validi: link già consumati/revocati spariscono anche dal riquadro copia.
+        function lf261CleanInvitePreview(allInvites,linkInputId,resultId,tokenQueryKey){
+            const field=document.getElementById(linkInputId);
+            const preview=document.getElementById(resultId);
+            if(!field?.value || !preview)return;
+            try{
+                const token=new URL(field.value,location.href).searchParams.get(tokenQueryKey);
+                const active=allInvites.some(inv=>inv.id===token && inv.status==='pending' &&
+                    (!inv.expiresAt?.toDate || inv.expiresAt.toDate().getTime()>Date.now()));
+                if(!active){field.value='';preview.classList.add('hidden');}
+            }catch(_){field.value='';preview.classList.add('hidden');}
+        }
         async function lf23LoadInvites() {
             const list=document.getElementById('lf23-invites-list');
             list.textContent='Caricamento...';
             const snapshot=await getDocs(collection(db,'gyms',currentGymId,'coach_invites'));
             const data=snapshot.docs.map(d=>({id:d.id,...d.data()}))
                 .filter(inv=>inv.status==='pending' && (!inv.expiresAt?.toDate || inv.expiresAt.toDate().getTime()>Date.now())); // Solo link utilizzabili; gli altri restano nel database.
+            lf261CleanInvitePreview(snapshot.docs.map(d=>({id:d.id,...d.data()})), 'lf23-invite-link', 'lf23-invite-result','coachInvite');
             data.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
             list.replaceChildren();
             if(!data.length) list.textContent='Nessun invito da visualizzare.';
@@ -1358,6 +1660,7 @@ Martedì	Forza	...
                 const items=snapshot.docs.map(d=>({id:d.id,...d.data()}))
                     .filter(inv=>inv.status==='pending' && (!inv.expiresAt?.toDate || inv.expiresAt.toDate().getTime()>Date.now())) // Solo inviti utilizzabili, senza eliminare i token dal database.
                     .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,12);
+                lf261CleanInvitePreview(snapshot.docs.map(d=>({id:d.id,...d.data()})), 'lf24-athlete-invite-link', 'lf24-athlete-invite-result','athleteInvite');
                 root.replaceChildren();
                 if(!items.length)root.textContent='Nessun invito da visualizzare.';
                 for(const inv of items){
@@ -1894,8 +2197,8 @@ Martedì	Forza	...
         window.deleteCurrentWeek = async function(weekDocId) {
             if (!selectedAthlete || !currentGymId) return;
             showConfirm("Spostare questa settimana nel Cestino? Potrai ripristinarla.", async () => {
-                await lf26MoveToTrash(doc(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "weeks", weekDocId));
-                await loadAthleteWeeksProgram();
+                try {await lf26MoveToTrash(doc(db, 'gyms', currentGymId, 'athlete_programs', selectedAthlete.id, 'weeks', weekDocId));await loadAthleteWeeksProgram();}
+                catch(err){showAlert('Impossibile spostare la settimana nel Cestino: '+(err.code||err.message),'Errore');}
             });
         }
 
@@ -1978,15 +2281,149 @@ Martedì	Forza	...
             showAlert('Tabella inserita. Controlla le attività e premi Salva nella settimana per confermare.','Importazione pronta');
         });
 
-        function updateExercisesDatalist() {
-            const dl = document.getElementById('lib-exercises');
-            dl.innerHTML = '';
-            catalogExercises.forEach(ex => {
-                const opt = document.createElement('option');
-                opt.value = ex.name_it || ex.name;
-                dl.appendChild(opt);
-                if (ex.name_it) { const enOption = document.createElement('option'); enOption.value = ex.name; dl.appendChild(enOption); }
+        // Ricerca SMART anche nell'editor schede (non solo nella Libreria).
+        // Il datalist nativo ordinava alfabeticamente "archer push up" prima di "push up".
+        // Un unico menu non tagliato dai contenitori scrollabili/finestre modali.
+        const lionSmartSuggest = {input:null, items:[], active:0, menu:null, timer:null};
+        function lionHideSmartSuggestions() {
+            clearTimeout(lionSmartSuggest.timer);
+            if (lionSmartSuggest.menu) {
+                lionSmartSuggest.menu.hidden=true;
+                lionSmartSuggest.menu.style.display='none';
+            }
+            if (lionSmartSuggest.input) {
+                lionSmartSuggest.input.setAttribute('aria-expanded','false');
+                lionSmartSuggest.input.removeAttribute('aria-activedescendant');
+            }
+            lionSmartSuggest.input=null;
+            lionSmartSuggest.items=[];
+        }
+        function lionPositionSmartSuggestions() {
+            const state=lionSmartSuggest, input=state.input, menu=state.menu;
+            if (!input || !input.isConnected || !menu || menu.hidden) return;
+            const rect=input.getBoundingClientRect();
+            if (rect.bottom<0 || rect.top>window.innerHeight) {lionHideSmartSuggestions();return;}
+            const width=Math.min(window.innerWidth-20,Math.max(360,rect.width));
+            menu.style.width=Math.max(210,width)+'px';
+            menu.style.left=Math.max(10,Math.min(rect.left,window.innerWidth-width-10))+'px';
+            const below=window.innerHeight-rect.bottom-12;
+            const above=rect.top-12;
+            const showAbove=below<180 && above>below;
+            const maxHeight=Math.max(90,Math.min(320,showAbove?above:below));
+            menu.style.maxHeight=maxHeight+'px';
+            if (showAbove) {
+                menu.style.top=Math.max(8,rect.top-Math.min(maxHeight,menu.scrollHeight)-5)+'px';
+            } else {
+                menu.style.top=Math.max(8,rect.bottom+5)+'px';
+            }
+        }
+        function lionEnsureSmartMenu() {
+            if (lionSmartSuggest.menu) return lionSmartSuggest.menu;
+            const menu=document.createElement('div');
+            menu.id='lf-smart-suggestions';menu.setAttribute('role','listbox');
+            menu.setAttribute('aria-label','Esercizi suggeriti');
+            menu.hidden=true;
+            document.body.appendChild(menu);
+            // Previene la perdita di focus prima del click (desktop e Android).
+            menu.addEventListener('pointerdown',event=>event.preventDefault());
+            document.addEventListener('pointerdown',event=>{
+                if (lionSmartSuggest.input && !menu.contains(event.target) && event.target!==lionSmartSuggest.input)
+                    lionHideSmartSuggestions();
             });
+            window.addEventListener('resize',lionPositionSmartSuggestions);
+            window.addEventListener('scroll',lionPositionSmartSuggestions,true);
+            lionSmartSuggest.menu=menu;
+            return menu;
+        }
+        function lionSetSmartActive(next) {
+            const state=lionSmartSuggest, menu=state.menu;
+            if (!state.items.length || !menu) return;
+            state.active=(next+state.items.length)%state.items.length;
+            [...menu.querySelectorAll('.lf-smart-result')].forEach((button,i)=>{
+                button.setAttribute('aria-selected',String(i===state.active));
+                if (i===state.active){state.input?.setAttribute('aria-activedescendant',button.id);button.scrollIntoView({block:'nearest'});}
+            });
+        }
+        function lionChooseSmartExercise(index) {
+            const state=lionSmartSuggest, input=state.input, ex=state.items[index];
+            if (!input || !ex) return;
+            input.value=ex.name_it || ex.name;
+            input.dataset.lionSelectedId=String(ex.id);
+            input.dataset.lionSelectedValue=input.value;
+            lionHideSmartSuggestions();
+            input.dispatchEvent(new Event('change',{bubbles:true}));
+            input.focus({preventScroll:true});
+        }
+        function lionShowSmartSuggestions(input) {
+            const menu=lionEnsureSmartMenu(), state=lionSmartSuggest;
+            clearTimeout(state.timer);
+            if (!input.isConnected || lionExerciseKey(input.value).length<2 || !catalogExercises.length) {
+                lionHideSmartSuggestions();return;
+            }
+            state.input=input;
+            state.items=lionLibrarySearch(input.value,'').slice(0,9);
+            state.active=0;
+            menu.textContent='';
+            if (!state.items.length) {
+                const empty=document.createElement('div');empty.className='lf-smart-empty';
+                empty.textContent='Nessun esercizio del catalogo trovato. Puoi comunque scriverne uno personalizzato.';
+                menu.appendChild(empty);
+            }
+            state.items.forEach((ex,i)=>{
+                const option=document.createElement('button');option.type='button';
+                option.className='lf-smart-result';option.setAttribute('role','option');
+                option.setAttribute('aria-selected',String(i===0));
+                option.id='lf-smart-option-'+i;
+                const rank=document.createElement('span');rank.className='lf-smart-rank'+(i===0?' lf-smart-top':'');
+                rank.textContent=i===0?'★':String(i+1);
+                const names=document.createElement('span');names.style.minWidth='0';
+                const title=document.createElement('strong');title.textContent=ex.name || ex.name_it || '';
+                const details=document.createElement('small');
+                details.textContent=(ex.name_it && lionExerciseKey(ex.name_it)!==lionExerciseKey(ex.name)?ex.name_it+' · ':'')+'ID '+String(ex.id)+(i===0?' · Miglior risultato':'');
+                names.append(title,details);option.append(rank,names);
+                option.addEventListener('pointerenter',()=>lionSetSmartActive(i));
+                option.addEventListener('click',()=>lionChooseSmartExercise(i));
+                menu.appendChild(option);
+            });
+            menu.hidden=false;menu.style.display='block';
+            input.setAttribute('aria-expanded','true');
+            input.setAttribute('aria-controls',menu.id);
+            if (state.items.length) input.setAttribute('aria-activedescendant','lf-smart-option-0');
+            lionPositionSmartSuggestions();
+        }
+        function lionAttachSmartSuggestions(input) {
+            input.setAttribute('role','combobox');
+            input.setAttribute('aria-autocomplete','list');
+            input.setAttribute('aria-expanded','false');
+            input.addEventListener('input',()=>{
+                delete input.dataset.lionSelectedId;
+                delete input.dataset.lionSelectedValue;
+                clearTimeout(lionSmartSuggest.timer);
+                lionSmartSuggest.timer=setTimeout(()=>lionShowSmartSuggestions(input),95);
+            });
+            input.addEventListener('focus',()=>{if(input.value.trim())lionShowSmartSuggestions(input);});
+            input.addEventListener('keydown',event=>{
+                const state=lionSmartSuggest;
+                if (state.input!==input || !state.menu || state.menu.hidden) {
+                    if (event.key==='ArrowDown' && input.value.trim()){
+                        event.preventDefault();lionShowSmartSuggestions(input);
+                    }
+                    return;
+                }
+                if (event.key==='ArrowDown' || event.key==='ArrowUp') {
+                    event.preventDefault();lionSetSmartActive(state.active+(event.key==='ArrowDown'?1:-1));
+                } else if (event.key==='Enter' && state.items.length) {
+                    event.preventDefault();lionChooseSmartExercise(state.active);
+                } else if (event.key==='Escape' || event.key==='Tab') {
+                    lionHideSmartSuggestions();
+                }
+            });
+        }
+        function lionExerciseRowId(row) {
+            const input=row.querySelector('.ex-name');
+            const id=input?.dataset.lionSelectedId;
+            if (id && input.dataset.lionSelectedValue===input.value) return id;
+            return lionFindExercise(input?.value.trim())?.id || null;
         }
 
         function addExerciseRowToContainerWithValues(container, exData = null) {
@@ -1996,7 +2433,7 @@ Martedì	Forza	...
             div.innerHTML = `
                 <div class="lf14-exhead"><strong>ESERCIZIO <span class="lf14-exindex"></span></strong><span class="lf14-exbadge">Scheda allenamento</span></div>
                 <div class="lf14-row-top">
-                    <label>Nome esercizio<input type="text" list="lib-exercises" placeholder="Cerca in italiano o inglese" value="${esc(exData?.name)}" required class="ex-name" autocomplete="off"></label>
+                    <label>Nome esercizio<input type="text" placeholder="Cerca in italiano o inglese" value="${esc(exData?.name)}" required class="ex-name" autocomplete="off"></label>
                     <label>Serie<input type="text" placeholder="4" value="${esc(exData?.sets)}" required class="ex-sets"></label>
                     <label>Ripetizioni<input type="text" placeholder="10" value="${esc(exData?.reps)}" required class="ex-reps"></label>
                 </div>
@@ -2010,8 +2447,13 @@ Martedì	Forza	...
             const refreshIndexes = () => container.querySelectorAll('.lf14-exindex').forEach((node,i)=>node.textContent=String(i+1).padStart(2,'0'));
             const preview = div.querySelector('.lf14-exmatch');
             const input = div.querySelector('.ex-name');
+            if (exData?.exerciseId && exData?.name) {
+                input.dataset.lionSelectedId=String(exData.exerciseId);
+                input.dataset.lionSelectedValue=String(exData.name);
+            }
+            lionAttachSmartSuggestions(input);
             const updatePreview = () => {
-                const exercise = lionFindExercise(input.value.trim(), exData?.exerciseId && input.value.trim()===exData?.name ? exData.exerciseId : null);
+                const exercise = lionFindExercise(input.value.trim(), lionExerciseRowId(div));
                 if (!exercise) { preview.hidden = true; return; }
                 preview.hidden = false;
                 preview.querySelector('strong').textContent = exercise.name_it || exercise.name || '';
@@ -2052,7 +2494,7 @@ Martedì	Forza	...
             const title = document.getElementById('custom-tpl-title').value.trim();
             const exercises = Array.from(customExContainer.querySelectorAll('.ex-row')).map(row => ({
                 name: row.querySelector('.ex-name').value.trim(),
-                exerciseId: lionFindExercise(row.querySelector('.ex-name').value.trim())?.id || null,
+                exerciseId: lionExerciseRowId(row),
                 sets: row.querySelector('.ex-sets').value.trim(),
                 reps: row.querySelector('.ex-reps').value.trim(),
                 load: row.querySelector('.ex-load').value.trim(),
@@ -2169,8 +2611,8 @@ Martedì	Forza	...
                 del.textContent = 'Elimina';
                 del.addEventListener('click', () => {
                     showConfirm(`Spostare "${tpl.title}" nel Cestino?`, async () => {
-                        await lf26MoveToTrash(doc(db, 'gyms', currentGymId, 'athlete_programs', selectedAthlete.id, 'personal_templates', tpl.id));
-                        loadAthletePersonalTemplates();
+                        try {await lf26MoveToTrash(doc(db, 'gyms', currentGymId, 'athlete_programs', selectedAthlete.id, 'personal_templates', tpl.id));await loadAthletePersonalTemplates();}
+                        catch(err){showAlert('Impossibile spostare la scheda nel Cestino: '+(err.code||err.message),'Errore');}
                     });
                 });
                 actions.append(share, del);
@@ -2198,7 +2640,7 @@ Martedì	Forza	...
             const container = document.getElementById('edit-exercises-container');
             const exercises = Array.from(container.querySelectorAll('.ex-row')).map(row => ({
                 name: row.querySelector('.ex-name').value.trim(),
-                exerciseId: lionFindExercise(row.querySelector('.ex-name').value.trim())?.id || null,
+                exerciseId: lionExerciseRowId(row),
                 sets: row.querySelector('.ex-sets').value.trim(),
                 reps: row.querySelector('.ex-reps').value.trim(),
                 load: row.querySelector('.ex-load').value.trim(),
@@ -2427,7 +2869,7 @@ Martedì	Forza	...
             const title = document.getElementById('tpl-title').value.trim();
             const exercises = Array.from(exercisesContainer.querySelectorAll('.ex-row')).map(row => ({
                 name: row.querySelector('.ex-name').value.trim(),
-                exerciseId: lionFindExercise(row.querySelector('.ex-name').value.trim())?.id || null,
+                exerciseId: lionExerciseRowId(row),
                 sets: row.querySelector('.ex-sets').value.trim(),
                 reps: row.querySelector('.ex-reps').value.trim(),
                 load: row.querySelector('.ex-load').value.trim(),
@@ -2481,7 +2923,7 @@ Martedì	Forza	...
         document.getElementById('lf17-archive-sort').addEventListener('change', e => { lf17ArchiveSort = e.target.value; lf17RenderArchive(); });
         function lf17Btn(label, iconName, action, cls='') {
             const b=document.createElement('button'); b.type='button';
-            b.className='inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white hover:bg-green-50 px-3 py-2 text-xs font-bold text-gray-900 transition '+cls;
+            b.className='lf261-archive-action inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white hover:bg-green-50 px-3 py-2 text-xs font-bold text-gray-900 transition '+cls; b.dataset.lfAction=label;
             b.setAttribute('aria-label',label);
             b.textContent=label; b.addEventListener('click',action); return b;
         }
@@ -2502,7 +2944,7 @@ Martedì	Forza	...
                 list.appendChild(empty);return;
             }
             rows.forEach(tpl=>{
-                const card=document.createElement('article');card.className='bg-gray-50 border border-gray-300 rounded-2xl p-3 sm:p-4 space-y-3 hover:border-green-500 transition';
+                const card=document.createElement('article');card.className='lf261-archive-card bg-gray-50 border border-gray-300 rounded-2xl p-3 sm:p-4 space-y-3 hover:border-green-500 transition';
                 const header=document.createElement('div');header.className='flex justify-between items-start gap-3';
                 const info=document.createElement('div');info.className='min-w-0';
                 const title=document.createElement('h4');title.className='text-sm font-black text-gray-900 break-words'; title.textContent=tpl.title||'Scheda senza nome';
@@ -2510,7 +2952,7 @@ Martedì	Forza	...
                 info.append(title,meta);header.appendChild(info);card.appendChild(header);
                 const preview=document.createElement('p');preview.className='text-xs text-gray-600 line-clamp-2';
                 preview.textContent=(tpl.exercises||[]).slice(0,3).map(ex=>ex.name).join(' · ')||'Nessun esercizio';card.appendChild(preview);
-                const actions=document.createElement('div');actions.className='flex flex-wrap gap-2 pt-2 border-t border-gray-200';
+                const actions=document.createElement('div');actions.className='lf261-archive-actions flex flex-wrap gap-2 pt-2 border-t border-gray-200';
                 actions.append(
                     lf17Btn('Visualizza','eye',()=>openViewTemplateModal(tpl,'global')),
                     lf17Btn('Modifica','pencil',()=>lf17OpenEdit(tpl)),
@@ -2840,7 +3282,7 @@ Martedì	Forza	...
                 catalogExercises = (Array.isArray(data) ? data : (data.exercises || [])).map(lionEnrich);
 
                 document.getElementById('lib-count-badge').textContent = `${catalogExercises.length} Esercizi`;
-                updateExercisesDatalist();
+                // Il menu intelligente usa il catalogo gia caricato (non datalist).
                 renderAdminLibraryGrid(catalogExercises);
                 document.querySelectorAll('.lf14-exrow .ex-name').forEach(el => { if (el.value.trim()) el.dispatchEvent(new Event('change')); });
             } catch(e) {
@@ -2849,43 +3291,109 @@ Martedì	Forza	...
             }
         }
 
-        // LION FIT V11: ricerca bilingue con ranking, senza cambiare gli ID degli SVG.
-        // Questo ranking e' SOLO per l'elenco dei risultati; non associa automaticamente esercizi alle schede.
+        // LION FIT BETA 0.26.1 - Ricerca intelligente PLUS (solo catalogo locale).
+        // Graduatoria: nome esatto EN > nome IT > sinonimo; varianti e tolleranza errori
+        // sono sempre secondarie. Non cambia ID, schede, SVG o dati Firebase.
         function lionLibrarySearch(term, muscle) {
-            const query = lionExerciseKey(term);
-            const translated = query ? lionTranslateName(term) : '';
-            const queries = [...new Set([query, translated].filter(Boolean))];
+            const key = lionExerciseKey(term);
             const matchesMuscle = ex => !muscle ||
                 (ex.bodyPart || '').toLowerCase().includes(muscle) ||
                 (ex.target || '').toLowerCase().includes(muscle);
-            if (!query) return catalogExercises.filter(matchesMuscle);
-            const scored = [];
-            for (const ex of catalogExercises) {
-                if (!matchesMuscle(ex)) continue;
-                const names = ex._lfSearchNames || [lionExerciseKey(ex.name)];
-                let score = 0;
-                for (const q of queries) {
-                    if (q.length < 2) continue;
-                    for (const name of names) {
-                        if (!name) continue;
-                        if (name === q) score = Math.max(score, 100);
-                        else if (name.startsWith(q + ' ')) score = Math.max(score, 92);
-                        else if (name.includes(q)) score = Math.max(score, 82);
-                        else {
-                            const parts = q.split(' ').filter(Boolean);
-                            if (parts.length > 1 && parts.every(part => name.split(' ').some(word => word.startsWith(part)))) score = Math.max(score, 74);
-                            // Piccoli errori di battitura: proponi risultati, non collegamenti automatici.
-                            if (q.length >= 5 && Math.abs(name.length - q.length) <= 8) {
-                                const similar = lionExerciseSimilarity(q, name);
-                                if (similar >= 0.82) score = Math.max(score, Math.round(similar * 68));
-                            }
-                        }
+            if (!key) return catalogExercises.filter(matchesMuscle);
+
+            // "pushups", "push ups", "push-up" sono lo stesso intento.
+            const wordForms = value => value
+                .replace(/\bpushups?\b/g, 'push up')
+                .replace(/\bpullups?\b/g, 'pull up')
+                .replace(/\b(push|pull) ups\b/g, '$1 up')
+                .replace(/\bsitups?\b/g, 'sit up');
+            const direct = wordForms(key);
+            const english = wordForms(lionTranslateName(direct));
+            const queries = [{value:direct,primary:true}];
+            if (english && english !== direct) queries.push({value:english,primary:false});
+            // In caso di errori nella digitazione valutiamo forme normalizzate, ma con
+            // un punteggio inferiore alle corrispondenze esatte.
+            const oneEdit = (a,b) => {
+                if (a===b) return true;
+                if (Math.abs(a.length-b.length)>1) return false;
+                if (a.length===b.length) {
+                    let diffs=[];
+                    for(let i=0;i<a.length;i++) if(a[i]!==b[i]) diffs.push(i);
+                    if(diffs.length===1) return true;
+                    if(diffs.length===2 && diffs[1]===diffs[0]+1 &&
+                       a[diffs[0]]===b[diffs[1]] && a[diffs[1]]===b[diffs[0]]) return true;
+                    return false;
+                }
+                const longer=a.length>b.length?a:b, shorter=a.length>b.length?b:a;
+                let i=0,j=0,skipped=false;
+                while(i<longer.length && j<shorter.length) {
+                    if(longer[i]===shorter[j]){i++;j++;}
+                    else if(skipped) return false;
+                    else {skipped=true;i++;}
+                }
+                return true;
+            };
+            const tokenMatch = (word, candidate) => word===candidate ||
+                (word.length>=3 && candidate.startsWith(word)) ||
+                (word.length>=4 && candidate.length>=4 && oneEdit(word,candidate)) ||
+                (word.length===2 && candidate.length===2 && word[0]===candidate[1] && word[1]===candidate[0]);
+            const smartScore = (q,name) => {
+                if (!name || q===name) return 0;
+                if (name.startsWith(q+' ')) return 1120 - Math.min(180,name.length-q.length);
+                if (name.startsWith(q)) return 1040 - Math.min(160,name.length-q.length);
+                if ((' '+name+' ').includes(' '+q+' ')) return 860 - Math.min(130,name.length-q.length);
+                const want=q.split(' ').filter(Boolean), got=name.split(' ').filter(Boolean);
+                if (want.length===0) return 0;
+                let exact=0,near=0;
+                // Ogni parola di ricerca deve corrispondere a una parola diversa del nome.
+                const used=new Set();
+                for (const w of want) {
+                    let best=-1,quality=0;
+                    for(let i=0;i<got.length;i++){
+                        if (used.has(i)) continue;
+                        const candidate=got[i];
+                        const level=w===candidate?3:(w.length>=3 && candidate.startsWith(w)?2:(tokenMatch(w,candidate)?1:0));
+                        if (level>quality){best=i;quality=level;if(level===3)break;}
+                    }
+                    if(best<0 || quality===0) return 0;
+                    used.add(best);
+                    if(quality===3) exact++;
+                    else if(quality===1) near++;
+                }
+                // Tutte le parole presenti, anche se in ordine invertito.
+                // Gli errori di digitazione ricevono una penalita' consistente.
+                const extras=Math.max(0,got.length-want.length);
+                return Math.max(410,790-45*extras-95*near-18*(want.length-exact-near));
+            };
+            const found=new Map();
+            for(const ex of catalogExercises){
+                if(!matchesMuscle(ex))continue;
+                const canonical=lionExerciseKey(ex.name);
+                const italian=lionExerciseKey(ex.name_it);
+                const aliases=(Array.isArray(ex.aliases_it)?ex.aliases_it:[]).map(lionExerciseKey).filter(Boolean);
+                const fields=[{name:wordForms(canonical),weight:40,type:'en'},
+                    {name:wordForms(italian),weight:25,type:'it'},
+                    ...aliases.map(name=>({name:wordForms(name),weight:10,type:'alias'}))];
+                let score=0;
+                for(const {value:q,primary} of queries){
+                    if(q.length<2)continue;
+                    const bonus=primary?25:0;
+                    for(const field of fields){
+                        if(!field.name)continue;
+                        let next=field.name===q ? 1500+field.weight+bonus : smartScore(q,field.name)+field.weight/5+bonus;
+                        if(next>score)score=next;
                     }
                 }
-                if (score > 0) scored.push({ex,score});
+                if(score<400)continue;
+                const id=String(ex.id ?? canonical+'|'+italian);
+                const previous=found.get(id);
+                if(!previous || score>previous.score)found.set(id,{ex,score,canonical});
             }
-            scored.sort((a,b) => b.score-a.score || String(a.ex.name).localeCompare(String(b.ex.name)));
-            return scored.map(item => item.ex);
+            return [...found.values()].sort((a,b)=>b.score-a.score ||
+                a.canonical.length-b.canonical.length ||
+                a.canonical.localeCompare(b.canonical,'en') ||
+                String(a.ex.id).localeCompare(String(b.ex.id)))
+                .map(item=>item.ex);
         }
 
         function renderAdminLibraryGrid(list, visibleCount=100) {
@@ -2895,7 +3403,7 @@ Martedì	Forza	...
                 container.innerHTML = '<p class="text-[10px] sm:text-xs text-gray-400 uppercase text-center col-span-4 py-8">Nessun esercizio trovato.</p>';
                 return;
             }
-            list.slice(0,visibleCount).forEach(ex => {
+            list.slice(0,visibleCount).forEach((ex, index) => {
                 const card = document.createElement('div');
                 card.className = "bg-white border border-gray-200 p-2 sm:p-3 rounded-xl sm:rounded-2xl flex flex-col justify-between space-y-1.5 sm:space-y-2 shadow-2xs";
                 const previewBox = document.createElement('div');
@@ -2923,6 +3431,13 @@ Martedì	Forza	...
                 card.setAttribute('aria-label', 'Apri esercizio: ' + (ex.name_it || ex.name));
                 card.addEventListener('click', () => lf15OpenExercise(ex));
                 card.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); lf15OpenExercise(ex); } });
+                // La persona vede subito il risultato principale prima delle varianti.
+                if (index === 0 && lionExerciseKey(document.getElementById('lib-search')?.value)) {
+                    const primaryBadge = document.createElement('span');
+                    primaryBadge.textContent = '★ MIGLIOR RISULTATO';
+                    primaryBadge.className = 'text-[9px] font-black tracking-wide text-emerald-900 bg-emerald-100 border border-emerald-300 rounded-md px-2 py-1 w-fit';
+                    card.prepend(primaryBadge);
+                }
                 container.appendChild(card);
             });
             if (list.length > visibleCount) {
@@ -3066,45 +3581,6 @@ Martedì	Forza	...
                 saveFinalData();
             }
         });
-
-        document.getElementById('btn-open-athletes-registry').addEventListener('click', () => {
-            renderRegistryList('');
-            toggleModal('registry-modal');
-        });
-        document.getElementById('btn-open-athletes-registry-mobile').addEventListener('click', () => {
-            toggleModal('settings-modal');
-            document.getElementById('btn-open-athletes-registry').click();
-        });
-        document.getElementById('registry-search').addEventListener('input', (e) => renderRegistryList(e.target.value.toLowerCase().trim()));
-
-        function renderRegistryList(filter) {
-            const container = document.getElementById('registry-list-container');
-            container.innerHTML = '';
-            const filtered = allAthletes.filter(a => `${a.name || ''} ${a.surname || ''} ${a.email}`.toLowerCase().includes(filter));
-
-            if(filtered.length === 0) {
-                container.innerHTML = '<p class="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase text-center py-6">Nessun atleta trovato.</p>';
-                return;
-            }
-
-            filtered.forEach(athlete => {
-                const div = document.createElement('div');
-                div.className = "p-3 sm:p-4 bg-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl space-y-2 text-[10px] sm:text-xs";
-                div.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-gray-200 pb-1.5 sm:pb-2">
-                        <span class="font-black text-black uppercase tracking-widest truncate pr-2">${athlete.name || 'Atleta'} ${athlete.surname || ''}</span>
-                        <span class="text-[8px] sm:text-[10px] font-bold text-gray-500 shrink-0">${athlete.email || ''}</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-1.5 sm:gap-2 text-[8px] sm:text-[10px] font-bold text-gray-500 uppercase">
-                        <div>Altezza: <span class="text-black">${athlete.height ? athlete.height + ' cm' : 'N.D.'}</span></div>
-                        <div>Peso: <span class="text-black">${athlete.weight ? athlete.weight + ' kg' : 'N.D.'}</span></div>
-                        <div>Età/Info: <span class="text-black">${athlete.age || 'N.D.'}</span></div>
-                        <div>ID: <span class="text-gray-400 truncate block">${athlete.id.substring(0,8)}...</span></div>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
     </script>
 
 <script>
@@ -3175,21 +3651,73 @@ Martedì	Forza	...
 })();
 </script>
 <script>
-/* Stampa A4 autonoma, indipendente dalla pagina Admin/Atleta e dai colori dell'interfaccia. */
-window.lf26PrintSheet=function(sheet,context){
-  if(!sheet){alert('Apri prima una scheda.');return;}
-  const esc=v=>String(v===undefined||v===null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const popup=window.open('','_blank','width=900,height=950');
-  if(!popup){alert('Consenti le finestre popup per stampare la scheda.');return;}
-  const exercises=Array.isArray(sheet.exercises)?sheet.exercises:[];
-  const rows=exercises.map((ex,i)=>`<tr><td class="num">${i+1}</td><td><strong>${esc(ex.name||'Esercizio')}</strong>${ex.notes?`<small>${esc(ex.notes)}</small>`:''}</td><td>${esc(ex.sets||'—')}</td><td>${esc(ex.reps||'—')}</td><td>${esc(ex.load||'—')}</td></tr>`).join('');
-  const subtitle=context?`<p class="sub">${esc(context)}</p>`:'';
-  popup.document.open();
-  popup.document.write(`<!doctype html><html lang="it"><head><meta charset="utf-8"><title>${esc(sheet.title||'Scheda')} · Lion Fit</title><style>
-    @page{size:A4;margin:15mm}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#172820;margin:0;background:#fff}header{border-bottom:3px solid #178044;padding-bottom:17px;margin-bottom:23px}.brand{letter-spacing:.22em;font-size:11px;font-weight:900;color:#178044}.title{font-size:27px;font-weight:850;margin:9px 0 3px;text-transform:uppercase;overflow-wrap:anywhere}.sub{color:#63746a;font-size:12px;margin:4px 0}.chip{display:inline-block;background:#ecfaf1;padding:5px 10px;color:#17613b;border-radius:6px;font-size:11px;margin-top:10px;font-weight:700}table{width:100%;border-collapse:collapse;font-size:11px}thead{display:table-header-group}th{background:#e9f6ed;color:#194d30;text-align:left;font-size:10px;text-transform:uppercase;padding:11px 9px}td{border-bottom:1px solid #dce8df;vertical-align:top;padding:12px 9px}tr{break-inside:avoid}td.num{font-weight:800;color:#1d884b;width:28px}td strong{display:block;font-size:12px}td small{display:block;color:#52655b;margin-top:5px;line-height:1.35;white-space:pre-wrap}footer{font-size:10px;color:#85968a;margin-top:26px;border-top:1px solid #dce8df;padding-top:12px}button{background:#168345;color:white;border:0;border-radius:9px;padding:10px 17px;font-weight:700;cursor:pointer;margin:18px 0} @media print{button{display:none}body{padding:0}}@media screen{body{padding:24px;max-width:920px;margin:auto}}
-  </style></head><body><header><div class="brand">LION FIT · SCHEDA ALLENAMENTO</div><h1 class="title">${esc(sheet.title||'Scheda allenamento')}</h1>${subtitle}<span class="chip">${exercises.length} esercizi</span></header><table><thead><tr><th>#</th><th>Esercizio / Note</th><th>Serie</th><th>Rip.</th><th>Carico</th></tr></thead><tbody>${rows||'<tr><td colspan="5">Nessun esercizio presente.</td></tr>'}</tbody></table><footer>Lion Fit · Stampa scheda · V26.0</footer><button onclick="window.print()">🖨️ Stampa / Salva come PDF</button></body></html>`);
-  popup.document.close();popup.focus();
-  setTimeout(()=>{if(!popup.closed)popup.print();},350);
+/* Lion Fit — Stampa scheda in finestra separata: DOM sicuro, senza HTML inline nel JavaScript. */
+window.lf26PrintSheet = function (sheet, context) {
+  if (!sheet) { alert('Apri prima una scheda.'); return; }
+  const printWindow = window.open('', '_blank', 'width=920,height=950');
+  if (!printWindow) { alert('Consenti le finestre popup per stampare la scheda.'); return; }
+  const page = printWindow.document;
+  page.title = (sheet.title || 'Scheda') + ' · Lion Fit';
+  page.documentElement.lang = 'it';
+  page.head.replaceChildren();
+  const charset = page.createElement('meta');
+  charset.setAttribute('charset', 'utf-8');
+  const viewport = page.createElement('meta');
+  viewport.name = 'viewport'; viewport.content = 'width=device-width, initial-scale=1';
+  const titleTag = page.createElement('title'); titleTag.textContent = page.title;
+  const css = page.createElement('style');
+  css.textContent = `
+    @page{size:A4;margin:15mm}*{box-sizing:border-box}
+    body{font-family:Arial,Helvetica,sans-serif;color:#172820;margin:0;background:#fff}
+    header{border-bottom:3px solid #168345;padding-bottom:16px;margin-bottom:22px}
+    .brand{font-size:11px;letter-spacing:.18em;font-weight:900;color:#15703c}
+    h1{font-size:26px;font-weight:900;text-transform:uppercase;overflow-wrap:anywhere;margin:10px 0 6px}
+    .sub{font-size:12px;color:#52655b;margin:4px 0}
+    .chip{display:inline-block;background:#ecfaf1;color:#166534;border-radius:7px;font-weight:700;font-size:11px;padding:6px 10px;margin-top:9px}
+    table{width:100%;border-collapse:collapse;font-size:11px}
+    thead{display:table-header-group}
+    th{text-align:left;background:#e9f6ed;color:#194d30;font-size:10px;text-transform:uppercase;padding:11px 8px}
+    td{border-bottom:1px solid #dce8df;padding:12px 8px;vertical-align:top;overflow-wrap:anywhere}
+    tr{break-inside:avoid}td.num{color:#168345;font-weight:900;width:25px}
+    td strong{display:block;font-size:12px}td small{display:block;color:#52655b;margin-top:4px;white-space:pre-wrap}
+    footer{font-size:10px;color:#63746a;margin-top:24px;border-top:1px solid #dce8df;padding-top:12px}
+    button{background:#168345;color:white;border:0;border-radius:10px;padding:11px 17px;font-weight:750;cursor:pointer;margin:20px 0}
+    @media screen{body{max-width:920px;margin:0 auto;padding:22px}}
+    @media print{button{display:none!important}body{padding:0!important}}
+  `;
+  page.head.append(charset, viewport, titleTag, css);
+  const body = page.body; body.replaceChildren();
+  const header = page.createElement('header');
+  const brand = page.createElement('div'); brand.className = 'brand'; brand.textContent = 'LION FIT · SCHEDA ALLENAMENTO';
+  const heading = page.createElement('h1'); heading.textContent = sheet.title || 'Scheda allenamento';
+  header.append(brand, heading);
+  if (context) { const sub = page.createElement('p'); sub.className = 'sub'; sub.textContent = context; header.append(sub); }
+  const exercises = Array.isArray(sheet.exercises) ? sheet.exercises : [];
+  const count = page.createElement('span'); count.className = 'chip'; count.textContent = exercises.length + ' esercizi'; header.append(count);
+  const table = page.createElement('table');
+  const thead = page.createElement('thead'); const trh = page.createElement('tr');
+  ['#','Esercizio / Note','Serie','Rip.','Carico'].forEach(x=>{const th=page.createElement('th');th.textContent=x;trh.append(th);});
+  thead.append(trh);table.append(thead);
+  const tbody = page.createElement('tbody');
+  exercises.forEach((exercise, i) => {
+    const tr=page.createElement('tr');
+    const number=page.createElement('td'); number.className='num';number.textContent=String(i+1);
+    const name=page.createElement('td');
+    const strong=page.createElement('strong');strong.textContent=exercise.name||'Esercizio';name.append(strong);
+    if(exercise.notes){const note=page.createElement('small');note.textContent=String(exercise.notes);name.append(note);}
+    tr.append(number,name);
+    [exercise.sets,exercise.reps,exercise.load].forEach(value=>{
+      const cell=page.createElement('td');cell.textContent=value===null||value===undefined||value===''?'—':String(value);tr.append(cell);
+    });tbody.append(tr);
+  });
+  if (!exercises.length){const tr=page.createElement('tr');const td=page.createElement('td');td.colSpan=5;td.textContent='Nessun esercizio presente.';tr.append(td);tbody.append(tr);}
+  table.append(tbody);
+  const footer=page.createElement('footer');footer.textContent='Lion Fit · Stampa scheda · Beta 0.26.1';
+  const button=page.createElement('button');button.type='button';button.textContent='Stampa / Salva come PDF';
+  button.addEventListener('click', ()=>printWindow.print());
+  body.append(header,table,footer,button);
+  printWindow.focus();
+  // Non apriamo la finestra di stampa automaticamente: l'utente può controllare prima l'anteprima A4.
 };
 </script>
 

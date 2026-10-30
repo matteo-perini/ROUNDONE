@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+    <!-- Lion Fit · iPhone web app (Beta 0.26.1) -->
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Lion Fit">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#080d13">
+
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="LOGO-APP.png">
-    <link rel="apple-touch-icon" href="LOGO-APP.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Area Atleta - LION FIT 🦁</title>
     <!-- Tailwind CSS CDN -->
@@ -229,6 +236,258 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
   window.addEventListener('storage',event=>{if(event.key===storageKey)apply(event.newValue==='dark'?'dark':'light');});
 })();
 </script>
+    <!-- Carattere del marchio, con fallback sportivo locale in caso di assenza rete. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+
+<style id="lf261-visual-system">
+/* LION FIT BETA 0.26.1 — Midnight / Onyx / Emerald design system */
+.lf261-brand{
+  display:inline-block; font-family:'Barlow Condensed',Impact,'Arial Narrow',sans-serif!important;
+  font-size:clamp(18px,1.55vw,24px)!important; font-weight:900!important;
+  line-height:.92!important; letter-spacing:.075em!important; font-style:italic;
+  text-transform:uppercase; transform:skew(-3deg); white-space:nowrap;
+}
+.lf261-brand .lf261-fit{color:#16864F}
+.lf261-brand-role{font-family:'Barlow Condensed',Impact,sans-serif;font-style:italic;letter-spacing:.04em;font-size:.68em;color:#6b7280;margin-left:3px}
+.lf26-version{letter-spacing:.08em!important;font-size:10px!important;font-weight:750!important}
+html[data-lion-theme="dark"]{
+  color-scheme:dark;
+  --lf-green:#60E5A2;--lf-ink:#EEF4FB;--lf-soft:#151D2B;
+  --lf-outline:#303C4C;--lf-panel:#151C28;--lf-mint:#152B28;--lf-forest:#83EDB8;
+  --lf261-page:#090D14;--lf261-side:#0F1520;--lf261-card:#171F2C;
+  --lf261-field:#0D1521;--lf261-line:#303A49;--lf261-muted:#A6B6C6;
+}
+html[data-lion-theme="dark"] body.bg-gray-50, html[data-lion-theme="dark"] body.bg-gray-100{background:#090D14!important;background-image:radial-gradient(ellipse 90% 44% at 60% -5%,rgba(23,55,75,.25),transparent 70%)!important}
+html[data-lion-theme="dark"] body{background:#090D14!important;background-image:radial-gradient(ellipse 90% 44% at 60% -5%,rgba(23,55,75,.25),transparent 70%)!important;color:#E9F1F8!important}
+html[data-lion-theme="dark"] header,
+html[data-lion-theme="dark"] aside,
+html[data-lion-theme="dark"] nav.fixed.bottom-0{background:#0F1520!important;border-color:#2C3544!important;color:#E9F1F8!important}
+html[data-lion-theme="dark"] .bg-white,
+html[data-lion-theme="dark"] .bg-white\/95,
+html[data-lion-theme="dark"] .bg-white\/90,
+html[data-lion-theme="dark"] .bg-white\/80,
+html[data-lion-theme="dark"] .bg-white\/70{background-color:#171F2C!important}
+html[data-lion-theme="dark"] .bg-gray-50,
+html[data-lion-theme="dark"] .bg-gray-100,
+html[data-lion-theme="dark"] .bg-slate-50,
+html[data-lion-theme="dark"] .bg-gray-200{background-color:#1B2431!important}
+html[data-lion-theme="dark"] .bg-green-50,
+html[data-lion-theme="dark"] .bg-green-50\/70,
+html[data-lion-theme="dark"] .bg-green-100,
+html[data-lion-theme="dark"] .bg-emerald-50{background-color:#162C27!important}
+html[data-lion-theme="dark"] .bg-gray-900{background:#0F1724!important}
+html[data-lion-theme="dark"] .text-black,
+html[data-lion-theme="dark"] .text-gray-900,
+html[data-lion-theme="dark"] .text-gray-800,
+html[data-lion-theme="dark"] .text-gray-700,
+html[data-lion-theme="dark"] .text-slate-900,
+html[data-lion-theme="dark"] .text-slate-800{color:#F2F6FC!important}
+html[data-lion-theme="dark"] .text-gray-600,
+html[data-lion-theme="dark"] .text-gray-500,
+html[data-lion-theme="dark"] .text-gray-400,
+html[data-lion-theme="dark"] .text-slate-600,
+html[data-lion-theme="dark"] .text-slate-500{color:#A6B6C6!important}
+html[data-lion-theme="dark"] .text-neon,
+html[data-lion-theme="dark"] .text-green-700,
+html[data-lion-theme="dark"] .text-green-800,
+html[data-lion-theme="dark"] .text-green-900{color:#78EAAE!important}
+html[data-lion-theme="dark"] .border,
+html[data-lion-theme="dark"] .border-gray-100,
+html[data-lion-theme="dark"] .border-gray-200,
+html[data-lion-theme="dark"] .border-gray-300,
+html[data-lion-theme="dark"] .border-green-100,
+html[data-lion-theme="dark"] .border-green-200{border-color:#303A49!important}
+html[data-lion-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+html[data-lion-theme="dark"] select,
+html[data-lion-theme="dark"] textarea{background:#0D1521!important;color:#F2F6FC!important;border-color:#374659!important;accent-color:#42C98A}
+html[data-lion-theme="dark"] input::placeholder,
+html[data-lion-theme="dark"] textarea::placeholder{color:#8C9EAF!important}
+html[data-lion-theme="dark"] option{background:#151D29;color:#F2F6FC}
+html[data-lion-theme="dark"] .lf14-navcard,
+html[data-lion-theme="dark"] .lf14-stat,
+html[data-lion-theme="dark"] .lf-quick-action,
+html[data-lion-theme="dark"] .lf20-action,
+html[data-lion-theme="dark"] .lf14-exrow,
+html[data-lion-theme="dark"] .lf-training-sheet-card,
+html[data-lion-theme="dark"] .lf26-trash-card,
+html[data-lion-theme="dark"] .lf-day-card,
+html[data-lion-theme="dark"] #auth-section{background:#171F2C!important;border-color:#333F50!important;color:#F2F6FC!important;box-shadow:0 8px 22px rgba(0,0,0,.19)!important}
+html[data-lion-theme="dark"] .lf14-welcome,
+html[data-lion-theme="dark"] .lf26-trash-hero{background:linear-gradient(120deg,#111B2A 0%,#0B1220 65%,#122C28 100%)!important;border:1px solid #30473F!important;color:#F2F6FC!important}
+html[data-lion-theme="dark"] .lf14-navicon,
+html[data-lion-theme="dark"] .lf-quick-icon,
+html[data-lion-theme="dark"] .lf20-action-icon{background:#202C3A!important;color:#89F0BB!important}
+html[data-lion-theme="dark"] .lf14-navcopy strong,
+html[data-lion-theme="dark"] .lf20-action-text strong,
+html[data-lion-theme="dark"] .lf14-stat strong,
+html[data-lion-theme="dark"] .lf14-section-heading h3,
+html[data-lion-theme="dark"] .lf14-exhead strong,
+html[data-lion-theme="dark"] .lf-training-sheet-card .lf-sheet-title{color:#F2F6FC!important}
+html[data-lion-theme="dark"] .lf26-trash-meta{color:#AFBDCC!important}
+html[data-lion-theme="dark"] .side-nav-btn[aria-current="page"],
+html[data-lion-theme="dark"] .nav-btn[aria-current="page"]{background:#162E29!important;color:#83EFB7!important;border-color:#315E4B!important}
+html[data-lion-theme="dark"] .lf14-navcard:hover,
+html[data-lion-theme="dark"] .lf-quick-action:hover,
+html[data-lion-theme="dark"] .lf20-action:hover{background:#222D3B!important;border-color:#3B8C68!important}
+html[data-lion-theme="dark"] .lf26-theme-btn{background:#162231!important;color:#D6F7E6!important;border-color:#3D6557!important}
+html[data-lion-theme="dark"] .lf26-version{color:#91A8BB!important}
+html[data-lion-theme="dark"] .lf261-brand{color:#F7FAFF!important}
+html[data-lion-theme="dark"] .lf261-brand .lf261-fit{color:#66E3A4!important}
+html[data-lion-theme="dark"] .lf261-brand-role{color:#A0AEBE!important}
+html[data-lion-theme="dark"] .bg-neon{background-color:#14834F!important;color:white!important}
+html[data-lion-theme="dark"] .bg-neon:hover{background-color:#199A60!important}
+html[data-lion-theme="dark"] #active-week-editor-container > .grid,
+html[data-lion-theme="dark"] #active-week-container > div{background:#151F2C!important}
+html[data-lion-theme="dark"] #section-profile > div:first-child > div:first-child{background:#090D14!important}
+html[data-lion-theme="dark"] .lf26-trash-card:hover{border-color:#409C75!important}
+html[data-lion-theme="dark"] :focus-visible{outline:2px solid #6BE7AC!important;outline-offset:2px}
+@media(max-width:480px){.lf261-brand{font-size:18px!important;letter-spacing:.045em!important}}
+@media print{html[data-lion-theme="dark"]{color-scheme:light!important}}
+</style>
+
+<style id="lf261-dark-contrast-fix">
+/* Lion Fit Beta 0.26.1 - Patch contrasto. Nessuna modifica al tema chiaro. */
+html[data-lion-theme="dark"] .side-nav-btn,
+html[data-lion-theme="dark"] .nav-btn {
+  color:#C1CFDF!important;
+  background-color:transparent!important;
+}
+html[data-lion-theme="dark"] .side-nav-btn:hover:not([aria-current="page"]),
+html[data-lion-theme="dark"] .side-nav-btn:focus-visible:not([aria-current="page"]),
+html[data-lion-theme="dark"] .nav-btn:hover:not([aria-current="page"]),
+html[data-lion-theme="dark"] .nav-btn:focus-visible:not([aria-current="page"]) {
+  background-color:#202C3C!important;
+  color:#F7FAFF!important;
+  border-color:#34465A!important;
+}
+html[data-lion-theme="dark"] .side-nav-btn[aria-current="page"],
+html[data-lion-theme="dark"] .nav-btn[aria-current="page"],
+html[data-lion-theme="dark"] .side-nav-btn[aria-current="page"]:hover,
+html[data-lion-theme="dark"] .nav-btn[aria-current="page"]:hover {
+  background-color:#18362F!important;
+  color:#98F5C4!important;
+  border-color:#39795E!important;
+}
+html[data-lion-theme="dark"] button[class*="hover:bg-gray-100"]:hover:not(.side-nav-btn):not(.nav-btn),
+html[data-lion-theme="dark"] button[class*="hover:bg-gray-100"]:focus-visible:not(.side-nav-btn):not(.nav-btn) {
+  background-color:#243144!important;
+  color:#F4F8FD!important;
+}
+html[data-lion-theme="dark"] button[class*="hover:bg-green-50"]:hover:not(.side-nav-btn):not(.nav-btn),
+html[data-lion-theme="dark"] button[class*="hover:bg-green-100"]:hover:not(.side-nav-btn):not(.nav-btn) {
+  background-color:#1B3A30!important;
+  color:#B8FFDA!important;
+}
+/* Card Team/Atleta: la vecchia regola #athletes-list imponeva uno sfondo bianco. */
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item {
+  background-color:#171F2D!important;
+  color:#F2F7FD!important;
+  border-color:#344253!important;
+}
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item:hover,
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item:focus-visible,
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item:focus-within {
+  background-color:#213044!important;
+  color:#FFFFFF!important;
+  border-color:#4AAE82!important;
+}
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item h5 {
+  color:#F5F9FF!important;
+}
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item p {
+  color:#AEBFD2!important;
+}
+html[data-lion-theme="dark"] #athletes-list .lf-athlete-item > span {
+  color:#81EAB2!important;
+}
+</style>
+
+<style id="lf261-premium-card-contrast">
+
+/* ==============================================================
+   LION FIT BETA 0.26.1 — Midnight Cards, contrasto migliorato
+   Esclusivamente tema scuro: il tema chiaro resta invariato.
+   ============================================================== */
+html[data-lion-theme="dark"] {
+  --lf261-card-bg:#1B2634;
+  --lf261-card-edge:#516378;
+  --lf261-card-hover:#233244;
+  --lf261-action-bg:#223044;
+  --lf261-action-edge:#53677E;
+  --lf261-emerald:#8EF1BB;
+}
+html[data-lion-theme="dark"] :is(button,a,[role="button"]):focus-visible {
+  outline:2px solid #8EF1BB!important;
+  outline-offset:3px;
+}
+
+/* Area Atleta: schede distinguibili a colpo d'occhio. */
+html[data-lion-theme="dark"] #plan-assigned-list .lf-training-sheet-card,
+html[data-lion-theme="dark"] #plan-independent-list .lf-training-sheet-card {
+  background:linear-gradient(150deg,#202F40,#192534)!important;
+  border:2px solid #597488!important;
+  color:#F4F9FF!important;
+  box-shadow:0 5px 18px rgba(0,0,0,.22)!important;
+  transition:background .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+html[data-lion-theme="dark"] #plan-independent-list .lf-training-sheet-card {
+  background:linear-gradient(150deg,#202A39,#192333)!important;
+  border-color:#64778B!important;
+}
+html[data-lion-theme="dark"] #plan-assigned-list .lf-training-sheet-card:hover,
+html[data-lion-theme="dark"] #plan-independent-list .lf-training-sheet-card:hover,
+html[data-lion-theme="dark"] #plan-assigned-list .lf-training-sheet-card:focus-visible,
+html[data-lion-theme="dark"] #plan-independent-list .lf-training-sheet-card:focus-visible {
+  background:linear-gradient(150deg,#293F4D,#203245)!important;
+  border-color:#74DDA8!important;
+  box-shadow:0 8px 21px rgba(0,0,0,.28),0 0 0 1px rgba(116,221,168,.16)!important;
+}
+html[data-lion-theme="dark"] .lf-training-sheet-card .lf-sheet-title {
+  color:#FFFFFF!important;
+  letter-spacing:.025em;
+}
+html[data-lion-theme="dark"] #plan-assigned-list .lf-training-sheet-card .text-gray-500,
+html[data-lion-theme="dark"] #plan-independent-list .lf-training-sheet-card .text-gray-500 {
+  color:#B6C8DA!important;
+}
+/* Giorni della settimana: eliminare verdi sbiaditi e aumentare i bordi. */
+html[data-lion-theme="dark"] .lf-day-card {
+  background:#192B35!important;
+  border:2px solid #587483!important;
+  color:#F5F9FF!important;
+  box-shadow:0 4px 13px rgba(0,0,0,.19)!important;
+  transition:border-color .16s ease,background .16s ease,box-shadow .16s ease;
+}
+html[data-lion-theme="dark"] .lf-day-card:hover,
+html[data-lion-theme="dark"] .lf-day-card:focus-within {
+  background:#233849!important;
+  border-color:#71DCA7!important;
+  box-shadow:0 7px 20px rgba(0,0,0,.28)!important;
+}
+html[data-lion-theme="dark"] .lf-day-card.ring-2 {
+  background:#204137!important;
+  border-color:#86EAB6!important;
+}
+html[data-lion-theme="dark"] .lf-day-card > div:first-child > span:first-child {
+  color:#92EFBD!important;
+}
+/* Libreria esercizi e Team: card scure, ma mai fuse nello sfondo. */
+html[data-lion-theme="dark"] #library-grid-container > div,
+html[data-lion-theme="dark"] #community-roster-list > div {
+  background:#1B2838!important;
+  border:1.5px solid #4F657B!important;
+  color:#F3F8FF!important;
+  box-shadow:0 4px 12px rgba(0,0,0,.18)!important;
+}
+html[data-lion-theme="dark"] #library-grid-container > div:hover,
+html[data-lion-theme="dark"] #community-roster-list > div:hover {
+  border-color:#67CB9E!important;
+  background:#243449!important;
+}
+
+</style>
 </head>
 <body class="bg-gray-100 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col relative pb-20">
 
@@ -237,7 +496,7 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
         <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 bg-white border border-green-100 flex items-center justify-center font-black text-sm rounded-xl shadow-sm overflow-hidden"><img src="LOGO-APP.png" alt="Logo Lion Fit" class="w-full h-full object-contain" onerror="this.classList.add('hidden');this.nextElementSibling.classList.remove('hidden')"><span class="hidden text-green-700" aria-hidden="true">🦁</span></div>
             <div>
-                <h1 class="text-xs font-black uppercase tracking-widest text-black">LION FIT</h1>
+                <h1 class="text-xs font-black uppercase tracking-widest text-black"><span class="lf261-brand">LION <span class="lf261-fit">FIT</span></span></h1>
                 <p class="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Area Atleta</p>
             </div>
         </div>
@@ -247,7 +506,7 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
         </div>
     </header>
 
-    <div class="lf26-version pt-1">LION FIT · V26.0</div>
+    <div class="lf26-version pt-1">LION FIT · BETA 0.26.1</div>
     <!-- MAIN CONTAINER -->
     <main class="flex-grow w-full max-w-3xl mx-auto p-4 pb-24 relative">
 
@@ -1292,43 +1551,109 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
             renderLibraryGrid(catalogExercises);
         }
 
-        // LION FIT V11: ricerca bilingue con ranking, senza cambiare gli ID degli SVG.
-        // Questo ranking e' SOLO per l'elenco dei risultati; non associa automaticamente esercizi alle schede.
+        // LION FIT BETA 0.26.1 - Ricerca intelligente PLUS (solo catalogo locale).
+        // Graduatoria: nome esatto EN > nome IT > sinonimo; varianti e tolleranza errori
+        // sono sempre secondarie. Non cambia ID, schede, SVG o dati Firebase.
         function lionLibrarySearch(term, muscle) {
-            const query = lionExerciseKey(term);
-            const translated = query ? lionTranslateName(term) : '';
-            const queries = [...new Set([query, translated].filter(Boolean))];
+            const key = lionExerciseKey(term);
             const matchesMuscle = ex => !muscle ||
                 (ex.bodyPart || '').toLowerCase().includes(muscle) ||
                 (ex.target || '').toLowerCase().includes(muscle);
-            if (!query) return catalogExercises.filter(matchesMuscle);
-            const scored = [];
-            for (const ex of catalogExercises) {
-                if (!matchesMuscle(ex)) continue;
-                const names = ex._lfSearchNames || [lionExerciseKey(ex.name)];
-                let score = 0;
-                for (const q of queries) {
-                    if (q.length < 2) continue;
-                    for (const name of names) {
-                        if (!name) continue;
-                        if (name === q) score = Math.max(score, 100);
-                        else if (name.startsWith(q + ' ')) score = Math.max(score, 92);
-                        else if (name.includes(q)) score = Math.max(score, 82);
-                        else {
-                            const parts = q.split(' ').filter(Boolean);
-                            if (parts.length > 1 && parts.every(part => name.split(' ').some(word => word.startsWith(part)))) score = Math.max(score, 74);
-                            // Piccoli errori di battitura: proponi risultati, non collegamenti automatici.
-                            if (q.length >= 5 && Math.abs(name.length - q.length) <= 8) {
-                                const similar = lionExerciseSimilarity(q, name);
-                                if (similar >= 0.82) score = Math.max(score, Math.round(similar * 68));
-                            }
-                        }
+            if (!key) return catalogExercises.filter(matchesMuscle);
+
+            // "pushups", "push ups", "push-up" sono lo stesso intento.
+            const wordForms = value => value
+                .replace(/\bpushups?\b/g, 'push up')
+                .replace(/\bpullups?\b/g, 'pull up')
+                .replace(/\b(push|pull) ups\b/g, '$1 up')
+                .replace(/\bsitups?\b/g, 'sit up');
+            const direct = wordForms(key);
+            const english = wordForms(lionTranslateName(direct));
+            const queries = [{value:direct,primary:true}];
+            if (english && english !== direct) queries.push({value:english,primary:false});
+            // In caso di errori nella digitazione valutiamo forme normalizzate, ma con
+            // un punteggio inferiore alle corrispondenze esatte.
+            const oneEdit = (a,b) => {
+                if (a===b) return true;
+                if (Math.abs(a.length-b.length)>1) return false;
+                if (a.length===b.length) {
+                    let diffs=[];
+                    for(let i=0;i<a.length;i++) if(a[i]!==b[i]) diffs.push(i);
+                    if(diffs.length===1) return true;
+                    if(diffs.length===2 && diffs[1]===diffs[0]+1 &&
+                       a[diffs[0]]===b[diffs[1]] && a[diffs[1]]===b[diffs[0]]) return true;
+                    return false;
+                }
+                const longer=a.length>b.length?a:b, shorter=a.length>b.length?b:a;
+                let i=0,j=0,skipped=false;
+                while(i<longer.length && j<shorter.length) {
+                    if(longer[i]===shorter[j]){i++;j++;}
+                    else if(skipped) return false;
+                    else {skipped=true;i++;}
+                }
+                return true;
+            };
+            const tokenMatch = (word, candidate) => word===candidate ||
+                (word.length>=3 && candidate.startsWith(word)) ||
+                (word.length>=4 && candidate.length>=4 && oneEdit(word,candidate)) ||
+                (word.length===2 && candidate.length===2 && word[0]===candidate[1] && word[1]===candidate[0]);
+            const smartScore = (q,name) => {
+                if (!name || q===name) return 0;
+                if (name.startsWith(q+' ')) return 1120 - Math.min(180,name.length-q.length);
+                if (name.startsWith(q)) return 1040 - Math.min(160,name.length-q.length);
+                if ((' '+name+' ').includes(' '+q+' ')) return 860 - Math.min(130,name.length-q.length);
+                const want=q.split(' ').filter(Boolean), got=name.split(' ').filter(Boolean);
+                if (want.length===0) return 0;
+                let exact=0,near=0;
+                // Ogni parola di ricerca deve corrispondere a una parola diversa del nome.
+                const used=new Set();
+                for (const w of want) {
+                    let best=-1,quality=0;
+                    for(let i=0;i<got.length;i++){
+                        if (used.has(i)) continue;
+                        const candidate=got[i];
+                        const level=w===candidate?3:(w.length>=3 && candidate.startsWith(w)?2:(tokenMatch(w,candidate)?1:0));
+                        if (level>quality){best=i;quality=level;if(level===3)break;}
+                    }
+                    if(best<0 || quality===0) return 0;
+                    used.add(best);
+                    if(quality===3) exact++;
+                    else if(quality===1) near++;
+                }
+                // Tutte le parole presenti, anche se in ordine invertito.
+                // Gli errori di digitazione ricevono una penalita' consistente.
+                const extras=Math.max(0,got.length-want.length);
+                return Math.max(410,790-45*extras-95*near-18*(want.length-exact-near));
+            };
+            const found=new Map();
+            for(const ex of catalogExercises){
+                if(!matchesMuscle(ex))continue;
+                const canonical=lionExerciseKey(ex.name);
+                const italian=lionExerciseKey(ex.name_it);
+                const aliases=(Array.isArray(ex.aliases_it)?ex.aliases_it:[]).map(lionExerciseKey).filter(Boolean);
+                const fields=[{name:wordForms(canonical),weight:40,type:'en'},
+                    {name:wordForms(italian),weight:25,type:'it'},
+                    ...aliases.map(name=>({name:wordForms(name),weight:10,type:'alias'}))];
+                let score=0;
+                for(const {value:q,primary} of queries){
+                    if(q.length<2)continue;
+                    const bonus=primary?25:0;
+                    for(const field of fields){
+                        if(!field.name)continue;
+                        let next=field.name===q ? 1500+field.weight+bonus : smartScore(q,field.name)+field.weight/5+bonus;
+                        if(next>score)score=next;
                     }
                 }
-                if (score > 0) scored.push({ex,score});
+                if(score<400)continue;
+                const id=String(ex.id ?? canonical+'|'+italian);
+                const previous=found.get(id);
+                if(!previous || score>previous.score)found.set(id,{ex,score,canonical});
             }
-            scored.sort((a,b) => b.score-a.score || String(a.ex.name).localeCompare(String(b.ex.name)));
-            return scored.map(item => item.ex);
+            return [...found.values()].sort((a,b)=>b.score-a.score ||
+                a.canonical.length-b.canonical.length ||
+                a.canonical.localeCompare(b.canonical,'en') ||
+                String(a.ex.id).localeCompare(String(b.ex.id)))
+                .map(item=>item.ex);
         }
 
         function renderLibraryGrid(list, visibleCount=100) {
@@ -1340,7 +1665,7 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
                 return;
             }
 
-            list.slice(0,visibleCount).forEach(ex => {
+            list.slice(0,visibleCount).forEach((ex, index) => {
                 const card = document.createElement('div');
                 card.className = "bg-white p-3 rounded-2xl border border-gray-200 shadow-2xs hover:border-neon cursor-pointer transition flex flex-col justify-between space-y-2";
                 
@@ -1367,6 +1692,13 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
                 card.append(previewBox, info);
 
                 card.addEventListener('click', () => openExerciseDetailModal(ex));
+                // La persona vede subito il risultato principale prima delle varianti.
+                if (index === 0 && lionExerciseKey(document.getElementById('library-search-input')?.value)) {
+                    const primaryBadge = document.createElement('span');
+                    primaryBadge.textContent = '★ MIGLIOR RISULTATO';
+                    primaryBadge.className = 'text-[9px] font-black tracking-wide text-emerald-900 bg-emerald-100 border border-emerald-300 rounded-md px-2 py-1 w-fit';
+                    card.prepend(primaryBadge);
+                }
                 container.appendChild(card);
             });
             if (list.length > visibleCount) {
@@ -2275,21 +2607,73 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
 })();
 </script>
 <script>
-/* Stampa A4 autonoma, indipendente dalla pagina Admin/Atleta e dai colori dell'interfaccia. */
-window.lf26PrintSheet=function(sheet,context){
-  if(!sheet){alert('Apri prima una scheda.');return;}
-  const esc=v=>String(v===undefined||v===null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const popup=window.open('','_blank','width=900,height=950');
-  if(!popup){alert('Consenti le finestre popup per stampare la scheda.');return;}
-  const exercises=Array.isArray(sheet.exercises)?sheet.exercises:[];
-  const rows=exercises.map((ex,i)=>`<tr><td class="num">${i+1}</td><td><strong>${esc(ex.name||'Esercizio')}</strong>${ex.notes?`<small>${esc(ex.notes)}</small>`:''}</td><td>${esc(ex.sets||'—')}</td><td>${esc(ex.reps||'—')}</td><td>${esc(ex.load||'—')}</td></tr>`).join('');
-  const subtitle=context?`<p class="sub">${esc(context)}</p>`:'';
-  popup.document.open();
-  popup.document.write(`<!doctype html><html lang="it"><head><meta charset="utf-8"><title>${esc(sheet.title||'Scheda')} · Lion Fit</title><style>
-    @page{size:A4;margin:15mm}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#172820;margin:0;background:#fff}header{border-bottom:3px solid #178044;padding-bottom:17px;margin-bottom:23px}.brand{letter-spacing:.22em;font-size:11px;font-weight:900;color:#178044}.title{font-size:27px;font-weight:850;margin:9px 0 3px;text-transform:uppercase;overflow-wrap:anywhere}.sub{color:#63746a;font-size:12px;margin:4px 0}.chip{display:inline-block;background:#ecfaf1;padding:5px 10px;color:#17613b;border-radius:6px;font-size:11px;margin-top:10px;font-weight:700}table{width:100%;border-collapse:collapse;font-size:11px}thead{display:table-header-group}th{background:#e9f6ed;color:#194d30;text-align:left;font-size:10px;text-transform:uppercase;padding:11px 9px}td{border-bottom:1px solid #dce8df;vertical-align:top;padding:12px 9px}tr{break-inside:avoid}td.num{font-weight:800;color:#1d884b;width:28px}td strong{display:block;font-size:12px}td small{display:block;color:#52655b;margin-top:5px;line-height:1.35;white-space:pre-wrap}footer{font-size:10px;color:#85968a;margin-top:26px;border-top:1px solid #dce8df;padding-top:12px}button{background:#168345;color:white;border:0;border-radius:9px;padding:10px 17px;font-weight:700;cursor:pointer;margin:18px 0} @media print{button{display:none}body{padding:0}}@media screen{body{padding:24px;max-width:920px;margin:auto}}
-  </style></head><body><header><div class="brand">LION FIT · SCHEDA ALLENAMENTO</div><h1 class="title">${esc(sheet.title||'Scheda allenamento')}</h1>${subtitle}<span class="chip">${exercises.length} esercizi</span></header><table><thead><tr><th>#</th><th>Esercizio / Note</th><th>Serie</th><th>Rip.</th><th>Carico</th></tr></thead><tbody>${rows||'<tr><td colspan="5">Nessun esercizio presente.</td></tr>'}</tbody></table><footer>Lion Fit · Stampa scheda · V26.0</footer><button onclick="window.print()">🖨️ Stampa / Salva come PDF</button></body></html>`);
-  popup.document.close();popup.focus();
-  setTimeout(()=>{if(!popup.closed)popup.print();},350);
+/* Lion Fit — Stampa scheda in finestra separata: DOM sicuro, senza HTML inline nel JavaScript. */
+window.lf26PrintSheet = function (sheet, context) {
+  if (!sheet) { alert('Apri prima una scheda.'); return; }
+  const printWindow = window.open('', '_blank', 'width=920,height=950');
+  if (!printWindow) { alert('Consenti le finestre popup per stampare la scheda.'); return; }
+  const page = printWindow.document;
+  page.title = (sheet.title || 'Scheda') + ' · Lion Fit';
+  page.documentElement.lang = 'it';
+  page.head.replaceChildren();
+  const charset = page.createElement('meta');
+  charset.setAttribute('charset', 'utf-8');
+  const viewport = page.createElement('meta');
+  viewport.name = 'viewport'; viewport.content = 'width=device-width, initial-scale=1';
+  const titleTag = page.createElement('title'); titleTag.textContent = page.title;
+  const css = page.createElement('style');
+  css.textContent = `
+    @page{size:A4;margin:15mm}*{box-sizing:border-box}
+    body{font-family:Arial,Helvetica,sans-serif;color:#172820;margin:0;background:#fff}
+    header{border-bottom:3px solid #168345;padding-bottom:16px;margin-bottom:22px}
+    .brand{font-size:11px;letter-spacing:.18em;font-weight:900;color:#15703c}
+    h1{font-size:26px;font-weight:900;text-transform:uppercase;overflow-wrap:anywhere;margin:10px 0 6px}
+    .sub{font-size:12px;color:#52655b;margin:4px 0}
+    .chip{display:inline-block;background:#ecfaf1;color:#166534;border-radius:7px;font-weight:700;font-size:11px;padding:6px 10px;margin-top:9px}
+    table{width:100%;border-collapse:collapse;font-size:11px}
+    thead{display:table-header-group}
+    th{text-align:left;background:#e9f6ed;color:#194d30;font-size:10px;text-transform:uppercase;padding:11px 8px}
+    td{border-bottom:1px solid #dce8df;padding:12px 8px;vertical-align:top;overflow-wrap:anywhere}
+    tr{break-inside:avoid}td.num{color:#168345;font-weight:900;width:25px}
+    td strong{display:block;font-size:12px}td small{display:block;color:#52655b;margin-top:4px;white-space:pre-wrap}
+    footer{font-size:10px;color:#63746a;margin-top:24px;border-top:1px solid #dce8df;padding-top:12px}
+    button{background:#168345;color:white;border:0;border-radius:10px;padding:11px 17px;font-weight:750;cursor:pointer;margin:20px 0}
+    @media screen{body{max-width:920px;margin:0 auto;padding:22px}}
+    @media print{button{display:none!important}body{padding:0!important}}
+  `;
+  page.head.append(charset, viewport, titleTag, css);
+  const body = page.body; body.replaceChildren();
+  const header = page.createElement('header');
+  const brand = page.createElement('div'); brand.className = 'brand'; brand.textContent = 'LION FIT · SCHEDA ALLENAMENTO';
+  const heading = page.createElement('h1'); heading.textContent = sheet.title || 'Scheda allenamento';
+  header.append(brand, heading);
+  if (context) { const sub = page.createElement('p'); sub.className = 'sub'; sub.textContent = context; header.append(sub); }
+  const exercises = Array.isArray(sheet.exercises) ? sheet.exercises : [];
+  const count = page.createElement('span'); count.className = 'chip'; count.textContent = exercises.length + ' esercizi'; header.append(count);
+  const table = page.createElement('table');
+  const thead = page.createElement('thead'); const trh = page.createElement('tr');
+  ['#','Esercizio / Note','Serie','Rip.','Carico'].forEach(x=>{const th=page.createElement('th');th.textContent=x;trh.append(th);});
+  thead.append(trh);table.append(thead);
+  const tbody = page.createElement('tbody');
+  exercises.forEach((exercise, i) => {
+    const tr=page.createElement('tr');
+    const number=page.createElement('td'); number.className='num';number.textContent=String(i+1);
+    const name=page.createElement('td');
+    const strong=page.createElement('strong');strong.textContent=exercise.name||'Esercizio';name.append(strong);
+    if(exercise.notes){const note=page.createElement('small');note.textContent=String(exercise.notes);name.append(note);}
+    tr.append(number,name);
+    [exercise.sets,exercise.reps,exercise.load].forEach(value=>{
+      const cell=page.createElement('td');cell.textContent=value===null||value===undefined||value===''?'—':String(value);tr.append(cell);
+    });tbody.append(tr);
+  });
+  if (!exercises.length){const tr=page.createElement('tr');const td=page.createElement('td');td.colSpan=5;td.textContent='Nessun esercizio presente.';tr.append(td);tbody.append(tr);}
+  table.append(tbody);
+  const footer=page.createElement('footer');footer.textContent='Lion Fit · Stampa scheda · Beta 0.26.1';
+  const button=page.createElement('button');button.type='button';button.textContent='Stampa / Salva come PDF';
+  button.addEventListener('click', ()=>printWindow.print());
+  body.append(header,table,footer,button);
+  printWindow.focus();
+  // Non apriamo la finestra di stampa automaticamente: l'utente può controllare prima l'anteprima A4.
 };
 </script>
 

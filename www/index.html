@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+    <!-- Lion Fit · iPhone web app (Beta 0.26.1) -->
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Lion Fit">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#080d13">
+
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="LOGO-APP.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Lion Fit 🦁 - Accedi o Registrati</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="apple-touch-icon" href="LOGO-APP.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Lion Fit">
     <script>
         tailwind.config = {
             theme: {
@@ -120,6 +124,116 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
   window.addEventListener('storage',event=>{if(event.key===storageKey)apply(event.newValue==='dark'?'dark':'light');});
 })();
 </script>
+    <!-- Carattere del marchio, con fallback sportivo locale in caso di assenza rete. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+
+<style id="lf261-visual-system">
+/* LION FIT BETA 0.26.1 — Midnight / Onyx / Emerald design system */
+.lf261-brand{
+  display:inline-block; font-family:'Barlow Condensed',Impact,'Arial Narrow',sans-serif!important;
+  font-size:clamp(18px,1.55vw,24px)!important; font-weight:900!important;
+  line-height:.92!important; letter-spacing:.075em!important; font-style:italic;
+  text-transform:uppercase; transform:skew(-3deg); white-space:nowrap;
+}
+.lf261-brand .lf261-fit{color:#16864F}
+.lf261-brand-role{font-family:'Barlow Condensed',Impact,sans-serif;font-style:italic;letter-spacing:.04em;font-size:.68em;color:#6b7280;margin-left:3px}
+.lf26-version{letter-spacing:.08em!important;font-size:10px!important;font-weight:750!important}
+html[data-lion-theme="dark"]{
+  color-scheme:dark;
+  --lf-green:#60E5A2;--lf-ink:#EEF4FB;--lf-soft:#151D2B;
+  --lf-outline:#303C4C;--lf-panel:#151C28;--lf-mint:#152B28;--lf-forest:#83EDB8;
+  --lf261-page:#090D14;--lf261-side:#0F1520;--lf261-card:#171F2C;
+  --lf261-field:#0D1521;--lf261-line:#303A49;--lf261-muted:#A6B6C6;
+}
+html[data-lion-theme="dark"] body.bg-gray-50, html[data-lion-theme="dark"] body.bg-gray-100{background:#090D14!important;background-image:radial-gradient(ellipse 90% 44% at 60% -5%,rgba(23,55,75,.25),transparent 70%)!important}
+html[data-lion-theme="dark"] body{background:#090D14!important;background-image:radial-gradient(ellipse 90% 44% at 60% -5%,rgba(23,55,75,.25),transparent 70%)!important;color:#E9F1F8!important}
+html[data-lion-theme="dark"] header,
+html[data-lion-theme="dark"] aside,
+html[data-lion-theme="dark"] nav.fixed.bottom-0{background:#0F1520!important;border-color:#2C3544!important;color:#E9F1F8!important}
+html[data-lion-theme="dark"] .bg-white,
+html[data-lion-theme="dark"] .bg-white\/95,
+html[data-lion-theme="dark"] .bg-white\/90,
+html[data-lion-theme="dark"] .bg-white\/80,
+html[data-lion-theme="dark"] .bg-white\/70{background-color:#171F2C!important}
+html[data-lion-theme="dark"] .bg-gray-50,
+html[data-lion-theme="dark"] .bg-gray-100,
+html[data-lion-theme="dark"] .bg-slate-50,
+html[data-lion-theme="dark"] .bg-gray-200{background-color:#1B2431!important}
+html[data-lion-theme="dark"] .bg-green-50,
+html[data-lion-theme="dark"] .bg-green-50\/70,
+html[data-lion-theme="dark"] .bg-green-100,
+html[data-lion-theme="dark"] .bg-emerald-50{background-color:#162C27!important}
+html[data-lion-theme="dark"] .bg-gray-900{background:#0F1724!important}
+html[data-lion-theme="dark"] .text-black,
+html[data-lion-theme="dark"] .text-gray-900,
+html[data-lion-theme="dark"] .text-gray-800,
+html[data-lion-theme="dark"] .text-gray-700,
+html[data-lion-theme="dark"] .text-slate-900,
+html[data-lion-theme="dark"] .text-slate-800{color:#F2F6FC!important}
+html[data-lion-theme="dark"] .text-gray-600,
+html[data-lion-theme="dark"] .text-gray-500,
+html[data-lion-theme="dark"] .text-gray-400,
+html[data-lion-theme="dark"] .text-slate-600,
+html[data-lion-theme="dark"] .text-slate-500{color:#A6B6C6!important}
+html[data-lion-theme="dark"] .text-neon,
+html[data-lion-theme="dark"] .text-green-700,
+html[data-lion-theme="dark"] .text-green-800,
+html[data-lion-theme="dark"] .text-green-900{color:#78EAAE!important}
+html[data-lion-theme="dark"] .border,
+html[data-lion-theme="dark"] .border-gray-100,
+html[data-lion-theme="dark"] .border-gray-200,
+html[data-lion-theme="dark"] .border-gray-300,
+html[data-lion-theme="dark"] .border-green-100,
+html[data-lion-theme="dark"] .border-green-200{border-color:#303A49!important}
+html[data-lion-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+html[data-lion-theme="dark"] select,
+html[data-lion-theme="dark"] textarea{background:#0D1521!important;color:#F2F6FC!important;border-color:#374659!important;accent-color:#42C98A}
+html[data-lion-theme="dark"] input::placeholder,
+html[data-lion-theme="dark"] textarea::placeholder{color:#8C9EAF!important}
+html[data-lion-theme="dark"] option{background:#151D29;color:#F2F6FC}
+html[data-lion-theme="dark"] .lf14-navcard,
+html[data-lion-theme="dark"] .lf14-stat,
+html[data-lion-theme="dark"] .lf-quick-action,
+html[data-lion-theme="dark"] .lf20-action,
+html[data-lion-theme="dark"] .lf14-exrow,
+html[data-lion-theme="dark"] .lf-training-sheet-card,
+html[data-lion-theme="dark"] .lf26-trash-card,
+html[data-lion-theme="dark"] .lf-day-card,
+html[data-lion-theme="dark"] #auth-section{background:#171F2C!important;border-color:#333F50!important;color:#F2F6FC!important;box-shadow:0 8px 22px rgba(0,0,0,.19)!important}
+html[data-lion-theme="dark"] .lf14-welcome,
+html[data-lion-theme="dark"] .lf26-trash-hero{background:linear-gradient(120deg,#111B2A 0%,#0B1220 65%,#122C28 100%)!important;border:1px solid #30473F!important;color:#F2F6FC!important}
+html[data-lion-theme="dark"] .lf14-navicon,
+html[data-lion-theme="dark"] .lf-quick-icon,
+html[data-lion-theme="dark"] .lf20-action-icon{background:#202C3A!important;color:#89F0BB!important}
+html[data-lion-theme="dark"] .lf14-navcopy strong,
+html[data-lion-theme="dark"] .lf20-action-text strong,
+html[data-lion-theme="dark"] .lf14-stat strong,
+html[data-lion-theme="dark"] .lf14-section-heading h3,
+html[data-lion-theme="dark"] .lf14-exhead strong,
+html[data-lion-theme="dark"] .lf-training-sheet-card .lf-sheet-title{color:#F2F6FC!important}
+html[data-lion-theme="dark"] .lf26-trash-meta{color:#AFBDCC!important}
+html[data-lion-theme="dark"] .side-nav-btn[aria-current="page"],
+html[data-lion-theme="dark"] .nav-btn[aria-current="page"]{background:#162E29!important;color:#83EFB7!important;border-color:#315E4B!important}
+html[data-lion-theme="dark"] .lf14-navcard:hover,
+html[data-lion-theme="dark"] .lf-quick-action:hover,
+html[data-lion-theme="dark"] .lf20-action:hover{background:#222D3B!important;border-color:#3B8C68!important}
+html[data-lion-theme="dark"] .lf26-theme-btn{background:#162231!important;color:#D6F7E6!important;border-color:#3D6557!important}
+html[data-lion-theme="dark"] .lf26-version{color:#91A8BB!important}
+html[data-lion-theme="dark"] .lf261-brand{color:#F7FAFF!important}
+html[data-lion-theme="dark"] .lf261-brand .lf261-fit{color:#66E3A4!important}
+html[data-lion-theme="dark"] .lf261-brand-role{color:#A0AEBE!important}
+html[data-lion-theme="dark"] .bg-neon{background-color:#14834F!important;color:white!important}
+html[data-lion-theme="dark"] .bg-neon:hover{background-color:#199A60!important}
+html[data-lion-theme="dark"] #active-week-editor-container > .grid,
+html[data-lion-theme="dark"] #active-week-container > div{background:#151F2C!important}
+html[data-lion-theme="dark"] #section-profile > div:first-child > div:first-child{background:#090D14!important}
+html[data-lion-theme="dark"] .lf26-trash-card:hover{border-color:#409C75!important}
+html[data-lion-theme="dark"] :focus-visible{outline:2px solid #6BE7AC!important;outline-offset:2px}
+@media(max-width:480px){.lf261-brand{font-size:18px!important;letter-spacing:.045em!important}}
+@media print{html[data-lion-theme="dark"]{color-scheme:light!important}}
+</style>
 </head>
 <body class="bg-gray-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-neon selection:text-white overflow-x-hidden relative">
 
@@ -128,11 +242,11 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
         <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 bg-white border border-green-100 flex items-center justify-center font-black text-sm rounded-xl shadow-sm overflow-hidden"><img src="LOGO-APP.png" alt="Logo Lion Fit" class="w-full h-full object-contain" onerror="this.classList.add('hidden');this.nextElementSibling.classList.remove('hidden')"><span class="hidden text-green-700" aria-hidden="true">🦁</span></div>
             <div>
-                <h1 class="text-sm font-black uppercase tracking-widest text-slate-900">LION FIT</h1>
+                <h1 class="text-sm font-black uppercase tracking-widest text-slate-900"><span class="lf261-brand">LION <span class="lf261-fit">FIT</span></span></h1>
                 <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Area Accesso</p>
             </div>
         </div>
-        <div class="flex items-center gap-2"><button data-lf-theme-toggle class="lf26-theme-btn" aria-label="Cambia tema">🌙 Tema scuro</button><span class="lf26-version">V26.0</span></div>
+        <div class="flex items-center gap-2"><button data-lf-theme-toggle class="lf26-theme-btn" aria-label="Cambia tema">🌙 Tema scuro</button><span class="lf26-version">Beta 0.26.1</span></div>
     </header>
 
     <!-- MAIN CONTAINER CENTRATO -->
@@ -162,6 +276,9 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
                     <label class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Password</label>
                     <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
                 </div>
+                <div class="flex justify-end -mt-1">
+                    <button id="lf261-forgot-open" type="button" class="text-xs font-bold text-green-700 hover:underline focus-visible:underline" aria-controls="lf261-reset-form">Password dimenticata?</button>
+                </div>
                 <label class="flex items-start gap-2.5 rounded-lg border border-green-200 bg-green-50/70 px-3 py-2 cursor-pointer">
                     <input type="checkbox" id="login-remember" checked class="mt-0.5 shrink-0 accent-green-700" aria-describedby="login-remember-help">
                     <span class="flex-1 text-left">
@@ -172,6 +289,21 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
                 <button type="submit" id="btn-login-submit" class="w-full bg-neon hover:bg-green-700 text-white font-black uppercase tracking-widest py-3.5 rounded-xl transition text-sm shadow-md mt-2 flex justify-center items-center gap-2">
                     <span>Accedi</span> &rarr;
                 </button>
+            </form>
+
+            <!-- Recupero password Firebase: non crea account e non cambia UID o dati atleta. -->
+            <form id="lf261-reset-form" class="hidden space-y-4" aria-label="Recupero password">
+                <div>
+                    <h3 class="font-black text-base text-slate-900">Recupera il tuo accesso</h3>
+                    <p class="text-xs text-gray-600 mt-1">Inserisci l'email del tuo account. Riceverai un collegamento per scegliere una nuova password.</p>
+                </div>
+                <div>
+                    <label for="lf261-reset-email" class="block text-[11px] font-black uppercase tracking-widest text-gray-500 mb-1">Email</label>
+                    <input id="lf261-reset-email" type="email" required autocomplete="email" placeholder="la-tua-email@esempio.it" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-neon focus:bg-white focus:outline-none text-sm font-bold text-black transition">
+                </div>
+                <button id="lf261-reset-send" type="submit" class="w-full bg-neon hover:bg-green-700 text-white font-black uppercase tracking-wider py-3 rounded-xl transition text-xs">Invia email di recupero</button>
+                <button id="lf261-reset-back" type="button" class="w-full border border-gray-200 rounded-xl px-3 py-3 text-xs font-bold text-gray-600">← Torna all'accesso</button>
+                <p id="lf261-reset-message" role="status" aria-live="polite" class="text-xs text-gray-600 hidden"></p>
             </form>
 
             <!-- FORM REGISTRAZIONE -->
@@ -280,7 +412,7 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
     <!-- SCRIPT JAVASCRIPT LOGICA AUTENTICAZIONE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence, browserSessionPersistence, sendEmailVerification, reload, getIdToken, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence, browserSessionPersistence, sendPasswordResetEmail, sendEmailVerification, reload, getIdToken, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -338,6 +470,50 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
         const tabRegister = document.getElementById('tab-register');
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
+        // Beta 0.26.1 — recupero password (Firebase Authentication).
+        const lf261ResetForm=document.getElementById('lf261-reset-form');
+        const lf261ResetEmail=document.getElementById('lf261-reset-email');
+        const lf261ResetMessage=document.getElementById('lf261-reset-message');
+        function lf261ShowReset(){
+            loginForm.classList.add('hidden');
+            registerForm.classList.add('hidden');
+            lf261ResetForm.classList.remove('hidden');
+            lf261ResetEmail.value=document.getElementById('login-email').value.trim();
+            lf261ResetMessage.classList.add('hidden');
+            lf261ResetEmail.focus();
+        }
+        function lf261CloseReset(){
+            lf261ResetForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+        }
+        document.getElementById('lf261-forgot-open').addEventListener('click',lf261ShowReset);
+        document.getElementById('lf261-reset-back').addEventListener('click',lf261CloseReset);
+        lf261ResetForm.addEventListener('submit',async event=>{
+            event.preventDefault();
+            const email=lf261ResetEmail.value.trim();
+            if(!email || !lf261ResetEmail.checkValidity()) {lf261ResetEmail.reportValidity();return;}
+            const submit=document.getElementById('lf261-reset-send');
+            submit.disabled=true;submit.textContent='Invio in corso...';
+            try {
+                await sendPasswordResetEmail(auth,email);
+                lf261ResetMessage.textContent='Se esiste un account associato a questa email, riceverai un collegamento per reimpostare la password. Controlla anche lo spam.';
+            }catch(error){
+                console.warn('Recupero password:',error.code||error.message);
+                if(error.code==='auth/too-many-requests'){
+                    lf261ResetMessage.textContent='Sono state effettuate troppe richieste. Riprova più tardi.';
+                }else if(error.code==='auth/network-request-failed'){
+                    lf261ResetMessage.textContent='Connessione non disponibile. Controlla Internet e riprova.';
+                }else if(error.code==='auth/operation-not-allowed'||error.code==='auth/unauthorized-domain'){
+                    lf261ResetMessage.textContent='Servizio temporaneamente non disponibile. Contatta il coach o il supporto.';
+                }else{
+                    // Non rivelare se l'email è o non è registrata.
+                    lf261ResetMessage.textContent='Se esiste un account associato a questa email, riceverai un collegamento per reimpostare la password. Controlla anche lo spam.';
+                }
+            }finally {
+                lf261ResetMessage.classList.remove('hidden');
+                submit.disabled=false;submit.textContent='Invia email di recupero';
+            }
+        });
         const regRole = document.getElementById('reg-role');
         const inviteCodeContainer = document.getElementById('invite-code-container');
         const gymCreateContainer = document.getElementById('gym-create-container');
@@ -387,6 +563,7 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
         updateSignupRoleUI();
 
         tabLogin.addEventListener('click', () => {
+            lf261ResetForm.classList.add('hidden');
             tabLogin.className = "w-1/2 pb-3 font-black text-center border-b-2 border-neon text-black transition uppercase text-sm tracking-wider";
             tabRegister.className = "w-1/2 pb-3 font-bold text-center text-gray-400 border-b-2 border-transparent transition uppercase text-sm tracking-wider hover:text-black";
             loginForm.classList.remove('hidden');
@@ -394,6 +571,7 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
         });
 
         tabRegister.addEventListener('click', () => {
+            lf261ResetForm.classList.add('hidden');
             tabRegister.className = "w-1/2 pb-3 font-black text-center border-b-2 border-neon text-black transition uppercase text-sm tracking-wider";
             tabLogin.className = "w-1/2 pb-3 font-bold text-center text-gray-400 border-b-2 border-transparent transition uppercase text-sm tracking-wider hover:text-black";
             registerForm.classList.remove('hidden');
@@ -598,24 +776,7 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
   } catch (e) { /* CSS safe-area fallback remains active */ }
 })();
 </script>
-<script>
-/* Stampa A4 autonoma, indipendente dalla pagina Admin/Atleta e dai colori dell'interfaccia. */
-window.lf26PrintSheet=function(sheet,context){
-  if(!sheet){alert('Apri prima una scheda.');return;}
-  const esc=v=>String(v===undefined||v===null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const popup=window.open('','_blank','width=900,height=950');
-  if(!popup){alert('Consenti le finestre popup per stampare la scheda.');return;}
-  const exercises=Array.isArray(sheet.exercises)?sheet.exercises:[];
-  const rows=exercises.map((ex,i)=>`<tr><td class="num">${i+1}</td><td><strong>${esc(ex.name||'Esercizio')}</strong>${ex.notes?`<small>${esc(ex.notes)}</small>`:''}</td><td>${esc(ex.sets||'—')}</td><td>${esc(ex.reps||'—')}</td><td>${esc(ex.load||'—')}</td></tr>`).join('');
-  const subtitle=context?`<p class="sub">${esc(context)}</p>`:'';
-  popup.document.open();
-  popup.document.write(`<!doctype html><html lang="it"><head><meta charset="utf-8"><title>${esc(sheet.title||'Scheda')} · Lion Fit</title><style>
-    @page{size:A4;margin:15mm}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#172820;margin:0;background:#fff}header{border-bottom:3px solid #178044;padding-bottom:17px;margin-bottom:23px}.brand{letter-spacing:.22em;font-size:11px;font-weight:900;color:#178044}.title{font-size:27px;font-weight:850;margin:9px 0 3px;text-transform:uppercase;overflow-wrap:anywhere}.sub{color:#63746a;font-size:12px;margin:4px 0}.chip{display:inline-block;background:#ecfaf1;padding:5px 10px;color:#17613b;border-radius:6px;font-size:11px;margin-top:10px;font-weight:700}table{width:100%;border-collapse:collapse;font-size:11px}thead{display:table-header-group}th{background:#e9f6ed;color:#194d30;text-align:left;font-size:10px;text-transform:uppercase;padding:11px 9px}td{border-bottom:1px solid #dce8df;vertical-align:top;padding:12px 9px}tr{break-inside:avoid}td.num{font-weight:800;color:#1d884b;width:28px}td strong{display:block;font-size:12px}td small{display:block;color:#52655b;margin-top:5px;line-height:1.35;white-space:pre-wrap}footer{font-size:10px;color:#85968a;margin-top:26px;border-top:1px solid #dce8df;padding-top:12px}button{background:#168345;color:white;border:0;border-radius:9px;padding:10px 17px;font-weight:700;cursor:pointer;margin:18px 0} @media print{button{display:none}body{padding:0}}@media screen{body{padding:24px;max-width:920px;margin:auto}}
-  </style></head><body><header><div class="brand">LION FIT · SCHEDA ALLENAMENTO</div><h1 class="title">${esc(sheet.title||'Scheda allenamento')}</h1>${subtitle}<span class="chip">${exercises.length} esercizi</span></header><table><thead><tr><th>#</th><th>Esercizio / Note</th><th>Serie</th><th>Rip.</th><th>Carico</th></tr></thead><tbody>${rows||'<tr><td colspan="5">Nessun esercizio presente.</td></tr>'}</tbody></table><footer>Lion Fit · Stampa scheda · V26.0</footer><button onclick="window.print()">🖨️ Stampa / Salva come PDF</button></body></html>`);
-  popup.document.close();popup.focus();
-  setTimeout(()=>{if(!popup.closed)popup.print();},350);
-};
-</script>
+
 
 </body>
 </html>
