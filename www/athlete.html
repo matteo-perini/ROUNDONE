@@ -521,6 +521,8 @@ html[data-lion-theme="dark"] #section-archive details button{color:#a1f4c9!impor
 html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321a!important;color:#ffebad!important;border-color:#806d3a!important}
 
 </style>
+    <!-- Lion Fit: controllo aggiornamenti APK per Android (Beta 0.28.9) -->
+    <script defer src="./lionfit-updates.js?v=0288"></script>
 </head>
 <body class="bg-gray-100 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col relative pb-20">
 
@@ -539,7 +541,7 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
         </div>
     </header>
 
-    <div class="lf26-version pt-1">LION FIT · BETA 0.28.5</div>
+    <div class="lf26-version pt-1">LION FIT · BETA 0.28.9</div>
     <!-- MAIN CONTAINER -->
     <main class="flex-grow w-full max-w-3xl mx-auto p-4 pb-24 relative">
 
@@ -628,7 +630,6 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
                 
             </div>
 
-            <div id="lf282-missing-link-warning" class="hidden rounded-xl border border-amber-300 bg-amber-50 text-amber-950 text-xs p-3" role="status"></div>
 
             <div id="plan-assigned-section" class="space-y-3">
                 <div class="flex justify-between items-center px-1 gap-3">
@@ -1008,12 +1009,27 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
         </div>
     </div>
 
+    <!-- Lion Fit 0.28.6 — Eliminazione archivio: conferma esplicita, NO Cestino atleta -->
+    <div id="lf286-delete-modal" class="hidden fixed inset-0 z-[120] bg-black/75 p-4 flex items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="lf286-delete-title">
+      <div class="w-full max-w-md rounded-2xl bg-white border border-red-300 shadow-2xl p-5 space-y-3 text-gray-900">
+        <h3 id="lf286-delete-title" class="font-black text-lg text-red-800">Elimina definitivamente dall'Archivio?</h3>
+        <p id="lf286-delete-explanation" class="text-sm leading-relaxed">La scheda non comparirà più nel tuo Archivio e non potrai ripristinarla dall'app. Lo storico della palestra e il programma del coach restano protetti.</p>
+        <label for="lf286-delete-confirm" class="block text-sm font-semibold">Scrivi ELIMINA per confermare</label>
+        <input type="text" id="lf286-delete-confirm" autocomplete="off" autocapitalize="characters" class="w-full border-2 border-gray-300 rounded-xl px-3 py-3 text-black bg-white" placeholder="ELIMINA" />
+        <p id="lf286-delete-error" role="alert" class="text-red-800 text-xs hidden"></p>
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <button type="button" id="lf286-delete-cancel" class="rounded-xl border border-gray-300 py-3 font-bold text-gray-900">Annulla</button>
+          <button type="button" id="lf286-delete-accept" disabled class="rounded-xl bg-red-700 text-white py-3 font-bold disabled:opacity-40">Elimina definitivamente</button>
+        </div>
+      </div>
+    </div>
+
     <!-- SCRIPT FIREBASE E LOGICA APPLICATIVA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { 
-            getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, where, serverTimestamp, 
+            getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, where, serverTimestamp, writeBatch, 
             enableIndexedDbPersistence 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -2169,14 +2185,109 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
             lfRenderAssignedSheets();
         });
 
+        // Beta 0.28.6: l'atleta può eliminare SOLO copie archiviate protette.
+        // Ogni eliminazione crea atomicamente un'esclusione per impedire che la copia
+        // dell'archivio ricompaia dalle vecchie personal_templates ancora presenti.
+        // Le settimane e i documenti personali che il coach gestisce NON vengono toccati.
+        let lf286HiddenArchiveIds = new Set();
+        let lf286RulesReady = false;
+        let lf286Deleting = false;
+        let lf286PendingGroup = null;
+
+        function lf286IsScheduled(id) {
+            const key=String(id||'');
+            return athleteWeeksList.some(week=>Object.values(week.days||{}).some(day=>
+                String(day?.templateId||'')===key || String(day?.templateId2||'')===key));
+        }
+        function lf286DeleteEligibility(group) {
+            if(!lf286RulesReady) return 'Verifica prima le regole Firestore aggiornate.';
+            if(athleteWeeksLoadFailed) return 'Impossibile verificare le settimane. Riprova quando il Piano è disponibile.';
+            // La presenza della scheda nella programmazione impedisce sempre la
+            // cancellazione, anche se nell'Archivio esistono copie con ID diversi.
+            if(group.some(t=>lf286IsScheduled(t.id)))
+                return 'Impossibile eliminare: scheda attualmente in uso nella programmazione.';
+            if(!group.length || group.some(t=>!t._lf277Protected))
+                return 'Una o più copie non sono protette. Chiedi al coach di salvare le vecchie schede nell’Archivio.';
+            return '';
+        }
+        function lf286CloseDeleteModal() {
+            document.getElementById('lf286-delete-modal').classList.add('hidden');
+            document.getElementById('lf286-delete-confirm').value='';
+            document.getElementById('lf286-delete-error').classList.add('hidden');
+            document.getElementById('lf286-delete-accept').disabled=true;
+            lf286PendingGroup=null;
+        }
+        function lf286AskDelete(tpl) {
+            const signature=lf281TemplateSignature(tpl);
+            const group=(lf276ArchiveAllSheets||[]).filter(item=>lf281TemplateSignature(item)===signature);
+            const error=lf286DeleteEligibility(group);
+            if(error) { showAlert(error,'Eliminazione non disponibile'); return; }
+            lf286PendingGroup=group;
+            document.getElementById('lf286-delete-explanation').textContent=
+                `Stai eliminando definitivamente dall'Archivio personale «${tpl.title||'Scheda'}»`+
+                (group.length>1?` (${group.length} copie identiche).`:'.')+
+                ' Non potrai ripristinarla nell’app. Le copie storiche e i programmi del coach rimangono protetti.';
+            const modal=document.getElementById('lf286-delete-modal');
+            modal.classList.remove('hidden');
+            document.getElementById('lf286-delete-confirm').value='';
+            document.getElementById('lf286-delete-accept').disabled=true;
+            document.getElementById('lf286-delete-error').classList.add('hidden');
+            document.getElementById('lf286-delete-confirm').focus();
+        }
+        document.getElementById('lf286-delete-cancel').addEventListener('click',lf286CloseDeleteModal);
+        document.getElementById('lf286-delete-confirm').addEventListener('input',(event)=>{
+            document.getElementById('lf286-delete-accept').disabled=
+                event.target.value.trim().toUpperCase()!=='ELIMINA' || lf286Deleting;
+        });
+        document.getElementById('lf286-delete-accept').addEventListener('click',async()=>{
+            if(lf286Deleting || !lf286PendingGroup ||
+                document.getElementById('lf286-delete-confirm').value.trim().toUpperCase()!=='ELIMINA')return;
+            const group=[...lf286PendingGroup];
+            const failure=lf286DeleteEligibility(group);
+            if(failure){showAlert(failure,'Operazione bloccata');lf286CloseDeleteModal();return;}
+            lf286Deleting=true;
+            const confirmButton=document.getElementById('lf286-delete-accept');
+            confirmButton.disabled=true;
+            try {
+                // Batch di due marcatori per volta: nessuna scheda viene distrutta nel database.
+                // Tutte le copie archiviate con gli stessi esercizi/serie/ripetizioni sono rimosse.
+                for(let i=0;i<group.length;i+=2){
+                    const chunk=group.slice(i,i+2);
+                    const batch=writeBatch(db);
+                    for(const tpl of chunk){
+                        // Nasconde la copia SOLO nella visualizzazione personale.
+                        // Il documento storico archive_templates rimane intatto
+                        // e nessuna assegnazione del coach viene modificata.
+                        const exclusionDoc=doc(db,'gyms',currentGymId,'athlete_programs',currentUserUid,'archive_exclusions',String(tpl.id));
+                        batch.set(exclusionDoc,{sourceTemplateId:String(tpl.id),hiddenBy:currentUserUid,hiddenAt:serverTimestamp()});
+                    }
+                    await batch.commit();
+                }
+                lf286CloseDeleteModal();
+                await loadAthleteTemplates();
+                showAlert('La scheda non comparirà più nel tuo Archivio personale. Le copie storiche della palestra e le assegnazioni non sono state eliminate.','Archivio aggiornato');
+            } catch(e) {
+                console.error('Eliminazione archivio non riuscita',e);
+                const status=document.getElementById('lf286-delete-error');
+                status.textContent='Operazione non completata. Verifica le regole Firestore e aggiorna l’Archivio prima di riprovare. Alcune schede potrebbero essere già state nascoste.';
+                status.classList.remove('hidden');
+                await loadAthleteTemplates();
+            } finally { lf286Deleting=false; confirmButton.disabled=true; }
+        });
+
         async function lf277LoadProtectedArchive(personalDocs){
             const current=(personalDocs||[]).map(snap=>({id:snap.id,...snap.data(),isPersonal:true,_lf277Protected:false}));
             const status=document.getElementById('lf277-archive-status');
             try {
                 const path=collection(db,'gyms',currentGymId,'athlete_programs',currentUserUid,'archive_templates');
                 const archived=await getDocs(path);
-                const byId=new Map(current.map(t=>[String(t.id),t]));
+                const exclusionsPath=collection(db,'gyms',currentGymId,'athlete_programs',currentUserUid,'archive_exclusions');
+                const exclusions=await getDocs(exclusionsPath);
+                lf286HiddenArchiveIds=new Set(exclusions.docs.map(snap=>String(snap.id)));
+                lf286RulesReady=true;
+                const byId=new Map(current.filter(t=>!lf286HiddenArchiveIds.has(String(t.id))).map(t=>[String(t.id),t]));
                 archived.forEach(snap=>{
+                    if(lf286HiddenArchiveIds.has(String(snap.id)))return;
                     const d=snap.data();
                     byId.set(String(snap.id),{id:snap.id,title:d.title,exercises:d.exercises||[],
                         createdAt:d.archivedAt,isPersonal:true,_lf277Protected:true});
@@ -2189,8 +2300,9 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
                     ? `${protectedCount} schede diverse protette. ${remaining} schede diverse ancora da proteggere: chiedi al coach di usare “Salva le vecchie schede nell'ARCHIVIO”. Le copie identiche sono riunite nella visualizzazione.`
                     : 'Le tue schede diverse sono conservate in copie protette, indipendenti dalle settimane e dal Cestino.';
             } catch(err) {
+                lf286RulesReady=false;
                 console.warn('Archivio protetto non accessibile:',err);
-                lf276ArchiveAllSheets=current;
+                lf276ArchiveAllSheets=current.filter(t=>!lf286HiddenArchiveIds.has(String(t.id)));
                 if(status)status.textContent='Archivio protetto non disponibile: le schede mostrate provengono dalle copie personali, che possono ancora essere rimosse. Verifica le regole Firebase.';
             }
             lf276RenderArchive();
@@ -2277,7 +2389,36 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
                     (tpl.deletedAt?'Scheda nel Cestino · da proteggere':'Scheda ricevuta · da proteggere');
                 button.append(title,label);
                 button.addEventListener('click',()=>openViewTemplateModal(tpl));
-                sheetsHost.append(button);
+                const row=document.createElement('div');
+                row.className='flex flex-col sm:flex-row gap-2 rounded-xl border border-gray-200 p-2 bg-white';
+                button.className+=' flex-1 min-w-0';
+                row.append(button);
+                const signature=lf281TemplateSignature(tpl);
+                const group=(lf276ArchiveAllSheets||[]).filter(item=>lf281TemplateSignature(item)===signature);
+                const why=lf286DeleteEligibility(group);
+                const action=document.createElement('button');
+                action.type='button';
+                action.className='rounded-xl px-4 py-3 border border-red-200 bg-red-50 text-red-800 font-bold text-xs min-h-[42px]';
+                const usedInProgram=group.some(t=>lf286IsScheduled(t.id)) && !athleteWeeksLoadFailed;
+                action.textContent=why ? (usedInProgram ? 'Impossibile eliminare' : 'Eliminazione non disponibile') : 'Elimina definitivamente';
+                action.title=why || 'Elimina definitivamente solo dal tuo Archivio personale';
+                if(usedInProgram){
+                    // Forniamo una spiegazione al tocco senza eseguire alcuna scrittura.
+                    action.className+=' cursor-pointer';
+                    action.addEventListener('click',()=>showAlert(
+                        'Impossibile eliminare: scheda attualmente in uso nella programmazione.',
+                        'Scheda in utilizzo'
+                    ));
+                } else if(why){action.disabled=true;action.className+=' opacity-60 cursor-not-allowed';}
+                else action.addEventListener('click',()=>lf286AskDelete(tpl));
+                row.append(action);
+                if(why){
+                    const explanation=document.createElement('p');
+                    explanation.className='text-[11px] text-gray-600 sm:col-span-2';
+                    explanation.textContent=why;
+                    const wrap=document.createElement('div');wrap.className='space-y-1';
+                    wrap.append(row,explanation);sheetsHost.append(wrap);
+                }else sheetsHost.append(row);
             });
             if(moreBtn){
                 moreBtn.classList.toggle('hidden',sheets.length<=lf282ArchiveVisibleCount);
@@ -2310,13 +2451,8 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
                     if(d?.templateId2 && !known.has(String(d.templateId2)))missing.add(d.templateId2);
                 }
             }
-            const warning=document.getElementById('lf282-missing-link-warning');
-            if(warning){
-                warning.classList.toggle('hidden',missing.size===0);
-                warning.textContent=missing.size
-                  ? `${missing.size} schede collegate alle settimane non sono disponibili tra le schede personali attive. Potrebbero essere nel Cestino: chiedi al coach di ripristinarle e verificare l'allineamento. Non cancellare le settimane.`
-                  : '';
-            }
+            // Nessun avviso giallo permanente nell'Area Atleta: i riferimenti
+            // mancanti sono segnalati solo nella console diagnostica.
             if(missing.size) console.warn('Schede settimanali da allineare dal coach:',missing.size);
         }
 
