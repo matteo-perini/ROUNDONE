@@ -530,7 +530,7 @@ html[data-lion-theme="dark"] #section-profile > div:first-child {background:#000
 #btn-logout-settings svg {flex-shrink:0;stroke:currentColor;}
 </style>
     <!-- Lion Fit: controllo aggiornamenti APK per Android (Beta 0.28.10) -->
-    <script defer src="./lionfit-updates.js?v=02810"></script>
+    <script defer src="./lionfit-updates.js?v=02811"></script>
 </head>
 <body class="bg-gray-100 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col relative pb-20">
 
@@ -549,7 +549,7 @@ html[data-lion-theme="dark"] #section-profile > div:first-child {background:#000
         </div>
     </header>
 
-    <div class="lf26-version pt-1">LION FIT · BETA 0.28.10</div>
+    <div class="lf26-version pt-1">LION FIT · BETA 0.28.13</div>
     <!-- MAIN CONTAINER -->
     <main class="flex-grow w-full max-w-3xl mx-auto p-4 pb-24 relative">
 
@@ -683,7 +683,7 @@ html[data-lion-theme="dark"] #section-profile > div:first-child {background:#000
                     <button type="button" id="lf276-archive-reload" class="bg-green-50 text-green-900 border border-green-200 rounded-lg p-2 text-xs font-black">↻ Aggiorna</button>
                 </div>
                 <p class="text-xs text-gray-600">Qui ritrovi soltanto le tue schede di allenamento ricevute dal coach: pesistica, forza, potenza, ipertrofia, mobilità e altre schede, anche quando non sono più collegate a un giorno del Piano.</p>
-                <p id="lf277-archive-status" class="text-[11px] text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-2">Le copie protette sono conservate separatamente dalle schede attive. Quelle precedenti all'aggiornamento vanno messe al sicuro dal coach.</p>
+                <p id="lf277-archive-status" role="status" class="hidden text-[11px] text-gray-500 px-1"></p>
             </div>
             <div class="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
                 <div class="flex items-center justify-between gap-2"><h4 class="font-black text-sm text-black">Le mie schede di allenamento</h4><span id="lf282-archive-count" class="text-xs font-semibold text-gray-500"></span></div>
@@ -691,7 +691,7 @@ html[data-lion-theme="dark"] #section-profile > div:first-child {background:#000
                 <input id="lf282-archive-search" type="search" placeholder="Cerca nell'Archivio..." class="w-full rounded-xl bg-gray-50 border border-gray-300 text-black text-sm p-3 outline-none focus:border-green-500" autocomplete="off"/>
                 <div id="lf276-archived-sheets" class="grid grid-cols-1 sm:grid-cols-2 gap-2"><p class="text-xs text-gray-500">Caricamento...</p></div>
                 <button type="button" id="lf282-archive-more" class="hidden w-full p-3 border border-green-300 bg-green-50 text-green-900 font-bold text-xs rounded-xl">Mostra altre schede</button>
-                <p class="text-[11px] text-gray-500">Le copie storiche protette non possono essere eliminate dall'app con le regole Firebase attuali. Le rimozioni dal Piano non cancellano lo storico.</p>
+                
             </div>
         </section>
 
@@ -1038,7 +1038,7 @@ html[data-lion-theme="dark"] #section-profile > div:first-child {background:#000
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { 
-            getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, where, serverTimestamp, writeBatch, 
+            getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, where, onSnapshot, serverTimestamp, writeBatch, 
             enableIndexedDbPersistence 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -1414,6 +1414,7 @@ html[data-lion-theme="dark"] #section-profile > div:first-child {background:#000
                 await loadAthleteWeeks();
                 await loadAthleteTemplates();
                 await loadCommunityRoster();
+                lf2813StartAthleteLive();
 
             } catch (err) {
                 console.error("Errore caricamento dati atleta:", err);
@@ -2284,14 +2285,14 @@ html[data-lion-theme="dark"] #section-profile > div:first-child {background:#000
             } finally { lf286Deleting=false; confirmButton.disabled=true; }
         });
 
-        async function lf277LoadProtectedArchive(personalDocs){
+        async function lf277LoadProtectedArchive(personalDocs,liveArchivedSnap=null,liveExclusionSnap=null){
             const current=(personalDocs||[]).map(snap=>({id:snap.id,...snap.data(),isPersonal:true,_lf277Protected:false}));
             const status=document.getElementById('lf277-archive-status');
             try {
                 const path=collection(db,'gyms',currentGymId,'athlete_programs',currentUserUid,'archive_templates');
-                const archived=await getDocs(path);
+                const archived=liveArchivedSnap || await getDocs(path);
                 const exclusionsPath=collection(db,'gyms',currentGymId,'athlete_programs',currentUserUid,'archive_exclusions');
-                const exclusions=await getDocs(exclusionsPath);
+                const exclusions=liveExclusionSnap || await getDocs(exclusionsPath);
                 lf286HiddenArchiveIds=new Set(exclusions.docs.map(snap=>String(snap.id)));
                 lf286RulesReady=true;
                 const byId=new Map(current.filter(t=>!lf286HiddenArchiveIds.has(String(t.id))).map(t=>[String(t.id),t]));
@@ -2305,26 +2306,30 @@ html[data-lion-theme="dark"] #section-profile > div:first-child {background:#000
                 const uniqueArchive=lf281UniqueTemplates(lf276ArchiveAllSheets);
                 const protectedCount=uniqueArchive.filter(t=>t._lf277Protected).length;
                 const remaining=uniqueArchive.length-protectedCount;
-                if(status)status.textContent=remaining
-                    ? `${protectedCount} schede diverse protette. ${remaining} schede diverse ancora da proteggere: chiedi al coach di usare “Salva le vecchie schede nell'ARCHIVIO”. Le copie identiche sono riunite nella visualizzazione.`
-                    : 'Le tue schede diverse sono conservate in copie protette, indipendenti dalle settimane e dal Cestino.';
+                // Nessun banner permanente: mostrano una nota discreta solo eventuali copie non protette.
+                if(status){
+                    status.textContent=remaining
+                        ? `${remaining} schede ancora senza copia storica protetta: chiedi al coach di salvarle dall’Admin.`
+                        : '';
+                    status.classList.toggle('hidden',!remaining);
+                }
             } catch(err) {
                 lf286RulesReady=false;
                 console.warn('Archivio protetto non accessibile:',err);
                 lf276ArchiveAllSheets=current.filter(t=>!lf286HiddenArchiveIds.has(String(t.id)));
-                if(status)status.textContent='Archivio protetto non disponibile: le schede mostrate provengono dalle copie personali, che possono ancora essere rimosse. Verifica le regole Firebase.';
+                if(status){status.textContent='Impossibile leggere le copie protette. Verifica le regole Firebase.';status.classList.remove('hidden');}
             }
             lf276RenderArchive();
         }
 
-        async function loadAthleteTemplates() {
+        async function loadAthleteTemplates(livePersonalSnap=null,liveArchivedSnap=null,liveExclusionSnap=null) {
             if (!currentUserUid || !currentGymId) return;
             try {
                 const ref = collection(db, 'gyms', currentGymId, 'athlete_programs', currentUserUid, 'personal_templates');
-                const snapshot = await getDocs(ref);
+                const snapshot = livePersonalSnap || await getDocs(ref);
                 const personalList = [];
                 snapshot.forEach(snap => {if(!snap.data().deletedAt)personalList.push({ id: snap.id, ...snap.data(), isPersonal: true });});
-                await lf277LoadProtectedArchive(snapshot.docs);
+                await lf277LoadProtectedArchive(snapshot.docs,liveArchivedSnap,liveExclusionSnap);
                 personalList.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'it'));
                 assignedPersonalTemplates = personalList;
                 lfRenderAssignedSheets();
@@ -2355,6 +2360,95 @@ html[data-lion-theme="dark"] #section-profile > div:first-child {background:#000
                 planTotalCountBadge.textContent = 'Caricamento incompleto';
             }
         }
+
+        // Beta 0.28.13: aggiornamento collaborativo in tempo reale, senza ricaricare la pagina.
+        // Quattro collezioni del solo atleta + Team pubblico; i cataloghi di esercizi non vengono ri-scaricati.
+        let lf2813AthleteLive=null;
+        function lf2813StopAthleteLive(){
+            const live=lf2813AthleteLive;if(!live)return;
+            live.active=false;live.unsubs.forEach(fn=>{try{fn();}catch(_){}});
+            if(live.timer)clearTimeout(live.timer);
+            lf2813AthleteLive=null;
+        }
+        function lf2813StartAthleteLive(){
+            lf2813StopAthleteLive();
+            if(!currentUserUid||!currentGymId)return;
+            const gym=currentGymId,uid=currentUserUid;
+            const live={gym,uid,active:true,unsubs:[],data:{},flags:new Set(),busy:false,pending:false,timer:null};
+            lf2813AthleteLive=live;
+            function schedule(key,snap){
+                if(!live.active||lf2813AthleteLive!==live)return;
+                live.data[key]=snap;live.flags.add(key);
+                if(live.timer)clearTimeout(live.timer);
+                live.timer=setTimeout(()=>{live.timer=null;lf2813FlushAthleteLive(live)},75);
+            }
+            function listen(key,reference){
+                live.unsubs.push(onSnapshot(reference,snap=>schedule(key,snap),err=>{
+                    console.warn('[Lion Fit] Sincronizzazione '+key+' sospesa:',err.code||err.message);
+                    // Non nascondiamo i messaggi di permesso e non inventiamo schede disponibili.
+                }));
+            }
+            const base=['gyms',gym,'athlete_programs',uid];
+            listen('weeks',collection(db,...base,'weeks'));
+            listen('personal',collection(db,...base,'personal_templates'));
+            listen('archive',collection(db,...base,'archive_templates'));
+            listen('exclusions',collection(db,...base,'archive_exclusions'));
+            listen('team',query(collection(db,'team_public'),where('gymId','==',gym),where('role','==','athlete')));
+            live.unsubs.push(onSnapshot(doc(db,'users',uid),snap=>{
+                if(!live.active||!snap.exists()||lf2813AthleteLive!==live)return;
+                const info=snap.data();if(info.gymId!==gym)return;
+                displayFullname.textContent=`${info.name||''} ${info.surname||''}`.trim()||'ATLETA';
+                homeUserName.textContent=info.name||'Atleta';
+                displayLocation.textContent=info.location||'Italia';
+                displayBio.textContent=info.bio||'Aggiungi una bio al tuo profilo';
+                // Non toccare i campi del modulo mentre l'atleta li sta modificando.
+                const photo=info.photoUrl||info.photoURL;
+                if(photo && avatarPreviewImg.src!==photo){
+                    avatarPreviewImg.src=photo;avatarPreviewImg.classList.remove('hidden');
+                    avatarPlaceholderIcon.classList.add('hidden');
+                }
+            },err=>console.warn('[Lion Fit] Profilo non sincronizzato:',err.code||err.message)));
+        }
+        async function lf2813FlushAthleteLive(live){
+            if(!live.active||lf2813AthleteLive!==live)return;
+            if(live.busy){live.pending=true;return;}
+            live.busy=true;
+            try{
+                do{
+                    live.pending=false;
+                    const keys=new Set(live.flags);live.flags.clear();
+                    if(keys.has('team')&&live.data.team){
+                        teamMembersList=live.data.team.docs.map(d=>({id:d.id,...d.data()}));
+                        document.getElementById('community-count-badge').textContent=`${teamMembersList.length} membri`;
+                        const badge=document.getElementById('lf-team-shortcut-count');
+                        if(badge)badge.textContent=`${teamMembersList.length} atlet${teamMembersList.length===1?'a':'i'} iscritt${teamMembersList.length===1?'o':'i'}`;
+                        const term=document.getElementById('community-search-input').value.trim().toLocaleLowerCase('it');
+                        renderCommunityList(term?teamMembersList.filter(u=>`${u.name||''} ${u.surname||''} ${u.bio||''}`.toLocaleLowerCase('it').includes(term)):teamMembersList);
+                    }
+                    const data=live.data;
+                    if(!data.weeks||!data.personal)continue;
+                    const changedCore=keys.has('weeks')||keys.has('personal');
+                    const changedArchive=keys.has('archive')||keys.has('exclusions');
+                    if(changedCore){
+                        await loadAthleteWeeks(data.weeks,data.personal,true);
+                        if(!live.active||lf2813AthleteLive!==live)break;
+                        await loadAthleteTemplates(data.personal,data.archive||null,data.exclusions||null);
+                    }else if(changedArchive && data.archive && data.exclusions){
+                        await lf277LoadProtectedArchive(data.personal.docs,data.archive,data.exclusions);
+                    }
+                }while(live.pending||live.flags.size);
+            }catch(err){console.error('[Lion Fit] Aggiornamento in tempo reale',err);}
+            finally{
+                live.busy=false;
+                if(live.active&&live.flags.size&&!live.timer){
+                    live.timer=setTimeout(()=>{live.timer=null;lf2813FlushAthleteLive(live)},100);
+                }
+            }
+        }
+        window.addEventListener('pagehide',lf2813StopAthleteLive);
+        window.addEventListener('pageshow',event=>{
+            if(event.persisted&&currentGymId&&currentUserUid)lf2813StartAthleteLive();
+        });
 
         // Archivio atleta: copie protette di sole schede, mai settimane.
         // Prima della migrazione mostra anche le vecchie schede, marcate come non protette.
@@ -2570,15 +2664,16 @@ html[data-lion-theme="dark"] #section-profile > div:first-child {background:#000
         }
 
         // CARICAMENTO SETTIMANE & CONTEGGIO TOTALE SETTIMANE
-        async function loadAthleteWeeks() {
+        async function loadAthleteWeeks(liveWeekSnap=null,livePersonalSnap=null,preserveWeek=false) {
             if (!currentUserUid || !currentGymId) return;
             const circlesNav = document.getElementById('weeks-circles-nav');
             const weekContainer = document.getElementById('active-week-container');
             const weeksBadge = document.getElementById('weeks-total-count-badge');
+            const selectedWeekId=preserveWeek?athleteWeeksList[activeWeekIndex]?.id:null;
 
             try {
                 const weeksRef = collection(db, "gyms", currentGymId, "athlete_programs", currentUserUid, "weeks");
-                const snapshot = await getDocs(weeksRef);
+                const snapshot = liveWeekSnap || await getDocs(weeksRef);
                 athleteWeeksList = [];
                 athleteWeeksLoadFailed = false;
                 snapshot.forEach(docSnap => {if(!docSnap.data().deletedAt)athleteWeeksList.push({ id: docSnap.id, ...docSnap.data() });});
@@ -2588,7 +2683,7 @@ html[data-lion-theme="dark"] #section-profile > div:first-child {background:#000
                 weeksBadge.textContent = `${athleteWeeksList.length} Settimane`;
 
                 const personalRef = collection(db, "gyms", currentGymId, "athlete_programs", currentUserUid, "personal_templates");
-                const personalSnap = await getDocs(personalRef);
+                const personalSnap = livePersonalSnap || await getDocs(personalRef);
                 let personalList = [];
                 personalSnap.forEach(docSnap => {if(!docSnap.data().deletedAt)personalList.push({ id: docSnap.id, ...docSnap.data() });});
                 await loadLinkedWeekTemplates(personalList);
@@ -2617,8 +2712,10 @@ html[data-lion-theme="dark"] #section-profile > div:first-child {background:#000
                     const first = new Date(y, m - 1, d).getTime();
                     return today >= first && today < first + 7 * 24 * 60 * 60 * 1000;
                 });
+                const rememberedIndex=selectedWeekId?athleteWeeksList.findIndex(w=>w.id===selectedWeekId):-1;
+                const nextIndex=rememberedIndex>=0?rememberedIndex:(actualWeek>=0?actualWeek:0);
                 activeWeekIndex = -1;
-                selectWeek(actualWeek >= 0 ? actualWeek : 0);
+                selectWeek(nextIndex);
                 updateHomeDashboardForToday(athleteWeeksList[actualWeek >= 0 ? actualWeek : 0]);
 
             } catch (error) {

@@ -654,6 +654,23 @@ html[data-lion-theme="dark"] .lf29-sheet-name,html[data-lion-theme="dark"] .lf29
 html[data-lion-theme="dark"] .lf29-subtitle{color:#c3cdd3}
 html[data-lion-theme="dark"] .lf29-link-option.lf29-previewed{background:#183f35;border-color:#65c79d}
 </style>
+<style id="lf2813-layer-realtime">
+/* Conferme SEMPRE davanti a Gestisci giorni, in ogni tema e viewport. */
+#lf29-manage-schedule-modal{z-index:110}
+#custom-confirm-modal{z-index:180!important}
+#custom-alert-modal{z-index:185!important}
+#custom-confirm-modal>div,#custom-alert-modal>div{background:#f8fafc!important;color:#12202d!important;border:2px solid #b7c9c3!important;box-shadow:0 22px 75px #0009}
+#custom-confirm-message,#custom-alert-message{color:#334155!important;font-size:clamp(13px,1vw,15px)!important;line-height:1.55!important}
+#custom-confirm-yes{color:#fff!important;background:#b91c1c!important}
+#custom-confirm-cancel{color:#142333!important;background:#e5e7eb!important}
+#lf29-manage-schedule-modal .lf29-modal-body{background:#132533;color:#f4faf6;border:1px solid #5a7781;box-shadow:0 20px 75px #0009}
+#lf29-manage-schedule-modal .lf29-subtitle{color:#dde9e5!important}
+#lf29-manage-schedule-modal .lf29-link-option{background:#1c3645!important;border-color:#52707a!important;color:#fff!important}
+#lf29-manage-schedule-modal .lf29-btn:not(.lf29-btn-danger){color:#e3fff1;background:#1e5548;border-color:#5a927e}
+#lf29-manage-schedule-modal .lf29-btn-danger{color:#8f1420!important;background:#fff1f2!important;border:1px solid #fecdd3!important}
+#lf29-manage-schedule-modal button:focus-visible,#custom-confirm-modal button:focus-visible{outline:3px solid #22c55e;outline-offset:2px}
+@media(max-width:640px){#lf29-manage-schedule-modal .lf29-modal-body{padding:13px}#lf29-manage-schedule-modal .lf29-link-option{gap:8px}}
+</style>
 <style id="lf2810-admin-refinement">
 /* Lion Fit 0.28.10 · revisione profilo, programma e archivio */
 #section-profile > div:first-child > div:first-child,
@@ -688,7 +705,7 @@ html[data-lion-theme="dark"] #active-week-editor-container .lf-day-card .lf2810-
 #lf2810-archive-more{margin:8px auto 0;max-width:360px;min-height:44px;}
 </style>
     <!-- Lion Fit: controllo aggiornamenti APK per Android (Beta 0.28.10) -->
-    <script defer src="./lionfit-updates.js?v=02810"></script>
+    <script defer src="./lionfit-updates.js?v=02811"></script>
 </head>
 <body class="bg-gray-50 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col md:flex-row relative overflow-x-hidden">
 
@@ -741,7 +758,7 @@ html[data-lion-theme="dark"] #active-week-editor-container .lf-day-card .lf2810-
 
         <div class="p-4 border-t border-gray-200 space-y-3">
             <button data-lf-theme-toggle class="lf26-theme-btn w-full" aria-label="Cambia tema">🌙 Tema scuro</button>
-            <div class="lf26-version">LION FIT · BETA 0.28.10</div>
+            <div class="lf26-version">LION FIT · BETA 0.28.13</div>
             <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-1">
                 <span class="text-[9px] font-black uppercase text-gray-500 block">Codice Invito Palestra</span>
                 <span id="side-gym-code" class="text-xs font-black text-neon tracking-widest block">Cod. ---</span>
@@ -768,7 +785,7 @@ html[data-lion-theme="dark"] #active-week-editor-container .lf-day-card .lf2810-
 
         <!-- ================= SEZIONE 1: HOME / DASHBOARD ================= -->
         <section id="section-home" class="block space-y-5">
-            <div class="flex justify-end"><span class="lf26-version">Beta 0.28.10</span></div>
+            <div class="flex justify-end"><span class="lf26-version">Beta 0.28.13</span></div>
             <div class="lf14-welcome">
                 <div class="lf14-welcome-top"><span class="lf14-eyebrow">LION FIT · PANNELLO COACH</span><span class="lf14-status"><span></span> Panoramica palestra</span></div>
                 <h2>Benvenuto, <span id="welcome-coach-name">Coach</span></h2>
@@ -1058,7 +1075,7 @@ html[data-lion-theme="dark"] #active-week-editor-container .lf-day-card .lf2810-
             <p class="text-xs text-gray-600">L’invito è personale, vale 7 giorni e si usa una sola volta. Inserisci l’email per inviarlo direttamente, oppure genera e copia il link. Il vecchio codice GYM-XXXX non iscrive più nuovi atleti.</p>
             <div class="lf29-invite-subcard">
               <h4>✉ Invio diretto via email</h4>
-              <p class="text-xs text-gray-600">Crea un nuovo invito personale e invia automaticamente il collegamento tramite EmailJS.</p>
+              <p class="text-xs text-gray-600">Crea un invito personale e lo invia tramite EmailJS. Il link non comparirà nella sezione manuale.</p>
               <label for="lf28-athlete-email" class="block text-xs font-black text-gray-700">Email dell’atleta</label>
               <input type="email" id="lf28-athlete-email" inputmode="email" autocomplete="email" placeholder="atleta@esempio.it" class="w-full min-w-0 border border-gray-300 bg-white text-gray-900 rounded-xl px-3.5 py-3 text-sm" />
               <button type="button" id="lf28-send-athlete-email" class="bg-neon text-white rounded-xl px-4 py-3 font-black text-xs uppercase">✉ Invia codice invito</button>
@@ -1066,7 +1083,7 @@ html[data-lion-theme="dark"] #active-week-editor-container .lf-day-card .lf2810-
             </div>
             <div class="lf29-invite-subcard">
               <h4>🔗 Genera e copia link</h4>
-              <p class="text-xs text-gray-600">Crea un invito valido 7 giorni, da inviare personalmente via WhatsApp o SMS. Non serve inserire l’email.</p>
+              <p class="text-xs text-gray-600">Ogni clic crea un NUOVO link monouso valido 7 giorni, da inviare via WhatsApp o SMS. Non serve inserire l’email.</p>
               <button type="button" id="lf24-create-athlete-invite" class="bg-white text-green-900 border border-green-300 rounded-xl px-4 py-3 font-black text-xs uppercase">+ Genera link</button>
               <div id="lf24-athlete-invite-result" class="hidden bg-green-50 border border-green-200 rounded-xl p-3 space-y-2">
                 <label for="lf24-athlete-invite-link" class="block font-bold text-xs text-green-900">Collegamento da condividere privatamente</label>
@@ -1383,9 +1400,9 @@ Martedì	Forza	...
     </div>
 
     <!-- MODAL CONFERME -->
-    <div id="custom-confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[80] hidden flex items-center justify-center p-4">
+    <div id="custom-confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="lf2813-confirm-heading" aria-describedby="custom-confirm-message" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[80] hidden flex items-center justify-center p-4">
         <div class="bg-white border border-gray-200 text-black w-full max-w-sm rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-3 sm:space-y-4 text-center">
-            <h4 class="font-black text-sm sm:text-base uppercase tracking-widest text-black">Conferma</h4>
+            <h4 id="lf2813-confirm-heading" class="font-black text-sm sm:text-base uppercase tracking-widest text-black">Conferma</h4>
             <p id="custom-confirm-message" class="text-[10px] sm:text-xs font-medium text-gray-600 leading-relaxed"></p>
             <div class="grid grid-cols-2 gap-2 sm:gap-3 pt-1 sm:pt-2">
                 <button type="button" id="custom-confirm-cancel" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-black uppercase tracking-widest py-2.5 sm:py-3 rounded-xl text-[9px] sm:text-[10px]">Annulla</button>
@@ -1523,8 +1540,9 @@ Martedì	Forza	...
             const newCancelBtn = cancelBtn.cloneNode(true);
             cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
             
-            newYesBtn.addEventListener('click', () => { modal.classList.add('hidden'); onYes(); });
+            newYesBtn.addEventListener('click', () => { modal.classList.add('hidden'); Promise.resolve().then(onYes).catch(err=>showAlert('Operazione non riuscita: '+(err?.message||err),'Errore')); });
             newCancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+            requestAnimationFrame(()=>newCancelBtn.focus({preventScroll:true}));
         }
 
         let lf23CurrentRole = 'collaborator';
@@ -1756,6 +1774,7 @@ Martedì	Forza	...
                 await loadAthletes();
                 await loadTemplates();
                 await loadCentralExerciseCatalog();
+                lf2813StartAdminLiveCollections();
 
             } catch (error) {
                 console.error("Errore inizializzazione Lion Fit:", error);
@@ -1893,40 +1912,92 @@ Martedì	Forza	...
         });
 
         // V24: inviti atleta monouso. La validazione effettiva e' nelle Security Rules V3.
-        async function lf24LoadAthleteInvites(){
+        async function lf24LoadAthleteInvites(liveInvitesSnap=null){
             if(!currentGymId) return;
             const root=document.getElementById('lf24-athlete-invites-list');
-            root.textContent='Caricamento inviti...';
+            if(!liveInvitesSnap)root.textContent='Caricamento inviti...';
             try {
-                const snapshot=await getDocs(collection(db,'gyms',currentGymId,'athlete_invites'));
-                const items=snapshot.docs.map(d=>({id:d.id,...d.data()}))
-                    .filter(inv=>inv.status==='pending' && (!inv.expiresAt?.toDate || inv.expiresAt.toDate().getTime()>Date.now())) // Solo inviti utilizzabili, senza eliminare i token dal database.
-                    .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,12);
-                lf261CleanInvitePreview(snapshot.docs.map(d=>({id:d.id,...d.data()})), 'lf24-athlete-invite-link', 'lf24-athlete-invite-result','athleteInvite');
+                const snapshot=liveInvitesSnap||await getDocs(collection(db,'gyms',currentGymId,'athlete_invites'));
+                const all=snapshot.docs.map(d=>({id:d.id,...d.data()}));
+                lf261CleanInvitePreview(all,'lf24-athlete-invite-link','lf24-athlete-invite-result','athleteInvite');
+                const pending=all.filter(inv=>inv.status==='pending' &&
+                    (!inv.expiresAt?.toDate || inv.expiresAt.toDate().getTime()>Date.now()))
+                    .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+                const manual=pending.filter(inv=>inv.id.startsWith('a1')).slice(0,12);
+                // Email e vecchi inviti, privi di metadati di canale, sono gestibili ma non
+                // riempiono la lista dei link creati con il pulsante manuale.
+                const others=pending.filter(inv=>!inv.id.startsWith('a1'));
                 root.replaceChildren();
-                if(!items.length)root.textContent='Nessun invito da visualizzare.';
-                for(const inv of items){
-                    const wrap=document.createElement('div');wrap.className='border rounded-lg p-2 flex items-center justify-between gap-2';
-                    const label=document.createElement('span');
-                    const expired=inv.expiresAt?.toDate?.().getTime()<Date.now();
-                    label.textContent=inv.status==='claimed'?'Utilizzato':inv.status==='revoked'?'Revocato':expired?'Scaduto':'Disponibile';
-                    const suffix=document.createElement('small');suffix.textContent=' · '+inv.id.slice(0,8)+'…';
-                    label.appendChild(suffix);wrap.appendChild(label);
-                    if(inv.status==='pending'&&!expired){
-                        const revoke=document.createElement('button');revoke.type='button';revoke.textContent='Revoca';
-                        revoke.className='border border-red-200 text-red-700 rounded-lg px-3 py-2 text-xs';
-                        revoke.onclick=()=>showConfirm('Revocare questo invito atleta?',async()=>{
+                const label=document.createElement('p');
+                label.className='font-black text-gray-700';
+                label.textContent='Link manuali attivi: '+manual.length;
+                root.appendChild(label);
+                function renderInvite(inv,parent){
+                    const wrap=document.createElement('div');
+                    wrap.className='border rounded-lg p-2 flex items-center justify-between gap-2';
+                    const caption=document.createElement('span');
+                    caption.textContent=(inv.id.startsWith('a1')?'Link manuale':
+                        inv.id.startsWith('e1')?'Invito email':'Invito precedente')+
+                        ' · '+inv.id.slice(0,8)+'…';
+                    wrap.appendChild(caption);
+                    if(inv.id.startsWith('a1')){
+                        const copy=document.createElement('button');
+                        copy.type='button';copy.textContent='Copia link';
+                        copy.className='border border-green-200 text-green-800 rounded-lg px-3 py-2 text-xs';
+                        copy.onclick=async()=>{
+                            const url=new URL(lf28PublicUrl('index.html'));
+                            url.searchParams.set('gym',currentGymId);
+                            url.searchParams.set('athleteInvite',inv.id);
                             try{
-                                await updateDoc(doc(db,'gyms',currentGymId,'athlete_invites',inv.id),{status:'revoked'});
-                                const field=document.getElementById('lf24-athlete-invite-link');
+                                await navigator.clipboard.writeText(url.href);
+                                lf28Toast('Link manuale copiato');
+                            }catch(_){showAlert('Copia non riuscita: usa il pulsante Genera link su un dispositivo compatibile.','Copia non riuscita');}
+                        };
+                        wrap.appendChild(copy);
+                    }
+                    const revoke=document.createElement('button');
+                    revoke.type='button';revoke.textContent='Revoca';
+                    revoke.className='border border-red-200 text-red-700 rounded-lg px-3 py-2 text-xs';
+                    revoke.onclick=()=>showConfirm('Revocare questo invito atleta?',async()=>{
+                        try{
+                            await updateDoc(doc(db,'gyms',currentGymId,'athlete_invites',inv.id),{status:'revoked'});
+                            const field=document.getElementById('lf24-athlete-invite-link');
+                            try {
                                 if(field.value && new URL(field.value).searchParams.get('athleteInvite')===inv.id){
-                                    field.value=''; document.getElementById('lf24-athlete-invite-result').classList.add('hidden');
+                                    field.value='';
+                                    document.getElementById('lf24-athlete-invite-result').classList.add('hidden');
                                 }
-                                await lf24LoadAthleteInvites();
+                            }catch(_){}
+                            if(lf28LastUnsentInvite){
+                                try {
+                                    if(new URL(lf28LastUnsentInvite.link).searchParams.get('athleteInvite')===inv.id){
+                                        lf28LastUnsentInvite=null;
+                                        sessionStorage.removeItem(lf28PendingKey);
+                                    }
+                                }catch(_){}
                             }
-                            catch(e){showAlert(e.message,'Errore')}
-                        });wrap.appendChild(revoke);
-                    }root.appendChild(wrap);
+                            await lf24LoadAthleteInvites();
+                        }catch(e){showAlert(e.message||String(e),'Errore')}
+                    });
+                    wrap.appendChild(revoke);
+                    parent.appendChild(wrap);
+                }
+                if(!manual.length){
+                    const empty=document.createElement('p');
+                    empty.textContent='Nessun link manuale attivo. Premi «+ Genera link» per crearne uno.';
+                    root.appendChild(empty);
+                } else manual.forEach(inv=>renderInvite(inv,root));
+                if(others.length){
+                    const details=document.createElement('details');
+                    details.className='rounded-lg border border-gray-200 p-2';
+                    const summary=document.createElement('summary');
+                    summary.className='cursor-pointer font-semibold';
+                    summary.textContent='Gestisci inviti email e precedenti ('+others.length+')';
+                    details.appendChild(summary);
+                    const list=document.createElement('div');list.className='mt-2 space-y-2';
+                    others.slice(0,30).forEach(inv=>renderInvite(inv,list));
+                    details.appendChild(list);
+                    root.appendChild(details);
                 }
             } catch(e){root.textContent='Non riesco a leggere gli inviti: '+(e.code||e.message)}
         }
@@ -1946,8 +2017,7 @@ Martedì	Forza	...
                 new URL(previous.link).pathname==='/www/index.html' &&
                 new URL(previous.link).searchParams.has('athleteInvite')) {
                 lf28LastUnsentInvite=previous;
-                document.getElementById('lf24-athlete-invite-link').value=previous.link;
-                document.getElementById('lf24-athlete-invite-result').classList.remove('hidden');
+                // L'invito email non deve comparire nella sezione Genera e copia link.
             } else sessionStorage.removeItem(lf28PendingKey);
         } catch(err){console.warn('Invito sospeso non recuperabile',err);}
         if(lf28LastUnsentInvite) {
@@ -2001,10 +2071,14 @@ Martedì	Forza	...
             return invite.status==='pending' && invite.gymId===currentGymId
                 && Boolean(expiry && expiry.getTime()>Date.now());
         }
-        async function lf28CreateAthleteInvite(){
+        // Canali separati: il link email viene usato solo da EmailJS, NON compare nell'anteprima manuale.
+        // Il token continua ad avere 48 caratteri esadecimali, validati dalle Firestore Rules.
+        // Prefisso a1=manuale, e1=email; i restanti 46 caratteri sono casuali (184 bit).
+        async function lf28CreateAthleteInvite(channel='manual'){
             if(!currentGymId||!currentUserUid)throw new Error('Devi essere autenticato come coach della palestra.');
-            const b=new Uint8Array(24);crypto.getRandomValues(b);
-            const token=Array.from(b,v=>v.toString(16).padStart(2,'0')).join('');
+            if(channel!=='manual' && channel!=='email')throw new Error('Tipo invito non valido.');
+            const bytes=new Uint8Array(23);crypto.getRandomValues(bytes);
+            const token=(channel==='email'?'e1':'a1')+Array.from(bytes,v=>v.toString(16).padStart(2,'0')).join('');
             await setDoc(doc(db,'gyms',currentGymId,'athlete_invites',token),{
                 gymId:currentGymId,gymName:lf23GymName,status:'pending',createdBy:currentUserUid,
                 createdAt:serverTimestamp(),expiresAt:Timestamp.fromDate(new Date(Date.now()+7*86400000))
@@ -2012,19 +2086,21 @@ Martedì	Forza	...
             const url=new URL(lf28PublicUrl('index.html'));
             url.searchParams.set('gym',currentGymId);
             url.searchParams.set('athleteInvite',token);
-            document.getElementById('lf24-athlete-invite-link').value=url.href;
-            document.getElementById('lf24-local-athlete-link-warning').classList.add('hidden');
-            document.getElementById('lf24-athlete-invite-result').classList.remove('hidden');
+            if(channel==='manual'){
+                const linkField=document.getElementById('lf24-athlete-invite-link');
+                linkField.value=url.href;
+                document.getElementById('lf24-local-athlete-link-warning').classList.add('hidden');
+                document.getElementById('lf24-athlete-invite-result').classList.remove('hidden');
+            }
             await lf24LoadAthleteInvites().catch(err=>console.warn('Lista inviti non aggiornata',err));
             return url.href;
         }
         document.getElementById('lf24-create-athlete-invite').addEventListener('click',async e=>{
             const btn=e.currentTarget;btn.disabled=true;
             try {
-                const link=await lf28CreateAthleteInvite();
-                lf28LastUnsentInvite=null;
-                sessionStorage.removeItem(lf28PendingKey);
-                lf28MailStatus('Link generato. Puoi copiarlo e inviarlo privatamente all’atleta.');
+                await lf28CreateAthleteInvite('manual');
+                // Generare un link manuale non altera un invio email da ritentare.
+                lf28Toast('Nuovo link monouso creato · puoi copiarlo e inviarlo');
             } catch(err) {showAlert('Invito non creato: '+(err.code||err.message),'Errore Firebase');}
             finally{btn.disabled=false;}
         });
@@ -2061,7 +2137,7 @@ Martedì	Forza	...
                 } else {
                     lf28LastUnsentInvite=null;
                     sessionStorage.removeItem(lf28PendingKey);
-                    inviteLink=await lf28CreateAthleteInvite();
+                    inviteLink=await lf28CreateAthleteInvite('email');
                 }
                 lf28LastUnsentInvite={email,link:inviteLink,gymId:currentGymId,createdAt:Date.now()};
                 sessionStorage.setItem(lf28PendingKey,JSON.stringify(lf28LastUnsentInvite));
@@ -2072,7 +2148,7 @@ Martedì	Forza	...
                 input.value='';
             }catch(err){
                 console.error('Invio email invito',err);
-                lf28MailStatus((lf28LastUnsentInvite ? 'Invito creato, ma email NON confermata: ' : 'Invito NON completato: ')+(err.message||err)+(lf28LastUnsentInvite ? '. Puoi copiare il link o ritentare senza crearne un altro.' : '. Nessuna email confermata.'),'error');
+                lf28MailStatus((lf28LastUnsentInvite ? 'Invito creato, ma email NON confermata: ' : 'Invito NON completato: ')+(err.message||err)+(lf28LastUnsentInvite ? '. Riprova: useremo lo stesso invito se ancora valido. Puoi anche revocarlo dalla gestione inviti email.' : '. Nessuna email confermata.'),'error');
             }finally{btn.disabled=false;btn.textContent='✉ Invia codice invito';}
         });
         document.getElementById('lf24-copy-athlete-invite').addEventListener('click',async()=>{
@@ -2345,6 +2421,8 @@ Martedì	Forza	...
         });
 
         async function openAthleteProgram(athlete) {
+            // Chiudi eventuali ascolti dell'atleta precedente prima del cambio.
+            lf2812StopAssignmentWatch();
             selectedAthlete = athlete;
             document.getElementById('selected-athlete-title').textContent = `${athlete.name || 'Atleta'} ${athlete.surname || ''}`.trim();
             document.getElementById('selected-athlete-avatar').innerHTML = athlete.photoURL 
@@ -2356,10 +2434,13 @@ Martedì	Forza	...
 
             await loadAthleteWeeksProgram();
             await loadAthletePersonalTemplates();
+            // Aggiornamento silenzioso della lista in tempo reale: nessun refresh della pagina.
+            if(selectedAthlete?.id===athlete.id)lf2812StartAssignmentWatch();
             document.getElementById('athlete-program-section').scrollIntoView({behavior:'smooth',block:'start'});
         }
 
         document.getElementById('btn-close-program').addEventListener('click', () => {
+            lf2812StopAssignmentWatch();
             document.getElementById('athlete-program-section').classList.add('hidden');
             document.getElementById('athletes-selection-container').classList.remove('hidden');
             selectedAthlete = null;
@@ -2668,6 +2749,11 @@ Martedì	Forza	...
                 showAlert('Settimana NON salvata: ' + (err.code || err.message || 'controlla la connessione') + '. Le modifiche restano aperte.', 'Errore di salvataggio');
             } finally {
                 lfWeekSavePending = false;
+                const watch=lf2812AssignmentWatch;
+                if(!lfWeekDirty && watch?.deferredWeekSnap){
+                    watch.lastWeekSignature=null;
+                    lf2813SyncWeekEditorFromSnapshot(watch.deferredWeekSnap,watch);
+                }
             }
         };
 
@@ -3149,36 +3235,47 @@ Martedì	Forza	...
             finally { submitBtn.disabled = false; }
         });
 
-        function renderExistingTemplatesListForAssign() {
-            const container = document.getElementById('assign-template-options-list');
-            container.innerHTML = '';
-
-            if (gymTemplates.length === 0) {
-                container.innerHTML = '<p class="text-[10px] sm:text-xs text-gray-400 uppercase font-bold text-center py-4">Nessuna scheda dell’archivio in archivio.</p>';
-            } else {
-                gymTemplates.forEach(tpl => {
-                    const div = document.createElement('div');
-                    div.className = "p-2.5 sm:p-3 bg-gray-50 border border-gray-200 hover:border-neon rounded-xl flex justify-between items-center cursor-pointer transition mb-2";
-                    div.innerHTML = `
-                        <div class="min-w-0 pr-2">
-                            <span class="font-black uppercase text-black block text-[10px] sm:text-xs truncate">${tpl.title}</span>
-                            <span class="text-[8px] sm:text-[9px] text-gray-500 uppercase font-bold">${tpl.exercises ? tpl.exercises.length : 0} esercizi</span>
-                        </div>
-                        <span class="text-neon font-black text-[9px] sm:text-xs uppercase shrink-0">Assegna &rarr;</span>
-                    `;
-                    div.addEventListener('click', async () => {
-                        try {
-                            const created=await lf275AssignSharedToPersonal(selectedAthlete.id,tpl);
-                            toggleModal('gym-workout-modal');
-                            showAlert(created
-                                ? 'Scheda assegnata con lo stesso ID dell’archivio: è utilizzabile anche nelle settimane.'
-                                : 'Questa scheda era già assegnata all’atleta. Nessuna copia duplicata creata.',
-                                'Assegnazione verificata');
-                            await loadAthletePersonalTemplates();
-                        } catch(e) {showAlert('Assegnazione non riuscita: '+(e.message||e.code),'Verifica scheda');}
+        async function renderExistingTemplatesListForAssign() {
+            const container=document.getElementById('assign-template-options-list');
+            container.replaceChildren();
+            const notice=document.createElement('p');notice.className='lf29-muted-panel';
+            notice.textContent='Verifica delle schede disponibili…';container.appendChild(notice);
+            const athleteId=selectedAthlete?.id,gymId=currentGymId;
+            if(!athleteId||!gymId)return;
+            try{
+                const personal=await getDocs(collection(db,'gyms',gymId,'athlete_programs',athleteId,'personal_templates'));
+                if(selectedAthlete?.id!==athleteId||currentGymId!==gymId)return;
+                const trashed=new Set(personal.docs.filter(d=>!!d.data().deletedAt).map(d=>String(d.id)));
+                const available=gymTemplates.filter(tpl=>!tpl.deletedAt&&!trashed.has(String(tpl.id)));
+                container.replaceChildren();
+                if(!available.length){
+                    const p=document.createElement('p');p.className='lf29-muted-panel';
+                    p.textContent='Nessuna scheda attiva disponibile per questo atleta. Le copie nel Cestino vanno prima ripristinate.';
+                    container.appendChild(p);return;
+                }
+                available.forEach(tpl=>{
+                    const div=document.createElement('div');
+                    div.className='p-2.5 sm:p-3 bg-gray-50 border border-gray-200 hover:border-neon rounded-xl flex justify-between items-center cursor-pointer transition mb-2';
+                    const left=document.createElement('div');left.className='min-w-0 pr-2';
+                    const name=document.createElement('span');name.className='font-black uppercase text-black block text-[10px] sm:text-xs truncate';name.textContent=tpl.title||'Scheda';
+                    const detail=document.createElement('span');detail.className='text-[8px] sm:text-[9px] text-gray-500 uppercase font-bold';detail.textContent=`${tpl.exercises?.length||0} esercizi`;
+                    left.append(name,detail);
+                    const action=document.createElement('span');action.className='text-neon font-black text-[9px] sm:text-xs uppercase shrink-0';action.textContent='Assegna →';
+                    div.append(left,action);
+                    div.addEventListener('click',async()=>{
+                        try{
+                            const created=await lf275AssignSharedToPersonal(athleteId,tpl);
+                            document.getElementById('gym-workout-modal').classList.add('hidden');
+                            showAlert(created?'Scheda assegnata con lo stesso ID dell’archivio: utilizzabile anche nelle settimane.':'Scheda già assegnata. Nessuna copia duplicata.','Assegnazione verificata');
+                            if(selectedAthlete?.id===athleteId)await loadAthletePersonalTemplates();
+                        }catch(err){showAlert('Assegnazione non riuscita: '+(err.message||err.code),'Verifica scheda');}
                     });
                     container.appendChild(div);
                 });
+            }catch(err){
+                console.error('[Lion Fit] Verifica schede personali non riuscita',err);
+                notice.textContent='Non posso verificare il Cestino. Per sicurezza non mostro schede assegnabili. Riprova.';
+                container.replaceChildren(notice);
             }
         }
 
@@ -3297,9 +3394,11 @@ Martedì	Forza	...
                 const row=document.createElement('div');row.className='lf29-link-option';
                 const label=document.createElement('span');label.className='lf29-subtitle';
                 label.textContent=`Settimana ${entry.weekNumber} (${entry.weekDate}) · ${entry.day} · Scheda ${entry.slot}`;
-                row.append(label,lf29PlainButton('Cancella',()=>lf29ConfirmRemoveLink(entry,()=>{
+                row.append(label,lf29PlainButton('Cancella',()=>{
+                    // La conferma non deve aprirsi dietro al pannello di gestione.
                     document.getElementById('lf29-manage-schedule-modal').classList.add('hidden');
-                }),'lf29-btn-danger'));
+                    lf29ConfirmRemoveLink(entry);
+                },'lf29-btn-danger'));
                 host.appendChild(row);
             });
             document.getElementById('lf29-manage-schedule-modal').classList.remove('hidden');
@@ -3353,43 +3452,120 @@ Martedì	Forza	...
             }
             card.append(title,details,actions);return card;
         }
+        // Beta 0.28.13: render puro utilizzato sia dal refresh manuale sia da onSnapshot.
+        // Non ricarica la pagina e non tocca le modifiche testuali aperte nell'editor.
+        function lf2812RenderPersonalAssignments(sheetSnap,weekSnap,athleteId,gymId){
+            if(selectedAthlete?.id!==athleteId||currentGymId!==gymId)return;
+            const solo=document.getElementById('lf29-unprogrammed-list');
+            const scheduled=document.getElementById('lf29-programmed-list');
+            const status=document.getElementById('lf29-personal-list-status');
+            const weeks=weekSnap.docs.map(d=>({id:d.id,...d.data()})).filter(w=>!w.deletedAt)
+                .sort((a,b)=>String(a.startDate||'').localeCompare(String(b.startDate||'')));
+            const byTemplate=lf29AssignmentsFor(weeks);
+            solo.replaceChildren();scheduled.replaceChildren();let a=0,b=0;
+            const availableIds=new Set();
+            sheetSnap.docs.forEach(d=>{
+                if(d.data().deletedAt)return;
+                const tpl={...d.data(),id:d.id};availableIds.add(d.id);
+                const links=byTemplate.get(d.id)||[];
+                (links.length?scheduled:solo).appendChild(lf29PersonalCard(tpl,links,athleteId));
+                if(links.length)b++;else a++;
+            });
+            if(!a){const p=document.createElement('p');p.className='lf29-muted-panel';p.textContent='Nessuna scheda singola senza programma.';solo.appendChild(p);}
+            if(!b){const p=document.createElement('p');p.className='lf29-muted-panel';p.textContent='Nessuna scheda attualmente collegata ai giorni delle settimane.';scheduled.appendChild(p);}
+            const missing=[...byTemplate.keys()].filter(id=>!availableIds.has(id));
+            if(missing.length)console.info('[Lion Fit] Vecchi collegamenti non attivi:',missing.length);
+            status.textContent=`${a} schede senza programma · ${b} schede in programma · aggiornamento in tempo reale`;
+        }
+        // Beta 0.28.13: le settimane dell'editor seguono lo stesso listener già attivo.
+        // Non creiamo un listener in più e non riscriviamo i campi non salvati.
+        function lf2813WeeksSignature(snap){
+            return JSON.stringify(snap.docs.map(d=>({id:d.id,startDate:d.data().startDate||'',deletedAt:!!d.data().deletedAt,days:d.data().days||{}})));
+        }
+        function lf2813SyncWeekEditorFromSnapshot(snap,watch){
+            if(!watch?.active||selectedAthlete?.id!==watch.athleteId)return;
+            const signature=lf2813WeeksSignature(snap);
+            if(watch.lastWeekSignature===signature)return;
+            watch.lastWeekSignature=signature;
+            if(lfWeekDirty||lfWeekSavePending){
+                watch.deferredWeekSnap=snap;
+                const status=document.getElementById('lf29-personal-list-status');
+                if(status)status.textContent+=' · Aggiornamento in attesa: salva o annulla le modifiche prima di aggiornare l’editor';
+                return;
+            }
+            watch.deferredWeekSnap=null;
+            const openId=athleteWeeksList[activeWeekIndex]?.id;
+            athleteWeeksList=snap.docs.filter(d=>!d.data().deletedAt).map(d=>({id:d.id,...d.data()}))
+                .sort((a,b)=>String(a.startDate||'').localeCompare(String(b.startDate||'')));
+            lfLoadedWeeksAthleteId=watch.athleteId;
+            document.getElementById('program-weeks-count-badge').textContent=`${athleteWeeksList.length} settimane`;
+            activeWeekIndex=openId?athleteWeeksList.findIndex(w=>w.id===openId):-1;
+            renderWeekBadgesBar();
+            if(activeWeekIndex>=0)renderSelectedWeekDaysEditor(activeWeekIndex);
+            else {
+                document.getElementById('active-week-editor-container').innerHTML=athleteWeeksList.length
+                    ? '<p class="text-xs font-bold text-gray-500 bg-white border border-gray-200 rounded-xl p-4">Seleziona una settimana per vedere e modificare i 7 giorni.</p>'
+                    : '<p class="text-xs font-bold text-gray-500 p-4">Non ci sono settimane attive.</p>';
+                document.getElementById('lf-close-week').classList.add('hidden');
+            }
+        }
+        let lf2812AssignmentWatch=null;
+        function lf2812StopAssignmentWatch(){
+            const old=lf2812AssignmentWatch;
+            if(!old)return;
+            old.active=false;
+            old.unsubs.forEach(unsub=>{try{unsub();}catch(err){console.warn(err);}});
+            lf2812AssignmentWatch=null;
+        }
+        function lf2812StartAssignmentWatch(){
+            const athleteId=selectedAthlete?.id,gymId=currentGymId;
+            if(!athleteId||!gymId)return;
+            if(lf2812AssignmentWatch?.active && lf2812AssignmentWatch.athleteId===athleteId && lf2812AssignmentWatch.gymId===gymId)return;
+            lf2812StopAssignmentWatch();
+            const watch={athleteId,gymId,active:true,unsubs:[],sheetSnap:null,weekSnap:null};
+            lf2812AssignmentWatch=watch;
+            const base=['gyms',gymId,'athlete_programs',athleteId];
+            const render=()=>{
+                if(!watch.active||lf2812AssignmentWatch!==watch||!watch.sheetSnap||!watch.weekSnap)return;
+                try{
+                    lf2812RenderPersonalAssignments(watch.sheetSnap,watch.weekSnap,athleteId,gymId);
+                    lf2813SyncWeekEditorFromSnapshot(watch.weekSnap,watch);
+                }catch(err){console.error('[Lion Fit] Aggiornamento assegnazioni',err);}
+            };
+            const fail=err=>{
+                if(!watch.active)return;
+                console.warn('[Lion Fit] Ascolto in tempo reale non disponibile:',err);
+                const status=document.getElementById('lf29-personal-list-status');
+                if(status)status.textContent='Aggiornamento in tempo reale non disponibile · riapri l’atleta per aggiornare';
+            };
+            watch.unsubs.push(onSnapshot(collection(db,...base,'personal_templates'),snap=>{watch.sheetSnap=snap;render();},fail));
+            watch.unsubs.push(onSnapshot(collection(db,...base,'weeks'),snap=>{watch.weekSnap=snap;render();},fail));
+        }
         async function loadAthletePersonalTemplates(){
             if(!selectedAthlete||!currentGymId)return;
             const solo=document.getElementById('lf29-unprogrammed-list');
             const scheduled=document.getElementById('lf29-programmed-list');
             const status=document.getElementById('lf29-personal-list-status');
-            solo.textContent='Caricamento schede…';scheduled.textContent='Caricamento programmi…';status.textContent='';
             const athleteId=selectedAthlete.id,gymId=currentGymId;
+            // Non cancellare la griglia prima del refresh: nessun lampeggiamento.
+            if(!solo.querySelector('.lf29-sheet-card'))solo.textContent='Caricamento schede…';
+            if(!scheduled.querySelector('.lf29-sheet-card'))scheduled.textContent='Caricamento programmi…';
             try{
                 const [sheetSnap,weekSnap]=await Promise.all([
                     getDocs(collection(db,'gyms',gymId,'athlete_programs',athleteId,'personal_templates')),
                     getDocs(collection(db,'gyms',gymId,'athlete_programs',athleteId,'weeks'))
                 ]);
-                // Evita di mischiare dati di atleti diversi se l'utente cambia selezione durante il caricamento.
                 if(selectedAthlete?.id!==athleteId||currentGymId!==gymId)return;
-                const weeks=weekSnap.docs.map(d=>({id:d.id,...d.data()})).filter(w=>!w.deletedAt)
-                    .sort((a,b)=>String(a.startDate||'').localeCompare(String(b.startDate||'')));
-                const byTemplate=lf29AssignmentsFor(weeks);
-                solo.replaceChildren();scheduled.replaceChildren();let a=0,b=0;
-                const availableIds=new Set();
-                sheetSnap.docs.forEach(d=>{
-                    if(d.data().deletedAt)return;
-                    const tpl={...d.data(),id:d.id};availableIds.add(d.id);
-                    const links=byTemplate.get(d.id)||[];
-                    (links.length?scheduled:solo).appendChild(lf29PersonalCard(tpl,links,athleteId));
-                    if(links.length)b++;else a++;
-                });
-                if(!a){const p=document.createElement('p');p.className='lf29-muted-panel';p.textContent='Nessuna scheda singola senza programma.';solo.appendChild(p);}
-                if(!b){const p=document.createElement('p');p.className='lf29-muted-panel';p.textContent='Nessuna scheda attualmente collegata ai giorni delle settimane.';scheduled.appendChild(p);}
-                const missing=[...byTemplate.keys()].filter(id=>!availableIds.has(id));
-                if(missing.length)console.info('[Lion Fit] Riferimenti storici non attivi rilevati (manutenzione disponibile):',missing.length);
-                status.textContent=`${a} schede senza programma · ${b} schede in programma`;
+                // Se l'ascoltatore ha già una versione più recente, non sovrascriverla.
+                const watch=lf2812AssignmentWatch;
+                if(watch?.active&&watch.athleteId===athleteId&&watch.gymId===gymId&&watch.sheetSnap&&watch.weekSnap)
+                    lf2812RenderPersonalAssignments(watch.sheetSnap,watch.weekSnap,athleteId,gymId);
+                else lf2812RenderPersonalAssignments(sheetSnap,weekSnap,athleteId,gymId);
             }catch(err){
                 console.error('Errore separazione schede',err);
-                solo.replaceChildren();scheduled.replaceChildren();status.textContent='';
                 const p=document.createElement('p');p.className='lf29-muted-panel';
                 p.textContent='Impossibile leggere le schede e le settimane: '+(err.message||err.code)+'. Nessun dato modificato.';
-                solo.appendChild(p);
+                solo.replaceChildren(p);scheduled.replaceChildren();status.textContent='';
             }
         }
 
@@ -3534,33 +3710,73 @@ Martedì	Forza	...
             lf29PreviewReturnSelector=true;
             openViewTemplateModal(tpl,'global');
         }
-        window.openLinkDayTemplateModal = function(dayName,slot=1) {
+        let lf2812SelectorSequence=0;
+        const lf2812ModalSearch=document.getElementById('modal-tpl-search');
+        lf2812ModalSearch.addEventListener('input',()=>{
+            const term=lf2812ModalSearch.value.trim().toLocaleLowerCase('it');
+            const container=document.getElementById('modal-tpl-list-container');
+            const rows=Array.from(container.querySelectorAll('.lf29-link-option'));
+            let shown=0;
+            for(const row of rows){
+                const visible=!term||String(row.dataset.lfSearch||'').includes(term);
+                row.classList.toggle('hidden',!visible);
+                if(visible)shown++;
+            }
+            container.querySelector('.lf2812-search-empty')?.remove();
+            if(rows.length&&!shown){
+                const p=document.createElement('p');p.className='lf29-muted-panel lf2812-search-empty';
+                p.textContent='Nessuna scheda attiva corrisponde alla ricerca.';
+                container.prepend(p);
+            }
+        });
+        window.openLinkDayTemplateModal = async function(dayName,slot=1) {
+            const athleteId=selectedAthlete?.id,gymId=currentGymId;
+            if(!athleteId||!gymId)return showAlert('Seleziona prima un atleta.','Selezione scheda');
+            const seq=++lf2812SelectorSequence;
             targetLinkingDayName=dayName;targetLinkingSlot=slot===2?2:1;
+            lf2812ModalSearch.value='';
             document.querySelector('#select-template-modal h3')?.replaceChildren(document.createTextNode(`Collega Scheda ${targetLinkingSlot} · ${dayName.toUpperCase()}`));
             const container=document.getElementById('modal-tpl-list-container');container.replaceChildren();
-            const none=lf29PlainButton(`Rimuovi scheda ${targetLinkingSlot} dal giorno`,()=>linkTemplateToDayConfirm(''),'lf29-btn-danger');
-            none.classList.add('w-full','mb-2');container.appendChild(none);
-            if(!gymTemplates.length){
-                const p=document.createElement('p');p.className='lf29-muted-panel';p.textContent='Nessuna scheda disponibile nell’Archivio schede.';container.appendChild(p);
-            }else{
-                gymTemplates.forEach(tpl=>{
-                    const row=document.createElement('div');row.className='lf29-link-option';row.dataset.sheetId=String(tpl.id);
-                    if(lf29LastPreviewedTemplateId===String(tpl.id))row.classList.add('lf29-previewed');
-                    const left=document.createElement('div');left.className='min-w-0 flex-1';
-                    const name=document.createElement('div');name.className='font-black text-xs break-words';name.textContent=tpl.title||'Scheda senza nome';
-                    const meta=document.createElement('p');meta.className='lf29-subtitle';meta.textContent=`${(tpl.exercises||[]).length} esercizi · ID …${String(tpl.id).slice(-6)}`;
-                    left.append(name,meta);
-                    const actions=document.createElement('div');actions.className='flex flex-wrap gap-2 shrink-0';
-                    const preview=document.createElement('button');preview.type='button';preview.className='lf29-mini-btn';preview.textContent='Visualizza';
-                    preview.addEventListener('click',()=>lf29PreviewFromSelector(tpl));
-                    const select=document.createElement('button');select.type='button';select.className='lf29-mini-btn';select.textContent='Assegna';
-                    select.addEventListener('click',()=>linkTemplateToDayConfirm(tpl.id));
-                    actions.append(preview,select);row.append(left,actions);container.appendChild(row);
-                });
+            const loading=document.createElement('p');loading.className='lf29-muted-panel';loading.textContent='Controllo schede disponibili per questo atleta…';container.appendChild(loading);
+            document.getElementById('select-template-modal').classList.remove('hidden');
+            try{
+                // Le schede cestinate a livello di palestra sono già escluse da gymTemplates.
+                // Serve anche il controllo sulla COPIA PERSONALE: se è cestinata, non deve comparire come selezionabile.
+                const personalSnap=await getDocs(collection(db,'gyms',gymId,'athlete_programs',athleteId,'personal_templates'));
+                if(seq!==lf2812SelectorSequence||selectedAthlete?.id!==athleteId||currentGymId!==gymId)return;
+                const trashedPersonalIds=new Set(personalSnap.docs.filter(d=>Boolean(d.data().deletedAt)).map(d=>String(d.id)));
+                const available=gymTemplates.filter(tpl=>!tpl.deletedAt && !trashedPersonalIds.has(String(tpl.id)));
+                container.replaceChildren();
+                if(!available.length){
+                    const p=document.createElement('p');p.className='lf29-muted-panel';p.textContent='Nessuna scheda attiva assegnabile. Le schede nel Cestino non sono disponibili: ripristinale prima di utilizzarle.';container.appendChild(p);
+                }else{
+                    available.forEach(tpl=>{
+                        const row=document.createElement('div');row.className='lf29-link-option';row.dataset.sheetId=String(tpl.id);
+                        row.dataset.lfSearch=(`${tpl.title||''} ${(tpl.exercises||[]).map(ex=>ex.name||'').join(' ')}`).toLocaleLowerCase('it');
+                        if(lf29LastPreviewedTemplateId===String(tpl.id))row.classList.add('lf29-previewed');
+                        const left=document.createElement('div');left.className='min-w-0 flex-1';
+                        const name=document.createElement('div');name.className='font-black text-xs break-words';name.textContent=tpl.title||'Scheda senza nome';
+                        const meta=document.createElement('p');meta.className='lf29-subtitle';meta.textContent=`${(tpl.exercises||[]).length} esercizi · ID …${String(tpl.id).slice(-6)}`;
+                        left.append(name,meta);
+                        const actions=document.createElement('div');actions.className='flex flex-wrap gap-2 shrink-0';
+                        const preview=document.createElement('button');preview.type='button';preview.className='lf29-mini-btn';preview.textContent='Visualizza';
+                        preview.addEventListener('click',()=>lf29PreviewFromSelector(tpl));
+                        const select=document.createElement('button');select.type='button';select.className='lf29-mini-btn';select.textContent='Assegna';
+                        select.addEventListener('click',()=>linkTemplateToDayConfirm(tpl.id));
+                        actions.append(preview,select);row.append(left,actions);container.appendChild(row);
+                    });
+                }
+                // La rimozione è già disponibile nel pulsante compatto «Cancella» accanto a «+ Crea» del singolo giorno.
+                const create=lf29PlainButton('+ Crea nuova scheda e collega al giorno',()=>lf26StartSharedFromWeek(dayName,targetLinkingSlot));
+                create.classList.add('w-full','mt-2');container.appendChild(create);
+            }catch(err){
+                if(seq!==lf2812SelectorSequence)return;
+                console.error('[Lion Fit] Impossibile controllare il Cestino prima di assegnare:',err);
+                container.replaceChildren();
+                const p=document.createElement('p');p.className='lf29-muted-panel';
+                p.textContent='Impossibile verificare quali schede siano nel Cestino. Per sicurezza non puoi assegnarle adesso. Riprova quando la connessione è disponibile.';
+                container.appendChild(p);
             }
-            const create=lf29PlainButton('+ Crea nuova scheda e collega al giorno',()=>lf26StartSharedFromWeek(dayName,targetLinkingSlot));
-            create.classList.add('w-full','mt-2');container.appendChild(create);
-            toggleModal('select-template-modal');
         };
 
         async function linkTemplateToDayConfirm(templateId) {
@@ -3799,6 +4015,60 @@ Martedì	Forza	...
                 finally {btn.disabled=false;}
             };
         }
+        // Beta 0.28.13: ascolto leggero dei soli dati condivisi della palestra.
+        // I listener vengono attivati una volta, non ogni volta che si cambia scheda.
+        let lf2813AdminLiveUnsubs=[];
+        function lf2813StartAdminLiveCollections(){
+            lf2813AdminLiveUnsubs.forEach(fn=>{try{fn();}catch(_){}});
+            lf2813AdminLiveUnsubs=[];
+            if(!currentGymId||!currentUserUid)return;
+            const gym=currentGymId;
+            const fail=(name,err)=>console.warn('[Lion Fit] Sincronizzazione '+name+' non disponibile:',err.code||err.message);
+            lf2813AdminLiveUnsubs.push(onSnapshot(
+                query(collection(db,'users'),where('gymId','==',gym)), snap=>{
+                    if(currentGymId!==gym)return;
+                    allAthletes=snap.docs.map(d=>({id:d.id,...d.data()})).filter(u=>u.role==='athlete');
+                    const term=lfCurrentAthleteTerm;
+                    renderAthletes(term?allAthletes.filter(a=>`${a.name||''} ${a.surname||''} ${a.email||''}`.toLowerCase().includes(term)):allAthletes);
+                    const count=document.getElementById('stat-total-athletes');if(count)count.textContent=allAthletes.length;
+                    if(selectedAthlete){
+                        const updated=allAthletes.find(a=>a.id===selectedAthlete.id);
+                        if(updated){selectedAthlete={...selectedAthlete,...updated};}
+                    }
+                    const myDoc=snap.docs.find(d=>d.id===currentUserUid);
+                    if(myDoc){
+                        const coach=myDoc.data();
+                        document.getElementById('welcome-coach-name').textContent=coach.name||'Coach';
+                        document.getElementById('profile-coach-name').textContent=`${coach.name||'Coach'} ${coach.surname||''}`.trim();
+                    }
+                },err=>fail('atleti',err)));
+            lf2813AdminLiveUnsubs.push(onSnapshot(
+                collection(db,'gyms',gym,'templates'),snap=>{
+                    if(currentGymId!==gym)return;
+                    lf275TrashedSharedIds=new Set(snap.docs.filter(d=>!!d.data().deletedAt).map(d=>String(d.id)));
+                    gymTemplates=snap.docs.filter(d=>!d.data().deletedAt).map(d=>({id:d.id,...d.data()}));
+                    lf17RenderArchive();
+                    const count=document.getElementById('stat-total-templates');if(count)count.textContent=gymTemplates.length;
+                    // Il menu già aperto non viene ricreato durante la scelta di una scheda.
+                    if(selectedAthlete&&activeWeekIndex>=0&&!lfWeekDirty&&!lfWeekSavePending){
+                        const open=document.getElementById('select-template-modal');
+                        if(!open||open.classList.contains('hidden'))renderSelectedWeekDaysEditor(activeWeekIndex);
+                    }
+                },err=>fail('Archivio schede',err)));
+            lf2813AdminLiveUnsubs.push(onSnapshot(
+                collection(db,'gyms',gym,'athlete_invites'),
+                snap=>{if(currentGymId===gym)lf24LoadAthleteInvites(snap).catch(err=>fail('Inviti',err));},
+                err=>fail('Inviti',err)));
+        }
+        window.addEventListener('pagehide',()=>{lf2813AdminLiveUnsubs.forEach(fn=>{try{fn();}catch(_){}});lf2813AdminLiveUnsubs=[];lf2812StopAssignmentWatch();});
+        window.addEventListener('pageshow',event=>{
+            // Ritorno da BFCache, se il browser aveva congelato la sessione.
+            if(event.persisted&&currentGymId&&currentUserUid){
+                lf2813StartAdminLiveCollections();
+                if(selectedAthlete)lf2812StartAssignmentWatch();
+            }
+        });
+
         async function loadTemplates() {
             if (!currentGymId) return;
             try {
