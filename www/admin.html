@@ -621,6 +621,39 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
 #lf-smart-suggestions .lf-smart-top{color:#86efac}
 #lf-smart-suggestions .lf-smart-empty{font-size:12px;padding:11px;color:#d9e7df}
 </style>
+<style id="lf29-admin-patches">
+/* Lion Fit 0.28.4 — schede chiare, comandi a prova di errore */
+.lf29-assigned-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media(min-width:850px){.lf29-assigned-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.lf29-sheet-panel{min-width:0;display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid #d6e2e7;border-radius:17px;background:#f6f9fa}
+.lf29-sheet-panel h6{font-size:12px;font-weight:900;letter-spacing:.035em;text-transform:uppercase;color:#132335}
+.lf29-sheet-panel .lf29-list{min-height:90px;max-height:340px;overflow:auto;display:flex;flex-direction:column;gap:9px}
+.lf29-sheet-card{border:1px solid #d5e0e5;border-radius:12px;background:#fff;padding:11px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.lf29-sheet-name{font-weight:850;font-size:13px;overflow-wrap:anywhere;text-align:left}
+.lf29-subtitle{font-size:11px;color:#4b5b69;overflow-wrap:anywhere;line-height:1.55}
+.lf29-sheet-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.lf29-btn{font-size:11px;font-weight:800;padding:8px 10px;border-radius:9px;border:1px solid #c7d6d2;background:#fff;color:#12644c;min-height:36px}
+.lf29-btn:hover,.lf29-btn:focus-visible{background:#e6f7ef;outline:2px solid transparent}
+.lf29-btn-danger{border-color:#f1c8c8;color:#b02835}
+.lf29-btn-danger:hover{background:#fff0f0}
+.lf29-muted-panel{border:1px solid #dfe8ea;background:#fafcfc;border-radius:12px;padding:14px;font-size:12px;color:#61717a}
+.lf29-modal{position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;padding:15px;background:rgba(3,12,20,.7)}
+.lf29-modal.hidden{display:none}
+.lf29-modal-body{background:#fff;color:#17232b;border-radius:18px;padding:18px;width:min(100%,560px);max-height:87vh;overflow:auto;box-shadow:0 20px 65px #0005}
+.lf29-link-option{display:flex;gap:9px;justify-content:space-between;align-items:center;background:#fff;border:1px solid #dce6e5;border-radius:12px;padding:10px;margin:7px 0;min-width:0}
+.lf29-link-option.lf29-previewed{border-color:#7fc6a9;background:#effaf4;box-shadow:inset 0 0 0 1px #a5dcc5}
+.lf29-mini-btn{border:1px solid #bfdccf;border-radius:9px;background:#f1faf5;color:#0d6647;font-size:11px;font-weight:900;padding:9px 11px;white-space:nowrap}
+.lf29-mini-btn:focus-visible{outline:2px solid #148a5f;outline-offset:2px}
+.lf29-invite-subcard{border:1px solid #d7e3e7;border-radius:14px;padding:13px;background:#f8fafb;display:flex;flex-direction:column;gap:10px}
+.lf29-invite-subcard h4{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+@media(min-width:1024px){.lf29-coaches-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto 1fr;align-items:start}.lf29-coaches-layout #lf24-athlete-invites{grid-column:2;grid-row:1 / span 2}.lf29-coaches-layout #lf23-owner-tools{grid-column:1;grid-row:2}}
+@media(max-width:600px){.lf29-sheet-panel{padding:11px}.lf29-link-option{flex-wrap:wrap}.lf29-invite-subcard{padding:12px}.lf29-sheet-actions .lf29-btn{flex:1}}
+html[data-lion-theme="dark"] .lf29-sheet-panel,html[data-lion-theme="dark"] .lf29-invite-subcard{background:#182631;border-color:#405b5d}
+html[data-lion-theme="dark"] .lf29-sheet-card,html[data-lion-theme="dark"] .lf29-link-option{background:#1d303b;border-color:#49606a;color:#f1f5f7}
+html[data-lion-theme="dark"] .lf29-sheet-name,html[data-lion-theme="dark"] .lf29-sheet-panel h6,html[data-lion-theme="dark"] .lf29-invite-subcard h4{color:#f1f5f7}
+html[data-lion-theme="dark"] .lf29-subtitle{color:#c3cdd3}
+html[data-lion-theme="dark"] .lf29-link-option.lf29-previewed{background:#183f35;border-color:#65c79d}
+</style>
 </head>
 <body class="bg-gray-50 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col md:flex-row relative overflow-x-hidden">
 
@@ -673,7 +706,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
 
         <div class="p-4 border-t border-gray-200 space-y-3">
             <button data-lf-theme-toggle class="lf26-theme-btn w-full" aria-label="Cambia tema">🌙 Tema scuro</button>
-            <div class="lf26-version">LION FIT · BETA 0.28</div>
+            <div class="lf26-version">LION FIT · BETA 0.28.4</div>
             <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-1">
                 <span class="text-[9px] font-black uppercase text-gray-500 block">Codice Invito Palestra</span>
                 <span id="side-gym-code" class="text-xs font-black text-neon tracking-widest block">Cod. ---</span>
@@ -700,7 +733,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
 
         <!-- ================= SEZIONE 1: HOME / DASHBOARD ================= -->
         <section id="section-home" class="block space-y-5">
-            <div class="flex justify-end"><span class="lf26-version">Beta 0.28</span></div>
+            <div class="flex justify-end"><span class="lf26-version">Beta 0.28.4</span></div>
             <div class="lf14-welcome">
                 <div class="lf14-welcome-top"><span class="lf14-eyebrow">LION FIT · PANNELLO COACH</span><span class="lf14-status"><span></span> Panoramica palestra</span></div>
                 <h2>Benvenuto, <span id="welcome-coach-name">Coach</span></h2>
@@ -778,18 +811,27 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
                     </button>
                 </div>
 
-                <!-- SCHEDE DI PREPARAZIONE ATLETICA ASSEGNATE -->
-                <div class="bg-gray-50 border border-gray-200 p-3 sm:p-4 rounded-2xl space-y-2 sm:space-y-3">
-                    <h6 class="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2"><svg class="lf-mono-icon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20 M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12 M12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/></svg> Schede personali assegnate</h6>
-                    <details class="rounded-xl bg-white border border-gray-200 p-3">
-                      <summary class="cursor-pointer text-xs font-black text-gray-700">⚙ Manutenzione schede esistenti</summary>
-                      <p class="text-[10px] text-gray-600 mt-2 mb-2">Da usare solo per le schede vecchie, dopo aver verificato le regole. Le nuove schede vengono archiviate durante l’assegnazione.</p>
-                      <button type="button" id="lf277-protect-legacy-sheets" class="w-full rounded-xl bg-green-50 border border-green-300 p-2 text-xs font-bold text-green-900">🛡 Salva le vecchie schede nell'ARCHIVIO dell'atleta</button>
-                      <button type="button" id="lf24-migrate-week-sheets" class="w-full mt-2 text-xs font-bold text-green-800 bg-green-50 border border-green-200 rounded-lg px-2.5 py-2" title="Crea copie personali delle schede già collegate alle settimane">Allinea schede delle settimane (manutenzione)</button>
-                    </details>
-                    <div id="personal-templates-list" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase py-2">Nessuna scheda presente.</p>
+                <!-- Lion Fit 0.28.4: sezioni separate per i collegamenti, non per il nome della scheda -->
+                <div class="space-y-3" id="lf29-personal-assignment-area">
+                    <div class="lf29-assigned-grid">
+                        <section class="lf29-sheet-panel" aria-label="Schede singole senza programma">
+                            <h6>📄 Schede singole senza programma</h6>
+                            <p class="lf29-subtitle">Schede assegnate all’atleta ma non collegate a giorni attivi. Puoi rimuovere l’assegnazione senza perdere la copia nell’Archivio storico.</p>
+                            <div id="lf29-unprogrammed-list" class="lf29-list"><p class="lf29-subtitle">Caricamento...</p></div>
+                        </section>
+                        <section class="lf29-sheet-panel" aria-label="Schede in programma">
+                            <h6>🗓️ Schede in programma</h6>
+                            <p class="lf29-subtitle">Una scheda per ogni ID, con settimana e giorni esatti. «Gestisci giorni» modifica le assegnazioni vere del programma.</p>
+                            <div id="lf29-programmed-list" class="lf29-list"><p class="lf29-subtitle">Caricamento...</p></div>
+                        </section>
                     </div>
+                    <p id="lf29-personal-list-status" role="status" aria-live="polite" class="lf29-subtitle"></p>
+                    <details class="rounded-xl bg-white border border-gray-200 p-3">
+                      <summary class="cursor-pointer text-xs font-black text-gray-700">⚙ Manutenzione delle schede esistenti</summary>
+                      <p class="text-[10px] text-gray-600 mt-2 mb-2">Le vecchie schede possono essere protette nell’Archivio. La manutenzione non cancella automaticamente schede o settimane.</p>
+                      <button type="button" id="lf277-protect-legacy-sheets" class="w-full rounded-xl bg-green-50 border border-green-300 p-2 text-xs font-bold text-green-900">🛡 Salva le vecchie schede nell'ARCHIVIO dell'atleta</button>
+                      <button type="button" id="lf24-migrate-week-sheets" class="w-full mt-2 text-xs font-bold text-green-800 bg-green-50 border border-green-200 rounded-lg px-2.5 py-2">Allinea schede delle settimane (manutenzione)</button>
+                    </details>
                 </div>
 
                 <!-- PROGRAMMA ATTUALE (SETTIMANE CON BOLLINI NUMERATI) -->
@@ -838,7 +880,10 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
             <div id="view-create-tpl" class="bg-white border border-gray-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 shadow-xs hidden">
                 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-3">
                     <h3 class="text-xs sm:text-sm font-black uppercase tracking-widest text-black"><svg class="lf-mono-icon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14 M5 12h14"/></svg> Crea nuova scheda dell’archivio</h3>
-                    <button id="tab-btn-saved-tpl" type="button" class="inline-flex items-center justify-center border border-gray-300 rounded-lg px-3 py-2 text-xs font-bold text-gray-800 hover:bg-gray-100">← Torna all'archivio</button>
+                    <div class="flex flex-wrap gap-2">
+                      <button id="lf29-return-to-athlete" type="button" class="hidden inline-flex items-center justify-center border border-green-300 bg-green-50 text-green-900 rounded-lg px-3 py-2 text-xs font-bold">← Torna alla gestione atleti</button>
+                      <button id="tab-btn-saved-tpl" type="button" class="inline-flex items-center justify-center border border-gray-300 rounded-lg px-3 py-2 text-xs font-bold text-gray-800 hover:bg-gray-100">← Torna all'archivio</button>
+                    </div>
                 </div>
                 <!-- V25.1: ritorno guidato alla settimana quando la scheda nasce durante la programmazione. -->
                 <div id="lf26-week-context" class="hidden rounded-xl border border-green-300 bg-green-50 p-3 sm:p-4 space-y-2">
@@ -967,7 +1012,7 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
             </div>
             <div id="lf23-role-info" class="mt-4 rounded-xl border border-green-200 bg-green-50 p-3 text-xs font-medium text-gray-800">Controllo permessi in corso...</div>
           </div>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:items-start">
+          <div class="lf29-coaches-layout grid grid-cols-1 lg:grid-cols-2 gap-4 lg:items-start">
           <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
             <h3 class="font-black uppercase tracking-wide text-sm">Coach presenti nella palestra</h3>
             <div id="lf23-coach-list" class="mt-3 space-y-2 text-sm text-gray-600">Caricamento...</div>
@@ -975,20 +1020,24 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
           <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4" id="lf24-athlete-invites">
             <h3 class="font-black uppercase tracking-wider text-sm">Invita un atleta</h3>
             <p class="text-xs text-gray-600">L’invito è personale, vale 7 giorni e si usa una sola volta. Inserisci l’email per inviarlo direttamente, oppure genera e copia il link. Il vecchio codice GYM-XXXX non iscrive più nuovi atleti.</p>
-            <div class="lf28-invite-actions">
-              <label for="lf28-athlete-email" class="block text-xs font-black text-gray-700">Email dell’atleta (solo per l’invio automatico)</label>
+            <div class="lf29-invite-subcard">
+              <h4>✉ Invio diretto via email</h4>
+              <p class="text-xs text-gray-600">Crea un nuovo invito personale e invia automaticamente il collegamento tramite EmailJS.</p>
+              <label for="lf28-athlete-email" class="block text-xs font-black text-gray-700">Email dell’atleta</label>
               <input type="email" id="lf28-athlete-email" inputmode="email" autocomplete="email" placeholder="atleta@esempio.it" class="w-full min-w-0 border border-gray-300 bg-white text-gray-900 rounded-xl px-3.5 py-3 text-sm" />
-              <div class="flex flex-wrap gap-2">
-                <button type="button" id="lf28-send-athlete-email" class="bg-neon text-white rounded-xl px-4 py-3 font-black text-xs uppercase">✉ Invia codice invito</button>
-                <button type="button" id="lf24-create-athlete-invite" class="bg-white text-green-900 border border-green-300 rounded-xl px-4 py-3 font-black text-xs uppercase">+ Genera link</button>
-              </div>
-              <p id="lf28-mail-status" role="status" aria-live="polite" class="text-xs font-medium text-gray-600">Puoi generare un link anche senza email. L’invio usa EmailJS.</p>
+              <button type="button" id="lf28-send-athlete-email" class="bg-neon text-white rounded-xl px-4 py-3 font-black text-xs uppercase">✉ Invia codice invito</button>
+              <p id="lf28-mail-status" role="status" aria-live="polite" class="text-xs font-medium text-gray-600">Invio con EmailJS. Se non arriva, controlla anche Spam.</p>
             </div>
-            <div class="rounded-xl border border-amber-300 bg-amber-50 p-3 space-y-2">
-              <p class="font-black text-xs text-amber-900">Prima di invitare: verifica il sito pubblico</p>
-              <p class="text-xs text-amber-900">Apri la registrazione dal browser esterno e verifica che si carichi prima di inviare un invito. La spunta HTTPS di GitHub non sostituisce questa prova.</p>
-              <a id="lf28-test-public-site" href="https://www.lionfit.it/www/index.html" target="_blank" rel="noopener noreferrer" class="inline-flex rounded-lg bg-white border border-amber-400 px-3 py-2 text-xs font-black text-amber-900">↗ Apri registrazione pubblica</a>
-              <label class="flex items-start gap-2 text-xs font-bold text-amber-900"><input id="lf28-public-site-ok" type="checkbox" class="mt-0.5 shrink-0" /> Ho verificato che si apre correttamente dal browser esterno.</label>
+            <div class="lf29-invite-subcard">
+              <h4>🔗 Genera e copia link</h4>
+              <p class="text-xs text-gray-600">Crea un invito valido 7 giorni, da inviare personalmente via WhatsApp o SMS. Non serve inserire l’email.</p>
+              <button type="button" id="lf24-create-athlete-invite" class="bg-white text-green-900 border border-green-300 rounded-xl px-4 py-3 font-black text-xs uppercase">+ Genera link</button>
+              <div id="lf24-athlete-invite-result" class="hidden bg-green-50 border border-green-200 rounded-xl p-3 space-y-2">
+                <label for="lf24-athlete-invite-link" class="block font-bold text-xs text-green-900">Collegamento da condividere privatamente</label>
+                <input id="lf24-athlete-invite-link" type="text" readonly class="w-full bg-white border border-green-200 rounded-lg p-2 text-xs" />
+                <button id="lf24-copy-athlete-invite" type="button" class="px-4 py-2 border border-green-300 bg-white rounded-lg font-bold text-xs">Copia invito</button>
+                <p id="lf24-local-athlete-link-warning" class="hidden text-xs text-amber-800 font-semibold">Collegamento locale di prova: non condividerlo.</p>
+              </div>
             </div>
             <details class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs">
               <summary class="cursor-pointer font-black text-gray-800">⚙ Impostazioni invio email</summary>
@@ -1000,12 +1049,6 @@ html[data-lion-theme="dark"] #section-templates .lf26-trash-card {
               <button type="button" id="lf28-save-emailjs" class="mt-3 rounded-lg bg-gray-800 text-white px-4 py-2 font-black">Salva configurazione EmailJS</button>
               <p class="mt-2 text-gray-600">Se i due ID pubblici sono presenti in lionfit-emailjs-config.js, la configurazione vale per tutti i coach sul sito. Altrimenti puoi inserire Service ID e Public Key qui e salvarli solo su questo dispositivo. Mai inserire Private Key o password.</p>
             </details>
-            <div id="lf24-athlete-invite-result" class="hidden bg-green-50 border border-green-200 rounded-xl p-3 space-y-2">
-              <label for="lf24-athlete-invite-link" class="block font-bold text-xs text-green-900">Collegamento da condividere privatamente</label>
-              <input id="lf24-athlete-invite-link" type="text" readonly class="w-full bg-white border border-green-200 rounded-lg p-2 text-xs" />
-              <button id="lf24-copy-athlete-invite" type="button" class="px-4 py-2 border border-green-300 bg-white rounded-lg font-bold text-xs">Copia invito</button>
-              <p id="lf24-local-athlete-link-warning" class="hidden text-xs text-amber-800 font-semibold">Collegamento di prova locale: 127.0.0.1 funziona solo sul tuo PC. Prima di condividerlo occorre pubblicare e verificare la versione online.</p>
-            </div>
             <div id="lf24-athlete-invites-list" class="text-xs text-gray-600 space-y-2">Nessun invito caricato.</div>
           </div>
           <div id="lf23-owner-tools" class="hidden bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
@@ -1317,6 +1360,16 @@ Martedì	Forza	...
 
     <div id="lf28-toast" role="status" aria-live="polite" class="fixed bottom-24 md:bottom-6 right-4 z-[120] hidden rounded-xl bg-gray-900 text-white shadow-lg border border-green-700 px-4 py-3 text-xs font-bold max-w-xs pointer-events-none"></div>
     <!-- ID pubblici EmailJS: configurazione condivisa da GitHub Pages, nessuna chiave privata. -->
+    <div id="lf29-manage-schedule-modal" class="lf29-modal hidden" role="dialog" aria-modal="true" aria-labelledby="lf29-manage-title">
+      <div class="lf29-modal-body">
+        <div class="flex justify-between items-center gap-3 mb-3">
+          <h3 id="lf29-manage-title" class="text-base font-black">Gestisci giorni assegnati</h3>
+          <button id="lf29-manage-close" type="button" class="lf29-btn" aria-label="Chiudi gestione assegnazioni">Chiudi ✕</button>
+        </div>
+        <p class="lf29-subtitle mb-3">La rimozione elimina soltanto il collegamento nel giorno indicato. La scheda resta nell’Archivio storico dell’atleta.</p>
+        <div id="lf29-manage-assignment-list" class="space-y-2"></div>
+      </div>
+    </div>
     <script src="lionfit-emailjs-config.js"></script>
     <!-- SCRIPT LOGICA LION FIT ADMIN -->
 
@@ -1402,10 +1455,15 @@ Martedì	Forza	...
             window.lfMotionEnter?.(sectionId);
         }
 
+        let lf29PreviewReturnSelector=false;
         window.toggleModal = function(modalId) {
             const modal = document.getElementById(modalId);
-            if (modal.classList.contains('hidden')) modal.classList.remove('hidden');
-            else modal.classList.add('hidden');
+            const closing=!modal.classList.contains('hidden');
+            modal.classList.toggle('hidden',closing);
+            if(modalId==='view-template-modal' && closing && lf29PreviewReturnSelector){
+                lf29PreviewReturnSelector=false;
+                document.getElementById('select-template-modal').classList.remove('hidden');
+            }
         }
 
         window.showAlert = function(message, title = "Notifica Lion Fit") {
@@ -1930,7 +1988,7 @@ Martedì	Forza	...
                 const link=await lf28CreateAthleteInvite();
                 lf28LastUnsentInvite=null;
                 sessionStorage.removeItem(lf28PendingKey);
-                lf28MailStatus('Link generato. Prima di condividerlo controlla che la pagina web si apra sul telefono.');
+                lf28MailStatus('Link generato. Puoi copiarlo e inviarlo privatamente all’atleta.');
             } catch(err) {showAlert('Invito non creato: '+(err.code||err.message),'Errore Firebase');}
             finally{btn.disabled=false;}
         });
@@ -1954,8 +2012,6 @@ Martedì	Forza	...
             const input=document.getElementById('lf28-athlete-email');
             const email=input.value.trim().toLowerCase();
             if(!email||!input.checkValidity())return lf28MailStatus('Inserisci un indirizzo email valido.', 'error');
-            if(!document.getElementById('lf28-public-site-ok').checked)
-                return lf28MailStatus('Apri prima il sito pubblico e conferma che la pagina di registrazione si carica.', 'error');
             const cfg=lf28GetEmailConfig();
             if(!cfg.service_id||!cfg.user_id||!cfg.template_id)
                 return lf28MailStatus('Configura EmailJS (Service ID, Public Key, Template ID) per questo dispositivo.', 'error');
@@ -2482,6 +2538,7 @@ Martedì	Forza	...
                             <span class="truncate pr-1">${linkedTemplateTitle}</span>
                             <span class="text-gray-400 text-[10px] sm:text-xs leading-none shrink-0">+</span>
                         </button>
+                        ${dayInfo.templateId ? `<button type="button" class="lf29-btn lf29-btn-danger w-full mt-1" onclick="lf29RemoveDaySlot('${dayName}', 1)">Rimuovi scheda 1 da questo giorno</button>` : ''}
                         <div class="flex items-center justify-between gap-1 pt-2">
                             <span class="block text-[10px] font-black uppercase text-gray-500">Scheda 2 (facoltativa)</span>
                             <button type="button" onclick="lf26StartSharedFromWeek('${dayName}',2)" class="text-[10px] font-bold text-green-800 border border-green-200 bg-green-50 rounded-md px-2 py-1" title="Crea la seconda scheda per ${dayName}">+ Crea</button>
@@ -2490,6 +2547,7 @@ Martedì	Forza	...
                             <span class="truncate pr-1">${linkedTemplateTitle2}</span>
                             <span class="text-gray-400 shrink-0">+</span>
                         </button>
+                        ${dayInfo.templateId2 ? `<button type="button" class="lf29-btn lf29-btn-danger w-full mt-1" onclick="lf29RemoveDaySlot('${dayName}', 2)">Rimuovi scheda 2 da questo giorno</button>` : ''}
                     </div>
                 `;
                 grid.appendChild(dayCard);
@@ -3111,75 +3169,172 @@ Martedì	Forza	...
             finally{btn.disabled=false;btn.textContent='🛡 Salva le vecchie schede nell\'ARCHIVIO dell\'atleta';}
         });
 
-        async function loadAthletePersonalTemplates() {
-            if (!selectedAthlete || !currentGymId) return;
-            const personalTemplatesList = document.getElementById('personal-templates-list');
-            const ref = collection(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "personal_templates");
-            const snapshot = await getDocs(ref);
-            personalTemplatesList.innerHTML = snapshot.docs.every(d=>!!d.data().deletedAt) ? '<p class="text-[9px] sm:text-[10px] text-gray-400 font-bold uppercase py-2">Nessuna scheda presente.</p>' : '';
-
-            snapshot.forEach(docSnap => {
-                if(docSnap.data().deletedAt) return;
-                const tpl = { id: docSnap.id, ...docSnap.data() };
-                const div = document.createElement('div');
-                div.className = 'p-2.5 sm:p-3 bg-white border border-gray-200 rounded-xl flex flex-wrap items-center justify-between gap-2 transition shadow-2xs mb-2';
-                const label = document.createElement('button');
-                label.type = 'button';
-                label.className = 'flex-1 min-w-[110px] text-left font-black text-[10px] sm:text-xs text-black uppercase tracking-wide break-words hover:text-green-700';
-                label.textContent = '🏋️ ' + (tpl.title || 'Scheda senza nome');
-                label.title = 'Apri scheda personale';
-                label.addEventListener('click', () => openViewTemplateModal(tpl, 'personal', selectedAthlete.id));
-                const actions = document.createElement('div');
-                actions.className = 'lf20-personal-actions';
-                const share = document.createElement('button');
-                share.type = 'button';
-                share.className = 'lf20-share-btn';
-                share.textContent = 'Copia nelle condivise';
-                share.setAttribute('aria-label', 'Copia ' + (tpl.title || 'la scheda') + ' nell’Archivio schede');
-                share.addEventListener('click', () => {
-                    // Nessuna modifica alla scheda personale originale.
-                    showConfirm(`Copiare "${tpl.title || 'questa scheda'}" nell’Archivio schede?`, async () => {
-                        share.disabled = true;
-                        try {
-                            await addDoc(collection(db, 'gyms', currentGymId, 'templates'), {
-                                title: tpl.title || 'Scheda',
-                                exercises: (tpl.exercises || []).map(ex => ({...ex})),
-                                createdAt: serverTimestamp()
-                            });
-                            await loadTemplates();
-                            await loadDashboardStats();
-                            showAlert('Copia salvata nell’Archivio schede. La scheda personale non è stata modificata.', 'Scheda copiata');
-                        } catch(err) { console.error('Errore copia condivisa', err); showAlert('Impossibile copiare nell’Archivio schede. Controlla i permessi Firebase.', 'Errore'); }
-                        finally { share.disabled = false; }
-                    });
+        // Beta 0.28.4: la distinzione dipende dai collegamenti delle settimane, mai dal titolo.
+        // Le operazioni non eliminano il contenuto dell'Archivio protetto.
+        const lf29DayName = {"lunedì":"Lun", "martedì":"Mar", "mercoledì":"Mer", "giovedì":"Gio", "venerdì":"Ven", "sabato":"Sab", "domenica":"Dom"};
+        let lf29RenderedAssignments=[];
+        let lf29CurrentManagement=null;
+        function lf29AssignmentsFor(weeks){
+            const map = new Map();
+            weeks.forEach((w,idx)=>{
+                if(w.deletedAt) return;
+                Object.entries(w.days||{}).forEach(([day,info])=>{
+                    for(const slot of [1,2]){
+                        const id=String(info?.[slot===2?'templateId2':'templateId']||'');
+                        if(!id)continue;
+                        if(!map.has(id))map.set(id,[]);
+                        map.get(id).push({weekId:w.id,weekDate:w.startDate||'Senza data',weekNumber:idx+1,day,slot,templateId:id});
+                    }
                 });
-                const del = document.createElement('button');
-                del.type = 'button';
-                del.className = 'text-[9px] text-red-600 hover:bg-red-50 border border-red-200 font-black uppercase px-2 py-1.5 rounded-lg shrink-0';
-                del.textContent = 'Elimina';
-                del.addEventListener('click', async () => {
-                    const athleteId=selectedAthlete?.id;
-                    if(!athleteId) return;
-                    del.disabled=true;
-                    try {
-                        const links=await lf275FindActiveWeekLinks(athleteId,tpl.id);
-                        const warning=links.length
-                            ? `ATTENZIONE: "${tpl.title}" è collegata a ${links.length} giorno/i (${links.slice(0,4).join('; ')}). Nel Cestino non sarà visibile all’atleta; ripristinandola tornerà utilizzabile negli stessi giorni. Vuoi continuare?`
-                            : `Spostare "${tpl.title}" nel Cestino? Potrai ripristinarla senza cambiarne l'ID.`;
-                        showConfirm(warning, async () => {
-                            try {
-                                await lf26MoveToTrash(doc(db,'gyms',currentGymId,'athlete_programs',athleteId,'personal_templates',tpl.id));
-                                await loadAthletePersonalTemplates();
-                                showAlert('Scheda spostata nel Cestino. Nessun collegamento alle settimane è stato cancellato: al ripristino tornerà utilizzabile.','Scheda archiviata nel Cestino');
-                            }catch(err){showAlert('Impossibile spostare la scheda nel Cestino: '+(err.code||err.message),'Errore');}
-                        });
-                    }catch(err){showAlert('Impossibile verificare i collegamenti: eliminazione annullata. '+(err.code||err.message),'Errore');}
-                    finally{del.disabled=false;}
-                });
-                actions.append(share, del);
-                div.append(label, actions);
-                personalTemplatesList.appendChild(div);
             });
+            return map;
+        }
+        function lf29PlainButton(text,action,additionalClass=''){
+            const b=document.createElement('button');b.type='button';b.className='lf29-btn '+additionalClass;b.textContent=text;b.addEventListener('click',action);return b;
+        }
+        async function lf29ProtectedBeforeUnlink(athleteId,templateId){
+            const ref=lf277ArchiveRef(athleteId,templateId);
+            if((await getDoc(ref)).exists())return;
+            const personal=await getDoc(doc(db,'gyms',currentGymId,'athlete_programs',athleteId,'personal_templates',templateId));
+            if(!personal.exists())throw new Error('Scheda originale mancante e copia nell’Archivio non trovata. Ripristina la scheda o esegui la manutenzione prima di rimuoverla.');
+            await lf277EnsureProtectedCopy(athleteId,templateId,personal.data());
+        }
+        async function lf29UnlinkAssignment(entry){
+            if(!selectedAthlete||!currentGymId)throw new Error('Seleziona un atleta.');
+            if(lfWeekDirty)throw new Error('Salva prima le attività modificate nella settimana.');
+            const athleteId=selectedAthlete.id, gymId=currentGymId;
+            const reference=doc(db,'gyms',gymId,'athlete_programs',athleteId,'weeks',entry.weekId);
+            const snap=await getDoc(reference);
+            if(!snap.exists()||snap.data().deletedAt)throw new Error('Settimana assente o nel Cestino. Aggiorna l’elenco.');
+            const key=entry.slot===2?'templateId2':'templateId';
+            const currentId=String(snap.data().days?.[entry.day]?.[key]||'');
+            if(currentId!==String(entry.templateId))throw new Error('L’assegnazione è cambiata: aggiorna la settimana prima di rimuovere.');
+            await lf29ProtectedBeforeUnlink(athleteId,currentId);
+            await updateDoc(reference,{[`days.${entry.day}.${key}`]:'',updatedAt:serverTimestamp()});
+            // Non rimuovere il documento personale: potrà essere riassegnato o visto nell'Archivio.
+            await loadAthleteWeeksProgram();
+            await loadAthletePersonalTemplates();
+            lf28Toast('Rimossa da '+lf29DayName[entry.day]+', settimana '+entry.weekNumber+' · Archivio conservato');
+        }
+        function lf29ConfirmRemoveLink(entry,after){
+            const label=`Settimana ${entry.weekNumber} (${entry.weekDate}), ${entry.day}, scheda ${entry.slot}`;
+            showConfirm(`Rimuovere la scheda SOLO da ${label}? Le altre assegnazioni e l’Archivio dell’atleta restano invariati.`, async()=>{
+                try{await lf29UnlinkAssignment(entry);after?.();}
+                catch(err){showAlert('Rimozione non riuscita: '+(err.message||err.code),'Assegnazione non modificata');}
+            });
+        }
+        window.lf29RemoveDaySlot=function(day,slot){
+            const week=athleteWeeksList[activeWeekIndex];
+            if(!week)return;
+            const templateId=String(week.days?.[day]?.[slot===2?'templateId2':'templateId']||'');
+            if(!templateId)return lf28Toast('Nessuna scheda collegata.');
+            lf29ConfirmRemoveLink({weekId:week.id,weekDate:week.startDate||'',weekNumber:activeWeekIndex+1,day,slot,templateId});
+        };
+        function lf29ManageWeeks(tpl,links){
+            lf29CurrentManagement={tpl,links};
+            const host=document.getElementById('lf29-manage-assignment-list');host.replaceChildren();
+            document.getElementById('lf29-manage-title').textContent='Gestisci giorni · '+(tpl.title||'Scheda');
+            links.forEach(entry=>{
+                const row=document.createElement('div');row.className='lf29-link-option';
+                const label=document.createElement('span');label.className='lf29-subtitle';
+                label.textContent=`Settimana ${entry.weekNumber} (${entry.weekDate}) · ${entry.day} · Scheda ${entry.slot}`;
+                row.append(label,lf29PlainButton('Rimuovi dal giorno',()=>lf29ConfirmRemoveLink(entry,()=>{
+                    document.getElementById('lf29-manage-schedule-modal').classList.add('hidden');
+                }),'lf29-btn-danger'));
+                host.appendChild(row);
+            });
+            document.getElementById('lf29-manage-schedule-modal').classList.remove('hidden');
+        }
+        document.getElementById('lf29-manage-close').addEventListener('click',()=>document.getElementById('lf29-manage-schedule-modal').classList.add('hidden'));
+        document.getElementById('lf29-manage-schedule-modal').addEventListener('click',e=>{
+            if(e.target.id==='lf29-manage-schedule-modal')e.currentTarget.classList.add('hidden');
+        });
+        function lf29PersonalCard(tpl,links,athleteId){
+            const card=document.createElement('article');card.className='lf29-sheet-card';
+            const title=document.createElement('button');title.type='button';title.className='lf29-sheet-name';
+            title.textContent='🏋 '+(tpl.title||'Scheda senza nome');
+            title.title='Apri scheda';title.addEventListener('click',()=>openViewTemplateModal(tpl,'personal',athleteId));
+            const details=document.createElement('p');details.className='lf29-subtitle';
+            details.textContent=links.length
+                ? links.map(e=>`Sett. ${e.weekNumber} · ${lf29DayName[e.day]||e.day} (scheda ${e.slot})`).join('  •  ')
+                : 'Senza giorno · non collegata a settimane attive';
+            const actions=document.createElement('div');actions.className='lf29-sheet-actions';
+            actions.appendChild(lf29PlainButton('Visualizza',()=>openViewTemplateModal(tpl,'personal',athleteId)));
+            // Manteniamo anche la funzione storica di copia nell'Archivio condiviso del coach.
+            actions.appendChild(lf29PlainButton('Copia nell’Archivio schede',()=>{
+                showConfirm(`Copiare «${tpl.title||'questa scheda'}» nell’Archivio delle schede riutilizzabili?`,async()=>{
+                    try{
+                        await addDoc(collection(db,'gyms',currentGymId,'templates'),{
+                            title:tpl.title||'Scheda',exercises:(tpl.exercises||[]).map(ex=>({...ex})),createdAt:serverTimestamp()
+                        });
+                        await loadTemplates();await loadDashboardStats();
+                        lf28Toast('Copia creata nell’Archivio schede · originale invariato');
+                    }catch(err){showAlert('Copia non riuscita: '+(err.message||err.code),'Errore');}
+                });
+            }));
+            if(links.length){
+                actions.appendChild(lf29PlainButton('Gestisci giorni',()=>lf29ManageWeeks(tpl,links)));
+            }else{
+                actions.appendChild(lf29PlainButton('Rimuovi assegnazione',()=>{
+                    showConfirm(`Rimuovere «${tpl.title||'questa scheda'}» dalle schede singole? Rimarrà nell’Archivio storico dell’atleta, se la copia protetta è disponibile.`,async()=>{
+                        try{
+                            // Controllo aggiornato per non cestinare una scheda usata in un programma appena modificato.
+                            const latest=await lf275FindActiveWeekLinks(athleteId,tpl.id);
+                            if(latest.length)throw new Error('La scheda è ora collegata a un programma: usa Gestisci giorni.');
+                            await lf29ProtectedBeforeUnlink(athleteId,tpl.id);
+                            await lf26MoveToTrash(doc(db,'gyms',currentGymId,'athlete_programs',athleteId,'personal_templates',tpl.id));
+                            await loadAthletePersonalTemplates();
+                            lf28Toast('Assegnazione singola rimossa · copia nell’Archivio protetta');
+                        }catch(err){showAlert('Impossibile rimuovere: '+(err.message||err.code),'Nessun dato eliminato');}
+                    });
+                },'lf29-btn-danger'));
+            }
+            card.append(title,details,actions);return card;
+        }
+        async function loadAthletePersonalTemplates(){
+            if(!selectedAthlete||!currentGymId)return;
+            const solo=document.getElementById('lf29-unprogrammed-list');
+            const scheduled=document.getElementById('lf29-programmed-list');
+            const status=document.getElementById('lf29-personal-list-status');
+            solo.textContent='Caricamento schede…';scheduled.textContent='Caricamento programmi…';status.textContent='';
+            const athleteId=selectedAthlete.id,gymId=currentGymId;
+            try{
+                const [sheetSnap,weekSnap]=await Promise.all([
+                    getDocs(collection(db,'gyms',gymId,'athlete_programs',athleteId,'personal_templates')),
+                    getDocs(collection(db,'gyms',gymId,'athlete_programs',athleteId,'weeks'))
+                ]);
+                // Evita di mischiare dati di atleti diversi se l'utente cambia selezione durante il caricamento.
+                if(selectedAthlete?.id!==athleteId||currentGymId!==gymId)return;
+                const weeks=weekSnap.docs.map(d=>({id:d.id,...d.data()})).filter(w=>!w.deletedAt)
+                    .sort((a,b)=>String(a.startDate||'').localeCompare(String(b.startDate||'')));
+                const byTemplate=lf29AssignmentsFor(weeks);
+                solo.replaceChildren();scheduled.replaceChildren();let a=0,b=0;
+                const availableIds=new Set();
+                sheetSnap.docs.forEach(d=>{
+                    if(d.data().deletedAt)return;
+                    const tpl={...d.data(),id:d.id};availableIds.add(d.id);
+                    const links=byTemplate.get(d.id)||[];
+                    (links.length?scheduled:solo).appendChild(lf29PersonalCard(tpl,links,athleteId));
+                    if(links.length)b++;else a++;
+                });
+                if(!a){const p=document.createElement('p');p.className='lf29-muted-panel';p.textContent='Nessuna scheda singola senza programma.';solo.appendChild(p);}
+                if(!b){const p=document.createElement('p');p.className='lf29-muted-panel';p.textContent='Nessuna scheda attualmente collegata ai giorni delle settimane.';scheduled.appendChild(p);}
+                let missing=0;
+                for(const [id,links] of byTemplate){
+                    if(availableIds.has(id))continue;
+                    missing++;
+                    const p=document.createElement('div');p.className='lf29-muted-panel';
+                    p.textContent=`⚠ Scheda collegata ma non attiva: ${id.slice(0,12)}… · ${links.map(x=>`Sett. ${x.weekNumber} ${x.day}`).join(', ')}. Controlla il Cestino e usa la manutenzione.`;
+                    scheduled.appendChild(p);
+                }
+                status.textContent=`${a} schede senza programma · ${b} schede in programma${missing?' · '+missing+' collegamenti da verificare':''}`;
+            }catch(err){
+                console.error('Errore separazione schede',err);
+                solo.replaceChildren();scheduled.replaceChildren();status.textContent='';
+                const p=document.createElement('p');p.className='lf29-muted-panel';
+                p.textContent='Impossibile leggere le schede e le settimane: '+(err.message||err.code)+'. Nessun dato modificato.';
+                solo.appendChild(p);
+            }
         }
 
         document.getElementById('btn-add-edit-ex').addEventListener('click', () => addExerciseRowToContainerWithValues(document.getElementById('edit-exercises-container')));
@@ -3231,6 +3386,7 @@ Martedì	Forza	...
             const archiveBanner = document.getElementById('lf26-archive-week-context');
             banner.classList.toggle('hidden', !lf26PendingWeekTemplate);
             archiveBanner.classList.toggle('hidden', !lf26PendingWeekTemplate);
+            document.getElementById('lf29-return-to-athlete').classList.toggle('hidden', !lf26PendingWeekTemplate);
             if (lf26PendingWeekTemplate) {
                 const summary = `Scheda per ${lf26PendingWeekTemplate.day.toUpperCase()} · ${lf26PendingWeekTemplate.athleteName} · Settimana ${lf26PendingWeekTemplate.weekNumber}`;
                 document.getElementById('lf26-week-context-text').textContent = summary;
@@ -3285,6 +3441,7 @@ Martedì	Forza	...
             lfWeekDirty = ctx.wasDirty;
         }
         document.getElementById('lf26-cancel-week-flow').addEventListener('click', lf26CancelCreationAndRestoreDraft);
+        document.getElementById('lf29-return-to-athlete').addEventListener('click', lf26CancelCreationAndRestoreDraft);
         document.getElementById('lf26-archive-return-week').addEventListener('click', lf26CancelCreationAndRestoreDraft);
         async function lf26AutoLinkAfterCreate(templateId, ctx) {
             if (!ctx || currentGymId !== ctx.gymId || selectedAthlete?.id !== ctx.athleteId)
@@ -3310,47 +3467,45 @@ Martedì	Forza	...
             await loadAthletePersonalTemplates();
             lf26ReturnToWeek(ctx.weekId);
         }
+        let lf29LastPreviewedTemplateId=null;
+        function lf29PreviewFromSelector(tpl){
+            lf29LastPreviewedTemplateId=String(tpl.id);
+            document.querySelectorAll('#modal-tpl-list-container .lf29-link-option').forEach(row=>{
+                row.classList.toggle('lf29-previewed',row.dataset.sheetId===lf29LastPreviewedTemplateId);
+            });
+            // Visualizzare non equivale a selezionare o assegnare.
+            document.getElementById('select-template-modal').classList.add('hidden');
+            lf29PreviewReturnSelector=true;
+            openViewTemplateModal(tpl,'global');
+        }
         window.openLinkDayTemplateModal = function(dayName,slot=1) {
-            targetLinkingDayName = dayName;
-            targetLinkingSlot = slot === 2 ? 2 : 1;
+            targetLinkingDayName=dayName;targetLinkingSlot=slot===2?2:1;
             document.querySelector('#select-template-modal h3')?.replaceChildren(document.createTextNode(`Collega Scheda ${targetLinkingSlot} · ${dayName.toUpperCase()}`));
-            const container = document.getElementById('modal-tpl-list-container');
-            container.innerHTML = '';
-
-            const noneDiv = document.createElement('div');
-            noneDiv.className = "p-2.5 sm:p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-500 cursor-pointer hover:bg-gray-100 transition mb-2 text-[10px] sm:text-xs";
-            noneDiv.textContent = `❌ Rimuovi scheda ${targetLinkingSlot}`;
-            noneDiv.addEventListener('click', () => linkTemplateToDayConfirm(""));
-            container.appendChild(noneDiv);
-
-            if (gymTemplates.length === 0) {
-                const p = document.createElement('p');
-                p.className = "text-[10px] sm:text-xs text-gray-400 uppercase font-bold text-center py-4";
-                p.textContent = "Nessuna scheda dell’archivio. Creane una in 'Archivio schede'.";
-                container.appendChild(p);
-            } else {
-                gymTemplates.forEach(tpl => {
-                    const div = document.createElement('div');
-                    div.className = "p-2.5 sm:p-3 bg-gray-50 border border-gray-200 hover:border-neon rounded-xl flex justify-between items-center cursor-pointer transition mb-2";
-                    div.innerHTML = `
-                        <div class="min-w-0 pr-2">
-                            <span class="font-black uppercase text-black block text-[10px] sm:text-xs truncate">${tpl.title}</span>
-                            <span class="text-[8px] sm:text-[9px] text-gray-500 uppercase font-bold">${tpl.exercises ? tpl.exercises.length : 0} esercizi</span>
-                        </div>
-                        <span class="text-neon font-black text-[9px] sm:text-xs uppercase shrink-0">Seleziona &rarr;</span>
-                    `;
-                    div.addEventListener('click', () => linkTemplateToDayConfirm(tpl.id));
-                    container.appendChild(div);
+            const container=document.getElementById('modal-tpl-list-container');container.replaceChildren();
+            const none=lf29PlainButton(`Rimuovi scheda ${targetLinkingSlot} dal giorno`,()=>linkTemplateToDayConfirm(''),'lf29-btn-danger');
+            none.classList.add('w-full','mb-2');container.appendChild(none);
+            if(!gymTemplates.length){
+                const p=document.createElement('p');p.className='lf29-muted-panel';p.textContent='Nessuna scheda disponibile nell’Archivio schede.';container.appendChild(p);
+            }else{
+                gymTemplates.forEach(tpl=>{
+                    const row=document.createElement('div');row.className='lf29-link-option';row.dataset.sheetId=String(tpl.id);
+                    if(lf29LastPreviewedTemplateId===String(tpl.id))row.classList.add('lf29-previewed');
+                    const left=document.createElement('div');left.className='min-w-0 flex-1';
+                    const name=document.createElement('div');name.className='font-black text-xs break-words';name.textContent=tpl.title||'Scheda senza nome';
+                    const meta=document.createElement('p');meta.className='lf29-subtitle';meta.textContent=`${(tpl.exercises||[]).length} esercizi · ID …${String(tpl.id).slice(-6)}`;
+                    left.append(name,meta);
+                    const actions=document.createElement('div');actions.className='flex flex-wrap gap-2 shrink-0';
+                    const preview=document.createElement('button');preview.type='button';preview.className='lf29-mini-btn';preview.textContent='Visualizza';
+                    preview.addEventListener('click',()=>lf29PreviewFromSelector(tpl));
+                    const select=document.createElement('button');select.type='button';select.className='lf29-mini-btn';select.textContent='Assegna';
+                    select.addEventListener('click',()=>linkTemplateToDayConfirm(tpl.id));
+                    actions.append(preview,select);row.append(left,actions);container.appendChild(row);
                 });
             }
-            const createButton = document.createElement('button');
-            createButton.type = 'button';
-            createButton.className = 'w-full mt-2 rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-left text-sm font-black text-green-900 hover:bg-green-100';
-            createButton.textContent = '+ Crea nuova scheda dell’archivio e collega al giorno';
-            createButton.addEventListener('click', () => lf26StartSharedFromWeek(dayName,targetLinkingSlot));
-            container.appendChild(createButton);
+            const create=lf29PlainButton('+ Crea nuova scheda e collega al giorno',()=>lf26StartSharedFromWeek(dayName,targetLinkingSlot));
+            create.classList.add('w-full','mt-2');container.appendChild(create);
             toggleModal('select-template-modal');
-        }
+        };
 
         async function linkTemplateToDayConfirm(templateId) {
             if (!selectedAthlete || !currentGymId || !targetLinkingDayName) return;
@@ -3358,7 +3513,14 @@ Martedì	Forza	...
             if (!currentWeekData) return;
             const linkDay = targetLinkingDayName;
             try {
-                if (templateId) await lf24EnsurePersonalWeekTemplate(selectedAthlete.id, templateId);
+                if (!templateId) {
+                    const oldId=String(currentWeekData.days?.[linkDay]?.[targetLinkingSlot===2?'templateId2':'templateId']||'');
+                    toggleModal('select-template-modal');
+                    if(oldId) lf29ConfirmRemoveLink({weekId:currentWeekData.id,weekDate:currentWeekData.startDate||'',weekNumber:activeWeekIndex+1,day:linkDay,slot:targetLinkingSlot,templateId:oldId});
+                    else lf28Toast('Nessuna scheda da rimuovere.');
+                    return;
+                }
+                await lf24EnsurePersonalWeekTemplate(selectedAthlete.id, templateId);
                 const weekRef = doc(db, "gyms", currentGymId, "athlete_programs", selectedAthlete.id, "weeks", currentWeekData.id);
                 // Field path mirato: non sovrascrive attivita' e schede degli altri giorni.
                 const fieldName = targetLinkingSlot === 2 ? 'templateId2' : 'templateId';
