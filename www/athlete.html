@@ -521,8 +521,16 @@ html[data-lion-theme="dark"] #section-archive details button{color:#a1f4c9!impor
 html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321a!important;color:#ffebad!important;border-color:#806d3a!important}
 
 </style>
-    <!-- Lion Fit: controllo aggiornamenti APK per Android (Beta 0.28.9) -->
-    <script defer src="./lionfit-updates.js?v=0288"></script>
+<style id="lf2810-athlete-refinement">
+/* Lion Fit 0.28.10 — logo profilo uniforme in tema chiaro e scuro */
+#section-profile > div:first-child,
+html[data-lion-theme="dark"] #section-profile > div:first-child {background:#000!important;}
+#section-profile > div:first-child > img {mix-blend-mode:screen;}
+#btn-logout-settings {align-items:center;gap:12px;text-align:left;}
+#btn-logout-settings svg {flex-shrink:0;stroke:currentColor;}
+</style>
+    <!-- Lion Fit: controllo aggiornamenti APK per Android (Beta 0.28.10) -->
+    <script defer src="./lionfit-updates.js?v=02810"></script>
 </head>
 <body class="bg-gray-100 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col relative pb-20">
 
@@ -541,7 +549,7 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
         </div>
     </header>
 
-    <div class="lf26-version pt-1">LION FIT · BETA 0.28.9</div>
+    <div class="lf26-version pt-1">LION FIT · BETA 0.28.10</div>
     <!-- MAIN CONTAINER -->
     <main class="flex-grow w-full max-w-3xl mx-auto p-4 pb-24 relative">
 
@@ -885,7 +893,8 @@ html[data-lion-theme="dark"] #section-archive p.text-amber-900{background:#3d321
             
             <div class="p-4 mt-6">
                 <button id="btn-logout-settings" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-3.5 rounded-xl font-bold uppercase text-xs tracking-wider flex justify-between px-6 transition">
-                    <span>Esci dall'Account</span> 🚪
+                    <span>Esci dall'Account</span>
+                    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/></svg>
                 </button>
             </div>
         </div>

@@ -654,8 +654,41 @@ html[data-lion-theme="dark"] .lf29-sheet-name,html[data-lion-theme="dark"] .lf29
 html[data-lion-theme="dark"] .lf29-subtitle{color:#c3cdd3}
 html[data-lion-theme="dark"] .lf29-link-option.lf29-previewed{background:#183f35;border-color:#65c79d}
 </style>
-    <!-- Lion Fit: controllo aggiornamenti APK per Android (Beta 0.28.8) -->
-    <script defer src="./lionfit-updates.js?v=0288"></script>
+<style id="lf2810-admin-refinement">
+/* Lion Fit 0.28.10 · revisione profilo, programma e archivio */
+#section-profile > div:first-child > div:first-child,
+html[data-lion-theme="dark"] #section-profile > div:first-child > div:first-child {background:#000!important;}
+#section-profile > div:first-child > div:first-child > img {mix-blend-mode:screen;opacity:1!important;}
+/* Settimane: pill rettangolari, contenuto centrato, senza numeri tagliati */
+#weeks-badges-bar .lf2810-week-pill {width:56px!important;height:38px!important;min-width:56px!important;min-height:38px!important;padding:0 10px!important;box-sizing:border-box;line-height:1!important;font-size:15px!important;border-radius:12px!important;transform:none!important;overflow:visible!important;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+#weeks-badges-bar {padding-block:8px;align-items:center;}
+/* Giorni più compatti. Segnaposti dentro gli input, non etichette sopra. */
+#active-week-editor-container .lf-day-card {padding:10px!important;gap:0!important;justify-content:flex-start!important;overflow:visible!important;}
+#active-week-editor-container .lf-day-card > div:first-child {display:flex;flex-direction:column;gap:5px!important;}
+#active-week-editor-container .lf-day-card .lf2810-day-heading {font-size:11px!important;letter-spacing:.04em!important;margin-bottom:1px;padding-bottom:3px!important;}
+#active-week-editor-container .lf-day-card .lf2810-activity-input {width:100%;min-height:36px!important;height:36px!important;padding:7px 10px!important;font-size:13px!important;line-height:1.3!important;}
+#active-week-editor-container .lf-day-card .lf2810-slot-area {margin-top:8px!important;padding-top:8px!important;display:flex;flex-direction:column;gap:6px!important;}
+#active-week-editor-container .lf-day-card .lf2810-slot-header {display:flex;align-items:center;justify-content:space-between;gap:5px;min-height:29px;}
+#active-week-editor-container .lf-day-card .lf2810-slot-title {min-width:0;flex:1;font-size:10px!important;letter-spacing:0!important;white-space:normal;line-height:1.2;}
+#active-week-editor-container .lf-day-card .lf2810-slot-actions {display:flex;gap:5px;align-items:center;flex-shrink:0;}
+#active-week-editor-container .lf-day-card .lf2810-slot-actions button {min-height:29px!important;height:29px;padding:4px 7px!important;border-radius:8px!important;white-space:nowrap;font-size:10px!important;font-weight:850!important;line-height:1!important;}
+#active-week-editor-container .lf-day-card .lf2810-slot-actions button.lf2810-delete {background:#fff1f2;color:#a32938;border:1px solid #e6a8ae;}
+#active-week-editor-container .lf-day-card .lf2810-slot-actions button.lf2810-delete:hover:not(:disabled) {background:#ffe4e6;}
+#active-week-editor-container .lf-day-card .lf2810-slot-actions button:disabled {opacity:.36;cursor:not-allowed;}
+#active-week-editor-container .lf-day-card .lf2810-slot-select {min-height:37px!important;padding:7px 9px!important;line-height:1.3!important;}
+@media(min-width:768px){#active-week-editor-container .lf2810-sunday {grid-column:2!important;}}
+@media(max-width:640px){#active-week-editor-container .lf-day-card {padding:8px!important;}#active-week-editor-container .lf-day-card .lf2810-slot-actions button{flex:none!important;padding:3px 6px!important;}}
+/* Giorni assegnati: settimana una sola volta e giorni estesi in verde */
+.lf2810-week-links{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 6px;font-size:11px;line-height:1.5;}
+.lf2810-week-links .lf2810-week-name{color:inherit;font-weight:850;}
+.lf2810-week-links .lf2810-week-days{color:#18834e;font-weight:800;}
+html[data-lion-theme="dark"] .lf2810-week-links .lf2810-week-days{color:#8aefb2;}
+html[data-lion-theme="dark"] #active-week-editor-container .lf-day-card .lf2810-slot-actions button.lf2810-delete{background:#3a212a;color:#ffc3ca;border-color:#985361;}
+/* paginazione dell'Archivio coach */
+#lf2810-archive-more{margin:8px auto 0;max-width:360px;min-height:44px;}
+</style>
+    <!-- Lion Fit: controllo aggiornamenti APK per Android (Beta 0.28.10) -->
+    <script defer src="./lionfit-updates.js?v=02810"></script>
 </head>
 <body class="bg-gray-50 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col md:flex-row relative overflow-x-hidden">
 
@@ -708,7 +741,7 @@ html[data-lion-theme="dark"] .lf29-link-option.lf29-previewed{background:#183f35
 
         <div class="p-4 border-t border-gray-200 space-y-3">
             <button data-lf-theme-toggle class="lf26-theme-btn w-full" aria-label="Cambia tema">🌙 Tema scuro</button>
-            <div class="lf26-version">LION FIT · BETA 0.28.8</div>
+            <div class="lf26-version">LION FIT · BETA 0.28.10</div>
             <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-1">
                 <span class="text-[9px] font-black uppercase text-gray-500 block">Codice Invito Palestra</span>
                 <span id="side-gym-code" class="text-xs font-black text-neon tracking-widest block">Cod. ---</span>
@@ -735,7 +768,7 @@ html[data-lion-theme="dark"] .lf29-link-option.lf29-previewed{background:#183f35
 
         <!-- ================= SEZIONE 1: HOME / DASHBOARD ================= -->
         <section id="section-home" class="block space-y-5">
-            <div class="flex justify-end"><span class="lf26-version">Beta 0.28.8</span></div>
+            <div class="flex justify-end"><span class="lf26-version">Beta 0.28.10</span></div>
             <div class="lf14-welcome">
                 <div class="lf14-welcome-top"><span class="lf14-eyebrow">LION FIT · PANNELLO COACH</span><span class="lf14-status"><span></span> Panoramica palestra</span></div>
                 <h2>Benvenuto, <span id="welcome-coach-name">Coach</span></h2>
@@ -823,7 +856,7 @@ html[data-lion-theme="dark"] .lf29-link-option.lf29-previewed{background:#183f35
                         </section>
                         <section class="lf29-sheet-panel" aria-label="Schede in programma">
                             <h6>🗓️ Schede in programma</h6>
-                            <p class="lf29-subtitle">Una scheda per ogni ID, con settimana e giorni esatti. «Gestisci giorni» modifica le assegnazioni vere del programma.</p>
+                            <p class="lf29-subtitle">Visualizza le assegnazioni e cancellale da qui oppure dai giorni della settimana.</p>
                             <div id="lf29-programmed-list" class="lf29-list"><p class="lf29-subtitle">Caricamento...</p></div>
                         </section>
                     </div>
@@ -837,7 +870,7 @@ html[data-lion-theme="dark"] .lf29-link-option.lf29-previewed{background:#183f35
                 </div>
 
                 <!-- PROGRAMMA ATTUALE (SETTIMANE CON BOLLINI NUMERATI) -->
-                <div class="bg-gray-50 border border-gray-200 p-3 sm:p-5 rounded-2xl space-y-3 sm:space-y-4">
+                <div class="bg-gray-50 border border-gray-200 p-3 sm:p-4 rounded-2xl space-y-2 sm:space-y-3">
                     <div class="flex justify-between items-center">
                         <h4 class="font-black text-xs sm:text-sm text-black uppercase tracking-widest">Programma attuale</h4>
                         <span id="program-weeks-count-badge" class="text-[9px] sm:text-[10px] font-black bg-white border border-gray-200 text-gray-700 px-2 sm:px-3 py-1 rounded-xl uppercase shadow-2xs">
@@ -930,6 +963,7 @@ html[data-lion-theme="dark"] .lf29-link-option.lf29-previewed{background:#183f35
                 <div id="saved-templates-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <p class="text-xs font-bold text-gray-400 uppercase text-center col-span-3 py-6">Caricamento schede in corso...</p>
                 </div>
+                <button id="lf2810-archive-more" type="button" class="hidden w-full block text-xs font-black bg-green-50 border border-green-300 text-green-900 rounded-xl px-4 py-3 hover:bg-green-100">Carica altre schede</button>
             </div>
         </section>
 
@@ -2449,9 +2483,9 @@ Martedì	Forza	...
                 btn.type = 'button';
                 const isSelected = idx === activeWeekIndex;
 
-                btn.className = isSelected 
-                    ? "w-11 h-11 sm:w-11 sm:h-11 rounded-xl bg-neon text-white font-black text-[10px] sm:text-xs flex items-center justify-center shrink-0 shadow-xs transform scale-105"
-                    : "w-11 h-11 sm:w-11 sm:h-11 rounded-xl bg-white text-gray-700 font-black text-[10px] sm:text-xs flex items-center justify-center shrink-0 border border-gray-200 hover:border-neon transition-all";
+                btn.className = isSelected
+                    ? "lf2810-week-pill bg-neon text-white font-black shadow-xs border border-green-700"
+                    : "lf2810-week-pill bg-white text-gray-700 font-black border border-gray-300 hover:border-neon transition-colors";
 
                 btn.textContent = `${idx + 1}`;
                 btn.setAttribute('aria-pressed', String(isSelected));
@@ -2471,6 +2505,8 @@ Martedì	Forza	...
             });
         }
 
+        function lf2810EscapeHtml(value){return String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+        function lf2810EscapeAttr(value){return lf2810EscapeHtml(value);}
         function renderSelectedWeekDaysEditor(index) {
             const container = document.getElementById('active-week-editor-container');
             container.innerHTML = '';
@@ -2499,7 +2535,7 @@ Martedì	Forza	...
                 const isDomenica = dayName === 'domenica';
                 
                 const dayCard = document.createElement('div');
-                dayCard.className = `lf-day-card bg-gray-50 border border-gray-200 p-3 sm:p-4 rounded-xl space-y-2 flex flex-col justify-between overflow-hidden `;
+                dayCard.className = `lf-day-card bg-gray-50 border border-gray-200 rounded-xl flex flex-col min-w-0 ${isDomenica?'lf2810-sunday':''}`;
 
                 let linkedTemplateTitle = 'Nessuna scheda collegata';
                 if (dayInfo.templateId) {
@@ -2519,37 +2555,34 @@ Martedì	Forza	...
                 }
 
                 dayCard.innerHTML = `
-                    <div class="space-y-1.5 sm:space-y-2">
-                        <span class="font-black text-[9px] sm:text-[10px] uppercase tracking-widest text-gray-500 border-b border-gray-200 pb-0.5 sm:pb-1 block truncate">${dayName}</span>
-                        <div>
-                            <label class="block text-[10px] font-black uppercase text-gray-500 mb-0.5 truncate">Attività 1</label>
-                            <input type="text" id="input-act1-${dayName}" value="${dayInfo.activity1 || ''}" placeholder="..." class="w-full bg-white border border-gray-200 rounded-md sm:rounded-lg p-1 sm:p-2 text-sm font-semibold text-black outline-none focus:border-neon min-w-0 min-h-[42px]">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black uppercase text-gray-500 mb-0.5 truncate">Attività 2</label>
-                            <input type="text" id="input-act2-${dayName}" value="${dayInfo.activity2 || ''}" placeholder="..." class="w-full bg-white border border-gray-200 rounded-md sm:rounded-lg p-1 sm:p-2 text-sm font-semibold text-black outline-none focus:border-neon min-w-0 min-h-[42px]">
-                        </div>
+                    <div class="lf2810-activity-fields">
+                        <span class="lf2810-day-heading font-black uppercase text-gray-600 border-b border-gray-200 block truncate">${dayName}</span>
+                        <label class="sr-only" for="input-act1-${dayName}">Attività 1 · ${dayName}</label>
+                        <input type="text" id="input-act1-${dayName}" value="${lf2810EscapeAttr(dayInfo.activity1 || '')}" placeholder="Attività 1" aria-label="Attività 1, ${dayName}" class="lf2810-activity-input bg-white border border-gray-300 rounded-lg font-semibold text-black outline-none focus:border-neon">
+                        <label class="sr-only" for="input-act2-${dayName}">Attività 2 · ${dayName}</label>
+                        <input type="text" id="input-act2-${dayName}" value="${lf2810EscapeAttr(dayInfo.activity2 || '')}" placeholder="Attività 2" aria-label="Attività 2, ${dayName}" class="lf2810-activity-input bg-white border border-gray-300 rounded-lg font-semibold text-black outline-none focus:border-neon">
                     </div>
-
-                    <div class="pt-1 sm:pt-2 border-t border-gray-200 space-y-0.5 sm:space-y-1">
-                        <div class="flex items-center justify-between gap-1">
-                            <span class="block text-[10px] font-black uppercase text-gray-500 truncate">Scheda 1 dall’archivio</span>
-                            <button type="button" onclick="lf26StartSharedFromWeek('${dayName}')" class="text-[10px] font-bold text-green-800 hover:text-green-950 border border-green-200 bg-green-50 rounded-md px-2 py-1" title="Crea una scheda dell’archivio e collegala a ${dayName}">+ Crea</button>
+                    <div class="lf2810-slot-area border-t border-gray-200">
+                        <div class="lf2810-slot-header">
+                            <span class="lf2810-slot-title font-black uppercase text-gray-500">Scheda 1</span>
+                            <div class="lf2810-slot-actions">
+                                <button type="button" onclick="lf26StartSharedFromWeek('${dayName}')" class="text-green-800 border border-green-200 bg-green-50" title="Crea una scheda e collegala a ${dayName}">+ Crea</button>
+                                <button type="button" onclick="lf29RemoveDaySlot('${dayName}',1)" class="lf2810-delete" ${dayInfo.templateId?'':'disabled'} aria-label="Cancella la scheda 1 da ${dayName}" title="Rimuove solo il collegamento da ${dayName}">Cancella</button>
+                            </div>
                         </div>
-                        <button type="button" onclick="openLinkDayTemplateModal('${dayName}',1)" class="w-full bg-white hover:border-neon border border-gray-200 p-2.5 rounded-xl text-left min-h-[42px] text-xs sm:text-sm font-bold text-neon flex items-center justify-between min-w-0">
-                            <span class="truncate pr-1">${linkedTemplateTitle}</span>
-                            <span class="text-gray-400 text-[10px] sm:text-xs leading-none shrink-0">+</span>
+                        <button type="button" onclick="openLinkDayTemplateModal('${dayName}',1)" class="lf2810-slot-select w-full bg-white hover:border-neon border border-gray-300 rounded-lg text-left text-xs font-bold text-neon flex items-center justify-between min-w-0">
+                            <span class="truncate pr-1">${lf2810EscapeHtml(linkedTemplateTitle)}</span><span class="text-gray-500 shrink-0">+</span>
                         </button>
-                        ${dayInfo.templateId ? `<button type="button" class="lf29-btn lf29-btn-danger w-full mt-1" onclick="lf29RemoveDaySlot('${dayName}', 1)">Rimuovi scheda 1 da questo giorno</button>` : ''}
-                        <div class="flex items-center justify-between gap-1 pt-2">
-                            <span class="block text-[10px] font-black uppercase text-gray-500">Scheda 2 (facoltativa)</span>
-                            <button type="button" onclick="lf26StartSharedFromWeek('${dayName}',2)" class="text-[10px] font-bold text-green-800 border border-green-200 bg-green-50 rounded-md px-2 py-1" title="Crea la seconda scheda per ${dayName}">+ Crea</button>
+                        <div class="lf2810-slot-header">
+                            <span class="lf2810-slot-title font-black uppercase text-gray-500">Scheda 2 (facoltativa)</span>
+                            <div class="lf2810-slot-actions">
+                                <button type="button" onclick="lf26StartSharedFromWeek('${dayName}',2)" class="text-green-800 border border-green-200 bg-green-50" title="Crea una seconda scheda per ${dayName}">+ Crea</button>
+                                <button type="button" onclick="lf29RemoveDaySlot('${dayName}',2)" class="lf2810-delete" ${dayInfo.templateId2?'':'disabled'} aria-label="Cancella la scheda 2 da ${dayName}" title="Rimuove solo il collegamento da ${dayName}">Cancella</button>
+                            </div>
                         </div>
-                        <button type="button" onclick="openLinkDayTemplateModal('${dayName}',2)" class="w-full bg-white hover:border-neon border border-gray-200 p-2.5 rounded-xl text-left min-h-[42px] text-xs sm:text-sm font-bold text-neon flex items-center justify-between min-w-0">
-                            <span class="truncate pr-1">${linkedTemplateTitle2}</span>
-                            <span class="text-gray-400 shrink-0">+</span>
+                        <button type="button" onclick="openLinkDayTemplateModal('${dayName}',2)" class="lf2810-slot-select w-full bg-white hover:border-neon border border-gray-300 rounded-lg text-left text-xs font-bold text-neon flex items-center justify-between min-w-0">
+                            <span class="truncate pr-1">${lf2810EscapeHtml(linkedTemplateTitle2)}</span><span class="text-gray-500 shrink-0">+</span>
                         </button>
-                        ${dayInfo.templateId2 ? `<button type="button" class="lf29-btn lf29-btn-danger w-full mt-1" onclick="lf29RemoveDaySlot('${dayName}', 2)">Rimuovi scheda 2 da questo giorno</button>` : ''}
                     </div>
                 `;
                 grid.appendChild(dayCard);
@@ -3173,7 +3206,26 @@ Martedì	Forza	...
 
         // Beta 0.28.8: la distinzione dipende dai collegamenti delle settimane, mai dal titolo.
         // Le operazioni non eliminano il contenuto dell'Archivio protetto.
-        const lf29DayName = {"lunedì":"Lun", "martedì":"Mar", "mercoledì":"Mer", "giovedì":"Gio", "venerdì":"Ven", "sabato":"Sab", "domenica":"Dom"};
+        const lf29DayName = {"lunedì":"Lunedì", "martedì":"Martedì", "mercoledì":"Mercoledì", "giovedì":"Giovedì", "venerdì":"Venerdì", "sabato":"Sabato", "domenica":"Domenica"};
+        const lf2810DayIndex = Object.fromEntries(["lunedì","martedì","mercoledì","giovedì","venerdì","sabato","domenica"].map((day,i)=>[day,i]));
+        function lf2810RenderWeekLinks(host,links){
+            const groups=new Map();
+            const ordered=[...links].sort((x,y)=>x.weekNumber-y.weekNumber || (lf2810DayIndex[x.day]??99)-(lf2810DayIndex[y.day]??99) || x.slot-y.slot);
+            ordered.forEach(link=>{
+                const key=String(link.weekId);
+                if(!groups.has(key)) groups.set(key,{week:link.weekNumber,days:[]});
+                const group=groups.get(key);
+                if(!group.days.includes(link.day))group.days.push(link.day);
+            });
+            host.replaceChildren();
+            for(const group of groups.values()){
+                const wrap=document.createElement('span');wrap.className='lf2810-week-links';
+                const heading=document.createElement('strong');heading.className='lf2810-week-name';heading.textContent='Settimana '+group.week+' ·';
+                const days=document.createElement('span');days.className='lf2810-week-days';
+                days.textContent=group.days.map(day=>lf29DayName[day]||day).join(' e ');
+                wrap.append(heading,days);host.append(wrap);
+            }
+        }
         let lf29RenderedAssignments=[];
         let lf29CurrentManagement=null;
         function lf29AssignmentsFor(weeks){
@@ -3198,7 +3250,12 @@ Martedì	Forza	...
             const ref=lf277ArchiveRef(athleteId,templateId);
             if((await getDoc(ref)).exists())return;
             const personal=await getDoc(doc(db,'gyms',currentGymId,'athlete_programs',athleteId,'personal_templates',templateId));
-            if(!personal.exists())throw new Error('Scheda originale mancante e copia nell’Archivio non trovata. Ripristina la scheda o esegui la manutenzione prima di rimuoverla.');
+            if(!personal.exists()){
+                // Vecchio collegamento orfano: la sorgente è già stata rimossa.
+                // La sola rimozione del riferimento settimanale non elimina altri dati.
+                console.info('[Lion Fit] Pulizia riferimento orfano',templateId);
+                return;
+            }
             await lf277EnsureProtectedCopy(athleteId,templateId,personal.data());
         }
         async function lf29UnlinkAssignment(entry){
@@ -3236,11 +3293,11 @@ Martedì	Forza	...
             lf29CurrentManagement={tpl,links};
             const host=document.getElementById('lf29-manage-assignment-list');host.replaceChildren();
             document.getElementById('lf29-manage-title').textContent='Gestisci giorni · '+(tpl.title||'Scheda');
-            links.forEach(entry=>{
+            [...links].sort((x,y)=>x.weekNumber-y.weekNumber || (lf2810DayIndex[x.day]??99)-(lf2810DayIndex[y.day]??99) || x.slot-y.slot).forEach(entry=>{
                 const row=document.createElement('div');row.className='lf29-link-option';
                 const label=document.createElement('span');label.className='lf29-subtitle';
                 label.textContent=`Settimana ${entry.weekNumber} (${entry.weekDate}) · ${entry.day} · Scheda ${entry.slot}`;
-                row.append(label,lf29PlainButton('Rimuovi dal giorno',()=>lf29ConfirmRemoveLink(entry,()=>{
+                row.append(label,lf29PlainButton('Cancella',()=>lf29ConfirmRemoveLink(entry,()=>{
                     document.getElementById('lf29-manage-schedule-modal').classList.add('hidden');
                 }),'lf29-btn-danger'));
                 host.appendChild(row);
@@ -3257,9 +3314,8 @@ Martedì	Forza	...
             title.textContent='🏋 '+(tpl.title||'Scheda senza nome');
             title.title='Apri scheda';title.addEventListener('click',()=>openViewTemplateModal(tpl,'personal',athleteId));
             const details=document.createElement('p');details.className='lf29-subtitle';
-            details.textContent=links.length
-                ? links.map(e=>`Sett. ${e.weekNumber} · ${lf29DayName[e.day]||e.day} (scheda ${e.slot})`).join('  •  ')
-                : 'Senza giorno · non collegata a settimane attive';
+            if(links.length) lf2810RenderWeekLinks(details,links);
+            else details.textContent='Senza giorno · non collegata a settimane attive';
             const actions=document.createElement('div');actions.className='lf29-sheet-actions';
             actions.appendChild(lf29PlainButton('Visualizza',()=>openViewTemplateModal(tpl,'personal',athleteId)));
             // Manteniamo anche la funzione storica di copia nell'Archivio condiviso del coach.
@@ -3276,6 +3332,10 @@ Martedì	Forza	...
             }));
             if(links.length){
                 actions.appendChild(lf29PlainButton('Gestisci giorni',()=>lf29ManageWeeks(tpl,links)));
+                actions.appendChild(lf29PlainButton('Cancella',()=>{
+                    if(links.length===1)lf29ConfirmRemoveLink(links[0]);
+                    else lf29ManageWeeks(tpl,links);
+                },'lf29-btn-danger'));
             }else{
                 actions.appendChild(lf29PlainButton('Rimuovi assegnazione',()=>{
                     showConfirm(`Rimuovere «${tpl.title||'questa scheda'}» dalle schede singole? Rimarrà nell’Archivio storico dell’atleta, se la copia protetta è disponibile.`,async()=>{
@@ -3321,15 +3381,9 @@ Martedì	Forza	...
                 });
                 if(!a){const p=document.createElement('p');p.className='lf29-muted-panel';p.textContent='Nessuna scheda singola senza programma.';solo.appendChild(p);}
                 if(!b){const p=document.createElement('p');p.className='lf29-muted-panel';p.textContent='Nessuna scheda attualmente collegata ai giorni delle settimane.';scheduled.appendChild(p);}
-                let missing=0;
-                for(const [id,links] of byTemplate){
-                    if(availableIds.has(id))continue;
-                    missing++;
-                    const p=document.createElement('div');p.className='lf29-muted-panel';
-                    p.textContent=`⚠ Scheda collegata ma non attiva: ${id.slice(0,12)}… · ${links.map(x=>`Sett. ${x.weekNumber} ${x.day}`).join(', ')}. Controlla il Cestino e usa la manutenzione.`;
-                    scheduled.appendChild(p);
-                }
-                status.textContent=`${a} schede senza programma · ${b} schede in programma${missing?' · '+missing+' collegamenti da verificare':''}`;
+                const missing=[...byTemplate.keys()].filter(id=>!availableIds.has(id));
+                if(missing.length)console.info('[Lion Fit] Riferimenti storici non attivi rilevati (manutenzione disponibile):',missing.length);
+                status.textContent=`${a} schede senza programma · ${b} schede in programma`;
             }catch(err){
                 console.error('Errore separazione schede',err);
                 solo.replaceChildren();scheduled.replaceChildren();status.textContent='';
@@ -3640,9 +3694,12 @@ Martedì	Forza	...
         // Lion Fit V17: archivio compatto, ricerca per nome/esercizio, operazioni esplicite.
         let lf17ArchiveTerm = '';
         let lf17ArchiveSort = 'recent';
+        let lf2810ArchiveShown=6;
+        const lf2810ArchiveMore=document.getElementById('lf2810-archive-more');
+        lf2810ArchiveMore.addEventListener('click',()=>{lf2810ArchiveShown+=6;lf17RenderArchive();});
         const lf17ArchiveList = document.getElementById('saved-templates-list');
-        document.getElementById('lf17-archive-search').addEventListener('input', e => { lf17ArchiveTerm = e.target.value.trim().toLocaleLowerCase('it'); lf17RenderArchive(); });
-        document.getElementById('lf17-archive-sort').addEventListener('change', e => { lf17ArchiveSort = e.target.value; lf17RenderArchive(); });
+        document.getElementById('lf17-archive-search').addEventListener('input', e => { lf17ArchiveTerm = e.target.value.trim().toLocaleLowerCase('it'); lf2810ArchiveShown=6; lf17RenderArchive(); });
+        document.getElementById('lf17-archive-sort').addEventListener('change', e => { lf17ArchiveSort = e.target.value; lf2810ArchiveShown=6; lf17RenderArchive(); });
         function lf17Btn(label, iconName, action, cls='') {
             const b=document.createElement('button'); b.type='button';
             b.className='lf261-archive-action inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white hover:bg-green-50 px-3 py-2 text-xs font-bold text-gray-900 transition '+cls; b.dataset.lfAction=label;
@@ -3659,13 +3716,16 @@ Martedì	Forza	...
             if(lf17ArchiveSort==='az') rows=rows.slice().sort((a,b)=>String(a.title).localeCompare(String(b.title),'it'));
             else if(lf17ArchiveSort==='size') rows=rows.slice().sort((a,b)=>(b.exercises?.length||0)-(a.exercises?.length||0));
             else rows=rows.slice().sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-            document.getElementById('lf17-archive-count').textContent = `${rows.length} schede visualizzate su ${gymTemplates.length}`;
+            const visibleCount=Math.min(rows.length,lf2810ArchiveShown);
+            document.getElementById('lf17-archive-count').textContent = `${visibleCount} di ${rows.length} schede ${lf17ArchiveTerm?'trovate':'nell’archivio'}`;
+            lf2810ArchiveMore.classList.toggle('hidden',visibleCount>=rows.length);
+            lf2810ArchiveMore.textContent=`Carica altre schede (${visibleCount} di ${rows.length})`;
             if(!rows.length) {
                 const empty=document.createElement('p');empty.className='col-span-full text-sm text-gray-500 p-6 text-center bg-gray-50 border rounded-xl';
                 empty.textContent=gymTemplates.length ? 'Nessuna scheda corrisponde alla ricerca.' : 'Archivio vuoto. Premi «Crea nuova scheda dell’archivio» per iniziare.';
                 list.appendChild(empty);return;
             }
-            rows.forEach(tpl=>{
+            rows.slice(0,visibleCount).forEach(tpl=>{
                 const card=document.createElement('article');card.className='lf261-archive-card bg-gray-50 border border-gray-300 rounded-2xl p-3 sm:p-4 space-y-3 hover:border-green-500 transition';
                 const header=document.createElement('div');header.className='flex justify-between items-start gap-3';
                 const info=document.createElement('div');info.className='min-w-0';
