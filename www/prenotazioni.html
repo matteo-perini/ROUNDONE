@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html lang="it">
+<head>
+<meta charset="utf-8"/><meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="#0b1111" name="theme-color"/><title>Lion Fit · Prenotazioni</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1012;--side:#10181b;--card:#172125;--card2:#1c292c;--border:#344447;--text:#eef9f2;--muted:#adbec2;--green:#45d38d;--green2:#217b54;--red:#ffb2a6;--blue:#74b8ff;--gold:#ffc37b;font:14px/1.42 system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}a{color:var(--green)}.layout{display:flex;min-height:100vh}.side{width:228px;min-width:228px;padding:24px 14px;background:var(--side);border-right:1px solid #293739;position:sticky;top:0;align-self:flex-start;height:100vh;display:flex;flex-direction:column;gap:28px}.brand{font-weight:1000;font-size:22px;letter-spacing:.04em}.brand b{color:var(--green)}.brand-mark{display:inline-flex;background:#173f2b;width:36px;height:36px;align-items:center;justify-content:center;border-radius:12px;margin-right:8px;color:#75f3ab}.brand-sub{color:var(--muted);text-transform:uppercase;letter-spacing:.17em;font-size:9px;margin:7px 0 0 45px}.side a,.side button{display:block;color:#cad9d6;text-align:left;text-decoration:none;border:0;background:none;border-radius:12px;padding:12px 13px;font-weight:750;width:100%}.side a:hover,.side a.current{background:#1a3b2d;color:#9ff1c4}.side-note{margin-top:auto;color:#93a8a4;font-size:11px;padding:12px;border:1px solid #33453d;border-radius:12px}.workspace{width:100%;min-width:0;max-width:1450px;margin-inline:auto;padding:26px clamp(14px,3vw,36px) 65px}.head{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:25px}.kicker{color:var(--green);text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:850}.head h1{font-size:clamp(24px,3vw,35px);line-height:1.1;margin:5px 0 6px;letter-spacing:-.045em}.muted{color:var(--muted)}.small{font-size:12px}.pill{display:inline-block;border-radius:99px;border:1px solid #4e6a61;color:#9ae8bc;padding:4px 10px;font-weight:800;font-size:11px}.button,.chip,.navbutton{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:12px;border:1px solid #4b5c5b;background:#263538;color:var(--text);padding:11px 16px;font-weight:780;min-height:43px;transition:.15s}.button:hover:not(:disabled),.chip:hover:not(:disabled){border-color:#78dfa8}.button.primary{background:#178253;border-color:#2fbb73;color:white}.button.danger{background:#543332;border-color:#ba6c66;color:#ffdcd9}.button.ghost{background:transparent}.button.sm{min-height:36px;padding:6px 10px;font-size:12px}.chip{padding:9px 12px;min-height:38px;border-radius:99px;font-size:12px}.chip.active{background:#164d32;border-color:#44d38d;color:#b6f9d0}.grid{display:grid;gap:14px}.two{grid-template-columns:repeat(2,minmax(0,1fr))}.three{grid-template-columns:repeat(3,minmax(0,1fr))}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;min-width:0;box-shadow:0 6px 24px rgba(0,0,0,.08)}.card h2,.card h3{margin:0 0 9px;font-size:17px}.card p{margin:4px 0 11px}.section-title{font-size:18px;font-weight:900;letter-spacing:-.02em;margin:12px 0}.stack{display:flex;flex-direction:column;gap:12px}.flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.grow{flex:1}.hide{display:none!important}.status{border-radius:12px;padding:11px 13px;background:#193a2c;border:1px solid #397c57;color:#c6f6d8}.status.error{background:#422523;border-color:#b46c6a;color:#ffe0d8}.status.warning{background:#453819;border-color:#977844;color:#ffe6a6}.service{min-height:210px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;gap:12px;padding:20px;border-radius:19px;border:1px solid #49605a;background:linear-gradient(140deg,#1b322a,#172125 64%);color:var(--text)}.service .big-icon{font-size:35px}.service h2{font-size:24px;margin:0}.service.fighter{background:linear-gradient(140deg,#27322b,#182123 72%)}.service.active{outline:2px solid var(--green);border-color:#5ce29c}.badge{font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:900;color:var(--green)}.coachcard{display:flex;align-items:center;gap:12px;text-align:left;min-height:82px;width:100%;color:var(--text);border-radius:15px;padding:14px;background:#1c292c;border:1px solid #46615b}.coachcard.active{border-color:var(--green);outline:1px solid var(--green)}.avatar{width:44px;height:44px;flex-shrink:0;border-radius:14px;background:#2e5140;display:grid;place-items:center;font-weight:900;font-size:17px}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0}.field{width:100%;background:#0d181b;color:var(--text);border:1px solid #4c6460;border-radius:10px;min-height:42px;padding:9px 12px}.field:focus{outline:2px solid #46cc8b;outline-offset:1px}.field:disabled{background:#1a2526;color:#708683}.label{display:block;font-weight:800;margin:0 0 7px;font-size:12px}.cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 15px}.month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.weekday{text-align:center;font-weight:800;color:#8fa9a5;font-size:11px;padding:6px 0}.day{min-width:0;min-height:45px;background:#22352d;border:1px solid #3c7656;border-radius:10px;color:#c3f6d9;font-weight:850;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}.day:not(:disabled):hover{background:#245e42}.day.off{background:#171e21;color:#728783;border-color:#2d3639}.day.selected{border-color:#a2fac7;box-shadow:inset 0 0 0 1px #a2fac7;background:#187f51;color:#fff}.day small{font-size:9px;font-weight:700;opacity:.8}.slot{background:#203b2d;border:1px solid #3c8a5c;color:#dcf8e6;border-radius:11px;padding:12px 5px;min-height:54px;font-weight:850}.slot strong{display:block}.slot small{display:block;font-size:9px;opacity:.8}.slot.booked,.slot.past{background:#1b2426;border-color:#2c383a;color:#758a86}.slot.selected{outline:2px solid #75f8ad;background:#176a46}.slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.booking{border:1px solid #405754;background:#19292b;padding:13px;border-radius:12px;border-left:4px solid var(--green)}.booking.mutedbook{opacity:.7}.booking h3{margin:2px 0;font-size:14px}.booking .time{font-weight:850;font-size:12px;color:#e7fcf1}.booking .meta{font-size:12px;color:#bdd0c8}.booking .actions{margin-top:9px}.empty{padding:25px 12px;text-align:center;color:#b5c6c0;border:1px dashed #4b635d;border-radius:13px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:15px}.count{font-size:11px;border:1px solid #3f6a55;border-radius:99px;padding:5px 9px;color:#b2edce}.week-box{border:1px solid #344e45;border-radius:13px;padding:14px;margin-bottom:9px}.week-box h3{margin:0 0 10px;font-size:14px}.dayline{display:grid;grid-template-columns:75px minmax(0,1fr);gap:8px;align-items:start;margin-bottom:9px}.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.month-cell{background:#1d2b2d;border:1px solid #36494a;border-radius:10px;min-height:72px;text-align:left;padding:8px;color:var(--text)}.month-cell.current{border-color:#55c785}.month-cell .n{font-weight:800;font-size:12px}.month-cell .stat{font-size:10px;color:#a3e6c1;margin-top:9px}.dayedit{border:1px solid #3a4f4b;padding:12px;border-radius:12px;margin-bottom:8px}.range-row{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;align-items:center;margin-top:7px}.range-row button{min-height:40px}.settingsrow{display:flex;justify-content:space-between;align-items:center;gap:12px}.switch{appearance:none;width:44px;height:25px;background:#4a5354;border:1px solid #657875;border-radius:50px;position:relative;cursor:pointer;flex-shrink:0}.switch:before{content:"";position:absolute;top:3px;left:3px;border-radius:50%;width:17px;height:17px;background:white;transition:transform .15s}.switch:checked{background:#198f59}.switch:checked:before{transform:translateX(19px)}.inline-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.notice{font-size:11px;border:1px dashed #5b6b5a;background:#1f2a29;border-radius:12px;padding:12px;color:#bed7c7}.banner{position:fixed;z-index:1000;bottom:16px;left:16px;right:16px;max-width:520px;margin:0 auto;background:#163e2b;border:1px solid #50bf7d;color:white;border-radius:13px;padding:14px 18px;box-shadow:0 20px 60px #000a}.banner.bad{background:#572c2c;border-color:#ffab9c}.modal-bg{position:fixed;inset:0;background:#050909d9;display:grid;place-items:center;z-index:999;padding:16px}.modal{width:min(100%,440px);background:#1b292b;border:1px solid #75a28c;border-radius:17px;padding:20px;box-shadow:0 16px 50px #000b}.modal h3{margin:0 0 10px}.busy{opacity:.55;pointer-events:none}.top-right{display:flex;gap:10px;align-items:center}.loading{border:2px solid #244736;border-top-color:#49db90;width:18px;height:18px;border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.sr{position:absolute;clip:rect(0,0,0,0);width:1px;height:1px;overflow:hidden}.footer{margin-top:25px;font-size:11px;color:#8ca49a}
+@media(max-width:900px){.side{display:none}.workspace{padding:19px 14px 94px}.head{margin-bottom:17px}.two{grid-template-columns:1fr}.three{grid-template-columns:repeat(2,minmax(0,1fr))}.mobile-back{display:inline-flex!important}}
+@media(max-width:520px){.workspace{padding-inline:12px}.card{padding:14px;border-radius:15px}.head h1{font-size:25px}.slots{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.month{gap:3px}.day{min-height:42px;border-radius:8px}.service{min-height:184px;padding:16px}.three{grid-template-columns:1fr}.inline-controls{grid-template-columns:1fr}.month-cell{min-height:58px;padding:5px}.toolbar .button{font-size:12px;padding:8px 11px}.coachcard{padding:10px}.brand{font-size:18px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+
+/* Compatibilità con la preferenza visiva già salvata nelle aree Admin e Atleta. */
+html[data-lion-theme="light"]{color-scheme:light;--bg:#f4f7f5;--side:#ffffff;--card:#ffffff;--card2:#eef4f0;--border:#ccdcd3;--text:#172d25;--muted:#54685e;--green:#137e4c;--green2:#e6f8ec;--red:#9d302a;--blue:#21639d;--gold:#8a5c10}
+html[data-lion-theme="light"] .brand-mark{background:#ddf5e6;color:#156c44}
+html[data-lion-theme="light"] .side a,html[data-lion-theme="light"] .side button{color:#314d40}
+html[data-lion-theme="light"] .side a.current{background:#e0f5e8;color:#125734}
+html[data-lion-theme="light"] .button,html[data-lion-theme="light"] .chip{background:#e8f1ec;color:var(--text);border-color:#b9d5c6}
+html[data-lion-theme="light"] .button.primary{background:#157d4d;color:#fff;border-color:#15965a}
+html[data-lion-theme="light"] .button.danger{background:#ffefec;color:#8c2b26;border-color:#dba6a0}
+html[data-lion-theme="light"] .button.ghost{background:transparent;color:var(--text)}
+html[data-lion-theme="light"] .chip.active{background:#dcf5e7;color:#175f39}
+html[data-lion-theme="light"] .service{background:linear-gradient(140deg,#e5f8ed,#fff 72%);color:#17392a}
+html[data-lion-theme="light"] .service.fighter{background:linear-gradient(140deg,#f2f5ea,#fff 72%)}
+html[data-lion-theme="light"] .coachcard{background:#f4f8f5;color:var(--text);border-color:#bdcec5}
+html[data-lion-theme="light"] .avatar{background:#d3eddf}
+html[data-lion-theme="light"] .field{background:#fff;color:var(--text);border-color:#a8c4b6}
+html[data-lion-theme="light"] .day{background:#ddf5e6;color:#146738;border-color:#7ac79f}
+html[data-lion-theme="light"] .day.off{background:#f1f3f2;color:#8a9b93;border-color:#d3ddda}
+html[data-lion-theme="light"] .day.selected{background:#16864e;color:#fff}
+html[data-lion-theme="light"] .slot{background:#dcf5e6;color:#195936;border-color:#6fbd8f}
+html[data-lion-theme="light"] .slot.booked,html[data-lion-theme="light"] .slot.past{background:#eef0ee;color:#82918b;border-color:#d2ded7}
+html[data-lion-theme="light"] .slot.selected{background:#acebc7}
+html[data-lion-theme="light"] .booking{background:#f4f7f4;border-color:#d0ddd6}
+html[data-lion-theme="light"] .booking .time{color:#183c2b}
+html[data-lion-theme="light"] .booking .meta{color:#5a7164}
+html[data-lion-theme="light"] .month-cell{background:#f3f6f3;color:#244330;border-color:#d3e1d6}
+html[data-lion-theme="light"] .notice{background:#f0f6f0;color:#4c6155;border-color:#b4d0bd}
+html[data-lion-theme="light"] .modal{background:#fff;color:#193527}
+html[data-lion-theme="light"] .dayedit{border-color:#c9dace}
+html[data-lion-theme="light"] .pill{border-color:#8ac9a0;color:#145c36}
+html[data-lion-theme="light"] .side-note{border-color:#c8dbce;color:#617a6b}
+html[data-lion-theme="light"] .status{color:#194e2d;background:#e0f6e7}
+html[data-lion-theme="light"] .status.error{color:#873028;background:#ffebe9}
+</style>
+<style id="lf0291-booking-ui">
+/* 0.29.1 Prenotazioni: layout più leggibile e semplice, grafica prima del backend */
+:root{--bg:#0a1115;--side:#111c21;--card:#152126;--card2:#1a292e;--border:#31474a;--green:#47d09c}
+.workspace{max-width:1360px;padding-top:20px}.head{margin-bottom:18px}.head h1{font-size:clamp(23px,2.7vw,31px)}
+.brand-mark{background:#0c1215;border:1px solid #387859;border-radius:10px;overflow:hidden;font-weight:900;font-size:13px;letter-spacing:0;margin-right:9px}
+.brand-mark img{width:100%;height:100%;object-fit:cover}
+.side{width:208px;min-width:208px;padding:18px 12px}
+.service{position:relative;overflow:hidden;min-height:245px;gap:14px;border-color:#3d5958;background:linear-gradient(145deg,#1d302d,#111f24 75%);padding:21px}
+.service.fighter{background:linear-gradient(145deg,#242e31,#121f24 78%)}
+.service .big-icon.lf29-mono-art{display:flex;align-items:center;justify-content:center;width:82px;height:78px;padding:9px;border-radius:15px;background:#0e171c;border:1px solid #3e5b5a;color:#f2f7f5;font-size:inherit;flex-shrink:0;box-shadow:0 6px 18px #0003}
+.service .big-icon.lf29-mono-art svg{width:100%;height:100%;filter:grayscale(1)}
+.service h2{font-size:clamp(20px,2.3vw,25px);letter-spacing:-.025em}
+.service p{line-height:1.5;margin-top:9px;font-size:13px;color:#c0d2d0}
+.service .pill{display:inline-flex;align-items:center;max-width:100%;font-weight:750}
+.service:hover{transform:translateY(-2px);border-color:#72e7b7;box-shadow:0 10px 30px #0005}
+.service.active{border-color:#73e7b4;outline:1px solid #4ebd8b}
+#view-book>.grid.two{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#view-staff>.card:first-child{padding:16px}
+#staff-coaches{gap:7px!important;flex-wrap:wrap}
+#staff-coaches .chip{min-height:37px;padding:8px 12px}
+.lf29-view-filters{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:13px}
+.lf29-filter-group{gap:7px;align-items:center;flex-wrap:wrap}.lf29-filter-group .chip{padding:7px 12px;min-height:35px}
+.lf29-filter-label{font-size:11px;font-weight:850;color:#91aaa9;letter-spacing:.035em;margin-right:3px}
+.lf29-date-toolbar{gap:8px}.lf29-date-toolbar #staff-date{min-height:40px;max-width:180px!important}
+.lf29-today-link{min-height:36px;padding:6px 10px!important;color:#b9dbc9;border:1px solid #3d6554!important;background:transparent!important}
+.lf29-today-link:hover{color:white!important;background:#20513a!important}
+#staff-calendar{padding:14px}.month-cell{min-height:65px}
+#staff-calendar .booking{margin-bottom:3px}
+button:focus-visible,a:focus-visible{outline:3px solid #6eecb5!important;outline-offset:2px}
+html[data-lion-theme="light"] .service,html[data-lion-theme="light"] .service.fighter{background:linear-gradient(145deg,#e7f5eb,#f5faf7);border-color:#acc8b8}
+html[data-lion-theme="light"] .service .big-icon.lf29-mono-art{background:#142a24;color:#fff;border-color:#356b52}
+html[data-lion-theme="light"] .service p{color:#395a4a}
+html[data-lion-theme="light"] .lf29-today-link{color:#226345}
+@media(max-width:900px){.workspace{padding-top:16px}.head{margin-bottom:14px}.side{display:none}#view-book>.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){
+  .workspace{padding-inline:12px;padding-bottom:94px}
+  #view-book>.grid.two{gap:9px}
+  .service{min-height:270px;padding:12px 10px;gap:10px;border-radius:15px}
+  .service .big-icon.lf29-mono-art{width:57px;height:54px;border-radius:11px;padding:7px}
+  .service h2{font-size:20px}
+  .service .badge{font-size:9px;line-height:1.3}
+  .service p{font-size:11px;line-height:1.36;margin:7px 0}
+  .service .pill{font-size:10px;line-height:1.2;padding:6px 8px;white-space:normal}
+  #view-book>.section-title{font-size:17px}
+  #book-details > .grid.two{grid-template-columns:1fr}
+  .lf29-view-filters{gap:10px}
+  .lf29-filter-label{width:100%;margin:0 0 -2px;font-size:10px}
+  .lf29-filter-group .chip{min-height:33px;padding:6px 9px;font-size:11px}
+  .lf29-date-toolbar{display:grid;grid-template-columns:37px minmax(0,1fr) 37px auto;gap:5px}
+  .lf29-date-toolbar #staff-date{min-width:0;width:100%;max-width:none!important;padding-inline:8px}
+  .lf29-date-toolbar #staff-category{grid-column:1/-1;max-width:none!important}
+  .lf29-date-toolbar .button{padding:6px!important;min-height:39px}
+  #staff-calendar{padding:10px}.month-grid{gap:4px}.month-cell{min-height:55px;padding:5px}
+}
+@media(max-width:360px){.service{min-height:285px;padding:11px 8px}.service h2{font-size:18px}.service p{font-size:10.5px;line-height:1.34}.service .badge{font-size:8px}}
+@media(prefers-reduced-motion:reduce){.service{transform:none!important}}
+</style>
+<style id="lf0292-calendar-and-settings">
+/* Lion Fit Beta 0.29.2 — interventi UI mirati, nessuna alterazione delle altre sezioni */
+#weekly-editor{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
+#weekly-editor .dayedit{margin:0;min-width:0;border-radius:13px;padding:12px;background:#1b2d2f}
+#weekly-editor .range-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 42px;gap:6px}
+#weekly-editor .range-row .field{min-width:0;padding:7px 6px;font-weight:750}
+#weekly-editor .range-row .button{padding:8px;min-width:39px}
+#weekly-editor .settingsrow b{font-size:13px}
+.lf29-booking-identifiers{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:8px}
+.lf29-coach-name{border-left:4px solid var(--lf-coach-accent,#6fb7ee);padding:5px 9px;font-size:13px;font-weight:900;letter-spacing:.01em;border-radius:5px;background:#203238;color:#f0faf6}
+.lf29-service-tag{display:inline-flex;align-items:center;padding:5px 9px;border-radius:7px;font-size:11px;line-height:1.35;font-weight:950;letter-spacing:.06em;border:1px solid}
+.lf-type-fighter{background:#243d31;color:#b8f6d0;border-color:#4ca879}
+.lf-type-pesi{background:#24384c;color:#b7ddff;border-color:#609ed5}
+.lf29-athlete-name{font-size:12px;color:#bfd0d1;margin-top:7px}
+.lf29-athlete-name strong{color:#f2faf4;font-weight:850}
+.lf29-month-coaches{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.lf29-month-coach{font-size:10px;font-weight:850;background:#24353a;border:1px solid #425760;color:#f3fbf8;border-radius:6px;padding:2px 5px;display:inline-flex;gap:4px;align-items:center}
+.lf29-month-coach .dot{background:var(--lf-coach-accent);width:7px;height:7px}
+.lf29-advanced{display:block;border:1px solid var(--border);border-radius:15px;padding:12px;margin-top:13px;background:var(--card)}
+.lf29-advanced>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:12px;align-items:center;color:var(--text);font-weight:850;padding:5px 3px}
+.lf29-advanced>summary::-webkit-details-marker{display:none}
+.lf29-advanced>summary::after{content:'▾';font-size:15px;color:#88cba8}
+.lf29-advanced[open]>summary::after{content:'▴'}
+.lf29-advanced-note{font-size:12px;font-weight:450;color:var(--muted);display:block;margin-top:4px}
+.lf29-advanced>.card{border:0;box-shadow:none;padding:13px 2px;background:transparent}
+html[data-lion-theme="light"] #weekly-editor .dayedit{background:#f3f8f5}
+html[data-lion-theme="light"] .lf29-coach-name{background:#e7f3f1;color:#113c34}
+html[data-lion-theme="light"] .lf-type-fighter{background:#dff7e8;color:#165936;border-color:#77c698}
+html[data-lion-theme="light"] .lf-type-pesi{background:#e0f0fc;color:#235880;border-color:#8bbbe4}
+html[data-lion-theme="light"] .lf29-athlete-name{color:#48675c}
+html[data-lion-theme="light"] .lf29-athlete-name strong{color:#194734}
+html[data-lion-theme="light"] .lf29-month-coach{background:#e7f2eb;color:#184332;border-color:#c5dccc}
+@media(max-width:720px){#weekly-editor{grid-template-columns:1fr}}
+@media(max-width:400px){.lf29-booking-identifiers{align-items:flex-start;gap:5px}.lf29-coach-name{font-size:12px}.lf29-service-tag{font-size:10px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="side"><div><div class="brand"><span class="brand-mark"><img alt="" onerror="this.style.display='none';this.parentNode.textContent='LF'" src="./LOGO-APP.png"/></span>LION <b>FIT</b></div><div class="brand-sub">Train · Fight · Evolve</div></div>
+<div class="stack" id="side-links"><a href="athlete.html" id="back-side">← Torna all'app</a><button class="current" id="btn-side-main">▦ Prenotazioni</button></div>
+<div class="side-note">Appuntamenti Lion Fit · Beta sviluppo 0.29<br/>Solo le prenotazioni lavorative sono condivise fra i coach.</div>
+</aside>
+<main class="workspace">
+<header class="head"><div><div class="kicker">LION FIT · SERVIZI</div><h1>Prenotazioni</h1><div class="muted small" id="user-caption">Connessione in corso…</div></div>
+<div class="top-right"><button aria-label="Cambia tema" class="button sm ghost" id="lf-theme-btn" type="button">◐ Tema</button><a class="button ghost mobile-back hide" href="athlete.html" id="back-top">← App</a><span class="pill" id="online-pill">● Connessione</span></div></header>
+<div class="status warning" id="global-status" role="status">Versione di sviluppo Spark: scritture Firebase disabilitate fino al termine dei test di sicurezza.</div>
+<section class="card" id="loading"><div class="flex"><span class="loading"></span><b>Verifica account e palestra…</b></div></section>
+<div class="hide" id="app">
+<div aria-label="Sezioni prenotazioni" class="toolbar" id="main-tabs" role="navigation"></div>
+<section aria-label="Prenota appuntamento" class="hide" id="view-book">
+<div class="section-title">1. Scegli il tuo percorso</div>
+<div class="grid two">
+<button class="service fighter" data-category="fighter" type="button"><span class="big-icon lf29-mono-art"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" viewbox="0 0 100 74" xmlns="http://www.w3.org/2000/svg"><path d="M24 53 10 39c-8-8-4-21 6-24 8-3 13 1 16 6 2-7 11-11 18-6 4 3 7 8 6 13 6-1 12 2 14 8 4 12-4 20-15 23l-12 5z"></path><path d="m31 61 19-16c4-3 9-2 13 2 3 4 3 8-1 12L41 73"></path><path d="M25 23c-2 7 2 13 8 16M45 21c-4 6-4 11-1 15M58 33c-4 3-6 7-6 12"></path><rect fill="currentColor" fill-opacity=".12" height="15" rx="5" transform="rotate(-42 13 54)" width="27" x="13" y="54"></rect></svg></span><div><div class="badge">SESSIONE PRIVATA</div><h2>FIGHTER</h2><p class="muted">MMA, Boxe, K-1, Karate tradizionale e Karate agonistico. Allena la tecnica con il coach che preferisci.</p></div><span class="pill">Scegli Fighter →</span></button>
+<button class="service" data-category="pesi" type="button"><span class="big-icon lf29-mono-art"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4" viewbox="0 0 100 74" xmlns="http://www.w3.org/2000/svg"><path d="M10 37h80"></path><path d="M27 18v38M19 23v28M15 23v28M73 18v38M81 23v28M85 23v28"></path><path d="M34 35h32"></path><rect fill="currentColor" fill-opacity=".12" height="46" rx="2" width="9" x="24" y="14"></rect><rect fill="currentColor" fill-opacity=".12" height="46" rx="2" width="9" x="67" y="14"></rect></svg></span><div><div class="badge">PROGRAMMA PERSONALIZZATO</div><h2>PESI</h2><p class="muted">Costruisci una scheda di pesistica insieme al coach in un incontro privato dedicato ai tuoi obiettivi.</p></div><span class="pill">Scegli Pesi →</span></button>
+</div>
+<div class="hide" id="book-steps">
+<div class="section-title">2. Seleziona il coach</div>
+<div class="grid three" id="coach-list"></div>
+<div class="hide" id="book-details">
+<div class="section-title">3. Tipo di incontro</div>
+<div class="card"><label class="label" for="discipline">Disciplina / motivo dell'appuntamento</label><select class="field" id="discipline"></select></div>
+<div class="section-title">4. Scegli giorno e orario</div>
+<div class="grid two">
+<div class="card"><div class="cal-head"><button aria-label="Mese precedente" class="button sm ghost" id="cal-prev">‹</button><b id="cal-title">Calendario</b><button aria-label="Mese successivo" class="button sm ghost" id="cal-next">›</button></div><div class="month" id="cal-days"></div><p class="muted small">Verde: ci sono orari prenotabili. Grigio: chiuso, completo o fuori periodo.</p></div>
+<div class="card"><h2 id="slots-date">Orari disponibili</h2><div class="slots" id="slots-list"></div><p class="muted small" id="slot-hint">Gli orari occupati non sono selezionabili.</p></div>
+</div>
+<div class="card" style="margin-top:14px"><div class="flex between"><div><div class="badge">RIEPILOGO</div><h2 id="book-summary">Seleziona coach, data e orario</h2><div class="muted small" id="book-sub"></div></div><button class="button primary" disabled="" id="book-submit">Conferma prenotazione</button></div></div>
+</div>
+</div>
+</section>
+<section class="hide" id="view-mine"><div class="flex between"><h2 class="section-title">Le mie prenotazioni</h2><div class="flex"><button class="chip active" data-history="next">Prossime</button><button class="chip" data-history="history">Storico</button></div></div><div class="stack" id="mine-list"></div></section>
+<section class="hide" id="view-staff"><div class="card" style="margin-bottom:14px"><div class="flex between"><div><h2>Calendario condiviso</h2><p class="muted small">Un calendario, filtri per coach. Le prenotazioni cambiano senza ricaricare la pagina.</p></div><span class="count" id="staff-count">0 prenotazioni</span></div><div class="flex lf29-coach-filters" id="staff-coaches" style="margin:10px 0"></div><div class="lf29-view-filters"><div aria-label="Vista calendario" class="flex lf29-filter-group"><span class="lf29-filter-label">Vista</span><button class="chip active" data-calendar="day">Giorno</button><button class="chip" data-calendar="week">Settimana</button><button class="chip" data-calendar="month">Mese</button></div><div aria-label="Periodo appuntamenti" class="flex lf29-filter-group"><span class="lf29-filter-label">Mostra</span><button class="chip" data-history="next">Prossimi</button><button class="chip" data-history="history">Storico</button></div></div></div>
+<div class="toolbar lf29-date-toolbar"><button class="button sm ghost" id="staff-prev">‹</button><input aria-label="Data del calendario" class="field" id="staff-date" style="max-width:200px" type="date"/><button class="button sm ghost" id="staff-next">›</button><button aria-label="Torna alla data odierna" class="button sm ghost lf29-today-link" id="staff-today" title="Torna alla data di oggi, mantenendo la vista scelta" type="button">↺ Oggi</button><select aria-label="Categoria" class="field" id="staff-category" style="max-width:180px"><option value="all">Fighter e Pesi</option><option value="fighter">Solo Fighter</option><option value="pesi">Solo Pesi</option></select></div>
+<div class="card" id="staff-calendar"></div>
+</section>
+<section class="hide" id="view-settings"><div class="flex between"><h2 class="section-title">Le mie disponibilità</h2><span class="pill">Modificabili in ogni momento</span></div><div class="notice">Gli orari settimanali si ripetono automaticamente. Le modifiche non spostano o cancellano gli appuntamenti già confermati.</div>
+<div class="card" style="margin-top:12px"><div class="settingsrow"><div><b>Attiva prenotazioni</b><p class="muted small">Spegni per non ricevere nuovi appuntamenti.</p></div><input aria-label="Prenotazioni attive" class="switch" id="sett-active" type="checkbox"/></div><hr style="border-color:#30423d"/><div class="inline-controls"><label class="label">Fighter abilitato<input checked="" class="switch" id="sett-fighter" style="display:block;margin-top:10px" type="checkbox"/></label><label class="label">Pesi abilitato<input checked="" class="switch" id="sett-pesi" style="display:block;margin-top:10px" type="checkbox"/></label></div></div>
+
+<div class="card" style="margin-top:12px"><h2>Settimana tipo</h2><p class="muted small">Orari da lunedì a domenica; ON / OFF per ogni giorno. Fasce di 30 minuti e appuntamenti da 60 o 120 minuti.</p><div id="weekly-editor"></div></div><details class="lf29-advanced" id="lf29-advanced-settings"><summary>Impostazioni avanzate, periodi, ferie ed eccezioni</summary><p class="lf29-advanced-note">Durata delle lezioni, preavviso, disdetta, periodo e giorni di chiusura.</p><div class="card"><h3>Durate e limiti di prenotazione</h3><div class="inline-controls"><div><label class="label" for="dur-fighter">Durata Fighter</label><select class="field" id="dur-fighter"></select></div><div><label class="label" for="dur-pesi">Durata Pesi</label><select class="field" id="dur-pesi"></select></div><div><label class="label" for="sett-notice">Preavviso minimo (ore)</label><input class="field" id="sett-notice" max="168" min="0" type="number" value="12"/></div><div><label class="label" for="sett-cancel">Disdetta autonoma entro (ore)</label><input class="field" id="sett-cancel" max="168" min="0" type="number" value="12"/></div><div><label class="label" for="sett-horizon">Prenotabile entro (giorni)</label><input class="field" id="sett-horizon" max="30" min="1" type="number" value="30"/></div></div></div><div class="card" style="margin-top:12px"><div class="section-title" style="margin-top:0">Ripetizione della settimana</div><div class="flex"><label><input checked="" name="sett-mode" type="radio" value="always"/> Sempre attiva</label><label><input name="sett-mode" type="radio" value="period"/> Solo per un periodo</label></div><div class="inline-controls hide" id="sett-period" style="margin-top:12px"><div><label class="label">Dal</label><input class="field" id="sett-from" type="date"/></div><div><label class="label">Al</label><input class="field" id="sett-to" type="date"/></div></div></div><div class="card" style="margin-top:12px"><h2>Eccezioni e ferie</h2><p class="muted small">Modifica solo una data senza cambiare la settimana abituale.</p><div class="inline-controls"><div><label class="label">Giorno</label><input class="field" id="exception-date" type="date"/></div><div><label class="label">Tipo modifica</label><select class="field" id="exception-type"><option value="off">Chiudi questo giorno</option><option value="open">Orario straordinario</option></select></div></div><div class="inline-controls" style="margin:11px 0"><div><label class="label">Dalle</label><select class="field" id="exception-from"></select></div><div><label class="label">Alle</label><select class="field" id="exception-to"></select></div></div><div class="flex"><button class="button sm" id="exception-add">+ Aggiungi eccezione</button><button class="button sm ghost" id="exception-clear">Annulla eccezione del giorno</button></div><div class="stack" id="exception-list" style="margin-top:12px"></div>
+<hr style="border-color:#30423d;margin:20px 0"/>
+<h3>Ferie e chiusure per un periodo</h3>
+<p class="muted small">Alla fine del periodo torna automaticamente la settimana abituale. Le prenotazioni già confermate restano visibili e vanno gestite dal coach.</p>
+<div class="inline-controls"><div><label class="label" for="holiday-from">Dal</label><input class="field" id="holiday-from" type="date"/></div><div><label class="label" for="holiday-to">Al</label><input class="field" id="holiday-to" type="date"/></div></div>
+<button class="button sm ghost" id="holiday-add" type="button">+ Chiudi il periodo</button>
+<div class="stack" id="holiday-list" style="margin-top:12px"></div></div></details>
+
+<div class="notice" style="margin-top:12px">Modalità Spark: quando salvi, il coach prepara gli slot dei prossimi 30 giorni. Riportando aperta l’area Coach almeno una volta al giorno, Lion Fit estende la finestra automaticamente. Le scritture sono reali: verifica che le regole Firestore 0.29 siano pubblicate.</div><button class="button primary" id="sett-save" style="margin-top:15px;width:100%">Salva disponibilità e prepara gli orari</button>
+</section>
+<footer class="footer">Lion Fit · Prenotazioni Beta 0.29.2 · Orario palestra: Europa/Roma · Conferma tramite transazione Firestore.</footer>
+</div>
+</main>
+</div>
+<div class="banner hide" id="toast" role="status"></div>
+<div aria-labelledby="modal-title" aria-modal="true" class="modal-bg hide" id="modal" role="dialog"><div class="modal"><h3 id="modal-title">Conferma</h3><p class="muted" id="modal-msg"></p><div class="flex" style="justify-content:flex-end;margin-top:22px"><button class="button ghost" id="modal-no">Annulla</button><button class="button danger" id="modal-yes">Conferma</button></div></div></div>
+<script src="./lionfit-bookings.js?v=0292" type="module"></script>
+</body></html>

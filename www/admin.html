@@ -704,8 +704,180 @@ html[data-lion-theme="dark"] #active-week-editor-container .lf-day-card .lf2810-
 /* paginazione dell'Archivio coach */
 #lf2810-archive-more{margin:8px auto 0;max-width:360px;min-height:44px;}
 </style>
+
+<style id="lf029-mobile-admin-refactor">
+/* Lion Fit 0.29 DEV — Solo interfaccia Admin: nessuna modifica alle scritture Firebase. */
+/* Un giorno per riga sul telefono, tre colonne su PC. */
+#active-week-editor-container .lfv2-day-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;min-width:0;}
+@media (min-width:768px) and (max-width:1023px){
+  #active-week-editor-container .lfv2-day-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  #active-week-editor-container .lfv2-day-grid .lf2810-sunday{grid-column:auto!important;}
+}
+@media (min-width:1024px){
+  #active-week-editor-container .lfv2-day-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+  #active-week-editor-container .lfv2-day-grid .lf2810-sunday{grid-column:2!important;}
+}
+#active-week-editor-container .lfv2-day-card{min-width:0!important;padding:13px!important;overflow:hidden!important;}
+#active-week-editor-container .lfv2-day-card .lf2810-day-heading{font-size:13px!important;line-height:1.4!important;margin-bottom:9px!important;padding-bottom:8px!important;}
+#active-week-editor-container .lfv2-day-card .lf2810-activity-fields{display:flex;flex-direction:column;gap:9px!important;min-width:0;}
+#active-week-editor-container .lfv2-day-card .lfv2-activity-box{display:flex!important;flex-direction:column!important;gap:3px!important;min-width:0;padding:9px 11px!important;border:1px solid #cbd5e1;border-radius:11px;background:#fff;cursor:text;transition:border-color .15s,box-shadow .15s;}
+#active-week-editor-container .lfv2-day-card .lfv2-activity-box:focus-within{border-color:#18a06c;box-shadow:0 0 0 2px #18a06c26;}
+#active-week-editor-container .lfv2-day-card .lfv2-field-caption{font-size:10px!important;line-height:1.35!important;font-weight:900!important;letter-spacing:.035em!important;text-transform:uppercase;color:#177d59;}
+#active-week-editor-container .lfv2-day-card .lfv2-activity-box .lf2810-activity-input{display:block;width:100%;min-width:0;height:25px!important;min-height:25px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;color:#172733;font-size:13px!important;font-weight:700!important;}
+#active-week-editor-container .lfv2-day-card .lfv2-activity-box .lf2810-activity-input:focus{outline:none!important;}
+#active-week-editor-container .lfv2-day-card .lfv2-activity-box .lf2810-activity-input::placeholder{color:#80919f;opacity:1;}
+#active-week-editor-container .lfv2-day-card .lfv2-slots-area{margin-top:12px!important;padding-top:11px!important;gap:10px!important;}
+#active-week-editor-container .lfv2-day-card .lfv2-slot-box{display:flex;flex-direction:column;gap:7px;min-width:0;background:#f8fafc;border:1px solid #cbd5df;border-radius:12px;padding:7px;}
+#active-week-editor-container .lfv2-day-card button.lfv2-slot-select{display:flex!important;align-items:center;justify-content:space-between;gap:10px;min-width:0;width:100%;height:auto!important;min-height:58px!important;padding:8px 10px!important;text-align:left;border:1px solid #91b5a6!important;border-radius:9px;background:#edf9f2!important;color:#126849!important;cursor:pointer;}
+#active-week-editor-container .lfv2-day-card button.lfv2-slot-select:hover{background:#dff5e8!important;border-color:#19a56c!important;}
+#active-week-editor-container .lfv2-day-card button.lfv2-slot-select:focus-visible{outline:2px solid #22c55e!important;outline-offset:2px;}
+#active-week-editor-container .lfv2-day-card .lfv2-slot-copy{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1;}
+#active-week-editor-container .lfv2-day-card .lfv2-slot-caption{display:block;font-size:10px!important;font-weight:900!important;text-transform:uppercase;letter-spacing:.045em;line-height:1.1;color:#14764f;}
+#active-week-editor-container .lfv2-day-card .lfv2-slot-value{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:800;line-height:1.35;}
+#active-week-editor-container .lfv2-day-card .lfv2-slot-plus{display:flex;justify-content:center;align-items:center;flex:0 0 26px;width:26px;height:26px;border:1px solid #79caa2;border-radius:8px;background:#d5f7e4;font-size:18px;color:#086746;}
+#active-week-editor-container .lfv2-day-card .lfv2-slot-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px!important;width:100%;}
+#active-week-editor-container .lfv2-day-card .lfv2-slot-actions button{width:100%;min-width:0;min-height:34px!important;height:auto!important;padding:7px 6px!important;font-size:11px!important;font-weight:800!important;line-height:1.2!important;white-space:normal!important;border-radius:8px!important;}
+#active-week-editor-container .lfv2-day-card .lfv2-slot-actions .lfv2-create-btn{background:#173e31;color:#8cf0bc;border:1px solid #3e8264;}
+#active-week-editor-container .lfv2-day-card .lfv2-slot-actions .lfv2-create-btn:hover{background:#205940;}
+#active-week-editor-container .lfv2-day-card .lfv2-slot-actions button:disabled{opacity:.40!important;cursor:not-allowed;}
+/* Pulsanti di settimana stabili, anche sul telefono. */
+#active-week-editor-container .lf-week-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px!important;width:100%;}
+#active-week-editor-container .lf-week-actions button{min-width:0!important;min-height:42px!important;font-size:11px!important;letter-spacing:0!important;padding:9px 7px!important;border-radius:10px!important;}
+@media(min-width:768px){#active-week-editor-container .lf-week-actions{width:auto;grid-template-columns:repeat(3,minmax(110px,1fr));}}
+/* Atleti: il nome si restringe, il comando Gestisci resta sempre visibile. */
+#athletes-list .lfv2-athlete-item{max-width:100%;min-width:0;gap:9px;overflow:hidden;}
+#athletes-list .lfv2-athlete-content,#athletes-list .lfv2-athlete-meta{min-width:0!important;}
+#athletes-list .lfv2-athlete-meta h5,#athletes-list .lfv2-athlete-meta p{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#athletes-list .lfv2-manage{display:inline-flex;flex:0 0 auto;align-items:center;gap:4px;margin-left:auto;max-width:30%;white-space:nowrap;font-size:11px!important;letter-spacing:.01em!important;}
+#athletes-list .lfv2-athlete-item:focus-visible{outline:2px solid #27c987;outline-offset:2px;}
+@media(max-width:360px){#athletes-list .lfv2-athlete-item{padding:10px!important;gap:6px;}#athletes-list .lfv2-athlete-avatar{width:33px;height:33px;}#athletes-list .lfv2-manage{font-size:10px!important;}}
+/* Pulsanti identici in "Schede singole" e "Schede in programma". */
+.lf29-sheet-card .lf29-sheet-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px!important;align-items:stretch;}
+.lf29-sheet-card .lf29-sheet-actions .lf29-btn{display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:56px;padding:8px!important;font-size:12px!important;text-align:center;line-height:1.3;white-space:normal!important;overflow-wrap:anywhere;}
+/* Piccole rifiniture generali per la gestione mobile. */
+@media(max-width:640px){
+  #section-athletes{min-width:0;}
+  #section-athletes #athletes-selection-container{min-width:0;}
+  #section-athletes #lf242-sync-team,#section-athletes #lf24-open-athlete-invites{flex:1 1 135px;min-height:42px;text-align:center;}
+  #section-athletes #athlete-search{min-height:44px;font-size:13px!important;}
+  #active-week-editor-container .lfv2-day-card{padding:12px!important;}
+  .lf29-sheet-card{padding:11px;}
+  .lf29-sheet-panel{padding:12px;}
+}
+html.lf-native body > header.md\:hidden{top:var(--lf-status-top)!important;}
+/* Contrasto coerente con l'attuale tema scuro. */
+html[data-lion-theme="dark"] #active-week-editor-container .lfv2-day-card .lfv2-activity-box{background:#0d1724!important;border-color:#435667!important;}
+html[data-lion-theme="dark"] #active-week-editor-container .lfv2-day-card .lfv2-field-caption{color:#86e6b5!important;}
+html[data-lion-theme="dark"] #active-week-editor-container .lfv2-day-card .lfv2-activity-box .lf2810-activity-input{background:transparent!important;border:0!important;color:#f1f8ff!important;}
+html[data-lion-theme="dark"] #active-week-editor-container .lfv2-day-card .lfv2-slot-box{background:#142431!important;border-color:#455866!important;}
+html[data-lion-theme="dark"] #active-week-editor-container .lfv2-day-card button.lfv2-slot-select{background:#193b35!important;border-color:#4f9878!important;color:#e6fff1!important;}
+html[data-lion-theme="dark"] #active-week-editor-container .lfv2-day-card button.lfv2-slot-select:hover{background:#225043!important;}
+html[data-lion-theme="dark"] #active-week-editor-container .lfv2-day-card .lfv2-slot-caption{color:#9cf2bf!important;}
+html[data-lion-theme="dark"] #active-week-editor-container .lfv2-day-card .lfv2-slot-plus{background:#2a5c46!important;color:#b3f7d0!important;}
+html[data-lion-theme="dark"] .lf29-sheet-panel .lf29-muted-panel{background:#182631!important;color:#c4d5de!important;border-color:#405b5d!important;}
+html[data-lion-theme="dark"] #lf-show-all-athletes{color:#95eab7!important;border-color:#35594a!important;background:#182637!important;}
+</style>
     <!-- Lion Fit: controllo aggiornamenti APK per Android (Beta 0.28.10) -->
     <script defer src="./lionfit-updates.js?v=02811"></script>
+
+<style id="lf-029-mobile-compact-01nov2026">
+/* LION FIT: solo Admin smartphone, zero modifiche ai comportamenti JS/Firebase. */
+@media screen and (max-width: 767px) {
+  /* Le schede in programma conservano quattro azioni uguali, ma non più giganti. */
+  #section-athletes .lf29-sheet-panel { padding: 10px !important; }
+  #section-athletes .lf29-sheet-panel .lf29-list { gap: 7px !important; }
+  #section-athletes .lf29-sheet-card {
+    padding: 9px !important;
+    gap: 6px !important;
+    border-radius: 11px !important;
+  }
+  #section-athletes .lf29-sheet-card .lf29-sheet-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    align-items: stretch !important;
+  }
+  #section-athletes .lf29-sheet-card .lf29-sheet-actions .lf29-btn {
+    box-sizing: border-box;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    height: auto !important;
+    padding: 6px 7px !important;
+    font-size: 11px !important;
+    line-height: 1.16 !important;
+    border-radius: 8px !important;
+    overflow-wrap: anywhere;
+    white-space: normal !important;
+  }
+  /* Più densità nella programmazione settimanale, senza ridurre la superficie cliccabile. */
+  #active-week-editor-container .lfv2-day-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+  }
+  #active-week-editor-container .lfv2-day-card {
+    padding: 8px 9px !important;
+    gap: 0 !important;
+    border-radius: 13px !important;
+  }
+  #active-week-editor-container .lfv2-day-card .lf2810-day-heading {
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+    margin-bottom: 5px !important;
+    padding-bottom: 5px !important;
+  }
+  #active-week-editor-container .lfv2-day-card .lf2810-activity-fields {
+    gap: 5px !important;
+  }
+  #active-week-editor-container .lfv2-day-card .lfv2-activity-box {
+    gap: 1px !important;
+    padding: 5px 8px !important;
+    border-radius: 8px !important;
+  }
+  #active-week-editor-container .lfv2-day-card .lfv2-field-caption {
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+  #active-week-editor-container .lfv2-day-card .lfv2-activity-box .lf2810-activity-input {
+    height: 25px !important;
+    min-height: 25px !important;
+    font-size: 12px !important;
+  }
+  #active-week-editor-container .lfv2-day-card .lfv2-slots-area {
+    margin-top: 7px !important;
+    padding-top: 7px !important;
+    gap: 6px !important;
+  }
+  #active-week-editor-container .lfv2-day-card .lfv2-slot-box {
+    padding: 5px !important;
+    gap: 4px !important;
+    border-radius: 9px !important;
+  }
+  #active-week-editor-container .lfv2-day-card button.lfv2-slot-select {
+    min-height: 44px !important;
+    padding: 5px 8px !important;
+    gap: 6px !important;
+  }
+  #active-week-editor-container .lfv2-day-card .lfv2-slot-copy { gap: 2px !important; }
+  #active-week-editor-container .lfv2-day-card .lfv2-slot-caption { font-size: 9px !important; }
+  #active-week-editor-container .lfv2-day-card .lfv2-slot-value { font-size: 11px !important; }
+  #active-week-editor-container .lfv2-day-card .lfv2-slot-plus {
+    flex-basis: 23px;
+    width: 23px;
+    height: 23px;
+    font-size: 16px;
+  }
+  #active-week-editor-container .lfv2-day-card .lfv2-slot-actions { gap: 5px !important; }
+  #active-week-editor-container .lfv2-day-card .lfv2-slot-actions button {
+    min-height: 38px !important;
+    padding: 5px 6px !important;
+    font-size: 10px !important;
+  }
+}
+</style>
 </head>
 <body class="bg-gray-50 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col md:flex-row relative overflow-x-hidden">
 
@@ -741,6 +913,7 @@ html[data-lion-theme="dark"] #active-week-editor-container .lf-day-card .lf2810-
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                 <span>Libreria Esercizi</span>
             </button>
+            <a href="./prenotazioni.html" id="lf029-nav-bookings" class="side-nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider text-gray-500 hover:text-black hover:bg-gray-100 transition" style="text-decoration:none" aria-label="Apri il calendario delle prenotazioni">📅 <span>Calendario appuntamenti</span></a>
             <button type="button" id="side-nav-trash" onclick="lf26OpenTrash()" class="side-nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider text-gray-500 hover:text-black hover:bg-gray-100 transition" title="Apri il Cestino">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
                 <span>Cestino</span>
@@ -796,6 +969,7 @@ html[data-lion-theme="dark"] #active-week-editor-container .lf-day-card .lf2810-
 <button type="button" onclick="document.getElementById('lf24-open-athlete-invites').click()" class="lf14-navcard"><span class="lf14-navicon">✉</span><span class="lf14-navcopy"><strong>Invita atleta</strong><small>Invia email o copia link</small></span><span class="lf14-chevron" aria-hidden="true">›</span></button>
 <button type="button" onclick="showSection('library')" class="lf14-navcard"><span class="lf14-navicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6C9 4 6 4 3 6v13c3-2 6-2 9 0 3-2 6-2 9 0V6c-3-2-6-2-9 0ZM12 6v13"/></svg></span><span class="lf14-navcopy"><strong>Libreria esercizi</strong><small>Ricerca italiano e inglese</small></span><span class="lf14-chevron" aria-hidden="true">›</span></button>
 <button type="button" onclick="showSection('profile')" class="lf14-navcard"><span class="lf14-navicon"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5h4l.6 2.7c.65.22 1.25.57 1.78 1l2.6-.93 2 3.46-2.05 1.8c.13.65.13 1.3 0 1.95l2.05 1.8-2 3.46-2.6-.93c-.53.43-1.13.78-1.78 1L14 21.5h-4l-.6-2.7a7.6 7.6 0 0 1-1.78-1l-2.6.93-2-3.46 2.05-1.8a7.6 7.6 0 0 1 0-1.95l-2.05-1.8 2-3.46 2.6.93c.53-.43 1.13-.78 1.78-1L10 2.5Z"/><circle cx="12" cy="12" r="3.1"/></svg></span><span class="lf14-navcopy"><strong>Palestra e profilo</strong><small>Impostazioni e inviti</small></span><span class="lf14-chevron" aria-hidden="true">›</span></button></div>
+            <a href="./prenotazioni.html" id="lf029-bookings-coach" style="display:flex;align-items:center;gap:12px;border:1px solid #46b886;border-radius:15px;padding:16px;background:#163c2f;color:#f1fff7;text-decoration:none;min-height:64px;font-weight:850"><span style="font-size:25px" aria-hidden="true">📅</span><span>Calendario e prenotazioni <small style="display:block;font-weight:500;color:#b4e9cd">Appuntamenti di tutti i coach · Disponibilità</small></span><span style="margin-left:auto">›</span></a>
             <div class="lf14-section-heading lf14-stats-heading"><div><h3>La tua palestra</h3><p>Riepilogo sintetico</p></div></div>
             <div class="lf14-stats">
                 <div class="lf14-stat"><span>Atleti iscritti</span><strong id="stat-total-athletes">0</strong><small>Account nella palestra</small></div>
@@ -881,7 +1055,7 @@ html[data-lion-theme="dark"] #active-week-editor-container .lf-day-card .lf2810-
                     <details class="rounded-xl bg-white border border-gray-200 p-3">
                       <summary class="cursor-pointer text-xs font-black text-gray-700">⚙ Manutenzione delle schede esistenti</summary>
                       <p class="text-[10px] text-gray-600 mt-2 mb-2">Le vecchie schede possono essere protette nell’Archivio. La manutenzione non cancella automaticamente schede o settimane.</p>
-                      <button type="button" id="lf277-protect-legacy-sheets" class="w-full rounded-xl bg-green-50 border border-green-300 p-2 text-xs font-bold text-green-900">🛡 Salva le vecchie schede nell'ARCHIVIO dell'atleta</button>
+                      <button type="button" id="lf277-protect-legacy-sheets" class="hidden w-full rounded-xl bg-green-50 border border-green-300 p-2 text-xs font-bold text-green-900">🛡 Salva le vecchie schede nell'ARCHIVIO dell'atleta</button>
                       <button type="button" id="lf24-migrate-week-sheets" class="w-full mt-2 text-xs font-bold text-green-800 bg-green-50 border border-green-200 rounded-lg px-2.5 py-2">Allinea schede delle settimane (manutenzione)</button>
                     </details>
                 </div>
@@ -2172,13 +2346,21 @@ Martedì	Forza	...
             return doc(db,'gyms',currentGymId,'athlete_programs',athleteId,'archive_templates',String(templateId));
         }
         async function lf277EnsureProtectedCopy(athleteId,templateId,personalData) {
-            // Le copie gia' presenti non vengono mai sovrascritte.
+            // Le copie storiche sono immutabili: MAI sovrascrivere una copia esistente.
             const archiveRef=lf277ArchiveRef(athleteId,templateId);
             if((await getDoc(archiveRef)).exists())return false;
             const personalRef=doc(db,'gyms',currentGymId,'athlete_programs',athleteId,'personal_templates',String(templateId));
             const actual=personalData || (await getDoc(personalRef)).data();
             if(!actual)throw new Error('La scheda personale originale non esiste.');
-            await setDoc(archiveRef,lf277ArchivePayload(templateId,actual));
+            try {
+                await setDoc(archiveRef,lf277ArchivePayload(templateId,actual));
+            } catch(error) {
+                // Due coach potrebbero salvare simultaneamente la stessa copia:
+                // se nel frattempo esiste, la consideriamo gia' protetta.
+                try {if((await getDoc(archiveRef)).exists())return false;}
+                catch(readError) {console.warn('[Lion Fit] Controllo copia storica:',readError);}
+                throw error;
+            }
             return true;
         }
         async function lf277CreatePersonalWithArchive(athleteId,personalRef,personalData) {
@@ -2189,6 +2371,64 @@ Martedì	Forza	...
             batch.set(personalRef,{...personalData,createdAt:serverTimestamp()});
             if(!existing.exists())batch.set(archiveRef,lf277ArchivePayload(personalRef.id,personalData));
             await batch.commit();
+        }
+
+        // Lion Fit Auto-Archivio: recupera automaticamente le schede legacy
+        // quando un coach visita un atleta. Non tocca settimane, schede originali
+        // o copie storiche preesistenti. Una sola esecuzione per atleta/sessione.
+        const lfAutoArchiveRunning=new Map();
+        const lfAutoArchiveCompleted=new Set();
+        async function lfAutoArchiveLegacyForAthlete(athleteId,gymId) {
+            if(!athleteId || !gymId || currentGymId!==gymId || !auth.currentUser)return;
+            const key=JSON.stringify([gymId,athleteId]);
+            if(lfAutoArchiveCompleted.has(key))return;
+            if(lfAutoArchiveRunning.has(key))return lfAutoArchiveRunning.get(key);
+            const job=(async()=>{
+                const base=['gyms',gymId,'athlete_programs',athleteId];
+                const [personalSnap,archiveSnap]=await Promise.all([
+                    getDocs(collection(db,...base,'personal_templates')),
+                    getDocs(collection(db,...base,'archive_templates'))
+                ]);
+                if(currentGymId!==gymId || !auth.currentUser)return;
+                const archived=new Set(archiveSnap.docs.map(s=>String(s.id)));
+                let saved=0;
+                const failed=[];
+                for(const item of personalSnap.docs){
+                    if(currentGymId!==gymId || !auth.currentUser)return;
+                    if(archived.has(String(item.id)))continue;
+                    try {
+                        const created=await lf277EnsureProtectedCopy(athleteId,item.id,item.data());
+                        if(created)saved++;
+                        archived.add(String(item.id));
+                    } catch(error) {
+                        failed.push({id:item.id,code:error.code||error.message||String(error)});
+                    }
+                }
+                if(failed.length){
+                    // Niente cancellazioni e nessuna modifica alle schede originali.
+                    console.warn('[Lion Fit] Alcune copie storiche non protette:',failed);
+                    const retry=document.getElementById('lf277-protect-legacy-sheets');
+                    if(retry && selectedAthlete?.id===athleteId && currentGymId===gymId){
+                        retry.classList.remove('hidden');
+                        retry.textContent='Archivio da completare · Riprova protezione';
+                    }
+                    return;
+                }
+                lfAutoArchiveCompleted.add(key);
+                const retry=document.getElementById('lf277-protect-legacy-sheets');
+                if(retry && selectedAthlete?.id===athleteId && currentGymId===gymId)
+                    retry.classList.add('hidden');
+                if(saved)console.info('[Lion Fit] Archivio storico protetto automaticamente:',saved,'schede');
+            })().catch(error=>{
+                console.warn('[Lion Fit] Recupero automatico archivio sospeso:',error);
+                const retry=document.getElementById('lf277-protect-legacy-sheets');
+                if(retry && selectedAthlete?.id===athleteId && currentGymId===gymId){
+                    retry.classList.remove('hidden');
+                    retry.textContent='Archivio da completare · Riprova protezione';
+                }
+            }).finally(()=>lfAutoArchiveRunning.delete(key));
+            lfAutoArchiveRunning.set(key,job);
+            return job;
         }
 
         // Beta 0.27.5: collegamenti stabili. Una scheda condivisa viene copiata
@@ -2393,18 +2633,24 @@ Martedì	Forza	...
                     : `<span>🦁</span>`;
 
                 const div = document.createElement('div');
-                div.className = "lf-athlete-item p-3 sm:p-4 rounded-xl sm:rounded-2xl flex justify-between items-center cursor-pointer transition shadow-xs";
+                div.className = "lf-athlete-item lfv2-athlete-item p-3 sm:p-4 rounded-xl sm:rounded-2xl flex items-center cursor-pointer transition shadow-xs min-w-0 w-full";
+                div.setAttribute('role','button');
+                div.setAttribute('tabindex','0');
+                div.setAttribute('aria-label',`Gestisci atleta ${athlete.name || ''} ${athlete.surname || ''}`.trim());
                 div.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center font-black text-xs border border-gray-200 overflow-hidden shrink-0">${avatarHtml}</div>
-                        <div class="min-w-0">
+                    <div class="lfv2-athlete-content flex items-center gap-3 min-w-0 flex-1">
+                        <div class="lfv2-athlete-avatar w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center font-black text-xs border border-gray-200 overflow-hidden shrink-0">${avatarHtml}</div>
+                        <div class="lfv2-athlete-meta min-w-0 flex-1">
                             <h5 class="font-black text-[10px] sm:text-xs uppercase text-black truncate">${athlete.name || 'Atleta'} ${athlete.surname || ''}</h5>
                             <p class="text-[8px] sm:text-[9px] font-bold text-gray-400 uppercase truncate">${athlete.email || ''}</p>
                         </div>
                     </div>
-                    <span class="text-neon font-black text-[10px] sm:text-xs uppercase tracking-wider shrink-0 ml-2">Gestisci &rarr;</span>
+                    <span class="lfv2-manage text-neon font-black text-[10px] sm:text-xs uppercase tracking-wider shrink-0">Gestisci <span aria-hidden="true">&rarr;</span></span>
                 `;
                 div.addEventListener('click', () => openAthleteProgram(athlete));
+                div.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openAthleteProgram(athlete); }
+                });
                 container.appendChild(div);
             });
         }
@@ -2436,6 +2682,8 @@ Martedì	Forza	...
             await loadAthletePersonalTemplates();
             // Aggiornamento silenzioso della lista in tempo reale: nessun refresh della pagina.
             if(selectedAthlete?.id===athlete.id)lf2812StartAssignmentWatch();
+            // Recupero archivio senza pulsanti e senza bloccare l'interfaccia.
+            void lfAutoArchiveLegacyForAthlete(athlete.id,currentGymId);
             document.getElementById('athlete-program-section').scrollIntoView({behavior:'smooth',block:'start'});
         }
 
@@ -2609,14 +2857,14 @@ Martedì	Forza	...
             container.appendChild(headerActions);
 
             const grid = document.createElement('div');
-            grid.className = "grid grid-cols-1 min-[360px]:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3";
+            grid.className = "lfv2-day-grid grid gap-3";
 
             daysOrder.forEach(dayName => {
                 const dayInfo = (weekData.days && weekData.days[dayName]) ? weekData.days[dayName] : { activity1: '', activity2: '', templateId: '' };
                 const isDomenica = dayName === 'domenica';
                 
                 const dayCard = document.createElement('div');
-                dayCard.className = `lf-day-card bg-gray-50 border border-gray-200 rounded-xl flex flex-col min-w-0 ${isDomenica?'lf2810-sunday':''}`;
+                dayCard.className = `lf-day-card lfv2-day-card bg-gray-50 border border-gray-200 rounded-xl flex flex-col min-w-0 ${isDomenica?'lf2810-sunday':''}`;
 
                 let linkedTemplateTitle = 'Nessuna scheda collegata';
                 if (dayInfo.templateId) {
@@ -2638,32 +2886,42 @@ Martedì	Forza	...
                 dayCard.innerHTML = `
                     <div class="lf2810-activity-fields">
                         <span class="lf2810-day-heading font-black uppercase text-gray-600 border-b border-gray-200 block truncate">${dayName}</span>
-                        <label class="sr-only" for="input-act1-${dayName}">Attività 1 · ${dayName}</label>
-                        <input type="text" id="input-act1-${dayName}" value="${lf2810EscapeAttr(dayInfo.activity1 || '')}" placeholder="Attività 1" aria-label="Attività 1, ${dayName}" class="lf2810-activity-input bg-white border border-gray-300 rounded-lg font-semibold text-black outline-none focus:border-neon">
-                        <label class="sr-only" for="input-act2-${dayName}">Attività 2 · ${dayName}</label>
-                        <input type="text" id="input-act2-${dayName}" value="${lf2810EscapeAttr(dayInfo.activity2 || '')}" placeholder="Attività 2" aria-label="Attività 2, ${dayName}" class="lf2810-activity-input bg-white border border-gray-300 rounded-lg font-semibold text-black outline-none focus:border-neon">
+                        <label class="lfv2-activity-box" for="input-act1-${dayName}">
+                            <span class="lfv2-field-caption">Attività 1</span>
+                            <input type="text" id="input-act1-${dayName}" value="${lf2810EscapeAttr(dayInfo.activity1 || '')}" placeholder="Scrivi l'attività..." aria-label="Attività 1, ${dayName}" class="lf2810-activity-input font-semibold outline-none">
+                        </label>
+                        <label class="lfv2-activity-box" for="input-act2-${dayName}">
+                            <span class="lfv2-field-caption">Attività 2</span>
+                            <input type="text" id="input-act2-${dayName}" value="${lf2810EscapeAttr(dayInfo.activity2 || '')}" placeholder="Scrivi l'attività..." aria-label="Attività 2, ${dayName}" class="lf2810-activity-input font-semibold outline-none">
+                        </label>
                     </div>
-                    <div class="lf2810-slot-area border-t border-gray-200">
-                        <div class="lf2810-slot-header">
-                            <span class="lf2810-slot-title font-black uppercase text-gray-500">Scheda 1</span>
-                            <div class="lf2810-slot-actions">
-                                <button type="button" onclick="lf26StartSharedFromWeek('${dayName}')" class="text-green-800 border border-green-200 bg-green-50" title="Crea una scheda e collegala a ${dayName}">+ Crea</button>
-                                <button type="button" onclick="lf29RemoveDaySlot('${dayName}',1)" class="lf2810-delete" ${dayInfo.templateId?'':'disabled'} aria-label="Cancella la scheda 1 da ${dayName}" title="Rimuove solo il collegamento da ${dayName}">Cancella</button>
+                    <div class="lf2810-slot-area lfv2-slots-area border-t border-gray-200">
+                        <div class="lfv2-slot-box">
+                            <button type="button" onclick="openLinkDayTemplateModal('${dayName}',1)" class="lf2810-slot-select lfv2-slot-select" aria-label="Scheda 1, ${dayName}: scegli o cambia scheda">
+                                <span class="lfv2-slot-copy">
+                                    <span class="lfv2-slot-caption">Scheda 1</span>
+                                    <span class="lfv2-slot-value">${lf2810EscapeHtml(linkedTemplateTitle)}</span>
+                                </span>
+                                <span class="lfv2-slot-plus" aria-hidden="true">+</span>
+                            </button>
+                            <div class="lf2810-slot-actions lfv2-slot-actions">
+                                <button type="button" onclick="lf26StartSharedFromWeek('${dayName}')" class="lfv2-create-btn" title="Crea una scheda e collegala a ${dayName}">+ Crea nuova</button>
+                                <button type="button" onclick="lf29RemoveDaySlot('${dayName}',1)" class="lf2810-delete" ${dayInfo.templateId?'':'disabled'} aria-label="Scollega la scheda 1 da ${dayName}" title="Rimuove solo il collegamento da ${dayName}, senza eliminare la scheda">Scollega</button>
                             </div>
                         </div>
-                        <button type="button" onclick="openLinkDayTemplateModal('${dayName}',1)" class="lf2810-slot-select w-full bg-white hover:border-neon border border-gray-300 rounded-lg text-left text-xs font-bold text-neon flex items-center justify-between min-w-0">
-                            <span class="truncate pr-1">${lf2810EscapeHtml(linkedTemplateTitle)}</span><span class="text-gray-500 shrink-0">+</span>
-                        </button>
-                        <div class="lf2810-slot-header">
-                            <span class="lf2810-slot-title font-black uppercase text-gray-500">Scheda 2 (facoltativa)</span>
-                            <div class="lf2810-slot-actions">
-                                <button type="button" onclick="lf26StartSharedFromWeek('${dayName}',2)" class="text-green-800 border border-green-200 bg-green-50" title="Crea una seconda scheda per ${dayName}">+ Crea</button>
-                                <button type="button" onclick="lf29RemoveDaySlot('${dayName}',2)" class="lf2810-delete" ${dayInfo.templateId2?'':'disabled'} aria-label="Cancella la scheda 2 da ${dayName}" title="Rimuove solo il collegamento da ${dayName}">Cancella</button>
+                        <div class="lfv2-slot-box">
+                            <button type="button" onclick="openLinkDayTemplateModal('${dayName}',2)" class="lf2810-slot-select lfv2-slot-select" aria-label="Scheda 2, ${dayName}: scegli o cambia scheda">
+                                <span class="lfv2-slot-copy">
+                                    <span class="lfv2-slot-caption">Scheda 2</span>
+                                    <span class="lfv2-slot-value">${lf2810EscapeHtml(linkedTemplateTitle2)}</span>
+                                </span>
+                                <span class="lfv2-slot-plus" aria-hidden="true">+</span>
+                            </button>
+                            <div class="lf2810-slot-actions lfv2-slot-actions">
+                                <button type="button" onclick="lf26StartSharedFromWeek('${dayName}',2)" class="lfv2-create-btn" title="Crea una seconda scheda per ${dayName}">+ Crea nuova</button>
+                                <button type="button" onclick="lf29RemoveDaySlot('${dayName}',2)" class="lf2810-delete" ${dayInfo.templateId2?'':'disabled'} aria-label="Scollega la scheda 2 da ${dayName}" title="Rimuove solo il collegamento da ${dayName}, senza eliminare la scheda">Scollega</button>
                             </div>
                         </div>
-                        <button type="button" onclick="openLinkDayTemplateModal('${dayName}',2)" class="lf2810-slot-select w-full bg-white hover:border-neon border border-gray-300 rounded-lg text-left text-xs font-bold text-neon flex items-center justify-between min-w-0">
-                            <span class="truncate pr-1">${lf2810EscapeHtml(linkedTemplateTitle2)}</span><span class="text-gray-500 shrink-0">+</span>
-                        </button>
                     </div>
                 `;
                 grid.appendChild(dayCard);
@@ -3295,10 +3553,14 @@ Martedì	Forza	...
                         else already++;
                     }catch(err){failed++;console.error('Archivio '+item.id,err);}
                 }
+                if(failed===0){
+                    lfAutoArchiveCompleted.add(JSON.stringify([currentGymId,athleteId]));
+                    btn.classList.add('hidden');
+                }
                 showAlert(`Archivio atleta: ${created} nuove copie protette, ${already} già esistenti, ${failed} non riuscite. Le schede originali non sono state modificate.${failed?' Controlla la Console per i dettagli.':''}`,
                     failed?'Protezione incompleta':'Protezione completata');
             }catch(err){showAlert('Non è stato possibile leggere le schede: '+(err.code||err.message),'Errore Archivio');}
-            finally{btn.disabled=false;btn.textContent='🛡 Salva le vecchie schede nell\'ARCHIVIO dell\'atleta';}
+            finally{btn.disabled=false;btn.textContent='Ricontrolla Archivio storico';}
         });
 
         // Beta 0.28.8: la distinzione dipende dai collegamenti delle settimane, mai dal titolo.
