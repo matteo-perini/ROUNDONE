@@ -1,4 +1,4 @@
-// Lion Fit Beta 0.29.2 — prenotazioni Spark / account Firebase reali.
+// Lion Fit Beta 0.29.3 — prenotazioni Spark / account Firebase reali.
 // Applica PRIMA le regole Firestore 0.29 collaudate in emulatore.
 // Esegui un test online controllato prima di distribuire agli utenti.
 import {initializeApp,getApps,getApp} from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
@@ -36,15 +36,17 @@ const dateIT=()=>romeParts(Date.now()).date;
 const stampMs=v=>v?.toMillis?.()??(v?.seconds?Number(v.seconds)*1000:0);
 const slotId=(coachId,ms)=>`${coachId}_${ms}`;
 const coachName=c=>c?.displayName||'Coach';
-// Un coach mantiene sempre il suo colore anche quando arriva un nuovo collega.
+// Colore calcolato dall'UID (non dal nome): nessun coach codificato a mano.
+// Resta stabile anche se cambiano nome o si aggiungono colleghi.
 function coachColor(id){
- const c=S.coaches.find(x=>x.id===id);
- const name=String(c?.displayName||'').toLocaleLowerCase('it');
- if(/\briccardo\b/u.test(name))return '#6fb7ee';
- if(/\bmarco\b/u.test(name))return '#53c987';
- let h=2166136261;for(const x of String(id||'')){h^=x.charCodeAt(0);h=Math.imul(h,16777619)}
- return COLORS[Math.abs(h>>>0)%COLORS.length];
+ let h=2166136261;
+ for(const x of String(id||'')){h^=x.charCodeAt(0);h=Math.imul(h,16777619)}
+ const hue=(h>>>0)%360;
+ return `hsl(${hue} 65% 63%)`;
 }
+// Elenco staff: proviene dai profili REALI /users, non dalle configurazioni
+// di disponibilita' (che esistono solo dopo il primo salvataggio di un coach).
+const staffCoachInfo=id=>S.staffProfiles.find(x=>x.id===id)||S.coaches.find(x=>x.id===id)||null;
 const athleteNames=new Map();
 async function loadAthleteNames(rows){
  if(S.role!=='admin'||!S.gym)return;
@@ -95,7 +97,7 @@ function validateConfig(c){if(![60,120].includes(c.durations.fighter)||![60,120]
   for(let i=0;i<r.length;i++){const [a,b]=r[i];if(!validTime(a)||!validTime(b)||mm(a)>=mm(b))return `${k}: fascia non valida`;if(i&&mm(r[i-1][1])>mm(a))return `${k}: fasce sovrapposte`}}
  for(const [d,v] of Object.entries(c.exceptions)){if(!/^\d{4}-\d\d-\d\d$/.test(d))return 'Data eccezione non valida';for(const [a,b]of v.ranges){if(!validTime(a)||!validTime(b)||mm(a)>=mm(b))return 'Orario eccezione non valido'}}
  for(const h of c.holidays){if(!/^\d{4}-\d\d-\d\d$/.test(h.from)||!/^\d{4}-\d\d-\d\d$/.test(h.to)||h.from>h.to)return 'Periodo ferie non valido'}return null}
-const S={uid:null,gym:null,role:null,name:'',coaches:[],bookings:[],category:null,coach:null,discipline:null,date:null,slot:null,month:null,monthDays:{},occupiedReady:false,history:'next',view:'day',staffDate:null,staffCoach:'all',staffCategory:'all',config:null,dirtySettings:false,pending:false,unsubs:[],unsubDays:null,unsubBookings:null,staffKey:null,autoPrepared:null};
+const S={uid:null,gym:null,role:null,name:'',isOwner:false,staffProfiles:[],coaches:[],bookings:[],category:null,coach:null,discipline:null,date:null,slot:null,month:null,monthDays:{},occupiedReady:false,history:'next',view:'day',staffDate:null,staffCoach:'all',staffCategory:'all',config:null,dirtySettings:false,pending:false,unsubs:[],unsubDays:null,unsubBookings:null,staffKey:null,autoPrepared:null};
 const getCoach=()=>S.coaches.find(c=>c.id===S.coach);
 const shade=id=>id==='all'?'#b4c8c1':coachColor(id);
 const configsRef=()=>collection(db,'gyms',S.gym,'spark_booking_coaches');
@@ -106,7 +108,23 @@ const slotRef=(id,ms)=>doc(db,'gyms',S.gym,'spark_booking_slots',slotId(id,ms));
 function indexRange(coachId,from,to){return query(slotsRef(),where(documentId(),'>=',slotId(coachId,from)),where(documentId(),'<=',slotId(coachId,to)))}
 function activateView(id){qsa('#app > section').forEach(el=>el.classList.toggle('hide',el.id!=='view-'+id));qsa('#main-tabs button').forEach(el=>el.classList.toggle('active',el.dataset.view===id));if(id==='staff'){staffListen();renderStaff()}else if(id==='settings')renderSettings();else if(id==='book')renderBook();else renderMine()}
 function nav(){const views=S.role==='admin'?[['staff','Calendario coach'],['settings','Disponibilità']]:[['book','Prenota'],['mine','Le mie prenotazioni']];$('main-tabs').innerHTML=views.map(([id,name])=>`<button type="button" class="chip" data-view="${id}">${name}</button>`).join('');qsa('#main-tabs button').forEach(b=>b.onclick=()=>activateView(b.dataset.view));activateView(S.role==='admin'?'staff':'book')}
-function beginListeners(){S.unsubs.push(onSnapshot(configsRef(),snap=>{S.coaches=snap.docs.map(d=>({id:d.id,...fromSaved(d.data())})).sort((a,b)=>coachName(a).localeCompare(coachName(b),'it'));
+function beginListeners(){
+ if(S.role==='admin'){
+  // Stesso schema gia' usato dalla sezione Coach della palestra in admin.html:
+  // consulta i profili appartenenti alla palestra e filtra role=admin.
+  // Non creare configurazioni false per chi non ha ancora attivato prenotazioni.
+  S.staffProfiles=[{id:S.uid,displayName:S.name||'Coach'}];
+  S.unsubs.push(onSnapshot(query(collection(db,'users'),where('gymId','==',S.gym)),snap=>{
+   const roster=snap.docs.filter(d=>d.data().role==='admin').map(d=>{
+    const p=d.data();
+    return {id:d.id,displayName:[p.name,p.surname].filter(Boolean).join(' ').trim()||p.email||'Coach',coachRole:p.coachRole||'collaborator'};
+   });
+   S.staffProfiles=roster.some(c=>c.id===S.uid)?roster:[...roster,{id:S.uid,displayName:S.name||'Coach'}];
+   S.staffProfiles.sort((a,b)=>coachName(a).localeCompare(coachName(b),'it'));
+   renderStaff();
+  },e=>status('Impossibile leggere i coach della palestra: '+tokenError(e),true)));
+ }
+ S.unsubs.push(onSnapshot(configsRef(),snap=>{S.coaches=snap.docs.map(d=>({id:d.id,...fromSaved(d.data())})).sort((a,b)=>coachName(a).localeCompare(coachName(b),'it'));
  if(S.role==='admin'){const me=S.coaches.find(c=>c.id===S.uid);if(!S.dirtySettings)S.config=fromSaved(me);if(me?.active&&me.lastPreparedDate!==dateIT()&&S.autoPrepared!==dateIT()&&!S.pending){S.autoPrepared=dateIT();setTimeout(()=>syncAvailability(S.config,true).catch(e=>toast('Aggiornamento disponibilità: '+tokenError(e),true)),200)}if(!$('view-settings').classList.contains('hide')&&!S.dirtySettings)renderSettings();renderStaff()}
  else {if(S.coach&&!S.coaches.some(c=>c.id===S.coach)){S.coach=null;clearDayListener()}renderBook()}
  },e=>status('Coach non disponibili: '+tokenError(e),true)));
@@ -151,7 +169,7 @@ async function submitBooking(){if(!SPARK_WRITES_ENABLED){toast('Prenotazioni non
 const historic=b=>b.status==='cancelled'||stampMs(b.startAt)+b.durationMinutes*60000<=Date.now();
 function cardBooking(b,staff=false){
  const start=stampMs(b.startAt),p=romeParts(start),end=romeParts(start+b.durationMinutes*60000),past=historic(b);
- const c=S.coaches.find(x=>x.id===b.coachId),service=b['service']==='fighter'?'FIGHTER':'PESI';
+ const c=staff?staffCoachInfo(b.coachId):S.coaches.find(x=>x.id===b.coachId),service=b['service']==='fighter'?'FIGHTER':'PESI';
  const coach=coachName(c),athlete=staff?staffAthleteName(b.athleteId):'';
  const typeClass=b['service']==='fighter'?'lf-type-fighter':'lf-type-pesi';
  const accent=staff?shade(b.coachId):'#43cc89';
@@ -163,12 +181,12 @@ function cardBooking(b,staff=false){
     <div class="lf29-booking-identifiers"><span class="lf29-coach-name" style="--lf-coach-accent:${accent}">Coach ${html(coach)}</span><span class="lf29-service-tag ${typeClass}">${service}</span></div>
     ${meta}
   </div><span class="count">${b.status==='cancelled'?'Disdetto':past?'Concluso':'Confermato'}</span></div>
-  ${b.status==='confirmed'&&!past?`<div class="actions"><button type="button" class="button danger sm" data-cancel="${html(b.id)}">Cancella appuntamento</button></div>`:''}
+  ${b.status==='confirmed'&&!past&&(!staff||S.isOwner||b.coachId===S.uid)?`<div class="actions"><button type="button" class="button danger sm" data-cancel="${html(b.id)}">Cancella appuntamento</button></div>`:''}
  </article>`;
 }
 function wireCancel(root){qsa('[data-cancel]',root).forEach(el=>el.onclick=()=>cancelOne(el.dataset.cancel))}
 function renderMine(){if(S.role!=='athlete'||$('view-mine').classList.contains('hide'))return;const arr=S.bookings.filter(b=>S.history==='next'?!historic(b):historic(b)).sort((a,b)=>S.history==='next'?stampMs(a.startAt)-stampMs(b.startAt):stampMs(b.startAt)-stampMs(a.startAt));$('mine-list').innerHTML=arr.length?arr.map(b=>cardBooking(b)).join(''):'<div class="empty">Nessuna prenotazione da mostrare.</div>';qsa('#view-mine [data-history]').forEach(b=>b.classList.toggle('active',b.dataset.history===S.history));wireCancel($('mine-list'))}
-async function cancelOne(id){if(!SPARK_WRITES_ENABLED){toast('Cancellazione non ancora abilitata.',true);return}const b=S.bookings.find(x=>x.id===id);if(!b||b.status!=='confirmed')return;const c=S.coaches.find(x=>x.id===b.coachId),cancelHours=c?.cancelHours??12;if(S.role==='athlete'&&stampMs(b.startAt)-Date.now()<=cancelHours*3600000){toast(`La disdetta richiede ${cancelHours} ore di preavviso. Contatta il coach.`,true);return}
+async function cancelOne(id){if(!SPARK_WRITES_ENABLED){toast('Cancellazione non ancora abilitata.',true);return}const b=S.bookings.find(x=>x.id===id);if(!b||b.status!=='confirmed')return;if(S.role==='admin'&&!S.isOwner&&b.coachId!==S.uid){toast('Solo il titolare o il coach interessato puo annullare questo appuntamento.',true);return}const c=S.coaches.find(x=>x.id===b.coachId),cancelHours=c?.cancelHours??12;if(S.role==='athlete'&&stampMs(b.startAt)-Date.now()<=cancelHours*3600000){toast(`La disdetta richiede ${cancelHours} ore di preavviso. Contatta il coach.`,true);return}
  if(!await ask('Annullare appuntamento?',`${b.discipline} · ${romeParts(stampMs(b.startAt)).date} alle ${romeParts(stampMs(b.startAt)).time}.`))return;
  try{const ref=doc(bookingsRef(),id),startMs=stampMs(b.startAt),slotRefs=Array.from({length:b.durationMinutes/30},(_,i)=>slotRef(b.coachId,startMs+i*SLOT_MS));await runTransaction(db,async tx=>{
    const booking=await tx.get(ref),slots=[];for(const r of slotRefs)slots.push(await tx.get(r));if(!booking.exists()||booking.data().status!=='confirmed'||slots.some(s=>!s.exists()||s.data().status!=='booked'||s.data().bookingId!==id))throw Error('Prenotazione già modificata');
@@ -180,7 +198,7 @@ function staffListen(){if(S.role!=='admin'||!S.gym)return;const m=S.staffDate.sl
 function shownStaff(){return S.bookings.filter(b=>{const date=romeParts(stampMs(b.startAt)).date;if(S.staffCoach!=='all'&&b.coachId!==S.staffCoach)return false;if(S.staffCategory!=='all'&&b.service!==S.staffCategory)return false;if(S.history==='next'&&historic(b)||S.history==='history'&&!historic(b))return false;return S.view==='day'?date===S.staffDate:S.view==='week'?(date>=plusDays(S.staffDate,-mondayIndex(S.staffDate))&&date<=plusDays(S.staffDate,6-mondayIndex(S.staffDate))):date.slice(0,7)===S.staffDate.slice(0,7)}).sort((a,b)=>stampMs(a.startAt)-stampMs(b.startAt))}
 function renderStaff(){
  if(S.role!=='admin'||$('view-staff').classList.contains('hide'))return;
- $('staff-coaches').innerHTML=[{id:'all',displayName:'Tutti'},...S.coaches].map(c=>`<button type="button" class="chip ${S.staffCoach===c.id?'active':''}" data-coach="${html(c.id)}"><span class="dot" style="background:${shade(c.id)}"></span>${html(coachName(c))}</button>`).join('');
+ $('staff-coaches').innerHTML=[{id:'all',displayName:'Tutti'},...S.staffProfiles].map(c=>`<button type="button" class="chip ${S.staffCoach===c.id?'active':''}" data-coach="${html(c.id)}"><span class="dot" style="background:${shade(c.id)}"></span>${html(coachName(c))}</button>`).join('');
  qsa('#staff-coaches button').forEach(b=>b.onclick=()=>{S.staffCoach=b.dataset.coach;renderStaff()});
  qsa('#view-staff [data-calendar]').forEach(b=>b.classList.toggle('active',b.dataset.calendar===S.view));
  qsa('#view-staff [data-history]').forEach(b=>b.classList.toggle('active',b.dataset.history===S.history));
@@ -205,7 +223,7 @@ function renderStaff(){
    const count=rows.length,byCoach=new Map();
    rows.forEach(b=>byCoach.set(b.coachId,(byCoach.get(b.coachId)||0)+1));
    const names=[...byCoach].map(([id,num])=>{
-    const c=S.coaches.find(x=>x.id===id);
+    const c=staffCoachInfo(id);
     const name=coachName(c);
     return `<span class="lf29-month-coach" style="--lf-coach-accent:${shade(id)}" title="Coach ${html(name)}: ${num} appuntamenti"><span class="dot"></span>${num}</span>`;
    }).join('');
@@ -256,6 +274,6 @@ function attachControls(){qsa('.service').forEach(b=>b.onclick=()=>chooseCategor
 function setupTheme(){const apply=v=>{document.documentElement.setAttribute('data-lion-theme',v);$('lf-theme-btn').textContent=v==='dark'?'☀ Tema chiaro':'☾ Tema scuro'};let saved='dark';try{saved=localStorage.getItem('lionfit_theme')||'dark'}catch(e){}apply(saved==='light'?'light':'dark');$('lf-theme-btn').onclick=()=>{const next=document.documentElement.getAttribute('data-lion-theme')==='dark'?'light':'dark';try{localStorage.setItem('lionfit_theme',next)}catch(e){}apply(next)}}
 attachControls();setupTheme();
 onAuthStateChanged(auth,async user=>{if(!user){location.replace('index.html');return}if(S.uid&&S.uid!==user.uid){location.reload();return}S.uid=user.uid;
- try{const profile=await getDoc(doc(db,'users',S.uid));if(!profile.exists())throw Error('Profilo mancante');const p=profile.data();if(!['admin','athlete'].includes(p.role)||!p.gymId)throw Error('Ruolo o palestra non validi');S.gym=p.gymId;S.role=p.role;S.name=[p.name,p.surname].filter(Boolean).join(' ');S.date=dateIT();S.month=S.date.slice(0,7);S.staffDate=S.date;S.config=initialConfig();
- $('user-caption').textContent=(S.role==='admin'?'Area Coach':'Area Atleta')+' · '+S.name;$('back-side').href=S.role==='admin'?'admin.html':'athlete.html';$('back-top').href=$('back-side').href;$('back-top').classList.remove('hide');$('loading').classList.add('hide');$('app').classList.remove('hide');$('online-pill').textContent=navigator.onLine?'● Online':'● Offline';nav();beginListeners()}
+ try{const profile=await getDoc(doc(db,'users',S.uid));if(!profile.exists())throw Error('Profilo mancante');const p=profile.data();if(!['admin','athlete'].includes(p.role)||!p.gymId)throw Error('Ruolo o palestra non validi');S.gym=p.gymId;S.role=p.role;S.name=[p.name,p.surname].filter(Boolean).join(' ');if(S.role==='admin'){try{const gym=await getDoc(doc(db,'gyms',S.gym));S.isOwner=gym.exists()&&gym.data().ownerUid===S.uid}catch(e){S.isOwner=false}}S.date=dateIT();S.month=S.date.slice(0,7);S.staffDate=S.date;S.config=initialConfig();
+ $('user-caption').textContent=(S.role==='admin'?'Area Coach':'Area Atleta')+' · '+S.name;$('back-side').href=S.role==='admin'?'admin.html':'athlete.html';$('back-top').href=$('back-side').href;$('back-top').classList.remove('hide');$('loading').classList.add('hide');$('app').classList.remove('hide');$('online-pill').textContent=navigator.onLine?'● Online':'● Offline';status('Prenotazioni collegate a Firebase. Solo i coach con disponibilità attive sono prenotabili.');$('global-status').classList.remove('warning');nav();beginListeners()}
  catch(e){$('loading').textContent='Accesso non disponibile: '+tokenError(e)}});

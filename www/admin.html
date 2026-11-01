@@ -322,7 +322,7 @@ html[data-lion-theme="dark"] ::selection{background:#27a362;color:#fff}
     const dark=theme==='dark';
     document.documentElement.setAttribute('data-lion-theme',dark?'dark':'light');
     document.querySelectorAll('[data-lf-theme-toggle]').forEach(button=>{
-      button.textContent=dark?'☀️ Tema chiaro':'🌙 Tema scuro';
+      // Le icone monocromatiche sono SVG statici: aggiorniamo solo stato e suggerimento.
       button.setAttribute('aria-pressed',String(dark));
       button.title=dark?'Attiva il tema chiaro':'Attiva il tema scuro';
     });
@@ -878,6 +878,33 @@ html[data-lion-theme="dark"] #lf-show-all-athletes{color:#95eab7!important;borde
   }
 }
 </style>
+
+<style id="lf0293-admin-polish">
+/* Admin Beta 0.29.3: annotazioni visuali; nessun cambiamento ai permessi o ai dati. */
+.lf0293-theme-square.lf26-theme-btn{margin-left:auto;flex:0 0 38px;display:inline-flex!important;align-items:center;justify-content:center;width:38px;height:38px;min-width:38px;min-height:38px;padding:7px!important;border-radius:10px!important;color:#111827!important;background:#f8fafc!important;border:1.5px solid #cbd5e1!important;box-shadow:none!important}
+.lf0293-theme-square svg{display:block;width:20px;height:20px;stroke:currentColor;flex-shrink:0}
+.lf0293-theme-square .lf0293-icon-sun{display:none}
+.lf0293-theme-square .lf0293-icon-moon{display:block}
+html[data-lion-theme="dark"] .lf0293-theme-square.lf26-theme-btn{background:#172231!important;color:#fff!important;border-color:#546473!important}
+html[data-lion-theme="dark"] .lf0293-theme-square .lf0293-icon-sun{display:block}
+html[data-lion-theme="dark"] .lf0293-theme-square .lf0293-icon-moon{display:none}
+.lf0293-theme-square:hover{filter:brightness(1.1)}
+.lf0293-nav-calendar{color:#111827!important}
+html[data-lion-theme="dark"] .lf0293-nav-calendar{color:#fff!important}
+.lf0293-invite-shortcut{cursor:pointer;transition:border-color .15s,background-color .15s}
+.lf0293-invite-shortcut:hover{border-color:#16a34a!important}
+.lf0293-invite-shortcut:focus-visible{outline:3px solid #16a34a;outline-offset:2px}
+.lf0293-invite-caption{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.lf0293-invite-caption svg{width:17px;height:17px;flex-shrink:0;color:#5e8273}
+.lf0293-sidebar-foot{flex-shrink:0}
+.lf0293-version{padding:5px 0 0;letter-spacing:.08em}
+#lf28-mail-status:empty{display:none}
+#lf24-athlete-invites,#lf23-owner-tools{scroll-margin-top:85px}
+html[data-lion-theme="dark"] .lf0293-invite-shortcut{background:#172231!important;color:#eef6fb!important;border-color:#405362!important}
+html[data-lion-theme="dark"] .lf0293-invite-caption svg{color:#ccd9e2}
+@media(max-width:767px){.lf0293-theme-square.lf26-theme-btn{margin-left:0;flex-basis:36px;width:36px;height:36px;min-width:36px;min-height:36px}}
+@media print{.lf0293-theme-square{display:none!important}}
+</style>
 </head>
 <body class="bg-gray-50 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col md:flex-row relative overflow-x-hidden">
 
@@ -894,6 +921,7 @@ html[data-lion-theme="dark"] #lf-show-all-athletes{color:#95eab7!important;borde
                 <h1 class="text-sm font-black uppercase tracking-widest text-black"><span class="lf261-brand">LION <span class="lf261-fit">FIT</span></span></h1>
                 <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Area Coach / Admin</p>
             </div>
+            <button type="button" data-lf-theme-toggle class="lf26-theme-btn lf0293-theme-square" aria-label="Cambia tema" title="Cambia tema"><svg class="lf0293-icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg><svg class="lf0293-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 14.1A8.5 8.5 0 0 1 9.9 3.4 8.5 8.5 0 1 0 20.6 14.1Z"/></svg></button>
         </div>
 
         <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto">
@@ -913,7 +941,7 @@ html[data-lion-theme="dark"] #lf-show-all-athletes{color:#95eab7!important;borde
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                 <span>Libreria Esercizi</span>
             </button>
-            <a href="./prenotazioni.html" id="lf029-nav-bookings" class="side-nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider text-gray-500 hover:text-black hover:bg-gray-100 transition" style="text-decoration:none" aria-label="Apri il calendario delle prenotazioni">📅 <span>Calendario appuntamenti</span></a>
+            <a href="./prenotazioni.html" id="lf029-nav-bookings" class="side-nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider text-gray-500 hover:text-black hover:bg-gray-100 transition" style="text-decoration:none" aria-label="Apri il calendario delle prenotazioni"><svg class="lf0293-nav-calendar w-5 h-5 shrink-0" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M8 14h3M8 17h3"/></svg><span>Calendario appuntamenti</span></a>
             <button type="button" id="side-nav-trash" onclick="lf26OpenTrash()" class="side-nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider text-gray-500 hover:text-black hover:bg-gray-100 transition" title="Apri il Cestino">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
                 <span>Cestino</span>
@@ -929,13 +957,12 @@ html[data-lion-theme="dark"] #lf-show-all-athletes{color:#95eab7!important;borde
             </button>
         </nav>
 
-        <div class="p-4 border-t border-gray-200 space-y-3">
-            <button data-lf-theme-toggle class="lf26-theme-btn w-full" aria-label="Cambia tema">🌙 Tema scuro</button>
-            <div class="lf26-version">LION FIT · BETA 0.28.13</div>
-            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-1">
-                <span class="text-[9px] font-black uppercase text-gray-500 block">Codice Invito Palestra</span>
-                <span id="side-gym-code" class="text-xs font-black text-neon tracking-widest block">Cod. ---</span>
-            </div>
+        <div class="lf0293-sidebar-foot p-4 border-t border-gray-200 space-y-2">
+            <button type="button" id="lf0293-open-invites" class="lf0293-invite-shortcut bg-gray-50 p-3 rounded-xl border border-gray-200 text-left w-full" aria-label="Apri inviti monouso nella sezione Coach della palestra">
+                <span class="text-[9px] font-black uppercase text-gray-500 block">Inviti della palestra</span>
+                <span class="lf0293-invite-caption"><span id="side-gym-code" class="text-xs font-black text-neon tracking-widest block">Cod. ---</span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span>
+            </button>
+            <div class="lf26-version lf0293-version">LION FIT · BETA 0.28.13</div>
         </div>
     </aside>
 
@@ -948,7 +975,7 @@ html[data-lion-theme="dark"] #lf-show-all-athletes{color:#95eab7!important;borde
                 <p class="text-[8px] font-bold text-gray-500 uppercase tracking-wider">Pannello Admin</p>
             </div>
         </div>
-        <div class="flex gap-1.5 items-center"><button data-lf-theme-toggle class="lf26-theme-btn" aria-label="Cambia tema">🌙 Tema scuro</button><span id="header-gym-code" class="bg-green-50 text-neon border border-green-200 px-2.5 py-1 rounded-lg text-[9px] font-black tracking-widest shrink-0">
+        <div class="flex gap-1.5 items-center"><button type="button" data-lf-theme-toggle class="lf26-theme-btn lf0293-theme-square" aria-label="Cambia tema" title="Cambia tema"><svg class="lf0293-icon-sun" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg><svg class="lf0293-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 14.1A8.5 8.5 0 0 1 9.9 3.4 8.5 8.5 0 1 0 20.6 14.1Z"/></svg></button><span id="header-gym-code" class="bg-green-50 text-neon border border-green-200 px-2.5 py-1 rounded-lg text-[9px] font-black tracking-widest shrink-0">
             Cod. ---
         </span></div>
     </header>
@@ -1234,7 +1261,7 @@ html[data-lion-theme="dark"] #lf-show-all-athletes{color:#95eab7!important;borde
           <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
             <div class="flex items-center justify-between gap-3 flex-wrap">
               <div><h2 class="font-black uppercase tracking-wider text-lg">Coach della palestra</h2>
-                <p class="text-sm text-gray-600 mt-1">Tutti i coach lavorano nello stesso pannello Admin e nella stessa palestra.</p></div>
+                <p class="text-sm text-gray-600 mt-1">Coach e inviti della tua palestra.</p></div>
               <button type="button" onclick="showSection('profile')" class="bg-gray-100 border border-gray-200 rounded-lg px-4 py-2 text-xs font-bold">← Profilo e palestra</button>
             </div>
             <div id="lf23-role-info" class="mt-4 rounded-xl border border-green-200 bg-green-50 p-3 text-xs font-medium text-gray-800">Controllo permessi in corso...</div>
@@ -1246,47 +1273,45 @@ html[data-lion-theme="dark"] #lf-show-all-athletes{color:#95eab7!important;borde
           </div>
           <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4" id="lf24-athlete-invites">
             <h3 class="font-black uppercase tracking-wider text-sm">Invita un atleta</h3>
-            <p class="text-xs text-gray-600">L’invito è personale, vale 7 giorni e si usa una sola volta. Inserisci l’email per inviarlo direttamente, oppure genera e copia il link. Il vecchio codice GYM-XXXX non iscrive più nuovi atleti.</p>
+            <p class="text-xs text-gray-600">Inviti monouso · validi 7 giorni.</p>
             <div class="lf29-invite-subcard">
-              <h4>✉ Invio diretto via email</h4>
-              <p class="text-xs text-gray-600">Crea un invito personale e lo invia tramite EmailJS. Il link non comparirà nella sezione manuale.</p>
+              <h4>Invito via email</h4>
               <label for="lf28-athlete-email" class="block text-xs font-black text-gray-700">Email dell’atleta</label>
               <input type="email" id="lf28-athlete-email" inputmode="email" autocomplete="email" placeholder="atleta@esempio.it" class="w-full min-w-0 border border-gray-300 bg-white text-gray-900 rounded-xl px-3.5 py-3 text-sm" />
               <button type="button" id="lf28-send-athlete-email" class="bg-neon text-white rounded-xl px-4 py-3 font-black text-xs uppercase">✉ Invia codice invito</button>
-              <p id="lf28-mail-status" role="status" aria-live="polite" class="text-xs font-medium text-gray-600">Invio con EmailJS. Se non arriva, controlla anche Spam.</p>
+              <p id="lf28-mail-status" role="status" aria-live="polite" class="text-xs font-medium text-gray-600"></p>
             </div>
             <div class="lf29-invite-subcard">
-              <h4>🔗 Genera e copia link</h4>
-              <p class="text-xs text-gray-600">Ogni clic crea un NUOVO link monouso valido 7 giorni, da inviare via WhatsApp o SMS. Non serve inserire l’email.</p>
+              <h4>Link da condividere</h4>
               <button type="button" id="lf24-create-athlete-invite" class="bg-white text-green-900 border border-green-300 rounded-xl px-4 py-3 font-black text-xs uppercase">+ Genera link</button>
               <div id="lf24-athlete-invite-result" class="hidden bg-green-50 border border-green-200 rounded-xl p-3 space-y-2">
-                <label for="lf24-athlete-invite-link" class="block font-bold text-xs text-green-900">Collegamento da condividere privatamente</label>
+                <label for="lf24-athlete-invite-link" class="block font-bold text-xs text-green-900">Link privato</label>
                 <input id="lf24-athlete-invite-link" type="text" readonly class="w-full bg-white border border-green-200 rounded-lg p-2 text-xs" />
                 <button id="lf24-copy-athlete-invite" type="button" class="px-4 py-2 border border-green-300 bg-white rounded-lg font-bold text-xs">Copia invito</button>
                 <p id="lf24-local-athlete-link-warning" class="hidden text-xs text-amber-800 font-semibold">Collegamento locale di prova: non condividerlo.</p>
               </div>
             </div>
             <details class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs">
-              <summary class="cursor-pointer font-black text-gray-800">⚙ Impostazioni invio email</summary>
+              <summary class="cursor-pointer font-black text-gray-800">Impostazioni email (avanzate)</summary>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
                 <label class="font-bold text-gray-700">Service ID<input id="lf28-emailjs-service" type="text" placeholder="service_..." class="w-full mt-1 rounded-lg border border-gray-300 p-2 text-gray-900" autocomplete="off" /></label>
                 <label class="font-bold text-gray-700">Public Key<input id="lf28-emailjs-public" type="text" placeholder="Public Key EmailJS" class="w-full mt-1 rounded-lg border border-gray-300 p-2 text-gray-900" autocomplete="off" /></label>
                 <label class="font-bold text-gray-700 sm:col-span-2">Template ID<input id="lf28-emailjs-template" type="text" value="template_a27mk9g" class="w-full mt-1 rounded-lg border border-gray-300 p-2 text-gray-900" autocomplete="off" /></label>
               </div>
               <button type="button" id="lf28-save-emailjs" class="mt-3 rounded-lg bg-gray-800 text-white px-4 py-2 font-black">Salva configurazione EmailJS</button>
-              <p class="mt-2 text-gray-600">Se i due ID pubblici sono presenti in lionfit-emailjs-config.js, la configurazione vale per tutti i coach sul sito. Altrimenti puoi inserire Service ID e Public Key qui e salvarli solo su questo dispositivo. Mai inserire Private Key o password.</p>
+              <p class="mt-2 text-gray-600">Gli ID salvati qui valgono solo su questo dispositivo. Mai inserire chiavi private o password.</p>
             </details>
             <div id="lf24-athlete-invites-list" class="text-xs text-gray-600 space-y-2">Nessun invito caricato.</div>
           </div>
           <div id="lf23-owner-tools" class="hidden bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
             <div><h3 class="font-black uppercase tracking-wide text-sm">Invita un coach collaboratore</h3>
-              <p class="text-xs text-gray-600 mt-1">Genera un collegamento personale da inviare al coach. Scade dopo 7 giorni e vale per un solo account.</p></div>
+              <p class="text-xs text-gray-600 mt-1">Link monouso · valido 7 giorni · solo il titolare può invitarlo.</p></div>
             <form id="lf23-invite-form" class="flex gap-2 flex-col sm:flex-row">
               <input type="email" id="lf23-invite-email" required placeholder="email del nuovo coach" autocomplete="email" class="flex-1 min-w-0 border border-gray-300 rounded-xl px-3 py-3 text-sm text-black" />
               <button type="submit" id="lf23-invite-submit" class="bg-neon text-white rounded-xl px-5 py-3 font-black text-xs uppercase">Genera invito</button>
             </form>
             <div id="lf23-invite-result" class="hidden rounded-xl bg-green-50 border border-green-200 p-3 space-y-2">
-              <label for="lf23-invite-link" class="block text-xs font-black text-green-800">Collegamento personale (da condividere privatamente)</label>
+              <label for="lf23-invite-link" class="block text-xs font-black text-green-800">Link privato</label>
               <input type="text" id="lf23-invite-link" readonly class="w-full border border-green-200 rounded-lg bg-white p-2 text-xs" />
               <button type="button" id="lf23-copy-invite" class="border border-green-300 bg-white text-green-800 rounded-lg px-4 py-2 text-sm font-bold">Copia collegamento</button>
               <p id="lf24-local-coach-link-warning" class="hidden text-xs text-amber-800 font-semibold">Collegamento di prova locale: 127.0.0.1 funziona solo sul tuo PC. Prima di condividerlo occorre pubblicare e verificare la versione online.</p>
@@ -1964,6 +1989,10 @@ Martedì	Forza	...
         }
         document.getElementById('lf23-open-coaches').addEventListener('click', lf23OpenCoachManagement);
         document.getElementById('side-nav-coaches').addEventListener('click', lf23OpenCoachManagement);
+        document.getElementById('lf0293-open-invites').addEventListener('click', () => {
+            lf23OpenCoachManagement();
+            requestAnimationFrame(() => document.getElementById('lf24-athlete-invites')?.scrollIntoView({behavior:'smooth',block:'start'}));
+        });
         async function lf23LoadCoaches() {
             if (!currentGymId || !currentUserUid) return;
             const owner = lf23CurrentRole === 'owner';
@@ -2158,7 +2187,7 @@ Martedì	Forza	...
                 }
                 if(!manual.length){
                     const empty=document.createElement('p');
-                    empty.textContent='Nessun link manuale attivo. Premi «+ Genera link» per crearne uno.';
+                    empty.textContent='Nessun link attivo.';
                     root.appendChild(empty);
                 } else manual.forEach(inv=>renderInvite(inv,root));
                 if(others.length){
