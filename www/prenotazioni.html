@@ -136,16 +136,30 @@ html[data-lion-theme="light"] .lf29-month-coach{background:#e7f2eb;color:#184332
 @media(max-width:720px){#weekly-editor{grid-template-columns:1fr}}
 @media(max-width:400px){.lf29-booking-identifiers{align-items:flex-start;gap:5px}.lf29-coach-name{font-size:12px}.lf29-service-tag{font-size:10px}}
 </style>
+
+<style id="lf0294-mobile-navigation">
+/* Pulsante ritorno compatto, non sottolineato, uguale per Coach e Atleta. */
+a.lf0294-back-link,a.lf0294-back-link:link,a.lf0294-back-link:visited,
+a.lf0294-back-link:hover,a.lf0294-back-link:focus{ text-decoration:none!important; }
+#back-top.lf0294-back-link{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;min-height:36px;padding:7px 11px;font-size:12px;font-weight:800;border-radius:10px;line-height:1.15}
+#back-side.lf0294-back-link{font-size:12px;text-decoration:none!important}
+@media(max-width:520px){
+ .top-right{gap:7px;flex-wrap:wrap}
+ #back-top.lf0294-back-link{min-height:34px;padding:6px 9px;font-size:11px}
+ #lf-theme-btn{min-height:34px;padding:6px 9px;font-size:11px}
+ .top-right .pill{font-size:10px;padding:4px 7px}
+}
+</style>
 </head>
 <body>
 <div class="layout">
 <aside class="side"><div><div class="brand"><span class="brand-mark"><img alt="" onerror="this.style.display='none';this.parentNode.textContent='LF'" src="./LOGO-APP.png"/></span>LION <b>FIT</b></div><div class="brand-sub">Train · Fight · Evolve</div></div>
-<div class="stack" id="side-links"><a href="athlete.html" id="back-side">← Torna all'app</a><button class="current" id="btn-side-main">▦ Prenotazioni</button></div>
-<div class="side-note">Appuntamenti Lion Fit · Beta sviluppo 0.29<br/>Solo le prenotazioni lavorative sono condivise fra i coach.</div>
+<div class="stack" id="side-links"><a href="athlete.html" id="back-side" class="lf0294-back-link">← Torna all'app</a><button class="current" id="btn-side-main">▦ Prenotazioni</button></div>
+<div class="side-note">Lion Fit · Prenotazioni</div>
 </aside>
 <main class="workspace">
 <header class="head"><div><div class="kicker">LION FIT · SERVIZI</div><h1>Prenotazioni</h1><div class="muted small" id="user-caption">Connessione in corso…</div></div>
-<div class="top-right"><button aria-label="Cambia tema" class="button sm ghost" id="lf-theme-btn" type="button">◐ Tema</button><a class="button ghost mobile-back hide" href="athlete.html" id="back-top">← Torna all’app</a><span class="pill" id="online-pill">● Connessione</span></div></header>
+<div class="top-right"><button aria-label="Cambia tema" class="button sm ghost" id="lf-theme-btn" type="button">◐ Tema</button><a class="button ghost mobile-back hide lf0294-back-link" href="athlete.html" id="back-top">← Torna all’app</a><span class="pill" id="online-pill">● Connessione</span></div></header>
 <div class="status warning" id="global-status" role="status">Connessione sicura a Firebase in corso…</div>
 <section class="card" id="loading"><div class="flex"><span class="loading"></span><b>Verifica account e palestra…</b></div></section>
 <div class="hide" id="app">
@@ -189,11 +203,11 @@ html[data-lion-theme="light"] .lf29-month-coach{background:#e7f2eb;color:#184332
 
 <div class="notice" style="margin-top:12px">Modalità Spark: quando salvi, il coach prepara gli slot dei prossimi 30 giorni. Riportando aperta l’area Coach almeno una volta al giorno, Lion Fit estende la finestra automaticamente. Le scritture sono reali: verifica che le regole Firestore 0.29 siano pubblicate.</div><button class="button primary" id="sett-save" style="margin-top:15px;width:100%">Salva disponibilità e prepara gli orari</button>
 </section>
-<footer class="footer">Lion Fit · Prenotazioni Beta 0.29.3 · Orario palestra: Europa/Roma · Conferma tramite transazione Firestore.</footer>
+<footer class="footer">Lion Fit · Prenotazioni Beta 0.29.4</footer>
 </div>
 </main>
 </div>
 <div class="banner hide" id="toast" role="status"></div>
 <div aria-labelledby="modal-title" aria-modal="true" class="modal-bg hide" id="modal" role="dialog"><div class="modal"><h3 id="modal-title">Conferma</h3><p class="muted" id="modal-msg"></p><div class="flex" style="justify-content:flex-end;margin-top:22px"><button class="button ghost" id="modal-no">Annulla</button><button class="button danger" id="modal-yes">Conferma</button></div></div></div>
-<script src="./lionfit-bookings.js?v=0293" type="module"></script>
+<script src="./lionfit-bookings.js?v=0294" type="module"></script>
 </body></html>

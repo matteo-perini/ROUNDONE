@@ -1,4 +1,4 @@
-// Lion Fit Beta 0.29.3 — prenotazioni Spark / account Firebase reali.
+// Lion Fit Beta 0.29.4 — prenotazioni Spark / account Firebase reali.
 // Applica PRIMA le regole Firestore 0.29 collaudate in emulatore.
 // Esegui un test online controllato prima di distribuire agli utenti.
 import {initializeApp,getApps,getApp} from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
@@ -85,7 +85,7 @@ function slotsWanted(c,fromMs,toMs){const wanted=new Map();if(!c.active)return w
 function futureBounds(maxDays){const now=Date.now();return {from:Math.floor(now/SLOT_MS)*SLOT_MS,until:now+Math.min(30,maxDays)*DAY_MS}}
 function tokenError(e){const code=String(e?.code||'');if(code.includes('permission-denied'))return 'Permesso negato: prima occorre verificare e attivare le regole Spark. Nessun dato è stato modificato.';if(code.includes('failed-precondition'))return 'Operazione non disponibile: riprova online o verifica gli indici Firestore.';if(code.includes('aborted'))return 'La disponibilità è cambiata durante la prenotazione. Scegli un altro orario.';return String(e?.message||'Operazione non riuscita.').slice(0,220)}
 function toast(message,bad=false){const el=$('toast');el.textContent=message;el.classList.toggle('bad',bad);el.classList.remove('hide');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.add('hide'),5200)}
-function status(msg,bad=false){const el=$('global-status');el.textContent=msg;el.classList.toggle('error',bad);el.classList.remove('hide')}
+function status(msg,bad=false){const el=$('global-status');el.textContent=msg||'';el.classList.toggle('error',!!bad);el.classList.toggle('hide',!msg)}
 function ask(title,msg){return new Promise(resolve=>{const el=$('modal'),yes=$('modal-yes'),no=$('modal-no');$('modal-title').textContent=title;$('modal-msg').textContent=msg;el.classList.remove('hide');const finish=v=>{el.classList.add('hide');yes.onclick=null;no.onclick=null;resolve(v)};yes.onclick=()=>finish(true);no.onclick=()=>finish(false)})}
 function validTime(v){return /^([01]\d|2[0-3]):(00|30)$/.test(v)}
 function validateConfig(c){if(![60,120].includes(c.durations.fighter)||![60,120].includes(c.durations.pesi))return 'Durate supportate: 60 o 120 minuti.';
@@ -97,7 +97,7 @@ function validateConfig(c){if(![60,120].includes(c.durations.fighter)||![60,120]
   for(let i=0;i<r.length;i++){const [a,b]=r[i];if(!validTime(a)||!validTime(b)||mm(a)>=mm(b))return `${k}: fascia non valida`;if(i&&mm(r[i-1][1])>mm(a))return `${k}: fasce sovrapposte`}}
  for(const [d,v] of Object.entries(c.exceptions)){if(!/^\d{4}-\d\d-\d\d$/.test(d))return 'Data eccezione non valida';for(const [a,b]of v.ranges){if(!validTime(a)||!validTime(b)||mm(a)>=mm(b))return 'Orario eccezione non valido'}}
  for(const h of c.holidays){if(!/^\d{4}-\d\d-\d\d$/.test(h.from)||!/^\d{4}-\d\d-\d\d$/.test(h.to)||h.from>h.to)return 'Periodo ferie non valido'}return null}
-const S={uid:null,gym:null,role:null,name:'',isOwner:false,staffProfiles:[],coaches:[],bookings:[],category:null,coach:null,discipline:null,date:null,slot:null,month:null,monthDays:{},occupiedReady:false,history:'next',view:'day',staffDate:null,staffCoach:'all',staffCategory:'all',config:null,dirtySettings:false,pending:false,unsubs:[],unsubDays:null,unsubBookings:null,staffKey:null,autoPrepared:null};
+const S={uid:null,gym:null,role:null,name:'',isOwner:false,staffProfiles:[],coaches:[],bookings:[],category:null,coach:null,discipline:null,date:null,slot:null,month:null,monthDays:{},occupiedReady:false,history:'next',view:'day',staffDate:null,staffCoach:'all',staffCategory:'all',config:null,dirtySettings:false,pending:false,pendingCancels:new Set(),locallyCancelledIds:new Set(),unsubs:[],unsubDays:null,unsubBookings:null,staffKey:null,autoPrepared:null};
 const getCoach=()=>S.coaches.find(c=>c.id===S.coach);
 const shade=id=>id==='all'?'#b4c8c1':coachColor(id);
 const configsRef=()=>collection(db,'gyms',S.gym,'spark_booking_coaches');
@@ -128,7 +128,17 @@ function beginListeners(){
  if(S.role==='admin'){const me=S.coaches.find(c=>c.id===S.uid);if(!S.dirtySettings)S.config=fromSaved(me);if(me?.active&&me.lastPreparedDate!==dateIT()&&S.autoPrepared!==dateIT()&&!S.pending){S.autoPrepared=dateIT();setTimeout(()=>syncAvailability(S.config,true).catch(e=>toast('Aggiornamento disponibilità: '+tokenError(e),true)),200)}if(!$('view-settings').classList.contains('hide')&&!S.dirtySettings)renderSettings();renderStaff()}
  else {if(S.coach&&!S.coaches.some(c=>c.id===S.coach)){S.coach=null;clearDayListener()}renderBook()}
  },e=>status('Coach non disponibili: '+tokenError(e),true)));
- if(S.role==='athlete'){S.unsubs.push(onSnapshot(query(bookingsRef(),where('athleteId','==',S.uid)),snap=>{S.bookings=snap.docs.map(d=>({id:d.id,...d.data()}));renderMine()},e=>status('Le tue prenotazioni: '+tokenError(e),true)))}
+ if(S.role==='athlete'){S.unsubs.push(onSnapshot(query(bookingsRef(),where('athleteId','==',S.uid)),snap=>{
+  // Dopo un annullamento riuscito non mostrare un vecchio stato confirmed
+  // mentre la cache del telefono riceve lo snapshot del server.
+  S.bookings=snap.docs.map(d=>{
+   const row={id:d.id,...d.data()};
+   if(row.status==='cancelled') S.locallyCancelledIds.delete(row.id);
+   else if(S.locallyCancelledIds.has(row.id)) row.status='cancelled';
+   return row;
+  });
+  renderMine();
+ },e=>status('Le tue prenotazioni: '+tokenError(e),true)))}
 }
 function clearDayListener(){S.unsubDays?.();S.unsubDays=null;S.monthDays={};S.occupiedReady=false}
 function listenMonth(){clearDayListener();if(!S.coach)return;const coach=S.coach,m=S.month;
@@ -181,17 +191,65 @@ function cardBooking(b,staff=false){
     <div class="lf29-booking-identifiers"><span class="lf29-coach-name" style="--lf-coach-accent:${accent}">Coach ${html(coach)}</span><span class="lf29-service-tag ${typeClass}">${service}</span></div>
     ${meta}
   </div><span class="count">${b.status==='cancelled'?'Disdetto':past?'Concluso':'Confermato'}</span></div>
-  ${b.status==='confirmed'&&!past&&(!staff||S.isOwner||b.coachId===S.uid)?`<div class="actions"><button type="button" class="button danger sm" data-cancel="${html(b.id)}">Cancella appuntamento</button></div>`:''}
+  ${b.status==='confirmed'&&!past&&(!staff||S.isOwner||b.coachId===S.uid)?`<div class="actions"><button type="button" class="button danger sm" data-cancel="${html(b.id)}" ${S.pendingCancels.has(b.id)?'disabled aria-busy="true"':''}>${S.pendingCancels.has(b.id)?'Annullamento in corso…':'Cancella appuntamento'}</button></div>`:''}
  </article>`;
 }
 function wireCancel(root){qsa('[data-cancel]',root).forEach(el=>el.onclick=()=>cancelOne(el.dataset.cancel))}
 function renderMine(){if(S.role!=='athlete'||$('view-mine').classList.contains('hide'))return;const arr=S.bookings.filter(b=>S.history==='next'?!historic(b):historic(b)).sort((a,b)=>S.history==='next'?stampMs(a.startAt)-stampMs(b.startAt):stampMs(b.startAt)-stampMs(a.startAt));$('mine-list').innerHTML=arr.length?arr.map(b=>cardBooking(b)).join(''):'<div class="empty">Nessuna prenotazione da mostrare.</div>';qsa('#view-mine [data-history]').forEach(b=>b.classList.toggle('active',b.dataset.history===S.history));wireCancel($('mine-list'))}
-async function cancelOne(id){if(!SPARK_WRITES_ENABLED){toast('Cancellazione non ancora abilitata.',true);return}const b=S.bookings.find(x=>x.id===id);if(!b||b.status!=='confirmed')return;if(S.role==='admin'&&!S.isOwner&&b.coachId!==S.uid){toast('Solo il titolare o il coach interessato puo annullare questo appuntamento.',true);return}const c=S.coaches.find(x=>x.id===b.coachId),cancelHours=c?.cancelHours??12;if(S.role==='athlete'&&stampMs(b.startAt)-Date.now()<=cancelHours*3600000){toast(`La disdetta richiede ${cancelHours} ore di preavviso. Contatta il coach.`,true);return}
+// Aggiornamento locale dopo un commit riuscito: non aggiunge letture Firestore.
+function markCancelledLocally(id, cancelledAt=null){
+ S.locallyCancelledIds.add(id);
+ S.bookings=S.bookings.map(b=>b.id===id?{...b,status:'cancelled',...(cancelledAt?{cancelledAt}:{})}:b);
+ if(S.role==='admin')renderStaff();else renderMine();
+}
+async function cancelOne(id){
+ if(!SPARK_WRITES_ENABLED){toast('Cancellazione non ancora abilitata.',true);return}
+ if(S.pendingCancels.has(id))return;
+ const b=S.bookings.find(x=>x.id===id);
+ if(!b||b.status!=='confirmed'||S.locallyCancelledIds.has(id)){
+  if(S.locallyCancelledIds.has(id))markCancelledLocally(id);
+  return;
+ }
+ if(S.role==='admin'&&!S.isOwner&&b.coachId!==S.uid){toast('Solo il titolare o il coach interessato può annullare questo appuntamento.',true);return}
+ const c=S.coaches.find(x=>x.id===b.coachId),cancelHours=c?.cancelHours??12;
+ if(S.role==='athlete'&&stampMs(b.startAt)-Date.now()<=cancelHours*3600000){toast(`La disdetta richiede ${cancelHours} ore di preavviso. Contatta il coach.`,true);return}
  if(!await ask('Annullare appuntamento?',`${b.discipline} · ${romeParts(stampMs(b.startAt)).date} alle ${romeParts(stampMs(b.startAt)).time}.`))return;
- try{const ref=doc(bookingsRef(),id),startMs=stampMs(b.startAt),slotRefs=Array.from({length:b.durationMinutes/30},(_,i)=>slotRef(b.coachId,startMs+i*SLOT_MS));await runTransaction(db,async tx=>{
-   const booking=await tx.get(ref),slots=[];for(const r of slotRefs)slots.push(await tx.get(r));if(!booking.exists()||booking.data().status!=='confirmed'||slots.some(s=>!s.exists()||s.data().status!=='booked'||s.data().bookingId!==id))throw Error('Prenotazione già modificata');
-   tx.update(ref,{status:'cancelled',cancelledAt:serverTimestamp()});slotRefs.forEach(r=>tx.update(r,{status:'open',bookingId:''}));});toast('Appuntamento annullato.')}
- catch(e){toast(tokenError(e),true)}}
+ if(S.pendingCancels.has(id))return;
+ S.pendingCancels.add(id);
+ if(S.role==='admin')renderStaff();else renderMine();
+ const ref=doc(bookingsRef(),id),startMs=stampMs(b.startAt);
+ const slotRefs=Array.from({length:b.durationMinutes/30},(_,i)=>slotRef(b.coachId,startMs+i*SLOT_MS));
+ try{
+  await runTransaction(db,async tx=>{
+   const booking=await tx.get(ref),slots=[];
+   for(const r of slotRefs)slots.push(await tx.get(r));
+   if(!booking.exists()||booking.data().status!=='confirmed'||slots.some(s=>!s.exists()||s.data().status!=='booked'||s.data().bookingId!==id))throw Error('Prenotazione già modificata');
+   tx.update(ref,{status:'cancelled',cancelledAt:serverTimestamp()});
+   slotRefs.forEach(r=>tx.update(r,{status:'open',bookingId:''}));
+  });
+  // Il listener Firestore resta attivo. Anche se la WebView visualizza uno
+  // snapshot in ritardo, la lista Prossime si aggiorna immediatamente.
+  markCancelledLocally(id);
+  toast('Appuntamento annullato.');
+ }catch(e){
+  // Un altro dispositivo può aver già annullato. In quel caso non lasciare
+  // una scheda vecchia né mostrare un errore incomprensibile.
+  if(String(e?.message||'').includes('Prenotazione già modificata')){
+   try{
+    const current=await getDoc(ref);
+    if(current.exists()&&current.data().status==='cancelled'){
+     markCancelledLocally(id,current.data().cancelledAt||null);
+     toast('Appuntamento già annullato: elenco aggiornato.');
+     return;
+    }
+   }catch(_){/* Se non leggibile, lascia il listener attivo e mostra l'errore. */}
+  }
+  toast(tokenError(e),true);
+ }finally{
+  S.pendingCancels.delete(id);
+  if(S.role==='admin')renderStaff();else renderMine();
+ }
+}
 function staffListen(){if(S.role!=='admin'||!S.gym)return;const m=S.staffDate.slice(0,7),key=m;if(S.staffKey===key)return;S.staffKey=key;S.unsubBookings?.();
  const from=new Date(monthStart(m)+'T00:00:00Z').getTime()-7*DAY_MS,to=new Date(monthStart(addMonth(m,1))+'T00:00:00Z').getTime()+7*DAY_MS;
  S.unsubBookings=onSnapshot(query(bookingsRef(),where('startAt','>=',Timestamp.fromMillis(from)),where('startAt','<',Timestamp.fromMillis(to))),snap=>{S.bookings=snap.docs.map(d=>({id:d.id,...d.data()}));renderStaff();loadAthleteNames(S.bookings).catch(()=>{})},e=>status('Calendario: '+tokenError(e),true))}
@@ -275,5 +333,5 @@ function setupTheme(){const apply=v=>{document.documentElement.setAttribute('dat
 attachControls();setupTheme();
 onAuthStateChanged(auth,async user=>{if(!user){location.replace('index.html');return}if(S.uid&&S.uid!==user.uid){location.reload();return}S.uid=user.uid;
  try{const profile=await getDoc(doc(db,'users',S.uid));if(!profile.exists())throw Error('Profilo mancante');const p=profile.data();if(!['admin','athlete'].includes(p.role)||!p.gymId)throw Error('Ruolo o palestra non validi');S.gym=p.gymId;S.role=p.role;S.name=[p.name,p.surname].filter(Boolean).join(' ');if(S.role==='admin'){try{const gym=await getDoc(doc(db,'gyms',S.gym));S.isOwner=gym.exists()&&gym.data().ownerUid===S.uid}catch(e){S.isOwner=false}}S.date=dateIT();S.month=S.date.slice(0,7);S.staffDate=S.date;S.config=initialConfig();
- $('user-caption').textContent=(S.role==='admin'?'Area Coach':'Area Atleta')+' · '+S.name;$('back-side').href=S.role==='admin'?'admin.html':'athlete.html';$('back-top').href=$('back-side').href;$('back-top').classList.remove('hide');$('loading').classList.add('hide');$('app').classList.remove('hide');$('online-pill').textContent=navigator.onLine?'● Online':'● Offline';status('Prenotazioni collegate a Firebase. Solo i coach con disponibilità attive sono prenotabili.');$('global-status').classList.remove('warning');nav();beginListeners()}
+ $('user-caption').textContent=(S.role==='admin'?'Area Coach':'Area Atleta')+' · '+S.name;$('back-side').href=S.role==='admin'?'admin.html':'athlete.html';$('back-top').href=$('back-side').href;$('back-top').classList.remove('hide');$('loading').classList.add('hide');$('app').classList.remove('hide');$('online-pill').textContent=navigator.onLine?'● Online':'● Offline';status('');$('global-status').classList.remove('warning');nav();beginListeners()}
  catch(e){$('loading').textContent='Accesso non disponibile: '+tokenError(e)}});
