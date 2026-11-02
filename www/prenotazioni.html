@@ -4,6 +4,21 @@
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="#0b1111" name="theme-color"/><title>Lion Fit · Prenotazioni</title>
+<!-- Lion Fit Beta 0.29.7 — il layout nativo non deve entrare sotto la barra Android. -->
+<script id="lf0296-bookings-native-detection">
+(function () {
+  function detectNativeAndroid() {
+    try {
+      var cap = window.Capacitor;
+      if (cap && typeof cap.getPlatform === 'function' && cap.getPlatform() === 'android') {
+        document.documentElement.classList.add('lf-bookings-android');
+      }
+    } catch (_) { /* Sito web: nessuna modifica al layout. */ }
+  }
+  detectNativeAndroid();
+  document.addEventListener('DOMContentLoaded', detectNativeAndroid, { once: true });
+})();
+</script>
 <style>
 :root{color-scheme:dark;--bg:#0b1012;--side:#10181b;--card:#172125;--card2:#1c292c;--border:#344447;--text:#eef9f2;--muted:#adbec2;--green:#45d38d;--green2:#217b54;--red:#ffb2a6;--blue:#74b8ff;--gold:#ffc37b;font:14px/1.42 system-ui,-apple-system,"Segoe UI",sans-serif}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}a{color:var(--green)}.layout{display:flex;min-height:100vh}.side{width:228px;min-width:228px;padding:24px 14px;background:var(--side);border-right:1px solid #293739;position:sticky;top:0;align-self:flex-start;height:100vh;display:flex;flex-direction:column;gap:28px}.brand{font-weight:1000;font-size:22px;letter-spacing:.04em}.brand b{color:var(--green)}.brand-mark{display:inline-flex;background:#173f2b;width:36px;height:36px;align-items:center;justify-content:center;border-radius:12px;margin-right:8px;color:#75f3ab}.brand-sub{color:var(--muted);text-transform:uppercase;letter-spacing:.17em;font-size:9px;margin:7px 0 0 45px}.side a,.side button{display:block;color:#cad9d6;text-align:left;text-decoration:none;border:0;background:none;border-radius:12px;padding:12px 13px;font-weight:750;width:100%}.side a:hover,.side a.current{background:#1a3b2d;color:#9ff1c4}.side-note{margin-top:auto;color:#93a8a4;font-size:11px;padding:12px;border:1px solid #33453d;border-radius:12px}.workspace{width:100%;min-width:0;max-width:1450px;margin-inline:auto;padding:26px clamp(14px,3vw,36px) 65px}.head{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:25px}.kicker{color:var(--green);text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:850}.head h1{font-size:clamp(24px,3vw,35px);line-height:1.1;margin:5px 0 6px;letter-spacing:-.045em}.muted{color:var(--muted)}.small{font-size:12px}.pill{display:inline-block;border-radius:99px;border:1px solid #4e6a61;color:#9ae8bc;padding:4px 10px;font-weight:800;font-size:11px}.button,.chip,.navbutton{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:12px;border:1px solid #4b5c5b;background:#263538;color:var(--text);padding:11px 16px;font-weight:780;min-height:43px;transition:.15s}.button:hover:not(:disabled),.chip:hover:not(:disabled){border-color:#78dfa8}.button.primary{background:#178253;border-color:#2fbb73;color:white}.button.danger{background:#543332;border-color:#ba6c66;color:#ffdcd9}.button.ghost{background:transparent}.button.sm{min-height:36px;padding:6px 10px;font-size:12px}.chip{padding:9px 12px;min-height:38px;border-radius:99px;font-size:12px}.chip.active{background:#164d32;border-color:#44d38d;color:#b6f9d0}.grid{display:grid;gap:14px}.two{grid-template-columns:repeat(2,minmax(0,1fr))}.three{grid-template-columns:repeat(3,minmax(0,1fr))}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;min-width:0;box-shadow:0 6px 24px rgba(0,0,0,.08)}.card h2,.card h3{margin:0 0 9px;font-size:17px}.card p{margin:4px 0 11px}.section-title{font-size:18px;font-weight:900;letter-spacing:-.02em;margin:12px 0}.stack{display:flex;flex-direction:column;gap:12px}.flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.grow{flex:1}.hide{display:none!important}.status{border-radius:12px;padding:11px 13px;background:#193a2c;border:1px solid #397c57;color:#c6f6d8}.status.error{background:#422523;border-color:#b46c6a;color:#ffe0d8}.status.warning{background:#453819;border-color:#977844;color:#ffe6a6}.service{min-height:210px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;gap:12px;padding:20px;border-radius:19px;border:1px solid #49605a;background:linear-gradient(140deg,#1b322a,#172125 64%);color:var(--text)}.service .big-icon{font-size:35px}.service h2{font-size:24px;margin:0}.service.fighter{background:linear-gradient(140deg,#27322b,#182123 72%)}.service.active{outline:2px solid var(--green);border-color:#5ce29c}.badge{font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:900;color:var(--green)}.coachcard{display:flex;align-items:center;gap:12px;text-align:left;min-height:82px;width:100%;color:var(--text);border-radius:15px;padding:14px;background:#1c292c;border:1px solid #46615b}.coachcard.active{border-color:var(--green);outline:1px solid var(--green)}.avatar{width:44px;height:44px;flex-shrink:0;border-radius:14px;background:#2e5140;display:grid;place-items:center;font-weight:900;font-size:17px}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0}.field{width:100%;background:#0d181b;color:var(--text);border:1px solid #4c6460;border-radius:10px;min-height:42px;padding:9px 12px}.field:focus{outline:2px solid #46cc8b;outline-offset:1px}.field:disabled{background:#1a2526;color:#708683}.label{display:block;font-weight:800;margin:0 0 7px;font-size:12px}.cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 15px}.month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.weekday{text-align:center;font-weight:800;color:#8fa9a5;font-size:11px;padding:6px 0}.day{min-width:0;min-height:45px;background:#22352d;border:1px solid #3c7656;border-radius:10px;color:#c3f6d9;font-weight:850;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}.day:not(:disabled):hover{background:#245e42}.day.off{background:#171e21;color:#728783;border-color:#2d3639}.day.selected{border-color:#a2fac7;box-shadow:inset 0 0 0 1px #a2fac7;background:#187f51;color:#fff}.day small{font-size:9px;font-weight:700;opacity:.8}.slot{background:#203b2d;border:1px solid #3c8a5c;color:#dcf8e6;border-radius:11px;padding:12px 5px;min-height:54px;font-weight:850}.slot strong{display:block}.slot small{display:block;font-size:9px;opacity:.8}.slot.booked,.slot.past{background:#1b2426;border-color:#2c383a;color:#758a86}.slot.selected{outline:2px solid #75f8ad;background:#176a46}.slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.booking{border:1px solid #405754;background:#19292b;padding:13px;border-radius:12px;border-left:4px solid var(--green)}.booking.mutedbook{opacity:.7}.booking h3{margin:2px 0;font-size:14px}.booking .time{font-weight:850;font-size:12px;color:#e7fcf1}.booking .meta{font-size:12px;color:#bdd0c8}.booking .actions{margin-top:9px}.empty{padding:25px 12px;text-align:center;color:#b5c6c0;border:1px dashed #4b635d;border-radius:13px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:15px}.count{font-size:11px;border:1px solid #3f6a55;border-radius:99px;padding:5px 9px;color:#b2edce}.week-box{border:1px solid #344e45;border-radius:13px;padding:14px;margin-bottom:9px}.week-box h3{margin:0 0 10px;font-size:14px}.dayline{display:grid;grid-template-columns:75px minmax(0,1fr);gap:8px;align-items:start;margin-bottom:9px}.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.month-cell{background:#1d2b2d;border:1px solid #36494a;border-radius:10px;min-height:72px;text-align:left;padding:8px;color:var(--text)}.month-cell.current{border-color:#55c785}.month-cell .n{font-weight:800;font-size:12px}.month-cell .stat{font-size:10px;color:#a3e6c1;margin-top:9px}.dayedit{border:1px solid #3a4f4b;padding:12px;border-radius:12px;margin-bottom:8px}.range-row{display:grid;grid-template-columns:1fr 1fr auto;gap:7px;align-items:center;margin-top:7px}.range-row button{min-height:40px}.settingsrow{display:flex;justify-content:space-between;align-items:center;gap:12px}.switch{appearance:none;width:44px;height:25px;background:#4a5354;border:1px solid #657875;border-radius:50px;position:relative;cursor:pointer;flex-shrink:0}.switch:before{content:"";position:absolute;top:3px;left:3px;border-radius:50%;width:17px;height:17px;background:white;transition:transform .15s}.switch:checked{background:#198f59}.switch:checked:before{transform:translateX(19px)}.inline-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.notice{font-size:11px;border:1px dashed #5b6b5a;background:#1f2a29;border-radius:12px;padding:12px;color:#bed7c7}.banner{position:fixed;z-index:1000;bottom:16px;left:16px;right:16px;max-width:520px;margin:0 auto;background:#163e2b;border:1px solid #50bf7d;color:white;border-radius:13px;padding:14px 18px;box-shadow:0 20px 60px #000a}.banner.bad{background:#572c2c;border-color:#ffab9c}.modal-bg{position:fixed;inset:0;background:#050909d9;display:grid;place-items:center;z-index:999;padding:16px}.modal{width:min(100%,440px);background:#1b292b;border:1px solid #75a28c;border-radius:17px;padding:20px;box-shadow:0 16px 50px #000b}.modal h3{margin:0 0 10px}.busy{opacity:.55;pointer-events:none}.top-right{display:flex;gap:10px;align-items:center}.loading{border:2px solid #244736;border-top-color:#49db90;width:18px;height:18px;border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.sr{position:absolute;clip:rect(0,0,0,0);width:1px;height:1px;overflow:hidden}.footer{margin-top:25px;font-size:11px;color:#8ca49a}
@@ -150,6 +165,51 @@ a.lf0294-back-link:hover,a.lf0294-back-link:focus{ text-decoration:none!importan
  .top-right .pill{font-size:10px;padding:4px 7px}
 }
 </style>
+<style id="lf0296-bookings-android-safe-area">
+/* Patch Lion Fit 0.29.7 — solo APK Android: radice fissa sotto le barre di sistema, scroll confinato al contenuto.
+   Android 15/Capacitor puo' restituire safe-area-inset-top = 0: fallback di 32px.
+   Nessun cambiamento a Firebase, al sito web, alle pagine Atleta o Admin. */
+html.lf-bookings-android {
+  --lf-bookings-safe-top: max(env(safe-area-inset-top, 0px), 32px);
+  --lf-bookings-safe-bottom: env(safe-area-inset-bottom, 0px);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+html.lf-bookings-android body {
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  margin: 0;
+  box-sizing: border-box;
+  padding-top: var(--lf-bookings-safe-top);
+  padding-bottom: var(--lf-bookings-safe-bottom);
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+html.lf-bookings-android .layout {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+html.lf-bookings-android .side { height: 100%; }
+html.lf-bookings-android .workspace {
+  height: 100%;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+}
+html.lf-bookings-android .modal-bg {
+  padding-top: calc(var(--lf-bookings-safe-top) + 16px);
+  padding-bottom: calc(var(--lf-bookings-safe-bottom) + 16px);
+}
+html.lf-bookings-android .banner {
+  bottom: max(16px, var(--lf-bookings-safe-bottom));
+}
+</style>
 </head>
 <body>
 <div class="layout">
@@ -203,7 +263,7 @@ a.lf0294-back-link:hover,a.lf0294-back-link:focus{ text-decoration:none!importan
 
 <div class="notice" style="margin-top:12px">Modalità Spark: quando salvi, il coach prepara gli slot dei prossimi 30 giorni. Riportando aperta l’area Coach almeno una volta al giorno, Lion Fit estende la finestra automaticamente. Le scritture sono reali: verifica che le regole Firestore 0.29 siano pubblicate.</div><button class="button primary" id="sett-save" style="margin-top:15px;width:100%">Salva disponibilità e prepara gli orari</button>
 </section>
-<footer class="footer">Lion Fit · Prenotazioni Beta 0.29.6</footer>
+<footer class="footer">Lion Fit · Prenotazioni Beta 0.29.7</footer>
 </div>
 </main>
 </div>
