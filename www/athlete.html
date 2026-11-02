@@ -574,6 +574,40 @@ html[data-lion-theme="dark"] nav.fixed.bottom-0 .nav-btn[aria-current="page"]{ba
   }
 })();
 </script>
+
+<style id="lf0295-native-scroll-fix">
+/* Lion Fit Beta 0.29.5 — Scorrimento Android: resta ferma la cornice della app.
+   Solo la zona principale scorre, anche nelle sezioni lunghe. Modal e desktop invariati. */
+@media (max-width: 767px) {
+  html.lf-native {
+    width:100%; height:100%; overflow:hidden!important;
+    overscroll-behavior:none;
+  }
+  html.lf-native body {
+    box-sizing:border-box;
+    height:100dvh!important; min-height:0!important;
+    overflow:hidden!important; overscroll-behavior:none;
+    padding-top:var(--lf-status-top);
+    padding-bottom:0!important;
+    display:flex; flex-direction:column;
+  }
+  html.lf-native body > header {
+    position:relative!important;
+    top:0!important;
+    flex:0 0 auto;
+  }
+  /* L'Admin aveva una regola precedente piu' specifica per il top dell'header. */
+  html.lf-native body > header.md\:hidden {top:0!important;}
+  html.lf-native body > .lf26-version {flex:0 0 auto;}
+  html.lf-native body > main {
+    flex:1 1 auto; min-height:0; max-height:none;
+    overflow-x:hidden!important; overflow-y:auto!important;
+    overscroll-behavior-y:none;
+    -webkit-overflow-scrolling:touch;
+    scroll-behavior:auto;
+  }
+}
+</style>
 </head>
 <body class="bg-gray-100 text-slate-900 font-sans antialiased selection:bg-neon selection:text-white min-h-screen flex flex-col relative pb-20">
 
@@ -597,7 +631,7 @@ html[data-lion-theme="dark"] nav.fixed.bottom-0 .nav-btn[aria-current="page"]{ba
         </div>
     </header>
 
-    <div class="lf26-version pt-1">LION FIT · BETA 0.29.1 DEV</div>
+    <div class="lf26-version pt-1" data-lf-native-version="LION FIT · BETA ">LION FIT · BETA 0.29.5</div>
     <!-- MAIN CONTAINER -->
     <main class="flex-grow w-full max-w-3xl mx-auto p-4 pb-24 relative">
 
@@ -1153,7 +1187,8 @@ html[data-lion-theme="dark"] nav.fixed.bottom-0 .nav-btn[aria-current="page"]{ba
                 btn.removeAttribute('aria-current');
                 if (btn.id === `nav-btn-${sectionId}` || btn.id === `side-nav-${sectionId}`) btn.setAttribute('aria-current', 'page');
             });
-            window.scrollTo({top:0, behavior:'instant'});
+            (document.documentElement.classList.contains('lf-native') && window.matchMedia('(max-width: 767px)').matches
+                ? document.querySelector('body > main') : window)?.scrollTo({top:0, behavior:'instant'});
 
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('text-neon');
@@ -3240,6 +3275,23 @@ window.lf26PrintSheet = function (sheet, context) {
   document.addEventListener('visibilitychange',schedule);
   window.lf275SyncScroll = schedule;
   schedule();
+})();
+</script>
+
+<script id="lf0295-version-label">
+/* Mostra la vera versione installata in APK; per il sito resta il fallback HTML. */
+(() => {
+  const cap=window.Capacitor;
+  if (!(cap && (cap.isNativePlatform?.() || cap.getPlatform?.()==='android'))) return;
+  const getInfo=cap.Plugins?.App?.getInfo;
+  if (typeof getInfo!=='function') return;
+  getInfo().then(info=>{
+    const version=String(info?.version||'').trim();
+    if (!/^\d+\.\d+\.\d+(?:[.-][\w.-]+)?$/.test(version)) return;
+    document.querySelectorAll('[data-lf-native-version]').forEach(el=>{
+      el.textContent=el.getAttribute('data-lf-native-version')+version;
+    });
+  }).catch(()=>{});
 })();
 </script>
 </body>
