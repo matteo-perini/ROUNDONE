@@ -24,15 +24,15 @@ const requestedDay=computed(()=>typeof route.query.day==='string'&&/^[0-6]$/.tes
 watch(()=>route.query.week,next=>{selectedWeek.value=typeof next==='string'?next:''})
 const opened=ref<{title:string;exercises:readonly ExerciseRecord[]}|null>(null)
 const search=ref(''), archiveView=ref<ArchiveView>('all')
-const hideApproved=ref(false),hideBusy=ref(false),hideMessage=ref('')
+const hideBusy=ref(false),hideMessage=ref('')
 async function hideCopy(id:string){
- if(!hideApproved.value||hideBusy.value||!session.value)return
+ if(!mayWriteLive()||hideBusy.value||!session.value)return
  if(isArchiveCopyLinkedOrEquivalent(id,mergedArchive.value,data.value?.weeks||[],session.value.uid)){hideMessage.value='Questa scheda (o una sua copia equivalente) è ancora collegata a un giorno: non può essere nascosta.';return}
  if(!window.confirm('Nascondere questa copia dal tuo Archivio personale? Il documento storico non verra eliminato.'))return
  hideBusy.value=true
  try{await hideArchiveCopy(id);hideMessage.value='Copia nascosta soltanto nella visualizzazione personale.'}
  catch(e){hideMessage.value=e instanceof Error?e.message:String(e)}
- finally{hideBusy.value=false;hideApproved.value=false}
+ finally{hideBusy.value=false}
 }
 const currentWeek=computed(()=>data.value?liveWeekForDate(data.value.weeks):null)
 const todayIndex=computed(()=>{const day=new Date(`${romeParts(Date.now()).date}T12:00:00Z`).getUTCDay();return(day+6)%7})
@@ -65,9 +65,9 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
      </div>
      <p v-if="!archiveReady" class="muted">Caricamento archivio storico…</p>
      <p v-else-if="!archiveGroups.length" class="notice">Nessuna scheda corrisponde al filtro selezionato. Le copie protette non vengono eliminate.</p>
-     <div v-for="g in archiveGroups" :key="g.sheet.id" class="line-card athlete-archive-item"><button class="wide athlete-archive-open" @click="opened=g.sheet"><b>{{g.sheet.title}}</b><p class="athlete-archive-meta">{{g.sheet.legacy?'Scheda originale legacy · copia protetta da allineare':'Copia protetta · consultabile'}}</p></button><details class="athlete-archive-copies"><summary class="muted small">Gestisci le copie di questa scheda</summary><div v-for="copy in g.copies" :key="copy.id" class="row between" style="margin-top:8px;gap:8px"><span class="muted small">Copia {{g.copies.indexOf(copy)+1}}</span><button class="ghost" type="button" :disabled="isStagingMode()||!hideApproved||hideBusy||copy.legacy||isArchiveCopyLinkedOrEquivalent(copy.id,mergedArchive,data?.weeks||[],session?.uid||'')" @click="hideCopy(copy.id)">ELIMINA DALLA VISTA</button></div></details></div>
+     <div v-for="g in archiveGroups" :key="g.sheet.id" class="line-card athlete-archive-item"><button class="wide athlete-archive-open" @click="opened=g.sheet"><b>{{g.sheet.title}}</b><p class="athlete-archive-meta">{{g.sheet.legacy?'Scheda originale legacy · copia protetta da allineare':'Copia protetta · consultabile'}}</p></button><details class="athlete-archive-copies"><summary class="muted small">Gestisci le copie di questa scheda</summary><div v-for="copy in g.copies" :key="copy.id" class="row between" style="margin-top:8px;gap:8px"><span class="muted small">Copia {{g.copies.indexOf(copy)+1}}</span><button class="ghost" type="button" :disabled="!mayWriteLive()||hideBusy||copy.legacy||isArchiveCopyLinkedOrEquivalent(copy.id,mergedArchive,data?.weeks||[],session?.uid||'')" @click="hideCopy(copy.id)">ELIMINA DALLA VISTA</button></div></details></div>
      <p v-if="hideMessage" class="muted" role="status">{{hideMessage}}</p>
-     <label v-if="!isStagingMode()" class="muted small"><input v-model="hideApproved" type="checkbox"/> Autorizzo a nascondere questa copia dal mio archivio personale</label><p v-else class="muted small">Le copie storiche sono in sola lettura per questa build.</p>
+     <p v-if="!mayWriteLive()" class="muted small">Le modifiche all’archivio sono disabilitate in questa build.</p>
      <p class="muted small">Nascondere non elimina la copia protetta né modifica le schede assegnate.</p>
     </section>
    </template>

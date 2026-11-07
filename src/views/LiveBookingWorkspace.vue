@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import BookingServiceMark from '../components/BookingServiceMark.vue'
-/** Prenotazioni 2M/L: interfaccia originale nel Firebase reale.
- * Nessuna mutazione senza consenso, nessun documento di produzione.
- */
+/** Prenotazioni LIVE: le scritture richiedono un clic esplicito, un account verificato
+ * e Rules Firebase; cancellazioni e sincronizzazioni massive chiedono conferma. */
 import { computed,onMounted,onUnmounted,ref,watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { onAuthStateChanged } from 'firebase/auth'
@@ -35,7 +34,7 @@ const selectedDate=ref(romeParts(Date.now()).date),month=ref(selectedDate.value.
 const service=ref<Service>('fighter'),chosenCoach=ref(''),discipline=ref('MMA'),chosenStart=ref<number|null>(null)
 const athleteTab=ref<'prenota'|'mie'>('prenota'),coachTab=ref<'calendario'|'disponibilita'>('calendario')
 const coachFilter=ref('all'),serviceFilter=ref<'all'|Service>('all'),history=ref<'next'|'history'|'all'>('next')
-const view=ref<CalendarView>('day'),approved=ref(false),busy=ref(false)
+const view=ref<CalendarView>('day'),busy=ref(false)
 const draft=ref<LiveCoachConfig|null>(null),edited=ref(false)
 const exceptDate=ref(''),exceptKind=ref<'closed'|'special'>('closed'),exceptFrom=ref('09:00'),exceptTo=ref('13:00')
 const holidayFrom=ref(''),holidayTo=ref('')
@@ -227,25 +226,23 @@ function fail(e:unknown){
 watch([session,month],()=>{if(session.value&&alive)listenReservations()})
 watch([session,month,chosenCoach,athleteTab],()=>{if(session.value&&alive)listenSlots()})
 onUnmounted(()=>{alive=false;close();if(clockTimer)clearInterval(clockTimer)})
-watch([selectedDate,service,chosenCoach],()=>{chosenStart.value=null;approved.value=false})
+watch([selectedDate,service,chosenCoach],()=>{chosenStart.value=null})
 watch(service,(next)=>{
  discipline.value=SERVICE_DISCIPLINES[next][0]
  if(chosenCoach.value&&!configs.value.some(c=>c.coachId===chosenCoach.value&&c.active&&c.services[next]))chosenCoach.value=''
 })
-watch([coachFilter,serviceFilter,history,view],()=>{approved.value=false})
 async function runWrite(fn:()=>Promise<void|string>){
  if(!mayWriteLive()){message.value='Scritture Firebase non abilitate per questa build.';return}
- if(!approved.value||busy.value){message.value='Spunta prima la conferma per i dati reali.';return}
+ if(busy.value)return
  busy.value=true
  try{const result=await fn();message.value=typeof result==='string'?result:'Operazione completata su Firebase Lion Fit.'}
  catch(e){message.value=`Operazione non riuscita: ${e instanceof Error?e.message:String(e)}`}
- finally{busy.value=false;approved.value=false}
+ finally{busy.value=false}
 }
 function mustSession(){if(!session.value||status.value!=='ready')throw new Error('ACCESSO_NON_VERIFICATO');return session.value}
 async function makeBooking(){
  const c=chosenConfig.value,ms=chosenStart.value;if(!c||ms===null)return
  if(!availableTimes.value.some(x=>x.startMs===ms)||!disciplineAllowed(service.value,discipline.value))return
- if(!window.confirm('Confermi la prenotazione sul Firebase Lion Fit?'))return
  await runWrite(async()=>{
   const {db}=getStagingClients()
   await reserve(db,mustSession(),c,service.value,discipline.value,ms)
@@ -262,7 +259,7 @@ async function cancelBookingRow(b:LiveReservation){
   allRows.value=allRows.value.map(row=>row.id===b.id?{...row,status:'cancelled'}:row)
  })
 }
-function editConfig(){edited.value=true;approved.value=false}
+function editConfig(){edited.value=true}
 function setWeeklyDay(day:string,field:'enabled'|'from'|'to',value:boolean|string){
  const d=draft.value;if(!d)return
  const info=d.weekly[day as keyof typeof d.weekly]||{enabled:false,ranges:[{from:'09:00',to:'13:00'}]}
@@ -371,15 +368,15 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
      </section>
      <section class="panel"><span class="eyebrow">RIEPILOGO</span><h2>{{displayService(service)}} · {{chosenConfig?.displayName||'Seleziona Coach'}}</h2>
       <p class="muted">{{selectedDate}} · {{chosenStart!==null?romeParts(chosenStart).time:'Nessun orario selezionato'}} · {{shownDuration}} min · {{discipline}}</p>
-      <label class="checkline"><input v-model="approved" type="checkbox"/> Confermo di prenotare SOLO con dati reali del Firebase Lion Fit</label>
-      <button class="primary wide" :disabled="busy||!approved||chosenStart===null" @click="makeBooking">Conferma prenotazione</button>
+      
+      <button class="primary wide" :disabled="busy||chosenStart===null" @click="makeBooking">Conferma prenotazione</button>
      </section>
     </template>
     <template v-else><section class="panel"><h2>Le mie prenotazioni</h2><div class="booking-tabs"><button :class="{selected:myHistory==='next'}" @click="myHistory='next'">Prossime</button><button :class="{selected:myHistory==='history'}" @click="myHistory='history'">Storico</button></div><p v-if="!visibleMyRows.length" class="muted">Nessuna prenotazione in questa sezione.</p>
       <article v-for="b in visibleMyRows" :key="b.id" class="event-item" style="display:block;margin:9px 0"><strong>{{localStart(b.startMs)}} · {{displayService(b.service)}} · {{b.durationMinutes}} min</strong>
        <p class="small muted">{{coachLabel(b.coachId)}} · {{b.discipline}} · {{showStatus(b)}}</p>
-       <button v-if="canRemove(b)" class="danger" :disabled="busy||!approved" @click="cancelBookingRow(b)">Annulla e libera slot</button></article>
-      <label class="checkline"><input v-model="approved" type="checkbox"/> Autorizzo l'eventuale annullamento su Firebase</label>
+       <button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla e libera slot</button></article>
+      
      </section></template>
    </template>
    <template v-else>
@@ -399,17 +396,17 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
      </section>
      <section v-if="view==='day'" class="panel booking-period"><h3>{{selectedDate}} · {{todayEvents.length}} appuntamenti</h3>
       <p v-if="!todayEvents.length" class="muted">Nessun appuntamento.</p><article v-for="b in todayEvents" :key="b.id" class="event-item"><i class="coach-dot" :class="coachColor(b.coachId)"/><strong>{{formatTime(b.startMs)}}–{{endTime(b)}} · {{nameLabel(b.athleteId)}}</strong><span><b class="booking-service-badge" :class="b.service">{{displayService(b.service)}}</b> · {{coachLabel(b.coachId)}} · {{b.discipline}} · {{showStatus(b)}}</span>
-       <button v-if="canRemove(b)" class="danger" :disabled="busy||!approved" @click="cancelBookingRow(b)">Annulla</button></article>
+       <button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla</button></article>
      </section>
      <section v-else-if="view==='week'" class="panel booking-period"><h3>Settimana del {{weekDates[0]}} · {{events.length}} appuntamenti</h3>
-      <div v-for="day in weekDates" :key="day" class="week-event-day"><strong>{{day}}</strong><span class="event-count">{{eventsOn(day).length}}</span><article v-for="b in eventsOn(day)" :key="b.id" class="event-item"><i class="coach-dot" :class="coachColor(b.coachId)"/> {{formatTime(b.startMs)}}–{{endTime(b)}} · <strong>{{nameLabel(b.athleteId)}}</strong> · {{coachLabel(b.coachId)}} · <b class="booking-service-badge" :class="b.service">{{displayService(b.service)}}</b> · {{b.discipline}} · {{showStatus(b)}} <button v-if="canRemove(b)" class="danger" :disabled="busy||!approved" @click="cancelBookingRow(b)">Annulla</button></article></div>
+      <div v-for="day in weekDates" :key="day" class="week-event-day"><strong>{{day}}</strong><span class="event-count">{{eventsOn(day).length}}</span><article v-for="b in eventsOn(day)" :key="b.id" class="event-item"><i class="coach-dot" :class="coachColor(b.coachId)"/> {{formatTime(b.startMs)}}–{{endTime(b)}} · <strong>{{nameLabel(b.athleteId)}}</strong> · {{coachLabel(b.coachId)}} · <b class="booking-service-badge" :class="b.service">{{displayService(b.service)}}</b> · {{b.discipline}} · {{showStatus(b)}} <button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla</button></article></div>
      </section>
      <section v-else class="panel booking-period"><h3>{{monthLabel}} · {{events.length}} appuntamenti</h3>
       <div class="coach-month-grid"><span v-for="(n,i) in ['L','M','M','G','V','S','D']" :key="i" class="coach-month-weekday">{{n}}</span>
        <template v-for="(d,i) in monthDays" :key="i"><span v-if="!d" class="month-empty"/><button v-else class="coach-month-day" :class="{selected:selectedDate===dateInMonth(d)}" @click="chooseMonthDay(dateInMonth(d))"><b>{{Number(d)}}</b><small>{{counts[dateInMonth(d)]||0}} appuntamenti</small><span class="coach-month-dots" :aria-label="coachIdsOn(dateInMonth(d)).map(coachLabel).join(', ')"><span v-for="uid in coachIdsOn(dateInMonth(d))" :key="uid" class="booking-coach-mini"><i class="coach-dot" :class="coachColor(uid)"/>{{coachCountsOn(dateInMonth(d))[uid]||0}}</span></span></button></template>
       </div><p class="small muted">Tocca un giorno per aprire direttamente gli appuntamenti di quel giorno.</p>
      </section>
-     <section class="panel"><label class="checkline"><input v-model="approved" type="checkbox"/> Autorizzo la cancellazione di prenotazioni reali del solo Firebase Lion Fit</label></section>
+     
     </template>
     <template v-else><section class="panel coach-availability-compact"><h2>Disponibilità del Coach autenticato</h2><p class="muted coach-availability-intro">Solo il Coach proprietario può salvare la propria configurazione. Il titolare può preparare slot degli altri Coach solo con funzioni amministrative dedicate, qui disabilitate.</p>
       <template v-if="draft">
@@ -438,12 +435,12 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
        <div class="grid2"><label>Ferie dal<input v-model="holidayFrom" type="date"/></label><label>Ferie al<input v-model="holidayTo" type="date"/></label></div><button class="secondary" @click="addHoliday">+ Aggiungi ferie</button>
        <div v-for="(holiday,i) in draft.holidays||[]" :key="i" class="row"><small>Ferie {{holiday.from}} — {{holiday.to}}</small><button class="bare" @click="removeHoliday(i)">Rimuovi</button></div>
        <p class="muted small">Salvare sincronizza fino a 30 giorni di slot. Quelli aperti non più validi vengono ritirati; le prenotazioni confermate non vengono cancellate. In caso di errore la disponibilità resta inattiva finché non ripeti il salvataggio.</p>
-       <label class="checkline"><input v-model="approved" type="checkbox"/> Autorizzo questa scrittura sul Firebase Lion Fit</label>
-       <button class="primary wide" :disabled="busy||!approved" @click="persistAvailability">Salva e sincronizza disponibilità (30 giorni)</button>
+       
+       <button class="primary wide" :disabled="busy" @click="persistAvailability">Salva e sincronizza disponibilità (30 giorni)</button>
        <hr/><h3>Prepara slot del giorno selezionato</h3><p class="muted small">Crea soltanto slot mancanti e futuri da 30 minuti; non sovrascrive mai quelli esistenti o prenotati.</p>
-       <input v-model="selectedDate" type="date"/><label class="checkline"><input v-model="approved" type="checkbox"/> Confermo la preparazione sul Firebase</label>
-       <button class="primary wide" :disabled="busy||!approved||!myConfig||edited" @click="prepareDay">Prepara slot del {{selectedDate}}</button>
-       <button class="secondary wide" :disabled="busy||!approved||!myConfig||edited" @click="prepareNextWeek">Prepara i prossimi 7 giorni · Firebase</button>
+       <input v-model="selectedDate" type="date"/>
+       <button class="primary wide" :disabled="busy||!myConfig||edited" @click="prepareDay">Prepara slot del {{selectedDate}}</button>
+       <button class="secondary wide" :disabled="busy||!myConfig||edited" @click="prepareNextWeek">Prepara i prossimi 7 giorni · Firebase</button>
        <p v-if="edited" class="small muted">Salva prima la configurazione per preparare nuovi slot.</p>
       </template>
      </section></template>

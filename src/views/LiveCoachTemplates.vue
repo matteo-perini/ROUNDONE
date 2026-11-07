@@ -1,8 +1,6 @@
 <script setup lang="ts">
-/** The EXACT original Coach archive screen remains available in DEMO mode.
- * This component is mounted ONLY at /coach/archivio in Vite DEV,
- * behind verified Firebase Auth and the local emulator client; it never runs on production.
- */
+/** Archivio Coach operativo LIVE/STAGING: ruoli verificati con Firebase Auth
+ * e mutazioni protette da mayWriteLive() e dalle Rules Firestore. */
 import {computed,onMounted,onUnmounted,ref,shallowRef,watch} from 'vue'
 import {useRoute,useRouter,RouterLink} from 'vue-router'
 import {onAuthStateChanged} from 'firebase/auth'
@@ -47,7 +45,7 @@ function linkIntent():{weekId:string;day:number;slot:1|2;expected:string}|null{
  if(!w||w.includes('/')||!Number.isInteger(day)||day<0||day>6||(slot!==1&&slot!==2))return null
  return {weekId:w,day,slot:slot as 1|2,expected:typeof route.query.expectedSlotId==='string'?route.query.expectedSlotId:''}
 }
-const personal=ref<Personal[]>([]),error=ref(''),notice=ref(''),loading=ref(true),busy=ref(false),consent=ref(false)
+const personal=ref<Personal[]>([]),error=ref(''),notice=ref(''),loading=ref(true),busy=ref(false)
 const editing=ref(false),editingId=ref(''),revision=ref(0),isPersonal=ref(false)
 const saveAlsoShared=ref(false),pendingSharedLink=ref('')
 const personalEdit=ref(false),draftNameNotice=ref('')
@@ -102,27 +100,26 @@ const choice=computed(()=>models.value.filter(s=>(filter.value==='all'||(filter.
 const lastOwnEditable=computed(()=>editingId.value && models.value.find(x=>x.id===editingId.value))
 let live=true,stopModels:Unsubscribe|null=null,stopUsers:Unsubscribe|null=null,stopPersonal:Unsubscribe|null=null,stopAuth:Unsubscribe|null=null
 const closeListeners=()=>{stopModels?.();stopModels=null;stopUsers?.();stopUsers=null;stopPersonal?.();stopPersonal=null;stopAuth?.();stopAuth=null}
-function resetConsent(){consent.value=false}
-watch(athleteId,()=>{resetConsent();stopPersonal?.();stopPersonal=null;personal.value=[]
+watch(athleteId,()=>{stopPersonal?.();stopPersonal=null;personal.value=[]
  if(!session.value||!maySelectLabAthlete(roster.value,session.value.gymId,athleteId.value))return
  const {db}=getStagingClients(),s=session.value,id=athleteId.value
  stopPersonal=watchAthleteSheets(db,s.gymId,id,sheets=>{if(live && athleteId.value===id)personal.value=sheets.personal},e=>{if(live)error.value=`Schede personali non leggibili: ${e.message}`})
 })
-function beginPersonal(){isPersonal.value=true;personalEdit.value=false;saveAlsoShared.value=!!linkIntent();editing.value=true;editingId.value='';revision.value=0;title.value='';category.value='Personalizzata';exercises.value=[];alignCount();notice.value='';resetConsent()}
+function beginPersonal(){isPersonal.value=true;personalEdit.value=false;saveAlsoShared.value=!!linkIntent();editing.value=true;editingId.value='';revision.value=0;title.value='';category.value='Personalizzata';exercises.value=[];alignCount();notice.value=''}
 function beginEditPersonal(sheet:Personal){
  if(!session.value||!currentAthlete.value||sheet.deletedAt)return
  isPersonal.value=true;personalEdit.value=true;saveAlsoShared.value=false;editing.value=true;editingId.value=sheet.id;
  // Legacy personal records have no revision; watchAthleteSheets exposes it when present.
  revision.value=Number((sheet as Personal & {revision?:number}).revision||0)
- title.value=sheet.title;category.value=sheet.category;exercises.value=v1ToEditor(sheet.exercises);alignCount();notice.value='La copia storica non viene mai modificata.';resetConsent()
+ title.value=sheet.title;category.value=sheet.category;exercises.value=v1ToEditor(sheet.exercises);alignCount();notice.value='La copia storica non viene mai modificata.'
 }
 watch(personal,rows=>{const id=route.query.editPersonalId;if(typeof id!=='string'||editing.value)return;const sheet=rows.find(r=>r.id===id&&!r.deletedAt);if(sheet)beginEditPersonal(sheet)})
-function beginModel(){isPersonal.value=false;personalEdit.value=false;editing.value=true;editingId.value='';revision.value=0;title.value='';category.value='Allenamento';exercises.value=[];alignCount();notice.value='';resetConsent()}
+function beginModel(){isPersonal.value=false;personalEdit.value=false;editing.value=true;editingId.value='';revision.value=0;title.value='';category.value='Allenamento';exercises.value=[];alignCount();notice.value=''}
 function edit(s:Model){
  if(!session.value||!canManageCoachModel(s.id,session.value.role)||s.deletedAt){notice.value='Modello non attivo o Coach non autorizzato.';return}
  isPersonal.value=false;personalEdit.value=false;editing.value=true;editingId.value=s.id;revision.value=s.revision;title.value=s.title;category.value=s.category
  exercises.value=v1ToEditor(s.exercises).map(e=>({...e,rest:e.rest||e.notes||'',executionMode:e.supersetWithPrevious?'superset':'normale'}))
- alignCount();notice.value='';resetConsent()
+ alignCount();notice.value=''
 }
 async function runWrite(label:string,fn:(ctx:{gym:string;uid:string;athlete:string})=>Promise<void>,requireAthlete=false){
  if(busy.value)return
@@ -130,13 +127,15 @@ async function runWrite(label:string,fn:(ctx:{gym:string;uid:string;athlete:stri
  busy.value=true;notice.value=''
  const selected=currentAthlete.value,s=session.value
  try{
-  if(requireAthlete)verifyCoachEditor(s,selected,consent.value)
-  else verifyCoachArchiveEditor(s,consent.value)
+  // La pressione del pulsante e il consenso esplicito all’operazione: niente doppia spunta.
+  // L’identità Coach, l’atleta e le Rules Firebase restano obbligatori.
+  if(requireAthlete)verifyCoachEditor(s,selected,true)
+  else verifyCoachArchiveEditor(s,true)
   const ctx={gym:s.gymId,uid:s.uid,athlete:selected?.id||''}
   await fn(ctx)
   if(live)notice.value=`${label}: operazione completata. Le schede e lo storico sono conservati.`
  }catch(e){if(live)notice.value=`${label}: ${e instanceof Error?e.message:String(e)}`}
- finally{consent.value=false;busy.value=false}
+ finally{busy.value=false}
 }
 /** Retry the already-created shared template; NEVER create a second model ID. */
 async function retryPendingLink(){
@@ -186,7 +185,6 @@ function openAssign(s:Model){
  assignSearch.value=''
  const fromRoute=typeof route.query.athleteId==='string'?route.query.athleteId:''
  if(!currentAthlete.value)athleteId.value=roster.value.some(a=>a.id===fromRoute)?fromRoute:''
- resetConsent()
 }
 async function assign(s:Model){
  if(s.deletedAt||!currentAthlete.value){notice.value='Seleziona un atleta prima di assegnare.';return}
@@ -208,7 +206,6 @@ function duplicate(s:Model){
  exercises.value=v1ToEditor(s.exercises).map(e=>({...e,id:newId()}))
  alignCount()
  notice.value='Copia in bozza: nessuna scheda verrà creata prima di SALVA NELL’ARCHIVIO SCHEDE.'
- resetConsent()
 }
 async function trash(s:Model){
  if(!session.value || !canManageCoachModel(s.id,session.value.role)){notice.value='Cestino: accesso Coach non autorizzato.';return}
@@ -254,13 +251,12 @@ onUnmounted(()=>{live=false;closeListeners()})
  <section class="panel"><div class="row between"><div><h2 class="card-heading">ARCHIVIO SCHEDE</h2><p class="muted" style="margin:7px 0 0">CREA SCHEDE RIUTILIZZABILI E ASSEGNALE AI TUOI ATLETI</p></div><button v-if="!editing" class="primary" :disabled="!writable||busy" @click="beginModel">＋ Crea nuova scheda dell'archivio</button></div></section>
  <p v-if="error" class="notice" role="alert">{{error}}</p>
  <p v-if="loading" class="muted">Verifica del Coach e lettura degli archivi…</p>
- <section v-if="!loading && session" class="panel">
-  <label v-if="writable" class="checkline"><input v-model="consent" type="checkbox" :disabled="busy"/> Confermo le modifiche all'archivio</label>
-  <p v-else class="notice">Le modifiche sono temporaneamente disabilitate. Puoi consultare le schede.</p>
+ <section v-if="!loading && session && (!writable || notice)" class="panel">
+  <p v-if="!writable" class="notice">Le modifiche sono temporaneamente disabilitate. Puoi consultare le schede.</p>
   <p v-if="notice" class="notice" role="status">{{notice}}</p>
  </section>
  <section v-if="editing && !loading && session" class="panel">
-  <div class="row between"><h2>{{isPersonal?(personalEdit?'MODIFICA SCHEDA PERSONALE':'CREA SCHEDA PERSONALE'):editingId?'MODIFICA SCHEDA DELL’ARCHIVIO':'CREA NUOVA SCHEDA DELL’ARCHIVIO'}}</h2><button class="secondary" @click="editing=false;resetConsent()">← Torna all'archivio</button></div><div class="divider"/>
+  <div class="row between"><h2>{{isPersonal?(personalEdit?'MODIFICA SCHEDA PERSONALE':'CREA SCHEDA PERSONALE'):editingId?'MODIFICA SCHEDA DELL’ARCHIVIO':'CREA NUOVA SCHEDA DELL’ARCHIVIO'}}</h2><button class="secondary" @click="editing=false">← Torna all'archivio</button></div><div class="divider"/>
   <label>NOME SCHEDA</label><input v-model="title" maxlength="200" placeholder="Es. Potenza Esplosiva 1, Ipertrofia A"/>
   <label>CATEGORIA</label><input v-model="category" maxlength="100" placeholder="Allenamento"/>
   <div class="lf-superset-toolbar"><div><strong>ESERCIZI DELLA SCHEDA</strong><p class="muted small">Imposta il numero di esercizi principali: si aggiungono subito, senza conferma. Ridurre il numero non elimina nulla.</p></div><label class="lf-exercise-count">Nº esercizi<input :value="exerciseCounter" type="number" inputmode="numeric" min="0" max="250" step="1" aria-label="Numero esercizi principali" @input="onExerciseCountInput" @blur="onExerciseCountBlur"/></label></div>
@@ -284,7 +280,7 @@ onUnmounted(()=>{live=false;closeListeners()})
   <p class="muted small" v-if="isPersonal">{{personalEdit?'Aggiorna solo la copia personale. La copia protetta resta immutabile.':linkIntent()?'Creazione dal giorno: il nuovo modello va anche in Archivio Coach, poi personale+protetta+giorno con lo stesso ID.':'La scheda personale mantiene una copia storica protetta immutabile.'}}</p>
   <p v-if="pendingSharedLink" class="notice" role="alert">Scheda creata con ID {{pendingSharedLink}}; collegamento incompleto. Non premere di nuovo Salva: premi Riprendi collegamento.</p>
   <button v-if="pendingSharedLink" class="secondary wide" :disabled="busy" @click="retryPendingLink">Riprendi collegamento senza creare duplicati</button>
-  <button class="primary wide" :disabled="!consent||busy||!!pendingSharedLink||!writable||!title.trim()||!exercises.length" @click="save">{{isPersonal?(personalEdit?'SALVA MODIFICHE PERSONALI':'SALVA SCHEDA PERSONALE'):editingId?'SALVA MODIFICHE':'SALVA NELL’ARCHIVIO SCHEDE'}}</button>
+  <button class="primary wide" :disabled="busy||!!pendingSharedLink||!writable||!title.trim()||!exercises.length" @click="save">{{isPersonal?(personalEdit?'SALVA MODIFICHE PERSONALI':'SALVA SCHEDA PERSONALE'):editingId?'SALVA MODIFICHE':'SALVA NELL’ARCHIVIO SCHEDE'}}</button>
  </section>
  <section v-else-if="!loading && session" class="panel">
   <div class="row between"><div><h2 class="card-heading">ARCHIVIO · SCHEDE</h2><span class="muted small">{{choice.length}} di {{activeCount}} schede attive nell'archivio</span></div><button v-if="typeof route.query.athleteId==='string'" class="secondary" :disabled="!writable||busy" @click="beginPersonal">+ Crea scheda personale</button></div>
@@ -294,10 +290,10 @@ onUnmounted(()=>{live=false;closeListeners()})
    <p v-if="personal.some(p=>p.id===s.id)" class="muted small">{{personal.find(p=>p.id===s.id)?.deletedAt?'Scheda personale nel cestino':'Già assegnato a questo atleta (riutilizzabile per il giorno)'}}</p>
    <div class="archive-actions"><button class="secondary" @click="preview=s">Visualizza</button>
     <button v-if="!s.deletedAt" class="secondary" :disabled="!session||!canManageCoachModel(s.id,session.role)" @click="edit(s)">Modifica</button>
-    <button v-if="!s.deletedAt" class="secondary" :disabled="busy||!consent||!writable" @click="duplicate(s)">Duplica</button>
+    <button v-if="!s.deletedAt" class="secondary" :disabled="busy||!writable" @click="duplicate(s)">Duplica</button>
     <button v-if="!s.deletedAt" class="primary" :disabled="busy||!writable" @click="openAssign(s)">Assegna</button>
-    <button v-if="!s.deletedAt" class="danger" :disabled="busy||!consent||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="trash(s)">Nel Cestino</button>
-    <button v-if="s.deletedAt" class="secondary" :disabled="busy||!consent||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="restore(s)">Ripristina</button>
+    <button v-if="!s.deletedAt" class="danger" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="trash(s)">Nel Cestino</button>
+    <button v-if="s.deletedAt" class="secondary" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="restore(s)">Ripristina</button>
    </div>
   </div></div>
   <p v-if="!choice.length" class="muted">Nessuna scheda corrisponde ai filtri.</p>
@@ -306,7 +302,7 @@ onUnmounted(()=>{live=false;closeListeners()})
  <div v-if="pickAssign" class="modal-overlay" @click.self="pickAssign=null"><div class="dialog coach-assign-dialog"><div class="row between"><h2>Assegna · {{pickAssign.title}}</h2><button class="bare" aria-label="Chiudi" @click="pickAssign=null">✕</button></div><p class="small muted">Scegli un atleta. I filtri raggruppano i coach ma non modificano le Rules pubblicate.</p>
  <label>Visualizza atleti<select v-model="coachFilter" aria-label="Filtra atleti per coach"><option value="miei">I miei</option><option value="condivisi">Condivisi</option><option value="tutti">Tutti</option></select></label>
  <p v-if="!hasAnyMembership" class="small muted">Atleti storici senza assegnazione coach: disponibili in Tutti.</p>
- <label class="lfp-search-label">Cerca atleta <input class="lfp-inline-lookup" v-model="assignSearch" type="search" autocomplete="off" aria-label="Cerca atleta per nome" placeholder="Nome o cognome…"/></label><label>Atleta<select v-model="athleteId" :disabled="busy"><option value="">Seleziona atleta…</option><option v-for="a in searchedRoster" :key="a.id" :value="a.id">{{a.name}}</option></select></label><p v-if="!searchedRoster.length" class="muted small">Nessun atleta corrisponde alla ricerca nei filtri attivi.</p><p v-if="currentAthlete&&personal.some(p=>p.id===pickAssign?.id)" class="notice">Scheda già assegnata a questo atleta.</p><label class="checkline"><input v-model="consent" type="checkbox" :disabled="busy"/> Confermo l'assegnazione</label><button class="primary wide" :disabled="busy||!writable||!consent||!currentAthlete||personal.some(p=>p.id===pickAssign?.id&&p.deletedAt)" @click="assign(pickAssign)">Assegna scheda</button></div></div>
+ <label class="lfp-search-label">Cerca atleta <input class="lfp-inline-lookup" v-model="assignSearch" type="search" autocomplete="off" aria-label="Cerca atleta per nome" placeholder="Nome o cognome…"/></label><label>Atleta<select v-model="athleteId" :disabled="busy"><option value="">Seleziona atleta…</option><option v-for="a in searchedRoster" :key="a.id" :value="a.id">{{a.name}}</option></select></label><p v-if="!searchedRoster.length" class="muted small">Nessun atleta corrisponde alla ricerca nei filtri attivi.</p><p v-if="currentAthlete&&personal.some(p=>p.id===pickAssign?.id)" class="notice">Scheda già assegnata a questo atleta.</p><button class="primary wide" :disabled="busy||!writable||!currentAthlete||personal.some(p=>p.id===pickAssign?.id&&p.deletedAt)" @click="assign(pickAssign)">Assegna scheda</button></div></div>
  <SheetDetail v-if="preview" :sheet="preview" @close="preview=null"/>
 </div>
 </template>

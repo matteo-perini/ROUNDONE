@@ -14,7 +14,7 @@ type Kind='shared'|'personal'|'week'
 type Deleted={kind:Kind;id:string;title:string;athleteId:string;deletedAt:unknown}
 const session=shallowRef<StagingSession|null>(null)
 const athletes=ref<{id:string;name:string}[]>([]),selected=ref('')
-const deleted=ref<Deleted[]>([]),loading=ref(true),busy=ref(false),error=ref(''),notice=ref(''),allowWrites=ref(false)
+const deleted=ref<Deleted[]>([]),loading=ref(true),busy=ref(false),error=ref(''),notice=ref('')
 const asTime=(v:unknown):number=>{
  if(v&&typeof v==='object'&&'toMillis' in v&&typeof v.toMillis==='function')return v.toMillis() as number
  if(typeof v==='string')return Date.parse(v)||0
@@ -47,7 +47,6 @@ async function refresh(){
 async function restore(item:Deleted){
  const s=session.value;if(!s||busy.value)return
  if(!mayWriteLive()){notice.value='Ripristino bloccato finché le Rules e la build Live non sono autorizzate.';return}
- if(!allowWrites.value){notice.value='Autorizza esplicitamente il ripristino.';return}
  if(item.kind!=='shared'&&!athletes.value.some(x=>x.id===item.athleteId)){notice.value='Atleta non autorizzato.';return}
  if(!window.confirm(`Ripristinare ${item.title} nel documento originale ${item.id}? Nessun ID sarà modificato.`))return
  busy.value=true;notice.value='';error.value=''
@@ -55,7 +54,6 @@ async function restore(item:Deleted){
   const{db}=getStagingClients()
   await restoreFromTrash(db,s.gymId,item.kind,item.id,s.uid,item.kind==='shared'?undefined:item.athleteId)
   notice.value=`Ripristino completato con ID originale: ${item.id}`
-  allowWrites.value=false
   await refresh()
  }catch(e){error.value='Ripristino NON completato: '+(e instanceof Error?e.message:String(e))}
  finally{busy.value=false}
@@ -84,7 +82,7 @@ onMounted(async()=>{
   <label>Atleta (per vedere schede personali e settimane)
    <select v-model="selected" :disabled="busy||loading" @change="refresh"><option value="">Solo modelli Coach</option><option v-for="a in athletes" :key="a.id" :value="a.id">{{a.name}}</option></select>
   </label>
-  <label class="checkline"><input v-model="allowWrites" type="checkbox" :disabled="!mayWriteLive()"/>Autorizzo il ripristino dei documenti originali su Firebase</label>
+  
   <p v-if="!mayWriteLive()" class="muted small">Operazioni di scrittura disabilitate in questa build. Per testarle utilizza soltanto Firebase Emulator.</p>
   <p v-if="error" role="alert" class="notice">{{error}}</p>
   <p v-if="notice" role="status" class="notice">{{notice}}</p>
@@ -92,7 +90,7 @@ onMounted(async()=>{
   <p v-else-if="!error&&!deleted.length" class="muted">Nessun elemento cestinato per il filtro selezionato.</p>
   <article v-for="x in deleted" :key="x.kind+'-'+x.athleteId+'-'+x.id" class="line-card row between" style="gap:12px">
    <span><b>{{x.title}}</b><br/><small class="muted">{{x.kind==='shared'?'Modello Coach':x.kind==='personal'?'Scheda personale':'Settimana'}} · ID {{x.id}}</small></span>
-   <button class="secondary" :disabled="busy||!mayWriteLive()||!allowWrites" @click="restore(x)">↩ Ripristina</button>
+   <button class="secondary" :disabled="busy||!mayWriteLive()" @click="restore(x)">↩ Ripristina</button>
   </article>
   <p class="muted small">Il ripristino delle settimane controlla tutti i collegamenti alle schede attive. Non sono previsti pulsanti di eliminazione fisica.</p>
   <RouterLink to="/coach/atleti" class="ghost">Torna alla gestione atleti</RouterLink>

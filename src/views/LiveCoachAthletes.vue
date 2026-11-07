@@ -24,7 +24,7 @@ import SheetDetail from '../components/SheetDetail.vue'
 import LionIcon from '../components/LionIcon.vue'
 const route=useRoute(),router=useRouter(),session=shallowRef<StagingSession|null>(null)
 const roster=ref<RosterAthlete[]>([]),search=ref(''),currentId=ref(''),selectedWeek=ref('')
-const status=ref('Caricamento dati palestra…'),error=ref(''),busy=ref(false),consent=ref(false)
+const status=ref('Caricamento dati palestra…'),error=ref(''),busy=ref(false)
 const data=shallowRef<{personal:Personal[];weeks:ProgramWeek[];groups:Groups}|null>(null)
 const opened=shallowRef<Personal|null>(null),pick=ref<{day:number;slot:1|2}|null>(null),pickSearch=ref('')
 type SharedChoice={id:string;title:string;category:string;exercises:Personal['exercises']}
@@ -91,7 +91,7 @@ let stopShared:Unsubscribe|null=null,sharedGeneration=0
 function stopSharedListening(){
  sharedGeneration++;stopShared?.();stopShared=null;sharedLoading.value=false
 }
-function stopSelected(){stopSheets?.();stopSheets=null;data.value=null;opened.value=null;pick.value=null;consent.value=false;selectedWeek.value='';selectedWeekTrash.value=[];weekTrashMode.value=false;syncActivityDraft(null)}
+function stopSelected(){stopSheets?.();stopSheets=null;data.value=null;opened.value=null;pick.value=null;selectedWeek.value='';selectedWeekTrash.value=[];weekTrashMode.value=false;syncActivityDraft(null)}
 function choose(id:string){if(!roster.value.some(a=>a.id===id)||id===currentId.value||!discardIfDirty('Cambiare atleta'))return;currentId.value=id;showWeek.value=true
  const a=roster.value.find(a=>a.id===id);assignPrimary.value=a?.primaryCoachUid||'';assignShared.value=(a?.coachUids||[]).filter(uid=>uid!==assignPrimary.value)
 }
@@ -168,9 +168,9 @@ function linkToEditor(kind:'personal'|'shared',day?:number,slot?:1|2){
 async function withWrite(action:string,run:()=>Promise<void|string>){
  if(busy.value)return
  if(!canWrite.value){message.value='La modifica reale è protetta: verifica prima Rules e compatibilità APK V1.';return}
- if(!consent.value){message.value='Spunta prima la conferma di scrittura su Firebase.';return}
- if(!window.confirm(`${action} per l’atleta selezionato su Firebase reale?`))return
- busy.value=true;try{const result=await run();message.value=typeof result==='string'?result:action+' completato.';consent.value=false}
+ // Il clic su Salva/Assegna e' l'azione esplicita; evitiamo una seconda spunta
+ // e un popup generico. Restano i controlli identita', permessi e le conferme rischiose.
+ busy.value=true;try{const result=await run();message.value=typeof result==='string'?result:action+' completato.'}
  catch(e){message.value=action+': '+(e instanceof Error?e.message:String(e))}
  finally{busy.value=false}
 }
@@ -231,10 +231,14 @@ function applySlot(nextId:string){const s=session.value,a=athlete.value,w=week.v
  void nextTick(()=>document.getElementById('live-week-'+p.day)?.scrollIntoView({behavior:'smooth',block:'nearest'}))
  })
 }
-function unlink(day:number,slot:1|2){openPick(day,slot);applySlot('')}
+function unlink(day:number,slot:1|2){
+ if(!window.confirm('Scollegare la scheda da questo giorno? La scheda resterà nell’archivio.'))return
+ openPick(day,slot);applySlot('')
+}
 function unlinkExact(l:Link){
  const s=session.value,a=athlete.value
  if(!s||!a)return
+ if(!window.confirm('Scollegare la scheda da questo giorno? La scheda resterà nell’archivio.'))return
  void withWrite('Scollega uno slot',async()=>{
   const{db}=getStagingClients()
   await updateV1WeekSlot(db,s.gymId,a.id,l.weekId,l.dayIndex,l.slot,l.templateId,'',s.uid)
@@ -262,6 +266,7 @@ function duplicateCurrentWeek(){const s=session.value,a=athlete.value,w=currentW
 
 function trashCurrentWeek(){const s=session.value,a=athlete.value,w=week.value
  if(!s||!a||!w||!discardIfDirty('Spostare la settimana nel Cestino'))return
+ if(!window.confirm(`Spostare nel Cestino la settimana «${w.name}»? Potrai ripristinarla.`))return
  void withWrite('Sposta settimana nel Cestino',async()=>{
   const {db}=getStagingClients();await trashV1Week(db,s.gymId,a.id,w.id,s.uid)
   selectedWeek.value='';showWeek.value=false
@@ -277,6 +282,7 @@ function restoreWeek(id:string){const s=session.value,a=athlete.value
 function trashMultipleWeeks(){
  const s=session.value,a=athlete.value,ids=[...selectedWeekTrash.value]
  if(!s||!a||!ids.length||!discardIfDirty('Spostare le settimane selezionate nel Cestino'))return
+ if(!window.confirm(`Spostare nel Cestino ${ids.length} settimane? Potrai ripristinarle.`))return
  void withWrite(`Cestina ${ids.length} settimane`,async()=>{
   const {db}=getStagingClients()
   for(const id of ids)await trashV1Week(db,s.gymId,a.id,id,s.uid)
@@ -340,10 +346,6 @@ function copyToArchive(sheet:Personal){
   </div>
  </section>
  <p v-if="message" class="notice" role="status">{{message}}</p>
- <section v-if="data" class="panel" aria-label="Autorizzazione operazioni Coach">
-  <label class="checkline"><input v-model="consent" type="checkbox" :disabled="busy||!canWrite"/> Confermo le modifiche Firebase per questo atleta</label>
-  <p class="small muted">Necessario anche per «Nel Cestino» delle schede personali. La scheda non sarà più attiva per l’Atleta, ma la copia storica protetta rimarrà conservata. Le copie già presenti nell’Archivio Coach non vengono modificate.</p>
- </section>
  <div v-if="data" class="grid2 assignment-columns"><section class="panel assignment-panel"><h3>📄 SCHEDE SINGOLE SENZA PROGRAMMA</h3><p class="muted small">Assegnate ma non collegate a giorni attivi.</p>
   <div class="assignment-scroll"><div v-if="!groups?.unprogrammed.length" class="line-card">Nessuna scheda singola senza programma.</div><div v-for="g in groups?.unprogrammed||[]" :key="g.sheet.id" class="line-card coach-v1-assignment-card"><b>🏋️ {{g.sheet.title}}</b><div class="assignment-actions"><button class="secondary" @click="opened=g.sheet">Visualizza</button><button class="secondary" @click="editPersonal(g.sheet)">Modifica</button><button class="secondary" @click="copyToArchive(g.sheet)">Copia nell'Archivio schede</button><button class="danger" @click="trashUnusedPersonal(g.sheet)">Nel Cestino</button></div></div></div>
  </section><section class="panel assignment-panel"><h3>🗓️ SCHEDE IN PROGRAMMA</h3><p class="muted small">Una sola card per scheda; settimane e giorni rimangono visibili.</p>
@@ -375,7 +377,7 @@ function copyToArchive(sheet:Personal){
   <input v-model="pickSearch" type="search" placeholder="Cerca scheda…" aria-label="Cerca nell’Archivio Coach"/><button class="secondary wide" @click="linkToEditor('shared',pick.day,pick.slot);pick=null">Apri Archivio Coach · Visualizza / Assegna</button>
   <div class="row between"><strong>ARCHIVIO COACH · {{visibleShared.length}} schede</strong><button class="secondary" :disabled="sharedLoading" @click="refreshSharedChoices(true)">{{sharedLoading?'Caricamento…':'Aggiorna'}}</button></div>
   <p v-if="sharedError" class="notice" role="alert">Archivio non leggibile: {{sharedError}}</p>
-  <div class="coach-v1-pick-list"><article v-for="s in visibleShared" :key="s.id" class="line-card coach-pick-row"><div class="coach-pick-row-info"><b>{{s.title}}</b><p class="muted small">{{s.category}} · {{s.exercises.length}} esercizi</p></div><div class="row coach-pick-row-actions"><button class="secondary" @click="openSharedPreview(s)">Visualizza</button><button class="primary" :disabled="busy||!consent||!canWrite" @click="assignFromShared(s)">Assegna</button></div></article><p v-if="!sharedLoading&&!visibleShared.length" class="muted">Nessuna scheda nell’Archivio Coach corrisponde alla ricerca.</p></div>
+  <div class="coach-v1-pick-list"><article v-for="s in visibleShared" :key="s.id" class="line-card coach-pick-row"><div class="coach-pick-row-info"><b>{{s.title}}</b><p class="muted small">{{s.category}} · {{s.exercises.length}} esercizi</p></div><div class="row coach-pick-row-actions"><button class="secondary" @click="openSharedPreview(s)">Visualizza</button><button class="primary" :disabled="busy||!canWrite" @click="assignFromShared(s)">Assegna</button></div></article><p v-if="!sharedLoading&&!visibleShared.length" class="muted">Nessuna scheda nell’Archivio Coach corrisponde alla ricerca.</p></div>
   <p class="small muted">Per una nuova scheda usa «Crea nuova» nel giorno. Le schede personali già assegnate e quelle storiche restano conservate ma non compaiono in questa scelta.</p>
  </div></div>
  <div v-if="duplicateOpen" class="modal-overlay" @click.self="duplicateOpen=false"><div class="dialog" style="max-width:420px"><div class="row between"><h2>DUPLICA SETTIMANA</h2><button class="bare" aria-label="Chiudi duplicazione" @click="duplicateOpen=false">✕</button></div><p class="small muted">Copia attività e i due collegamenti a schede esistenti. L'originale non cambia.</p><label>Settimana sorgente<select v-model="duplicateSourceId"><option v-for="w in currentWeeks" :key="w.id" :value="w.id">{{w.name}} · {{w.startDate}}</option></select></label><label>Data nuovo lunedì<input v-model="duplicateMonday" type="date"/></label><button class="primary wide" :disabled="busy||!canWrite" @click="duplicateCurrentWeek">Duplica settimana</button></div></div>
@@ -391,7 +393,7 @@ function copyToArchive(sheet:Personal){
  </template><template v-else><label>Link Google Drive<input v-model="driveUrl" type="url" placeholder="https://drive.google.com/…"/></label><button class="primary wide" :disabled="!canWrite||busy" @click="saveDriveUrl">Salva link nel profilo atleta</button></template>
  </div></div>
  <div v-if="showDelete" class="modal-overlay" @click.self="showDelete=null"><div class="dialog" style="max-width:520px"><div class="row between"><h2>Cancella collegamenti · {{showDelete.title}}</h2><button class="bare" @click="showDelete=null">✕</button></div><p class="muted">Rimuovi solo il collegamento dal giorno, senza cancellare l'archivio.</p><article v-for="l in showDelete.links" :key="l.weekId+l.day+l.slot" class="line-card row between"><b>{{l.weekName}} · {{l.dayName}} · Scheda {{l.slot}}</b><button class="danger" @click="unlinkExact(l)">Scollega</button></article></div></div>
- <div v-if="createProgramOpen" class="modal-overlay" @click.self="createProgramOpen=false"><div class="dialog" style="max-width:440px"><div class="row between"><h2>NUOVO PROGRAMMA FIGHTER</h2><button class="bare" @click="createProgramOpen=false">✕</button></div><label>Nome programma<input v-model="programName" maxlength="90" placeholder="Preparazione match"/></label><label class="coach-date-picker-label" @click="openDatePicker">Data inizio (lunedì)<input v-model="monday" type="date" aria-label="Scegli la data di inizio"/></label><label>Numero settimane<input v-model.number="weekCount" type="number" min="1" max="52"/></label><label class="checkline"><input v-model="consent" type="checkbox"/> Autorizzo scrittura Firebase</label><button class="primary wide" :disabled="!canWrite||busy" @click="newProgram">Crea programma</button></div></div>
+ <div v-if="createProgramOpen" class="modal-overlay" @click.self="createProgramOpen=false"><div class="dialog" style="max-width:440px"><div class="row between"><h2>NUOVO PROGRAMMA FIGHTER</h2><button class="bare" @click="createProgramOpen=false">✕</button></div><label>Nome programma<input v-model="programName" maxlength="90" placeholder="Preparazione match"/></label><label class="coach-date-picker-label" @click="openDatePicker">Data inizio (lunedì)<input v-model="monday" type="date" aria-label="Scegli la data di inizio"/></label><label>Numero settimane<input v-model.number="weekCount" type="number" min="1" max="52"/></label><button class="primary wide" :disabled="!canWrite||busy" @click="newProgram">Crea programma</button></div></div>
  <SheetDetail v-if="opened" :sheet="opened" @close="opened=null"/>
 </div>
 </template>
