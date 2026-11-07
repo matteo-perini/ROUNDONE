@@ -1,0 +1,118 @@
+<script setup lang="ts">
+import {computed,ref,onMounted} from 'vue'
+import {sendPasswordResetEmail} from 'firebase/auth'
+import appMeta from '../../package.json'
+import {addDoc,collection,serverTimestamp} from 'firebase/firestore'
+import { RouterLink, useRouter, useRoute } from 'vue-router'
+import {isStagingMode,isLiveMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
+import {getStagingClients} from '../integrations/firebase/stagingClient'
+import {readStagingSession} from '../integrations/firebase/stagingSession'
+import {signOutStaging,stagingSession} from '../integrations/firebase/stagingSession'
+import { useLabStore } from '../stores/lab'
+import LionIcon from '../components/LionIcon.vue'
+import {interfaceLanguage,setInterfaceLanguage,uiText} from '../features/i18n/interfaceLanguage'
+const router = useRouter()
+const route=useRoute()
+const emulator=computed(()=>import.meta.env.DEV&&route.query.source==='emulator')
+const lab = useLabStore()
+const supportOpen=ref(false),supportText=ref(''),supportSubject=ref(''),supportType=ref('problema'),supportStatus=ref(''),supportBusy=ref(false)
+const verifiedCoach=ref(false),future=ref('')
+const infoOpen=ref(false),securityOpen=ref(false),securityStatus=ref(''),securityBusy=ref(false)
+const appVersion=appMeta.version
+// Anche in DEV usa soltanto i documenti legali pubblicabili; nessuna bozza raggiungibile.
+const privacyHref='/legal/policy.html'
+const termsHref='/legal/note-legali.html'
+const cookiesHref='/legal/policy.html'
+onMounted(async()=>{if(!emulator.value)return;try{const {readVerifiedDevSession}=await import('../integrations/firebase/devSession');verifiedCoach.value=(await readVerifiedDevSession()).role!=='atleta'}catch{/* Nessuna escalation autorizzazioni tramite UI. */}})
+async function sendSupport(){
+ const message=supportText.value.trim()
+ const subject=supportSubject.value.trim().slice(0,100)
+ if(!subject){supportStatus.value='Inserisci un oggetto per la richiesta.';return}
+ if(message.length<2||message.length>1800){supportStatus.value='Scrivi un messaggio da 2 a 1800 caratteri.';return}
+ const messageWithContext=`Tipo richiesta: ${supportType.value}\nOggetto: ${subject}\n\n${message}`
+ if(!mayWriteLive()){supportStatus.value='L’invio del feedback è protetto finché la versione Live non è abilitata. Nessun messaggio è stato spedito.';return}
+ supportBusy.value=true;supportStatus.value=''
+ try{
+  const session=await readStagingSession(),{db}=getStagingClients()
+  const payload=session.role==='atleta'
+   ? {athleteId:session.uid,athleteName:session.label,message:messageWithContext,createdAt:serverTimestamp()}
+   : {athleteName:session.label+' (Coach)',message:messageWithContext,createdAt:serverTimestamp()}
+  await addDoc(collection(db,'gyms',session.gymId,'support_feedback'),payload)
+  supportStatus.value='Richiesta registrata. Le email automatiche al creatore saranno attivate dopo la configurazione del servizio di notifica.';supportText.value='';supportSubject.value=''
+ }catch(e){supportStatus.value='Invio non riuscito: '+(e instanceof Error?e.message:String(e))}
+ finally{supportBusy.value=false}
+}
+async function resetPasswordViaEmail(){
+ if(securityBusy.value)return
+ securityStatus.value=''
+ if(!isStagingMode()||!isLiveMode()) {securityStatus.value='La modifica della password è disponibile soltanto dopo il login nella versione Live. Non verrà inviata alcuna email di prova.';return}
+ const {auth}=getStagingClients()
+ const user=auth.currentUser
+ if(!user?.email){securityStatus.value='Account senza email verificabile: utilizza il tuo metodo di accesso o contatta l’assistenza.';return}
+ if(!user.providerData.some(p=>p.providerId==='password')){securityStatus.value='Questo account non usa una password email: gestisci l’accesso dal provider esterno.';return}
+ if(!window.confirm('Inviare a '+user.email+' un collegamento Firebase per cambiare la password?'))return
+ securityBusy.value=true
+ try{await sendPasswordResetEmail(auth,user.email);securityStatus.value='Se l’account è abilitato, riceverai un’email con le istruzioni. Controlla anche la posta indesiderata.'}
+ catch(e){securityStatus.value='Impossibile inviare la richiesta: '+(e instanceof Error?e.message:String(e))}
+ finally{securityBusy.value=false}
+}
+function backFromSettings(){
+ const hasPrevious=Boolean(window.history.state?.back)
+ if(hasPrevious)router.back()
+ else void router.replace(profilePath.value)
+}
+const profilePath = computed(() => { const coach=isStagingMode()?stagingSession.value?.role!=='atleta':emulator.value?verifiedCoach.value:lab.role==='coach';return (coach?'/coach/profilo':'/profilo')+(emulator.value?'?source=emulator&edit=1':'?edit=1') })
+async function exit() { if(isStagingMode()){await signOutStaging();await router.replace('/accesso');return}if(emulator.value){const {leaveDevSession}=await import('../integrations/firebase/devSession');await leaveDevSession();await router.push('/dev/accesso')}else{lab.logout();await router.push('/accesso')} }
+</script>
+<template>
+ <div class="lfsettings">
+  <header class="lfsettings-header"><button type="button" class="settings-back" aria-label="Indietro" @click="backFromSettings"><LionIcon name="back" :size="22"/></button><div><span class="eyebrow">LION FIT · ACCOUNT</span><h1>{{uiText("Impostazioni")}}</h1></div></header>
+  <div class="lfsettings-categories">
+   <section class="lfsettings-group"><h2>{{uiText("Generali")}}</h2>
+    <button class="lfsettings-entry" type="button" @click="lab.toggleTheme()"><LionIcon name="sun"/><span><b>{{uiText("Tema")}}</b><small>Personalizza l’aspetto dell’app</small></span><strong>{{uiText(lab.theme==='dark'?'Scuro':'Chiaro')}}</strong><LionIcon name="chevron" :size="17"/></button>
+    <button class="lfsettings-entry" type="button" @click="future='Le notifiche verranno abilitate dopo il collegamento ai servizi.'"><LionIcon name="mail"/><span><b>{{uiText("Notifiche")}}</b><small>Avvisi e comunicazioni</small></span><em>In aggiornamento</em><LionIcon name="chevron" :size="17"/></button>
+    <label class="lfsettings-entry lfsettings-language"><LionIcon name="info"/><span><b>{{uiText('Lingua')}}</b><small>Interface language · impostazione locale</small></span><select :value="interfaceLanguage" aria-label="Lingua interfaccia" @change="setInterfaceLanguage(($event.target as HTMLSelectElement).value)"><option value="it">🇮🇹 Italiano</option><option value="en">🇬🇧 English (Beta)</option></select></label>
+    <div class="lfsettings-entry lfsettings-static"><LionIcon name="dumbbell"/><span><b>{{uiText("Unità di misura")}}</b><small>Valori del profilo</small></span><strong>kg, cm</strong></div>
+   </section>
+   <section class="lfsettings-group"><h2>{{uiText("Privacy e account")}}</h2>
+    <RouterLink class="lfsettings-entry" :to="profilePath"><LionIcon name="edit"/><span><b>{{uiText("Modifica profilo")}}</b><small>I tuoi dati personali</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
+    <button class="lfsettings-entry" type="button" @click="securityOpen=true;securityStatus=''"><LionIcon name="shield"/><span><b>{{uiText("Sicurezza")}}</b><small>Password e accessi</small></span><strong>Gestisci</strong><LionIcon name="chevron" :size="17"/></button>
+    <a class="lfsettings-entry"  :href="privacyHref" target="_blank" rel="noopener noreferrer"><LionIcon name="shield"/><span><b>{{uiText("Privacy")}}</b><small>Informativa sul trattamento dati</small></span><LionIcon name="chevron" :size="17"/></a>
+    <a class="lfsettings-entry"  :href="termsHref" target="_blank" rel="noopener noreferrer"><LionIcon name="clipboard"/><span><b>{{uiText("Termini e condizioni")}}</b><small>Documenti legali</small></span><LionIcon name="chevron" :size="17"/></a>
+    <a class="lfsettings-entry" :href="cookiesHref" target="_blank" rel="noopener noreferrer"><LionIcon name="info"/><span><b>{{uiText("Cookie e tecnologie locali")}}</b><small>Informazioni sul trattamento locale</small></span><LionIcon name="chevron" :size="17"/></a>
+   </section>
+   <section class="lfsettings-group"><h2>{{uiText("App e supporto")}}</h2>
+    <button class="lfsettings-entry" type="button" @click="infoOpen=true"><LionIcon name="info"/><span><b>{{uiText("Informazioni")}}</b><small>Chi ha creato LionFit, versione e aggiornamenti</small></span><strong>{{appVersion}}</strong><LionIcon name="chevron" :size="17"/></button>
+    <button class="lfsettings-entry" type="button" @click="supportOpen=true;supportStatus=''"><LionIcon name="mail"/><span><b>{{uiText("Assistenza e feedback")}}</b><small>Segnala problemi e suggerisci miglioramenti</small></span><LionIcon name="chevron" :size="17"/></button>
+   </section>
+  </div>
+  <p v-if="future" class="notice" role="status">{{future}}</p>
+  <button class="lfsettings-exit" @click="exit"><LionIcon name="logout" :size="19"/> {{uiText("Esci dall’account")}}</button>
+  <div v-if="infoOpen" class="modal-overlay" @click.self="infoOpen=false"><div class="dialog lf-about-dialog" role="dialog" aria-modal="true" aria-label="Informazioni sull'applicazione">
+   <div class="row between"><h2>LionFit · Informazioni</h2><button class="bare" type="button" aria-label="Chiudi informazioni" @click="infoOpen=false">✕</button></div>
+   <p class="eyebrow">LA TUA PALESTRA, SEMPRE CON TE.</p>
+   <p>LionFit è una piattaforma digitale pensata per semplificare la gestione degli allenamenti e l'organizzazione delle attività sportive, collegando palestre, allenatori e atleti in un ambiente condiviso.</p>
+   <p>Permette di consultare programmi e schede di allenamento, esplorare la libreria degli esercizi, seguire la programmazione e gestire le prenotazioni secondo le autorizzazioni del proprio ruolo.</p>
+   <p><strong>Ideazione e sviluppo:</strong> Matteo Perini</p>
+   <p><strong>Versione del progetto web:</strong> {{appVersion}}</p>
+   <p class="muted small">La versione Android installata può essere diversa da quella dei sorgenti web e si verifica nelle informazioni di sistema dell'app.</p>
+   <p>LionFit è un progetto in continua evoluzione: nuove funzioni, ottimizzazioni e miglioramenti vengono introdotti progressivamente. Le funzioni contrassegnate «In aggiornamento» non sono ancora disponibili.</p>
+   <button class="secondary wide" type="button" @click="infoOpen=false">Chiudi</button>
+  </div></div>
+  <div v-if="securityOpen" class="modal-overlay" @click.self="securityOpen=false"><div class="dialog" role="dialog" aria-modal="true" aria-label="Sicurezza account" style="max-width:510px">
+   <div class="row between"><h2>Sicurezza account</h2><button class="bare" type="button" aria-label="Chiudi sicurezza" @click="securityOpen=false">✕</button></div>
+   <p class="muted small">Per cambiare la password riceverai un link di ripristino da Firebase Authentication. La tua password non viene mai salvata da LionFit.</p>
+   <button class="primary wide" type="button" :disabled="securityBusy" @click="resetPasswordViaEmail">{{securityBusy?'Invio…':'Cambia password tramite email'}}</button>
+   <p v-if="securityStatus" class="notice" role="status">{{securityStatus}}</p>
+  </div></div>
+  <div v-if="supportOpen" class="modal-overlay" @click.self="supportOpen=false"><div class="dialog" role="dialog" aria-modal="true" aria-label="Assistenza e feedback" style="max-width:480px">
+   <div class="row between"><h2>Assistenza &amp; feedback</h2><button class="bare" aria-label="Chiudi feedback" @click="supportOpen=false">✕</button></div>
+   <p class="muted small">Descrivi un problema o proponi un miglioramento. Attualmente il messaggio viene salvato nel sistema assistenza della palestra se le scritture Live sono abilitate: non è ancora inoltrato via email al creatore.</p>
+   <label>Tipo di richiesta<select v-model="supportType" aria-label="Tipo richiesta assistenza"><option value="problema">Segnala un problema</option><option value="suggerimento">Suggerisci un miglioramento</option><option value="account">Problema account o accesso</option><option value="altro">Altro</option></select></label>
+   <label>Oggetto<input v-model="supportSubject" type="text" maxlength="100" autocomplete="off" placeholder="Es. Non vedo la mia prenotazione"/></label>
+   <label>Descrivi la richiesta<textarea v-model="supportText" rows="5" maxlength="1800" placeholder="Spiega cosa è successo o cosa vorresti migliorare…"/></label>
+   <p v-if="supportStatus" class="notice" role="status">{{supportStatus}}</p>
+   <div class="row between"><button class="secondary" @click="supportOpen=false">Annulla</button><button class="primary" :disabled="supportBusy||!supportText.trim()" @click="sendSupport">Invia richiesta</button></div>
+  </div></div>
+ </div>
+</template>

@@ -1,0 +1,25 @@
+// LION FIT - STORAGE SECURITY RULES
+// Versione Beta 0.26.1 - Permessi Storage invariati da V25.2
+// Membri leggono i file della propria palestra, coach scrivono; cartelle utenti riservate al proprietario.
+// Nota: i download URL con token gia condivisi richiedono una valutazione separata.
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signed() { return request.auth != null; }
+    function profile() { return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data; }
+    function sameGym(gid) { return signed() && profile().gymId == gid; }
+    function coach(gid) { return sameGym(gid) && profile().role == 'admin'; }
+    match /gyms/{gymId}/{allPaths=**} {
+      allow read: if sameGym(gymId);
+      allow create, update: if coach(gymId)
+        && request.resource.size < 100 * 1024 * 1024;
+      allow delete: if coach(gymId);
+    }
+    match /users/{userId}/{allPaths=**} {
+      allow read: if signed() && request.auth.uid == userId;
+      allow create, update: if signed() && request.auth.uid == userId
+        && request.resource.size < 10 * 1024 * 1024;
+      allow delete: if signed() && request.auth.uid == userId;
+    }
+  }
+}

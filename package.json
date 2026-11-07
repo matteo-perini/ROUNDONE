@@ -1,20 +1,41 @@
 {
-  "name": "roundone",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "lionfit-v1-vue-laboratorio-completo",
+  "private": true,
+  "version": "0.3.1",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite --host 127.0.0.1",
+    "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "android:sync": "npm run release:android:sync",
+    "android:open": "cap open android",
+    "release:audit": "node scripts/release-preflight.mjs --self-test",
+    "release:preflight": "node scripts/release-preflight.mjs --live",
+    "release:build": "node scripts/release-preflight.mjs --live --require-writes && npm run build -- --mode production && node scripts/release-preflight.mjs --dist && npm run release:publiccheck",
+    "release:configure": "node scripts/prepare-live-env.mjs",
+    "release:compat": "node scripts/check-live-compat.mjs && node scripts/prepare-live-env.mjs --self-test",
+    "release:review": "node scripts/release-3t-readiness.mjs",
+    "android:sync:staging": "npm run build -- --mode staging && cap sync android",
+    "release:android:sync": "npm run release:build && cap sync android",
+    "release:finalcheck": "node scripts/check-release-final.mjs",
+    "release:publiccheck": "node scripts/check-public-only.mjs --dist"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "@capacitor/android": "^8.5.2",
-    "@capacitor/app": "^8.1.2",
-    "@capacitor/browser": "^8.0.5",
-    "@capacitor/cli": "^8.5.2",
-    "@capacitor/core": "^8.5.2"
+    "vue": "^3.5.0",
+    "vue-router": "^4.5.0",
+    "pinia": "^3.0.0",
+    "firebase": "^12.4.0",
+    "@capacitor/android": "8.5.2",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/browser": "8.0.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.0",
+    "@types/node": "^22.0.0",
+    "typescript": "~5.9.0",
+    "vite": "^7.1.0",
+    "vue-tsc": "^3.1.0",
+    "@capacitor/cli": "8.5.2"
   }
 }

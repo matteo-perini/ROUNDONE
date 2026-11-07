@@ -1,0 +1,32 @@
+/* LIONFIT 7.2 · Correzione nav complementare all’attuale base caricata.
+   Stessa lista di route; mai due nav visibili nello stesso viewport. */
+@media (max-width:799px){
+ .app.as-athlete > .athlete-top-nav{display:none!important;visibility:hidden!important;}
+ /* Dock Teleport nel body mantiene il proprio padding safe-area. */
+ .app.as-athlete .main-layout{padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))!important;}
+}
+@media (min-width:800px){
+ .app.as-athlete > .athlete-top-nav{
+  display:grid!important;visibility:visible!important;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  width:min(940px,calc(100% - 32px));margin:8px auto 0;
+  gap:6px;padding:7px;background:var(--nav);border:1px solid var(--border);
+  border-radius:13px;position:sticky;top:calc(74px + env(safe-area-inset-top,0px));z-index:87;
+ }
+ .app.as-athlete > .athlete-top-nav a{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  min-width:0;min-height:38px;padding:6px 8px;border-radius:9px;
+  color:var(--text);font-weight:850;font-size:11px;
+ }
+ .app.as-athlete > .athlete-top-nav a.router-link-active{background:var(--green-bg);color:var(--mint);}
+ .app.as-athlete > .athlete-top-nav a:focus-visible{outline:2px solid var(--mint);outline-offset:-2px;}
+
+ .app.as-athlete .main-layout{padding-bottom:36px!important;}
+ .app.as-athlete{padding-bottom:0!important;}
+}
+/* Puntini in filtri, giorni, settimane e mese: riconoscibili e allineati. */
+.app .booking-coach-chips .coach-dot,
+.app .booking-tabs .coach-dot,
+.app .coach-month-dots .coach-dot,
+.app .event-item .coach-dot{width:9px;height:9px;flex:0 0 9px;vertical-align:middle;margin-right:4px;}
+.app .coach-month-dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;align-items:center;}

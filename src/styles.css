@@ -1,0 +1,1075 @@
+/* Lion Fit V1 Modern: palette grounded in ROUNDONE/www/admin.html and athlete.html */
+*{box-sizing:border-box}html{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Arial,sans-serif;-webkit-text-size-adjust:100%}body{margin:0}button,input,textarea,select{font:inherit}a{color:inherit;text-decoration:none}button{cursor:pointer}button:disabled{opacity:.48;cursor:not-allowed}h1,h2,h3,h4,p{margin-top:0}h1{font-size:clamp(25px,3.3vw,35px);font-weight:900}h2{font-size:21px;font-weight:900}h3{font-size:17px;font-weight:850}.app{--bg:#090D14;--nav:#0F1520;--card:#171F2C;--card2:#1B2634;--field:#0D1521;--text:#EEF4FB;--muted:#A6B6C6;--border:#303A49;--mint:#60E5A2;--green:#14834F;--outline:#516378;--green-bg:#16382E;background:var(--bg);color:var(--text);min-height:100dvh;padding-bottom:calc(86px + env(safe-area-inset-bottom,0px));font-size:15px}.theme-light{--bg:#F9FAFB;--nav:#fff;--card:#fff;--card2:#F0FDF4;--field:#F8FAFC;--text:#17231D;--muted:#64748B;--border:#D5DEE1;--mint:#16A34A;--green:#15803D;--outline:#9FAFBC;--green-bg:#E4FAEB}.lab-banner{position:relative;z-index:55;background:#60441f;color:#fff3d4;text-align:center;font-weight:800;font-size:10px;letter-spacing:.05em;padding:5px 8px}.desktop-sidebar{position:fixed;top:22px;bottom:0;left:0;width:256px;background:var(--nav);border-right:1px solid var(--border);z-index:25;display:flex;flex-direction:column}.sidebar-head{height:76px;display:flex;align-items:center;padding:14px;gap:9px;border-bottom:1px solid var(--border)}.sidebar-head img{width:36px;height:36px;object-fit:contain}.sidebar-head strong{display:block;font-size:18px;font-weight:950;font-style:italic;white-space:nowrap}.sidebar-head em,.brand-name span,.booking-brand span,.login-header b{font-style:italic;color:var(--mint)}.sidebar-head small{font-size:9px;display:block;color:var(--muted);font-weight:900;letter-spacing:.05em}.sidebar-head .theme-square{margin-left:auto;min-width:32px}.sidebar-nav{display:flex;flex-direction:column;gap:5px;padding:13px;flex:1;overflow:auto}.sidebar-nav a{display:flex;align-items:center;gap:9px;padding:11px 14px;font-size:11px;font-weight:950;border:1px solid transparent;border-radius:11px;line-height:1.3}.sidebar-nav a.router-link-active{background:linear-gradient(110deg,#14834f,#3d956b);border-color:#7fcda1;color:#fff}.sidebar-nav a:hover:not(.router-link-active){background:var(--card2)}.sidebar-foot{padding:10px 12px;border-top:1px solid var(--border)}.sidebar-foot small{display:block;text-align:center;font-size:10px;margin-top:10px;color:var(--muted)}.invite-shortcut{display:block;background:var(--card2);border:1px solid var(--outline);border-radius:10px;padding:9px 12px;font-size:9px;font-weight:850}.invite-shortcut strong{display:block;color:var(--mint);font-size:11px}.mobile-topbar{height:82px;padding:12px 25px;display:flex;align-items:center;justify-content:space-between;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:22px;z-index:20}.as-coach .mobile-topbar{display:none}.brand{display:flex;gap:11px;align-items:center}.brand img{height:45px;width:45px;object-fit:contain}.brand-name{font-size:23px;line-height:1.1;font-weight:1000;font-style:italic}.brand-name small{font-size:10px;margin-left:8px;color:var(--muted)}.brand-subtitle{font-size:12px;font-weight:850;color:var(--muted);letter-spacing:.08em;margin-top:3px}.top-actions{display:flex;align-items:center;gap:9px}.theme-square{display:grid;place-items:center;background:var(--card2);border:1px solid var(--outline);color:var(--text);border-radius:13px;width:44px;height:44px}.header-avatar{display:grid;place-items:center;border:2px solid var(--mint);border-radius:50%;height:45px;width:45px;background:var(--card2)}.main-layout{padding:28px 25px 50px;max-width:1300px;margin:auto}.as-coach .main-layout{margin-left:256px;max-width:none;padding:25px clamp(24px,3vw,48px) 45px}.as-athlete .main-layout{max-width:1150px}.version{text-align:right;color:var(--muted);font-size:11px;font-weight:850;letter-spacing:.05em;margin:0 0 23px}.as-athlete .version{text-align:center;margin:-10px 0 22px}.bottom-nav{position:fixed;bottom:0;left:0;right:0;padding:10px 8px calc(10px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-around;border-top:1px solid var(--border);background:var(--nav);z-index:30;gap:4px}.bottom-nav a{display:flex;flex:1;max-width:175px;align-items:center;justify-content:center;flex-direction:column;gap:5px;border-radius:16px;color:#BBC8D8;font-size:11px;font-weight:950;padding:12px 2px}.bottom-nav a.router-link-active{background:var(--green-bg);color:#8EF1BB}.coach-bottom{display:none}.card,.panel{background:var(--card);border:1px solid var(--border);border-radius:23px;padding:23px;min-width:0}.panel+.panel{margin-top:15px}.card-heading{font-size:21px;font-weight:950;letter-spacing:.08em;margin:0}.eyebrow{font-size:11px;letter-spacing:.13em;font-weight:900;color:var(--mint)}.subtitle,.muted,.small,.lead{color:var(--muted)}.muted,.lead{line-height:1.55}.small{font-size:12px;line-height:1.5}.pill{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border);border-radius:14px;padding:6px 11px;font-size:12px;font-weight:850;color:var(--mint);background:var(--card2)}.pill-neutral{color:var(--muted)}.status-green{color:#8ef1bb}.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.between{justify-content:space-between}.stack{display:flex;flex-direction:column;gap:13px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.muted-head{font-weight:850;color:var(--muted);font-size:11px;letter-spacing:.07em}.section-title{font-weight:950;font-size:20px;margin:30px 7px 15px}.bordered{border:1px solid var(--border)}.soft{background:var(--card2)}.action-card{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--outline);border-radius:16px;padding:16px;text-align:left;color:var(--text);width:100%;min-height:82px}.action-card:hover,.selectable:hover{border-color:var(--mint)}.action-icon{width:40px;height:40px;display:grid;place-items:center;color:var(--mint);background:#203041;border-radius:12px;flex-shrink:0}.action-card strong{display:block;font-size:14px}.action-card small{display:block;color:var(--muted);margin-top:5px;font-size:12px}.action-card .arrow{margin-left:auto;color:var(--muted)}.green-hero{background:linear-gradient(110deg,#152338,#0e2b27);border:1px solid #39624d;border-radius:24px;padding:29px 32px}.green-hero h1{margin:22px 0 8px}.green-hero p{margin:0;color:#c1d2d1}.hero-tag{color:#8ef1bb;font-weight:850;letter-spacing:.12em;font-size:12px}.primary,.secondary,.ghost,.danger,.bare{border-radius:12px;padding:11px 16px;font-weight:850;border:1px solid var(--border);min-height:43px}.primary{background:var(--green);border-color:var(--green);color:#fff}.primary:hover{filter:brightness(1.13)}.secondary{background:var(--card2);color:var(--text);border-color:var(--outline)}.ghost{background:transparent;color:var(--mint)}.danger{color:#ffc0c8;background:#49242a;border-color:#85444d}.bare{background:none;color:var(--muted);border:0}.wide{width:100%}.notice{border:1px solid var(--border);background:var(--card2);padding:14px 16px;border-radius:14px;line-height:1.5;color:var(--muted);font-size:12px}.notice-success{background:var(--green-bg);color:#a8f9ca;border-color:#3f8164}.small-flag{font-size:11px;letter-spacing:.05em}.green{color:var(--mint)}.field,input:not([type=checkbox]),select,textarea{width:100%;min-height:42px;background:var(--field);border:1px solid var(--outline);border-radius:12px;padding:11px 13px;color:var(--text);font-size:14px}input::placeholder,textarea::placeholder{color:#8296ab}label{color:var(--muted);font-size:12px;font-weight:800;display:block;margin:11px 0 6px}input[type=checkbox]{accent-color:var(--green);width:17px;height:17px}.checkline{display:flex;align-items:center;gap:9px;color:var(--text);font-size:12px}.checkline input{width:17px}select{appearance:auto}.divider{border-top:1px solid var(--border);margin:14px 0}.list-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border);padding:14px 0}.list-row:last-child{border:0}.list-row strong{font-size:13px}.preview-banner{height:190px;background:#050505;border:1px solid var(--border);border-radius:20px;display:grid;place-items:center;position:relative}.preview-banner img{max-height:140px;max-width:270px;object-fit:contain}.profile-overlap{margin:-43px 0 0 28px;position:relative;width:100px;height:100px;background:var(--card2);border:4px solid #f3f7f9;border-radius:50%;display:grid;place-items:center;font-size:45px}.week-pills{display:flex;gap:12px;margin:15px 0}.week-pill{border-radius:50%;width:43px;height:43px;background:var(--card);border:3px solid var(--border);color:var(--muted);font-weight:850}.week-pill.selected{border-color:#edf3fa;background:#050607;color:white}.week-days{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.day-card{border-radius:22px;border:2px solid #536d80;background:#172832;color:var(--text);padding:18px;min-height:155px;text-align:left}.day-card:first-child{border-color:#8ef1bb;background:#193d33}.day-card h3{color:#8ef1bb;margin-bottom:10px;font-size:16px}.day-card p{font-size:12px;font-weight:750;margin:0 0 6px}.card-outline{border:2px solid var(--outline);border-radius:23px;padding:18px;background:var(--card)}.scheme-item{border:1px solid var(--outline);border-radius:19px;padding:20px;background:var(--card2)}.scheme-item h3{font-size:23px;letter-spacing:.02em}.scheme-item .chip{display:inline-block;background:var(--green-bg);color:#8ef1bb;padding:8px 12px;border-radius:11px;font-weight:850;font-size:12px}.sheet-modal-bg{position:fixed;inset:0;background:#05070aeb;z-index:80;display:flex;justify-content:center;align-items:center;padding:12px}.sheet-modal{width:min(750px,100%);height:min(94dvh,950px);background:#171f2c;color:#eef4fb;border:1px solid #3a485b;border-radius:23px;display:flex;flex-direction:column;overflow:hidden}.sheet-modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:20px;border-bottom:1px solid #303a49}.sheet-modal-head h2{margin:0;letter-spacing:.1em;text-transform:uppercase}.sheet-modal-body{overflow:auto;flex:1;padding:20px}.sheet-modal-foot{border-top:1px solid #303a49;padding:15px;text-align:right}.exercise-item{border:1px solid #394658;border-radius:21px;padding:20px;margin-bottom:14px;background:#171f2c}.exercise-item h3{font-size:15px;letter-spacing:.02em}.exercise-tag{display:inline-block;padding:9px 12px;background:#1b2634;border-radius:9px;font-size:12px;font-weight:900}.exercise-note{font-size:12px;line-height:1.5;color:#a6b6c6;margin-top:13px;padding-top:12px;border-top:1px solid #303a49}.fixed-action{position:sticky;bottom:0}.pill-set{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.line-card{border:1px solid var(--outline);background:var(--card2);border-radius:14px;padding:12px 14px}.program-days{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.program-day{border:2px solid var(--border);border-radius:17px;background:var(--card);padding:14px}.program-day h3{color:var(--mint);border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:12px;text-transform:uppercase}.program-slot{background:var(--field);border:1px solid var(--outline);border-radius:11px;padding:10px;margin-bottom:8px}.program-slot label{margin:0 0 3px;color:var(--mint);font-size:10px}.program-slot input{border:0;background:transparent;padding:3px;min-height:30px}.program-sheet{border:1px solid #3b946d;background:#153b31;border-radius:11px;padding:10px;margin-top:8px}.program-sheet strong{font-size:12px;color:#eaffee}.chip{border-radius:9px;padding:6px 10px;color:var(--mint);background:var(--green-bg);font-size:11px;font-weight:850}.quick-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.stat-num{font-size:30px;font-weight:950}.archive-card{background:var(--card2);border:2px solid var(--outline);border-radius:22px;padding:16px}.archive-actions{display:flex;gap:8px;flex-wrap:wrap}.archive-actions button{font-size:12px;padding:8px 11px;min-height:37px}.library-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:24px}.library-card{border:1px solid var(--outline);padding:10px;border-radius:16px;background:var(--card2);min-width:0}.exercise-preview{height:105px;border-radius:12px;display:grid;place-items:center;background:#202d42}.exercise-preview img{max-width:100%;max-height:100%;object-fit:contain}.library-card h3{font-size:12px;margin:10px 0 4px}.library-card p{font-size:11px;color:var(--muted)}.modal-overlay{position:fixed;inset:0;background:#030609dd;z-index:75;display:grid;place-items:center;padding:12px}.dialog{background:var(--card);border:1px solid var(--outline);border-radius:20px;padding:22px;width:min(680px,100%);max-height:94dvh;overflow-y:auto}.dialog h2{margin:0 0 16px}.booking-layout{display:flex;background:#0b1012;min-height:100dvh;color:#eef9f2}.bookings-mode{--bg:#0b1012;--nav:#10181b;--card:#172125;--card2:#1c292c;--field:#101b1e;--border:#344447;--outline:#4a6569;--muted:#adbec2;--mint:#45d38d;--green:#217b54;padding:0}.booking-sidebar{width:220px;flex-shrink:0;background:#10181b;border-right:1px solid #344447;padding:26px 20px;display:flex;flex-direction:column;gap:22px}.booking-sidebar a{font-weight:700;font-size:13px}.booking-brand img{width:48px;height:48px;object-fit:contain}.booking-brand b{display:block;font-size:21px}.booking-brand small{font-size:9px;letter-spacing:.1em}.booking-main{flex:1;min-width:0;padding:26px clamp(16px,3vw,45px)}.booking-main .panel{background:#172125;border-color:#344447}.booking-main .primary{background:#217b54}.booking-section-title{font-size:21px;font-weight:900;margin:25px 0}.booking-tabs{display:flex;gap:10px;flex-wrap:wrap}.booking-tabs button{background:#293a3e;border:1px solid #445e62;color:#eef9f2;border-radius:35px;padding:10px 15px;font-size:13px;font-weight:800}.booking-tabs button.selected{background:#1b5c42;border-color:#45d38d;color:#a6f3ce}.booking-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.booking-choice{background:linear-gradient(150deg,#263739,#102125);min-height:175px;border:1px solid #486064;border-radius:23px;text-align:left;padding:22px;color:#eef9f2}.booking-choice.selected{border:2px solid #45d38d}.booking-choice strong{font-size:22px;display:block}.booking-choice small{display:block;margin-top:10px;color:#b6c6c7}.booking-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}.booking-day{border:1px solid #42745d;background:#1d372c;color:#c7f8df;border-radius:10px;padding:9px 1px;min-height:49px;font-weight:900}.booking-day small{display:block;font-size:9px;font-weight:600}.booking-day.selected{background:#175f42;border:2px solid #67dca5}.booking-day.disabled{opacity:.28;pointer-events:none}.times{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.times button{background:#1c2a2a;border:1px solid #547366;color:white;padding:13px;border-radius:9px}.times button.selected{background:#206746;border-color:#8cf4bb}.booking-filter{border:1px solid #344447;padding:14px;border-radius:15px;background:#253b3c}.availability-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.booking-main .green-hero{background:#29484c}.login-header{display:flex;gap:10px;align-items:center;padding:16px;background:var(--nav);font-weight:950;font-size:20px}.login-header img{width:45px}.login-main{max-width:720px;margin:auto;padding:55px 18px}.login-panel{background:var(--card);padding:26px;border-radius:24px;border:1px solid var(--border)}
+@media(min-width:901px){.as-coach{padding-bottom:0}}@media(max-width:900px){.desktop-sidebar{display:none}.as-coach .mobile-topbar{display:flex}.as-coach .main-layout{margin-left:auto;padding:21px 16px 35px}.coach-bottom{display:flex}.week-days,.program-days{grid-template-columns:repeat(2,minmax(0,1fr))}.library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.booking-sidebar{display:none}.booking-main{padding:18px 16px}.main-layout{padding:22px 16px 40px}.green-hero{padding:22px}.version{margin-bottom:22px}}@media(max-width:600px){.mobile-topbar{padding:10px 15px;height:76px}.brand img{width:42px;height:42px}.brand-name{font-size:20px}.brand-subtitle{font-size:11px}.card,.panel{padding:16px;border-radius:20px}.grid3,.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2,.quick-menu{gap:10px}.week-days,.program-days{grid-template-columns:1fr}.bottom-nav a{font-size:10px;padding:9px 1px}.bottom-nav svg{width:22px;height:22px}.as-athlete .bottom-nav a{font-size:9px}.main-layout{padding:23px 14px 40px}.green-hero h1{font-size:24px}.section-title{font-size:18px}.booking-choices,.availability-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.booking-choice{min-height:165px;padding:12px}.times{grid-template-columns:repeat(2,minmax(0,1fr))}.library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.preview-banner{height:150px}.sheet-modal{height:95dvh}.sheet-modal-body{padding:12px}}@media(max-width:360px){.booking-choices{grid-template-columns:1fr}.bottom-nav a{font-size:9px}.brand-name{font-size:17px}}
+
+/* Prenotazioni: variante chiara mantenuta distinta dal pannello principale. */
+.theme-light .booking-layout{background:#f5f8f7;color:#19312a}
+.theme-light .booking-sidebar{background:#fff;color:#19312a;border-color:#d6e3dc}
+.theme-light .booking-main .panel{background:#fff;border-color:#c9dad0;color:#19312a}
+.theme-light .booking-main .muted{color:#54665f}
+.theme-light .booking-main .booking-choice{background:#ecf6f0;color:#19312a}
+.theme-light .booking-main .booking-choice small{color:#63766d}
+.theme-light .booking-main .booking-tabs button{background:#eaf3ee;color:#284738;border-color:#bcd2c4}
+.theme-light .booking-main .booking-tabs button.selected{background:#137e4d;color:#fff}
+.theme-light .booking-main .booking-day{background:#ddf5e5;color:#174c31}
+.theme-light .booking-main .booking-day.selected{background:#168457;color:#fff}
+.theme-light .booking-main input,.theme-light .booking-main select{background:#fff;color:#1b3127;border-color:#b2c9bb}
+
+/* V1 Modern LAB 0.3.1 — audit visuale 02-11-2026.
+   Valori principali dalla V1, dimensioni adattate a screenshot desktop/mobile. */
+.desktop-sidebar{top:0;width:256px}
+.sidebar-nav a{font-size:12px;font-weight:850;padding:10px 13px}
+.as-coach .main-layout{padding-top:20px}
+.as-coach .card,.as-coach .panel{padding:17px;border-radius:18px}
+.as-coach .card-heading{font-size:16px;letter-spacing:.055em}
+.as-coach .green-hero{padding:19px 20px;border-radius:18px}
+.as-coach .green-hero h1{font-size:clamp(20px,2.25vw,27px);margin:10px 0 5px}
+.as-coach .green-hero p{font-size:12px}
+.as-coach .action-card{padding:11px 13px;min-height:65px;border-radius:14px;gap:9px}
+.as-coach .action-card strong{font-size:13px;line-height:1.25}
+.as-coach .action-card small{font-size:10px;line-height:1.35}
+.as-coach .action-icon{width:33px;height:33px;flex-shrink:0}
+.as-coach .stat-num{font-size:25px}
+.as-coach .grid3 .panel{min-height:115px}
+.as-coach .grid3 .panel p{font-size:22px!important}
+.booking-shortcut{background:linear-gradient(110deg,rgba(17,111,75,.28),rgba(9,87,56,.5))!important;border:1px solid #45c18b!important;color:var(--text)!important}
+.booking-shortcut .action-icon{color:#a6f1c8!important}
+.as-coach .archive-card{padding:13px;border-width:1px;border-radius:13px}
+.as-coach .archive-card h3{font-size:13px}
+.as-coach .archive-actions{gap:5px}
+.as-coach .archive-actions button{font-size:10px;min-height:31px;padding:6px 9px}
+.as-coach .archive-actions .primary{background:rgba(20,131,79,.26);color:var(--mint);border:1px solid #3a9569}
+.as-coach .archive-actions .danger{background:rgba(142,45,61,.24);color:#f0a6ae;border:1px solid #935464}
+.as-coach .program-day{padding:10px;border-radius:13px}
+.as-coach .program-slot{padding:8px;margin-bottom:7px}
+.as-coach .program-slot input{font-size:12px;min-height:26px}
+.as-coach .program-sheet{padding:8px;background:rgba(27,119,69,.30)}
+.as-coach .program-sheet .grid2 button{padding:7px;min-height:32px;font-size:10px}
+.as-coach .week-pill{width:44px;height:38px;border-radius:10px;font-size:14px}
+.assignment-columns{align-items:stretch}
+.as-coach .assignment-panel{background:linear-gradient(120deg,rgba(43,124,106,.14),rgba(23,39,46,.7));border-color:rgba(107,160,145,.5);min-width:0}
+.as-coach .assignment-panel h3{font-size:13px}
+.assignment-scroll{max-height:365px;overflow-y:auto;overscroll-behavior:contain}
+.as-coach .assignment-panel .line-card{padding:10px}
+.program-create-dialog{max-width:430px}
+.program-create-dialog label{display:block;margin:14px 0 5px}
+.staff-details{border:1px solid var(--border);border-radius:9px;margin-top:10px;padding:10px 12px}
+.staff-details summary{cursor:pointer;font-size:11px;font-weight:750}
+.coach-profile{max-width:590px;margin:0 auto;width:100%}
+.coach-profile .preview-banner{height:150px}
+.coach-profile .preview-banner img{max-height:100px}
+.coach-profile .panel{margin-top:-30px!important;text-align:center;padding-top:25px!important}
+.coach-profile .profile-overlap{margin:-65px auto 10px;width:75px;height:75px;font-size:30px}
+.coach-profile .panel h1{font-size:22px!important;margin:8px 0!important}
+.coach-profile .panel .pill{margin:2px!important}
+.coach-profile .panel .action-card{min-height:48px;margin-top:22px}
+.coach-profile .panel>.primary{display:none}
+.settings-screen{position:relative;min-height:70vh;max-width:850px;margin:auto}
+.settings-top{border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;position:relative;padding:9px 0 20px}
+.settings-top button{position:absolute;left:0;top:4px;font-size:25px}
+.settings-top h2{font-size:15px;margin:0;letter-spacing:.04em}
+.settings-inner{max-width:485px;margin:20px auto}
+.settings-inner h3{background:var(--card2);padding:10px;font-size:12px;margin:13px 0 0}
+.settings-inner>button{border:0;border-bottom:1px solid var(--border);color:var(--text);background:transparent;padding:14px 10px;display:flex;justify-content:space-between;width:100%;font-size:12px;font-weight:850;text-align:left}
+.settings-inner .settings-logout{margin:35px 0;background:#bc4b4e;color:white;border-radius:9px;padding:12px 15px}
+/* Shared catalogue: SVG scaled and clipped inside the same reserved preview box as V1 */
+.library-grid{gap:10px;margin-top:12px}
+.library-card{overflow:hidden;min-width:0;background:var(--card2);border-radius:13px;display:flex;flex-direction:column}
+.library-card .exercise-preview{width:100%;height:112px;flex:0 0 112px;position:relative;overflow:hidden;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;border-radius:9px;background:#29384d;isolation:isolate}
+.exercise-preview img{display:block;position:static!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center!important;transform:none!important;inset:auto!important;filter:none;pointer-events:none}
+.library-card h3,.library-card p,.library-card .green{position:static;max-width:100%;overflow-wrap:anywhere;white-space:normal}
+.library-card h3{font-size:11px;margin:7px 0 2px;line-height:1.35}
+.library-card p{font-size:10px;margin-bottom:5px}
+.library-card .green{font-size:9px}
+.library-card{padding:8px}
+.library-header{padding:16px!important}
+.library-filters{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-top:11px}
+.library-explain{font-size:11px!important;padding:10px!important}
+.best-result{color:#aef4c5;font-size:9px;font-weight:850;margin-top:5px}
+.exercise-dialog .exercise-preview{width:100%;height:250px;overflow:hidden}
+.exercise-dialog .exercise-preview img{height:100%!important;object-fit:contain!important}
+.exercise-steps{font-size:13px;color:var(--muted);line-height:1.6}
+/* Booking coach same three view modes; month is NOT an availability grid. */
+.booking-main{padding-top:18px}
+.booking-main h1{font-size:25px}
+.booking-top-controls{justify-content:flex-end;margin-top:-38px;margin-bottom:13px}
+.booking-main .panel{padding:14px;border-radius:15px}
+.booking-main .booking-tabs button{font-size:11px;padding:8px 12px}
+.booking-main .booking-filter,.booking-main .panel p{font-size:12px}
+.booking-period{background:#2b505c!important;border-color:#587d84!important}
+.booking-period h3{font-size:14px;margin:0 0 10px}
+.empty-event{border:1px dashed #7599a0;border-radius:10px;padding:16px;text-align:center;font-size:12px}
+.week-event-day{border:1px solid #5c858a;border-radius:9px;padding:10px 11px;margin:7px 0}
+.week-event-day strong{font-size:12px}
+.event-count{font-size:10px;padding:3px 7px;border:1px solid #86cfc1;border-radius:50%;color:#a5e0d2;margin-left:8px}
+.event-item{padding:9px;margin:6px 0;background:rgba(12,35,39,.4);border-radius:8px;font-size:12px}
+.event-item span{margin-left:8px}
+.coach-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.coach-month-weekday{text-align:center;font-size:10px;font-weight:850;padding:9px;color:#b7dbd7}
+.coach-month-day{min-width:0;min-height:50px;padding:7px;background:#396d76;color:#e5f5f3;border:1px solid #61969f;border-radius:8px;text-align:left;font-size:12px;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.coach-month-day small{font-size:9px;color:#b8dcda}
+.coach-month-day.selected{border:2px solid #8adcc7;background:#2c8176}
+.month-empty{min-height:45px}
+.booking-date-controls{margin:12px 0;gap:7px}
+.booking-sidebar{background:#153340}
+/* Theme light: retain full V1 light palette; no dark-only explicit card backgrounds */
+.theme-light .as-coach .assignment-panel,.theme-light .assignment-panel{background:#f0fdf4;color:#17231d}
+.theme-light .booking-shortcut{background:linear-gradient(100deg,#e0f5e7,#d3f1df)!important;border-color:#8ac9a0!important;color:#195637!important}
+.theme-light .booking-shortcut .action-icon{color:#15803d!important}
+.theme-light .booking-period{background:#e4eff0!important;color:#203c41!important}
+.theme-light .coach-month-day{background:#e1f0ef;color:#244f4f;border-color:#a4ccca}
+.theme-light .coach-month-day small{color:#4a7774}
+.theme-light .coach-month-day.selected{background:#c1e6da}
+@media (max-width:900px){
+ .desktop-sidebar{display:none}
+ .as-coach .mobile-topbar,.mobile-topbar{top:0;padding-top:calc(10px + env(safe-area-inset-top,0px));height:calc(76px + env(safe-area-inset-top,0px))}
+ .app{padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+ .bottom-nav{padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+ .booking-main{padding-top:calc(18px + env(safe-area-inset-top,0px));padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+ .booking-top-controls{margin-top:0;justify-content:flex-start}
+ .as-coach .main-layout{padding-top:16px}
+ .as-coach .action-card{min-height:80px}
+ .assignment-scroll{max-height:450px}
+ .coach-month-day{min-height:40px;padding:5px 2px}
+}
+@media (max-width:600px){
+ .assignment-columns{grid-template-columns:1fr}
+ .library-filters{grid-template-columns:1fr}
+ .library-card .exercise-preview{height:130px;flex-basis:130px}
+ .as-coach .action-card strong{font-size:13px}
+ .as-coach .grid3 .panel{min-height:100px}
+ .booking-main .booking-tabs{gap:5px}
+ .booking-main .booking-tabs button{padding:7px 9px;font-size:10px}
+ .coach-month-day small{font-size:8px;overflow:hidden;text-overflow:ellipsis}
+ .mobile-topbar{padding-right:max(12px,env(safe-area-inset-right));padding-left:max(12px,env(safe-area-inset-left))}
+}
+
+/* Original booking V1 colors copied from www/prenotazioni.html */
+.bookings-mode{--bg:#0a1115;--nav:#111c21;--card:#152126;--card2:#1a292e;--border:#31474a;--muted:#adbec2;--mint:#47d09c;--green:#217b54}
+.booking-layout{background:var(--bg)}
+.booking-sidebar{background:var(--nav);border-color:var(--border)}
+.booking-main .panel{background:var(--card);border-color:var(--border)}
+.booking-period{background:#152126!important;border-color:#31474a!important}
+.week-event-day{border-color:#344e45;background:#1a292e}
+.coach-month-day{background:#1d2b2d;color:#eef9f2;border-color:#36494a}
+.coach-month-day small{color:#a3e6c1}
+.coach-month-day.selected{background:#1e4335;border-color:#55c785}
+.booking-top-controls{gap:8px}
+.booking-return{display:inline-flex;align-items:center}
+.theme-light .booking-period{background:#fff!important;border-color:#ccdcd3!important}
+.theme-light .coach-month-day{background:#f4f8f5;color:#172d25;border-color:#bdcec5}
+.theme-light .coach-month-day small{color:#40845f}
+.theme-light .coach-month-day.selected{background:#d4f0df;border-color:#137e4c}
+
+/* V1 Modern 0.3.1d — fedeltà layout Gestione Atleti / Programma Coach.
+   Limitato alle sezioni indicate: non altera gli stili Atleta o Prenotazioni. */
+.as-coach .coach-athletes-screen{gap:11px}
+.as-coach .coach-team-toolbar{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;min-height:65px}
+.as-coach .coach-team-title{min-width:200px;flex:0 1 auto}
+.as-coach .coach-team-title .card-heading{font-size:14px;line-height:1.15;letter-spacing:.05em}
+.as-coach .coach-team-title .muted{display:block;font-size:9px;letter-spacing:.015em;line-height:1.4;margin-top:4px;font-weight:750}
+.as-coach .coach-team-tools{display:flex;justify-content:flex-end;align-items:center;gap:7px;flex:1;min-width:0}
+.as-coach .coach-team-tools .primary,.as-coach .coach-team-tools .secondary{display:inline-flex;align-items:center;justify-content:center;min-height:32px;white-space:nowrap;font-size:10px;padding:7px 10px;border-radius:8px;font-weight:780}
+.as-coach .coach-team-tools input{width:200px;max-width:33%;min-width:155px;min-height:32px;padding:7px 10px;font-size:10px;border-radius:8px}
+.as-coach .coach-athlete-count{padding:3px 8px;font-size:11px}
+.as-coach .coach-athlete-count button{font-size:10px;min-height:29px;padding:5px 9px;border-radius:7px}
+.as-coach .coach-athlete-list{gap:10px}
+.as-coach .coach-athlete-list .action-card{padding:9px 12px;min-height:57px;border-radius:10px}
+.as-coach .coach-athlete-list .action-card strong{font-size:11px}
+.as-coach .coach-athlete-list .action-card small{font-size:9px;margin-top:3px}
+.as-coach .coach-athlete-list .action-card b{font-size:10px;white-space:nowrap}
+.as-coach .coach-athlete-list .action-icon{height:29px;width:29px;border-radius:8px;font-size:15px}
+.as-coach .coach-selected-athlete{padding:13px 16px;border-radius:13px;margin-top:0}
+.as-coach .coach-selected-head{gap:8px}
+.as-coach .coach-selected-head .eyebrow{font-size:9px}
+.as-coach .coach-selected-head h2{font-size:16px;margin:2px 0}
+.as-coach .coach-selected-head button{min-height:30px;padding:5px 10px;font-size:10px;border-radius:7px}
+.as-coach .coach-selected-athlete>.divider{margin:10px 0}
+.as-coach .coach-athlete-quick-actions{gap:8px}
+.as-coach .coach-athlete-quick-actions .action-card{min-height:60px;padding:10px 12px;border-radius:9px}
+.as-coach .coach-athlete-quick-actions .action-card strong{font-size:11px}
+.as-coach .coach-athlete-quick-actions .action-card small{font-size:9px;margin-top:2px}
+.as-coach .coach-athlete-quick-actions svg{flex:0 0 20px;width:20px;height:20px}
+.as-coach .coach-athlete-message{margin:10px 0 0;padding:9px 11px;font-size:11px}
+.as-coach .assignment-columns{margin-top:12px;gap:10px}
+.as-coach .assignment-panel{padding:12px!important;border-radius:12px;overflow:hidden}
+.as-coach .assignment-panel h3{font-size:11px;letter-spacing:.025em;margin-bottom:6px}
+.as-coach .assignment-panel>p{font-size:10px;margin-bottom:10px;line-height:1.35}
+.as-coach .assignment-scroll{max-height:340px;overflow-y:auto;overscroll-behavior:contain}
+.as-coach .assignment-item{padding:10px;margin:8px 0;border-radius:9px;background:rgba(60,134,128,.13)}
+.as-coach .assignment-item>b{font-size:11px}
+.as-coach .assignment-week-label{font-size:10px;margin:6px 0 8px;line-height:1.4}
+.as-coach .assignment-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.as-coach .assignment-actions button{font-size:10px;font-weight:720;min-height:31px;padding:6px 5px;border-radius:7px;line-height:1.15;overflow-wrap:anywhere}
+.as-coach .assignment-actions button.secondary{background:#f7f9f6;border-color:#aecbc0;color:#0a684c}
+.as-coach .assignment-actions button.danger{background:#f7f6f5;border-color:#dfb4b4;color:#ad3140}
+.as-coach .assignment-item .small.muted{font-size:10px;margin:5px 0 8px}
+.as-coach .coach-group-totals{font-size:10px;margin:10px 0}
+.as-coach .coach-program-toggle{display:block;width:100%;text-align:left;min-height:32px;padding:8px 10px;border-radius:8px;font-size:11px}
+.as-coach #coach-athlete-program{margin-top:10px;scroll-margin-top:100px}
+.as-coach .coach-delete-dialog{width:min(520px,100%)}
+.as-coach .coach-delete-dialog h2{font-size:16px;margin:0}
+.as-coach .coach-delete-row{margin-top:7px;font-size:11px;gap:8px}
+.as-coach .coach-delete-row button{font-size:10px;min-height:29px;padding:5px 9px}
+
+/* Programmazione: 3 giorni per riga su desktop, campi e schede compatti come V1. */
+.as-coach .coach-program-compact{padding:12px!important;border-radius:12px}
+.as-coach .coach-program-overview{gap:9px}
+.as-coach .coach-program-overview .card-heading{font-size:13px}
+.as-coach .coach-program-overview .small{font-size:10px}
+.as-coach .coach-program-athlete-select{max-width:210px;font-size:11px;min-height:30px;padding:6px 8px}
+.as-coach .coach-week-bar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:9px}
+.as-coach .coach-week-bar .week-pills{margin:0;display:flex;gap:5px;flex-wrap:wrap}
+.as-coach .coach-week-bar .week-pill{width:34px;height:29px;border:1px solid var(--border);border-radius:7px;font-size:11px}
+.as-coach .coach-week-bar .week-pill.selected{border-color:#81bb97;background:var(--green);color:#fff}
+.as-coach .coach-week-bar .week-pill.week-delete-target{outline:1px solid #a15c61;outline-offset:1px}
+.as-coach .coach-week-delete-select{font-size:10px;color:#ef9ca0;border-color:#70505d;background:transparent;min-height:28px;padding:5px 8px;border-radius:6px;max-width:225px;line-height:1.2}
+.as-coach .coach-week-delete-select.week-delete-target{color:#fff;background:#833842}
+.as-coach .coach-week-instructions{gap:8px;margin:7px 0 9px}
+.as-coach .coach-week-instructions p{font-size:9px;margin:0;line-height:1.4;flex:1 1 210px}
+.as-coach .coach-week-close{font-size:10px;padding:5px 8px;border-radius:7px;min-height:27px}
+.as-coach .coach-program-notice{font-size:10px;padding:7px 9px}
+.as-coach .coach-week-body{padding:10px;border-radius:9px}
+.as-coach .coach-week-heading{gap:8px;margin-bottom:9px}
+.as-coach .coach-week-heading>b{font-size:11px}
+.as-coach .coach-week-actions{gap:6px}
+.as-coach .coach-week-actions button{min-height:29px;font-size:10px;padding:6px 11px;border-radius:6px}
+.as-coach .coach-program-compact .program-days{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.as-coach .coach-program-compact .program-day{min-width:0;padding:8px;border-width:1px;border-radius:10px}
+.as-coach .coach-program-compact .program-day h3{padding-bottom:6px;margin:0 0 7px;font-size:12px}
+.as-coach .coach-program-compact .program-slot{padding:5px 7px;margin-bottom:6px;border-radius:7px}
+.as-coach .coach-program-compact .program-slot label{font-size:9px;margin:0;color:var(--mint)}
+.as-coach .coach-program-compact .program-slot input{font-size:11px;min-height:23px;padding:3px 0;line-height:1.25}
+.as-coach .coach-program-compact .program-day .divider{margin:8px 0}
+.as-coach .coach-program-compact .program-sheet{padding:6px 7px;margin-top:6px;border-radius:8px;background:rgba(42,139,86,.34)}
+.as-coach .coach-program-compact .program-sheet .row{gap:5px;flex-wrap:nowrap}
+.as-coach .coach-program-compact .program-sheet .row>div{min-width:0}
+.as-coach .coach-program-compact .program-sheet strong{font-size:10px;line-height:1.3;overflow-wrap:anywhere}
+.as-coach .coach-program-compact .program-sheet .small{font-size:9px}
+.as-coach .coach-program-compact .program-sheet .ghost{padding:3px 6px;min-height:23px;min-width:25px;border-radius:6px}
+.as-coach .coach-program-compact .program-sheet .grid2{margin-top:5px;gap:5px}
+.as-coach .coach-program-compact .program-sheet .grid2 button{font-size:10px;min-height:28px;padding:5px 3px;border-radius:6px}
+.as-coach .coach-program-compact .program-sheet .grid2 button.primary{background:#2da558;border-color:#4ab66f;color:#fff}
+.as-coach .coach-program-compact .program-sheet .grid2 button.danger{background:#964145;color:#fff;border-color:#b55f67}
+@media (max-width:1120px) and (min-width:901px){
+ .as-coach .coach-team-toolbar{flex-wrap:wrap}
+ .as-coach .coach-team-tools{justify-content:flex-start;width:100%}
+ .as-coach .coach-team-tools input{max-width:220px}
+ .as-coach .coach-program-compact .program-days{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:900px){
+ .as-coach .coach-team-toolbar{flex-wrap:wrap}
+ .as-coach .coach-team-tools{justify-content:flex-start;width:100%;flex-wrap:wrap}
+ .as-coach .coach-team-tools input{flex:1 1 190px;max-width:none}
+ .as-coach .coach-program-compact .program-days{grid-template-columns:1fr}
+ .as-coach .coach-selected-athlete{padding:12px 10px}
+ .as-coach .assignment-scroll{max-height:440px}
+}
+@media (max-width:560px){
+ .as-coach .coach-team-tools .primary,.as-coach .coach-team-tools .secondary{flex:1 1 125px}
+ .as-coach .coach-team-tools input{width:100%;flex:1 1 100%}
+ .as-coach .coach-week-bar{flex-wrap:wrap}
+ .as-coach .coach-week-delete-select{margin-left:auto}
+ .as-coach .coach-week-heading{align-items:flex-start}
+ .as-coach .coach-week-actions{width:100%;justify-content:flex-start}
+ .as-coach .coach-week-actions button{flex:1}
+ .as-coach .coach-athlete-quick-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .as-coach .coach-athlete-quick-actions .action-card{min-height:68px}
+}
+/* SVG: fallback leggibile senza alterare posizione/dimensioni delle anteprime. */
+.exercise-preview .exercise-motion-fallback{display:grid;place-items:center;text-align:center;padding:10px;font-size:10px;line-height:1.35;color:#b8c8d6;max-width:100%;height:100%;overflow-wrap:break-word}
+
+
+/* V1 Modern 0.3.1e – soli dettagli piccoli più squadrati, senza alterare i pannelli grandi. */
+.as-coach .pill,
+.as-coach .staff-details,
+.as-coach .line-card,
+.as-coach .primary,
+.as-coach .secondary,
+.as-coach .danger,
+.as-coach .ghost,
+.as-coach .notice,
+.as-coach .theme-square,
+.as-coach input:not([type="checkbox"]),
+.as-coach select,
+.as-coach textarea {border-radius:8px}
+.as-coach .staff-details summary {border-radius:5px}
+.as-coach .staff-person {display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;padding:8px 12px;border-radius:8px;margin-top:7px}
+.as-coach .staff-name {font-size:12px;font-weight:770;min-width:0;overflow-wrap:anywhere;text-align:left}
+.as-coach .staff-role {flex-shrink:0;margin-left:auto;padding:4px 8px;border-radius:6px;font-size:9px;font-weight:900;letter-spacing:.02em}
+.as-coach .coach-staff-list h3{font-size:12px;margin-bottom:10px}
+
+/* Profilo Coach e Atleta: immagine realmente selezionabile nella demo locale. */
+.profile-screen .profile-info-card{position:relative}
+.profile-screen .profile-overlap.profile-photo-button{padding:0;cursor:pointer;overflow:visible;color:var(--text);font-size:38px}
+.profile-photo-button img{height:100%;width:100%;display:block;border-radius:50%;object-fit:cover;overflow:hidden}
+.profile-photo-button>span:not(.profile-camera){display:grid;place-items:center;height:100%;width:100%}
+.profile-photo-button:focus-visible,.profile-settings-gear:focus-visible,.profile-change-photo:focus-visible{outline:3px solid var(--mint);outline-offset:3px}
+.profile-camera{position:absolute;right:-7px;bottom:-4px;display:grid;place-items:center;background:var(--green);color:#fff;border:2px solid var(--card);height:30px;width:30px;border-radius:9px}
+.profile-file-input{display:none!important}
+.profile-change-photo{display:inline-block;background:transparent;border:0;padding:3px 7px;color:var(--mint);font-size:11px;font-weight:760;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.profile-name{font-size:clamp(21px,2.4vw,31px);font-weight:900;margin:9px 8px 17px;overflow-wrap:anywhere}
+.profile-settings-gear{position:absolute;right:17px;top:17px;width:41px;height:41px;display:grid;place-items:center;border-radius:9px;border:1px solid var(--border);background:#fff;color:#17231d;box-shadow:0 1px 5px #0003}
+.profile-settings-gear:hover{background:#e5f7ec;border-color:#50bc80}
+.profile-screen .profile-edit-action{display:inline-flex;align-items:center;justify-content:center;margin:13px 8px 4px;min-height:36px;font-size:11px;letter-spacing:.015em}
+.coach-profile .profile-edit-action{display:inline-flex!important}
+.profile-screen .profile-athlete-info{text-align:left;margin:10px 8px;line-height:2}
+.profile-screen .profile-gym-pill{font-size:11px;border-radius:7px}
+.coach-profile .profile-info-card{padding-bottom:18px!important}
+.coach-profile .profile-info-card .profile-name{font-size:21px;margin:7px 0 14px}
+.coach-profile .profile-coach-staff{margin:18px 0 0;border-radius:9px;min-height:46px;text-align:left;font-size:12px;background:var(--green-bg);color:var(--mint)}
+.coach-profile .profile-coach-staff strong{font-size:12px}
+.profile-editor,.profile-legal-links{max-width:650px;width:100%;margin:0 auto}
+.profile-editor-actions{margin-top:13px;gap:10px}
+.profile-editor-actions button{min-height:36px;font-size:11px}
+.profile-editor h3{font-size:13px}
+.profile-feedback{font-size:11px;margin-top:12px;padding:9px 11px}
+.profile-legal-links .list-row{color:var(--text);font-size:12px;font-weight:770}
+.header-avatar{overflow:hidden}
+.header-avatar img{display:block;height:100%;width:100%;object-fit:cover;border-radius:50%}
+
+/* Impostazioni: collegamenti veri, bottoni piatti allineati come la V1. */
+.settings-top .settings-back{position:absolute;left:4px;top:3px;color:var(--text);display:grid;place-items:center;background:transparent;border:0;border-radius:8px;height:35px;width:35px;padding:3px;cursor:pointer}
+.settings-inner .settings-entry{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding:13px 10px;gap:10px;font-weight:800;color:var(--text);font-size:12px;min-height:48px}
+.settings-inner .settings-entry>span{display:flex;gap:12px;align-items:center;min-width:0}
+.settings-inner .settings-entry:hover{background:var(--card2)}
+.settings-inner .settings-entry svg{flex-shrink:0}
+.settings-inner .settings-info-note{font-size:10px;margin:14px 4px 0}
+.settings-inner .settings-logout{display:flex;justify-content:space-between;align-items:center;width:100%;border:1px solid #c87375;background:#b9484b;color:#fff;border-radius:8px;font-size:12px;min-height:45px;padding:10px 14px}
+.settings-inner h3{border-radius:0;font-size:11px;letter-spacing:.06em}
+@media (max-width:600px){
+ .coach-profile .profile-info-card{padding-top:22px!important}
+ .profile-screen .preview-banner{height:150px}
+ .profile-screen .profile-name{font-size:22px}
+ .settings-inner{margin:16px auto}
+ .settings-top{padding-top:15px}
+}
+.coach-profile .profile-editor{margin:12px auto 0!important;padding-top:16px!important;text-align:left!important}
+.coach-profile .profile-editor .row{justify-content:flex-start}
+
+/* HOTFIX 0.3.1f — area Atleta fedele alla V1, specifico per smartphone. */
+.as-athlete .athlete-plan .section-title{margin:0;font-size:18px;letter-spacing:.035em}
+.as-athlete .athlete-scheduled-sheets>.row,.as-athlete .athlete-week-program>.row{margin:4px 2px 12px;align-items:center;gap:7px}
+.as-athlete .athlete-sheet-grid{margin-top:13px;gap:12px}
+.as-athlete .athlete-week-picker .week-pills{overflow-x:auto;max-width:100%;scrollbar-width:none}
+.as-athlete .athlete-week-picker .week-pills::-webkit-scrollbar{display:none}
+.as-athlete .athlete-week-program .week-days{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.as-athlete .athlete-week-program .day-card{min-width:0;display:flex;flex-direction:column;position:relative;border-radius:16px;padding:13px;min-height:140px;align-items:stretch}
+.as-athlete .athlete-week-program .day-card:first-child:not(.day-card-today){border-color:#536d80;background:#172832}
+.as-athlete .athlete-week-program .day-card-today,.as-athlete .athlete-week-program .day-card-selected{border-color:#8ef1bb;background:#193d33}
+.as-athlete .athlete-week-program .day-card h3{font-size:13px;line-height:1.2;overflow-wrap:anywhere}
+.as-athlete .athlete-week-program .day-card p{font-size:11px;line-height:1.3;overflow-wrap:anywhere}
+.as-athlete .athlete-week-program .day-card-sheet-activity{color:#8ef1bb}
+.as-athlete .athlete-week-program .day-card-detail{margin-top:auto;padding-top:12px;display:flex;gap:6px;justify-content:space-between;align-items:center;border-top:1px solid #344654;color:#a6b6c6;font-size:10px;font-weight:850}
+.as-athlete .athlete-week-program .day-card-sunday{grid-column:1/-1;min-height:75px}
+.as-athlete .athlete-week-program .day-card-sunday .day-card-detail{margin-top:10px}
+.athlete-day-overlay{z-index:78}
+.athlete-day-dialog{width:min(400px,100%);padding:0;max-height:min(88dvh,720px);overflow:auto;background:var(--card);border-radius:21px}
+.athlete-day-dialog-head{padding:17px 19px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border)}
+.athlete-day-dialog-head h2{font-size:18px;margin:0 0 4px}
+.athlete-day-dialog-head p{margin:0}
+.athlete-day-dialog-body{padding:19px}
+.athlete-day-dialog-body h3{font-size:11px;font-weight:950;letter-spacing:.05em;color:var(--muted);margin-bottom:13px}
+.athlete-day-activity{border:1px solid var(--border);background:var(--field);padding:10px 13px;border-radius:10px;font-weight:850;font-size:13px;margin:7px 0}
+.athlete-day-linked{display:grid;gap:8px;margin-top:15px}
+.athlete-day-dialog-foot{padding:12px 18px;border-top:1px solid var(--border);text-align:right}
+/* SVG: preview e finestra con area riservata, mai immagini sovrapposte alla descrizione. */
+.library-card .exercise-preview,.exercise-dialog .exercise-preview{contain:layout paint;overflow:hidden;position:relative;min-width:0;display:grid;place-items:center}
+.library-card .exercise-preview img{width:calc(100% - 18px)!important;height:calc(100% - 14px)!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center center!important}
+.exercise-dialog .exercise-preview{height:clamp(190px,38vh,310px);flex:none;background:#29384d}
+.exercise-dialog .exercise-preview img{display:block;width:calc(100% - 28px)!important;height:calc(100% - 22px)!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center center!important;transform:none!important}
+.exercise-dialog{width:min(580px,100%);max-height:calc(100dvh - 30px);overflow-y:auto;overscroll-behavior:contain}
+.exercise-dialog .exercise-steps{font-size:12px;line-height:1.55}
+@media(max-width:600px){
+ .as-athlete .athlete-plan{gap:17px!important}
+ .as-athlete .athlete-plan-summary{padding:17px 15px}
+ .as-athlete .athlete-plan-summary .card-heading{font-size:16px}
+ .as-athlete .athlete-plan-summary .pill{font-size:9px;white-space:nowrap;padding:5px 8px}
+ .as-athlete .athlete-plan-summary .muted{font-size:11px}
+ .as-athlete .athlete-week-picker{padding:15px 16px}
+ .as-athlete .athlete-week-picker .row{flex-wrap:nowrap;gap:8px}
+ .as-athlete .athlete-week-picker .row strong{font-size:11px;white-space:nowrap}
+ .as-athlete .athlete-week-picker .row .small{font-size:10px;text-align:right}
+ .as-athlete .athlete-week-picker .week-pills{gap:8px;margin:12px 0 0}
+ .as-athlete .athlete-week-picker .week-pill{width:36px;height:36px;min-width:36px;font-size:12px}
+ .as-athlete .athlete-scheduled-sheets .section-title,.as-athlete .athlete-week-program .section-title{font-size:13px;line-height:1.2}
+ .as-athlete .athlete-scheduled-sheets>.row .pill,.as-athlete .athlete-week-program>.row .pill{font-size:9px;padding:5px 7px;white-space:nowrap}
+ .as-athlete .athlete-sheet-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+ .as-athlete .athlete-sheet-grid .scheme-item{min-width:0;padding:12px 11px;border-radius:17px;display:flex;flex-direction:column}
+ .as-athlete .athlete-sheet-grid .scheme-item h3{font-size:15px;line-height:1.2;overflow-wrap:anywhere;margin:0 0 12px}
+ .as-athlete .athlete-sheet-grid .scheme-item .chip{font-size:9px;padding:6px 7px;line-height:1.4}
+ .as-athlete .athlete-sheet-grid .athlete-sheet-days{margin:11px 0 15px!important;font-size:10px;line-height:1.45}
+ .as-athlete .athlete-sheet-grid .bare{padding:5px 0;min-height:28px;margin-top:auto;font-size:10px;text-align:left}
+ .as-athlete .athlete-week-program-panel{padding:12px 10px;border-radius:18px}
+ .as-athlete .athlete-week-title{flex-wrap:nowrap;gap:5px}
+ .as-athlete .athlete-week-title strong{font-size:11px;letter-spacing:.025em}
+ .as-athlete .athlete-week-title .pill{font-size:9px;padding:4px 6px;white-space:nowrap}
+ .as-athlete .athlete-week-program .week-days{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .as-athlete .athlete-week-program .day-card{min-height:116px;padding:9px 7px;border-radius:14px;border-width:1.5px}
+ .as-athlete .athlete-week-program .day-card h3{font-size:10px;line-height:1.2;margin:0 0 8px}
+ .as-athlete .athlete-week-program .day-card p{font-size:9px;line-height:1.27;margin:0 0 4px;word-break:normal;overflow-wrap:anywhere}
+ .as-athlete .athlete-week-program .day-card-detail{font-size:8px;padding-top:8px;margin-top:auto}
+ .as-athlete .athlete-week-program .day-card-sunday{grid-column:1/-1;min-height:65px}
+ .athlete-day-dialog{width:min(390px,100%)}
+ .exercise-dialog{padding:14px;max-height:calc(100dvh - 28px)}
+ .exercise-dialog .exercise-preview{height:235px}
+ .library-card .exercise-preview{height:100px;flex-basis:100px}
+}
+@media(max-width:360px){
+ .as-athlete .athlete-week-program .week-days{gap:4px}
+ .as-athlete .athlete-week-program .day-card{padding:8px 5px}
+ .as-athlete .athlete-week-program .day-card h3{font-size:9px}
+ .as-athlete .athlete-week-program .day-card p{font-size:8px}
+}
+
+/* HOTFIX 0.3.1g — fedeltà richiesta: prenotazioni mobile, rotelline profilo/header, card coach uniformi. */
+.bookings-mode .booking-intro h1{font-size:clamp(25px,4vw,36px);letter-spacing:-.04em}
+.bookings-mode .booking-intro .muted{font-size:12px}
+.bookings-mode .booking-top-controls{gap:10px;justify-content:flex-start;flex-wrap:wrap;margin:10px 0 6px}
+.bookings-mode .booking-control{display:inline-flex;align-items:center;justify-content:center;min-height:43px;padding:11px 18px;border-radius:17px;border:1px solid #435a5e;background:transparent;color:#eef9f2;font-weight:780}
+.bookings-mode .booking-control:hover{border-color:#73dca3;background:rgba(29,54,46,.34)}
+.bookings-mode .booking-live-pill{min-height:43px;padding:11px 18px;border-radius:18px;background:transparent;border:1px solid #4b5c5b;color:#9ae8bc;font-size:12px}
+.bookings-mode .booking-main-tabs{gap:14px;margin:8px 0 4px}
+.bookings-mode .booking-main-tabs button{min-height:58px;padding:15px 24px;border-radius:29px;background:#36464d;border-color:#58676d;color:#eef9f2;font-size:14px;font-weight:850}
+.bookings-mode .booking-main-tabs button.selected{background:#178253;border-color:#4ad18b;color:#fff}
+.bookings-mode .booking-v1-services{gap:16px}
+.bookings-mode .booking-service-card{min-height:300px;padding:21px 20px 22px;border-radius:26px;background:linear-gradient(145deg,#1d2f35 0%,#152126 72%);border:1px solid #39575a;color:#eef9f2;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;box-shadow:inset 0 0 0 1px rgba(128,197,182,.06)}
+.bookings-mode .booking-service-card.selected{border-color:#59d39a;box-shadow:0 0 0 1px rgba(89,211,154,.32),inset 0 0 0 1px rgba(89,211,154,.14)}
+.bookings-mode .booking-service-card:nth-child(2){background:linear-gradient(145deg,#22373a 0%,#172625 72%)}
+.bookings-mode .booking-service-icon-box{width:112px;height:112px;border-radius:22px;border:1px solid #32545f;background:#0e171d;display:grid;place-items:center;color:#f5f7fb;box-shadow:inset 0 0 0 1px rgba(61,95,103,.26)}
+.bookings-mode .booking-service-icon{width:60px;height:60px}
+.bookings-mode .booking-service-badge{font-size:10px;line-height:1.25;letter-spacing:.1em;font-weight:900;color:#45d38d;text-transform:uppercase;margin:18px 0 9px}
+.bookings-mode .booking-service-card strong{display:block;font-size:28px;letter-spacing:-.03em;line-height:1.02;margin:0 0 13px}
+.bookings-mode .booking-service-card small{display:block;margin:0;color:#b6c6c7;font-size:12px;line-height:1.55}
+.bookings-mode .booking-service-cta{margin-top:16px;width:100%;min-height:48px;border-radius:999px;border:1px solid #44675a;padding:12px 16px;display:flex;align-items:center;justify-content:flex-start;color:#a9f0c8;font-size:13px;font-weight:850}
+.bookings-mode .booking-choice.selected .booking-service-cta{border-color:#5cd89e;color:#d9ffe8;background:rgba(21,76,49,.28)}
+.as-athlete .top-actions .theme-square{width:46px;height:46px;border-radius:13px;border:1px solid #56728c;background:rgba(24,40,58,.72);box-shadow:inset 0 0 0 1px rgba(138,184,220,.11)}
+.as-athlete .top-actions .theme-square:hover{border-color:#7ba1c0;background:rgba(30,49,70,.9)}
+.as-athlete .top-actions .theme-square svg{width:20px;height:20px}
+.as-athlete .top-actions .header-avatar{width:47px;height:47px;border-width:2px;background:#15263d}
+.profile-settings-gear{right:18px;top:18px;width:45px;height:45px;border-radius:12px;border:1px solid #d8e0e6;background:#fff;color:#5c6e77;box-shadow:0 10px 24px rgba(0,0,0,.18)}
+.profile-settings-gear:hover{background:#fff;border-color:#a8bcc7;color:#3f4e57}
+.profile-settings-gear svg{width:18px;height:18px}
+.profile-screen .preview-banner{border-radius:24px;overflow:hidden}
+.profile-screen .profile-coach-staff{display:flex;align-items:center;gap:12px}
+.profile-screen .profile-coach-staff-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
+.profile-screen .profile-coach-staff-copy small{font-size:10px;color:var(--muted);font-weight:700}
+.as-coach .coach-metrics-grid{align-items:stretch}
+.as-coach .coach-metric-card{min-height:108px;display:flex;flex-direction:column;justify-content:flex-start}
+.as-coach .coach-metric-number{font-size:24px!important;line-height:1;margin:13px 0 6px!important}
+.as-coach .coach-metric-title{font-weight:900;font-size:18px;line-height:1.15;margin:15px 0 6px}
+@media (max-width:900px){
+ .as-athlete .mobile-topbar{background:linear-gradient(180deg,#20395a,#1b314c);border-bottom-color:#324e6c}
+ .as-athlete .mobile-topbar .brand-subtitle{color:#bcd0e4}
+ .bookings-mode .booking-intro .muted{font-size:11px}
+}
+@media (max-width:600px){
+ .bookings-mode .booking-main{padding-top:calc(12px + env(safe-area-inset-top,0px))}
+ .bookings-mode .booking-main .booking-section-title{font-size:18px;margin:22px 0 12px}
+ .bookings-mode .booking-main-tabs{gap:12px}
+ .bookings-mode .booking-main-tabs button{min-height:56px;padding:14px 22px;font-size:13px}
+ .bookings-mode .booking-v1-services{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+ .bookings-mode .booking-service-card{min-height:255px;padding:18px 16px 20px;border-radius:22px}
+ .bookings-mode .booking-service-icon-box{width:95px;height:95px;border-radius:18px}
+ .bookings-mode .booking-service-icon{width:50px;height:50px}
+ .bookings-mode .booking-service-card strong{font-size:24px;margin-bottom:10px}
+ .bookings-mode .booking-service-card small{font-size:11px;line-height:1.5}
+ .bookings-mode .booking-service-badge{font-size:9px;margin:16px 0 8px}
+ .bookings-mode .booking-service-cta{min-height:44px;padding:10px 14px;font-size:12px}
+ .profile-settings-gear{width:42px;height:42px;right:14px;top:14px}
+ .as-coach .coach-metric-card{min-height:96px}
+}
+@media (max-width:430px){
+ .bookings-mode .booking-main-tabs button{flex:0 0 auto}
+ .bookings-mode .booking-service-card{min-height:248px}
+}
+
+
+/* LION FIT 0.3.1h — confronto V1: 3 stat box davvero identiche e compatte.
+   La regola legacy .panel+.panel applicava margin-top:15px a card della griglia,
+   sfalsando il riepilogo. Qui i componenti non usano .panel e non ereditano margini. */
+.as-coach .coach-dashboard-summary .coach-metrics-grid{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch;
+}
+.as-coach .coach-dashboard-summary .coach-metric-card{
+ margin:0!important;min-width:0;width:100%;height:100%;min-height:103px;
+ padding:15px 17px;display:flex;flex-direction:column;align-items:flex-start;
+ gap:7px;border:1.5px solid #333F50;border-radius:16px;
+ background:#171F2C;color:var(--text);
+}
+.as-coach .coach-dashboard-summary .coach-metric-label{
+ font-size:10px;line-height:1.25;font-weight:900;letter-spacing:.045em;
+ color:var(--muted);text-transform:uppercase;
+}
+.as-coach .coach-dashboard-summary .coach-metric-value{
+ color:var(--text);font-size:25px;font-weight:900;line-height:1.15;
+ margin:0!important;overflow-wrap:anywhere;
+}
+.as-coach .coach-dashboard-summary .coach-metric-invites{
+ color:var(--text);font-size:19px;letter-spacing:-.012em;
+}
+.as-coach .coach-dashboard-summary .coach-metric-card small{
+ font-size:10px;line-height:1.35;color:var(--muted);font-weight:500;
+}
+/* Colori V1 originale: data-lion-theme dark/light in ROUNDONE/www/admin.html. */
+.theme-light.as-coach .coach-dashboard-summary .coach-metric-card{
+ background:#fff;border-color:#D5E1D8;color:#17231D;
+}
+/* Rotellina: stesso disegno delle impostazioni nel banner, nella topbar coach/atleta. */
+.profile-screen .profile-settings-gear{
+ display:grid;place-items:center;position:absolute;top:14px;right:14px;
+ width:43px;height:43px;min-width:43px;padding:0;
+ border:1px solid #d9e0e8;border-radius:10px;
+ background:#fff;color:#233043;box-shadow:0 2px 8px rgba(0,0,0,.14);
+}
+.profile-screen .profile-settings-gear svg{width:21px;height:21px;display:block}
+.profile-screen .profile-settings-gear:hover{background:#f2fff7;color:#116b44;border-color:#8ccbaa}
+.top-actions .header-settings-button{display:grid;place-items:center;flex-shrink:0}
+.top-actions .header-settings-button svg{display:block;width:21px;height:21px}
+.as-athlete .top-actions .header-settings-button{border-color:#557795;background:rgba(24,40,58,.72);color:#e7f2fc}
+.as-athlete .top-actions .header-settings-button:hover{border-color:#83c7aa;color:#9ff3c8}
+.top-actions .theme-square:focus-visible,.profile-settings-gear:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+@media(max-width:620px){
+ .as-coach .coach-dashboard-summary .coach-metrics-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;
+ }
+ /* Seguendo la V1 mobile, il terzo riquadro occupa tutta la riga: nessuno ha una misura diversa dagli altri sulla stessa riga. */
+ .as-coach .coach-dashboard-summary .coach-metric-card:last-child{grid-column:1/-1}
+ .as-coach .coach-dashboard-summary .coach-metric-card{min-height:96px;padding:12px 13px;border-radius:13px}
+ .as-coach .coach-dashboard-summary .coach-metric-value{font-size:22px}
+ .as-coach .coach-dashboard-summary .coach-metric-invites{font-size:18px}
+ .as-coach .coach-dashboard-summary .coach-metric-label{font-size:9px}
+ .as-coach .coach-dashboard-summary .coach-metric-card small{font-size:10px}
+ .as-athlete .top-actions{gap:7px;flex-shrink:0}
+ .as-athlete .top-actions .theme-square{height:41px;width:41px;border-radius:11px}
+ .as-athlete .top-actions .header-avatar{height:42px;width:42px}
+ .profile-screen .profile-settings-gear{height:41px;width:41px;min-width:41px}
+}
+@media(max-width:380px){
+ .as-athlete .mobile-topbar{padding-left:10px;padding-right:10px}
+ .as-athlete .brand{gap:7px;min-width:0}
+ .as-athlete .brand img{width:35px;height:35px}
+ .as-athlete .brand-name{font-size:17px}
+ .as-athlete .brand-subtitle{font-size:9px}
+ .as-athlete .top-actions{gap:5px}
+ .as-athlete .top-actions .theme-square{height:35px;width:35px;border-radius:9px}
+ .as-athlete .top-actions .header-avatar{height:36px;width:36px}
+ .as-athlete .top-actions .header-settings-button svg{width:18px;height:18px}
+}
+
+
+
+/* Fase 2M/S — parita ROUNDONE: shell unica Coach/Atleta/Prenotazioni.
+   La palette dark resta quella V1; il light e' grigio chiaro, non bianco. */
+.theme-light{
+ --bg:#e7ebe9; --nav:#dce3df; --card:#f0f3f1; --card2:#e2e9e5;
+ --field:#e6ece8; --text:#20352a; --muted:#5e7067;
+ --border:#b7c7be; --outline:#95ad9f; --mint:#167447;
+ --green:#168251; --green-bg:#cfebd9;
+}
+.theme-light .mobile-topbar,.theme-light .desktop-sidebar,.theme-light .bottom-nav{background:var(--nav);color:var(--text)}
+.theme-light .card,.theme-light .panel,.theme-light .line-card,.theme-light .dialog,
+.theme-light .assignment-panel,.theme-light .action-card,.theme-light .program-day,
+.theme-light .program-slot,.theme-light .booking-filter,.theme-light .booking-period,
+.theme-light .booking-choice,.theme-light .coach-month-day,.theme-light .booking-day{
+ background:var(--card);color:var(--text);border-color:var(--border);
+}
+.theme-light input,.theme-light textarea,.theme-light select{background:var(--field);color:var(--text);border-color:var(--border)}
+.theme-light .booking-day.selected,.theme-light .coach-month-day.selected,
+.theme-light .booking-choice.selected,.theme-light .booking-tabs button.selected{background:#d0ebd9;color:#165838;border-color:#168251}
+.theme-light .booking-tabs button,.theme-light .booking-control{background:#dfe9e3;color:#1f4531;border-color:#a9c0b2}
+.theme-light .booking-intro,.theme-light .booking-in-shell{color:var(--text)}
+.theme-light .booking-main .panel{background:var(--card);color:var(--text)}
+.theme-light .booking-service-card small{color:var(--muted)}
+.theme-light .booking-day small,.theme-light .coach-month-day small{color:var(--muted)}
+/* Switch tema, contorno/tap target mobili */
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
+/* Prenotazioni nella shell originale, non nella pagina esterna con mini-sidebar */
+.booking-in-shell{width:100%;max-width:1180px;margin:0 auto;padding-bottom:20px}
+.booking-in-shell .booking-intro{position:relative}
+.booking-in-shell .booking-intro h1{font-size:clamp(21px,2.5vw,27px)}
+.booking-in-shell .booking-top-controls{margin:6px 0 8px;justify-content:flex-start}
+.booking-in-shell .booking-main-tabs button{min-height:38px;padding:8px 13px;font-size:12px}
+.booking-in-shell .booking-service-card{min-height:175px;padding:14px;border-radius:16px}
+.booking-in-shell .booking-service-icon-box{width:54px;height:54px}
+.booking-in-shell .booking-section-title{font-size:17px;margin:16px 0 9px}
+.booking-in-shell .booking-tabs button{padding:7px 10px;font-size:11px}
+.booking-in-shell .panel{padding:14px}
+.booking-in-shell .booking-v1-services{gap:10px}
+.booking-in-shell .booking-main{padding:0}
+.booking-in-shell .booking-choice strong{font-size:18px}
+.booking-in-shell .booking-choice small{font-size:11px}
+.booking-in-shell .booking-choice .booking-service-badge{font-size:9px;margin:8px 0}
+.booking-in-shell .booking-service-cta{min-height:32px;padding:6px 8px}
+/* Mobile navbar fixed in tutte le sezioni, anche Prenotazioni */
+.as-athlete .bottom-nav{display:flex}
+.bottom-nav{z-index:70;min-height:68px;padding:5px 4px calc(6px + env(safe-area-inset-bottom,0px));box-shadow:0 -3px 14px rgba(0,0,0,.15)}
+.bottom-nav a{min-width:0;gap:3px;padding:8px 1px;font-size:clamp(8px,1.6vw,11px);line-height:1.1;text-align:center}
+.bottom-nav a svg{width:21px;height:21px}
+.as-athlete .bottom-nav a.router-link-active{background:#123e2b;color:#7af0b6}
+.theme-light .bottom-nav a{color:#53675c}
+.theme-light .bottom-nav a.router-link-active{background:#c8e8d5;color:#167347}
+.main-layout{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+.coach-container{min-width:0}
+.program-day .program-slot label,.program-day .program-sheet b{display:block;margin:0 0 4px}
+/* Giorno V1: due attivita poi due schede nella stessa colonna */
+.coach-v1-day .coach-v1-activity,.coach-v1-day .coach-v1-sheet{border:1px solid var(--border);border-radius:11px;padding:9px;margin:5px 0;background:var(--field);min-width:0}
+.coach-v1-day .coach-v1-activity b,.coach-v1-day .coach-v1-sheet b{display:block;font-size:11px;color:var(--mint);margin-bottom:4px}
+.coach-v1-day .coach-v1-sheet{background:rgba(31,129,76,.21);border-color:#318b62}
+.coach-v1-day button{min-height:32px;font-size:11px;padding:6px 8px}
+.coach-v1-day .coach-v1-slot-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}
+.coach-v1-day .coach-v1-slot-actions .danger{background:#4f3035}
+.coach-v1-day .coach-v1-activity input{width:100%}
+.coach-v1-day .coach-v1-slot-head{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.coach-v1-day .coach-v1-slot-head b{margin:0}
+.coach-v1-assignment-card .assignment-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.coach-v1-assignment-card .assignment-actions button{font-size:11px;padding:6px 3px;min-width:0;white-space:normal}
+.coach-v1-pick-list{max-height:48vh;overflow:auto;overscroll-behavior:contain}
+/* Coach: footer invitation shortcut sempre visibile */
+.sidebar-foot .invite-shortcut{display:block;margin:8px 0;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--card);font-size:10px}
+.sidebar-foot .invite-shortcut strong{display:block;margin-top:4px;color:var(--mint)}
+/* Mese Coach — pallini per appartenenza stabile al coach, giallo/blu */
+.coach-month-dots{display:flex;gap:4px;justify-content:flex-start;flex-wrap:wrap;min-height:9px}
+.coach-dot{width:7px;height:7px;display:inline-block;flex:0 0 7px;border-radius:50%;background:#d8b432}
+.coach-dot.coach-blue{background:#4b9cef}
+.coach-dot.coach-other{background:#69d59e}
+@media(min-width:901px){.as-athlete .bottom-nav{max-width:none}.as-coach .bottom-nav{display:none}}
+@media(max-width:900px){.main-layout{padding-bottom:calc(106px + env(safe-area-inset-bottom,0px))}.as-coach .bottom-nav{display:flex}}
+@media(max-width:600px){.booking-in-shell .booking-choice{min-height:160px;padding:11px}.booking-in-shell .booking-choice strong{font-size:17px}.booking-in-shell .booking-service-icon-box{width:41px;height:41px}.booking-in-shell .booking-control{font-size:10px}.coach-v1-day{padding:9px}.coach-month-day{min-height:47px;padding:5px}.bottom-nav a{font-size:9px;max-width:none}}
+
+/* Profilo V1: modifica completa e foto/iPhone a dimensioni adattive */
+.profile-edit-screen{max-width:720px;margin:0 auto;width:100%}
+.profile-edit-screen header{border-bottom:1px solid var(--border);padding:12px 0;margin-bottom:12px}
+.profile-edit-screen header h2{font-size:15px;letter-spacing:.05em}
+.profile-photo-editor{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:5px;margin:0 auto 24px;color:var(--muted)}
+.profile-photo-editor img,.profile-photo-editor>span{height:106px;width:106px;border-radius:50%;border:3px dashed var(--outline);object-fit:cover;display:grid;place-items:center;font-size:37px}
+.profile-edit-fields{gap:14px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.profile-edit-fields label{font-size:11px;color:var(--muted);font-weight:800;letter-spacing:.04em;display:block;min-width:0}
+.profile-edit-fields label input,.profile-edit-fields label select{margin:7px 0 2px;font-size:14px;min-height:42px;max-width:100%}
+.profile-edit-screen .primary.wide{margin-top:19px}
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+@media(max-width:520px){.profile-edit-fields{grid-template-columns:1fr}.profile-edit-screen{padding:15px}}
+
+/* Login ROUNDONE: logo, sezioni Accedi/Registrati, campi compatti, reset password */
+.login-main{max-width:100%;padding:26px 14px 60px}
+.v1-login{display:flex;flex-direction:column;align-items:center;gap:18px;max-width:510px;margin:0 auto}
+.login-identity{text-align:center}
+.login-identity img{display:block;width:92px;height:92px;object-fit:contain;margin:0 auto 7px}
+.login-identity h1{font-weight:950;font-style:italic;font-size:30px;letter-spacing:.07em;margin:0}
+.login-identity h1 span{color:var(--mint)}
+.login-identity p{text-transform:uppercase;font-size:11px;color:var(--muted);font-weight:800;letter-spacing:.05em}
+.v1-login .access-card{width:100%;padding:22px;max-width:470px}
+.login-tabs{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}
+.login-tabs button{background:transparent;color:var(--muted);font-size:12px;font-weight:900;border:0;border-bottom:3px solid transparent;padding:12px 8px}
+.login-tabs button.selected{border-bottom-color:var(--mint);color:var(--text)}
+.v1-login label{display:block;font-size:11px;font-weight:850;color:var(--muted);letter-spacing:.04em}
+.v1-login label>input{display:block;margin-top:7px;min-height:42px}
+.password-control{display:flex;align-items:stretch;margin-top:7px;min-width:0}
+.password-control input{flex:1;min-width:0;border-radius:9px 0 0 9px!important}
+.password-control button{background:var(--card2);color:var(--text);border:1px solid var(--border);border-left:0;border-radius:0 9px 9px 0;font-size:11px;font-weight:800;padding:0 11px}
+.v1-register-link{display:block;text-align:center;border-radius:10px;padding:12px;text-decoration:none}
+.login-header{display:flex;justify-content:center;align-items:center;gap:10px}
+@media(max-width:480px){.v1-login .access-card{padding:16px}.login-main{padding:12px 12px 40px}.login-identity img{width:72px;height:72px}}
+.booking-coach-chips{margin:9px 0;display:flex;gap:8px;align-items:center}
+.booking-coach-chips button{display:inline-flex;gap:6px;align-items:center}
+.coach-dot.coach-yellow{background:#e3bb37}
+.coach-dot.coach-blue{background:#419ded}
+.booking-in-shell .coach-month-dots{gap:4px}
+
+/* 2M/S: navigation menu completa anche su smartphone Coach */
+.mobile-coach-menu-btn,.coach-mobile-shade{display:none}
+@media(max-width:900px){
+ .mobile-coach-menu-btn{display:grid;font-size:23px;font-weight:700}
+ .coach-mobile-shade{display:block;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:78}
+ .as-coach .desktop-sidebar.mobile-sidebar-open{display:flex;position:fixed;z-index:79;top:0;left:0;bottom:0;width:min(285px,88vw);box-shadow:12px 0 40px rgba(0,0,0,.5)}
+ .as-coach .desktop-sidebar.mobile-sidebar-open .sidebar-nav{overflow-y:auto;overscroll-behavior:contain}
+}
+
+
+/* 2M/T · Rifinitura finale del pannello Coach: compattezza e allineamenti. */
+.as-coach .main-layout{padding:15px clamp(12px,1.65vw,27px) 36px}
+.as-coach .main-layout>.version{margin-bottom:8px;font-size:9px}
+.as-coach .coach-athletes-screen{gap:8px}
+.as-coach .coach-athletes-screen .panel{border-radius:12px}
+.as-coach .assignment-columns{align-items:stretch;gap:9px;margin-top:7px}
+.as-coach .assignment-columns>.assignment-panel{margin-top:0!important;min-width:0;padding:10px!important}
+.as-coach .assignment-panel .line-card{padding:9px;margin:5px 0;border-radius:8px}
+.as-coach .assignment-panel h3{margin:0 0 5px;font-size:11px}
+.as-coach .assignment-panel>p{margin:0 0 6px;font-size:10px}
+.as-coach .assignment-panel .assignment-scroll{max-height:300px}
+.as-coach .coach-program-compact{padding:10px!important}
+.as-coach .coach-program-compact h2{font-size:14px;margin:0}
+.as-coach .coach-program-compact .week-pills{margin:7px 0;gap:5px;display:flex;flex-wrap:wrap}
+.as-coach .coach-program-compact .week-pill{height:28px;width:29px;min-height:28px;flex:none;border:1px solid var(--outline);border-radius:7px;font-size:10px}
+.as-coach .coach-program-compact .week-pill.selected{background:var(--green);border-color:var(--mint);color:white}
+.as-coach .coach-program-compact>.row,.as-coach .coach-program-compact>.stack{gap:7px}
+.as-coach .coach-program-compact .row h3{font-size:12px;margin:0}
+.as-coach .coach-program-compact .program-days{gap:8px;margin-top:6px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.as-coach .coach-v1-day{border-width:1px;padding:8px;min-width:0;border-radius:11px}
+.as-coach .coach-v1-day>h3{font-size:11px;margin:0 0 7px;padding:0 0 7px;line-height:1.2}
+.as-coach .coach-v1-day .coach-v1-activity,.as-coach .coach-v1-day .coach-v1-sheet{border-radius:8px;padding:7px;margin:5px 0}
+.as-coach .coach-v1-day .coach-v1-activity b,.as-coach .coach-v1-day .coach-v1-sheet b{font-size:10px;margin-bottom:2px}
+.as-coach .coach-v1-day .coach-v1-activity p,.as-coach .coach-v1-day .coach-v1-sheet p{font-size:10px;line-height:1.35;margin:2px 0}
+.as-coach .coach-v1-day .coach-v1-activity input{font-size:11px;min-height:30px;line-height:1.2;padding:5px 7px;border-radius:6px}
+.as-coach .coach-v1-day .coach-v1-slot-head button{width:28px;min-width:28px;min-height:27px;height:27px;padding:0;font-size:13px;border-radius:7px}
+.as-coach .coach-v1-day .coach-v1-slot-actions{margin-top:5px;gap:5px}
+.as-coach .coach-v1-day .coach-v1-slot-actions button{font-size:10px;padding:5px 4px;min-height:29px;border-radius:6px}
+.as-coach .coach-v1-day .coach-v1-sheet{background:rgba(37,141,85,.17);border-color:#459b74}
+.as-coach .coach-athlete-quick-actions .action-card{min-height:53px;padding:8px 10px}
+.as-coach .coach-selected-athlete{padding:11px 13px}
+.as-coach .coach-selected-athlete>.divider{margin:8px 0}
+.as-coach .archive-card{border-width:1px;border-radius:12px;padding:11px}
+.as-coach .archive-card h3{font-size:13px}
+.as-coach .archive-actions{gap:5px}
+.as-coach .archive-actions button{font-size:10px;min-height:30px;padding:5px 7px;border-radius:7px}
+.as-coach .coach-archive-toolbar{display:grid;grid-template-columns:minmax(150px,1fr) auto minmax(140px,200px);gap:7px;align-items:center;margin:11px 0}
+.as-coach .coach-archive-toolbar input,.as-coach .coach-archive-toolbar select,.as-coach .coach-archive-toolbar button{min-height:34px;height:34px;font-size:11px;padding:6px 9px;border-radius:8px}
+.as-coach .coach-assign-dialog{max-width:460px}
+.as-coach .coach-archive-guide{font-size:11px;padding:9px 11px}
+.as-coach .coach-staff-screen{gap:10px!important}
+.as-coach .coach-staff-screen .panel{padding:12px;border-radius:12px}
+.as-coach .coach-staff-screen h2{font-size:15px}
+.as-coach .coach-staff-screen h3{font-size:13px}
+.invite-action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:9px 0 0}
+.invite-action-buttons button{min-width:0;min-height:36px;font-size:11px;padding:7px 9px}
+.booking-in-shell .booking-intro{position:relative;min-height:88px;padding-right:0}
+.booking-in-shell .booking-top-controls{position:absolute;right:0;top:0;justify-content:flex-end;gap:6px;margin:0}
+.booking-in-shell .booking-top-controls .booking-control,.booking-in-shell .booking-top-controls .pill{font-size:10px;min-height:31px;padding:6px 9px;border-radius:8px}
+.booking-in-shell .booking-intro h1{max-width:48%;font-size:24px}
+.booking-in-shell .booking-main-tabs{margin-top:0}
+/* Quadro chiaro professionale, sfondi caldi e gerarchia coerente. */
+.app.theme-light{--bg:#F2F6F4;--nav:#FFFFFF;--card:#FFFFFF;--card2:#F5FAF7;--field:#F8FBFA;--text:#193129;--muted:#586F64;--border:#D7E4DC;--mint:#117B51;--green:#187E53;--outline:#AEC7B9;--green-bg:#E2F4E9}
+.theme-light .panel,.theme-light .card,.theme-light .action-card,.theme-light .archive-card,.theme-light .program-day{box-shadow:0 2px 12px rgba(26,63,44,.045)}
+.theme-light .sidebar-nav a.router-link-active{background:#187E53;border-color:#187E53;color:#fff}
+.theme-light .coach-v1-day .coach-v1-sheet{background:#E1F4E9;border-color:#9BCEB4}
+.theme-light .coach-v1-day .coach-v1-activity{background:#F7FAF9}
+.theme-light .coach-v1-day .coach-v1-sheet p,.theme-light .coach-v1-day .coach-v1-activity p{color:#2D5140}
+.theme-light .notice-success{background:#E5F5E9;color:#21593E;border-color:#B6D9BF}
+.theme-light .exercise-preview,.theme-light .library-card .exercise-preview,.theme-light .exercise-dialog .exercise-preview{background:#E7F0EF;border-color:#BED1CA}
+/* Libreria V1: immagini contenute, card coerenti e nessuna sovrapposizione. */
+.library-grid{align-items:stretch;gap:10px}
+.library-card{padding:8px!important;border-radius:12px!important;text-align:left;overflow:hidden;display:flex;flex-direction:column}
+.library-card .exercise-preview{height:118px;flex:0 0 118px;border-radius:8px}
+.library-card h3{font-size:11px;line-height:1.28;margin:7px 0 3px}
+.library-card p{font-size:10px;line-height:1.25;margin:0 0 4px}
+.exercise-preview{overflow:hidden}
+.exercise-preview img{will-change:contents;image-rendering:auto}
+@media(max-width:1150px) and (min-width:901px){.as-coach .coach-program-compact .program-days{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){.as-coach .main-layout{padding:13px 12px calc(100px + env(safe-area-inset-bottom,0px))}.as-coach .coach-program-compact .program-days{grid-template-columns:repeat(2,minmax(0,1fr))}.booking-in-shell .booking-intro{min-height:95px}}
+@media(max-width:650px){.as-coach .assignment-columns{grid-template-columns:1fr}.as-coach .coach-program-compact .program-days{grid-template-columns:1fr}.as-coach .coach-program-compact .week-pill{width:27px;height:27px}.as-coach .coach-v1-day{padding:7px}.as-coach .coach-archive-toolbar{grid-template-columns:1fr auto}.as-coach .coach-archive-toolbar select{grid-column:1 / -1}.booking-in-shell .booking-intro{min-height:130px}.booking-in-shell .booking-intro h1{max-width:100%}.booking-in-shell .booking-top-controls{position:static;justify-content:flex-end;flex-wrap:wrap;margin-top:10px}.library-card .exercise-preview{height:104px;flex-basis:104px}}
+@media(max-width:390px){.invite-action-buttons{grid-template-columns:1fr}.booking-in-shell .booking-top-controls .booking-control{font-size:9px}}
+/* Controlli animazioni visibili solo nella finestra dettaglio, non sulle card. */
+.exercise-preview-eager{position:relative}
+.exercise-motion-command{position:absolute;bottom:9px;right:9px;z-index:2;background:#103d30;border:1px solid #5ea986;color:#fff;border-radius:8px;padding:6px 10px;font-size:10px;font-weight:800}
+.exercise-preview img{display:block;max-height:100%;max-width:100%;object-fit:contain}
+
+/* ============================================================================
+   LION FIT MODERN 2M/U — PARITÀ ROUNDONE V1 ATLETA
+   Valori e gerarchia ricavati da www/athlete.html (Beta 0.29.x) e screenshot V1.
+   Scope rigoroso su .as-athlete: non altera le viste Admin, il modello Pinia
+   o le chiamate Firestore. Nessuna dipendenza da Tailwind o JS della vecchia V1.
+   ============================================================================ */
+.as-athlete{--athlete-panel:#171F2C;--athlete-subtle:#1B2431;--athlete-border:#303A49;--athlete-ink:#F2F6FC;--athlete-dim:#A6B6C6;--athlete-accent:#83EDB8}
+.theme-light.as-athlete{--athlete-panel:#fff;--athlete-subtle:#f4f7f5;--athlete-border:#d7e1db;--athlete-ink:#17231d;--athlete-dim:#637568;--athlete-accent:#15803d}
+.as-athlete .main-layout:not(.booking-in-shell){width:100%;max-width:768px;padding:12px 16px calc(106px + env(safe-area-inset-bottom,0px));margin:0 auto}
+.as-athlete .mobile-topbar{top:0;height:calc(61px + env(safe-area-inset-top,0px));min-height:61px;padding:calc(8px + env(safe-area-inset-top,0px)) 16px 8px;background:var(--nav);box-shadow:0 1px 5px rgba(0,0,0,.06)}
+.as-athlete .brand{gap:9px}
+.as-athlete .brand img{width:34px;height:34px;border:1px solid var(--border);border-radius:10px;background:#fff;object-fit:contain}
+.as-athlete .brand-name{font-family:'Barlow Condensed',Impact,'Arial Narrow',sans-serif;font-weight:900;font-size:19px;letter-spacing:.055em;line-height:1;font-style:italic;white-space:nowrap}
+.as-athlete .brand-subtitle{font-size:8px;letter-spacing:.08em;font-weight:900;margin-top:3px}
+.as-athlete .top-actions{gap:8px}
+.as-athlete .top-actions .theme-square{width:35px;height:35px;min-width:35px;border-radius:10px;background:var(--green-bg);border-color:var(--border);color:var(--mint)}
+.as-athlete .top-actions .header-avatar{width:39px;height:39px;min-width:39px;border-radius:50%;border:2px solid #409968;overflow:hidden;background:var(--card2);font-size:18px}
+.as-athlete .header-avatar img{height:100%;width:100%;object-fit:cover;border-radius:50%}
+.as-athlete .version{font-size:8px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin:-3px 0 14px;text-align:center;line-height:1.4}
+.as-athlete .bottom-nav{gap:0!important;padding:3px 2px calc(8px + env(safe-area-inset-bottom,0px));min-height:66px;z-index:70;background:var(--nav);border-color:var(--border);box-shadow:0 -3px 16px rgba(0,0,0,.17)}
+.as-athlete .bottom-nav a{min-width:0;max-width:none;flex:1 1 0;min-height:56px;gap:3px;margin:1px;border-radius:11px;padding:7px 0 5px;font-size:clamp(7px,2.05vw,9px);font-weight:900;line-height:1.1;letter-spacing:0;white-space:nowrap;color:#acb9c8}
+.as-athlete .bottom-nav a svg{height:19px;width:19px;flex:none}
+.as-athlete .bottom-nav a.router-link-active{background:#153a2b;color:#82f7b4}
+.as-athlete .bottom-nav a[href*="prenotazioni"]:not(.router-link-active){color:#79eeb5}
+.theme-light.as-athlete .bottom-nav a{color:#6b7880}
+.theme-light.as-athlete .bottom-nav a.router-link-active{background:#dcf5e8;color:#147943}
+.as-athlete:not(.bookings-mode) .panel{background:var(--athlete-panel);color:var(--athlete-ink);border-color:var(--athlete-border);border-radius:15px;padding:15px}
+.as-athlete:not(.bookings-mode) .stack{gap:14px}
+.as-athlete:not(.bookings-mode) .panel+.panel{margin-top:0}
+.as-athlete:not(.bookings-mode) .card-heading{font-size:14px;letter-spacing:.05em;font-weight:950}
+.as-athlete:not(.bookings-mode) .pill{border-radius:9px;padding:5px 8px;font-size:9px;line-height:1.25;white-space:normal;overflow-wrap:anywhere}
+.as-athlete .row.between{align-items:center}
+.as-athlete:not(.bookings-mode) .eyebrow{font-size:9px;letter-spacing:.085em;color:var(--mint)}
+.as-athlete:not(.bookings-mode) .muted-head{font-size:10px;font-weight:900;letter-spacing:.075em}
+.as-athlete:not(.bookings-mode) .small{font-size:10px}
+.as-athlete :is(button,a,input,select,textarea):focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+
+/* Home V1: accessi rapidi 2x2, saluto compatto e allenamento scuro del giorno. */
+.as-athlete .athlete-home-v1{gap:17px}
+.as-athlete .athlete-home-quick{padding:12px 13px 13px}
+.as-athlete .athlete-home-quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:10px}
+.as-athlete .athlete-home-quick-link{display:flex;align-items:center;gap:8px;min-width:0;min-height:49px;padding:8px;border-radius:11px;border:1px solid var(--athlete-border);background:var(--athlete-panel);color:var(--athlete-ink)}
+.as-athlete .athlete-home-quick-link strong{font-size:10px;font-weight:850;line-height:1.25;overflow-wrap:anywhere}
+.as-athlete .athlete-quick-icon{width:27px;height:27px;display:grid;place-items:center;border-radius:8px;flex:none;background:var(--athlete-subtle);color:var(--mint)}
+.as-athlete .athlete-home-quick-link:hover{border-color:var(--mint)}
+.as-athlete .athlete-home-welcome{gap:9px;padding:0 2px;flex-wrap:nowrap}
+.as-athlete .athlete-home-welcome>div{min-width:0}
+.as-athlete .athlete-home-welcome h1{font-size:clamp(18px,4.9vw,26px);line-height:1.2;margin:4px 0 3px;letter-spacing:-.025em}
+.as-athlete .athlete-home-welcome p{margin:0;color:var(--muted);font-size:10px;font-weight:650;line-height:1.35}
+.as-athlete .athlete-welcome-icon{display:grid;place-items:center;flex:none;width:35px;height:35px;border-radius:12px;background:var(--athlete-subtle);color:var(--mint)}
+.as-athlete .athlete-today-hero{background:linear-gradient(135deg,#151e2c 0%,#101623 75%);border:1px solid #354254;border-radius:15px;padding:16px;color:#f2f6fc;display:flex;flex-direction:column;gap:16px;box-shadow:0 8px 22px rgba(0,0,0,.14)}
+.as-athlete .athlete-today-headers{gap:6px;flex-wrap:nowrap}
+.as-athlete .athlete-today-badge{font-size:9px;letter-spacing:.06em;font-weight:950;color:#72edac;background:#143c2d;border:1px solid #376749;border-radius:6px;padding:5px 8px;white-space:nowrap}
+.as-athlete .athlete-today-week{font-size:9px;color:#9eadc0;text-transform:uppercase;font-weight:900;text-align:right}
+.as-athlete .athlete-today-hero h2{font-size:clamp(15px,4vw,21px);text-transform:uppercase;line-height:1.25;letter-spacing:.01em;margin:0 0 4px;color:#fff}
+.as-athlete .athlete-today-hero p{color:#bac9da;margin:0;font-weight:650;font-size:11px;line-height:1.4}
+.as-athlete .athlete-today-sheets{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:7px}
+.as-athlete .athlete-today-sheet-button{border-radius:9px;border:1px solid #648b75;color:#eaf7ef;background:#1d3e33;font-size:10px;font-weight:900;padding:10px 8px;display:flex;justify-content:center;gap:8px;align-items:center;min-height:36px}
+.as-athlete .athlete-today-open{display:flex;align-items:center;justify-content:center;gap:8px;text-align:center;border-radius:10px;min-height:39px;background:#f8fafc;color:#101827;font-size:10px;font-weight:950;letter-spacing:.02em;padding:11px}
+.as-athlete .athlete-today-open:hover{background:#8de6b2;color:#082515}
+.as-athlete .athlete-main-plan-shortcut{display:flex;align-items:center;gap:12px;min-height:83px;padding:14px;border:1px solid var(--athlete-border);border-radius:15px;background:var(--athlete-panel);color:var(--athlete-ink)}
+.as-athlete .athlete-main-plan-icon{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:9px;border:1px solid var(--athlete-border);background:var(--athlete-subtle);color:var(--mint)}
+.as-athlete .athlete-main-plan-shortcut strong{font-size:11px;font-weight:950;letter-spacing:.05em;display:block}
+.as-athlete .athlete-main-plan-shortcut small{display:block;font-size:9px;color:var(--muted);margin-top:3px;font-weight:800}
+
+/* Piano V1: 2 schede per riga, quattro cerchi settimane, lun-sab 3 colonne + domenica. */
+.as-athlete .athlete-plan{gap:16px!important}
+.as-athlete .athlete-plan-summary,.as-athlete .athlete-week-picker{padding:13px 14px;border-radius:15px}
+.as-athlete .athlete-plan-summary .row{flex-wrap:nowrap;gap:8px}
+.as-athlete .athlete-plan-summary .card-heading{font-size:13px;margin:0}
+.as-athlete .athlete-plan-summary .muted{font-size:9px;line-height:1.35!important;margin:5px 0 0!important;max-width:240px}
+.as-athlete .athlete-plan-summary .pill{font-size:8px;max-width:42%;padding:6px 8px}
+.as-athlete .athlete-week-picker .row strong{font-size:10px;letter-spacing:.045em}
+.as-athlete .athlete-week-picker .row .muted{font-size:9px}
+.as-athlete .athlete-week-picker .week-pills{display:flex;align-items:center;gap:7px;margin:10px 0 0;max-width:100%;overflow-x:auto}
+.as-athlete .athlete-week-picker .week-pill{flex:0 0 31px;width:31px;height:31px;min-width:31px;border-radius:50%;border:2px solid #536173;background:transparent;color:var(--muted);font-size:10px;padding:0}
+.as-athlete .athlete-week-picker .week-pill.selected{color:#f7fafc;background:#0b1017;border-color:#e6e9ec}
+.theme-light.as-athlete .athlete-week-picker .week-pill.selected{color:#0b1711;background:#e6f6ed;border-color:#168f59}
+.as-athlete .athlete-scheduled-sheets>.row,.as-athlete .athlete-unscheduled-sheets>.row,.as-athlete .athlete-week-program>.row{margin:0 2px 9px;gap:5px;flex-wrap:nowrap}
+.as-athlete .athlete-scheduled-sheets .section-title,.as-athlete .athlete-unscheduled-sheets .section-title,.as-athlete .athlete-week-program .section-title{margin:0;font-size:12px;letter-spacing:.03em}
+.as-athlete .athlete-scheduled-sheets .pill,.as-athlete .athlete-unscheduled-sheets .pill,.as-athlete .athlete-week-program .pill{font-size:9px}
+.as-athlete .athlete-sheet-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:8px;margin:0}
+.as-athlete .athlete-sheet-grid .scheme-item{min-width:0;min-height:126px;display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:13px 10px;border:1.5px solid #355b48;border-radius:13px;background:var(--athlete-panel)}
+.as-athlete .athlete-sheet-grid .scheme-item h3{font-size:clamp(11px,3.6vw,16px);line-height:1.2;font-weight:950;margin:0 0 2px;overflow-wrap:anywhere}
+.as-athlete .athlete-sheet-grid .scheme-item .chip{font-size:8px;color:#8ff4ba;background:#193c2c;border:0;padding:4px 5px;line-height:1.4;border-radius:5px;align-self:flex-start}
+.as-athlete .athlete-sheet-grid .scheme-item .athlete-sheet-days{color:var(--muted);font-size:9px;line-height:1.3;margin:0!important;min-height:12px}
+.as-athlete .athlete-sheet-grid .scheme-item .athlete-sheet-open{font-size:9px;font-weight:950;padding:5px 0;min-height:24px;margin-top:auto;text-align:left;color:var(--mint)}
+.as-athlete .athlete-week-program-panel{padding:11px 9px 9px;border-radius:14px;background:var(--athlete-panel)}
+.as-athlete .athlete-week-title{flex-wrap:nowrap;gap:4px}
+.as-athlete .athlete-week-title strong{font-size:10px}
+.as-athlete .athlete-week-title .pill{font-size:8px;padding:4px 5px}
+.as-athlete .athlete-week-program-panel>.divider{margin:8px 0}
+.as-athlete .athlete-week-program .week-days{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.as-athlete .athlete-week-program .day-card{min-height:113px;padding:8px 6px;border:1px solid #45645a;border-radius:9px;background:var(--athlete-subtle);color:var(--athlete-ink)}
+.as-athlete .athlete-week-program .day-card:first-child:not(.day-card-today):not(.day-card-selected){background:var(--athlete-subtle);border-color:#45645a}
+.as-athlete .athlete-week-program .day-card:is(.day-card-today,.day-card-selected){background:#153f2e;border-color:#42c783;color:#eafff1}
+.as-athlete .athlete-week-program .day-card h3{font-size:9px;margin:0 0 6px;color:var(--mint);line-height:1.2;font-weight:950}
+.as-athlete .athlete-week-program .day-card:is(.day-card-today,.day-card-selected) h3{color:#a4f4c4}
+.as-athlete .athlete-week-program .day-card p{font-size:8px;line-height:1.35;margin:0 0 3px;font-weight:750;overflow-wrap:anywhere}
+.as-athlete .athlete-week-program .day-card-detail{margin-top:auto;padding-top:6px;font-size:8px;line-height:1.15;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #50655f;color:var(--athlete-dim)}
+.as-athlete .athlete-week-program .day-card-sunday{grid-column:1/-1;min-height:57px}
+.as-athlete .athlete-week-program .day-card-sunday .day-card-detail{margin-top:7px}
+.theme-light.as-athlete .athlete-week-program .day-card:not(.day-card-today):not(.day-card-selected){background:#f0fdf4;color:#172b20;border-color:#a1c6ad}
+.theme-light.as-athlete .athlete-week-program .day-card:not(.day-card-today):not(.day-card-selected) h3{color:#166534}
+.theme-light.as-athlete .athlete-sheet-grid .scheme-item{border-color:#b0d9c0}
+.theme-light.as-athlete .athlete-sheet-grid .scheme-item .chip{background:#def4e5;color:#116b40}
+.as-athlete .athlete-day-overlay{z-index:78;background:rgba(0,0,0,.73)}
+.as-athlete .athlete-day-dialog{max-width:395px;border-radius:16px;background:var(--athlete-panel);padding:0;overflow:auto}
+.as-athlete .athlete-day-dialog-head{padding:15px 17px}
+.as-athlete .athlete-day-dialog-head h2{font-size:14px;letter-spacing:.06em;margin:0}
+.as-athlete .athlete-day-dialog-head p{font-size:9px}
+.as-athlete .athlete-day-dialog-body{background:var(--athlete-subtle);padding:16px}
+.as-athlete .athlete-day-dialog-body h3{font-size:10px;margin:0 0 10px}
+.as-athlete .athlete-day-activity{font-size:10px;letter-spacing:.02em;background:var(--athlete-panel);border:1px solid var(--athlete-border);padding:10px;border-radius:9px}
+.as-athlete .athlete-day-linked{margin-top:12px;gap:7px}
+.as-athlete .athlete-day-linked .primary{min-height:38px;font-size:10px;padding:10px;border-radius:8px;background:#16824c;color:white}
+.as-athlete .athlete-day-dialog-foot{padding:11px 14px}
+.as-athlete .athlete-day-dialog-foot .secondary{min-height:31px;font-size:10px;padding:7px 11px}
+
+/* Archivio V1 e Team: riquadri compatti, verde protezione e strumenti essenziali. */
+.as-athlete .athlete-archive-hero{padding:14px}
+.as-athlete .athlete-archive-hero>p{font-size:10px;margin:10px 0 0!important;line-height:1.55}
+.as-athlete .athlete-archive-list{padding:13px}
+.as-athlete .athlete-archive-list> .row{gap:5px;flex-wrap:wrap}
+.as-athlete .athlete-archive-list h3{font-size:12px;margin:0}
+.as-athlete .athlete-archive-list input,.as-athlete .athlete-archive-list select{font-size:11px;min-height:33px;padding:7px 9px;border-radius:9px}
+.as-athlete .athlete-archive-item{padding:0;margin:9px 0 0;background:transparent;border:0}
+.as-athlete .athlete-archive-open{display:block;width:100%;text-align:left;padding:13px 12px;border:1.5px solid #2b8156;border-radius:10px;background:#16392b;color:#c9f7df;min-height:65px}
+.as-athlete .athlete-archive-open b{display:block;font-size:12px;font-weight:950;text-transform:uppercase}
+.as-athlete .athlete-archive-meta{margin:6px 0 0;font-size:9px;color:#98e8b8}
+.as-athlete .athlete-archive-item>.secondary{margin-top:5px!important;min-height:30px;font-size:10px;border-radius:8px;padding:6px 8px}
+.as-athlete .athlete-archive-copies{font-size:10px;margin:7px 0 10px}
+.as-athlete .athlete-team-screen{padding:14px}
+.as-athlete .athlete-team-screen .card-heading{font-size:13px}
+.as-athlete .athlete-team-screen .row{gap:7px}
+.as-athlete .athlete-team-screen .muted{font-size:10px;margin-top:4px!important}
+.as-athlete .athlete-team-screen .divider{margin:10px 0}
+.as-athlete .athlete-team-screen input{min-height:35px;font-size:11px;padding:8px 10px;border-radius:9px}
+.as-athlete .athlete-team-list{margin-top:10px!important;gap:6px}
+.as-athlete .athlete-team-list .action-card{min-height:53px;border:1px solid #3b5a69;background:var(--athlete-subtle);border-radius:9px;padding:7px 10px;gap:10px}
+.as-athlete .athlete-team-list .action-icon{width:34px;height:34px;background:#203a38;border-radius:50%;overflow:hidden;font-size:16px}
+.as-athlete .athlete-team-list .action-icon img{width:34px!important;height:34px!important}
+.as-athlete .athlete-team-list strong{font-size:10px;font-weight:950}
+.as-athlete .athlete-team-list small{font-size:9px;margin-top:3px}
+.theme-light.as-athlete .athlete-team-list .action-card{border-color:#bed7c7}
+
+/* Profilo/Impostazioni: manteniamo l'editor e la logica già esistenti. */
+.as-athlete .profile-screen{gap:0!important;max-width:768px;margin:0 auto}
+.as-athlete .profile-screen .preview-banner{height:145px;border:1px solid var(--athlete-border);border-radius:14px;background:#050607;overflow:visible}
+.as-athlete .profile-screen .preview-banner img{height:115px;max-height:115px;max-width:240px;object-fit:contain}
+.as-athlete .profile-screen .profile-settings-gear{top:12px;right:12px;width:33px;height:33px;min-width:33px;border-radius:9px}
+.as-athlete .profile-screen .profile-info-card{margin-top:10px!important;padding:16px 15px 17px!important;border-radius:14px;min-height:150px}
+.as-athlete .profile-screen .profile-overlap{position:relative;margin:-52px 0 8px;width:74px;height:74px;border:3px solid var(--athlete-border);font-size:30px}
+.as-athlete .profile-screen .profile-overlap img{height:100%;width:100%;border-radius:50%;object-fit:cover}
+.as-athlete .profile-screen .profile-name{font-size:17px;font-weight:950;margin:3px 0 6px;text-align:left;line-height:1.2}
+.as-athlete .profile-screen .profile-athlete-info{font-size:10px;font-weight:900;line-height:1.7;letter-spacing:.035em;text-align:left;margin:0 0 14px}
+.as-athlete .profile-screen .profile-edit-action{display:inline-flex;width:auto;font-size:10px;min-height:34px;padding:9px 13px;border-radius:8px}
+.as-athlete .profile-screen .profile-change-photo{font-size:10px}
+.as-athlete .profile-screen .profile-legal-links{margin-top:12px}
+.as-athlete .settings-screen{max-width:768px;margin:0 auto;min-height:60vh}
+.as-athlete .settings-top{border-bottom:1px solid var(--athlete-border);padding:10px 0 16px}
+.as-athlete .settings-top h2{font-size:12px;letter-spacing:.08em}
+.as-athlete .settings-inner{margin:16px 0}
+@media(max-width:480px){
+ .as-athlete .main-layout:not(.booking-in-shell){padding-left:12px;padding-right:12px}
+ .as-athlete .mobile-topbar{padding-left:13px;padding-right:13px}
+ .as-athlete .athlete-plan .athlete-scheduled-sheets>.row .pill{flex:none}
+ .as-athlete .athlete-week-program .week-days{gap:5px}
+ .as-athlete .athlete-week-program .day-card{min-height:112px}
+ .as-athlete .athlete-week-program .day-card-sunday{min-height:57px}
+}
+@media(max-width:365px){
+ .as-athlete .athlete-home-quick-grid{gap:6px}
+ .as-athlete .athlete-home-quick-link{padding:6px;gap:6px}
+ .as-athlete .athlete-home-quick-link strong{font-size:9px}
+ .as-athlete .bottom-nav a{font-size:7px;gap:2px}
+ .as-athlete .bottom-nav a svg{height:18px;width:18px}
+}
+/* Raffinamenti condivisi derivati da ROUNDONE/admin.html e index.html. */
+.v1-login .login-remember-row{display:flex;align-items:flex-start;gap:9px;margin:2px 0 10px;font-size:11px;color:var(--text);font-weight:700;line-height:1.4}
+.v1-login .login-remember-row input{width:16px;height:16px;min-width:16px;margin:2px 0 0;accent-color:var(--green)}
+.v1-login .login-remember-row strong{display:block;font-size:11px;font-weight:900}
+.v1-login .login-remember-row small{display:block;color:var(--muted);font-size:10px;font-weight:500;margin:2px 0 0}
+.v1-login .login-recover-row{margin-top:-4px;justify-content:flex-start}
+.v1-login .login-recover-row .bare{padding:4px 0;min-height:28px;color:var(--mint);font-weight:850;font-size:11px}
+@media(min-width:1151px){.as-coach .coach-program-compact .program-days>.program-day:nth-child(7){grid-column:2}}
+@media(max-width:1150px){.as-coach .coach-program-compact .program-days>.program-day:nth-child(7){grid-column:auto}}
+
+/* LION FIT MODERN 2M/V — controlli V1 restituiti senza cambiare shell/dati */
+.settings-inner button.settings-entry{appearance:none;background:transparent;border-top:0;border-right:0;border-left:0;border-radius:0;font:inherit;color:var(--text);padding:13px 10px}
+.as-coach .coach-team-tools select{width:auto;min-width:110px;max-width:150px;min-height:32px;padding:6px 8px;font-size:10px;border-radius:8px}
+.as-coach .coach-program-compact>.row{margin:9px 0}
+.as-coach .coach-program-compact>.row .secondary,.as-coach .coach-program-compact>.row .danger{padding:7px 11px;min-height:34px;font-size:11px}
+.sheet-modal .exercise-item>.row button{min-height:31px;padding:5px 9px;font-size:10px;border-radius:8px}
+@media(max-width:650px){.as-coach .coach-team-tools select{flex:1 1 130px;max-width:none}.sheet-modal .exercise-item>.row{gap:6px}}
+
+/* 2M/W – rifiniture fedeli agli HTML ROUNDONE. Non spostare l'icona menu Coach. */
+.as-coach .sidebar-nav a.staff-nav-item span{margin-left:-5px;letter-spacing:-.035em}
+.as-coach .sidebar-nav a.staff-nav-item svg{flex-shrink:0}
+.staff-v1-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.staff-v1 .panel{min-width:0}
+.staff-v1 h4{font-size:12px;margin:0 0 8px;font-weight:900;letter-spacing:.04em}
+.staff-v1 label{font-size:10px;font-weight:850;display:block;color:var(--muted)}
+.staff-v1 label input{margin-top:6px;display:block;width:100%}
+.staff-email-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+.staff-email-row button{font-size:10px;min-height:38px}
+.staff-invite-subcard{border:1px solid var(--outline);background:var(--card2);border-radius:13px;padding:12px;margin-top:10px;display:grid;gap:10px}
+.staff-invite-subcard button{min-height:39px}
+.staff-link-result{padding:10px;border:1px solid var(--outline);border-radius:10px;background:var(--green-bg);display:grid;gap:7px;margin-top:10px}
+.staff-link-result input{font-size:11px;white-space:nowrap;text-overflow:ellipsis}
+.staff-v1 .staff-details{margin-top:12px;border:1px solid var(--border);border-radius:11px;padding:11px;background:var(--card2)}
+.staff-v1 .staff-details summary{font-size:11px;font-weight:900;cursor:pointer}
+.staff-v1 .staff-details[open] summary{margin-bottom:12px}
+.staff-email-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:12px}
+.staff-email-settings label:last-child{grid-column:1/-1}
+.staff-active-invites{padding:14px 2px 0}
+.staff-active-invites .line-card,.staff-v1 .staff-details .line-card{padding:8px;gap:6px}
+.staff-v1 .staff-details button,.staff-active-invites button{min-height:32px;font-size:10px;padding:5px 9px}
+/* Login originale: registrazione in linea con accesso, mai solo collegamento esterno. */
+.login-modern-header{gap:9px}
+.login-modern-header .login-brand-title{display:flex;flex-direction:column;gap:2px}
+.login-modern-header .login-brand-title small{font-size:10px;letter-spacing:.07em;color:var(--muted);font-weight:850}
+.login-modern-header .theme-square{margin-left:auto}
+.v1-login .login-identity h2{font-size:clamp(18px,3vw,23px);margin:14px 0 6px;font-weight:950;letter-spacing:-.02em}
+.v1-login .register-v1{gap:11px}
+.v1-login .register-v1 label{font-size:11px}
+.v1-login .register-v1 select,.v1-login .register-v1 input:not([type=checkbox]){margin-top:6px;min-height:42px}
+.v1-login .register-invite-group{background:var(--card2);border:1px solid var(--border);padding:12px;border-radius:11px}
+.v1-login .register-invite-group p{font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:8px}
+.v1-login .register-invite-group .register-link-loaded{color:var(--mint);font-weight:850}
+.v1-login .register-invite-group summary{font-size:11px;color:var(--mint);font-weight:900;cursor:pointer}
+.v1-login .register-invite-group details label{margin:9px 0 0}
+.v1-login .register-consents{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;border-top:1px solid var(--border);padding-top:10px}
+.v1-login .register-consents label{display:flex;gap:7px;align-items:flex-start;padding:9px;border:1px solid var(--border);border-radius:10px;background:var(--card2);font-size:11px;line-height:1.35;font-weight:600;color:var(--text);letter-spacing:0}
+.v1-login .register-consents input{flex:0 0 16px;width:16px;min-width:16px;height:16px;min-height:16px;margin:1px 0 0;accent-color:var(--green)}
+.v1-login .register-consents a{text-decoration:underline;font-weight:850}
+.v1-login .register-verification{padding:12px;border:1px solid #c7a64b;border-radius:12px;background:var(--card2);display:grid;gap:9px}
+.v1-login .register-verification strong{font-size:13px}
+.v1-login .register-verification p{font-size:11px;line-height:1.5;color:var(--muted);margin:0}
+.v1-login .register-verification button{font-size:10px}
+/* Sei voci fisse: nav atleta visibile, icone e testo senza tagli su smartphone. */
+.as-athlete .bottom-nav{position:fixed!important;bottom:0;left:0;right:0;width:100%;display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));align-items:stretch;gap:1px;padding:5px max(3px,env(safe-area-inset-right,0px)) calc(9px + env(safe-area-inset-bottom,0px)) max(3px,env(safe-area-inset-left,0px));z-index:85}
+.as-athlete .bottom-nav a{max-width:none!important;width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;font-size:clamp(8px,2.2vw,10px);line-height:1.15;min-height:55px}
+.as-athlete .bottom-nav a svg{width:21px;height:21px}
+.as-athlete .main-layout{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+@media(min-width:901px){.login-modern-header{display:none}}
+@media(max-width:900px){.staff-v1-columns{grid-template-columns:1fr}.login-modern-header{padding-top:calc(9px + env(safe-area-inset-top,0px))}}
+@media(max-width:420px){.staff-email-row{grid-template-columns:1fr}.staff-email-settings{grid-template-columns:1fr}.staff-email-settings label:last-child{grid-column:auto}.v1-login .register-consents{gap:7px}.v1-login .register-consents label{padding:7px}.as-athlete .bottom-nav a{font-size:8px}}
+
+/* PATCH-4: area Atleta responsive, footer 6 tab sempre visibile nelle route Atleta. */
+.as-athlete{min-width:0;overflow-x:clip}
+.as-athlete .main-layout{min-width:0;overflow-x:clip;padding-bottom:calc(105px + env(safe-area-inset-bottom,0px))}
+.as-athlete .bottom-nav{box-sizing:border-box;visibility:visible;opacity:1;pointer-events:auto;transform:none;min-width:0;max-width:100vw}
+.as-athlete .bottom-nav a{display:flex;align-items:center;justify-content:center;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;white-space:nowrap;min-width:0}
+.as-athlete .bottom-nav a span{display:block;max-width:100%;overflow:hidden;text-overflow:clip}
+.as-athlete .athlete-plan .athlete-week-picker,.as-athlete .athlete-plan .athlete-week-program-panel{min-width:0}
+.as-athlete .athlete-day-overlay{padding:max(12px,env(safe-area-inset-top,0px)) 10px calc(12px + env(safe-area-inset-bottom,0px))}
+.as-athlete .athlete-day-dialog{max-height:calc(100dvh - 35px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overscroll-behavior:contain}
+@media(max-width:390px){.as-athlete .bottom-nav a{font-size:7.5px;letter-spacing:-.015em}.as-athlete .bottom-nav a svg{width:19px;height:19px}.as-athlete .main-layout{padding-left:9px;padding-right:9px}}
+
+/* PATCH-5/7 — Calendario ROUNDONE compatto, nessun overflow laterale.
+   Scope rigoroso sulle Prenotazioni, nessun cambiamento agli altri calendari. */
+.booking-in-shell{min-width:0;max-width:min(1180px,100%);overflow-x:clip}
+.booking-in-shell .booking-compact-toolbar{padding:12px 14px;border-radius:14px}
+.booking-compact-toolbar .booking-toolbar-heading{gap:8px;flex-wrap:wrap}
+.booking-compact-toolbar h2{font-size:clamp(15px,2vw,18px);margin:0}
+.booking-compact-toolbar .booking-toolbar-line{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:7px;min-width:0}
+.booking-compact-toolbar .booking-tabs{display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-width:0}
+.booking-compact-toolbar .booking-coach-chips{border-bottom:1px solid var(--border);padding:6px 0 10px;margin:5px 0 6px}
+.booking-compact-toolbar .booking-tabs button{min-height:31px;font-size:11px;line-height:1.25;padding:6px 11px;white-space:normal}
+.booking-compact-toolbar .booking-date-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0;margin:0}
+.booking-compact-toolbar .booking-date-controls input{width:min(165px,100%);min-height:33px;padding:5px 9px;font-size:12px}
+.booking-compact-toolbar .booking-date-controls button{min-height:33px;padding:6px 10px}
+.booking-compact-toolbar .booking-date-line>select{width:min(195px,100%);min-height:33px;padding:5px 10px;font-size:12px}
+.booking-in-shell .booking-period{min-width:0;overflow-x:auto;padding:12px!important;border-radius:14px}
+.booking-in-shell .booking-period .event-item{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-width:0;overflow-wrap:anywhere}
+.booking-in-shell .booking-period .event-item span{margin-left:0}
+.booking-in-shell .coach-month-grid{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;width:100%;min-width:0}
+.booking-in-shell .coach-month-day{min-height:58px;min-width:0;padding:5px;gap:3px;border-radius:8px;overflow:hidden}
+.booking-in-shell .coach-month-day b{font-size:12px}
+.booking-in-shell .coach-month-day small{font-size:9px;line-height:1.2;word-break:normal}
+.booking-coach-mini{display:inline-flex;align-items:center;gap:2px;font-size:10px;line-height:1.1;font-weight:850}
+.booking-coach-mini .coach-dot{margin:0;flex-shrink:0}
+.booking-in-shell .coach-month-dots{display:flex;gap:3px;flex-wrap:wrap}
+.booking-service-badge{display:inline-block;padding:2px 6px;border-radius:7px;font-size:10px;line-height:1.3;font-weight:950;letter-spacing:.02em}
+.booking-service-badge.fighter{background:#174b45;color:#b5ffe2;border:1px solid #398e75}
+.booking-service-badge.pesi{background:#29456b;color:#d0ecff;border:1px solid #688fb6}
+.booking-in-shell .times button.unavailable{opacity:.55;cursor:not-allowed;border-style:dashed}
+.booking-in-shell .times button.unavailable small{display:block;font-size:9px;line-height:1.1}
+.booking-in-shell .booking-day:disabled{opacity:.35;background:var(--card2);border-color:var(--border)}
+.booking-in-shell .coach-dot.coach-hash-0{background:#e6b95b;color:#e6b95b;border-color:#e6b95b}
+.booking-in-shell .coach-dot.coach-hash-1{background:#71b7fa;color:#71b7fa;border-color:#71b7fa}
+.booking-in-shell .coach-dot.coach-hash-2{background:#8ce0af;color:#8ce0af;border-color:#8ce0af}
+.booking-in-shell .coach-dot.coach-hash-3{background:#f4a0af;color:#f4a0af;border-color:#f4a0af}
+.booking-in-shell .coach-dot.coach-hash-4{background:#bda5f6;color:#bda5f6;border-color:#bda5f6}
+.booking-in-shell .coach-dot.coach-hash-5{background:#e6a56d;color:#e6a56d;border-color:#e6a56d}
+@media(max-width:650px){
+ .booking-compact-toolbar .booking-toolbar-line{align-items:stretch;flex-direction:column}
+ .booking-compact-toolbar .booking-toolbar-line .booking-tabs{width:100%}
+ .booking-compact-toolbar .booking-date-line>select{width:100%}
+ .booking-compact-toolbar .booking-date-controls{width:100%;justify-content:flex-start}
+ .booking-in-shell .coach-month-day{min-height:46px;padding:4px 2px}
+ .booking-in-shell .coach-month-day small{font-size:8px}
+ .booking-in-shell .coach-month-dots{gap:1px}
+ .booking-coach-mini{font-size:9px}
+}
+@media(max-width:390px){.booking-in-shell .booking-compact-toolbar{padding:9px}
+ .booking-compact-toolbar .booking-coach-chips button{font-size:10px;padding:5px 7px}
+ .booking-in-shell .coach-month-day{min-height:43px}
+ .booking-in-shell .coach-month-day small{font-size:7px}}

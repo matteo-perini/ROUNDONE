@@ -1,0 +1,102 @@
+/* LionFit post-PATCH7 — sola integrazione, NON alterare bottom-nav (gia' corretta dall'utente).
+   Web, PWA iOS/Android, APK: rispetta insets e non introduce scrolling della shell. */
+html { background:#090d14; scroll-padding-top:calc(70px + env(safe-area-inset-top,0px)); overscroll-behavior-y:contain; }
+body,#app { width:100%; min-width:0; min-height:100%; overflow-x:clip; }
+body { -webkit-overflow-scrolling:touch; }
+.app { min-height:100dvh; overflow-x:clip; overscroll-behavior-x:none; }
+.app .main-layout { min-width:0; overflow-wrap:anywhere; }
+.app .mobile-topbar { top:0; box-sizing:border-box; padding-top:calc(10px + env(safe-area-inset-top,0px)); min-height:calc(66px + env(safe-area-inset-top,0px)); height:auto; }
+.app:has(> .lab-banner) > .lab-banner { padding-top:calc(5px + env(safe-area-inset-top,0px)); }
+.app.as-coach .desktop-sidebar { top:env(safe-area-inset-top,0px); }
+.app.as-coach:has(> .lab-banner) .desktop-sidebar { top:calc(22px + env(safe-area-inset-top,0px)); }
+.app .login-header { padding-top:calc(16px + env(safe-area-inset-top,0px)); }
+.app .login-main { padding-bottom:calc(32px + env(safe-area-inset-bottom,0px)); }
+.app .main-layout { padding-bottom:max(88px,calc(90px + env(safe-area-inset-bottom,0px))); }
+.app.as-athlete .main-layout { padding-bottom:calc(120px + env(safe-area-inset-bottom,0px)); }
+.app .dialog,.app .sheet-modal,.app .athlete-day-dialog { overscroll-behavior-y:contain; }
+.app .modal-overlay,.app .sheet-modal-bg,.app .athlete-day-overlay {
+  padding-top:max(14px,env(safe-area-inset-top,0px));
+  padding-bottom:max(16px,env(safe-area-inset-bottom,0px));
+}
+.app .dialog,.app .sheet-modal { max-height:calc(100dvh - max(16px,env(safe-area-inset-top,0px)) - max(18px,env(safe-area-inset-bottom,0px))); }
+/* Esercizi FLOW / ROUNDONE: animazione automatica nella lista, tasto solo nel dettaglio.
+   Niente crop sui frame SVG; tutta la figura rimane visibile. */
+.app .library-card .exercise-preview { height:clamp(104px,11vw,156px); min-height:104px; }
+.app .exercise-preview { position:relative; overflow:hidden; contain:layout paint; background:linear-gradient(145deg,#273c47,#22313c); }
+.app .exercise-preview > img { width:100%!important; height:100%!important; max-width:100%!important; max-height:100%!important; object-fit:contain!important; object-position:center center!important; padding:3px; }
+.app .exercise-preview-eager { min-height:180px; }
+.app .exercise-preview-eager .exercise-motion-command { position:absolute; right:10px; bottom:10px; z-index:1;
+ background:rgba(18,91,52,.95); border:1px solid #8ee8b5; color:white; border-radius:9px;
+ font-size:12px; font-weight:850; min-height:36px; padding:8px 12px; text-shadow:none; }
+.app .exercise-motion-fallback { font-size:11px; font-weight:700; text-align:center; padding:12px; color:#c7dddb; }
+@media(prefers-reduced-motion:reduce) { .app .library-card .exercise-preview img { animation:none; } }
+/* Calendario: leggibile e compatto. Modifica soltanto la presentazione, MAI Firestore. */
+.app .booking-in-shell { width:100%; max-width:min(1020px,100%); margin:0 auto; overflow-x:clip; }
+/* Coach: non sovrapporre il calendario alla sidebar fissa da 256px. */
+.app.as-coach .booking-in-shell { width:calc(100% - 256px); max-width:none; margin-left:256px; margin-right:0; }
+.app.as-coach .booking-in-shell > .stack { max-width:1020px; margin-left:auto; margin-right:auto; }
+.app .booking-in-shell > .stack { gap:12px!important; }
+.app .booking-in-shell .booking-intro { min-height:0; padding:0 0 3px; }
+.app .booking-in-shell .booking-intro h1 { font-size:clamp(22px,2.5vw,29px); }
+.app .booking-in-shell .booking-top-controls { display:flex; flex-wrap:wrap; gap:6px; }
+.app .booking-in-shell .booking-top-controls .booking-control { font-size:12px; }
+.app .booking-in-shell .booking-compact-toolbar { padding:12px 14px; border-radius:15px; }
+.app .booking-in-shell .booking-compact-toolbar h2,.app .booking-in-shell .booking-period h3 { font-size:clamp(15px,2.1vw,19px); line-height:1.3; }
+.app .booking-in-shell .booking-tabs button { min-height:36px; padding:8px 11px; font-size:12px; }
+.app .booking-in-shell .booking-date-controls button { min-width:34px; }
+.app .booking-in-shell .booking-section-title { margin:13px 0 7px; font-size:16px; }
+.app .booking-in-shell .panel { padding:clamp(10px,1.8vw,17px); border-radius:14px; }
+.app .booking-in-shell .booking-choice { min-height:118px; padding:12px; }
+.app .booking-in-shell .booking-choice strong { font-size:clamp(16px,2.1vw,20px); }
+.app .booking-in-shell .booking-choice small { font-size:12px; line-height:1.4; }
+.app .booking-in-shell .booking-calendar { margin-top:9px!important; gap:5px; }
+.app .booking-in-shell .booking-calendar > div.muted { text-align:center; font-size:12px; font-weight:850; }
+.app .booking-in-shell .booking-day { min-height:44px; padding:6px 2px; border-radius:10px; font-size:14px; }
+.app .booking-in-shell .coach-month-grid { gap:5px; }
+.app .booking-in-shell .coach-month-weekday { font-size:12px; font-weight:850; text-align:center; }
+.app .booking-in-shell .coach-month-day { min-height:63px; padding:6px; border-radius:9px; align-items:flex-start; gap:4px; }
+.app .booking-in-shell .coach-month-day b { font-size:13px; }
+.app .booking-in-shell .coach-month-day small { font-size:10px; white-space:normal; }
+.app .booking-in-shell .booking-period { overflow-x:clip; }
+.app .booking-in-shell .booking-period .event-item { padding:10px; font-size:13px; line-height:1.5; }
+.app .booking-in-shell .booking-period .event-item span { font-size:12px; }
+.app .booking-in-shell .week-event-day { min-width:0; overflow-wrap:anywhere; }
+.app .booking-in-shell .times { grid-template-columns:repeat(auto-fit,minmax(92px,1fr)); }
+.app .booking-in-shell .times button { min-height:42px; padding:9px 6px; }
+.app .booking-in-shell .availability-grid { grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr)); }
+@media(max-width:900px){
+ .app.as-coach .booking-in-shell { width:100%; margin-left:0; margin-right:0; }
+ .app.as-coach .mobile-topbar { padding-top:calc(8px + env(safe-area-inset-top,0px)); }
+ .app .booking-in-shell .booking-intro h1 { max-width:100%; }
+ .app .booking-in-shell .booking-top-controls { position:static; max-width:100%; margin:8px 0 0; justify-content:flex-start; }
+}
+@media(max-width:620px){
+ .app .booking-in-shell { padding-left:9px!important; padding-right:9px!important; }
+ .app .booking-in-shell .booking-main-tabs { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+ .app .booking-in-shell .booking-main-tabs button { font-size:12px; min-height:38px; padding:7px 5px; }
+ .app .booking-in-shell .booking-v1-services { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+ .app .booking-in-shell .booking-service-card { min-height:110px; padding:9px; }
+ .app .booking-in-shell .booking-choice strong { font-size:15px; }
+ .app .booking-in-shell .booking-choice small { font-size:10px; }
+ .app .booking-in-shell .booking-calendar,.app .booking-in-shell .coach-month-grid { gap:3px; }
+ .app .booking-in-shell .booking-day { min-height:41px; font-size:13px; }
+ .app .booking-in-shell .coach-month-day { min-height:47px; padding:4px 2px; gap:2px; }
+ .app .booking-in-shell .coach-month-day small { font-size:9px; }
+ .app .booking-in-shell .coach-month-day .coach-month-dots { gap:1px; }
+ .app .booking-in-shell .booking-period { padding:10px!important; }
+ .app .booking-in-shell .booking-date-controls input { max-width:150px; }
+}
+@media(max-width:360px){
+ .app .booking-in-shell .coach-month-day small { font-size:8px; }
+ .app .booking-in-shell .booking-day { min-height:38px; }
+}
+/* Conferma uscita nativa: fuori dalla shell Vue, sopra modali/navbar. */
+.lf-native-exit-shade { position:fixed; inset:0; display:grid; place-items:center; z-index:3000; padding:max(22px,env(safe-area-inset-top,0px)) 16px max(22px,env(safe-area-inset-bottom,0px)); background:rgba(3,8,12,.78); backdrop-filter:blur(9px); color:#f1fff6; }
+.lf-native-exit-dialog { width:min(400px,100%); background:linear-gradient(155deg,#1c3432,#121d2c); border:1px solid #68bd95; border-radius:24px; box-shadow:0 24px 70px rgba(0,0,0,.5); padding:27px 22px; text-align:center; }
+.lf-native-exit-dialog .lf-exit-badge { display:grid; place-items:center; width:60px; height:60px; border-radius:19px; font-size:32px; background:#1a644c; margin:0 auto 16px; }
+.lf-native-exit-dialog h2 { margin:0 0 10px; font-size:22px; line-height:1.2; }
+.lf-native-exit-dialog p { font-size:14px; line-height:1.55; color:#c5ddd8; margin:0 0 22px; }
+.lf-native-exit-dialog .lf-exit-actions { display:flex; gap:9px; }
+.lf-native-exit-dialog button { flex:1; min-width:0; border-radius:12px; padding:12px 9px; font-size:13px; font-weight:850; min-height:44px; cursor:pointer; }
+.lf-native-exit-dialog button:first-child { color:#eafff4; border:1px solid #70bea0; background:#136b4b; }
+.lf-native-exit-dialog button:last-child { color:#ffdae0; border:1px solid #a65c63; background:#3b232d; }

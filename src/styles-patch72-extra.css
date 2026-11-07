@@ -1,0 +1,70 @@
+/* LION FIT / PATCH 7.2 EXTRA — isolated overrides ONLY.
+   This is imported after the project CSS and after PATCH-6. It must not change
+   the existing six-link navbar component, Firebase state, route IDs or SVG data. */
+
+/* The Home 'ACCESSO RAPIDO' duplicated the 6-item navbar on mobile and desktop.
+   Keep the working navbar, remove only the redundant shortcut panel. */
+.app.as-athlete .athlete-home-quick {display:none!important;}
+
+/* Desktop athlete: existing six-link navbar in the TOP strip, below branding.
+   The same underlying RouterLinks work; no replacement component. */
+@media (min-width:901px) {
+ .app.as-athlete {display:flex;flex-direction:column;padding-bottom:0!important;min-height:100dvh;}
+ .app.as-athlete > .lab-banner {order:0;}
+ .app.as-athlete > .mobile-topbar {order:1;position:sticky!important;top:0!important;z-index:92;height:74px;min-height:74px;padding-block:9px;background:var(--nav);}
+ .app.as-athlete > .bottom-nav.athlete-bottom {order:2;position:sticky!important;top:74px!important;bottom:auto!important;left:auto!important;right:auto!important;inset-inline:auto!important;width:100%;max-width:100%;min-height:55px;display:flex!important;grid-template-columns:none!important;align-items:center;justify-content:center;padding:5px 12px!important;gap:4px;border-bottom:1px solid var(--border);z-index:91;}
+ .app.as-athlete > .bottom-nav.athlete-bottom a {min-height:45px;flex:1 1 0;max-width:156px;display:flex;flex-direction:row;gap:7px;white-space:nowrap;font-size:11px;padding:7px 10px;}
+ .app.as-athlete > .bottom-nav.athlete-bottom a svg {flex:none;width:17px;height:17px;}
+ .app.as-athlete > .main-layout {order:3;flex:1 0 auto;max-width:1000px;width:100%;padding-top:19px;padding-bottom:35px!important;}
+}
+/* Phone/tablet: preserve the NEW bottom navbar (6 entries), not the old quick menu. */
+@media (max-width:900px) {
+ .app.as-athlete > .bottom-nav.athlete-bottom {position:fixed!important;top:auto!important;bottom:0!important;left:0!important;right:0!important;z-index:95;visibility:visible!important;opacity:1!important;pointer-events:auto!important;transform:none!important;max-width:100%;padding-bottom:calc(7px + env(safe-area-inset-bottom,0px))!important;}
+ .app.as-athlete > .main-layout {padding-bottom:calc(97px + env(safe-area-inset-bottom,0px))!important;}
+ .app.as-athlete > .mobile-topbar {position:sticky!important;top:0!important;padding-top:max(10px,env(safe-area-inset-top,0px));}
+}
+/* Avoid clipping the controls into navigation bars, notch / dynamic island. */
+.app.as-athlete .sheet-modal-bg,.app.as-athlete .modal-overlay,
+.app.as-coach .sheet-modal-bg,.app.as-coach .modal-overlay {
+ padding-top:max(12px,env(safe-area-inset-top,0px));
+ padding-bottom:max(14px,env(safe-area-inset-bottom,0px));
+}
+.app .sheet-modal-foot {padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));}
+.app :is(.exercise-dialog,.coach-picker-dialog) {max-height:calc(100dvh - 32px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overscroll-behavior:contain;}
+/* ROUNDONE reference: library boxes h-24 to h-28 (96–112px),
+   sheet previews h-16 / h-20 (64–80px). Modern must not enlarge the SVG
+   to the entire width of a 300px card. Keep the img fully visible. */
+.app .library-grid .library-card .exercise-preview {height:100px!important;flex:0 0 100px!important;display:grid;place-items:center;overflow:hidden;}
+.app .library-grid .library-card .exercise-preview img {width:auto!important;height:auto!important;max-width:min(92px,calc(100% - 14px))!important;max-height:88px!important;object-fit:contain!important;object-position:50% 50%!important;transform:none!important;}
+.app .sheet-exercise-heading .sheet-exercise-mini {width:78px!important;height:78px!important;min-width:78px!important;max-width:78px!important;flex:0 0 78px!important;}
+.app .sheet-exercise-heading .sheet-exercise-mini img {width:auto!important;height:auto!important;max-width:72px!important;max-height:72px!important;object-fit:contain!important;}
+.app .exercise-dialog .exercise-preview {height:195px!important;max-height:29dvh!important;display:grid;place-items:center;}
+.app .exercise-dialog .exercise-preview img {width:auto!important;height:auto!important;max-width:min(188px,calc(100% - 16px))!important;max-height:min(168px,calc(100% - 16px))!important;object-fit:contain!important;}
+.app .exercise-preview .exercise-motion-command {font-size:11px;min-height:30px;}
+@media(max-width:600px) {
+ .app .library-grid {gap:8px;}
+ .app .library-grid .library-card .exercise-preview {height:92px!important;flex-basis:92px!important;}
+ .app .library-grid .library-card .exercise-preview img {max-width:78px!important;max-height:78px!important;}
+ .app .exercise-dialog .exercise-preview {height:168px!important;max-height:27dvh!important;}
+ .app .exercise-dialog .exercise-preview img {max-width:150px!important;max-height:143px!important;}
+}
+/* Compact date field and full-width week linking in the demo coach programme.
+   The LIVE coach programme already has .coach-v1-slot-link. */
+.app.as-coach .coach-program-compact .program-sheet .coach-v1-slot-link {display:block!important;width:100%;min-height:34px;margin-top:7px;border-radius:8px;font-size:11px;font-weight:900;text-align:center;}
+.app.as-coach .coach-program-compact .program-sheet .coach-v1-slot-actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:6px;}
+.app.as-coach .coach-program-compact .program-sheet .coach-v1-slot-actions button {width:100%;min-width:0;font-size:10px;min-height:32px;padding:5px 3px;}
+.app.as-coach .coach-program-compact .week-pills .week-selected-for-trash {background:#763337;color:#fff;border-color:#ffacb0;outline:2px solid #ffacb0;outline-offset:2px;}
+.app.as-coach .coach-program-compact .coach-week-multi-delete {font-size:11px;min-height:31px;padding:6px 9px;}
+/* Activity input: remove green highlight box without hiding the keyboard caret. */
+.app.as-coach .coach-program-compact .program-slot:focus-within {box-shadow:none;outline:0;background:var(--field);border-color:var(--outline);}
+.app.as-coach .coach-program-compact .program-slot input:focus {box-shadow:none;outline:0;background:transparent;}
+/* All activity text remains white in dark-mode athlete day presentation. */
+.app.as-athlete.theme-dark :is(.athlete-week-program,.athlete-day-dialog) :is(.day-activities,.day-card p,.athlete-day-activities,.day-activity){color:#fff;}
+/* Coach booking grid compact on narrow screens; no sideways overflow. */
+@media (max-width:600px) {
+ .app .booking-in-shell .coach-month-grid,.app .booking-in-shell .booking-calendar {gap:3px;grid-template-columns:repeat(7,minmax(0,1fr));min-width:0;}
+ .app .booking-in-shell .coach-month-day {min-width:0;min-height:43px;overflow:hidden;padding:4px 1px;}
+ .app .booking-in-shell .coach-month-day b {font-size:10px;}
+ .app .booking-in-shell .coach-month-day small {font-size:7px;line-height:1.1;}
+ .app .booking-in-shell .booking-compact-toolbar {padding:10px!important;}
+}

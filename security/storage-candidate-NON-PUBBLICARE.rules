@@ -1,0 +1,56 @@
+// PRIVACY/ACL 7.4 — EMULATOR ONLY, NON DEPLOYARE.
+// PATCH 1/7 EMULATOR-ONLY: NON DEPLOYARE SENZA BACKUP
+// LION FIT - STORAGE SECURITY RULES
+// Versione Beta 0.26.1 - Permessi Storage invariati da V25.2
+// Membri leggono i file della propria palestra, coach scrivono; cartelle utenti riservate al proprietario.
+// Nota: i download URL con token gia condivisi richiedono una valutazione separata.
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signed() { return request.auth != null; }
+    function profile() { return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data; }
+    function sameGym(gid) { return signed() && profile().gymId == gid && profile().get('membershipStatus', 'active') != 'revoked'; }
+    function coach(gid) { return sameGym(gid) && profile().role == 'admin'; }
+    match /gyms/{gymId}/{allPaths=**} {
+      allow read: if sameGym(gymId);
+      allow create, update: if coach(gymId)
+        && request.resource.size < 100 * 1024 * 1024;
+      // Owner puo' eliminare vecchi file privi di metadati; collaboratori solo
+      // i propri file con customMetadata.uploadedBy. Gli URL token RESTANO da censire.
+      allow delete: if coach(gymId) && (
+        firestore.get(/databases/(default)/documents/gyms/$(gymId)).data.ownerUid == request.auth.uid
+        || resource.metadata.get('uploadedBy','') == request.auth.uid
+      );
+    }
+    // NUOVO namespace RISERVATO, non sotto /gyms/{gid}/...: evita overlap delle allow legacy.
+    // Il client attuale non carica qui; usare solo dopo migrazione e collaudi.
+    function athleteIsInGym(gid, aid) {
+      return signed() && firestore.get(/databases/(default)/documents/users/$(aid)).data.gymId == gid
+        && firestore.get(/databases/(default)/documents/users/$(aid)).data.role == 'athlete'
+        && firestore.get(/databases/(default)/documents/users/$(aid)).data.get('membershipStatus','active') != 'revoked';
+    }
+    function isGymOwner(gid) {
+      return coach(gid)
+        && firestore.get(/databases/(default)/documents/gyms/$(gid)).data.ownerUid == request.auth.uid;
+    }
+    function isAssignedCoach(gid, aid) {
+      return coach(gid) && athleteIsInGym(gid,aid)
+        && (isGymOwner(gid)
+          || request.auth.uid in firestore.get(/databases/(default)/documents/users/$(aid)).data.get('coachUids', []));
+    }
+    match /athlete_private/{gymId}/{athleteId}/{allPaths=**} {
+      allow read: if athleteIsInGym(gymId, athleteId)
+        && ((sameGym(gymId) && request.auth.uid == athleteId) || isAssignedCoach(gymId, athleteId));
+      allow create, update: if isAssignedCoach(gymId, athleteId)
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType in ['image/png','image/jpeg','image/webp','application/pdf'];
+      allow delete: if isGymOwner(gymId) && athleteIsInGym(gymId,athleteId);
+    }
+    match /users/{userId}/{allPaths=**} {
+      allow read: if signed() && request.auth.uid == userId;
+      allow create, update: if signed() && request.auth.uid == userId
+        && request.resource.size < 10 * 1024 * 1024;
+      allow delete: if signed() && request.auth.uid == userId;
+    }
+  }
+}

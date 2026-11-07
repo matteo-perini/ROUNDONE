@@ -1,0 +1,234 @@
+/* LIONFIT V1 Modern - tema scuro coerente (blu notte originale).
+ * Patch cumulativa: il tema chiaro resta invariato.
+ * La struttura dashboard/Home e' quella nuova; verde solo come dettaglio.
+ * Non modifica Firebase, routing, contatori o dati.
+ */
+.app.theme-dark{
+ --bg:#090D14;--nav:#0F1520;--card:#171F2C;--card2:#1B2634;
+ --field:#0D1521;--text:#EEF4FB;--muted:#A6B6C6;--border:#303A49;
+ --outline:#516378;--mint:#60E5A2;--green:#14834F;--green-bg:#16382E;
+ --lf-accent:#55d99a;--lf-stroke:rgba(75,198,134,.21);
+ --lf-panel:linear-gradient(148deg,#1c2635 0%,#171f2c 80%,#1c2934 100%);
+ --lf-tile:linear-gradient(150deg,#1b2634,#151e2b 88%);
+ --lf-shadow:0 7px 20px rgba(2,5,13,.26);
+ background:#090D14!important;color:var(--text);
+}
+.app.theme-light{
+ --bg:#f4f8f6;--nav:#fff;--card:#fff;--card2:#f7fcf9;
+ --field:#fff;--text:#1a2b22;--muted:#5d7567;--border:#d8e8de;
+ --outline:#a5d3b4;--mint:#087c3f;--green:#0aa84f;--green-bg:#e0f8e9;
+ --lf-accent:#07883e;--lf-stroke:rgba(12,157,74,.18);
+ --lf-panel:linear-gradient(145deg,#fff 0%,#fff 75%,#f0fff4 100%);
+ --lf-tile:linear-gradient(145deg,#fff 0%,#fafffc 76%,#f2fbf5 100%);
+ --lf-shadow:0 5px 17px rgba(22,82,45,.065);
+ background:radial-gradient(ellipse 55% 35% at 100% 0%,rgba(106,227,145,.10),transparent 75%),#f4f8f6;
+}
+.app :is(.panel,.card,.action-card,.line-card,.lf-dashboard-panel,.lf-kpi-card){border-color:var(--border)}
+.app.theme-light :is(.panel,.card,.action-card,.line-card,.lf-dashboard-panel,.lf-kpi-card){background-color:#fff;color:var(--text)}
+.app.theme-dark :is(.panel,.card,.action-card,.line-card,.lf-dashboard-panel,.lf-kpi-card){color:var(--text)}
+.app.theme-light :is(input,select,textarea){color:var(--text);background:#fff;border-color:#badcc7}
+.app.theme-dark :is(input,select,textarea){color:var(--text);background:#0D1521;border-color:#48586b}
+.app :is(input,select,textarea):focus-visible{outline:2px solid var(--lf-accent);outline-offset:1px}
+.app.theme-light .desktop-sidebar{background:linear-gradient(165deg,#fff 0%,#fcfffd 72%,#e9f9ee 100%)}
+.app.theme-dark .desktop-sidebar{background:linear-gradient(165deg,#0F1520 0%,#172132 76%,#101825 100%)}
+.app.theme-light .mobile-topbar{background:linear-gradient(100deg,#fff,#f7fdf9 78%,#effaf2)}
+.app.theme-dark .mobile-topbar{background:linear-gradient(115deg,#0F1520,#1A2534 80%,#111A28)}
+/* Navigation: the fixed mobile athlete dock is scoped in AthleteBottomNavigation.vue.
+   Desktop nav, coach nav and fallback are harmonized here. */
+.app.theme-light :is(.bottom-nav,.athlete-top-nav){background:#fff!important;border-color:#deebe1!important;box-shadow:0 -3px 15px rgba(17,78,48,.06)}
+.app.theme-dark :is(.bottom-nav,.athlete-top-nav){background:linear-gradient(150deg,#151e2b,#0F1520)!important;border-color:#344254!important}
+.app.theme-light :is(.bottom-nav,.athlete-top-nav) a:not(.router-link-active){color:#526659!important}
+.app.theme-dark :is(.bottom-nav,.athlete-top-nav) a:not(.router-link-active){color:#d5e3da!important}
+.app.theme-light :is(.bottom-nav,.athlete-top-nav) a.router-link-active{background:#d9f7e3!important;color:#08783d!important}
+.app.theme-dark :is(.bottom-nav,.athlete-top-nav) a.router-link-active{background:linear-gradient(130deg,#17603d,#15432e)!important;color:#d8ffe8!important}
+/* The original photos contain baked-in UI. Only the clean PHOTO CROPS can ever be backgrounds. */
+.app.as-athlete .lf-athlete-intro{
+ background-image:linear-gradient(92deg,#090D14 0%,rgba(9,13,20,.97) 44%,rgba(9,13,20,.79) 75%,rgba(9,13,20,.51) 100%),url('/lionfit-redesign/mma-gym-clean.jpg')!important;
+ background-position:center,right center!important;background-size:cover,auto 100%!important;
+ background-repeat:no-repeat!important;box-shadow:none!important;
+}
+.app.theme-light.as-athlete .lf-athlete-intro{
+ background-image:linear-gradient(92deg,#fff 0%,rgba(255,255,255,.98) 44%,rgba(246,255,248,.79) 77%,rgba(235,254,240,.44) 100%),url('/lionfit-redesign/mma-gym-clean.jpg')!important;
+ color:#172a1d!important;
+}
+.app.as-athlete .lf-athlete-intro::after{opacity:.25}
+.app.as-athlete .lf-today-card{
+ background-image:linear-gradient(90deg,#111926 0%,rgba(12,19,29,.95) 40%,rgba(11,19,29,.47) 100%),url('/lionfit-redesign/gloves-clean.jpg')!important;
+ background-size:cover,auto 100%!important;background-position:center,right center!important;background-repeat:no-repeat!important;
+ box-shadow:0 7px 17px rgba(0,0,0,.17),0 0 0 1px rgba(58,218,114,.13)!important;
+}
+.app.theme-light.as-athlete .lf-today-card{
+ background-image:linear-gradient(90deg,#fff 0%,rgba(253,255,253,.97) 41%,rgba(249,255,251,.53) 100%),url('/lionfit-redesign/gloves-clean.jpg')!important;
+ color:#183423!important;box-shadow:0 6px 17px rgba(19,113,61,.10)!important;
+}
+.app .lf-today-card:after{box-shadow:none!important;opacity:.55}
+.app .lf-today-go{box-shadow:0 4px 12px rgba(0,120,50,.15)!important}
+.app .lf-day-tile.is-today{box-shadow:0 0 0 1px rgba(47,200,117,.20)!important}
+.app .lf-home-shortcut:hover,.app .lf-day-tile:hover{box-shadow:0 7px 16px rgba(0,110,61,.10)!important}
+/* Admin dashboard: photo only; wordmark and icons are live Vue elements, not baked in. */
+.app .lf-coach-banner{
+ background-image:linear-gradient(90deg,#062218 0%,rgba(6,33,23,.94) 40%,rgba(4,25,16,.58) 100%),url('/lionfit-redesign/mma-gym-clean.jpg')!important;
+ background-position:center,right center!important;background-size:cover,auto 100%!important;background-repeat:no-repeat!important;
+}
+.app .lf-coach-banner:after{filter:none!important;opacity:.35}
+.app.theme-light .lf-coach-banner{border-color:#55c27d;box-shadow:0 5px 17px rgba(16,108,53,.08)!important}
+.app :is(.lf-dashboard-panel,.lf-kpi-card,.lf-home-shortcut,.lf-day-tile){box-shadow:var(--lf-shadow)!important}
+.app.theme-light .lf-source-tag{background:#e2f9eb;color:#08783d}
+/* Archive: mild tint, clearer edge, matching action strip. No heavy haze. */
+.app.as-athlete .athlete-archive-open{
+ background:linear-gradient(150deg,#1B2634,#172130)!important;color:#eef4fb!important;
+ border:1.5px solid #396b63!important;box-shadow:none!important;
+}
+.app.as-athlete .athlete-archive-meta{color:#a6b6c6!important}
+.app.as-athlete .athlete-archive-item>.secondary{
+ background:linear-gradient(140deg,#192735,#182231)!important;
+ border:1px solid #396b63!important;color:#dbece6!important;box-shadow:none!important;
+}
+.app.theme-light.as-athlete .athlete-archive-open{
+ background:linear-gradient(135deg,#fbfffc,#ecf9f0)!important;color:#163d27!important;
+ border-color:#43b570!important;
+}
+.app.theme-light.as-athlete .athlete-archive-meta{color:#397d51!important}
+.app.theme-light.as-athlete .athlete-archive-item>.secondary{
+ background:#edf9f0!important;color:#1c5634!important;border-color:#43b570!important;
+}
+.app.as-athlete .athlete-archive-list input,.app.as-athlete .athlete-team-screen input,
+.app.as-athlete .athlete-team-screen input[type="search"]{
+ background:var(--field)!important;border:1.5px solid var(--lf-accent)!important;color:var(--text)!important;
+ box-shadow:none!important;
+}
+.app.as-athlete .athlete-team-screen .action-card{background:var(--lf-tile)!important;border-color:var(--outline)!important}
+/* Booking fighter/pesi cards: flat emerald accents + uncluttered custom line drawings. */
+.app.as-athlete .booking-in-shell .booking-service-card{
+ background:var(--lf-tile)!important;border:1.5px solid var(--outline)!important;box-shadow:none!important;
+}
+.app.as-athlete .booking-in-shell .booking-service-card.selected{
+ background:linear-gradient(150deg,var(--card2),var(--card))!important;
+ border-color:var(--lf-accent)!important;box-shadow:0 0 0 1px var(--lf-stroke)!important;
+}
+.app.as-athlete .booking-in-shell .booking-service-card .lf-booking-mark{
+ background:linear-gradient(155deg,rgba(18,91,53,.13),rgba(4,34,25,.06))!important;
+ color:#c3ffe0!important;border-color:rgba(51,195,109,.37)!important;
+}
+.app.theme-light.as-athlete .booking-in-shell .booking-service-card .lf-booking-mark{
+ background:#e6f9ed!important;color:#128a48!important;border-color:#b4e4c2!important;
+}
+.app.theme-light.as-athlete .booking-in-shell .booking-service-card{color:#1a3225!important;background:#fff!important}
+.app.theme-light.as-athlete .booking-in-shell .booking-service-card.selected{background:linear-gradient(140deg,#f0fff4,#fff)!important}
+.app.theme-light.as-athlete .booking-in-shell .booking-service-card small{color:#526b5c!important}
+.app.theme-light.as-athlete .booking-service-cta{color:#0b7639!important;border-color:#52bd79!important}
+/* SVG frames are always white artwork. Keep preview canvases DARK in BOTH themes. */
+.app .exercise-preview,.app .exercise-preview.lf76-auto-preview,
+.app .library-grid .library-card .exercise-preview,
+.app .exercise-dialog .exercise-preview{
+ background:linear-gradient(150deg,#1a3030,#0c1b20)!important;
+ border:1px solid #3b6558!important;color:#ecfff2!important;
+ box-shadow:inset 0 0 0 1px rgba(137,225,174,.035)!important;
+}
+.app.theme-light .exercise-preview,.app.theme-light .exercise-preview.lf76-auto-preview,
+.app.theme-light .library-grid .library-card .exercise-preview,.app.theme-light .exercise-dialog .exercise-preview{
+ background:linear-gradient(140deg,#223433,#132225)!important;
+ border-color:#456d5b!important;
+}
+.app .exercise-preview img{filter:none!important;opacity:1!important;mix-blend-mode:normal!important}
+.app .exercise-motion-fallback{color:#d7e8e0!important}
+/* Globally gentle panels, with green as a deliberate accent rather than a solid field. */
+.app.theme-light .lfsettings,.app.theme-light .profile-screen{color:#1a2c21}
+.app.theme-light .lfsettings-entry{background:#fff;border-color:#d9e9df}
+.app.theme-dark .lfsettings-entry{background:#171F2C;border-color:#303A49}
+.app.theme-light .notice-success{background:#eaf8ef!important;color:#1e6240!important;border-color:#bfddc7!important}
+@media(max-width:799px){
+ .app.as-athlete .lf-athlete-intro{background-size:cover,auto 100%!important}
+ .app .lf-today-card{background-size:cover,auto 100%!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .app .lf-coach-banner,.app .lf-athlete-intro,.app .lf-today-card{scroll-behavior:auto}
+}
+
+/* NOV 06 · Overwrite green-leaning historic athlete presentation with navy surfaces.
+   Scoped to theme-dark: the approved white/mint light theme is untouched. */
+.app.theme-dark.as-athlete {
+ --bg:#090D14;--nav:#0F1520;--card:#171F2C;--card2:#1B2634;
+ --field:#0D1521;--text:#EEF4FB;--muted:#A6B6C6;
+ --border:#303A49;--outline:#516378;--green-bg:#16382E;
+ --lf-panel:linear-gradient(148deg,#1b2634,#171f2c);
+ --lf-tile:linear-gradient(150deg,#1B2634,#151e2b 88%);
+ color:var(--text);background:#090D14!important;
+}
+.app.theme-dark.as-athlete :is(.panel,.card,.action-card,.line-card,.library-card,.athlete-plan,.athlete-archive-list,.athlete-team-screen,.booking-layout,.booking-service-card) {
+ border-color:var(--border);
+}
+.app.theme-dark.as-athlete :is(.panel,.card,.action-card,.line-card,.athlete-plan,.athlete-archive-list,.athlete-team-screen) {
+ color:var(--text);
+}
+.app.theme-dark.as-athlete :is(.lf-home-shortcut,.lf-day-tile,.lf-kpi-card,.lf-dashboard-panel) {
+ background:var(--lf-tile)!important;border-color:#344657!important;
+ box-shadow:0 5px 16px rgba(2,5,13,.21)!important;
+}
+.app.theme-dark.as-athlete .lf-day-tile.is-today {
+ border-color:#4bca87!important;box-shadow:0 0 0 1px rgba(65,192,128,.13)!important;
+ background:linear-gradient(150deg,#19332e,#172334)!important;
+}
+.app.theme-dark.as-athlete .lf-day-tile.has-plan:not(.is-today) {
+ background:linear-gradient(155deg,#1c2b35,#172232)!important;
+}
+.app.theme-dark.as-athlete .lf-athlete-intro {background-color:#090D14!important}
+.app.theme-dark.as-athlete .lf-athlete-intro::after {opacity:.08!important}
+.app.theme-dark.as-athlete .lf-today-card {
+ border-color:#399971!important;box-shadow:0 5px 17px rgba(0,0,0,.19)!important;
+}
+.app.theme-dark.as-athlete .lf-today-card::after {opacity:.24!important;box-shadow:none!important}
+.app.theme-dark.as-athlete :is(.lf-today-pill,.lf-home-shortcut-icon) {
+ background:linear-gradient(135deg,rgba(31,108,75,.29),rgba(37,74,74,.12))!important;
+ border-color:rgba(77,188,132,.36)!important;
+}
+.app.theme-dark.as-athlete :is(.athlete-archive-open,.athlete-archive-item>.secondary) {
+ background:linear-gradient(155deg,#1B2634,#172130)!important;
+ border-color:#416b69!important;box-shadow:none!important;
+}
+.app.theme-dark.as-athlete .athlete-archive-meta {color:#a6b6c6!important}
+.app.theme-dark.as-athlete :is(.athlete-archive-list input,.athlete-team-screen input,.athlete-team-screen input[type="search"]) {
+ background:#0D1521!important;color:#EEF4FB!important;border-color:#447569!important;
+}
+.app.theme-dark.as-athlete .athlete-team-screen .action-card {
+ background:var(--lf-tile)!important;border-color:#435668!important;
+}
+.app.theme-dark.as-athlete .booking-in-shell {
+ --bg:#090D14;--nav:#0F1520;--card:#171F2C;--card2:#1B2634;
+ --field:#0D1521;--border:#303A49;--outline:#516378;--green-bg:#16382E;
+}
+.app.theme-dark.as-athlete .booking-in-shell .booking-service-card,
+.app.theme-dark.as-athlete .booking-in-shell .booking-service-card.selected {
+ background:linear-gradient(150deg,#1B2634,#161f2d)!important;
+ border-color:#455c69!important;box-shadow:none!important;
+}
+.app.theme-dark.as-athlete .booking-in-shell .booking-service-card.selected {
+ border-color:#4bad80!important;box-shadow:inset 0 0 0 1px rgba(76,189,127,.12)!important;
+}
+.app.theme-dark.as-athlete .booking-in-shell .booking-service-card .lf-booking-mark {
+ background:linear-gradient(150deg,rgba(30,54,69,.78),rgba(21,36,51,.78))!important;
+ border-color:#405c65!important;color:#c7eedc!important;
+}
+.app.theme-dark.as-athlete :is(.profile-screen,.lfsettings,.booking-in-shell) {
+ color:#EEF4FB;
+}
+/* SVG continue to use the dark artwork canvas regardless of theme. */
+.app.theme-dark .exercise-preview,.app.theme-dark .exercise-preview.lf76-auto-preview {
+ background:linear-gradient(145deg,#1d2d3b,#111b27)!important;
+ border-color:#3c5866!important;
+}
+
+/* Fighter: primo disegno approvato, pugile in posizione di guardia.
+   Crop solo dell'illustrazione: nessun pulsante, testo o avatar nell'immagine.
+   Pesi mantiene il proprio SVG vettoriale esistente. */
+.app.as-athlete .booking-in-shell .booking-service-card .lf-booking-mark .lf-fighter-illustration {
+ display:block!important;width:auto!important;height:92px!important;
+ max-width:95%!important;max-height:95%!important;
+ object-fit:contain!important;border-radius:10px;
+ filter:none!important;
+}
+@media(max-width:520px){
+ .app.as-athlete .booking-in-shell .booking-service-card .lf-booking-mark .lf-fighter-illustration {
+  height:74px!important;max-height:94%!important;
+ }
+}

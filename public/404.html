@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="it"><head><meta charset="UTF-8"><meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Lion Fit · Collegamento</title></head>
+<body><p>Reindirizzamento a Lion Fit…</p><script>
+(function () {
+  const allowed = /^\/(?:accesso|home|piano|schede|archivio|team|profilo|impostazioni|prenotazioni|coach(?:\/(?:atleti|programmi|archivio|schede|libreria|cestino|staff|profilo|prenotazioni))?)\/?$/;
+  if (!allowed.test(location.pathname)) {
+    document.body.textContent = 'Pagina non trovata.';
+    return;
+  }
+  const dest = new URL('/', location.origin);
+  dest.searchParams.set('__lfRoute', location.pathname + location.search + location.hash);
+  location.replace(dest.href);
+})();
+</script></body></html>

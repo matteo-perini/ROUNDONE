@@ -1,0 +1,67 @@
+/* LionFit 7.5 - regressioni post 7.4. Last override. */
+/* UNA sola barra atleta per viewport: mobile dock (Teleport), desktop navbar superiore. */
+@media (min-width:800px) {
+ .app.as-athlete > #athlete-top-menu.lf-top-menu-75 {
+   display:grid!important;visibility:visible!important;opacity:1!important;
+   grid-template-columns:repeat(6,minmax(0,1fr))!important;
+   width:min(1200px,calc(100% - 44px))!important;max-width:1200px!important;
+   padding:9px!important;margin:0 auto 9px!important;gap:7px!important;
+   position:sticky!important;top:calc(61px + env(safe-area-inset-top,0px))!important;
+   z-index:105!important;background:var(--nav)!important;
+   box-shadow:0 8px 30px rgba(0,0,0,.14);border:1px solid var(--border);border-radius:0 0 16px 16px;
+ }
+ .app.as-athlete > #athlete-top-menu.lf-top-menu-75 a {
+   display:flex!important;justify-content:center!important;align-items:center!important;
+   gap:8px!important;min-height:42px!important;color:var(--text)!important;
+   font-weight:900!important;font-size:12px!important;letter-spacing:.03em;
+ }
+ .app.as-athlete > #athlete-top-menu.lf-top-menu-75 a.router-link-active {background:var(--green-bg)!important;color:var(--mint)!important;}
+ .app.as-athlete>.main-layout{max-width:1250px!important;width:100%!important;}
+}
+@media(max-width:799px){
+ .app.as-athlete > #athlete-top-menu.lf-top-menu-75 {display:none!important;visibility:hidden!important;}
+ .app.as-athlete > .main-layout {padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))!important;}
+}
+/* Header stays below camera/clock area; dock remains above gesture area. */
+.app.as-athlete > .mobile-topbar{top:0!important;position:sticky!important;z-index:110!important;}
+.app.as-athlete {overflow-x:clip;}
+.app.as-athlete .booking-in-shell .booking-v1-services {
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,220px))!important;
+  gap:12px!important;justify-content:start!important;align-items:stretch!important;
+}
+.app.as-athlete .booking-in-shell .booking-service-card {
+  box-sizing:border-box!important;min-height:260px!important;max-height:none!important;
+  aspect-ratio:0.80!important;min-width:0!important;width:100%!important;
+  padding:16px 13px!important;border-radius:19px!important;
+  display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+  justify-content:space-between!important;text-align:left!important;gap:10px!important;
+}
+.app.as-athlete .booking-in-shell .booking-service-card strong {font-size:clamp(17px,2.4vw,23px)!important;}
+.app.as-athlete .booking-in-shell .booking-service-card small {font-size:11px!important;line-height:1.35!important;}
+.app.as-athlete .booking-in-shell .booking-main-tabs{justify-content:flex-start!important;}
+.app.as-athlete .booking-in-shell .booking-main-tabs button{flex:0 0 auto!important;min-height:36px!important;padding:7px 13px!important;}
+.lf-booking-mark{display:grid;place-items:center;width:72px;height:72px;flex:0 0 72px;background:radial-gradient(circle at 36% 24%,rgba(92,245,168,.20),rgba(10,46,34,.06));border:1px solid rgba(88,215,160,.32);border-radius:20px;color:#92ffc2;}
+.lf-booking-mark svg{width:60px;height:60px;display:block;stroke:currentColor;}
+.booking-service-card.selected .lf-booking-mark{background:rgba(52,208,126,.18);border-color:#67dda4;}
+@media(max-width:500px){
+ .app.as-athlete .booking-in-shell .booking-v1-services{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;}
+ .app.as-athlete .booking-in-shell .booking-service-card{padding:12px 10px!important;min-height:244px!important;aspect-ratio:auto!important;}
+ .app.as-athlete .booking-in-shell .booking-service-card small{font-size:10px!important;}
+ .lf-booking-mark{width:58px;height:58px;flex-basis:58px;border-radius:16px;}
+ .lf-booking-mark svg{width:50px;height:50px;}
+}
+/* Solo un input già esistente: niente seconda cornice o glow verde durante la digitazione. */
+.app .lfp-inline-lookup{display:block;width:100%;min-height:39px;padding:9px 12px!important;border-radius:10px!important;border:1px solid var(--border)!important;background:var(--field)!important;color:var(--text)!important;outline:none!important;box-shadow:none!important;}
+.app .lfp-inline-lookup:focus,.app .lfp-inline-lookup:focus-visible,.app .lfp-search-standalone:focus-within {outline:none!important;box-shadow:none!important;border-color:var(--border)!important;}
+.app .lfp-search-standalone{display:block;min-width:185px;flex:1 1 220px;border:0!important;background:transparent!important;padding:0!important;outline:0!important;box-shadow:none!important;}
+/* SVG proportions match small library previews; prevent native oversize. */
+.app .library-grid .library-card .exercise-preview {height:106px!important;min-height:106px!important;flex:0 0 106px!important;display:flex;align-items:center;justify-content:center;}
+.app .library-grid .library-card .exercise-preview img{width:auto!important;height:auto!important;max-width:90px!important;max-height:88px!important;object-fit:contain!important;object-position:center!important;}
+.app .exercise-preview img{display:block;max-width:100%;max-height:100%;object-fit:contain;}
+.app .exercise-dialog .exercise-preview img{max-width:min(170px,95%)!important;max-height:160px!important;}
+@media(max-width:480px){.app .library-grid .library-card .exercise-preview img{max-width:79px!important;max-height:78px!important;}}
+
+.app .lfp-facts .lfp-metric-link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:95px;padding:10px 5px;text-align:center;border:1px solid var(--border);background:var(--card);border-radius:14px;color:var(--text);text-decoration:none;}
+.app .lfp-facts .lfp-metric-link:hover,.app .lfp-facts .lfp-metric-link:focus-visible{border-color:var(--mint);}
+.app .lfp-metric-link b{font-size:clamp(10px,1.5vw,15px)}
+.app .lfp-metric-link small{font-size:11px;color:var(--muted)}

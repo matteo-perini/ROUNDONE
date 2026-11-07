@@ -1,0 +1,32 @@
+{
+  "id": "/",
+  "name": "Lion Fit",
+  "short_name": "Lion Fit",
+  "description": "Programmi di allenamento per atleti, fighter e palestre.",
+  "start_url": "/www/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#090d14",
+  "theme_color": "#090d14",
+  "lang": "it",
+  "icons": [
+    {
+      "src": "/www/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/www/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/www/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

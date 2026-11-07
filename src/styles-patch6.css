@@ -1,0 +1,169 @@
+/* LIONFIT PATCH-6/7 · solo presentazione. Le regole API, Firestore e gli ID non cambiano.
+ * Manteniamo gli override confinati alla shell e alle sezioni originali ROUNDONE.
+ * Guardrail: nessun overflow orizzontale, sei tab inferiori, modali sopra nav,
+ * SVG sempre dentro al proprio riquadro, tema chiaro leggibile.
+ */
+html,body,#app {min-width:0;width:100%;max-width:100%;}
+.app {min-width:0;max-width:100%;overflow-x:clip;}
+.main-layout,.panel,.card,.stack,.grid2,.grid3,.grid4 {min-width:0;}
+.grid2,.grid3,.grid4 {max-width:100%;}
+.app button,.app a,.app select,.app input {touch-action:manipulation;}
+.app :is(a,button,input,select,textarea):focus-visible {outline:2px solid var(--mint);outline-offset:2px;}
+.app .theme-square svg,.app .sidebar-nav svg,.app .bottom-nav svg {display:block;flex-shrink:0;color:inherit;stroke:currentColor;}
+/* Nessun salto di 22px della sidebar in assenza di banner laboratorio. */
+.as-coach .desktop-sidebar {top:0;}
+.app:has(> .lab-banner) .desktop-sidebar {top:22px;}
+.as-coach .sidebar-nav a.staff-nav-item {gap:5px;}
+.as-coach .sidebar-nav a.staff-nav-item span {margin-left:0;letter-spacing:-.025em;min-width:0;}
+.as-coach .sidebar-nav a.staff-nav-item svg {flex:0 0 17px;}
+.as-coach .sidebar-nav a {overflow-wrap:anywhere;}
+.as-coach .main-layout {min-width:0;}
+.as-coach .coach-athletes-screen,.as-coach .coach-staff-screen {min-width:0;}
+/* V1: pannelli "Schede" sinistra/destra partono alla stessa altezza. */
+.as-coach .assignment-columns {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:stretch;max-width:100%;}
+.as-coach .assignment-columns > .assignment-panel {margin:0!important;height:100%;min-width:0;}
+.as-coach .assignment-columns .assignment-panel > :first-child {margin-top:0;}
+.as-coach .assignment-columns .assignment-scroll {overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;max-height:350px;}
+.as-coach .assignment-columns .assignment-item {min-width:0;overflow-wrap:anywhere;}
+/* Pannelli compatti, senza sacrificare input e leggibilità. */
+.as-coach .coach-program-compact {min-width:0;}
+.as-coach .coach-program-compact .week-pills {gap:6px;display:flex;flex-wrap:wrap;}
+.as-coach .coach-program-compact .week-pill {width:38px;min-width:38px;height:30px;min-height:30px;border-radius:8px;font-size:11px;font-weight:850;}
+.as-coach .coach-program-compact .coach-week-content {gap:8px;}
+.as-coach .coach-program-compact .coach-week-heading {align-items:center;gap:8px;margin-bottom:3px;}
+.as-coach .coach-program-compact .coach-week-close {font-size:10px;min-height:29px;padding:5px 10px;white-space:nowrap;}
+.as-coach .coach-program-compact .program-days {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;max-width:100%;}
+.as-coach .coach-program-compact .program-day {min-width:0;border-radius:11px;padding:9px;border-width:1px;}
+.as-coach .coach-v1-day > h3 {font-size:12px;letter-spacing:.01em;line-height:1.2;margin:0 0 6px;}
+.as-coach .coach-v1-day :is(.coach-v1-activity,.coach-v1-sheet) {min-width:0;border-radius:8px;padding:7px 8px;margin:5px 0;}
+.as-coach .coach-v1-day .coach-v1-sheet p {min-height:14px;overflow-wrap:anywhere;}
+.as-coach .coach-v1-day .coach-v1-slot-head {min-height:17px;}
+.as-coach .coach-v1-day .coach-v1-slot-link {
+ width:100%;display:flex;align-items:center;justify-content:center;text-align:center;
+ margin-top:6px;min-height:32px;padding:6px 9px;border-radius:8px;
+ font-size:10px;line-height:1.2;font-weight:900;background:#198753;border-color:#4ab781;color:#fff;
+}
+.as-coach .coach-v1-day .coach-v1-slot-link:hover {background:#0c7042;}
+.as-coach .coach-v1-day .coach-v1-slot-actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:6px;}
+.as-coach .coach-v1-day .coach-v1-slot-actions button {min-width:0;min-height:30px;font-size:10px;padding:6px 4px;line-height:1.2;}
+/* Popup di collegamento: lista scrollabile e due pulsanti esattamente alla stessa quota. */
+.coach-picker-dialog {width:min(540px,100%);max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;}
+.coach-picker-dialog .coach-v1-pick-list {max-height:min(35dvh,300px);overflow-y:auto;overscroll-behavior-y:contain;}
+.coach-picker-dialog .coach-pick-row {display:grid;grid-template-columns:minmax(0,1fr) minmax(156px,190px);align-items:center;gap:10px;min-width:0;padding:9px 10px;}
+.coach-picker-dialog .coach-pick-row-info {min-width:0;overflow-wrap:anywhere;}
+.coach-picker-dialog .coach-pick-row-info b {font-size:12px;line-height:1.3;}
+.coach-picker-dialog .coach-pick-row-info p {margin:3px 0 0;font-size:10px;}
+.coach-picker-dialog .coach-pick-row-actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;gap:6px;min-width:0;}
+.coach-picker-dialog .coach-pick-row-actions button {height:34px;min-height:34px;margin:0;min-width:0;padding:6px 7px;border-radius:8px;line-height:1.2;font-size:11px;white-space:nowrap;}
+/* Popup sopra la navbar, con safe area e scrollbar solo dentro. */
+.app .modal-overlay,.app .sheet-modal-bg,.app .athlete-day-overlay {z-index:120;padding:max(10px,env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) max(10px,env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));}
+.app .dialog {max-width:100%;max-height:calc(100dvh - 20px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow-y:auto;overscroll-behavior:contain;}
+.app .sheet-modal {max-width:100%;max-height:calc(100dvh - 20px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow:hidden;}
+.app .sheet-modal-body {overflow-y:auto;overscroll-behavior:contain;min-height:0;}
+.app .dialog h2 {overflow-wrap:anywhere;}
+/* Libreria: frame SVG mai fuori dal box, senza transform erratici. */
+.app .exercise-preview {position:relative;display:grid;place-items:center;min-width:0;overflow:hidden;isolation:isolate;border-radius:10px;background:#253749;border:1px solid var(--border);}
+.app .exercise-preview img {display:block!important;position:static!important;inset:auto!important;width:calc(100% - 14px)!important;height:calc(100% - 14px)!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:50% 50%!important;transform:none!important;filter:none!important;}
+.app .library-grid {grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;gap:10px;}
+.app .library-card {min-width:0;overflow:hidden;}
+.app .library-card .exercise-preview {height:116px;flex:0 0 116px;}
+.app .exercise-dialog .exercise-preview {height:clamp(180px,35dvh,295px);max-height:38dvh;}
+.app .exercise-dialog {width:min(590px,100%);}
+.app .exercise-motion-command {bottom:5px;right:5px;min-height:26px;padding:5px 8px;max-width:calc(100% - 10px);}
+/* Area Atleta: sei tab fissi, tutte cliccabili e nessun overflow di etichette. */
+.as-athlete .mobile-topbar {top:0;min-width:0;padding-top:max(10px,env(safe-area-inset-top,0px));height:auto;min-height:66px;}
+.app.as-athlete:has(> .lab-banner) .mobile-topbar {top:0;}
+.as-athlete .main-layout {width:100%;max-width:810px;min-width:0;padding-bottom:calc(103px + env(safe-area-inset-bottom,0px));}
+.as-athlete .bottom-nav {position:fixed!important;bottom:0;left:0;right:0;display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));max-width:100%;gap:0;z-index:85;min-height:66px;padding:6px max(4px,env(safe-area-inset-right,0px)) calc(7px + env(safe-area-inset-bottom,0px)) max(4px,env(safe-area-inset-left,0px));}
+.as-athlete .bottom-nav a {min-width:0;max-width:none!important;min-height:53px;gap:4px;padding:6px 1px;border-radius:10px;font-size:clamp(8px,1.95vw,10px);line-height:1.15;overflow:hidden;}
+.as-athlete .bottom-nav a span {max-width:100%;white-space:nowrap;text-overflow:clip;overflow:hidden;}
+.as-athlete .bottom-nav a svg {width:20px;height:20px;flex:0 0 20px;}
+.as-athlete .athlete-sheet-grid {align-items:stretch;}
+.as-athlete .athlete-sheet-grid .scheme-item {min-width:0;height:100%;display:flex;flex-direction:column;}
+.as-athlete .athlete-sheet-grid .athlete-sheet-open {margin-top:auto;text-align:left;}
+.as-athlete .athlete-week-picker .week-pills {display:flex;flex-wrap:wrap;gap:7px;}
+.as-athlete .athlete-week-picker .week-pill {border-radius:9px;width:36px;min-width:36px;height:33px;min-height:33px;font-size:12px;}
+.as-athlete .athlete-week-program .week-days {grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
+.as-athlete .athlete-week-program .day-card {min-width:0;display:flex;flex-direction:column;min-height:113px;border-radius:13px;overflow:hidden;}
+.as-athlete .athlete-week-program .day-card p {overflow-wrap:anywhere;}
+.as-athlete .athlete-week-program .day-card-sunday {grid-column:1/-1;min-height:65px;}
+/* Prenotazioni Coach: bottoni in alto a destra, 7 colonne dentro il contenitore. */
+.booking-in-shell .booking-intro {position:relative;min-height:79px;padding-right:0;}
+.booking-in-shell .booking-intro h1 {font-size:clamp(20px,2vw,25px);max-width:52%;}
+.booking-in-shell .booking-top-controls {position:absolute;top:0;right:0;display:flex;justify-content:flex-end;align-items:center;gap:6px;max-width:52%;margin:0;}
+.booking-in-shell .booking-top-controls .booking-control,.booking-in-shell .booking-top-controls .pill {display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:6px 9px;border-radius:8px;font-size:10px;line-height:1.2;white-space:nowrap;}
+.booking-in-shell .booking-calendar,.booking-in-shell .coach-month-grid {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;width:100%;max-width:100%;min-width:0;}
+.booking-in-shell .booking-calendar > *, .booking-in-shell .coach-month-grid > * {min-width:0;}
+.booking-in-shell .coach-month-day {min-height:53px;min-width:0;padding:5px 4px;overflow:hidden;}
+.booking-in-shell .coach-month-day small {font-size:9px;line-height:1.1;overflow-wrap:anywhere;}
+.booking-in-shell .booking-compact-toolbar {min-width:0;}
+.booking-in-shell .booking-compact-toolbar .booking-toolbar-line {min-width:0;}
+.booking-in-shell .booking-compact-toolbar .booking-date-controls input {max-width:100%;}
+/* Luce moderna: superfici neutre, contrasto e accent colore coerente. */
+.app.theme-light {--bg:#F3F6F4;--nav:#FFFFFF;--card:#FFFFFF;--card2:#F3F8F5;--field:#F9FBFA;--text:#192E25;--muted:#566F62;--border:#D7E2DC;--outline:#A7BEB0;--mint:#126F49;--green:#187D52;--green-bg:#DDEFE4;color:var(--text);}
+.theme-light .desktop-sidebar,.theme-light .mobile-topbar,.theme-light .bottom-nav {box-shadow:0 2px 14px rgba(30,66,43,.055);}
+.theme-light .panel,.theme-light .card,.theme-light .archive-card,.theme-light .action-card {background:#FFFFFF;color:var(--text);border-color:var(--border);box-shadow:0 2px 12px rgba(30,66,43,.055);}
+.theme-light .green-hero {background:linear-gradient(125deg,#EAF4EE,#D9EDE0);border-color:#B6D5C1;color:#153F2B;}
+.theme-light .green-hero h1,.theme-light .green-hero h2,.theme-light .green-hero strong {color:#1A4030;}
+.theme-light .green-hero p {color:#496D5D;}
+.theme-light .green-hero .eyebrow,.theme-light .hero-tag {color:#176844;}
+.theme-light .sidebar-nav a.router-link-active {color:#FFFFFF;background:#187D52;border-color:#3E9E70;}
+.theme-light .sidebar-nav a.router-link-active svg {color:#FFFFFF;}
+.theme-light .coach-v1-day .coach-v1-sheet {background:#E9F5ED;border-color:#A5D4B6;}
+.theme-light .coach-v1-day .coach-v1-activity {background:#F8FBF9;border-color:#D7E3DC;}
+.theme-light .coach-v1-day .coach-v1-slot-link {background:#18804E;color:#FFFFFF;border-color:#3E976D;}
+.theme-light .exercise-preview {background:#EFF3F1;border-color:#D0DDD4;}
+
+/* Dettaglio scheda coerente col tema chiaro; nello scuro restano i colori ROUNDONE. */
+.theme-light .sheet-modal,.theme-light .sheet-modal-body,.theme-light .exercise-item {background:var(--card);color:var(--text);border-color:var(--border);}
+.theme-light .sheet-modal-head,.theme-light .sheet-modal-foot,.theme-light .exercise-note {border-color:var(--border);color:var(--muted);}
+.theme-light .exercise-tag {background:var(--card2);color:var(--text);}
+.theme-light .superset-caption {color:#167B50;}
+
+.theme-light .booking-in-shell .booking-period,.theme-light .booking-in-shell .coach-month-day,.theme-light .booking-in-shell .week-event-day {background:#F6FAF7!important;color:#173F2A;border-color:#B9D2C3!important;}
+.theme-light .booking-in-shell .coach-month-day small {color:#476956;}
+.theme-light .booking-in-shell .coach-month-day.selected {background:#D7EEDD!important;border-color:#23865A!important;}
+.theme-light .booking-in-shell .booking-tabs button {background:#E8F2EC;color:#184F35;border-color:#AACDB8;}
+.theme-light .booking-in-shell .booking-tabs button.selected {background:#1A7850;color:#FFFFFF;border-color:#3A9368;}
+.theme-light .booking-in-shell .booking-service-badge.fighter {background:#DAEFE2;color:#155B3D;border-color:#8DC1A0;}
+.theme-light .booking-in-shell .booking-service-badge.pesi {background:#E1EFFA;color:#20547D;border-color:#A0C4E1;}
+.theme-light .booking-in-shell .booking-day {background:#EDF8F0;color:#185D3B;border-color:#B6D9C1;}
+.theme-light .booking-in-shell .booking-day.selected {background:#CFEAD8;color:#124D31;border-color:#218554;}
+.theme-light .booking-in-shell .booking-top-controls .booking-live-pill {background:#E0F2E7;color:#135C3B;border-color:#A4D1B4;}
+/* Desktop e tablet, senza sovrapposizioni. */
+@media (max-width:1150px) and (min-width:901px) {
+ .as-coach .coach-program-compact .program-days {grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media (max-width:900px) {
+ .as-coach .desktop-sidebar {display:none;}
+ .as-coach .desktop-sidebar.mobile-sidebar-open {display:flex;top:0;bottom:0;max-width:88vw;z-index:101;}
+ .as-coach .coach-program-compact .program-days {grid-template-columns:repeat(2,minmax(0,1fr));}
+ .as-coach .assignment-columns {grid-template-columns:repeat(2,minmax(0,1fr));}
+ .booking-in-shell .booking-intro {min-height:86px;}
+}
+@media (max-width:650px) {
+ .as-coach .assignment-columns {grid-template-columns:minmax(0,1fr);}
+ .as-coach .coach-program-compact .program-days {grid-template-columns:minmax(0,1fr);}
+ .app .library-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
+ .booking-in-shell .booking-intro {min-height:0;}
+ .booking-in-shell .booking-intro h1 {max-width:none;}
+ .booking-in-shell .booking-top-controls {position:static;max-width:none;justify-content:flex-start;flex-wrap:wrap;margin:9px 0 5px;}
+ .booking-in-shell .coach-month-day {min-height:47px;padding:4px 2px;}
+ .booking-in-shell .coach-month-day small {font-size:8px;}
+ .coach-picker-dialog .coach-pick-row {grid-template-columns:minmax(0,1fr) minmax(148px,180px);}
+}
+@media (max-width:390px) {
+ .as-athlete .main-layout,.as-coach .main-layout {padding-left:10px;padding-right:10px;}
+ .as-athlete .mobile-topbar {padding-left:10px;padding-right:10px;}
+ .as-athlete .bottom-nav a {font-size:8px;letter-spacing:-.02em;}
+ .as-athlete .bottom-nav a svg {width:19px;height:19px;flex-basis:19px;}
+ .as-athlete .athlete-week-program .week-days {gap:5px;}
+ .as-athlete .athlete-week-program .day-card {min-height:109px;padding:8px 6px;}
+ .booking-in-shell .coach-month-day {min-height:43px;}
+ .booking-in-shell .coach-month-day small {font-size:7.5px;}
+ .coach-picker-dialog .coach-pick-row {grid-template-columns:minmax(0,1fr);}
+ .coach-picker-dialog .coach-pick-row-actions {justify-self:end;width:min(100%,200px);}
+}
+@media (prefers-reduced-motion:reduce) {
+ .app :is(button,a,.panel,.card,.exercise-preview) {scroll-behavior:auto;transition-duration:.01ms!important;animation-duration:.01ms!important;}
+}

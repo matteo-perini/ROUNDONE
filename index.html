@@ -1,22 +1,38 @@
 <!doctype html>
-<html lang="it" translate="no">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lion Fit — Accesso</title>
-<meta name="robots" content="noindex">
-<script>
-/* Il sito e' pubblicato nella cartella /www/. Non perdere i parametri degli inviti. */
-(function () {
-  var destination = new URL('./www/index.html', window.location.href);
-  destination.search = window.location.search;
-  destination.hash = window.location.hash;
-  window.location.replace(destination.href);
-}());
-</script>
-</head>
-<body>
-<p>Reindirizzamento a <a href="./www/index.html" translate="no">Lion Fit</a>...</p>
-<noscript>JavaScript è necessario per mantenere il codice d'invito. Apri il link ricevuto direttamente sul tuo dispositivo.</noscript>
-</body>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- I token monouso possono essere nella query: non inviarli come Referer. -->
+    <meta name="referrer" content="no-referrer" />
+    <!-- GitHub Pages 404 fallback: restore only a known route on this same origin. -->
+    <script>
+      (function () {
+        const params = new URLSearchParams(location.search);
+        const requested = params.get('__lfRoute');
+        if (!requested || !requested.startsWith('/') || requested.startsWith('//')) return;
+        try {
+          const target = new URL(requested, location.origin);
+          const allowed = /^\/(?:accesso|home|piano|schede|archivio|team|profilo|impostazioni|prenotazioni|coach(?:\/(?:atleti|programmi|archivio|schede|libreria|cestino|staff|profilo|prenotazioni))?)\/?$/;
+          if (target.origin !== location.origin || !allowed.test(target.pathname)) return;
+          history.replaceState(null, '', target.pathname + target.search + target.hash);
+        } catch (_) { /* invalid route: keep the landing page */ }
+      })();
+    </script>
+    <!-- Web app Lion Fit: Android/desktop PWA e icona Home su iPhone -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="/LOGO-APP.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Lion Fit" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#090d14" />
+    <title>Lion Fit</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+    <!-- Rifinitura post-PATCH7 indipendente dalla navbar gia corretta. -->
+    <script type="module" src="/src/features/integrative/nativeBackEntry.ts"></script>
+  </body>
 </html>

@@ -1,0 +1,116 @@
+/* PATCH 7.6: LAST CSS IMPORT -- remove cumulative sticky conflicts on desktop.
+   Header and six-link navbar are FIXED in desktop with a single document scroll.
+   Mobile dock remains the existing 7.2 Teleport, untouched. */
+@media(min-width:800px) {
+ .app.as-athlete{--lf76-banner:0px;overflow-x:clip!important;min-height:100dvh!important;display:block!important;}
+ .app.as-athlete:has(> .lab-banner){--lf76-banner:24px;}
+ .app.as-athlete>.mobile-topbar{
+  position:fixed!important;inset:var(--lf76-banner) 0 auto 0!important;
+  width:100%!important;height:61px!important;min-height:61px!important;
+  padding-top:7px!important;padding-bottom:7px!important;
+  background:var(--nav)!important;z-index:220!important;box-sizing:border-box!important;
+  display:flex!important;visibility:visible!important;opacity:1!important;
+ }
+ .app.as-athlete>#athlete-top-menu.lf-top-menu-76{
+  position:fixed!important;top:calc(var(--lf76-banner) + 61px)!important;
+  left:50%!important;right:auto!important;bottom:auto!important;
+  transform:translateX(-50%)!important;
+  box-sizing:border-box!important;width:min(1200px,calc(100% - 36px))!important;
+  max-width:1200px!important;margin:0!important;padding:8px!important;display:grid!important;
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:6px!important;
+  height:58px!important;min-height:58px!important;align-items:center!important;
+  visibility:visible!important;opacity:1!important;pointer-events:auto!important;
+  overflow:visible!important;z-index:219!important;
+  background:var(--nav)!important;border:1px solid var(--border)!important;
+  border-top:0!important;border-radius:0 0 15px 15px!important;
+  box-shadow:0 8px 20px rgba(0,0,0,.19)!important;
+ }
+ .app.as-athlete>#athlete-top-menu.lf-top-menu-76 a{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:100%!important;min-width:0!important;min-height:40px!important;
+  line-height:1.2!important;padding:7px 3px!important;border-radius:9px!important;
+  font-size:clamp(10px,1vw,12px)!important;opacity:1!important;visibility:visible!important;
+  text-align:center!important;white-space:nowrap!important;
+ }
+ .app.as-athlete>#athlete-top-menu.lf-top-menu-76 a.router-link-active{background:var(--green-bg)!important;color:var(--mint)!important;}
+ .app.as-athlete>.main-layout{
+  margin-top:132px!important;padding-top:12px!important;padding-bottom:38px!important;
+  max-width:1250px!important;width:100%!important;overflow-x:clip!important;
+ }
+ .app.as-athlete .version{margin:0 0 15px!important;}
+}
+@media(max-width:799px){
+ .app.as-athlete>#athlete-top-menu.lf-top-menu-76{display:none!important;visibility:hidden!important;}
+ .app.as-athlete>.mobile-topbar{position:sticky!important;top:0!important;z-index:180!important;}
+ .app.as-athlete>.main-layout{margin-top:0!important;padding-bottom:calc(111px + env(safe-area-inset-bottom,0px))!important;}
+}
+/* All exercise thumbs run on entry; the small position indicator is decorative and
+   shows the autoplay system is actively engaged (no user action necessary). */
+.app .library-grid .library-card .exercise-preview.lf76-auto-preview{
+  position:relative!important;height:112px!important;min-height:112px!important;
+  flex:0 0 112px!important;width:100%!important;display:flex!important;
+  align-items:center!important;justify-content:center!important;overflow:hidden!important;
+}
+.app .library-grid .library-card .exercise-preview.lf76-auto-preview img{
+  display:block!important;width:auto!important;height:auto!important;
+  max-width:min(92px,86%)!important;max-height:88px!important;
+  object-position:center!important;object-fit:contain!important;
+}
+.app .library-grid .library-card .exercise-preview[data-lionfit-animating="true"]:after{
+  content:'▶';position:absolute;right:8px;bottom:6px;z-index:1;
+  color:#b7f5d2;background:rgba(8,22,19,.72);border-radius:5px;
+  font-size:9px;line-height:1;padding:3px 4px;pointer-events:none;
+}
+/* Vertical discipline choices, in all three views: demo, emulator, live. */
+.app.as-athlete .booking-in-shell .booking-v1-services{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,188px))!important;
+  gap:12px!important;justify-content:start!important;align-items:start!important;width:100%!important;
+}
+.app.as-athlete .booking-in-shell .booking-service-card{
+  width:100%!important;min-width:0!important;max-width:188px!important;
+  height:292px!important;min-height:292px!important;max-height:292px!important;
+  aspect-ratio:auto!important;padding:15px 13px!important;display:flex!important;
+  align-items:stretch!important;flex-direction:column!important;
+  justify-content:space-between!important;gap:9px!important;
+  background:linear-gradient(145deg,var(--card2),var(--card))!important;
+  border:1.5px solid var(--outline)!important;border-radius:18px!important;
+  text-align:left!important;white-space:normal!important;overflow:hidden!important;
+  box-shadow:0 7px 17px rgba(0,0,0,.11)!important;
+}
+.app.as-athlete .booking-in-shell .booking-service-card.selected{border-color:var(--mint)!important;background:linear-gradient(150deg,var(--green-bg),var(--card))!important;box-shadow:0 0 0 1px var(--mint),0 9px 22px rgba(0,0,0,.15)!important;}
+.app.as-athlete .booking-in-shell .booking-service-card .lf-booking-mark{height:97px!important;width:100%!important;flex:0 0 97px!important;display:grid!important;place-items:center!important;margin:0 auto!important;border-radius:14px!important;}
+.app.as-athlete .booking-in-shell .booking-service-card .lf-booking-mark svg{width:90px!important;height:90px!important;max-width:85%!important;max-height:95%!important;}
+.app.as-athlete .booking-in-shell .booking-service-card strong{display:block!important;font-size:21px!important;font-weight:900!important;letter-spacing:.05em!important;margin:0!important;}
+.app.as-athlete .booking-in-shell .booking-service-card small{font-size:11px!important;line-height:1.35!important;color:var(--muted)!important;overflow-wrap:break-word!important;}
+.app.as-athlete .booking-in-shell .booking-service-card>div:not(.lf-booking-mark){min-width:0!important;}
+.app.as-athlete .booking-in-shell .booking-service-badge{font-size:9px!important;line-height:1.2!important;margin-bottom:5px!important;}
+.app.as-athlete .booking-in-shell .booking-service-cta{font-size:10px!important;color:var(--mint)!important;font-weight:850!important;margin-top:auto!important;}
+.app.as-athlete .booking-in-shell .booking-main-tabs{display:flex!important;flex-wrap:wrap!important;justify-content:flex-start!important;gap:8px!important;}
+.app.as-athlete .booking-in-shell .booking-main-tabs button{flex:none!important;width:auto!important;min-height:35px!important;padding:6px 12px!important;font-size:11px!important;}
+@media(max-width:470px){
+ .app.as-athlete .booking-in-shell .booking-v1-services{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;}
+ .app.as-athlete .booking-in-shell .booking-service-card{max-width:none!important;height:264px!important;min-height:264px!important;max-height:264px!important;padding:12px 9px!important;}
+ .app.as-athlete .booking-in-shell .booking-service-card .lf-booking-mark{height:78px!important;flex-basis:78px!important;}
+ .app.as-athlete .booking-in-shell .booking-service-card .lf-booking-mark svg{height:72px!important;width:72px!important;}
+ .app.as-athlete .booking-in-shell .booking-service-card strong{font-size:17px!important;}
+ .app.as-athlete .booking-in-shell .booking-service-card small{font-size:9.8px!important;}
+}
+/* In Archivio > Assegna there is only ONE typing field; no green micro-dialog. */
+.app .lfp-search-label:focus-within,.app .lfp-search-standalone:focus-within{
+  background:transparent!important;outline:0!important;border-color:transparent!important;
+  box-shadow:none!important;
+}
+.app input.lfp-inline-lookup,.app input.lfp-inline-lookup:focus,.app input.lfp-inline-lookup:focus-visible{
+  outline:0!important;box-shadow:none!important;border:1px solid var(--border)!important;
+  background:var(--field)!important;appearance:none!important;-webkit-appearance:none!important;
+}
+/* Settings legal drafts have a distinct, honest status when previewing. */
+.app .lfsettings-entry small{line-height:1.4;}
+
+.app .lfsettings-language{display:flex!important;align-items:center!important;gap:14px!important;cursor:default!important;}
+.app .lfsettings-language>span{flex:1;min-width:0;}
+.app .lfsettings-language select{width:auto!important;max-width:175px!important;min-width:135px!important;min-height:38px!important;padding:7px 8px!important;font-size:12px!important;}
+@media(max-width:430px){.app .lfsettings-language{flex-wrap:wrap!important;}.app .lfsettings-language select{margin-left:26px!important;}}
+
+@media(min-width:800px){html:has(.app.as-athlete){scroll-padding-top:140px;} }
+.app.as-athlete .modal-overlay,.app.as-athlete .sheet-modal-bg{z-index:400!important;}

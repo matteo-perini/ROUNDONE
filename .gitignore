@@ -1,1 +1,54 @@
+# LionFit Modern — codice sorgente su GitHub, build locale fuori da Git
 node_modules/
+dist/
+coverage/
+.vite/
+.firebase/
+*.log
+npm-debug.log*
+
+# Configurazioni locali: contengono variabili di ambiente.
+.env
+.env.*
+!.env.example
+
+# Credenziali e file di firma (non caricare MAI su GitHub).
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
+*.key
+*-service-account*.json
+*serviceAccountKey*.json
+firebase-test.json
+
+# File Android generati; i sorgenti android/ sono invece versionati.
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/.cxx/
+android/capacitor-cordova-android-plugins/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/app/src/main/res/xml/config.xml
+*.apk
+*.aab
+*.aar
+
+# Cartelle editor e file temporanei.
+.DS_Store
+Thumbs.db
+.vscode/*.log
+*.tmp
+*.bak
+*.zip
+RISULTATO*.txt
+TEST_STEP*.cmd
+LEGGIMI-STEP*.md
+LEGGIMI-STEP*.txt
+
+# NOTA: non ignorare la cartella android/: contiene build.gradle e sorgenti nativi.
