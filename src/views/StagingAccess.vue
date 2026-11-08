@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import {uiText} from '../features/i18n/interfaceLanguage'
 /** Registrazione V1 portata in Vue: stessi documenti, ruoli e inviti monouso.
  * La conferma del server e' affidata alle Security Rules pubblicate, mai al solo client. */
 import {computed,onMounted,ref,watch} from 'vue'
@@ -165,36 +166,36 @@ async function register(){if(busy.value)return;if(!mayWriteLive()){error.value='
 </script>
 <template>
  <div class="access-wrap v1-login">
-  <div class="login-identity"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><h1>LION <span>FIT</span></h1><h2>GESTIONE &amp; PROGRAMMI</h2><p>Accedi al tuo piano o registrati con la tua palestra</p></div>
+  <div class="login-identity"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><h1>LION <span>FIT</span></h1><h2>GESTIONE &amp; PROGRAMMI</h2><p>{{uiText("Accedi al tuo piano o registrati con la tua palestra")}}</p></div>
   <section class="panel access-card" :aria-label="isTestMode()?'Accesso Lion Fit in ambiente di prova':'Accesso Lion Fit'">
-   <div class="login-tabs"><button type="button" :class="{selected:tab==='login'}" @click="switchTab('login')">ACCEDI</button><button type="button" :class="{selected:tab==='register'}" @click="switchTab('register')">REGISTRATI</button></div>
+   <div class="login-tabs"><button type="button" :class="{selected:tab==='login'}" @click="switchTab('login')">{{uiText("ACCEDI")}}</button><button type="button" :class="{selected:tab==='register'}" @click="switchTab('register')">{{uiText("REGISTRATI")}}</button></div>
    <form v-if="tab==='login'" class="stack" @submit.prevent="login">
     <label>EMAIL<input v-model="email" type="email" autocomplete="username" placeholder="la-tua-email@esempio.it" maxlength="160" required/></label>
     <label>PASSWORD<span class="password-control"><input v-model="password" :type="showPassword?'text':'password'" autocomplete="current-password" placeholder="••••••••" required/><button type="button" :aria-label="showPassword?'Nascondi password':'Mostra password'" @click="showPassword=!showPassword">{{showPassword?'Nascondi':'Mostra'}}</button></span></label>
-    <div class="row between login-recover-row"><button class="bare small" type="button" @click="switchTab('reset')">Password dimenticata?</button></div>
-    <label class="checkline login-remember-row"><input v-model="remember" type="checkbox"/><span><strong>Mantieni l'accesso</strong><small>Disattivala per una sessione temporanea.</small></span></label>
+    <div class="row between login-recover-row"><button class="bare small" type="button" @click="switchTab('reset')">{{uiText("Password dimenticata?")}}</button></div>
+    <label class="checkline login-remember-row"><input v-model="remember" type="checkbox"/><span><strong>{{uiText("Mantieni l'accesso")}}</strong><small>{{uiText("Disattivala per una sessione temporanea.")}}</small></span></label>
     <button type="submit" class="primary wide" :disabled="busy">{{busy?'ACCESSO IN CORSO…':'ACCEDI'}}</button>
    </form>
-   <form v-else-if="tab==='reset'" class="stack" @submit.prevent="reset"><h2>RECUPERA LA PASSWORD</h2><p class="muted small">Inserisci la tua email per ricevere un collegamento di recupero.</p><label>EMAIL<input v-model="email" type="email" autocomplete="email" required/></label><button class="primary wide" type="submit" :disabled="busy">INVIA EMAIL DI RECUPERO</button><button class="secondary wide" type="button" @click="switchTab('login')">← Torna all'accesso</button></form>
+   <form v-else-if="tab==='reset'" class="stack" @submit.prevent="reset"><h2>{{uiText("RECUPERA LA PASSWORD")}}</h2><p class="muted small">{{uiText("Inserisci la tua email per ricevere un collegamento di recupero.")}}</p><label>EMAIL<input v-model="email" type="email" autocomplete="email" required/></label><button class="primary wide" type="submit" :disabled="busy">{{uiText("INVIA EMAIL DI RECUPERO")}}</button><button class="secondary wide" type="button" @click="switchTab('login')">{{uiText("← Torna all'accesso")}}</button></form>
    <form v-else class="stack register-v1" @submit.prevent="register">
-    <div v-if="verifyCoach" class="register-verification"><strong>Verifica l'email per diventare coach</strong><p>Apri il link ricevuto, torna qui e conferma. Non creare un secondo account.</p><button class="primary wide" type="button" :disabled="busy" @click="confirmCoach">Ho verificato l'email · Completa registrazione</button><button class="secondary wide" type="button" :disabled="busy" @click="resendVerification">Invia nuovamente l'email</button></div>
-    <label>NOME E COGNOME<input v-model="regName" autocomplete="name" required maxlength="90" placeholder="Es. Mario Rossi"/></label>
+    <div v-if="verifyCoach" class="register-verification"><strong>{{uiText("Verifica l'email per diventare coach")}}</strong><p>{{uiText("Apri il link ricevuto, torna qui e conferma. Non creare un secondo account.")}}</p><button class="primary wide" type="button" :disabled="busy" @click="confirmCoach">{{uiText("Ho verificato l'email · Completa registrazione")}}</button><button class="secondary wide" type="button" :disabled="busy" @click="resendVerification">{{uiText("Invia nuovamente l'email")}}</button></div>
+    <label>{{uiText("NOME E COGNOME")}}<input v-model="regName" autocomplete="name" required maxlength="90" placeholder="Es. Mario Rossi"/></label>
     <label>EMAIL<input v-model="regEmail" type="email" autocomplete="email" maxlength="160" required placeholder="la-tua-email@esempio.it"/></label>
     <label>PASSWORD<input v-model="regPassword" type="password" autocomplete="new-password" minlength="6" :required="!verifyCoach" placeholder="••••••••"/></label>
-    <label>TIPO DI ACCOUNT<select v-model="regRole" :disabled="!!validLink||verifyCoach"><option value="athlete">Atleta (Iscriviti a una palestra)</option><option v-if="!isTestMode()" value="admin">Coach titolare (Crea palestra)</option><option value="coach_invited">Coach invitato (Palestra esistente)</option></select></label>
+    <label>{{uiText("TIPO DI ACCOUNT")}}<select v-model="regRole" :disabled="!!validLink||verifyCoach"><option value="athlete">{{uiText("Atleta (Iscriviti a una palestra)")}}</option><option v-if="!isTestMode()" value="admin">{{uiText("Coach titolare (Crea palestra)")}}</option><option value="coach_invited">{{uiText("Coach invitato (Palestra esistente)")}}</option></select></label>
     <div v-if="regRole==='athlete'||regRole==='coach_invited'" class="register-invite-group">
-     <p v-if="validLink" class="register-link-loaded">✓ Invito personale caricato dal link ricevuto.</p>
-     <p v-else>Apri il link personale inviato dalla palestra. Hai solo i codici? Inseriscili qui sotto.</p>
-     <details :open="manualCodes||!!validLink" @toggle="manualCodes=($event.target as HTMLDetailsElement).open"><summary>Inserisci codice manualmente</summary>
+     <p v-if="validLink" class="register-link-loaded">{{uiText("✓ Invito personale caricato dal link ricevuto.")}}</p>
+     <p v-else>{{uiText("Apri il link personale inviato dalla palestra. Hai solo i codici? Inseriscili qui sotto.")}}</p>
+     <details :open="manualCodes||!!validLink" @toggle="manualCodes=($event.target as HTMLDetailsElement).open"><summary>{{uiText("Inserisci codice manualmente")}}</summary>
       <label>{{regRole==='athlete'?'CODICE PERSONALE ATLETA (MONOUSO)':'CODICE SPECIALE COACH'}}<input v-model="regToken" type="text" autocomplete="off" placeholder="Codice lungo ricevuto dalla palestra" maxlength="48"/></label>
-      <label>ID PALESTRA (COMPILATO DAL COLLEGAMENTO)<input v-model="regGym" type="text" autocomplete="off" placeholder="gym_..."/></label>
+      <label>{{uiText("ID PALESTRA (COMPILATO DAL COLLEGAMENTO)")}}<input v-model="regGym" type="text" autocomplete="off" placeholder="gym_..."/></label>
      </details>
     </div>
-    <label v-if="regRole==='admin'">NOME DELLA TUA PALESTRA<input v-model="gymName" maxlength="90" placeholder="Es. Leoni di San Marco" :required="regRole==='admin'"/></label>
-    <div class="register-consents"><label><input v-model="acceptTerms" type="checkbox" required/><span>Accetto i <a href="/v1-preview/note-legali.html" target="_blank" rel="noopener">Termini d'uso</a>.</span></label><label><input v-model="acceptPrivacy" type="checkbox" required/><span>Acconsento alla <a href="/v1-preview/policy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span></label></div>
-    <label class="checkline login-remember-row"><input v-model="regRemember" type="checkbox"/><span><strong>Mantieni l'accesso</strong><small>Disattivala per una sessione temporanea.</small></span></label>
+    <label v-if="regRole==='admin'">{{uiText("NOME DELLA TUA PALESTRA")}}<input v-model="gymName" maxlength="90" placeholder="Es. Leoni di San Marco" :required="regRole==='admin'"/></label>
+    <div class="register-consents"><label><input v-model="acceptTerms" type="checkbox" required/><span>{{uiText("Accetto i")}} <a href="/v1-preview/note-legali.html" target="_blank" rel="noopener">{{uiText("Termini d'uso")}}</a>.</span></label><label><input v-model="acceptPrivacy" type="checkbox" required/><span>{{uiText("Acconsento alla")}} <a href="/v1-preview/policy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span></label></div>
+    <label class="checkline login-remember-row"><input v-model="regRemember" type="checkbox"/><span><strong>{{uiText("Mantieni l'accesso")}}</strong><small>{{uiText("Disattivala per una sessione temporanea.")}}</small></span></label>
     <button type="submit" class="primary wide" :disabled="busy||verifyCoach">{{busy?'REGISTRAZIONE IN CORSO…':'CREA ACCOUNT'}}</button>
-    <div v-if="canRecover && !verifyCoach" class="register-verification"><p class="muted small">Se l'account Firebase è stato creato ma la registrazione non è terminata, puoi riprenderla usando la stessa email, password e invito. Non sarà creato un secondo UID.</p><button class="secondary wide" type="button" :disabled="busy" @click="recoverRegistration">RECUPERA REGISTRAZIONE INTERROTTA</button></div>
+    <div v-if="canRecover && !verifyCoach" class="register-verification"><p class="muted small">{{uiText("Se l'account Firebase è stato creato ma la registrazione non è terminata, puoi riprenderla usando la stessa email, password e invito. Non sarà creato un secondo UID.")}}</p><button class="secondary wide" type="button" :disabled="busy" @click="recoverRegistration">{{uiText("RECUPERA REGISTRAZIONE INTERROTTA")}}</button></div>
    </form>
    <p v-if="error" class="notice" role="alert">{{error}}</p><p v-if="info" class="notice" role="status">{{info}}</p>
   </section>

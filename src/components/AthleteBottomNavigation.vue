@@ -5,16 +5,17 @@
  */
 import { RouterLink } from 'vue-router'
 import LionIcon from './LionIcon.vue'
+import {uiText} from '../features/i18n/interfaceLanguage'
 
 type NavigationItem = {to:string;label:string;icon:string}
 const props=defineProps<{items:readonly NavigationItem[];theme:string}>()
 </script>
 <template>
  <Teleport to="body">
-  <nav class="lionfit-athlete-dock" :class="props.theme==='light'?'dock-light':'dock-dark'" aria-label="Navigazione inferiore Atleta" data-lionfit-dock="athlete">
-   <RouterLink v-for="item in props.items" :key="item.to" :to="item.to" class="lionfit-dock-item" :aria-label="item.label">
+  <nav class="lionfit-athlete-dock" :class="props.theme==='light'?'dock-light':'dock-dark'" :aria-label="uiText('Navigazione inferiore Atleta')" data-lionfit-dock="athlete">
+   <RouterLink v-for="item in props.items" :key="item.to" :to="item.to" class="lionfit-dock-item" :aria-label="uiText(item.label)">
     <LionIcon :name="item.icon" :size="21"/>
-    <span>{{ item.label }}</span>
+    <span>{{uiText(item.label)}}</span>
    </RouterLink>
   </nav>
  </Teleport>
@@ -29,7 +30,7 @@ const props=defineProps<{items:readonly NavigationItem[];theme:string}>()
  padding:5px max(6px,env(safe-area-inset-right,0px)) calc(7px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));
  gap:4px;align-items:stretch;z-index:1400!important;overflow:visible!important;
  pointer-events:auto!important;visibility:visible!important;opacity:1!important;
- border-top:1px solid #344254;border-radius:12px 12px 0 0;
+ border-top:1px solid #344254;border-radius:0!important;
  background:linear-gradient(155deg,#192434 0%,#0F1520 76%,#172231 100%);
  color:#eef4fb;box-shadow:0 -4px 15px rgba(0,0,0,.20);
 }

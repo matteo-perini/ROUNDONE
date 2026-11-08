@@ -1,0 +1,170 @@
+/* LIONFIT PATCH 5/7 — Area Atleta V3. CSS isolato e caricato per ultimo.
+ * Le altre pagine, la shell Coach e i dati Firestore non sono modificati. */
+.app.as-athlete{
+ --lf-v3-bg:var(--card);--lf-v3-alt:var(--card2);--lf-v3-stroke:var(--border);
+ --lf-v3-accent:var(--mint);--lf-v3-ink:var(--text);--lf-v3-muted:var(--muted);
+ --lf-v3-glow:rgba(18,209,100,.13)
+}
+/* Sidebar desktop: solo atleta, indipendente dalla sidebar Coach. */
+.lf-athlete-desktop-sidebar{display:none}
+@media(min-width:800px){
+ .app.as-athlete{--lf-v3-sidebar:242px;padding-bottom:0!important}
+ .app.as-athlete.athlete-sidebar-collapsed{--lf-v3-sidebar:70px}
+ .app.as-athlete>.mobile-topbar{display:none!important}
+ .app.as-athlete>#athlete-top-menu{display:none!important;visibility:hidden!important}
+ .app.as-athlete>.main-layout{
+  margin:0 0 0 var(--lf-v3-sidebar)!important;padding:22px clamp(16px,2.2vw,34px) 38px!important;
+  max-width:none!important;width:calc(100% - var(--lf-v3-sidebar))!important;
+  overflow-x:clip!important;box-sizing:border-box!important;
+ }
+ .app.as-athlete .main-layout>.version{text-align:right!important;margin:0 0 12px!important;font-size:10px}
+ .lf-athlete-desktop-sidebar{
+  position:fixed;left:0;top:0;bottom:0;z-index:230;box-sizing:border-box;
+  width:var(--lf-v3-sidebar);display:flex;flex-direction:column;
+  background:var(--nav);border-right:1px solid var(--border);overflow:hidden;
+  box-shadow:4px 0 18px rgba(0,0,0,.06);
+ }
+ .lf-athlete-side-brand{height:78px;min-height:78px;display:flex;align-items:center;gap:9px;padding:11px;border-bottom:1px solid var(--border)}
+ .lf-athlete-side-brand img{width:40px;height:40px;object-fit:contain;flex:none}
+ .lf-athlete-side-brand>span{min-width:0;flex:1}
+ .lf-athlete-side-brand strong{font-size:17px;white-space:nowrap;font-style:italic;letter-spacing:-.02em}
+ .lf-athlete-side-brand em{font-style:italic;color:var(--mint)}
+ .lf-athlete-side-brand small{display:block;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.1em}
+ .lf-athlete-side-brand button{width:32px;height:34px;border:1px solid var(--border);border-radius:8px;display:grid;place-items:center;padding:0;color:var(--text);background:var(--card2);flex:none}
+ .lf-athlete-side-links{flex:1;display:flex;flex-direction:column;gap:4px;padding:14px 10px;overflow:auto}
+ .lf-athlete-side-links a,.lf-athlete-side-footer a,.lf-athlete-side-footer button{
+  display:flex;align-items:center;gap:11px;min-height:45px;width:100%;padding:10px 11px;
+  background:transparent;border:1px solid transparent;border-radius:10px;
+  font-size:12px;font-weight:800;color:var(--text);white-space:nowrap;text-decoration:none;
+ }
+ .lf-athlete-side-links a svg,.lf-athlete-side-footer svg{flex:none}
+ .lf-athlete-side-links a.router-link-active{background:linear-gradient(105deg,#097c3c,#10d35f);border-color:#37db82;color:white}
+ .lf-athlete-side-links a:hover:not(.router-link-active),.lf-athlete-side-footer a:hover,.lf-athlete-side-footer button:hover{background:var(--card2)}
+ .lf-athlete-side-footer{padding:11px 10px 16px;border-top:1px solid var(--border)}
+ .lf-athlete-side-footer button{cursor:pointer;text-align:left}
+ .lf-athlete-side-footer small{display:block;margin:10px 3px 0;text-align:center;font-size:9px;color:var(--muted);letter-spacing:.04em}
+ .is-collapsed .lf-athlete-side-brand{justify-content:center;flex-direction:column;padding:5px 0}
+ .is-collapsed .lf-athlete-side-links,.is-collapsed .lf-athlete-side-footer{padding-left:8px;padding-right:8px}
+ .is-collapsed .lf-athlete-side-links a,.is-collapsed .lf-athlete-side-footer a,.is-collapsed .lf-athlete-side-footer button{justify-content:center;padding:8px}
+}
+/* Eliminazione della curvatura del dock mobile anche in presenza di stili globali legacy. */
+.lionfit-athlete-dock{border-radius:0!important;left:0!important;right:0!important;width:100%!important}
+/* Dashboard V3 */
+.app.as-athlete .lf-home-v3{display:flex;flex-direction:column;gap:12px;min-width:0;color:var(--text)}
+.lf-home-v3 h1,.lf-home-v3 h2,.lf-home-v3 p{margin:0}
+.lf-v3-intro{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;padding:5px 2px}
+.lf-v3-person{display:flex;align-items:center;gap:11px;min-width:0}
+.lf-v3-avatar{width:50px;height:50px;object-fit:cover;flex:none;border:2px solid var(--mint);border-radius:50%;background:var(--green-bg)}
+.lf-v3-avatar-fallback{display:grid;place-items:center;font-size:15px;font-weight:900;color:var(--mint)}
+.lf-v3-greeting{min-width:0}
+.lf-v3-kicker,.lf-v3-section-label{display:block;font-size:10px;letter-spacing:.11em;color:var(--mint);font-weight:850}
+.lf-v3-greeting h1{font-size:clamp(19px,3vw,28px)!important;line-height:1.14!important;letter-spacing:-.025em;margin:4px 0 2px!important}
+.lf-v3-greeting p{font-size:11px;color:var(--muted)}
+.lf-v3-week-name{display:flex;align-items:center;gap:7px;border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:11px;color:var(--muted);font-weight:800;max-width:40%;text-align:right}
+.lf-v3-week-name svg{flex:none;color:var(--mint)}
+.lf-v3-feature-row{display:grid;grid-template-columns:minmax(185px,.65fr) minmax(0,1.55fr);gap:12px;min-height:205px}
+.lf-v3-progress,.lf-v3-today,.lf-v3-weekdays,.lf-v3-shortcuts{
+ border:1px solid var(--border);border-radius:18px;
+ background:var(--card);min-width:0;box-shadow:0 8px 22px rgba(0,0,0,.07)
+}
+.lf-v3-progress{padding:15px;display:flex;align-items:center;flex-direction:column;justify-content:center;gap:8px;text-align:center}
+.lf-v3-ring{
+ width:clamp(108px,11.5vw,148px);height:clamp(108px,11.5vw,148px);flex:none;border-radius:50%;
+ display:grid;place-items:center;
+ background:conic-gradient(var(--mint) var(--lf-v3-percent),var(--border) var(--lf-v3-percent));
+ box-shadow:0 0 21px var(--lf-v3-glow);
+}
+.lf-v3-ring-center{width:82%;height:82%;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;background:var(--card);gap:2px}
+.lf-v3-ring strong{font-size:clamp(26px,3.5vw,37px);line-height:1;font-weight:950}
+.lf-v3-ring small{font-size:9px;color:var(--muted)}
+.lf-v3-progress-foot{font-size:11px}
+.lf-v3-progress-note{color:var(--muted);font-size:9px;line-height:1.3}
+.lf-v3-today{display:flex;flex-direction:column;justify-content:space-between;gap:8px;padding:16px 19px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 90% 10%,rgba(20,220,96,.15),transparent 57%),var(--card)}
+.lf-v3-today-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--mint)}
+.lf-v3-today-badge{background:var(--green-bg);border:1px solid var(--border);border-radius:30px;padding:5px 10px;font-size:10px;font-weight:900;color:var(--mint)}
+.lf-v3-today-main{min-height:0}
+.lf-v3-today-main h2{color:var(--text)!important;font-size:clamp(17px,2.8vw,30px)!important;line-height:1.18!important;overflow-wrap:anywhere;font-weight:950;letter-spacing:-.018em;margin:5px 0!important}
+.lf-v3-today-main p{font-size:10px;color:var(--muted)}
+.lf-v3-sheets{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;max-height:45px;overflow:auto}
+.lf-v3-sheets button{max-width:100%;font-size:10px;font-weight:700;padding:5px 8px;border:1px solid var(--outline);border-radius:8px;background:var(--green-bg);color:var(--mint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lf-v3-today-cta{display:flex;align-items:center;justify-content:space-between;gap:8px;align-self:stretch;border-radius:11px;background:linear-gradient(110deg,#0bb855,#16da64);color:#062416!important;padding:11px 13px;font-size:12px;font-weight:950;min-height:39px;text-decoration:none}
+.lf-v3-today-cta:hover{filter:brightness(1.06)}
+.lf-v3-weekdays,.lf-v3-shortcuts{padding:13px 15px}
+.lf-v3-section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.lf-v3-section-head strong{font-size:12px;font-weight:900}
+.lf-v3-section-head a{display:inline-flex;align-items:center;gap:3px;color:var(--mint);font-size:10px;font-weight:850;text-decoration:none}
+.lf-v3-week-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+.lf-v3-day{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-width:0;min-height:53px;text-decoration:none;border:1px solid var(--border);background:var(--card2);border-radius:10px;color:var(--muted);font-size:10px;font-weight:800}
+.lf-v3-day i{width:6px;height:6px;border:1px solid var(--muted);border-radius:50%;background:transparent}
+.lf-v3-day.is-planned i{background:var(--mint);border-color:var(--mint)}
+.lf-v3-day.is-current{border-color:var(--mint);color:var(--text);box-shadow:inset 0 0 0 1px rgba(32,195,103,.18)}
+.lf-v3-shortcuts-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.lf-v3-shortcut{display:flex;align-items:center;gap:8px;min-width:0;min-height:61px;padding:9px;border:1px solid var(--border);border-radius:11px;background:var(--card2);color:var(--text)!important;text-decoration:none}
+.lf-v3-shortcut:hover{border-color:var(--mint)}
+.lf-v3-shortcut-icon{flex:none;color:var(--mint);display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--green-bg)}
+.lf-v3-shortcut-copy{display:block;min-width:0}
+.lf-v3-shortcut-copy strong{display:block;font-size:11px;line-height:1.2}
+.lf-v3-shortcut-copy small{display:block;font-size:9px;color:var(--muted);margin-top:3px;line-height:1.3}
+.lf-v3-chevron{flex:none;margin-left:auto;color:var(--muted)}
+.lf-v3-progress-link{white-space:nowrap}
+/* Progressi Atleta: pagina grafica, senza salvataggi o query. */
+.lf-athlete-coming{min-height:clamp(290px,63vh,570px);display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;gap:12px;padding:24px;border:1px solid var(--border);border-radius:18px;background:radial-gradient(ellipse at 50% 25%,var(--lf-v3-glow),transparent 47%),var(--card)}
+.lf-athlete-coming-eyebrow{color:var(--mint);font-size:10px;letter-spacing:.16em;font-weight:900}
+.lf-athlete-coming-symbol{width:86px;height:86px;border-radius:24px;border:1px solid var(--mint);color:var(--mint);background:var(--green-bg);display:grid;place-items:center}
+.lf-athlete-coming h1{font-size:clamp(25px,4vw,32px);margin:0}.lf-athlete-coming h2{font-size:19px;color:var(--mint);margin:0}
+.lf-athlete-coming p{max-width:430px;color:var(--muted);font-size:12px;line-height:1.65;margin:0}
+.lf-athlete-coming-back{margin-top:8px;text-decoration:none;padding:10px 14px;background:var(--card2);color:var(--text);font-size:11px;font-weight:800;border:1px solid var(--border);border-radius:10px}
+@media(max-width:1050px){.lf-v3-shortcut-copy small{display:none}.lf-v3-shortcuts-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:799px){
+ /* Non scorrere la Home: riduci le sezioni, senza tagliare la navbar. */
+ .app.as-athlete .athlete-container:has(.lf-home-v3){
+  display:flex!important;flex-direction:column!important;overflow:hidden!important;
+  height:calc(100dvh - 76px - 76px - env(safe-area-inset-bottom,0px));
+  min-height:0!important;padding:5px 10px 5px!important;margin:0!important;
+ }
+ .app.as-athlete .athlete-container:has(.lf-home-v3)>.version{display:none!important}
+ .app.as-athlete .athlete-container:has(.lf-home-v3)>.athlete-live-screen{height:100%;min-height:0;gap:0}
+ .app.as-athlete .athlete-container .lf-home-v3{flex:1;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:7px}
+ .lf-v3-intro{padding:0 2px}
+ .lf-v3-avatar{width:40px;height:40px}
+ .lf-v3-kicker{font-size:8px}
+ .lf-v3-greeting h1{font-size:19px!important;margin:2px 0!important}
+ .lf-v3-greeting p{font-size:9px}
+ .lf-v3-week-name{padding:6px;font-size:9px;max-width:35%}
+ .lf-v3-feature-row{grid-template-columns:minmax(113px,.70fr) minmax(0,1.7fr);gap:7px;min-height:0}
+ .lf-v3-progress,.lf-v3-today,.lf-v3-weekdays,.lf-v3-shortcuts{border-radius:13px}
+ .lf-v3-progress{padding:7px;gap:5px;overflow:hidden}
+ .lf-v3-section-label{font-size:8px;letter-spacing:.07em}
+ .lf-v3-ring{width:clamp(72px,22vw,115px);height:clamp(72px,22vw,115px)}
+ .lf-v3-ring strong{font-size:25px}
+ .lf-v3-ring small{font-size:8px}
+ .lf-v3-progress-foot{font-size:9px}
+ .lf-v3-progress-note{font-size:8px}
+ .lf-v3-today{padding:9px;gap:5px}
+ .lf-v3-today-badge{font-size:8px;padding:4px 6px}
+ .lf-v3-today-main h2{font-size:clamp(14px,3.8vw,21px)!important;margin:3px 0!important}
+ .lf-v3-today-main p{font-size:9px}
+ .lf-v3-sheets{margin-top:5px;max-height:55px;gap:4px}
+ .lf-v3-sheets button{font-size:9px;padding:4px 6px}
+ .lf-v3-today-cta{padding:8px;min-height:32px;font-size:10px;border-radius:9px}
+ .lf-v3-weekdays,.lf-v3-shortcuts{padding:9px 10px}
+ .lf-v3-section-head{margin-bottom:6px}.lf-v3-section-head strong{font-size:11px}
+ .lf-v3-week-strip{gap:4px}.lf-v3-day{min-height:39px;gap:5px;font-size:9px}
+ .lf-v3-shortcuts-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+ .lf-v3-shortcut{min-height:42px;padding:5px;gap:6px;border-radius:9px}
+ .lf-v3-shortcut-icon{width:28px;height:28px;border-radius:8px}.lf-v3-shortcut-icon svg{width:17px;height:17px}
+ .lf-v3-shortcut-copy strong{font-size:10px}
+ .lf-v3-shortcut-copy small,.lf-v3-chevron{display:none}
+}
+@media(max-width:370px){.lf-v3-week-name{display:none}.lf-v3-feature-row{grid-template-columns:105px minmax(0,1fr)}.lf-v3-today-main h2{font-size:14px!important}.lf-v3-progress-note{display:none}}
+@media(max-height:660px) and (max-width:799px){
+ .lf-v3-progress-note,.lf-v3-today-main p{display:none}
+ .lf-v3-avatar{width:32px;height:32px}.lf-v3-greeting p{display:none}
+ .lf-v3-ring{width:72px;height:72px}.lf-v3-ring strong{font-size:21px}
+ .lf-v3-day{min-height:32px;gap:3px}.lf-v3-shortcut{min-height:36px}
+}
+@media(prefers-reduced-motion:no-preference){
+ .lf-v3-shortcut,.lf-v3-day,.lf-v3-today-cta,.lf-athlete-side-links a{transition:background-color .17s ease,border-color .17s ease,box-shadow .17s ease}
+ .lf-v3-ring{transition:background .25s ease}
+}
+@media(prefers-reduced-motion:reduce){.lf-v3-ring,.lf-v3-shortcut,.lf-v3-day,.lf-v3-today-cta{transition:none!important;animation:none!important}}

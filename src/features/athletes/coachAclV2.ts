@@ -1,8 +1,10 @@
-/** Second phase ACL: enable ONLY after Emulator + real gym ownership backfill.
- * Client flags are NOT authorization; proposed Firestore Rules are mandatory.
+/** Historical ACL V2 helpers. PATCH 2/7: per-athlete isolation is retired.
+ * Coach ownership is organizational ONLY: all active coaches of one gym share access.
+ * DO NOT deploy the old ACL 7.4 candidate Rules that limit collaborators by coachUids.
+ * These frontend switches do not grant permissions; Firestore Rules remain authoritative.
  */
-export const coachAclV2Enabled=()=>import.meta.env.PROD && import.meta.env.VITE_LIONFIT_COACH_ACL_V2==='ENABLED_AFTER_EMULATOR'
-export const coachAclEnforced=()=>coachAclV2Enabled() && import.meta.env.VITE_LIONFIT_COACH_ACL_ENFORCED==='YES_VERIFIED'
+export const coachAclV2Enabled=()=>false
+export const coachAclEnforced=()=>false
 export type CoachMini={id:string;role:string;gymId:string;membershipStatus?:string}
 export function assignedCoaches(primary:string,shared:readonly string[],roster:readonly CoachMini[],gymId:string):string[]{
  const allowed=new Set(roster.filter(c=>c.gymId===gymId&&c.role==='admin'&&c.membershipStatus!=='revoked').map(c=>c.id))

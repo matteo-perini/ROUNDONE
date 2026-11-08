@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import {isStagingMode,isOperationalMode} from '../integrations/firebase/stagingConfig'
-import {readStagingSession,stagingSession} from '../integrations/firebase/stagingSession'
+import {readNavigationSession,stagingSession} from '../integrations/firebase/stagingSession'
 import { useLabStore } from '../stores/lab'
 import Access from '../views/Access.vue'
 const Home = () => import('../views/Home.vue')
@@ -12,10 +12,11 @@ const CoachProgram = () => import('../views/CoachProgram.vue')
 const CoachSheets = () => import('../views/CoachSheets.vue')
 const Bookings = () => import('../views/Bookings.vue')
 const Library = () => import('../views/Library.vue')
-const Team = () => import('../views/Team.vue')
+const AthleteProgress = () => import('../views/AthleteProgress.vue')
 const Profile = () => import('../views/Profile.vue')
 const Settings = () => import('../views/Settings.vue')
 const CoachTrash = () => import('../views/CoachTrash.vue')
+const CoachProgress = () => import('../views/CoachProgress.vue')
 const CoachStaff = () => import('../views/CoachStaff.vue')
 const router=createRouter({history:createWebHistory(),routes:[
  {path:'/',redirect:'/accesso'},{path:'/accesso',component:Access,meta:{title:'Accesso'}},
@@ -24,7 +25,8 @@ const router=createRouter({history:createWebHistory(),routes:[
  {path:'/schede',redirect:'/piano'},
  {path:'/archivio',component:Archive,meta:{title:'Archivio Atleta'}},
  {path:'/staging',redirect:'/accesso'},
- {path:'/team',component:Team,meta:{title:'Team'}},
+ {path:'/team',redirect:to=>({path:'/progressi',query:to.query})},
+ {path:'/progressi',component:AthleteProgress,meta:{title:'Progressi Atleta'}},
  {path:'/profilo',component:Profile,meta:{title:'Profilo'}},
  {path:'/impostazioni',component:Settings,meta:{title:'Impostazioni'}},
  {path:'/prenotazioni',component:Bookings,meta:{title:'Prenotazioni'}},
@@ -35,6 +37,7 @@ const router=createRouter({history:createWebHistory(),routes:[
  {path:'/coach/schede',redirect:'/coach/archivio'},
  {path:'/coach/libreria',component:Library,meta:{title:'Libreria Esercizi',coachOnly:true}},
  {path:'/coach/cestino',component:CoachTrash,meta:{title:'Cestino',coachOnly:true}},
+ {path:'/coach/progressi',component:CoachProgress,meta:{title:'Progressi Coach',coachOnly:true}},
  {path:'/coach/staff',component:CoachStaff,meta:{title:'Coach e Inviti',coachOnly:true}},
  {path:'/coach/profilo',component:Profile,meta:{title:'Profilo Coach',coachOnly:true}},
  {path:'/coach/prenotazioni',component:Bookings,meta:{title:'Calendario Appuntamenti',coachOnly:true}},
@@ -58,19 +61,19 @@ router.beforeEach(async to=>{
   if(!isStagingMode())return to.path==='/accesso'?true:'/accesso'
   if(to.path==='/accesso'){
    try{
-    const s=await readStagingSession()
+    const s=await readNavigationSession()
     if(to.query.open==='bookings' && isOperationalMode())return s.role==='atleta'?'/prenotazioni':'/coach/prenotazioni'
     return s.role==='atleta'?'/home':'/coach'
    }catch{stagingSession.value=null;return true}
   }
   let s
-  try{s=await readStagingSession()}
+  try{s=await readNavigationSession()}
   catch{stagingSession.value=null;return '/accesso'}
-  const athletes=['/home','/piano','/archivio','/team','/profilo']
+  const athletes=['/home','/piano','/archivio','/progressi','/profilo']
   const coaches=['/coach','/coach/profilo']
   if(isOperationalMode()) {
    const liveAthletes=[...athletes,'/prenotazioni','/impostazioni']
-   const liveCoaches=[...coaches,'/impostazioni','/coach/atleti','/coach/programmi','/coach/archivio','/coach/libreria','/coach/cestino','/coach/staff','/coach/prenotazioni']
+   const liveCoaches=[...coaches,'/impostazioni','/coach/atleti','/coach/programmi','/coach/archivio','/coach/libreria','/coach/cestino','/coach/progressi','/coach/staff','/coach/prenotazioni']
    return (s.role==='atleta'?liveAthletes:liveCoaches).includes(to.path)?true:(s.role==='atleta'?'/home':'/coach')
   }
   if(s.role==='atleta')return athletes.includes(to.path)?true:'/home'
@@ -100,7 +103,7 @@ router.beforeEach(async to=>{
  }
  // 2M/K: Home/Piano/Archivio Atleta nella shell originale, esclusivamente emulator.
  // Il parametro non autorizza nessuna lettura; la pagina verifica anche users/{uid}.
- if (import.meta.env.DEV && (['/home','/piano','/archivio'].includes(to.path) || ['/team','/profilo','/impostazioni'].includes(to.path)) && to.query.source === 'emulator') {
+ if (import.meta.env.DEV && (['/home','/piano','/archivio'].includes(to.path) || ['/progressi','/profilo','/impostazioni'].includes(to.path)) && to.query.source === 'emulator') {
   try {
    const {readVerifiedDevSession}=await import('../integrations/firebase/devSession')
    const verified=await readVerifiedDevSession()
@@ -110,7 +113,7 @@ router.beforeEach(async to=>{
  }
  // 2M/C: la UI Coach originale puo' mostrare le fixture dell'emulatore in DEV.
  // Nessun parametro URL concede autorizzazioni: serve la sessione Firebase verificata.
- if (import.meta.env.DEV && ((to.path === '/coach/atleti' && to.query.source === 'emulator') || (to.path === '/coach/archivio' && to.query.source === 'emulator') || (['/coach','/coach/profilo'].includes(to.path) && to.query.source === 'emulator'))) {
+ if (import.meta.env.DEV && ((to.path === '/coach/atleti' && to.query.source === 'emulator') || (to.path === '/coach/archivio' && to.query.source === 'emulator') || (to.path === '/coach/progressi' && to.query.source === 'emulator') || (['/coach','/coach/profilo'].includes(to.path) && to.query.source === 'emulator'))) {
   try {
    const { readVerifiedDevSession } = await import('../integrations/firebase/devSession')
    const verified = await readVerifiedDevSession()

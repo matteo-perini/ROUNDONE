@@ -6,7 +6,6 @@ import { collection,doc,getDocFromServer,onSnapshot,query,where,type Unsubscribe
 import { onAuthStateChanged } from 'firebase/auth'
 import { readVerifiedDevSession } from '../integrations/firebase/devSession'
 import {isStagingMode,isOperationalMode,isLiveMode} from '../integrations/firebase/stagingConfig'
-import {coachAclEnforced} from '../features/athletes/coachAclV2'
 import {readStagingSession} from '../integrations/firebase/stagingSession'
 import {getStagingClients} from '../integrations/firebase/stagingClient'
 import { getLocalEmulatorClients } from '../integrations/firebase/emulatorClient'
@@ -35,9 +34,7 @@ onMounted(async()=>{
    throw new Error('Il profilo Coach non corrisponde alla sessione verificata.')
   coachName.value=String(profile.data().name||s.label||'Coach').trim().slice(0,80)
   unsub.push(onAuthStateChanged(auth,u=>{if(active&&u?.uid!==s.uid){void router.replace(isStagingMode()?'/accesso':'/dev/accesso')}}))
-  unsub.push(onSnapshot(isStagingMode() && s.role==='collaboratore' && coachAclEnforced()
-    ? query(collection(db,'users'),where('gymId','==',s.gymId),where('role','==','athlete'),where('coachUids','array-contains',s.uid))
-    : query(collection(db,'users'),where('gymId','==',s.gymId),where('role','==','athlete')),snap=>{
+  unsub.push(onSnapshot(query(collection(db,'users'),where('gymId','==',s.gymId),where('role','==','athlete')),snap=>{
    if(!active)return;athletes.value=snap.docs.length;status.value='ready'
   },e=>{status.value='error';message.value=`Atleti non leggibili: ${e.message}`}))
   unsub.push(onSnapshot(collection(db,'gyms',s.gymId,'templates'),snap=>{

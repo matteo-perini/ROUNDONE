@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import {uiText} from '../features/i18n/interfaceLanguage'
 /**
  * Fase 2M/A — una sola UI del piano, indipendente dalla sorgente dei dati.
  * La stessa vista usa il Lab locale oppure gli snapshot Firestore Emulator.
@@ -78,34 +79,34 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
   <div class="stack athlete-plan" style="gap:20px">
     <section class="panel athlete-plan-summary">
       <div class="row between">
-        <div><h2 class="card-heading">IL MIO PIANO</h2><p class="muted" style="margin:8px 0 0">SCHEDE E PROGRAMMI ASSEGNATI DAL TUO COACH</p></div>
-        <span class="pill pill-neutral">{{ sheetCount }} SCHEDE<span v-if="activeWeeks.length"> · {{ activeWeeks.length }} SETTIMANE</span></span>
+        <div><h2 class="card-heading">{{uiText("IL MIO PIANO")}}</h2><p class="muted" style="margin:8px 0 0">{{uiText("SCHEDE E PROGRAMMI ASSEGNATI DAL TUO COACH")}}</p></div>
+        <span class="pill pill-neutral">{{ sheetCount }} {{uiText("SCHEDE")}}<span v-if="activeWeeks.length"> · {{ activeWeeks.length }} {{uiText("SETTIMANE")}}</span></span>
       </div>
     </section>
 
     <section v-if="activeWeeks.length" class="panel athlete-week-picker">
-      <div class="row between"><strong>SELEZIONA LA SETTIMANA</strong><span class="muted small">{{ week?.name || 'Nessuna settimana' }}</span></div>
+      <div class="row between"><strong>{{uiText("SELEZIONA LA SETTIMANA")}}</strong><span class="muted small">{{ week?.name || 'Nessuna settimana' }}</span></div>
       <div class="week-pills" aria-label="Seleziona la settimana del piano">
         <button v-for="(w,i) in activeWeeks" :key="w.id" type="button" class="week-pill" :aria-label="`Settimana ${i+1}: ${w.name}`" :class="{ selected: week?.id === w.id }" :aria-pressed="week?.id === w.id" @click="chooseWeek(w.id)">{{ i+1 }}</button>
       </div>
     </section>
 
     <section v-if="activeWeeks.length && programmed.length" class="athlete-scheduled-sheets">
-      <div class="row between"><div><h2 class="section-title">SCHEDE IN PROGRAMMA</h2><span class="muted small">{{ week?.startDate || '' }}</span></div><span class="pill">{{ programmed.length }} schede diverse</span></div>
+      <div class="row between"><div><h2 class="section-title">{{uiText("SCHEDE IN PROGRAMMA")}}</h2><span class="muted small">{{ week?.startDate || '' }}</span></div><span class="pill">{{ programmed.length }} {{uiText("schede diverse")}}</span></div>
       <div class="grid2 athlete-sheet-grid">
         <article v-for="group in programmed" :key="group.sheet.id" class="scheme-item">
           <h3>{{ group.sheet.title }}</h3>
-          <span class="chip athlete-sheet-state">In programma · {{ uniqueDaysForSheet(group).length }} {{ uniqueDaysForSheet(group).length === 1 ? 'giorno' : 'giorni' }}</span>
+          <span class="chip athlete-sheet-state">{{uiText("In programma ·")}} {{ uniqueDaysForSheet(group).length }} {{ uniqueDaysForSheet(group).length === 1 ? 'giorno' : 'giorni' }}</span>
           <p class="muted small athlete-sheet-days">{{ uniqueDaysForSheet(group).map(l => l.dayName.slice(0,3).toLowerCase()).join(' · ') }}</p>
-          <button type="button" class="bare green athlete-sheet-open" @click="openSheet(forWeekRepresentative(group,week?.id||''))">APRI SCHEDA ›</button>
+          <button type="button" class="bare green athlete-sheet-open" @click="openSheet(forWeekRepresentative(group,week?.id||''))">{{uiText("APRI SCHEDA ›")}}</button>
         </article>
       </div>
-      <p v-if="!programmed.length" class="notice">Nessuna scheda collegata a questa settimana.</p>
+      <p v-if="!programmed.length" class="notice">{{uiText("Nessuna scheda collegata a questa settimana.")}}</p>
     </section>
 
     <section v-if="unprogrammed.length" class="athlete-unscheduled-sheets">
-      <div class="row between"><h2 class="section-title">SCHEDE SENZA PROGRAMMAZIONE</h2><span class="pill pill-neutral">{{ unprogrammed.length }} schede diverse</span></div>
-      <p v-if="unprogrammed.length > 2" class="athlete-carousel-hint">Scorri le schede a destra e a sinistra <span aria-hidden="true">↔</span></p>
+      <div class="row between"><h2 class="section-title">{{uiText("SCHEDE SENZA PROGRAMMAZIONE")}}</h2><span class="pill pill-neutral">{{ unprogrammed.length }} {{uiText("schede diverse")}}</span></div>
+      <p v-if="unprogrammed.length > 2" class="athlete-carousel-hint">{{uiText("Scorri le schede a destra e a sinistra")}} <span aria-hidden="true">↔</span></p>
       <div
         class="grid2 athlete-sheet-grid"
         :class="{ 'athlete-sheet-carousel': unprogrammed.length > 2 }"
@@ -114,46 +115,46 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
       >
         <article v-for="group in unprogrammed" :key="group.sheet.id" class="scheme-item">
           <h3>{{group.sheet.title}}</h3>
-          <span class="chip">{{ activeWeeks.length ? 'Non collegata alle settimane attive' : 'Scheda personale' }}</span>
-          <p class="muted small">{{group.sheet.exercises.length}} esercizi · Scheda assegnata</p>
-          <button type="button" class="bare green athlete-sheet-open" @click="openSheet(forWeekRepresentative(group,week?.id||''))">APRI SCHEDA ›</button>
+          <span class="chip">{{uiText(activeWeeks.length ? 'Non collegata alle settimane attive' : 'Scheda personale')}}</span>
+          <p class="muted small">{{group.sheet.exercises.length}} {{uiText("esercizi · Scheda assegnata")}}</p>
+          <button type="button" class="bare green athlete-sheet-open" @click="openSheet(forWeekRepresentative(group,week?.id||''))">{{uiText("APRI SCHEDA ›")}}</button>
         </article>
       </div>
-      <p v-if="!unprogrammed.length" class="muted small">Non ci sono schede personali senza programmazione.</p>
+      <p v-if="!unprogrammed.length" class="muted small">{{uiText("Non ci sono schede personali senza programmazione.")}}</p>
     </section>
 
     <section v-if="activeWeeks.length" class="athlete-week-program">
-      <div class="row between"><h2 class="section-title">PROGRAMMAZIONE SETTIMANALE</h2><span class="pill pill-neutral">{{ activeWeeks.length }} SETTIMANE</span></div>
+      <div class="row between"><h2 class="section-title">{{uiText("PROGRAMMAZIONE SETTIMANALE")}}</h2><span class="pill pill-neutral">{{ activeWeeks.length }} {{uiText("SETTIMANE")}}</span></div>
       <div class="panel athlete-week-program-panel">
-        <div class="row between athlete-week-title"><strong>{{ week?.name.toUpperCase() || 'NESSUNA SETTIMANA' }}</strong><span class="pill pill-neutral">{{ week?.startDate || '' }}</span></div>
+        <div class="row between athlete-week-title"><strong>{{week?.name.toUpperCase() || uiText('NESSUNA SETTIMANA')}}</strong><span class="pill pill-neutral">{{ week?.startDate || '' }}</span></div>
         <div class="divider"/>
         <div class="week-days">
           <button v-for="(day,i) in weekDays" :key="`${week?.id}-${day.name}`" type="button" class="day-card" :aria-label="`Apri il programma di ${day.name}`" :class="{ 'day-card-today': i===currentDayIndex, 'day-card-selected': selectedDay===i, 'day-card-sunday': i===6 }" @click="openWeekDay(i)">
-            <h3>{{ day.name.toUpperCase() }}</h3>
+            <h3>{{uiText(day.name.toUpperCase())}}</h3>
             <p v-for="(activity,j) in displayActivities(i)" :key="j" class="athlete-day-activity-label">{{ activity.toUpperCase() }}</p>
             <p v-for="(linked,i2) in weekDayLinkedSheetNames(props.groups,week?.id||'',i)" :key="'sheet-'+i2" class="day-card-sheet-activity">{{linked}}</p>
-            <p v-if="!displayActivities(i).length&&!weekDayLinkedSheetNames(props.groups,week?.id||'',i).length" class="muted">RIPOSO</p>
-            <div class="day-card-detail">DETTAGLI <span aria-hidden="true">›</span></div>
+            <p v-if="!displayActivities(i).length&&!weekDayLinkedSheetNames(props.groups,week?.id||'',i).length" class="muted">{{uiText("RIPOSO")}}</p>
+            <div class="day-card-detail">{{uiText("DETTAGLI")}} <span aria-hidden="true">›</span></div>
           </button>
         </div>
-        <p v-if="!weekDays.length" class="muted">Non è ancora stata assegnata una settimana.</p>
+        <p v-if="!weekDays.length" class="muted">{{uiText("Non è ancora stata assegnata una settimana.")}}</p>
       </div>
     </section>
-    <p v-if="props.groups.orphanLinks.length" class="notice" role="alert">Attenzione: {{ props.groups.orphanLinks.length }} collegamenti fanno riferimento a schede assenti o cestinate. Nessuna modifica automatica.</p>
+    <p v-if="props.groups.orphanLinks.length" class="notice" role="alert">{{uiText("Attenzione:")}} {{ props.groups.orphanLinks.length }} {{uiText("collegamenti fanno riferimento a schede assenti o cestinate. Nessuna modifica automatica.")}}</p>
   </div>
 
   <div v-if="selectedDayDetails" class="modal-overlay athlete-day-overlay" @click.self="closeWeekDay()">
     <div class="dialog athlete-day-dialog" role="dialog" aria-modal="true" :aria-label="'Programma del ' + selectedDayDetails.name">
-      <div class="athlete-day-dialog-head"><div><h2>{{ selectedDayDetails.name.toUpperCase() }}</h2><p class="muted small">PROGRAMMA DEL GIORNO</p></div><button type="button" class="bare" aria-label="Chiudi dettagli" @click="closeWeekDay()">✕</button></div>
-      <div class="athlete-day-dialog-body"><h3>PROGRAMMAZIONE DEL GIORNO</h3>
+      <div class="athlete-day-dialog-head"><div><h2>{{uiText(selectedDayDetails.name.toUpperCase())}}</h2><p class="muted small">{{uiText("PROGRAMMA DEL GIORNO")}}</p></div><button type="button" class="bare" :aria-label="uiText('Chiudi dettagli')" @click="closeWeekDay()">✕</button></div>
+      <div class="athlete-day-dialog-body"><h3>{{uiText("PROGRAMMAZIONE DEL GIORNO")}}</h3>
         <p v-for="(activity,i) in selectedDay!==null?displayActivities(selectedDay):[]" :key="i" class="athlete-day-activity">{{ activity.toUpperCase() }}</p>
-        <p v-if="selectedDay!==null&&!displayActivities(selectedDay).length" class="muted">Nessuna attività prevista.</p>
+        <p v-if="selectedDay!==null&&!displayActivities(selectedDay).length" class="muted">{{uiText("Nessuna attività prevista.")}}</p>
         <div v-if="selectedDay !== null && linksForDay(selectedDay).length" class="athlete-day-linked">
-          <div v-for="link in linksForDay(selectedDay)" :key="link.id" class="athlete-day-sheet-row"><p class="athlete-day-sheet-title">SCHEDA {{link.slot}}: {{link.sheet.title}}</p><button type="button" class="primary wide athlete-day-open-sheet" @click="openSheet(link.sheet)">APRI SCHEDA {{link.slot}}</button></div>
+          <div v-for="link in linksForDay(selectedDay)" :key="link.id" class="athlete-day-sheet-row"><p class="athlete-day-sheet-title">{{uiText("SCHEDA")}} {{link.slot}}: {{link.sheet.title}}</p><button type="button" class="primary wide athlete-day-open-sheet" @click="openSheet(link.sheet)">{{uiText("APRI SCHEDA")}} {{link.slot}}</button></div>
         </div>
-        <p v-else class="muted small">Nessuna scheda collegata a questo giorno.</p>
+        <p v-else class="muted small">{{uiText("Nessuna scheda collegata a questo giorno.")}}</p>
       </div>
-      <div class="athlete-day-dialog-foot"><button type="button" class="secondary" @click="closeWeekDay()">CHIUDI</button></div>
+      <div class="athlete-day-dialog-foot"><button type="button" class="secondary" @click="closeWeekDay()">{{uiText("CHIUDI")}}</button></div>
     </div>
   </div>
   <SheetDetail v-if="opened" :sheet="opened" @close="opened=null" @finish="opened=null"/>

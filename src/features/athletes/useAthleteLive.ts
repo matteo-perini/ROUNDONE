@@ -21,6 +21,7 @@ export function useAthleteLive(){
  const status=ref<'loading'|'ready'|'error'>('loading')
  const message=ref(isStagingMode()?'Connessione a Firebase staging…':'Connessione a Firebase Emulator…')
  const session=shallowRef<VerifiedDevSession|null>(null)
+ const avatarUrl=ref('')
  const data=shallowRef<AthleteLiveData|null>(null)
  const archive=ref<HistoricalArchive[]>([])
  const archiveReady=ref(false)
@@ -42,6 +43,8 @@ export function useAthleteLive(){
    const target=staged?{gymId:verified.gymId,athleteId:verified.uid}:
     assertAthleteLabIdentity(verified,profile.exists()?profile.data():undefined)
    if(!profile.exists()||profile.data().gymId!==verified.gymId||profile.data().role!=='athlete')throw new Error('Profilo Atleta non valido.')
+   const possibleAvatar=profile.data()?.photoURL||profile.data()?.photoUrl
+   avatarUrl.value=typeof possibleAvatar==='string'&&possibleAvatar.length<870000&&/^(https:\/\/|data:image\/(png|jpeg|webp);base64,)/.test(possibleAvatar)?possibleAvatar:''
    session.value=verified
    stopAuth=onAuthStateChanged(auth,user=>{
     if(!alive)return
@@ -89,5 +92,5 @@ export function useAthleteLive(){
   const {db}=isStagingMode()?getStagingClients():getLocalEmulatorClients()
   await hideOneArchiveCopy(db,s,id)
  }
- return {status,message,session,data,archive,archiveReady,hiddenArchiveIds,hideArchiveCopy,snapshots,updatedAt}
+ return {status,message,session,data,avatarUrl,archive,archiveReady,hiddenArchiveIds,hideArchiveCopy,snapshots,updatedAt}
 }

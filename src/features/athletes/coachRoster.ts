@@ -3,7 +3,7 @@
  * Questo filtro NON sostituisce le Rules; nessun dato e' scritto o trasferito.
  */
 export type RosterProfile = { id: string; data: Record<string, unknown> }
-export type RosterAthlete = { id: string; name: string; email: string; gymId: string; primaryCoachUid?:string; coachUids?:readonly string[] }
+export type RosterAthlete = { id: string; name: string; email: string; gymId: string; primaryCoachUid?:string; invitedByUid?:string; coachUids?:readonly string[] }
 
 export function labCoachRoster(profiles: readonly RosterProfile[], gymId: string): RosterAthlete[] {
   if (!/^gym_lab2c_[ab]$/.test(gymId)) throw new Error('Palestra laboratorio non valida.')

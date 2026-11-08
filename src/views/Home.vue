@@ -16,5 +16,5 @@ const dayLink=computed(()=>lab.week?`/piano?week=${encodeURIComponent(lab.week.i
 </script>
 <template>
  <component v-if="live&&LiveAthlete" :is="LiveAthlete" screen="home"/>
- <AthleteHomeContent v-else :name="lab.athlete?.name||'Atleta'" :today-name="actualDay?.name||''" :week-name="lab.week?.name||''" :activities="actualDay?.activities||[]" :sheets="todaysSheets" :days="lab.week?.days||[]" plan-link="/piano" archive-link="/archivio" team-link="/team" profile-link="/profilo" :day-link="dayLink"/>
+ <AthleteHomeContent v-else :name="lab.athlete?.name||'Atleta'" :today-name="actualDay?.name||''" :week-name="lab.week?.name||''" :activities="actualDay?.activities||[]" :sheets="todaysSheets" :days="lab.week?.days||[]" plan-link="/piano" archive-link="/archivio" progress-link="/progressi" booking-link="/prenotazioni" profile-link="/profilo" :day-link="dayLink"/>
 </template>

@@ -1,40 +1,35 @@
 /**
- * ROUNDONE Beta 0.27.4 · animation parity for Vue 3 pages.
- * Original choreographic values: 970ms title, 1250ms panels, 145ms stagger,
- * original keyframe offsets, easing and transform coordinates.
- * No Firestore, storage, auth or application data interactions.
- * Old static preview uses its own original, unmodified JS file.
+ * Lion Fit Motion · PATCH 1/7.
+ * Ingresso leggero e una sola volta per navigazione; nessuna animazione al
+ * rientro da background o ad ogni aggiornamento realtime delle schede.
+ * Nessuna interazione con Auth, Firestore o dati dell'app.
  */
 import { nextTick } from 'vue'
 import type { Router } from 'vue-router'
 
-export const ROUNDONE_MOTION = Object.freeze({ titleMs: 970, panelMs: 1250, staggerMs: 145, maxDelayMs: 1450 })
+export const ROUNDONE_MOTION = Object.freeze({ titleMs: 250, panelMs: 310, staggerMs: 32, maxDelayMs: 144 })
 export type MotionRole = 'title' | 'panel'
 export const ROUNDONE_TITLE_FRAMES: Keyframe[] = [
-  { offset: 0, opacity: 0, transform: 'translate3d(0,-37px,0) scale(.94)' },
-  { offset: .55, opacity: 1, transform: 'translate3d(0,3px,0) scale(1.006)' },
-  { offset: .77, opacity: 1, transform: 'translate3d(0,-1px,0) scale(.999)' },
-  { offset: 1, opacity: 1, transform: 'translate3d(0,0,0) scale(1)' },
+  { opacity: 0, transform: 'translate3d(0,6px,0)' },
+  { opacity: 1, transform: 'translate3d(0,0,0)' },
 ]
 export const ROUNDONE_PANEL_FRAMES: Keyframe[] = [
-  { offset: 0, opacity: 0, transform: 'translate3d(0,105px,0) scale(.84)' },
-  { offset: .27, opacity: .92, transform: 'translate3d(0,35px,0) scale(.94)' },
-  { offset: .55, opacity: 1, transform: 'translate3d(0,-8px,0) scale(1.014)' },
-  { offset: .77, opacity: 1, transform: 'translate3d(0,3px,0) scale(.997)' },
-  { offset: 1, opacity: 1, transform: 'translate3d(0,0,0) scale(1)' },
+  { opacity: 0, transform: 'translate3d(0,9px,0)' },
+  { opacity: 1, transform: 'translate3d(0,0,0)' },
 ]
 export function roundOneMotionOptions(role: MotionRole, index: number): KeyframeAnimationOptions {
   return {
     duration: role === 'title' ? ROUNDONE_MOTION.titleMs : ROUNDONE_MOTION.panelMs,
     delay: Math.min(Math.max(0,index) * ROUNDONE_MOTION.staggerMs, ROUNDONE_MOTION.maxDelayMs),
-    easing: 'linear', fill: 'both',
+    easing: 'cubic-bezier(.22,.72,.28,1)', fill: 'none',
   }
 }
 
 /**
  * Hook run once from main.ts; route changes replace active animations. The
- * original script selects #section-X, while Vue has RouterView descendants.
- * We retain original timing/frames, selecting the visible Vue page content.
+ * Seleziona soltanto i componenti visibili della pagina. Le card caricate
+ * asincronamente possono entrare nei primi 750ms, ma NON si rianimano in
+ * seguito ad aggiornamenti Firebase o al ritorno da background.
  */
 export function installRoundOneMotion(router: Router): void {
   if (typeof window === 'undefined' || typeof document === 'undefined') return
@@ -42,6 +37,7 @@ export function installRoundOneMotion(router: Router): void {
   const active = new Set<Animation>()
   let frame = 0
   let lastCompose = 0
+  let allowNewCardsUntil = 0
   const visible = (node: Element): node is HTMLElement => {
     if (!(node instanceof HTMLElement) || node.closest('[hidden],[aria-hidden="true"],.hidden')) return false
     const s = window.getComputedStyle(node)
@@ -80,17 +76,20 @@ export function installRoundOneMotion(router: Router): void {
       animate(section, role, index)
     })
     lastCompose = window.performance.now()
+    allowNewCardsUntil = lastCompose + 750
   }
   const schedule = () => {
+    if (document.hidden) return
     if (frame) window.cancelAnimationFrame(frame)
     void nextTick(() => {
       frame = window.requestAnimationFrame(() => {frame = 0; compose()})
     })
   }
-  // Like ROUNDONE's original observer: animate newly added cards, not all content
-  // every time the realtime Firebase snapshot updates.
+  // Solo card entrate subito dopo il cambio pagina (caricamento asincrono).
+  // Non animare snapshot Firebase successivi o cambiamenti nella stessa pagina.
   const observer = new MutationObserver(mutations => {
-    if (reduce.matches || window.performance.now() - lastCompose < 550) return
+    const now = window.performance.now()
+    if (reduce.matches || document.hidden || now > allowNewCardsUntil || now - lastCompose < 65) return
     const root = rootElement()
     if (!root) return
     const additions: HTMLElement[] = []
@@ -110,7 +109,16 @@ export function installRoundOneMotion(router: Router): void {
     additions.slice(0,5).forEach((item,i)=>animate(item,'panel',i))
   })
   observer.observe(document.getElementById('app') ?? document.body, {subtree:true,childList:true})
-  reduce.addEventListener('change', () => { if (reduce.matches) abort() })
-  router.afterEach(schedule)
+  reduce.addEventListener('change', () => { if (reduce.matches) { abort(); allowNewCardsUntil=0 } })
+  // Quando WebView torna visibile, niente composizione di pagina né intro replay.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      abort(); allowNewCardsUntil=0
+      if (frame) {window.cancelAnimationFrame(frame);frame=0}
+    }
+  })
+  router.afterEach((to,from,failure) => {
+    if (!failure && to.path !== from.path) schedule()
+  })
   void router.isReady().then(schedule)
 }

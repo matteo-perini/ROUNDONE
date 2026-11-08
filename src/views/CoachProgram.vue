@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import {uiText} from '../features/i18n/interfaceLanguage'
 import {isOperationalMode} from '../integrations/firebase/stagingConfig'
 import {ref,computed,watch} from 'vue'
 import {useLabStore} from '../stores/lab'
@@ -55,7 +56,7 @@ watch(()=>lab.weekId,()=>{picker.value=null;notice.value=''}, {flush:'post'})
 <template v-else>
 <section class="panel coach-program-compact">
  <div class="row between coach-program-overview">
-  <div><h2 class="card-heading">PROGRAMMA ATTUALE</h2><span class="muted small">{{selectedAthlete?.name}} · {{lab.weeks.length}} {{lab.weeks.length===1?'SETTIMANA':'SETTIMANE'}}</span></div>
+  <div><h2 class="card-heading">{{uiText("PROGRAMMA ATTUALE")}}</h2><span class="muted small">{{selectedAthlete?.name}} · {{lab.weeks.length}} {{lab.weeks.length===1?'SETTIMANA':'SETTIMANE'}}</span></div>
   <select v-if="!embedded" v-model="lab.athleteId" class="coach-program-athlete-select" aria-label="Seleziona atleta"><option v-for="a in lab.data.athletes" :key="a.id" :value="a.id">{{a.name}}</option></select>
  </div>
  <div class="coach-week-bar">
@@ -68,15 +69,15 @@ watch(()=>lab.weekId,()=>{picker.value=null;notice.value=''}, {flush:'post'})
  <div v-if="opened&&lab.week" class="line-card coach-week-body">
   <div class="row between coach-week-heading"><b class="green">{{lab.week.name.toUpperCase()}} {{lab.week.startDate?'('+lab.week.startDate+')':''}}</b><div class="row coach-week-actions"><button class="primary" @click="notice='Modifiche salvate nel laboratorio locale.'">SALVA</button><button class="secondary" @click="doDuplicate">DUPLICA</button><button class="danger" @click="doDeleteWeek">ELIMINA</button></div></div>
   <div class="program-days"><div v-for="(d,i) in days" :key="d.name" class="program-day"><h3>{{d.name}}</h3>
-   <div class="program-slot"><label>ATTIVITÀ 1</label><input :value="d.activity1" placeholder="Scrivi l'attività..." @change="saveActivity($event,i,1)"/></div>
-   <div class="program-slot"><label>ATTIVITÀ 2</label><input :value="d.activity2" placeholder="Scrivi l'attività..." @change="saveActivity($event,i,2)"/></div>
+   <div class="program-slot"><label>{{uiText("ATTIVITÀ 1")}}</label><input :value="d.activity1" placeholder="Scrivi l'attività..." @change="saveActivity($event,i,1)"/></div>
+   <div class="program-slot"><label>{{uiText("ATTIVITÀ 2")}}</label><input :value="d.activity2" placeholder="Scrivi l'attività..." @change="saveActivity($event,i,2)"/></div>
    <div class="divider"/>
-   <div v-for="j in 2" :key="'s'+j" class="program-sheet"><div class="row between"><div><span class="small green">SCHEDA {{j}}</span><br/><strong>{{sheet(i,j===1?1:2)?.title??(j===1?'Nessuna scheda':'Nessuna seconda scheda')}}</strong></div></div><button type="button" class="primary coach-v1-slot-link" :aria-label="'Collega scheda '+j+' a '+d.name" @click="link(i,j===1?1:2)">Collega</button><div class="grid2 coach-v1-slot-actions"><button class="primary" @click="jumpToCreate(i,j===1?1:2)">Crea nuova</button><button class="danger" :disabled="!sheet(i,j===1?1:2)" @click="unlink(i,j===1?1:2)">Scollega</button></div></div>
+   <div v-for="j in 2" :key="'s'+j" class="program-sheet"><div class="row between"><div><span class="small green">{{uiText("SCHEDA")}} {{j}}</span><br/><strong>{{sheet(i,j===1?1:2)?.title??(j===1?'Nessuna scheda':'Nessuna seconda scheda')}}</strong></div></div><button type="button" class="primary coach-v1-slot-link" :aria-label="'Collega scheda '+j+' a '+d.name" @click="link(i,j===1?1:2)">{{uiText("Collega")}}</button><div class="grid2 coach-v1-slot-actions"><button class="primary" @click="jumpToCreate(i,j===1?1:2)">{{uiText("Crea nuova")}}</button><button class="danger" :disabled="!sheet(i,j===1?1:2)" @click="unlink(i,j===1?1:2)">{{uiText("Scollega")}}</button></div></div>
   </div></div>
  </div>
  <div v-else class="notice">{{lab.weeks.length?'Settimana chiusa. Tocca un numero per riaprirla.':'Nessun programma per questo atleta. Premi “Nuovo programma” per crearlo.'}}</div>
 </section>
-<div v-if="picker" class="modal-overlay" @click.self="picker=null"><div class="dialog"><h2>Collega dall’Archivio Coach</h2><p class="muted">{{days[picker.day]?.name}} · Scheda {{picker.slot}} · {{selectedAthlete?.name}}</p><label for="coach-archive-picker">Scegli fra tutti i modelli creati dal Coach</label><select id="coach-archive-picker" v-model="picked"><option value="" disabled>Seleziona una scheda dell’archivio…</option><optgroup label="Archivio Coach · assegna e collega"><option v-for="s in archiveChoices" :key="s.id" :value="'shared:'+s.id">{{s.title}}</option></optgroup></select><p v-if="!archiveChoices.length" class="muted">Archivio Coach vuoto: crea prima una scheda nell’archivio.</p><div class="row"><button class="primary" :disabled="!picked" @click="commit">Assegna e collega</button><button class="secondary" @click="picker=null">Annulla</button></div></div></div>
+<div v-if="picker" class="modal-overlay" @click.self="picker=null"><div class="dialog"><h2>Collega dall’Archivio Coach</h2><p class="muted">{{days[picker.day]?.name}} {{uiText("· Scheda")}} {{picker.slot}} · {{selectedAthlete?.name}}</p><label for="coach-archive-picker">Scegli fra tutti i modelli creati dal Coach</label><select id="coach-archive-picker" v-model="picked"><option value="" disabled>Seleziona una scheda dell’archivio…</option><optgroup label="Archivio Coach · assegna e collega"><option v-for="s in archiveChoices" :key="s.id" :value="'shared:'+s.id">{{s.title}}</option></optgroup></select><p v-if="!archiveChoices.length" class="muted">Archivio Coach vuoto: crea prima una scheda nell’archivio.</p><div class="row"><button class="primary" :disabled="!picked" @click="commit">Assegna e collega</button><button class="secondary" @click="picker=null">{{uiText("Annulla")}}</button></div></div></div>
 </template>
 
 </template>

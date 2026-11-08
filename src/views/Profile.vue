@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import {uiText} from '../features/i18n/interfaceLanguage'
 import { computed, ref, watch, defineAsyncComponent } from 'vue'
 import {useRoute} from 'vue-router'
 import {isStagingMode} from '../integrations/firebase/stagingConfig'
@@ -40,9 +41,9 @@ async function onPhotoChange(event:Event){const input=event.target as HTMLInputE
  <component v-if="emulator && ProfileLive" :is="ProfileLive"/>
  <div v-else class="lfp-container">
   <ProfileOverview v-if="!editing" :role="isCoach?'coach-demo':'atleta'" :name="profile.name" :photo="profile.photo" :bio="profile.bio" :location="profile.location" :height="profile.height" :weight="profile.weight" :settings-to="settingsPath" @edit="beginEdit" @photo="fileInput?.click()"/>
-  <section v-else class="lfp-form-wrap"><div class="lfp-form-heading"><button class="secondary" type="button" @click="editing=false">← Indietro</button><h1>Modifica profilo</h1></div><button class="lfp-avatar lfp-edit-avatar" type="button" :disabled="uploading" @click="fileInput?.click()"><img v-if="profile.photo" :src="profile.photo" alt="Foto profilo"/><img v-else src="/v1-preview/LOGO-APP.png" alt="Logo Lion Fit"/><span class="lfp-camera">✎</span></button><p class="muted small">Tocca la foto per cambiarla.</p>
-   <div class="lfp-edit-grid"><label>Nome visualizzato<input v-model="draftName" autocomplete="name" maxlength="80"/></label><label>Paese<input v-model="draftLocation" maxlength="80"/></label><label>Sport / descrizione<input v-model="draftBio" maxlength="160" placeholder="Es. MMA, Grappling"/></label><label>Altezza (cm)<input v-model="draftHeight" type="number" inputmode="decimal" min="1" max="280"/></label><label>Peso (kg)<input v-model="draftWeight" type="number" inputmode="decimal" min="1" max="500"/></label></div>
-   <button type="button" class="primary wide" @click="save">Salva modifiche</button><p class="muted small">Anteprima locale: questi dati non vengono sincronizzati con Firebase.</p>
+  <section v-else class="lfp-form-wrap"><div class="lfp-form-heading"><button class="secondary" type="button" @click="editing=false">{{uiText("← Indietro")}}</button><h1>{{uiText("Modifica profilo")}}</h1></div><button class="lfp-avatar lfp-edit-avatar" type="button" :disabled="uploading" @click="fileInput?.click()"><img v-if="profile.photo" :src="profile.photo" :alt="uiText('Foto profilo')"/><img v-else src="/v1-preview/LOGO-APP.png" alt="Logo Lion Fit"/><span class="lfp-camera">✎</span></button><p class="muted small">{{uiText("Tocca la foto per cambiarla.")}}</p>
+   <div class="lfp-edit-grid"><label>{{uiText("Nome visualizzato")}}<input v-model="draftName" autocomplete="name" maxlength="80"/></label><label>{{uiText("Paese")}}<input v-model="draftLocation" maxlength="80"/></label><label>{{uiText("Sport / descrizione")}}<input v-model="draftBio" maxlength="160" placeholder="Es. MMA, Grappling"/></label><label>{{uiText("Altezza (cm)")}}<input v-model="draftHeight" type="number" inputmode="decimal" min="1" max="280"/></label><label>{{uiText("Peso (kg)")}}<input v-model="draftWeight" type="number" inputmode="decimal" min="1" max="500"/></label></div>
+   <button type="button" class="primary wide" @click="save">{{uiText("Salva modifiche")}}</button><p class="muted small">{{uiText("Anteprima locale: questi dati non vengono sincronizzati con Firebase.")}}</p>
   </section>
   <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" class="visually-hidden" @change="onPhotoChange"/>
   <p v-if="feedback" class="notice" role="status">{{feedback}}</p>

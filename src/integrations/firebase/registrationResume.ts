@@ -7,6 +7,7 @@ import {reload,getIdToken} from 'firebase/auth'
 import type {Firestore} from 'firebase/firestore'
 import {doc,getDocFromServer,serverTimestamp,writeBatch} from 'firebase/firestore'
 import {validInvitation} from '../../features/invites/registration'
+import {coachAssignmentWritesReady} from '../../features/athletes/primaryCoachAssignment'
 import type {PendingSignup} from '../../features/invites/pendingSignup'
 
 export type RegistrationResult='complete'|'verify-email'
@@ -51,8 +52,16 @@ export async function finishPendingSignup(db:Firestore,user:User,intent:PendingS
   const inv=await getDocFromServer(inviteRef),data=inv.data()
   if(!data||data.status!=='pending'||data.gymId!==gymId||data.expiresAt?.toMillis?.()<=Date.now())
    throw new Error('Invito atleta non disponibile. Chiedi alla palestra un nuovo link: il tuo account Firebase rimarrà intatto.')
+  // createdBy is the historical inviter; it is immutable after the invite is created.
+  // The new Rules verify both these UIDs against the original invitation.
+  // Do NOT enable these fields before the Rules rollout: a denied batch would
+  // otherwise leave an Auth account without its corresponding Firestore profile.
+  const inviter=typeof data.createdBy==='string'?data.createdBy.trim():''
+  if(coachAssignmentWritesReady() && !inviter)
+   throw new Error('Invito privo di Coach creatore: chiedi alla palestra un nuovo invito.')
+  const coachFields=coachAssignmentWritesReady()?{invitedByUid:inviter,primaryCoachUid:inviter}:{}
   const batch=writeBatch(db)
-  batch.set(profileRef,{...profileBase,gymName:String(data.gymName||''),athleteInviteId:intent.token})
+  batch.set(profileRef,{...profileBase,gymName:String(data.gymName||''),athleteInviteId:intent.token,...coachFields})
   batch.update(inviteRef,{status:'claimed',claimedBy:user.uid,claimedAt:serverTimestamp()})
   await batch.commit()
   return 'complete'

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import {uiText} from '../features/i18n/interfaceLanguage'
 /** Archivio Coach operativo LIVE/STAGING: ruoli verificati con Firebase Auth
  * e mutazioni protette da mayWriteLive() e dalle Rules Firestore. */
 import {computed,onMounted,onUnmounted,ref,shallowRef,watch} from 'vue'
@@ -23,7 +24,6 @@ import {readLegacyExerciseCatalog} from '../integrations/firestore/legacyExercis
 import type {Exercise,Sheet} from '../model'
 import {newId} from '../model'
 import {mayWriteLive} from '../integrations/firebase/stagingConfig'
-import {coachAclEnforced} from '../features/athletes/coachAclV2'
 import type {Personal} from '../features/sheets/domain'
 import SheetDetail from '../components/SheetDetail.vue'
 
@@ -66,7 +66,7 @@ function onEditedNameInput(e:Exercise){
  e.exerciseId=found?.id||'';e.catalogId=found?.id||''
 }
 
-function blankExercise():Exercise{return {id:newId(),name:'',sets:'4',reps:'10',load:'',rest:'90 sec',notes:'90 sec',exerciseId:'',catalogId:'',supersetWithPrevious:false,supersetRest:'',executionMode:'normale'}}
+function blankExercise():Exercise{return {id:newId(),name:'',sets:'',reps:'',load:'',rest:'',notes:'',exerciseId:'',catalogId:'',supersetWithPrevious:false,supersetRest:'',executionMode:'normale'}}
 function alignCount(){exerciseCounter.value=String(primaryExerciseCount(exercises.value))}
 function onExerciseCountInput(event:Event){
  const raw=(event.target as HTMLInputElement).value.trim()
@@ -91,6 +91,20 @@ function addLinkedSuperset(e:Exercise){
 }
 function removeExerciseNow(e:Exercise){exercises.value=removeExercise(exercises.value,e.id);alignCount();notice.value=''}
 function selectCatalogId(e:Exercise,event:Event){const id=(event.target as HTMLSelectElement).value;e.exerciseId=id;e.catalogId=id}
+/** Muove un gruppo intero: le coppie superset restano contigue e l'ID non cambia. */
+function moveExerciseGroup(groupNumber:number,direction:-1|1){
+ const groups=exerciseGroups.value
+ const target=groupNumber+direction
+ if(target<0||target>=groups.length)return
+ const group=groups[groupNumber],other=groups[target]
+ const first=exercises.value.slice(group.primaryIndex,(group.secondaryIndex??group.primaryIndex)+1)
+ const second=exercises.value.slice(other.primaryIndex,(other.secondaryIndex??other.primaryIndex)+1)
+ const start=Math.min(group.primaryIndex,other.primaryIndex)
+ const end=Math.max(group.secondaryIndex??group.primaryIndex,other.secondaryIndex??other.primaryIndex)+1
+ const ordered=direction===1?[second,first]:[first,second]
+ exercises.value=[...exercises.value.slice(0,start),...ordered.flat(),...exercises.value.slice(end)]
+}
+
 const currentAthlete=computed(()=>visibleRoster.value.find(a=>a.id===athleteId.value)??null)
 const writable=computed(()=>mayWriteLive() && !!session.value && ['titolare','collaboratore'].includes(session.value.role))
 const activeCount=computed(()=>models.value.filter(s=>!s.deletedAt).length)
@@ -226,9 +240,7 @@ onMounted(async()=>{
    if(!live)return
    models.value=snap.docs.map(d=>{const x=d.data();return {id:d.id,title:String(x.title||''),category:String(x.category||'Allenamento'),exercises:Array.isArray(x.exercises)?x.exercises:[],createdBy:String(x.createdBy||''),revision:Number(x.revision||0),createdMs:typeof x.createdAt?.toMillis==='function'?x.createdAt.toMillis():typeof x.updatedAt?.toMillis==='function'?x.updatedAt.toMillis():0,...(x.deletedAt?{deletedAt:String(x.deletedAt)}:{})} as Model})
   },e=>{if(live)error.value=`Archivio Coach non leggibile: ${e.message}`})
-  stopUsers=onSnapshot(verified.role==='titolare' || !coachAclEnforced()
-   ?query(collection(db,'users'),where('gymId','==',verified.gymId),where('role','==','athlete'))
-   :query(collection(db,'users'),where('gymId','==',verified.gymId),where('role','==','athlete'),where('coachUids','array-contains',verified.uid)),snap=>{
+  stopUsers=onSnapshot(query(collection(db,'users'),where('gymId','==',verified.gymId),where('role','==','athlete')),snap=>{
    if(!live)return
    roster.value=labCoachRoster(snap.docs.map(d=>({id:d.id,data:d.data()})),verified.gymId)
    if(!coachFilterInitialized){coachFilterInitialized=true;if(roster.value.some(a=>a.primaryCoachUid===verified.uid))coachFilter.value='miei'}
@@ -247,80 +259,127 @@ onUnmounted(()=>{live=false;closeListeners()})
 </script>
 <template>
 <div class="stack" style="gap:20px">
- <div class="notice coach-archive-guide" role="status"><strong>ARCHIVIO DEL COACH</strong> · Gestisci le schede e assegnale tramite il pulsante della scheda. <RouterLink :to="{path:'/coach/atleti',query:{...(athleteId?{athleteId}:{}),...(typeof route.query.weekId==='string'?{weekId:route.query.weekId}:{})}}">← Torna alla settimana dell’atleta</RouterLink></div>
- <section class="panel"><div class="row between"><div><h2 class="card-heading">ARCHIVIO SCHEDE</h2><p class="muted" style="margin:7px 0 0">CREA SCHEDE RIUTILIZZABILI E ASSEGNALE AI TUOI ATLETI</p></div><button v-if="!editing" class="primary" :disabled="!writable||busy" @click="beginModel">＋ Crea nuova scheda dell'archivio</button></div></section>
+ <div class="notice coach-archive-guide" role="status"><strong>{{uiText("ARCHIVIO DEL COACH")}}</strong> {{uiText("· Gestisci le schede e assegnale tramite il pulsante della scheda.")}} <RouterLink :to="{path:'/coach/atleti',query:{...(athleteId?{athleteId}:{}),...(typeof route.query.weekId==='string'?{weekId:route.query.weekId}:{})}}">{{uiText("← Torna alla settimana dell’atleta")}}</RouterLink></div>
+ <section class="panel"><div class="row between"><div><h2 class="card-heading">{{uiText("ARCHIVIO SCHEDE")}}</h2><p class="muted" style="margin:7px 0 0">{{uiText("CREA SCHEDE RIUTILIZZABILI E ASSEGNALE AI TUOI ATLETI")}}</p></div><button v-if="!editing" class="primary" :disabled="!writable||busy" @click="beginModel">{{uiText("＋ Crea nuova scheda dell'archivio")}}</button></div></section>
  <p v-if="error" class="notice" role="alert">{{error}}</p>
- <p v-if="loading" class="muted">Verifica del Coach e lettura degli archivi…</p>
+ <p v-if="loading" class="muted">{{uiText("Verifica del Coach e lettura degli archivi…")}}</p>
  <section v-if="!loading && session && (!writable || notice)" class="panel">
-  <p v-if="!writable" class="notice">Le modifiche sono temporaneamente disabilitate. Puoi consultare le schede.</p>
+  <p v-if="!writable" class="notice">{{uiText("Le modifiche sono temporaneamente disabilitate. Puoi consultare le schede.")}}</p>
   <p v-if="notice" class="notice" role="status">{{notice}}</p>
  </section>
- <section v-if="editing && !loading && session" class="panel">
-  <div class="row between"><h2>{{isPersonal?(personalEdit?'MODIFICA SCHEDA PERSONALE':'CREA SCHEDA PERSONALE'):editingId?'MODIFICA SCHEDA DELL’ARCHIVIO':'CREA NUOVA SCHEDA DELL’ARCHIVIO'}}</h2><button class="secondary" @click="editing=false">← Torna all'archivio</button></div><div class="divider"/>
-  <label>NOME SCHEDA</label><input v-model="title" maxlength="200" placeholder="Es. Potenza Esplosiva 1, Ipertrofia A"/>
-  <label>CATEGORIA</label><input v-model="category" maxlength="100" placeholder="Allenamento"/>
-  <div class="lf-superset-toolbar"><div><strong>ESERCIZI DELLA SCHEDA</strong><p class="muted small">Imposta il numero di esercizi principali: si aggiungono subito, senza conferma. Ridurre il numero non elimina nulla.</p></div><label class="lf-exercise-count">Nº esercizi<input :value="exerciseCounter" type="number" inputmode="numeric" min="0" max="250" step="1" aria-label="Numero esercizi principali" @input="onExerciseCountInput" @blur="onExerciseCountBlur"/></label></div>
-  <p class="muted small" role="note"><strong>Privacy delle note:</strong> nelle schede condivise inserisci solo indicazioni tecniche, non dati sanitari.</p>
-  <p class="lf-superset-summary" role="status"><strong>{{exerciseGroups.length}}</strong> esercizi principali · <strong>{{supersetCount}}</strong> coppie superset · {{exercises.length}} righe totali</p>
-  <datalist id="lf-superset-exercise-names"><option v-for="item in suggest" :key="item.id" :value="item.name_it||item.name">{{item.name}}</option></datalist>
-  <div v-for="(group,groupNumber) in exerciseGroups" :key="exercises[group.primaryIndex].id" class="lf-exercise-group" :class="{'lf-has-superset':group.secondaryIndex!==null}">
-   <div class="lf-exercise-group-head"><strong>ESERCIZIO {{String(groupNumber+1).padStart(2,'0')}}</strong><span v-if="group.secondaryIndex!==null" class="lf-pair-pill">SUPERSET · 2 ESERCIZI</span></div>
-   <div v-for="(index,part) in (group.secondaryIndex===null?[group.primaryIndex]:[group.primaryIndex,group.secondaryIndex])" :key="exercises[index].id" class="lf-exercise-editor" :class="{'lf-superset-secondary':part===1}">
-    <div class="row between lf-exercise-row-top"><b>{{part===0?'ESERCIZIO PRINCIPALE':'↳ SUPERSET · ESERCIZIO COLLEGATO'}}</b><button type="button" class="lf-exercise-remove" :aria-label="'Elimina '+(part===0?'esercizio':'superset')+' '+exercises[index].name" title="Elimina questa riga, senza conferma" @click="removeExerciseNow(exercises[index])">✕</button></div>
-    <div class="row" style="gap:12px;align-items:center"><ExerciseMotion v-if="catalogForRow(exercises[index])" :exercise="catalogForRow(exercises[index])!" style="width:65px;height:65px;flex:0 0 65px"/><div style="flex:1;min-width:0"><label>Nome esercizio</label><input v-model="exercises[index].name" list="lf-superset-exercise-names" placeholder="Cerca o scrivi il nome" autocomplete="off" @focus="focusedExerciseName=exercises[index].name" @input="onEditedNameInput(exercises[index]);focusedExerciseName=exercises[index].name"/></div></div>
-    <label v-if="exactCatalogMatches(catalog,exercises[index].name).length>1">Nome ambiguo: seleziona l'esercizio corretto<select :value="exercises[index].exerciseId||''" @change="selectCatalogId(exercises[index],$event)"><option value="">Nessuna illustrazione selezionata</option><option v-for="candidate in exactCatalogMatches(catalog,exercises[index].name)" :key="candidate.id" :value="candidate.id">{{candidate.name_it||candidate.name}} · ID {{candidate.id}}</option></select></label>
-    <div class="grid2"><div><label>Serie</label><input v-model="exercises[index].sets"/></div><div><label>Ripetizioni</label><input v-model="exercises[index].reps"/></div><div><label>Carico / intensità</label><input v-model="exercises[index].load"/></div><div><label>Recupero / note</label><input v-model="exercises[index].rest"/></div></div>
-    <label v-if="part===1">Recupero al termine della coppia<input v-model="exercises[index].supersetRest" placeholder="90 sec"/></label>
-   </div>
-   <button v-if="group.secondaryIndex===null && availableMax>0" type="button" class="lf-superset-add" @click="addLinkedSuperset(exercises[group.primaryIndex])">＋ Aggiungi superset a questo esercizio</button>
+ <section v-if="editing && !loading && session" class="panel lf-editor-panel">
+  <div class="lf-editor-heading">
+   <div><span class="lf-editor-kicker">{{uiText("LION FIT · EDITOR COACH")}}</span><h2>{{isPersonal?(personalEdit?'MODIFICA SCHEDA PERSONALE':'CREA SCHEDA PERSONALE'):editingId?'MODIFICA SCHEDA DELL’ARCHIVIO':'CREA NUOVA SCHEDA DELL’ARCHIVIO'}}</h2></div>
+   <button class="secondary" type="button" @click="editing=false">{{uiText("← Torna all'archivio")}}</button>
   </div>
-  <p v-if="!exerciseGroups.length" class="muted small">Inserisci un numero nel contatore per creare i primi esercizi.</p>
+  <div class="lf-editor-metadata">
+   <label>{{uiText("Nome scheda")}}<input v-model="title" maxlength="200" placeholder="Es. Potenza Esplosiva 1, Ipertrofia A"/></label>
+   <label>{{uiText("Categoria")}}<input v-model="category" maxlength="100" placeholder="Allenamento"/></label>
+   <label class="lf-count-field">{{uiText("Esercizi principali")}}<input :value="exerciseCounter" type="number" inputmode="numeric" min="0" max="250" step="1" aria-label="Numero esercizi principali" @input="onExerciseCountInput" @blur="onExerciseCountBlur"/></label>
+  </div>
+  <div class="lf-editor-list-head">
+   <strong>{{uiText("ESERCIZI DELLA SCHEDA")}}</strong>
+   <span>{{exerciseGroups.length}} {{uiText("esercizi ·")}} {{supersetCount}} {{uiText("superset ·")}} {{exercises.length}} {{uiText("righe")}}</span>
+  </div>
+  <p class="muted small lf-editor-hint">{{uiText("Aumentando il numero si aggiungono righe vuote; diminuendolo non elimini esercizi già compilati. Le note tecniche delle schede condivise non devono contenere dati sanitari.")}}</p>
+  <datalist id="lf-superset-exercise-names"><option v-for="item in suggest" :key="item.id" :value="item.name_it||item.name">{{item.name}}</option></datalist>
+  <div class="lf-editor-groups">
+   <div v-for="(group,groupNumber) in exerciseGroups" :key="exercises[group.primaryIndex].id" class="lf-exercise-group" :class="{'lf-has-superset':group.secondaryIndex!==null}">
+    <div class="lf-exercise-group-head">
+     <span class="lf-group-number">{{groupNumber+1}}</span>
+     <strong>{{group.secondaryIndex!==null?'COPPIA SUPERSET':'ESERCIZIO'}}</strong>
+     <span v-if="group.secondaryIndex!==null" class="lf-pair-pill">A + B</span>
+     <div class="lf-group-reorder">
+      <button type="button" class="lf-mini-button" :disabled="groupNumber===0" :aria-label="'Sposta esercizio '+(groupNumber+1)+' su'" @click="moveExerciseGroup(groupNumber,-1)">↑</button>
+      <button type="button" class="lf-mini-button" :disabled="groupNumber===exerciseGroups.length-1" :aria-label="'Sposta esercizio '+(groupNumber+1)+' giù'" @click="moveExerciseGroup(groupNumber,1)">↓</button>
+     </div>
+    </div>
+    <div v-for="(index,part) in (group.secondaryIndex===null?[group.primaryIndex]:[group.primaryIndex,group.secondaryIndex])" :key="exercises[index].id" class="lf-exercise-editor" :class="{'lf-superset-secondary':part===1}">
+     <div v-if="part===1" class="lf-pair-line" aria-hidden="true">↳ B</div>
+     <span v-else-if="group.secondaryIndex!==null" class="lf-pair-line" aria-hidden="true">A</span>
+     <div class="lf-editor-motion"><ExerciseMotion v-if="catalogForRow(exercises[index])" :exercise="catalogForRow(exercises[index])!"/><span v-else class="lf-editor-motion-fallback" aria-hidden="true">✚</span></div>
+     <label class="lf-editor-exercise-name">{{uiText("Esercizio")}}<input v-model="exercises[index].name" list="lf-superset-exercise-names" placeholder="Cerca o scrivi esercizio…" autocomplete="off" @focus="focusedExerciseName=exercises[index].name" @input="onEditedNameInput(exercises[index]);focusedExerciseName=exercises[index].name"/></label>
+     <label class="lf-editor-short">{{uiText("Serie")}}<input v-model="exercises[index].sets" inputmode="numeric" placeholder="—"/></label>
+     <label class="lf-editor-short">{{uiText("Ripetizioni")}}<input v-model="exercises[index].reps" placeholder="—"/></label>
+     <label class="lf-editor-load">{{uiText("Carico / intensità")}}<input v-model="exercises[index].load" placeholder="—"/></label>
+     <label class="lf-editor-rest">{{uiText("Recupero / note")}}<input v-model="exercises[index].rest" placeholder="—"/></label>
+     <button type="button" class="lf-exercise-remove" :aria-label="'Elimina '+(part===1?'superset':'esercizio')+' '+exercises[index].name" title="Rimuovi questa riga" @click="removeExerciseNow(exercises[index])">✕</button>
+     <div v-if="exactCatalogMatches(catalog,exercises[index].name).length>1" class="lf-editor-disambiguation"><label>{{uiText("Nome ambiguo: scegli l'esercizio corretto")}}<select :value="exercises[index].exerciseId||''" @change="selectCatalogId(exercises[index],$event)"><option value="">{{uiText("Nessuna illustrazione selezionata")}}</option><option v-for="candidate in exactCatalogMatches(catalog,exercises[index].name)" :key="candidate.id" :value="candidate.id">{{candidate.name_it||candidate.name}} · ID {{candidate.id}}</option></select></label></div>
+     <label v-if="part===1" class="lf-editor-pair-rest">{{uiText("Recupero dopo la coppia")}}<input v-model="exercises[index].supersetRest" placeholder="Es. 90 sec"/></label>
+    </div>
+    <button v-if="group.secondaryIndex===null && availableMax>0" type="button" class="lf-superset-add" @click="addLinkedSuperset(exercises[group.primaryIndex])">{{uiText("＋ Aggiungi superset")}}</button>
+   </div>
+  </div>
+  <p v-if="!exerciseGroups.length" class="muted small">{{uiText("Imposta il numero di esercizi principali per iniziare.")}}</p>
   <p v-if="notice" class="notice" role="alert">{{notice}}</p>
-  <label v-if="isPersonal && !personalEdit && !linkIntent()" class="checkline"><input v-model="saveAlsoShared" type="checkbox"/> Salva anche nell’Archivio Coach e assegna allo stesso atleta (stesso ID)</label>
+  <label v-if="isPersonal && !personalEdit && !linkIntent()" class="checkline"><input v-model="saveAlsoShared" type="checkbox"/> {{uiText("Salva anche nell’Archivio Coach e assegna allo stesso atleta (stesso ID)")}}</label>
   <p class="muted small" v-if="isPersonal">{{personalEdit?'Aggiorna solo la copia personale. La copia protetta resta immutabile.':linkIntent()?'Creazione dal giorno: il nuovo modello va anche in Archivio Coach, poi personale+protetta+giorno con lo stesso ID.':'La scheda personale mantiene una copia storica protetta immutabile.'}}</p>
-  <p v-if="pendingSharedLink" class="notice" role="alert">Scheda creata con ID {{pendingSharedLink}}; collegamento incompleto. Non premere di nuovo Salva: premi Riprendi collegamento.</p>
-  <button v-if="pendingSharedLink" class="secondary wide" :disabled="busy" @click="retryPendingLink">Riprendi collegamento senza creare duplicati</button>
-  <button class="primary wide" :disabled="busy||!!pendingSharedLink||!writable||!title.trim()||!exercises.length" @click="save">{{isPersonal?(personalEdit?'SALVA MODIFICHE PERSONALI':'SALVA SCHEDA PERSONALE'):editingId?'SALVA MODIFICHE':'SALVA NELL’ARCHIVIO SCHEDE'}}</button>
+  <p v-if="pendingSharedLink" class="notice" role="alert">{{uiText("Scheda creata con ID")}} {{pendingSharedLink}}{{uiText("; collegamento incompleto. Non premere di nuovo Salva: premi Riprendi collegamento.")}}</p>
+  <button v-if="pendingSharedLink" class="secondary wide" :disabled="busy" @click="retryPendingLink">{{uiText("Riprendi collegamento senza creare duplicati")}}</button>
+  <div class="lf-editor-actions"><button type="button" class="secondary" @click="editing=false">{{uiText("← Indietro")}}</button><button class="primary" :disabled="busy||!!pendingSharedLink||!writable||!title.trim()||!exercises.length" @click="save">{{isPersonal?(personalEdit?'SALVA MODIFICHE PERSONALI':'SALVA SCHEDA PERSONALE'):editingId?'SALVA MODIFICHE':'SALVA SCHEDA'}}</button></div>
  </section>
  <section v-else-if="!loading && session" class="panel">
-  <div class="row between"><div><h2 class="card-heading">ARCHIVIO · SCHEDE</h2><span class="muted small">{{choice.length}} di {{activeCount}} schede attive nell'archivio</span></div><button v-if="typeof route.query.athleteId==='string'" class="secondary" :disabled="!writable||busy" @click="beginPersonal">+ Crea scheda personale</button></div>
-  <div class="coach-archive-toolbar"><input v-model="search" type="search" placeholder="Cerca una scheda…" aria-label="Cerca una scheda"/><button class="secondary" @click="filter=filter==='trash'?'active':'trash'">{{filter==='trash'?'← Archivio schede':'Apri cestino'}}</button><select v-model="sort" aria-label="Ordina schede"><option value="recent">Più recenti</option><option value="az">Nome A–Z</option><option value="more">Più esercizi</option></select></div>
+  <div class="row between"><div><h2 class="card-heading">{{uiText("ARCHIVIO · SCHEDE")}}</h2><span class="muted small">{{choice.length}} {{uiText("di")}} {{activeCount}} {{uiText("schede attive nell'archivio")}}</span></div><button v-if="typeof route.query.athleteId==='string'" class="secondary" :disabled="!writable||busy" @click="beginPersonal">{{uiText("+ Crea scheda personale")}}</button></div>
+  <div class="coach-archive-toolbar"><input v-model="search" type="search" placeholder="Cerca una scheda…" aria-label="Cerca una scheda"/><button class="secondary" @click="filter=filter==='trash'?'active':'trash'">{{filter==='trash'?'← Archivio schede':'Apri cestino'}}</button><select v-model="sort" aria-label="Ordina schede"><option value="recent">{{uiText("Più recenti")}}</option><option value="az">{{uiText("Nome A–Z")}}</option><option value="more">{{uiText("Più esercizi")}}</option></select></div>
   <div class="grid2"><div v-for="s in choice" :key="s.id" class="archive-card">
-   <h3 style="margin:0">{{s.title}}</h3><p class="muted small">{{s.category}} · {{s.exercises.length}} esercizi · {{s.deletedAt?'Nel cestino':'Attivo'}}</p><p class="small">{{s.exercises.slice(0,2).map(x=>x.name).join(' · ')}}</p><div class="divider"/>
+   <h3 style="margin:0">{{s.title}}</h3><p class="muted small">{{s.category}} · {{s.exercises.length}} {{uiText("esercizi ·")}} {{s.deletedAt?'Nel cestino':'Attivo'}}</p><p class="small">{{s.exercises.slice(0,2).map(x=>x.name).join(' · ')}}</p><div class="divider"/>
    <p v-if="personal.some(p=>p.id===s.id)" class="muted small">{{personal.find(p=>p.id===s.id)?.deletedAt?'Scheda personale nel cestino':'Già assegnato a questo atleta (riutilizzabile per il giorno)'}}</p>
-   <div class="archive-actions"><button class="secondary" @click="preview=s">Visualizza</button>
-    <button v-if="!s.deletedAt" class="secondary" :disabled="!session||!canManageCoachModel(s.id,session.role)" @click="edit(s)">Modifica</button>
-    <button v-if="!s.deletedAt" class="secondary" :disabled="busy||!writable" @click="duplicate(s)">Duplica</button>
-    <button v-if="!s.deletedAt" class="primary" :disabled="busy||!writable" @click="openAssign(s)">Assegna</button>
-    <button v-if="!s.deletedAt" class="danger" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="trash(s)">Nel Cestino</button>
-    <button v-if="s.deletedAt" class="secondary" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="restore(s)">Ripristina</button>
+   <div class="archive-actions"><button class="secondary" @click="preview=s">{{uiText("Visualizza")}}</button>
+    <button v-if="!s.deletedAt" class="secondary" :disabled="!session||!canManageCoachModel(s.id,session.role)" @click="edit(s)">{{uiText("Modifica")}}</button>
+    <button v-if="!s.deletedAt" class="secondary" :disabled="busy||!writable" @click="duplicate(s)">{{uiText("Duplica")}}</button>
+    <button v-if="!s.deletedAt" class="primary" :disabled="busy||!writable" @click="openAssign(s)">{{uiText("Assegna")}}</button>
+    <button v-if="!s.deletedAt" class="danger" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="trash(s)">{{uiText("Nel Cestino")}}</button>
+    <button v-if="s.deletedAt" class="secondary" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="restore(s)">{{uiText("Ripristina")}}</button>
    </div>
   </div></div>
-  <p v-if="!choice.length" class="muted">Nessuna scheda corrisponde ai filtri.</p>
-  <p class="notice">I modelli ROUNDONE vengono modificati mantenendo il loro ID. Ogni salvataggio verifica la revisione, inclusa la revisione iniziale 0 dei modelli legacy. Le copie storiche degli atleti non sono modificabili.</p>
+  <p v-if="!choice.length" class="muted">{{uiText("Nessuna scheda corrisponde ai filtri.")}}</p>
+  <p class="notice">{{uiText("I modelli ROUNDONE vengono modificati mantenendo il loro ID. Ogni salvataggio verifica la revisione, inclusa la revisione iniziale 0 dei modelli legacy. Le copie storiche degli atleti non sono modificabili.")}}</p>
  </section>
- <div v-if="pickAssign" class="modal-overlay" @click.self="pickAssign=null"><div class="dialog coach-assign-dialog"><div class="row between"><h2>Assegna · {{pickAssign.title}}</h2><button class="bare" aria-label="Chiudi" @click="pickAssign=null">✕</button></div><p class="small muted">Scegli un atleta. I filtri raggruppano i coach ma non modificano le Rules pubblicate.</p>
- <label>Visualizza atleti<select v-model="coachFilter" aria-label="Filtra atleti per coach"><option value="miei">I miei</option><option value="condivisi">Condivisi</option><option value="tutti">Tutti</option></select></label>
- <p v-if="!hasAnyMembership" class="small muted">Atleti storici senza assegnazione coach: disponibili in Tutti.</p>
- <label class="lfp-search-label">Cerca atleta <input class="lfp-inline-lookup" v-model="assignSearch" type="search" autocomplete="off" aria-label="Cerca atleta per nome" placeholder="Nome o cognome…"/></label><label>Atleta<select v-model="athleteId" :disabled="busy"><option value="">Seleziona atleta…</option><option v-for="a in searchedRoster" :key="a.id" :value="a.id">{{a.name}}</option></select></label><p v-if="!searchedRoster.length" class="muted small">Nessun atleta corrisponde alla ricerca nei filtri attivi.</p><p v-if="currentAthlete&&personal.some(p=>p.id===pickAssign?.id)" class="notice">Scheda già assegnata a questo atleta.</p><button class="primary wide" :disabled="busy||!writable||!currentAthlete||personal.some(p=>p.id===pickAssign?.id&&p.deletedAt)" @click="assign(pickAssign)">Assegna scheda</button></div></div>
+ <div v-if="pickAssign" class="modal-overlay" @click.self="pickAssign=null"><div class="dialog coach-assign-dialog"><div class="row between"><h2>{{uiText("Assegna ·")}} {{pickAssign.title}}</h2><button class="bare" :aria-label="uiText('Chiudi')" @click="pickAssign=null">✕</button></div><p class="small muted">{{uiText("Scegli un atleta. I filtri raggruppano i coach ma non modificano le Rules pubblicate.")}}</p>
+ <label>{{uiText("Visualizza atleti")}}<select v-model="coachFilter" aria-label="Filtra atleti per coach"><option value="miei">{{uiText("I miei")}}</option><option value="condivisi">{{uiText("Condivisi")}}</option><option value="tutti">{{uiText("Tutti")}}</option></select></label>
+ <p v-if="!hasAnyMembership" class="small muted">{{uiText("Atleti storici senza assegnazione coach: disponibili in Tutti.")}}</p>
+ <label class="lfp-search-label">{{uiText("Cerca atleta")}} <input class="lfp-inline-lookup" v-model="assignSearch" type="search" autocomplete="off" aria-label="Cerca atleta per nome" placeholder="Nome o cognome…"/></label><label>{{uiText("Atleta")}}<select v-model="athleteId" :disabled="busy"><option value="">{{uiText("Seleziona atleta…")}}</option><option v-for="a in searchedRoster" :key="a.id" :value="a.id">{{a.name}}</option></select></label><p v-if="!searchedRoster.length" class="muted small">{{uiText("Nessun atleta corrisponde alla ricerca nei filtri attivi.")}}</p><p v-if="currentAthlete&&personal.some(p=>p.id===pickAssign?.id)" class="notice">{{uiText("Scheda già assegnata a questo atleta.")}}</p><button class="primary wide" :disabled="busy||!writable||!currentAthlete||personal.some(p=>p.id===pickAssign?.id&&p.deletedAt)" @click="assign(pickAssign)">{{uiText("Assegna scheda")}}</button></div></div>
  <SheetDetail v-if="preview" :sheet="preview" @close="preview=null"/>
 </div>
 </template>
 
 <style scoped>
-.lf-superset-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:16px 0 10px;flex-wrap:wrap}
-.lf-superset-toolbar p{margin:4px 0 0;max-width:550px;line-height:1.4}
-.lf-exercise-count{display:flex;align-items:center;gap:8px;margin:0;font-size:12px;font-weight:900;white-space:nowrap}
-.lf-exercise-count input{width:84px;min-height:40px;text-align:center;font-weight:900;background:var(--field);color:var(--text);border:1px solid var(--mint);border-radius:10px}
-.lf-superset-summary{background:var(--card2);padding:10px 12px;border-radius:11px;font-size:12px;border:1px solid var(--border)}
-.lf-exercise-group{margin:12px 0;border:1px solid var(--outline);border-radius:17px;padding:10px;background:var(--card2);min-width:0}
+/* PATCH 4: editor compatto, senza alterare il formato delle schede V1. */
+.lf-editor-panel{--lf-editor-gap:8px;padding:18px!important}
+.lf-editor-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.lf-editor-heading h2{font-size:16px;margin:5px 0 0;line-height:1.25}
+.lf-editor-kicker{font-size:9px;letter-spacing:.14em;color:var(--mint);font-weight:850}
+.lf-editor-metadata{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(140px,1fr) minmax(100px,.52fr);gap:10px;margin:12px 0}
+.lf-editor-panel label{display:block;min-width:0;font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.02em}
+.lf-editor-panel input,.lf-editor-panel select{width:100%;min-width:0;margin:5px 0 0;height:35px;min-height:35px;padding:6px 9px;font-size:12px;border-radius:8px;color:var(--text);background:var(--field);border:1px solid var(--border)}
+.lf-editor-panel input:focus-visible,.lf-editor-panel select:focus-visible{outline:2px solid var(--mint);outline-offset:1px}
+.lf-count-field input{text-align:center;font-weight:850;border-color:var(--mint)}
+.lf-editor-list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px;font-size:11px}
+.lf-editor-list-head span{font-size:10px;color:var(--muted)}
+.lf-editor-hint{font-size:10px!important;line-height:1.35;margin:6px 0 8px}
+.lf-editor-groups{display:grid;gap:8px}
+.lf-exercise-group{border:1px solid var(--border);border-radius:11px;padding:8px;background:var(--card2);min-width:0;transition:border-color .15s ease}
 .lf-exercise-group.lf-has-superset{border-color:var(--mint)}
-.lf-exercise-group-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:3px 2px 10px;font-size:12px}
-.lf-pair-pill{color:var(--mint);background:var(--green-bg);border:1px solid var(--mint);border-radius:30px;padding:4px 8px;font-size:10px;font-weight:900}
-.lf-exercise-editor{padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--card);margin-bottom:7px;min-width:0}
-.lf-exercise-editor.lf-superset-secondary{border:1px solid var(--mint);border-left:4px solid var(--mint);margin-left:13px;background:var(--green-bg)}
-.lf-exercise-row-top{gap:9px;margin-bottom:9px;font-size:11px}
-.lf-exercise-remove{min-width:30px;min-height:30px;border:1px solid #da575f;background:#6e1724;color:#fff;border-radius:9px;font-weight:900}
-.lf-superset-add{width:100%;margin-top:2px;min-height:35px;border-radius:10px;border:1px dashed var(--mint);background:var(--green-bg);color:var(--mint);font-weight:900;font-size:12px}
-@media(max-width:600px){.lf-exercise-count{margin-left:auto}.lf-exercise-group{padding:7px}.lf-exercise-editor{padding:9px}.lf-exercise-editor.lf-superset-secondary{margin-left:8px}.lf-superset-toolbar{align-items:flex-start}}
+.lf-exercise-group-head{display:flex;align-items:center;gap:8px;padding:0 2px 6px;min-height:25px;font-size:10px}
+.lf-group-number{width:23px;height:23px;border:1px solid var(--mint);border-radius:50%;display:grid;place-items:center;color:var(--mint);font-size:11px;font-weight:800}
+.lf-pair-pill{color:var(--mint);border:1px solid var(--mint);border-radius:7px;padding:2px 6px;font-size:9px}
+.lf-group-reorder{margin-left:auto;display:flex;gap:4px}
+.lf-mini-button{border:1px solid var(--border);border-radius:6px;min-width:24px;min-height:24px;padding:0 4px;background:var(--card);color:var(--text);font-size:14px}
+.lf-mini-button:disabled{opacity:.3}
+.lf-exercise-editor{display:grid;grid-template-columns:50px minmax(115px,2.4fr) minmax(52px,.48fr) minmax(70px,.7fr) minmax(80px,.75fr) minmax(90px,1.05fr) 28px;align-items:center;gap:7px;min-width:0;padding:6px 5px;border:1px solid transparent;border-radius:8px;position:relative}
+.lf-exercise-editor.lf-superset-secondary{border:1px solid var(--mint);background:var(--green-bg);margin-top:4px;padding-left:17px}
+.lf-editor-motion{width:48px;height:48px;border:1px solid var(--border);border-radius:8px;background:var(--card);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.lf-editor-motion :deep(> *){width:100%!important;height:100%!important;min-width:0!important;min-height:0!important}
+.lf-editor-motion-fallback{color:var(--muted);font-size:19px}
+.lf-pair-line{position:absolute;left:3px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--mint);font-weight:900}
+.lf-exercise-remove{border:1px solid rgba(245,109,109,.45);background:rgba(245,70,70,.12);color:#ff8383;width:27px;height:27px;border-radius:50%;padding:0;display:grid;place-items:center;line-height:1}
+.lf-exercise-remove:hover{background:rgba(245,70,70,.25)}
+.lf-editor-disambiguation,.lf-editor-pair-rest{grid-column:2 / -2}
+.lf-editor-pair-rest{max-width:260px}
+.lf-superset-add{margin:5px 0 0 55px;min-height:29px;padding:4px 12px;border:1px solid var(--mint);border-radius:8px;background:var(--green-bg);color:var(--mint);font-weight:800;font-size:10px}
+.lf-editor-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:15px;padding-top:12px;border-top:1px solid var(--border)}
+.lf-editor-actions button{min-height:37px}
+@media(max-width:1100px){.lf-exercise-editor{grid-template-columns:48px minmax(125px,2fr) repeat(2,minmax(60px,.6fr)) minmax(80px,1fr) 28px}.lf-editor-rest{grid-column:2 / -2}.lf-editor-disambiguation,.lf-editor-pair-rest{grid-column:2 / -2}}
+@media(max-width:700px){.lf-editor-panel{padding:12px!important}.lf-editor-metadata{grid-template-columns:minmax(0,1fr) 100px}.lf-editor-metadata>label:first-child{grid-column:1/-1}.lf-exercise-editor{grid-template-columns:43px minmax(0,1fr) 28px;gap:6px}.lf-editor-motion{width:42px;height:42px}.lf-editor-exercise-name{grid-column:2}.lf-editor-short,.lf-editor-load,.lf-editor-rest{grid-column:auto}.lf-editor-short:nth-of-type(2){grid-column:1}.lf-editor-short:nth-of-type(3){grid-column:2}.lf-editor-load{grid-column:1 / 3}.lf-editor-rest{grid-column:1 / -1}.lf-exercise-remove{grid-column:3;grid-row:1}.lf-editor-disambiguation,.lf-editor-pair-rest{grid-column:1/-1}.lf-exercise-editor.lf-superset-secondary{padding-left:11px}.lf-pair-line{display:none}.lf-superset-add{margin-left:0}.lf-editor-actions{justify-content:stretch}.lf-editor-actions button{flex:1}}
+@media(prefers-reduced-motion:reduce){.lf-exercise-group{transition:none}}
 </style>

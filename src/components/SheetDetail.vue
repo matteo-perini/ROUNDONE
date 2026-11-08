@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import {uiText,interfaceLanguage} from '../features/i18n/interfaceLanguage'
 import {computed,onMounted,onUnmounted,ref} from 'vue'
 import type {ExerciseRecord} from '../features/sheets/domain'
 import {supersetView} from '../features/sheets/supersetView'
@@ -17,10 +18,27 @@ type SheetForDisplay={title:string;exercises:readonly ExerciseRecord[]}
 type VideoRecord=ExerciseVideo
 const props=defineProps<{sheet:SheetForDisplay}>()
 const supersets=computed(()=>supersetView(props.sheet.exercises))
+const notesOpen=ref<number[]>([])
+function hasData(value:unknown):boolean{return value!==null&&value!==undefined&&String(value).trim().length>0}
+function prescribedLoad(ex:ExerciseRecord):string{
+ if(hasData(ex.load))return String(ex.load)
+ return typeof ex.kg==='number'&&Number.isFinite(ex.kg)?`${ex.kg} kg`:''
+}
+// Only catalog-linked exercises use catalog translations; custom Coach names stay intact.
+function catalogName(item:CatalogExercise):string{return interfaceLanguage.value==='en'?item.name:(item.name_it||item.name)}
+function exerciseDisplayName(ex:ExerciseRecord):string{
+ const id=ex.exerciseId||ex.catalogId
+ if(!id)return ex.name
+ const found=catalog.value.find(x=>x.id===id)
+ return found?catalogName(found):ex.name
+}
+function toggleNotes(index:number){notesOpen.value=notesOpen.value.includes(index)?notesOpen.value.filter(i=>i!==index):[...notesOpen.value,index]}
+
 const groups=computed(()=>groupExerciseRows(props.sheet.exercises))
 const catalog=ref<CatalogExercise[]>([]),videos=ref<VideoRecord[]>([])
 const detail=ref<CatalogExercise|null>(null),playing=ref<VideoRecord|null>(null)
 const alternatives=ref<CatalogExercise[]>([])
+const illustrationUnavailableAt=ref<number|null>(null)
 const language=ref<'it'|'en'>('it')
 const emit=defineEmits<{close:[];finish:[title:string]}>()
 function escapeSheetDetail(e:KeyboardEvent){
@@ -68,12 +86,18 @@ function candidatesFor(ex:ExerciseRecord):CatalogExercise[]{
 function videoFor(ex:ExerciseRecord):VideoRecord|null{
  return findVideoByName(videos.value,ex.name)
 }
-function viewExercise(ex:ExerciseRecord){
+function viewExercise(ex:ExerciseRecord,index?:number){
+ illustrationUnavailableAt.value=null
  const x=matchingExercise(ex)
- if(x){detail.value=x;language.value='it';alternatives.value=[]}
- else alternatives.value=candidatesFor(ex)
+ if(x){detail.value=x;language.value=interfaceLanguage.value;alternatives.value=[]}
+ else {
+  alternatives.value=candidatesFor(ex)
+  if(!alternatives.value.length)illustrationUnavailableAt.value=index??null
+ }
 }
-function chooseAlternative(ex:CatalogExercise){detail.value=ex;language.value='it';alternatives.value=[]}
+function chooseAlternative(ex:CatalogExercise){detail.value=ex;language.value=interfaceLanguage.value;alternatives.value=[]}
+const resolved=computed(()=>props.sheet.exercises.map(ex=>matchingExercise(ex)))
+
 onMounted(async()=>{
  void loadCatalog(isStagingMode()?readLegacyExerciseCatalog:undefined).then(xs=>{catalog.value=xs}).catch(()=>{})
  if(!isStagingMode())return
@@ -84,53 +108,156 @@ onMounted(async()=>{
 })
 </script>
 <template>
- <div class="sheet-modal-bg" @click.self="$emit('close')">
-  <div class="sheet-modal" role="dialog" aria-modal="true" :aria-label="sheet.title">
-    <div class="sheet-modal-head"><h2>🏋️ {{sheet.title}}</h2><div class="row"><button class="ghost" @click="printSheet">🖨 Stampa / PDF</button><button class="bare" aria-label="Chiudi" @click="$emit('close')"><LionIcon name="x"/></button></div></div>
-    <div class="sheet-modal-body">
-      <div v-for="(group,groupNumber) in groups" :key="group.primaryIndex" class="sheet-pair-group" :class="{'sheet-pair-active':group.secondaryIndex!==null}">
-       <div v-if="group.secondaryIndex!==null" class="sheet-pair-head"><strong>↔ SUPERSET {{String(groupNumber+1).padStart(2,'0')}}</strong><small>Due esercizi collegati · esegui in successione</small></div>
-      <article v-for="i in (group.secondaryIndex===null?[group.primaryIndex]:[group.primaryIndex,group.secondaryIndex])" :key="i" class="exercise-item" :class="{'superset-first':supersets[i]?.position==='first','superset-second':supersets[i]?.position==='second'}">
-        <p v-if="supersets[i]" class="superset-caption">{{supersets[i]?.position==='first'?'A · ESERCIZIO PRINCIPALE':'B · ESERCIZIO IN SUPERSET'}}</p>
-        <div class="sheet-exercise-heading"><ExerciseMotion v-if="matchingExercise(sheet.exercises[i])" :exercise="matchingExercise(sheet.exercises[i])!" class="sheet-exercise-mini"/><h3>{{i+1}}. {{sheet.exercises[i].name.toUpperCase()}}</h3></div>
-        <div class="row" style="gap:8px;flex-wrap:wrap;margin:7px 0 10px">
-         <button v-if="matchingExercise(sheet.exercises[i])" class="secondary" type="button" @click="viewExercise(sheet.exercises[i])">▶ Vedi esercizio</button><button v-else-if="candidatesFor(sheet.exercises[i]).length" class="secondary" type="button" @click="viewExercise(sheet.exercises[i])">🔎 Scegli illustrazione</button>
-         <button v-if="videoFor(sheet.exercises[i])" class="secondary" type="button" @click="playing=videoFor(sheet.exercises[i])">📹 Video</button>
-        </div>
-        <div class="row between"><span class="exercise-tag">{{sheet.exercises[i].sets}} SET × {{sheet.exercises[i].reps}} REPS</span><span v-if="sheet.exercises[i].load || sheet.exercises[i].kg" class="exercise-tag">CARICO: {{sheet.exercises[i].load || (sheet.exercises[i].kg + ' KG')}}</span></div>
-        <div v-if="supersets[i]?.position==='second'" class="exercise-tag">RECUPERO DOPO LA COPPIA: {{supersets[i]?.rest || 'come da indicazioni'}}</div><div v-if="sheet.exercises[i].rest || sheet.exercises[i].notes" class="exercise-note">NOTE: {{sheet.exercises[i].rest || sheet.exercises[i].notes}}</div>
-      </article>
-      </div>
+ <div class="sheet-modal-bg lf6-backdrop" @click.self="$emit('close')">
+  <div class="sheet-modal lf6-sheet" role="dialog" aria-modal="true" :aria-label="sheet.title">
+   <header class="sheet-modal-head lf6-header">
+    <h2>{{sheet.title}}</h2>
+    <div class="lf6-head-actions">
+     <button type="button" class="lf6-print" @click="printSheet">{{uiText("Stampa / PDF")}}</button>
+     <button type="button" class="lf6-close" :aria-label="uiText('Chiudi scheda')" @click="$emit('close')"><LionIcon name="x" :size="20"/></button>
     </div>
-    <div class="sheet-modal-foot"><button class="primary" @click="$emit('close')">CHIUDI</button></div>
+   </header>
+   <div class="sheet-modal-body lf6-body">
+    <div v-if="!sheet.exercises.length" class="lf6-empty">{{uiText("Questa scheda non contiene ancora esercizi.")}}</div>
+    <section v-for="(group,groupNumber) in groups" :key="sheet.exercises[group.primaryIndex]?.id||group.primaryIndex"
+      class="lf6-group" :class="{'lf6-superset':group.secondaryIndex!==null}">
+     <header v-if="group.secondaryIndex!==null" class="lf6-superset-head">
+      <span class="lf6-pair-mark">A + B</span>
+      <strong>SUPERSET {{String(groupNumber+1).padStart(2,'0')}}</strong>
+      <small>{{uiText("Due esercizi collegati")}}</small>
+     </header>
+     <article v-for="(i,part) in (group.secondaryIndex===null?[group.primaryIndex]:[group.primaryIndex,group.secondaryIndex])"
+       :key="sheet.exercises[i].id||i" class="lf6-exercise" :class="{'lf6-exercise-second':part===1}">
+      <div class="lf6-preview-wrap">
+       <ExerciseMotion v-if="resolved[i]" :exercise="resolved[i]!" controls class="lf6-preview"/>
+       <div v-else class="lf6-preview-empty" :aria-label="'Nessuna illustrazione disponibile per '+sheet.exercises[i].name">
+        <LionIcon name="dumbbell" :size="31"/>
+       </div>
+       <button v-if="resolved[i]" type="button" class="lf6-enlarge" :aria-label="'Ingrandisci '+sheet.exercises[i].name" @click="viewExercise(sheet.exercises[i],i)">
+        <LionIcon name="search" :size="15"/> {{uiText("Ingrandisci")}}
+       </button>
+      </div>
+      <div class="lf6-content">
+       <div class="lf6-name-line">
+        <span class="lf6-sequence">{{group.secondaryIndex!==null?(part===0?'A':'B'):String(groupNumber+1).padStart(2,'0')}}</span>
+        <h3>{{exerciseDisplayName(sheet.exercises[i])}}</h3>
+        <button v-if="hasData(sheet.exercises[i].notes)" type="button" class="lf6-more"
+         :aria-label="'Note del Coach per '+sheet.exercises[i].name" :aria-expanded="notesOpen.includes(i)"
+         :title="notesOpen.includes(i)?'Chiudi note del Coach':'Leggi note del Coach'" @click="toggleNotes(i)">•••</button>
+       </div>
+       <div class="lf6-values">
+        <span v-if="hasData(sheet.exercises[i].sets)" class="lf6-chip"><b>{{uiText("Serie")}}</b> {{sheet.exercises[i].sets}}</span>
+        <span v-if="hasData(sheet.exercises[i].reps)" class="lf6-chip"><b>{{uiText("Rip.")}}</b> {{sheet.exercises[i].reps}}</span>
+        <span v-if="prescribedLoad(sheet.exercises[i])" class="lf6-chip"><b>{{uiText("Carico previsto")}}</b> {{prescribedLoad(sheet.exercises[i])}}</span>
+        <span v-if="hasData(sheet.exercises[i].rest)" class="lf6-chip"><b>{{uiText("Recupero")}}</b> {{sheet.exercises[i].rest}}</span>
+       </div>
+       <p v-if="illustrationUnavailableAt===i" class="lf6-illustration-unavailable">{{uiText("Nessuna illustrazione corrispondente trovata nel catalogo. La scheda non è stata modificata.")}}</p>
+       <p v-if="hasData(sheet.exercises[i].notes)" v-show="notesOpen.includes(i)" class="lf6-coach-note"><strong>{{uiText("Note del Coach")}}</strong>{{sheet.exercises[i].notes}}</p>
+       <div v-if="videoFor(sheet.exercises[i])||(!resolved[i]&&catalog.length)" class="lf6-extra-actions">
+        <button v-if="!resolved[i]&&catalog.length" type="button" class="lf6-text-link" @click="viewExercise(sheet.exercises[i],i)">{{uiText("Cerca illustrazione")}}</button>
+        <button v-if="videoFor(sheet.exercises[i])" type="button" class="lf6-text-link" @click="playing=videoFor(sheet.exercises[i])">{{uiText("Apri video del Coach")}}</button>
+       </div>
+      </div>
+     </article>
+     <div v-if="group.secondaryIndex!==null&&hasData(supersets[group.secondaryIndex]?.rest)" class="lf6-pair-recovery">
+      <LionIcon name="clock" :size="15"/><strong>{{uiText("Recupero dopo il superset:")}}</strong> {{supersets[group.secondaryIndex]?.rest}}
+     </div>
+    </section>
+   </div>
+   <footer class="sheet-modal-foot lf6-footer"><button type="button" class="primary" @click="$emit('close')">{{uiText("Chiudi scheda")}}</button></footer>
   </div>
-  <div v-if="alternatives.length" class="modal-overlay" style="z-index:1102" @click.self="alternatives=[]"><div class="dialog" role="dialog" aria-modal="true" aria-label="Seleziona esercizio"><div class="row between"><h2>Seleziona l'esercizio corretto</h2><button class="secondary" @click="alternatives=[]">CHIUDI ✕</button></div><p class="muted">Nome non univoco: nessun ID viene scelto automaticamente e nessun dato viene modificato.</p><div v-for="option in alternatives" :key="option.id" class="line-card row between"><span>{{option.name_it||option.name}} <small class="muted">{{option.id}}</small></span><button class="primary" @click="chooseAlternative(option)">Visualizza</button></div></div></div>
-  <div v-if="detail" class="modal-overlay" style="z-index:1102" @click.self="detail=null"><div class="dialog exercise-dialog" role="dialog" aria-modal="true" :aria-label="detail.name_it||detail.name">
-   <div class="row between"><h2>{{detail.name_it||detail.name}}</h2><button class="secondary" @click="detail=null">CHIUDI ✕</button></div>
-   <ExerciseMotion :exercise="detail" eager/>
-   <p class="muted small">EN: {{detail.name}} · {{detail.target}}</p>
-   <button class="ghost" :disabled="!detail.instructions_it?.length" @click="language=language==='it'?'en':'it'">{{language==='it'?'Mostra inglese':'Mostra italiano'}}</button>
-   <ol class="exercise-steps"><li v-for="(line,i) in (language==='it'&&detail.instructions_it?.length?detail.instructions_it:detail.instructions||[])" :key="i">{{line}}</li></ol>
-  </div></div>
-  <div v-if="playing" class="modal-overlay" style="z-index:1103" @click.self="playing=null"><div class="dialog" role="dialog" aria-modal="true" :aria-label="playing.name">
-   <div class="row between"><h2>📹 {{playing.name}}</h2><button class="secondary" @click="playing=null">CHIUDI ✕</button></div>
-   <video :key="playing.url" :src="playing.url" controls playsinline preload="metadata" style="width:100%;max-height:66dvh;border-radius:12px"/>
-  </div></div>
+  <div v-if="alternatives.length" class="modal-overlay lf6-dialog-layer" @click.self="alternatives=[]">
+   <div class="dialog" role="dialog" aria-modal="true" :aria-label="uiText('Seleziona esercizio')">
+    <div class="row between"><h2>{{uiText("Seleziona l'esercizio corretto")}}</h2><button class="secondary" @click="alternatives=[]">{{uiText("CHIUDI ✕")}}</button></div>
+    <p class="muted small">{{uiText("Il nome potrebbe riferirsi a più movimenti. La scelta mostra soltanto l'illustrazione e non modifica la scheda.")}}</p>
+    <div v-for="option in alternatives" :key="option.id" class="line-card row between">
+     <span>{{catalogName(option)}} <small class="muted">{{option.id}}</small></span>
+     <button class="primary" @click="chooseAlternative(option)">{{uiText("Visualizza")}}</button>
+    </div>
+   </div>
+  </div>
+  <div v-if="detail" class="modal-overlay lf6-dialog-layer" @click.self="detail=null">
+   <div class="dialog exercise-dialog lf6-enlarged" role="dialog" aria-modal="true" :aria-label="catalogName(detail)">
+    <div class="row between"><h2>{{catalogName(detail)}}</h2><button class="secondary" @click="detail=null">{{uiText("CHIUDI ✕")}}</button></div>
+    <ExerciseMotion :exercise="detail" eager/>
+    <p class="muted small">EN: {{detail.name}} · {{detail.target}}</p>
+    <button class="ghost" :disabled="!detail.instructions_it?.length" @click="language=language==='it'?'en':'it'">{{uiText(language==='it'?'Mostra inglese':'Mostra italiano')}}</button>
+    <ol class="exercise-steps"><li v-for="(line,i) in (language==='it'&&detail.instructions_it?.length?detail.instructions_it:detail.instructions||[])" :key="i">{{line}}</li></ol>
+   </div>
+  </div>
+  <div v-if="playing" class="modal-overlay lf6-video-layer" @click.self="playing=null">
+   <div class="dialog" role="dialog" aria-modal="true" :aria-label="playing.name">
+    <div class="row between"><h2>{{playing.name}}</h2><button class="secondary" @click="playing=null">{{uiText("CHIUDI ✕")}}</button></div>
+    <video :key="playing.url" :src="playing.url" controls playsinline preload="metadata" style="width:100%;max-height:66dvh;border-radius:12px"/>
+   </div>
+  </div>
  </div>
 </template>
 <style scoped>
-/* Emphasis is applied ONLY to confirmed two-exercise supersets. Base ROUNDONE layout is unchanged. */
-.superset-caption{font-size:11px;font-weight:950;letter-spacing:.07em;color:#8ef1bb;margin:0 0 12px}
-.sheet-pair-group{margin-bottom:9px}
-.sheet-pair-active{border:1px solid #438a70;background:var(--green-bg);border-radius:14px;padding:8px}
-.sheet-pair-head{display:flex;gap:5px 12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:2px 2px 9px;color:var(--mint);font-size:12px}
-.sheet-pair-head small{font-size:10px;opacity:.9}
-.exercise-item.superset-first{border-color:#438a70;margin-bottom:6px}
-.exercise-item.superset-second{border-color:#438a70;border-left-width:4px;margin-left:12px}
-@media(max-width:600px){.sheet-pair-active{padding:5px}.sheet-pair-head{font-size:11px}.exercise-item.superset-second{margin-left:6px}}
-@media print {.sheet-pair-group{break-inside:avoid}.sheet-pair-active{border-color:#888;background:transparent}.sheet-pair-head{color:#333}}
-.sheet-exercise-heading{display:flex;align-items:center;gap:12px;min-height:72px}
-.sheet-exercise-heading h3{flex:1;min-width:0;overflow-wrap:anywhere}
-.sheet-exercise-heading :deep(.sheet-exercise-mini){width:74px;max-width:74px;min-width:74px;height:74px;overflow:hidden;flex-shrink:0;border-radius:10px}
-.sheet-exercise-heading :deep(.sheet-exercise-mini img){width:100%;height:100%;object-fit:contain}
+/* PATCH 6/7: schede atleta (la stessa vista in Archivio e nelle anteprime Coach).
+ * Nessuna modifica a ID, Firebase o formato dati. Usa sempre la palette del tema. */
+.lf6-backdrop{padding:clamp(5px,1.5vw,12px);z-index:450}
+.lf6-sheet{width:min(820px,100%);height:min(95dvh,920px);border-radius:16px;background:var(--card);color:var(--text);border-color:var(--border)}
+.lf6-header{flex:0 0 auto;padding:13px 16px;border-color:var(--border);gap:10px}
+.lf6-header h2{margin:0;font-size:clamp(16px,2.2vw,21px);line-height:1.25;font-weight:950;min-width:0;overflow-wrap:anywhere}
+.lf6-head-actions{display:flex;align-items:center;gap:7px;flex:none}
+.lf6-print{background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:9px;min-height:33px;padding:7px 10px;font-size:11px;font-weight:800}
+.lf6-close{background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:9px;min-height:34px;min-width:34px;display:grid;place-items:center}
+.lf6-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;display:grid;align-content:start;gap:9px;padding:13px!important}
+.lf6-empty{padding:22px;text-align:center;color:var(--muted);font-size:12px}
+.lf6-group{margin:0;padding:6px;background:var(--card2);border:1px solid var(--border);border-radius:12px;min-width:0;break-inside:avoid}
+.lf6-group.lf6-superset{border:1px solid var(--mint);background:var(--green-bg);padding:8px}
+.lf6-superset-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:3px 3px 8px;color:var(--mint)}
+.lf6-superset-head strong{font-size:10px;letter-spacing:.08em}.lf6-superset-head small{font-size:10px;margin-left:auto;color:var(--muted)}
+.lf6-pair-mark{background:var(--green-bg);border:1px solid var(--mint);padding:4px 7px;border-radius:7px;font-size:9px;font-weight:900}
+.lf6-exercise{display:flex;align-items:stretch;gap:12px;min-width:0;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px;margin:0}
+.lf6-exercise+.lf6-exercise{margin-top:6px}.lf6-superset .lf6-exercise-second{border-left:3px solid var(--mint)}
+.lf6-preview-wrap{flex:0 0 116px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.lf6-preview-wrap :deep(.lf6-preview){width:116px;height:103px;min-width:0;border:1px solid var(--border);border-radius:9px;overflow:hidden;background:var(--card2);position:relative;display:grid;place-items:center}
+.lf6-preview-wrap :deep(.lf6-preview img){width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;pointer-events:none}
+.lf6-preview-wrap :deep(.exercise-motion-command){left:3px;right:3px;bottom:3px;min-height:23px;padding:2px 5px;border-radius:6px;font-size:9px;white-space:nowrap;background:rgba(10,58,41,.93);border-color:var(--mint)}
+.lf6-preview-empty{display:grid;place-items:center;width:116px;height:103px;color:var(--muted);background:var(--card2);border:1px dashed var(--border);border-radius:9px}
+.lf6-enlarge{border:1px solid var(--border);border-radius:7px;background:var(--card2);color:var(--mint);min-height:26px;padding:3px 5px;display:flex;gap:5px;align-items:center;justify-content:center;font-size:9px;font-weight:800}
+.lf6-content{flex:1;display:flex;flex-direction:column;justify-content:center;gap:9px;min-width:0}
+.lf6-name-line{display:flex;gap:7px;align-items:start;min-width:0}
+.lf6-sequence{flex:none;display:grid;place-items:center;min-width:25px;height:25px;padding:0 5px;font-size:11px;font-weight:900;color:var(--mint);border:1px solid var(--mint);border-radius:7px}
+.lf6-name-line h3{flex:1;min-width:0;margin:1px 0 0;font-size:clamp(12px,1.6vw,15px);line-height:1.35;font-weight:900;overflow-wrap:anywhere;color:var(--text);text-transform:uppercase}
+.lf6-more{flex:none;display:grid;place-items:center;min-width:32px;height:29px;background:var(--card2);color:var(--mint);border:1px solid var(--border);border-radius:8px;font-weight:900;letter-spacing:1px;font-size:15px;padding:0 4px}
+.lf6-more[aria-expanded="true"]{border-color:var(--mint)}
+.lf6-values{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.lf6-chip{font-size:11px;line-height:1.2;color:var(--text);padding:6px 8px;background:var(--card2);border:1px solid var(--border);border-radius:7px;overflow-wrap:anywhere}
+.lf6-chip b{font-size:9px;color:var(--mint);text-transform:uppercase;letter-spacing:.025em;margin-right:3px}
+.lf6-illustration-unavailable{color:var(--muted);font-size:10px;margin:0;line-height:1.45}
+.lf6-coach-note{margin:0;padding:9px 10px;color:var(--text);background:var(--card2);border-left:2px solid var(--mint);border-radius:7px;font-size:11px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.lf6-coach-note strong{display:block;color:var(--mint);font-size:10px;margin-bottom:4px}
+.lf6-extra-actions{display:flex;gap:7px;flex-wrap:wrap}
+.lf6-text-link{border:1px solid var(--border);border-radius:7px;background:var(--card2);color:var(--mint);font-size:10px;padding:5px 8px;min-height:27px}
+.lf6-pair-recovery{display:flex;gap:6px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:11px;padding:9px 4px 2px;line-height:1.3}
+.lf6-pair-recovery strong{color:var(--mint)}
+.lf6-footer{padding:9px 13px;border-color:var(--border);background:var(--card)}
+.lf6-footer button{min-height:35px;padding:6px 15px;font-size:11px}
+.lf6-dialog-layer{z-index:1102}.lf6-video-layer{z-index:1103}
+.lf6-enlarged{background:var(--card);color:var(--text)}
+.lf6-enlarged :deep(.exercise-preview){height:clamp(190px,38vh,320px);width:100%}
+@media(max-width:600px){
+ .lf6-backdrop{padding:max(4px,env(safe-area-inset-top,0px)) 4px max(4px,env(safe-area-inset-bottom,0px));align-items:center}.lf6-sheet{height:100%;max-height:100%;border-radius:12px}
+ .lf6-header{padding:10px;gap:8px}.lf6-header h2{font-size:16px}.lf6-print{font-size:10px;padding:6px}
+ .lf6-body{padding:8px!important;gap:7px}.lf6-group{padding:4px}.lf6-superset-head small{display:none}
+ .lf6-exercise{gap:8px;padding:7px;border-radius:8px}
+ .lf6-preview-wrap{flex-basis:106px}.lf6-preview-wrap :deep(.lf6-preview),.lf6-preview-empty{width:106px;height:100px}
+ .lf6-name-line{gap:5px}.lf6-name-line h3{font-size:12px}.lf6-sequence{min-width:22px;height:22px;font-size:10px}
+ .lf6-values{gap:4px}.lf6-chip{font-size:10px;padding:5px 6px}.lf6-chip b{font-size:8px}
+ .lf6-footer{padding:8px 10px}
+}
+@media(max-width:370px){.lf6-preview-wrap{flex-basis:88px}.lf6-preview-wrap :deep(.lf6-preview),.lf6-preview-empty{width:88px;height:92px}.lf6-exercise{gap:6px}.lf6-name-line h3{font-size:11px}.lf6-chip{padding:4px}}
+@media print{
+ .lf6-backdrop{position:static!important;display:block!important;padding:0!important;background:#fff!important}
+ .lf6-sheet{height:auto!important;max-height:none!important;overflow:visible!important;border:0!important;background:#fff!important;color:#000!important}
+ .lf6-header,.lf6-body,.lf6-group,.lf6-exercise{background:#fff!important;color:#000!important;overflow:visible!important;max-height:none!important;break-inside:avoid}
+ .lf6-body{display:block!important}.lf6-group{margin-bottom:8px}.lf6-exercise{border-color:#aaa!important}
+ .lf6-print,.lf6-close,.lf6-footer,.lf6-enlarge,.lf6-more,.lf6-extra-actions,.lf6-preview-wrap :deep(.exercise-motion-command){display:none!important}
+ .lf6-name-line h3,.lf6-chip{color:#000!important}.lf6-chip{border-color:#aaa!important;background:#fff!important}
+ .lf6-coach-note{display:block!important;color:#000!important}
+}
+@media(prefers-reduced-motion:reduce){.lf6-group,.lf6-exercise{transition:none}}
 </style>

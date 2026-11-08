@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import {uiText} from '../features/i18n/interfaceLanguage'
 import BookingServiceMark from '../components/BookingServiceMark.vue'
 /** Prenotazioni LIVE: le scritture richiedono un clic esplicito, un account verificato
  * e Rules Firebase; cancellazioni e sincronizzazioni massive chiedono conferma. */
@@ -329,119 +330,119 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
 </script>
 <template>
  <div class="stack" style="gap:18px" aria-label="Prenotazioni Lion Fit">
-  <div class="booking-intro"><span class="eyebrow">LION FIT · PRENOTAZIONI</span>
-   <h1 style="margin:4px 0">Prenotazioni</h1>
+  <div class="booking-intro"><span class="eyebrow">{{uiText("LION FIT · PRENOTAZIONI")}}</span>
+   <h1 style="margin:4px 0">{{uiText("Prenotazioni")}}</h1>
    <p class="muted">Area {{isCoach?'Coach / Admin':'Atleta'}} · {{session?.label||'account reale'}}</p>
    <div class="row booking-top-controls">
     
-    <RouterLink class="ghost booking-return booking-control" :to="isCoach?'/coach/atleti':'/home'">← Torna all'app</RouterLink>
+    <RouterLink class="ghost booking-return booking-control" :to="isCoach?'/coach/atleti':'/home'">{{uiText("← Torna all'app")}}</RouterLink>
     <span v-if="status==='ready'" class="pill booking-live-pill">● Online</span>
    </div>
   </div>
-  <div v-if="status==='loading'" class="panel" role="status">Connessione al Firebase Lion Fit…</div>
-  <div v-else-if="status==='error'" class="panel" role="alert">{{message}} <RouterLink to="/accesso">Torna all'accesso</RouterLink></div>
+  <div v-if="status==='loading'" class="panel" role="status">{{uiText("Connessione al Firebase Lion Fit…")}}</div>
+  <div v-else-if="status==='error'" class="panel" role="alert">{{message}} <RouterLink to="/accesso">{{uiText("Torna all'accesso")}}</RouterLink></div>
   <template v-else>
    <p v-if="calendarWarning" class="notice" role="alert">{{calendarWarning}}</p><p v-if="availabilityWarning&&!isCoach" class="notice" role="alert">{{availabilityWarning}}</p>
    <p v-if="message&&message!=='Calendario sincronizzato.'" class="small muted" role="status">{{message}}</p>
    <template v-if="!isCoach">
-    <div class="booking-tabs booking-main-tabs"><button :class="{selected:athleteTab==='prenota'}" @click="athleteTab='prenota'">Prenota</button><button :class="{selected:athleteTab==='mie'}" @click="athleteTab='mie'">Le mie prenotazioni</button></div>
+    <div class="booking-tabs booking-main-tabs"><button :class="{selected:athleteTab==='prenota'}" @click="athleteTab='prenota'">{{uiText("Prenota")}}</button><button :class="{selected:athleteTab==='mie'}" @click="athleteTab='mie'">{{uiText("Le mie prenotazioni")}}</button></div>
     <template v-if="athleteTab==='prenota'">
-     <h2 class="booking-section-title">1. Scegli il tuo percorso</h2>
+     <h2 class="booking-section-title">{{uiText("1. Scegli il tuo percorso")}}</h2>
      <div class="booking-choices booking-v1-services">
-      <button class="booking-choice booking-service-card" :class="{selected:service==='fighter'}" @click="service='fighter'"><BookingServiceMark kind="fighter"/><strong>FIGHTER</strong><small>MMA, Boxe, K-1 e discipline da combattimento</small></button>
-      <button class="booking-choice booking-service-card" :class="{selected:service==='pesi'}" @click="service='pesi'"><BookingServiceMark kind="pesi"/><strong>PESI</strong><small>Preparazione atletica e allenamento pesi</small></button>
+      <button class="booking-choice booking-service-card" :class="{selected:service==='fighter'}" @click="service='fighter'"><BookingServiceMark kind="fighter"/><strong>FIGHTER</strong><small>{{uiText("MMA, Boxe, K-1 e discipline da combattimento")}}</small></button>
+      <button class="booking-choice booking-service-card" :class="{selected:service==='pesi'}" @click="service='pesi'"><BookingServiceMark kind="pesi"/><strong>PESI</strong><small>{{uiText("Preparazione atletica e allenamento pesi")}}</small></button>
      </div>
-     <h2 class="booking-section-title">2. Seleziona il Coach</h2>
-     <div v-if="!configs.length" class="notice">Nessun Coach configurato per le prenotazioni. Accedi come Coach e prepara la disponibilità.</div>
+     <h2 class="booking-section-title">{{uiText("2. Seleziona il Coach")}}</h2>
+     <div v-if="!configs.length" class="notice">{{uiText("Nessun Coach configurato per le prenotazioni. Accedi come Coach e prepara la disponibilità.")}}</div>
      <div class="grid2"><button v-for="c in configs.filter(x=>x.active&&x.services[service])" :key="c.coachId" class="action-card" :class="{active:chosenCoach===c.coachId}" @click="chosenCoach=c.coachId">
-      <span class="action-icon">🦁</span><div><strong>{{c.displayName}}</strong><small>{{displayService(service)}} · {{c.durations[service]}} minuti</small></div></button></div>
-     <h2 class="booking-section-title">3. Tipo di incontro</h2>
+      <span class="action-icon">🦁</span><div><strong>{{c.displayName}}</strong><small>{{displayService(service)}} · {{c.durations[service]}} {{uiText("minuti")}}</small></div></button></div>
+     <h2 class="booking-section-title">{{uiText("3. Tipo di incontro")}}</h2>
      <section class="panel"><h3 class="booking-reasons-title">{{service==='fighter'?'Disciplina Fighter':'Motivo della prenotazione Pesi'}}</h3><div class="booking-reasons-list" role="radiogroup" aria-label="Disciplina o motivo"><label v-for="reason in serviceReasons" :key="reason" class="booking-reason" :class="{'booking-reason-active':discipline===reason}"><input type="radio" name="booking-reason" v-model="discipline" :value="reason"/><span>{{reason}}</span></label></div></section>
-     <h2 class="booking-section-title">4. Scegli giorno e orario</h2>
+     <h2 class="booking-section-title">{{uiText("4. Scegli giorno e orario")}}</h2>
      <section class="panel"><div class="row between"><button class="secondary" @click="moveAthleteMonth(-1)">‹</button><strong>{{monthLabel}}</strong><button class="secondary" @click="moveAthleteMonth(1)">›</button></div>
       <div class="booking-calendar" style="margin-top:20px"><div v-for="(n,i) in ['L','M','M','G','V','S','D']" :key="i" class="muted">{{n}}</div>
        <template v-for="(d,i) in monthDays" :key="i"><div v-if="!d"/><button v-else class="booking-day" :class="{selected:selectedDate===dateInMonth(d)}" :disabled="!monthDayAvailable(dateInMonth(d))" :title="monthDayAvailable(dateInMonth(d))?'Disponibile':'Nessun orario disponibile'" @click="chooseDate(dateInMonth(d))">{{Number(d)}}</button></template></div></section>
-     <section class="panel"><h2>{{selectedDate}} · {{shownDuration}} minuti</h2>
-      <p v-if="!candidates.length" class="muted">Nessun orario preparato per questo giorno. Seleziona un altro giorno o Coach.</p>
+     <section class="panel"><h2>{{selectedDate}} · {{shownDuration}} {{uiText("minuti")}}</h2>
+      <p v-if="!candidates.length" class="muted">{{uiText("Nessun orario preparato per questo giorno. Seleziona un altro giorno o Coach.")}}</p>
       <div v-else class="times"><button v-for="slot in candidates" :key="slot.startMs" :disabled="!slot.free" :class="{selected:chosenStart===slot.startMs,unavailable:!slot.free}" :title="slot.busy?'Occupato':slot.late?'Preavviso minimo':'Disponibile'" @click="chosenStart=slot.startMs">{{slot.time}} <small v-if="!slot.free">{{slot.busy?'Occupato':'Preavviso'}}</small></button></div>
-      <p class="small muted">Sono ammessi solo slot consecutivi da 30 minuti, senza sovrapposizioni. L'orario è Europe/Rome.</p>
+      <p class="small muted">{{uiText("Sono ammessi solo slot consecutivi da 30 minuti, senza sovrapposizioni. L'orario è Europe/Rome.")}}</p>
      </section>
-     <section class="panel"><span class="eyebrow">RIEPILOGO</span><h2>{{displayService(service)}} · {{chosenConfig?.displayName||'Seleziona Coach'}}</h2>
+     <section class="panel"><span class="eyebrow">{{uiText("RIEPILOGO")}}</span><h2>{{displayService(service)}} · {{chosenConfig?.displayName||'Seleziona Coach'}}</h2>
       <p class="muted">{{selectedDate}} · {{chosenStart!==null?romeParts(chosenStart).time:'Nessun orario selezionato'}} · {{shownDuration}} min · {{discipline}}</p>
       
-      <button class="primary wide" :disabled="busy||chosenStart===null" @click="makeBooking">Conferma prenotazione</button>
+      <button class="primary wide" :disabled="busy||chosenStart===null" @click="makeBooking">{{uiText("Conferma prenotazione")}}</button>
      </section>
     </template>
-    <template v-else><section class="panel"><h2>Le mie prenotazioni</h2><div class="booking-tabs"><button :class="{selected:myHistory==='next'}" @click="myHistory='next'">Prossime</button><button :class="{selected:myHistory==='history'}" @click="myHistory='history'">Storico</button></div><p v-if="!visibleMyRows.length" class="muted">Nessuna prenotazione in questa sezione.</p>
+    <template v-else><section class="panel"><h2>{{uiText("Le mie prenotazioni")}}</h2><div class="booking-tabs"><button :class="{selected:myHistory==='next'}" @click="myHistory='next'">{{uiText("Prossime")}}</button><button :class="{selected:myHistory==='history'}" @click="myHistory='history'">{{uiText("Storico")}}</button></div><p v-if="!visibleMyRows.length" class="muted">{{uiText("Nessuna prenotazione in questa sezione.")}}</p>
       <article v-for="b in visibleMyRows" :key="b.id" class="event-item" style="display:block;margin:9px 0"><strong>{{localStart(b.startMs)}} · {{displayService(b.service)}} · {{b.durationMinutes}} min</strong>
        <p class="small muted">{{coachLabel(b.coachId)}} · {{b.discipline}} · {{showStatus(b)}}</p>
-       <button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla e libera slot</button></article>
+       <button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">{{uiText("Annulla e libera slot")}}</button></article>
       
      </section></template>
    </template>
    <template v-else>
-    <div class="booking-tabs booking-main-tabs"><button :class="{selected:coachTab==='calendario'}" @click="coachTab='calendario'">Calendario appuntamenti</button><button :class="{selected:coachTab==='disponibilita'}" @click="coachTab='disponibilita'">Gestione disponibilità</button></div>
+    <div class="booking-tabs booking-main-tabs"><button :class="{selected:coachTab==='calendario'}" @click="coachTab='calendario'">{{uiText("Calendario appuntamenti")}}</button><button :class="{selected:coachTab==='disponibilita'}" @click="coachTab='disponibilita'">{{uiText("Gestione disponibilità")}}</button></div>
     <template v-if="coachTab==='calendario'">
-     <section class="panel booking-compact-toolbar"><div class="row between booking-toolbar-heading"><h2>Calendario condiviso</h2><span class="pill">{{events.length}} appuntamenti</span></div>
-      <p class="small muted">Un calendario, filtri per Coach; prenotazioni aggiornate senza ricaricare la pagina.</p>
+     <section class="panel booking-compact-toolbar"><div class="row between booking-toolbar-heading"><h2>{{uiText("Calendario condiviso")}}</h2><span class="pill">{{events.length}} {{uiText("appuntamenti")}}</span></div>
+      <p class="small muted">{{uiText("Un calendario, filtri per Coach; prenotazioni aggiornate senza ricaricare la pagina.")}}</p>
       <div class="booking-coach-chips booking-tabs" aria-label="Filtra per Coach">
-       <button :class="{selected:coachFilter==='all'}" @click="coachFilter='all'">Tutti</button>
+       <button :class="{selected:coachFilter==='all'}" @click="coachFilter='all'">{{uiText("Tutti")}}</button>
        <button v-for="c in coachChips" :key="c.id" :class="{selected:coachFilter===c.id}" @click="coachFilter=c.id"><i class="coach-dot" :class="coachColor(c.id)"/> {{c.name}}</button>
       </div>
-      <div class="booking-toolbar-line"><div class="booking-tabs booking-view-tabs"><span class="muted small">Vista</span><button v-for="v in (['day','week','month'] as const)" :key="v" :class="{selected:view===v}" @click="view=v">{{v==='day'?'Giorno':v==='week'?'Settimana':'Mese'}}</button></div>
-      <div class="booking-tabs booking-history-tabs"><span class="muted small">Mostra</span><button :class="{selected:history==='next'}" @click="history='next'">Prossimi</button><button :class="{selected:history==='history'}" @click="history='history'">Storico</button><button :class="{selected:history==='all'}" @click="history='all'">Tutti</button></div></div>
-      <div class="booking-toolbar-line booking-date-line"><div class="booking-date-controls"><button class="secondary" @click="moveDate(-1)" aria-label="Periodo precedente">‹</button><input type="date" :value="selectedDate" aria-label="Data calendario" @change="chooseDate(($event.target as HTMLInputElement).value)"/><button class="secondary" @click="moveDate(1)" aria-label="Periodo successivo">›</button><button class="ghost" @click="today">Oggi</button></div>
-       <select v-model="serviceFilter" aria-label="Filtra servizio"><option value="all">Fighter e Pesi</option><option value="fighter">Fighter</option><option value="pesi">Pesi</option></select>
+      <div class="booking-toolbar-line"><div class="booking-tabs booking-view-tabs"><span class="muted small">{{uiText("Vista")}}</span><button v-for="v in (['day','week','month'] as const)" :key="v" :class="{selected:view===v}" @click="view=v">{{v==='day'?'Giorno':v==='week'?'Settimana':'Mese'}}</button></div>
+      <div class="booking-tabs booking-history-tabs"><span class="muted small">{{uiText("Mostra")}}</span><button :class="{selected:history==='next'}" @click="history='next'">{{uiText("Prossimi")}}</button><button :class="{selected:history==='history'}" @click="history='history'">{{uiText("Storico")}}</button><button :class="{selected:history==='all'}" @click="history='all'">{{uiText("Tutti")}}</button></div></div>
+      <div class="booking-toolbar-line booking-date-line"><div class="booking-date-controls"><button class="secondary" @click="moveDate(-1)" aria-label="Periodo precedente">‹</button><input type="date" :value="selectedDate" aria-label="Data calendario" @change="chooseDate(($event.target as HTMLInputElement).value)"/><button class="secondary" @click="moveDate(1)" aria-label="Periodo successivo">›</button><button class="ghost" @click="today">{{uiText("Oggi")}}</button></div>
+       <select v-model="serviceFilter" aria-label="Filtra servizio"><option value="all">{{uiText("Fighter e Pesi")}}</option><option value="fighter">Fighter</option><option value="pesi">{{uiText("Pesi")}}</option></select>
       </div>
      </section>
-     <section v-if="view==='day'" class="panel booking-period"><h3>{{selectedDate}} · {{todayEvents.length}} appuntamenti</h3>
-      <p v-if="!todayEvents.length" class="muted">Nessun appuntamento.</p><article v-for="b in todayEvents" :key="b.id" class="event-item"><i class="coach-dot" :class="coachColor(b.coachId)"/><strong>{{formatTime(b.startMs)}}–{{endTime(b)}} · {{nameLabel(b.athleteId)}}</strong><span><b class="booking-service-badge" :class="b.service">{{displayService(b.service)}}</b> · {{coachLabel(b.coachId)}} · {{b.discipline}} · {{showStatus(b)}}</span>
-       <button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla</button></article>
+     <section v-if="view==='day'" class="panel booking-period"><h3>{{selectedDate}} · {{todayEvents.length}} {{uiText("appuntamenti")}}</h3>
+      <p v-if="!todayEvents.length" class="muted">{{uiText("Nessun appuntamento.")}}</p><article v-for="b in todayEvents" :key="b.id" class="event-item"><i class="coach-dot" :class="coachColor(b.coachId)"/><strong>{{formatTime(b.startMs)}}–{{endTime(b)}} · {{nameLabel(b.athleteId)}}</strong><span><b class="booking-service-badge" :class="b.service">{{displayService(b.service)}}</b> · {{coachLabel(b.coachId)}} · {{b.discipline}} · {{showStatus(b)}}</span>
+       <button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">{{uiText("Annulla")}}</button></article>
      </section>
-     <section v-else-if="view==='week'" class="panel booking-period"><h3>Settimana del {{weekDates[0]}} · {{events.length}} appuntamenti</h3>
-      <div v-for="day in weekDates" :key="day" class="week-event-day"><strong>{{day}}</strong><span class="event-count">{{eventsOn(day).length}}</span><article v-for="b in eventsOn(day)" :key="b.id" class="event-item"><i class="coach-dot" :class="coachColor(b.coachId)"/> {{formatTime(b.startMs)}}–{{endTime(b)}} · <strong>{{nameLabel(b.athleteId)}}</strong> · {{coachLabel(b.coachId)}} · <b class="booking-service-badge" :class="b.service">{{displayService(b.service)}}</b> · {{b.discipline}} · {{showStatus(b)}} <button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla</button></article></div>
+     <section v-else-if="view==='week'" class="panel booking-period"><h3>{{uiText("Settimana del")}} {{weekDates[0]}} · {{events.length}} {{uiText("appuntamenti")}}</h3>
+      <div v-for="day in weekDates" :key="day" class="week-event-day"><strong>{{day}}</strong><span class="event-count">{{eventsOn(day).length}}</span><article v-for="b in eventsOn(day)" :key="b.id" class="event-item"><i class="coach-dot" :class="coachColor(b.coachId)"/> {{formatTime(b.startMs)}}–{{endTime(b)}} · <strong>{{nameLabel(b.athleteId)}}</strong> · {{coachLabel(b.coachId)}} · <b class="booking-service-badge" :class="b.service">{{displayService(b.service)}}</b> · {{b.discipline}} · {{showStatus(b)}} <button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">{{uiText("Annulla")}}</button></article></div>
      </section>
-     <section v-else class="panel booking-period"><h3>{{monthLabel}} · {{events.length}} appuntamenti</h3>
+     <section v-else class="panel booking-period"><h3>{{monthLabel}} · {{events.length}} {{uiText("appuntamenti")}}</h3>
       <div class="coach-month-grid"><span v-for="(n,i) in ['L','M','M','G','V','S','D']" :key="i" class="coach-month-weekday">{{n}}</span>
-       <template v-for="(d,i) in monthDays" :key="i"><span v-if="!d" class="month-empty"/><button v-else class="coach-month-day" :class="{selected:selectedDate===dateInMonth(d)}" @click="chooseMonthDay(dateInMonth(d))"><b>{{Number(d)}}</b><small>{{counts[dateInMonth(d)]||0}} appuntamenti</small><span class="coach-month-dots" :aria-label="coachIdsOn(dateInMonth(d)).map(coachLabel).join(', ')"><span v-for="uid in coachIdsOn(dateInMonth(d))" :key="uid" class="booking-coach-mini"><i class="coach-dot" :class="coachColor(uid)"/>{{coachCountsOn(dateInMonth(d))[uid]||0}}</span></span></button></template>
-      </div><p class="small muted">Tocca un giorno per aprire direttamente gli appuntamenti di quel giorno.</p>
+       <template v-for="(d,i) in monthDays" :key="i"><span v-if="!d" class="month-empty"/><button v-else class="coach-month-day" :class="{selected:selectedDate===dateInMonth(d)}" @click="chooseMonthDay(dateInMonth(d))"><b>{{Number(d)}}</b><small>{{counts[dateInMonth(d)]||0}} {{uiText("appuntamenti")}}</small><span class="coach-month-dots" :aria-label="coachIdsOn(dateInMonth(d)).map(coachLabel).join(', ')"><span v-for="uid in coachIdsOn(dateInMonth(d))" :key="uid" class="booking-coach-mini"><i class="coach-dot" :class="coachColor(uid)"/>{{coachCountsOn(dateInMonth(d))[uid]||0}}</span></span></button></template>
+      </div><p class="small muted">{{uiText("Tocca un giorno per aprire direttamente gli appuntamenti di quel giorno.")}}</p>
      </section>
      
     </template>
-    <template v-else><section class="panel coach-availability-compact"><h2>Disponibilità del Coach autenticato</h2><p class="muted coach-availability-intro">Solo il Coach proprietario può salvare la propria configurazione. Il titolare può preparare slot degli altri Coach solo con funzioni amministrative dedicate, qui disabilitate.</p>
+    <template v-else><section class="panel coach-availability-compact"><h2>{{uiText("Disponibilità del Coach autenticato")}}</h2><p class="muted coach-availability-intro">{{uiText("Solo il Coach proprietario può salvare la propria configurazione. Il titolare può preparare slot degli altri Coach solo con funzioni amministrative dedicate, qui disabilitate.")}}</p>
       <template v-if="draft">
-       <label>Nome pubblico del Coach<input :value="draft.displayName" maxlength="100" @input="draft.displayName=($event.target as HTMLInputElement).value;editConfig()"/></label>
-       <label class="checkline"><input :checked="draft.active" type="checkbox" @change="draft.active=($event.target as HTMLInputElement).checked;editConfig()"/> Disponibilità attiva</label>
-       <div class="grid2 coach-availability-fields"><label class="checkline"><input :checked="draft.services.fighter" type="checkbox" @change="draft.services.fighter=($event.target as HTMLInputElement).checked;editConfig()"/> FIGHTER abilitato</label>
-        <label class="checkline"><input :checked="draft.services.pesi" type="checkbox" @change="draft.services.pesi=($event.target as HTMLInputElement).checked;editConfig()"/> PESI abilitato</label>
-        <label>Durata Fighter<select :value="draft.durations.fighter" @change="draft.durations.fighter=Number(($event.target as HTMLSelectElement).value) as 60|120;editConfig()"><option :value="60">60 minuti</option><option :value="120">120 minuti</option></select></label>
-        <label>Durata Pesi<select :value="draft.durations.pesi" @change="draft.durations.pesi=Number(($event.target as HTMLSelectElement).value) as 60|120;editConfig()"><option :value="60">60 minuti</option><option :value="120">120 minuti</option></select></label>
-        <label>Preavviso (ore)<input type="number" min="0" max="168" :value="draft.noticeHours" @input="draft.noticeHours=Number(($event.target as HTMLInputElement).value);editConfig()"/></label>
-        <label>Disdetta (ore)<input type="number" min="0" max="168" :value="draft.cancelHours" @input="draft.cancelHours=Number(($event.target as HTMLInputElement).value);editConfig()"/></label>
-        <label>Prenotabile entro (giorni)<input type="number" min="1" max="30" :value="draft.maxDays" @input="draft.maxDays=Number(($event.target as HTMLInputElement).value);editConfig()"/></label>
-       </div><div class="grid2 coach-availability-period"><label>Validità disponibilità<select :value="draft.mode||'always'" @change="draft.mode=($event.target as HTMLSelectElement).value as 'always'|'period';editConfig()"><option value="always">Sempre</option><option value="period">Solo per un periodo</option></select></label></div>
-       <div v-if="draft.mode==='period'" class="grid2"><label>Dal<input type="date" :value="draft.from" @change="draft.from=($event.target as HTMLInputElement).value;editConfig()"/></label><label>Al<input type="date" :value="draft.to" @change="draft.to=($event.target as HTMLInputElement).value;editConfig()"/></label></div>
-       <h3 class="coach-availability-heading">Settimana tipo · massimo 4 fasce per giorno</h3>
-       <button class="secondary" type="button" @click="fillDefaultWeek">Precompila Lun–Sab 09:00–13:00 (solo modulo)</button>
+       <label>{{uiText("Nome pubblico del Coach")}}<input :value="draft.displayName" maxlength="100" @input="draft.displayName=($event.target as HTMLInputElement).value;editConfig()"/></label>
+       <label class="checkline"><input :checked="draft.active" type="checkbox" @change="draft.active=($event.target as HTMLInputElement).checked;editConfig()"/> {{uiText("Disponibilità attiva")}}</label>
+       <div class="grid2 coach-availability-fields"><label class="checkline"><input :checked="draft.services.fighter" type="checkbox" @change="draft.services.fighter=($event.target as HTMLInputElement).checked;editConfig()"/> {{uiText("FIGHTER abilitato")}}</label>
+        <label class="checkline"><input :checked="draft.services.pesi" type="checkbox" @change="draft.services.pesi=($event.target as HTMLInputElement).checked;editConfig()"/> {{uiText("PESI abilitato")}}</label>
+        <label>{{uiText("Durata Fighter")}}<select :value="draft.durations.fighter" @change="draft.durations.fighter=Number(($event.target as HTMLSelectElement).value) as 60|120;editConfig()"><option :value="60">{{uiText("60 minuti")}}</option><option :value="120">{{uiText("120 minuti")}}</option></select></label>
+        <label>{{uiText("Durata Pesi")}}<select :value="draft.durations.pesi" @change="draft.durations.pesi=Number(($event.target as HTMLSelectElement).value) as 60|120;editConfig()"><option :value="60">{{uiText("60 minuti")}}</option><option :value="120">{{uiText("120 minuti")}}</option></select></label>
+        <label>{{uiText("Preavviso (ore)")}}<input type="number" min="0" max="168" :value="draft.noticeHours" @input="draft.noticeHours=Number(($event.target as HTMLInputElement).value);editConfig()"/></label>
+        <label>{{uiText("Disdetta (ore)")}}<input type="number" min="0" max="168" :value="draft.cancelHours" @input="draft.cancelHours=Number(($event.target as HTMLInputElement).value);editConfig()"/></label>
+        <label>{{uiText("Prenotabile entro (giorni)")}}<input type="number" min="1" max="30" :value="draft.maxDays" @input="draft.maxDays=Number(($event.target as HTMLInputElement).value);editConfig()"/></label>
+       </div><div class="grid2 coach-availability-period"><label>{{uiText("Validità disponibilità")}}<select :value="draft.mode||'always'" @change="draft.mode=($event.target as HTMLSelectElement).value as 'always'|'period';editConfig()"><option value="always">{{uiText("Sempre")}}</option><option value="period">{{uiText("Solo per un periodo")}}</option></select></label></div>
+       <div v-if="draft.mode==='period'" class="grid2"><label>{{uiText("Dal")}}<input type="date" :value="draft.from" @change="draft.from=($event.target as HTMLInputElement).value;editConfig()"/></label><label>Al<input type="date" :value="draft.to" @change="draft.to=($event.target as HTMLInputElement).value;editConfig()"/></label></div>
+       <h3 class="coach-availability-heading">{{uiText("Settimana tipo · massimo 4 fasce per giorno")}}</h3>
+       <button class="secondary" type="button" @click="fillDefaultWeek">{{uiText("Precompila Lun–Sab 09:00–13:00 (solo modulo)")}}</button>
        <div class="availability-grid coach-availability-week"><div v-for="day in weekdays" :key="day.id" class="line-card"><div class="row between"><strong>{{day.label}}</strong><input type="checkbox" :checked="draft.weekly[day.id as keyof typeof draft.weekly]?.enabled??false" @change="setWeeklyDay(day.id,'enabled',($event.target as HTMLInputElement).checked)"/></div>
         <div v-for="(band,i) in (draft.weekly[day.id as keyof typeof draft.weekly]?.ranges||[])" :key="i" class="row"><input class="coach-time-input" type="time" step="1800" :value="bandFrom(band)" @change="draft!.weekly[day.id as keyof typeof draft.weekly]!.ranges[i]={from:($event.target as HTMLInputElement).value,to:bandTo(band)};editConfig()"/>
          <input class="coach-time-input" type="time" step="1800" :value="bandTo(band)" @change="draft!.weekly[day.id as keyof typeof draft.weekly]!.ranges[i]={from:bandFrom(band),to:($event.target as HTMLInputElement).value};editConfig()"/>
          <button type="button" class="bare" :disabled="(draft.weekly[day.id as keyof typeof draft.weekly]?.ranges.length||0)<=1" @click="removeBand(day.id,i)">×</button></div>
-        <button class="ghost" :disabled="(draft.weekly[day.id as keyof typeof draft.weekly]?.ranges.length||0)>=4" @click="addBand(day.id)">+ Fascia</button></div></div>
-       <h3>Eccezioni e ferie</h3><div class="grid2"><label>Giorno<input v-model="exceptDate" type="date"/></label><label>Tipo<select v-model="exceptKind"><option value="closed">Chiudi questo giorno</option><option value="special">Orario speciale</option></select></label>
-        <label v-if="exceptKind==='special'">Dalle<input v-model="exceptFrom" type="time" step="1800"/></label><label v-if="exceptKind==='special'">Alle<input v-model="exceptTo" type="time" step="1800"/></label></div>
-       <button class="secondary" @click="addException">+ Aggiungi eccezione</button>
-       <div v-for="(val,date) in draft.exceptions||{}" :key="date" class="row"><small>{{date}} · {{val.enabled?'Orario speciale':'Chiuso'}}</small><button class="bare" @click="removeException(String(date))">Rimuovi</button></div>
-       <div class="grid2"><label>Ferie dal<input v-model="holidayFrom" type="date"/></label><label>Ferie al<input v-model="holidayTo" type="date"/></label></div><button class="secondary" @click="addHoliday">+ Aggiungi ferie</button>
-       <div v-for="(holiday,i) in draft.holidays||[]" :key="i" class="row"><small>Ferie {{holiday.from}} — {{holiday.to}}</small><button class="bare" @click="removeHoliday(i)">Rimuovi</button></div>
-       <p class="muted small">Salvare sincronizza fino a 30 giorni di slot. Quelli aperti non più validi vengono ritirati; le prenotazioni confermate non vengono cancellate. In caso di errore la disponibilità resta inattiva finché non ripeti il salvataggio.</p>
+        <button class="ghost" :disabled="(draft.weekly[day.id as keyof typeof draft.weekly]?.ranges.length||0)>=4" @click="addBand(day.id)">{{uiText("+ Fascia")}}</button></div></div>
+       <h3>{{uiText("Eccezioni e ferie")}}</h3><div class="grid2"><label>{{uiText("Giorno")}}<input v-model="exceptDate" type="date"/></label><label>{{uiText("Tipo")}}<select v-model="exceptKind"><option value="closed">{{uiText("Chiudi questo giorno")}}</option><option value="special">{{uiText("Orario speciale")}}</option></select></label>
+        <label v-if="exceptKind==='special'">{{uiText("Dalle")}}<input v-model="exceptFrom" type="time" step="1800"/></label><label v-if="exceptKind==='special'">{{uiText("Alle")}}<input v-model="exceptTo" type="time" step="1800"/></label></div>
+       <button class="secondary" @click="addException">{{uiText("+ Aggiungi eccezione")}}</button>
+       <div v-for="(val,date) in draft.exceptions||{}" :key="date" class="row"><small>{{date}} · {{val.enabled?'Orario speciale':'Chiuso'}}</small><button class="bare" @click="removeException(String(date))">{{uiText("Rimuovi")}}</button></div>
+       <div class="grid2"><label>{{uiText("Ferie dal")}}<input v-model="holidayFrom" type="date"/></label><label>{{uiText("Ferie al")}}<input v-model="holidayTo" type="date"/></label></div><button class="secondary" @click="addHoliday">{{uiText("+ Aggiungi ferie")}}</button>
+       <div v-for="(holiday,i) in draft.holidays||[]" :key="i" class="row"><small>{{uiText("Ferie")}} {{holiday.from}} — {{holiday.to}}</small><button class="bare" @click="removeHoliday(i)">{{uiText("Rimuovi")}}</button></div>
+       <p class="muted small">{{uiText("Salvare sincronizza fino a 30 giorni di slot. Quelli aperti non più validi vengono ritirati; le prenotazioni confermate non vengono cancellate. In caso di errore la disponibilità resta inattiva finché non ripeti il salvataggio.")}}</p>
        
-       <button class="primary wide" :disabled="busy" @click="persistAvailability">Salva e sincronizza disponibilità (30 giorni)</button>
-       <hr/><h3>Prepara slot del giorno selezionato</h3><p class="muted small">Crea soltanto slot mancanti e futuri da 30 minuti; non sovrascrive mai quelli esistenti o prenotati.</p>
+       <button class="primary wide" :disabled="busy" @click="persistAvailability">{{uiText("Salva e sincronizza disponibilità (30 giorni)")}}</button>
+       <hr/><h3>{{uiText("Prepara slot del giorno selezionato")}}</h3><p class="muted small">{{uiText("Crea soltanto slot mancanti e futuri da 30 minuti; non sovrascrive mai quelli esistenti o prenotati.")}}</p>
        <input v-model="selectedDate" type="date"/>
-       <button class="primary wide" :disabled="busy||!myConfig||edited" @click="prepareDay">Prepara slot del {{selectedDate}}</button>
-       <button class="secondary wide" :disabled="busy||!myConfig||edited" @click="prepareNextWeek">Prepara i prossimi 7 giorni · Firebase</button>
-       <p v-if="edited" class="small muted">Salva prima la configurazione per preparare nuovi slot.</p>
+       <button class="primary wide" :disabled="busy||!myConfig||edited" @click="prepareDay">{{uiText("Prepara slot del")}} {{selectedDate}}</button>
+       <button class="secondary wide" :disabled="busy||!myConfig||edited" @click="prepareNextWeek">{{uiText("Prepara i prossimi 7 giorni · Firebase")}}</button>
+       <p v-if="edited" class="small muted">{{uiText("Salva prima la configurazione per preparare nuovi slot.")}}</p>
       </template>
      </section></template>
    </template>

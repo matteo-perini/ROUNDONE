@@ -1,32 +1,40 @@
-/** UI interface labels only: never translate athlete notes, custom names or user content. */
-import { ref } from 'vue'
+/** PATCH 7/7 — interfaccia IT/EN reattiva e persistente.
+ * I dati degli Atleti, nomi personalizzati delle schede, note del Coach, payload
+ * Firebase ed errori di rete non vengono mai tradotti automaticamente.
+ * Chiavi mancanti: fallback italiano, non testo generato/inventato.
+ */
+import {ref} from 'vue'
+import enMessages from './en.json'
 export type InterfaceLanguage='it'|'en'
 const KEY='lionfit.interface.language.v1'
 function initial():InterfaceLanguage{
- try{return typeof localStorage!=='undefined'&&localStorage.getItem(KEY)==='en'?'en':'it'}catch{return'it'}
+ try{return typeof localStorage!=='undefined'&&localStorage.getItem(KEY)==='en'?'en':'it'}catch{return 'it'}
 }
 export const interfaceLanguage=ref<InterfaceLanguage>(initial())
 export function setInterfaceLanguage(lang:string){
  if(lang!=='it'&&lang!=='en')return
  interfaceLanguage.value=lang
- try{localStorage.setItem(KEY,lang)}catch{/* Private mode; preference remains in memory. */}
+ try{localStorage.setItem(KEY,lang)}catch{/* Memoria in uso senza storage disponibile. */}
+ if(typeof document!=='undefined')document.documentElement.lang=lang
 }
-const en:Record<string,string>={
- 'HOME':'HOME','PIANO':'PLAN','ARCHIVIO':'ARCHIVE','TEAM':'TEAM','PRENOTA':'BOOK','PROFILO':'PROFILE',
- 'DASHBOARD':'DASHBOARD','GESTIONE ATLETI':'ATHLETES','LIBRERIA ESERCIZI':'EXERCISE LIBRARY',
- 'ARCHIVIO SCHEDE':'SHEET ARCHIVE','CALENDARIO APPUNTAMENTI':'BOOKING CALENDAR','CESTINO':'TRASH',
- 'COACH DELLA PALESTRA':'GYM COACHES','PROFILO & PALESTRA':'PROFILE & GYM',
- 'Impostazioni':'Settings','Generali':'General','Privacy e account':'Privacy & account',
- 'App e supporto':'App & support','Tema':'Theme','Notifiche':'Notifications',
- 'Lingua':'Language','Unità di misura':'Units','Modifica profilo':'Edit profile',
- 'Sicurezza':'Security','Privacy':'Privacy','Termini e condizioni':'Terms & conditions',
- 'Cookie e tecnologie locali':'Cookies & local technologies','Informazioni':'About',
- 'Assistenza e feedback':'Support & feedback','Esci dall’account':'Sign out',
- 'Scuro':'Dark','Chiaro':'Light','In aggiornamento':'Coming soon',
- 'Il mio piano':'My plan','Le mie prenotazioni':'My bookings','Prenota':'Book',
- 'CATALOGO ESERCIZI CONDIVISO LION FIT':'LIONFIT SHARED EXERCISE CATALOG',
- 'Tutti i Muscoli':'All muscles','Mostra altri esercizi':'Show more exercises',
- 'Nessun esercizio trovato.':'No exercises found.',
- 'CHIUDI':'CLOSE','Mostra inglese':'Show English','Mostra italiano':'Show Italian',
+const messages:Record<string,string>=enMessages
+/** Usare in espressioni Vue (tracciamento reattivo della lingua). */
+export function uiText(value:string):string{
+ if(interfaceLanguage.value!=='en')return value
+ const direct=messages[value]
+ if(direct!==undefined)return direct
+ // Solo countdown prodotti da programOverview.ts: mai testi liberi del Coach.
+ const days=value.match(/^Mancano (\d+) giorni$/)
+ if(days)return `${days[1]} days left`
+ const weeks=value.match(/^Mancano (\d+) settimane$/)
+ if(weeks)return `${weeks[1]} weeks left`
+ return value
 }
-export function uiText(value:string):string{return interfaceLanguage.value==='en'?(en[value]||value):value}
+/** Parametri dinamici: traduce SOLO il modello, mai i valori utente. */
+export function uiFormat(template:string,params:Record<string,string|number>):string{
+ return uiText(template).replace(/\{([a-zA-Z][a-zA-Z0-9_]*)\}/g,(whole,name)=>
+  Object.prototype.hasOwnProperty.call(params,name)?String(params[name]):whole)
+}
+export function localizedWeekday(short:string):string{
+ return uiText(short)
+}

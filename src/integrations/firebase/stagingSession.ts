@@ -26,6 +26,25 @@ export async function readStagingSession():Promise<StagingSession>{
  stagingSession.value=result
  return result
 }
+/**
+ * Navigazione tra le pagine: evita due letture Firestore ad ogni tocco.
+ * La sessione nasce sempre da readStagingSession() (profilo e palestra verificati).
+ * Prima di riusarla controlliamo l'utente corrente in Firebase Auth: non basta
+ * un ruolo salvato nel browser. Le Firestore Rules restano autoritative su dati
+ * e scritture, e le pagine sensibili verificano il loro accesso come prima.
+ * Non viene conservata una sessione in localStorage o in altre cache manuali.
+ */
+export async function readNavigationSession():Promise<StagingSession>{
+ const {auth}=getStagingClients()
+ await auth.authStateReady()
+ const user=auth.currentUser
+ if(!user?.email){stagingSession.value=null;throw new Error('Accedi con un account Firebase.')}
+ const cached=stagingSession.value
+ if(cached?.uid===user.uid && cached.email.toLowerCase()===user.email.toLowerCase())return cached
+ // Prima navigazione / cambio account: verifica LIVE completa dal server.
+ stagingSession.value=null
+ return readStagingSession()
+}
 export async function signInStaging(email:string,password:string,remember=true){
  const {auth}=getStagingClients()
  await setPersistence(auth,remember?browserLocalPersistence:browserSessionPersistence)

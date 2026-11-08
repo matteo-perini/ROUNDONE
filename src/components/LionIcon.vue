@@ -32,6 +32,7 @@ const paths:Record<string,string>={
  logout:'M10 17l5-5-5-5M15 12H3M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7',
  gym:'M2 12h20M5 7v10M8 9v6M16 9v6M19 7v10',
  shield:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z',
+ progress:'M3 19h18M4 16l5-5 4 3 7-8M16 6h4v4',
  filter:'M4 7h16M7 12h10M10 17h4',
  edit:'M4 20l5-1 11-11-4-4L5 15l-1 5Zm10-14 4 4',
  info:'M12 12v5m0-9v1M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z'

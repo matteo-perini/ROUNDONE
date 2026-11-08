@@ -1,4 +1,6 @@
 import { createApp } from 'vue'
+import { watch } from 'vue'
+import {interfaceLanguage} from './features/i18n/interfaceLanguage'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
@@ -12,7 +14,11 @@ import './styles-patch75.css' // Base integrativa 7.5
 import './styles-patch76.css' // Override 7.6: navbar desktop fixed, SVG, card verticali
 import './styles-lionfit-redesign.css' // Tema globale e dashboard/Home V1, ultimo override grafico
 import './styles-restyling-finale.css' // 06Nov2026: palette globale, sfondi ripuliti, SVG con fondo scuro
+import './styles-patch5-athlete.css' // PATCH 5: V3 Atleta, sidebar desktop, navbar a tutta larghezza
+import './styles-patch7-final.css' // PATCH 7: safe-area, temi e testi IT/EN responsive
 import { installRoundOneMotion } from './features/motion/roundOneMotion'
+// Rispetta lingua memorizzata: accessibilita' e formati anche dopo il riavvio dell'APK.
+watch(interfaceLanguage,lang=>{document.documentElement.lang=lang},{immediate:true})
 createApp(App).use(createPinia()).use(router).mount('#app')
 installRoundOneMotion(router)
 

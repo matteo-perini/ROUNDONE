@@ -81,7 +81,13 @@ async function installAndroidBack(nav: Router) {
     lastPress = Date.now()
     showExitPrompt()
   })
-  // Disinnesca una richiesta scaduta: il popup rimane visibile e richiede ancora un gesto esplicito.
-  document.addEventListener('visibilitychange', () => { if (document.hidden) { lastPress = 0 } })
+  // L'overlay di uscita non deve restare sopra la navbar dopo il ritorno
+  // dall'elenco delle app recenti, uno sblocco schermo o una pausa Android.
+  await NativeApp.addListener('appStateChange', ({isActive}) => {
+    if (!isActive || dialog) dismissExit()
+    if (isActive) lastPress = 0
+  })
+  // Non lasciare un livello trasparente sopra i touch quando WebView va in background.
+  document.addEventListener('visibilitychange', () => { if (document.hidden) dismissExit() })
   console.info('Lion Fit: Indietro Android attivo (un passaggio per volta, uscita confermata).', EXIT_DOUBLE_BACK_MS)
 }
