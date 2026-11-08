@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {computed,ref,onMounted} from 'vue'
+import {Capacitor} from '@capacitor/core'
+import type {NativeUpdateStatus} from '../features/release/nativeUpdates'
 import {sendPasswordResetEmail} from 'firebase/auth'
 import appMeta from '../../package.json'
 import {addDoc,collection,serverTimestamp} from 'firebase/firestore'
@@ -19,6 +21,41 @@ const supportOpen=ref(false),supportText=ref(''),supportSubject=ref(''),supportT
 const verifiedCoach=ref(false),future=ref('')
 const infoOpen=ref(false),securityOpen=ref(false),securityStatus=ref(''),securityBusy=ref(false)
 const appVersion=appMeta.version
+const nativeAndroid=Capacitor.isNativePlatform()&&Capacitor.getPlatform()==='android'
+const updateBusy=ref(false),downloadBusy=ref(false),updateMessage=ref(''),installedAndroidVersion=ref('')
+const latestUpdate=ref<Extract<NativeUpdateStatus,{kind:'available'}>|null>(null)
+async function checkForUpdatesManually(){
+ if(!nativeAndroid||updateBusy.value)return
+ updateBusy.value=true;latestUpdate.value=null;updateMessage.value='Controllo GitHub in corso…'
+ try{
+  const {checkNativeUpdateNow}=await import('../features/release/nativeUpdates')
+  const result=await checkNativeUpdateNow()
+  if('installed' in result)installedAndroidVersion.value=result.installed
+  if(result.kind==='available'){
+   latestUpdate.value=result
+   updateMessage.value=`Nuova versione ${result.tag} disponibile (installata: ${result.installed}).`
+  }else if(result.kind==='current')updateMessage.value=`LionFit ${result.installed} è già aggiornato.`
+  else if(result.kind==='error')updateMessage.value=result.message
+  else updateMessage.value='Disponibile solo nell’APK Android.'
+ }catch{updateMessage.value='Verifica non riuscita. Riprova più tardi.'}
+ finally{updateBusy.value=false}
+}
+async function downloadLatestUpdate(){
+ const current=latestUpdate.value
+ if(!current||downloadBusy.value)return
+ downloadBusy.value=true
+ try{
+  const {openAndroidApkDownload}=await import('../features/release/nativeUpdates')
+  await openAndroidApkDownload(current.url)
+ }catch{updateMessage.value='Impossibile aprire il download esterno. Usa il collegamento a GitHub Releases.'}
+ finally{downloadBusy.value=false}
+}
+async function openLatestReleases(){
+ try{
+  const {openAndroidReleases}=await import('../features/release/nativeUpdates')
+  await openAndroidReleases()
+ }catch{updateMessage.value='Apri GitHub Releases dal browser del telefono.'}
+}
 // Anche in DEV usa soltanto i documenti legali pubblicabili; nessuna bozza raggiungibile.
 const privacyHref='/legal/policy.html'
 const termsHref='/legal/note-legali.html'
@@ -96,6 +133,15 @@ async function exit() { if(isStagingMode()){await signOutStaging();await router.
    <p><strong>{{uiText("Ideazione e sviluppo:")}}</strong> Matteo Perini</p>
    <p><strong>{{uiText("Versione del progetto web:")}}</strong> {{appVersion}}</p>
    <p class="muted small">{{uiText("La versione Android installata può essere diversa da quella dei sorgenti web e si verifica nelle informazioni di sistema dell'app.")}}</p>
+   <section v-if="nativeAndroid" class="lf-android-update-box" aria-label="Aggiornamenti Android">
+    <h3>{{uiText('Aggiornamenti Android')}}</h3>
+    <p v-if="installedAndroidVersion" class="muted small">{{uiText('Versione Android installata:')}} <strong>{{installedAndroidVersion}}</strong></p>
+    <button class="primary wide" type="button" :disabled="updateBusy" @click="checkForUpdatesManually">{{uiText(updateBusy?'Controllo in corso…':'Controlla aggiornamenti')}}</button>
+    <p v-if="updateMessage" class="muted small" role="status" aria-live="polite">{{uiText(updateMessage)}}</p>
+    <button v-if="latestUpdate" class="primary wide" type="button" :disabled="downloadBusy" @click="downloadLatestUpdate">{{uiText(downloadBusy?'Apertura download…':'Scarica aggiornamento')}} {{latestUpdate.tag}}</button>
+    <button class="secondary wide" type="button" @click="openLatestReleases">{{uiText('Apri GitHub Releases')}}</button>
+   </section>
+   <p v-else class="muted small">{{uiText('Il controllo manuale degli aggiornamenti APK è disponibile nell’app Android.')}}</p>
    <p>{{uiText("LionFit è un progetto in continua evoluzione: nuove funzioni, ottimizzazioni e miglioramenti vengono introdotti progressivamente. Le funzioni contrassegnate «In aggiornamento» non sono ancora disponibili.")}}</p>
    <button class="secondary wide" type="button" @click="infoOpen=false">{{uiText("Chiudi")}}</button>
   </div></div>

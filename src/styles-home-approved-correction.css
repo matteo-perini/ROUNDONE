@@ -47,12 +47,12 @@
  min-width:0;min-height:0;display:flex;flex-direction:column;justify-content:space-between;
  gap:10px;padding:clamp(16px,3vw,26px);border:1px solid rgba(60,218,139,.58);
  border-radius:18px;overflow:hidden;isolation:isolate;color:var(--text);
- background:linear-gradient(90deg,rgba(10,20,29,.95) 0%,rgba(10,21,30,.91) 45%,rgba(9,24,33,.28) 100%),url('/lionfit-redesign/gloves-banner.jpg') right center / auto 100% no-repeat,var(--card);
+ background:linear-gradient(90deg,rgba(10,20,29,.95) 0%,rgba(10,21,30,.91) 45%,rgba(9,24,33,.28) 100%),url('/lionfit-redesign/gloves-clean.jpg') right center / auto 100% no-repeat,var(--card);
  box-shadow:0 1px 0 rgba(63,239,153,.22),0 8px 26px rgba(0,0,0,.15);
 }
 .app.theme-light.as-athlete .lf-home-approved .lf-v3-today{
  color:#133522;
- background:linear-gradient(90deg,rgba(250,255,251,.99) 0%,rgba(247,255,251,.94) 50%,rgba(240,255,248,.37) 100%),url('/lionfit-redesign/gloves-banner.jpg') right center / auto 100% no-repeat,#fff;
+ background:linear-gradient(90deg,rgba(250,255,251,.99) 0%,rgba(247,255,251,.94) 50%,rgba(240,255,248,.37) 100%),url('/lionfit-redesign/gloves-clean.jpg') right center / auto 100% no-repeat,#fff;
  border-color:#8fcdab;
 }
 .lf-home-approved .lf-v3-today-head{display:flex!important;align-items:center;justify-content:flex-start;gap:10px;color:var(--lf-home-green);font-size:clamp(12px,1.7vw,18px);font-weight:900}

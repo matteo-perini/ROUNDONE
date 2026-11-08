@@ -1,0 +1,6 @@
+/* PATCH incrementale 08NOV2026: Info app / verifica aggiornamenti APK */
+.lf-about-dialog .lf-android-update-box{display:flex;flex-direction:column;gap:9px;margin:16px 0;padding:14px;border-radius:14px;border:1px solid var(--outline,#365346);background:var(--card,rgba(19,43,37,.5));min-width:0}
+.lf-about-dialog .lf-android-update-box h3{font-weight:800;font-size:16px;margin:0}
+.lf-about-dialog .lf-android-update-box p{margin:0;line-height:1.45;overflow-wrap:anywhere}
+.lf-about-dialog .lf-android-update-box button{min-height:42px;font-size:14px;white-space:normal}
+.lf-about-dialog{max-height:min(88dvh,770px);overflow-y:auto;overscroll-behavior:contain}

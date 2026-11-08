@@ -1,16 +1,60 @@
-/** OPTIONAL updater for verified Android APK only. No auto-download/installation.
- * Never executed in a dev server; requires explicit release env opt-in in main.ts.
+/** LionFit native Android update checker: automatic throttled notice + manual on-demand check.
+ * Both paths use the same validated GitHub Release asset. No auto-install or silent download.
  */
 import {Capacitor} from '@capacitor/core'
 import {App} from '@capacitor/app'
-import {Browser} from '@capacitor/browser'
+import {AppLauncher} from '@capacitor/app-launcher'
 import {NATIVE_UPDATE_API,NATIVE_UPDATE_CHECK_MS,NATIVE_UPDATE_SNOOZE_MS,safeNewAndroidRelease} from './nativeUpdatePolicy'
+
 let started=false
+let automaticChecking=false
 const lastKey='lf_modern_android_update_checked_v7'
 const snoozeKey=(tag:string)=>'lf_modern_android_update_snooze_v7_'+tag
+const RELEASES_URL='https://github.com/matteo-perini/ROUNDONE/releases/latest'
 function read(key:string):number {try{return Number(localStorage.getItem(key)||0)||0}catch{return 0}}
-function write(key:string,value:number) {try{localStorage.setItem(key,String(value))}catch{ /* storage disabled */ }}
-function isAndroid(){return Capacitor.isNativePlatform()&&Capacitor.getPlatform()==='android'}
+function write(key:string,value:number) {try{localStorage.setItem(key,String(value))}catch{/* unavailable storage */}}
+export function isNativeAndroid():boolean {return Capacitor.isNativePlatform()&&Capacitor.getPlatform()==='android'}
+export type NativeUpdateStatus =
+ | {kind:'available';installed:string;tag:string;url:string}
+ | {kind:'current';installed:string}
+ | {kind:'unsupported'}
+ | {kind:'error';message:string}
+
+/** Always bypasses the automatic 8-hour interval and any snooze; returns a status for the settings UI.
+ * It does not display the automatic banner, so no overlapping modals.
+ */
+export async function checkNativeUpdateNow():Promise<NativeUpdateStatus>{
+ if(!isNativeAndroid())return {kind:'unsupported'}
+ const controller=new AbortController()
+ const timeout=setTimeout(()=>controller.abort(),12000)
+ try{
+  const installed=(await App.getInfo()).version
+  const response=await fetch(NATIVE_UPDATE_API,{
+   headers:{Accept:'application/vnd.github+json'},cache:'no-store',signal:controller.signal
+  })
+  if(!response.ok){
+   return {kind:'error',message:response.status===403?'GitHub limita temporaneamente le verifiche. Riprova tra qualche minuto.':`GitHub non risponde (HTTP ${response.status}).`}
+  }
+  const candidate=safeNewAndroidRelease(await response.json(),installed)
+  write(lastKey,Date.now())
+  return candidate?{kind:'available',installed,...candidate}:{kind:'current',installed}
+ }catch(error){
+  return {kind:'error',message:error instanceof Error&&error.name==='AbortError'?'Controllo scaduto. Verifica la connessione e riprova.':'Controllo non riuscito. Verifica Internet e riprova.'}
+ }finally{clearTimeout(timeout)}
+}
+/** Android ACTION_VIEW: passes the URL to an external app/browser instead of a Capacitor Custom Tab.
+ * The asset URL is validated by the Release policy before being passed here.
+ */
+export async function openAndroidApkDownload(url:string):Promise<void>{
+ if(!isNativeAndroid())throw new Error('Il download APK è disponibile nell’app Android.')
+ const result=await AppLauncher.openUrl({url})
+ if(!result.completed)throw new Error('Impossibile aprire il browser esterno.')
+}
+export async function openAndroidReleases():Promise<void>{
+ if(!isNativeAndroid())throw new Error('Disponibile solo nell’app Android.')
+ const result=await AppLauncher.openUrl({url:RELEASES_URL})
+ if(!result.completed)throw new Error('Impossibile aprire GitHub Releases.')
+}
 function notice(tag:string,installed:string,url:string){
  if(Date.now()-read(snoozeKey(tag))<NATIVE_UPDATE_SNOOZE_MS || document.getElementById('lf-modern-update'))return
  const style=document.createElement('style')
@@ -20,31 +64,31 @@ function notice(tag:string,installed:string,url:string){
  const title=document.createElement('strong');title.textContent='Aggiornamento Lion Fit disponibile'
  const p=document.createElement('p');p.textContent=`Versione ${tag} disponibile (installata: ${installed}). Vuoi aprire il download?`
  const download=document.createElement('button');download.type='button';download.textContent='Scarica aggiornamento'
- download.addEventListener('click',()=>{void Browser.open({url}).catch(()=>{p.textContent='Impossibile aprire il download. Riprovare più tardi.'})})
+ let useReleasesPage=false
+ download.addEventListener('click',()=>{
+  if(download.disabled)return
+  download.disabled=true
+  void (useReleasesPage?openAndroidReleases():openAndroidApkDownload(url)).catch(()=>{
+   p.textContent='Non è stato possibile aprire il download. Prova dalla pagina GitHub Releases.'
+   useReleasesPage=true
+   download.textContent='Apri GitHub Releases'
+  }).finally(()=>{download.disabled=false})
+ })
  const later=document.createElement('button');later.type='button';later.className='later';later.textContent='Più tardi'
  later.addEventListener('click',()=>{write(snoozeKey(tag),Date.now());panel.remove()})
  panel.append(title,p,download,later);document.body.appendChild(panel)
 }
 export function installNativeUpdateChecker():void {
- if(started||!isAndroid())return
+ if(started||!isNativeAndroid())return
  started=true
- let checking=false
  const check=async()=>{
-  if(checking||document.hidden||Date.now()-read(lastKey)<NATIVE_UPDATE_CHECK_MS)return
-  checking=true
-  try {
-   const installed=(await App.getInfo()).version
-   const controller=new AbortController()
-   const timeout=setTimeout(()=>controller.abort(),9000)
-   try{
-    const response=await fetch(NATIVE_UPDATE_API,{headers:{Accept:'application/vnd.github+json'},cache:'no-store',signal:controller.signal})
-    if(!response.ok)return
-    const candidate=safeNewAndroidRelease(await response.json(),installed)
-    write(lastKey,Date.now())
-    if(candidate)notice(candidate.tag,installed,candidate.url)
-   }finally{clearTimeout(timeout)}
-  }catch{ /* offline/no GitHub: never block the app */ }
-  finally{checking=false}
+  if(automaticChecking||document.hidden||Date.now()-read(lastKey)<NATIVE_UPDATE_CHECK_MS)return
+  automaticChecking=true
+  try{
+   const result=await checkNativeUpdateNow()
+   if(result.kind==='available')notice(result.tag,result.installed,result.url)
+  }catch{/* Never block the app during connectivity errors. */}
+  finally{automaticChecking=false}
  }
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)void check()})
  void check()

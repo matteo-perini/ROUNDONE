@@ -30,3 +30,6 @@ if (import.meta.env.PROD && import.meta.env.VITE_LIONFIT_UPDATE_CHECK === 'ENABL
 import './styles-home-approved-correction.css'
 // Correzione layout avatar e tasto Indietro: ultima regola, senza alterare il tema.
 import './styles-profile-back-fix.css'
+
+// Correttiva download Android esterno e pannello aggiornamenti Info app.
+import './styles-update-download-fix.css'

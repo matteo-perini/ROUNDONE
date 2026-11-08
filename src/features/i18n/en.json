@@ -648,5 +648,18 @@
   "La modifica della password è disponibile soltanto dopo il login nella versione Live. Non verrà inviata alcuna email di prova.": "Password changes are only available after signing into the Live version. No test email will be sent.",
   "Account senza email verificabile: utilizza il tuo metodo di accesso o contatta l’assistenza.": "This account has no verifiable email. Use your sign-in provider or contact support.",
   "Questo account non usa una password email: gestisci l’accesso dal provider esterno.": "This account does not use an email password. Manage sign-in through the external provider.",
-  "Se l’account è abilitato, riceverai un’email con le istruzioni. Controlla anche la posta indesiderata.": "If the account is eligible, you will receive an email with instructions. Check your spam folder too."
+  "Se l’account è abilitato, riceverai un’email con le istruzioni. Controlla anche la posta indesiderata.": "If the account is eligible, you will receive an email with instructions. Check your spam folder too.",
+  "Aggiornamenti Android": "Android updates",
+  "Versione Android installata:": "Installed Android version:",
+  "Controlla aggiornamenti": "Check for updates",
+  "Controllo in corso…": "Checking…",
+  "Controllo GitHub in corso…": "Checking GitHub…",
+  "Scarica aggiornamento": "Download update",
+  "Apertura download…": "Opening download…",
+  "Apri GitHub Releases": "Open GitHub Releases",
+  "Il controllo manuale degli aggiornamenti APK è disponibile nell’app Android.": "Manual APK update checks are available in the Android app.",
+  "Verifica non riuscita. Riprova più tardi.": "Unable to check. Please try again later.",
+  "Disponibile solo nell’APK Android.": "Only available in the Android APK.",
+  "Impossibile aprire il download esterno. Usa il collegamento a GitHub Releases.": "Unable to open the external download. Use the GitHub Releases link.",
+  "Apri GitHub Releases dal browser del telefono.": "Open GitHub Releases in your phone browser."
 }

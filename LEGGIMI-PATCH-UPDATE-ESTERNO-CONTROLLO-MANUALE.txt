@@ -1,0 +1,52 @@
+LIONFIT MODERN — PATCH INCREMENTALE (successiva a PATCH 07 e correttive Home/Profilo)
+8 novembre 2026 — download APK esterno + controllo aggiornamenti manuale + immagine Oggi
+
+Questa ZIP contiene SOLO i file da sostituire, con i percorsi esatti sotto la radice di LionFit-Modern-Git.
+Non contiene .env, credenziali, APK, Firebase Rules, node_modules, dati degli atleti o cartella .git.
+
+PREPARAZIONE
+ 1. Fai una copia di sicurezza della tua cartella LionFit-Modern-Git.
+ 2. Estrai questo ZIP NELLA RADICE della cartella LionFit-Modern-Git (non creare una sottocartella).
+ 3. Conferma la sovrascrittura dei file.
+ 4. Esegui UNA SOLA VOLTA INSTALLA_PLUGIN_UPDATE_ANDROID.cmd nella cartella del progetto.
+    In alternativa, terminale VS Code: npm install --save-exact @capacitor/app-launcher@8.0.1
+    Serve Internet. Il plugin non e' incluso in node_modules nel pacchetto ZIP.
+ 5. Esegui LIONFIT_PREPARA_WEB_E_DOCS.cmd (ricompila il web e aggiorna docs).
+ 6. In terminale VS Code, nella radice: npx cap sync android
+ 7. Poi: npx cap open android
+ 8. In Android Studio, android/app/build.gradle: versionCode 14 e versionName "0.30.5"
+    (se l'ultima RELEASE installata era 0.30.4, code 13; verifica i tuoi numeri effettivi).
+ 9. Gradle Sync, genera APK con stessa firma delle versioni gia' installate.
+10. TESTA PRIMA IN LOCALE, POI commit/push dei soli file legittimi e Release se tutto e' OK.
+
+MODIFICHE
+- Download dal banner degli aggiornamenti: passa attraverso il plugin ufficiale @capacitor/app-launcher
+  con Android ACTION_VIEW. Evita il Browser.open in Custom Tab che si bloccava sul download.
+- Impostazioni > Informazioni > Aggiornamenti Android (solo app Android):
+  Controlla aggiornamenti, esito esplicito, versione installata e Scarica aggiornamento
+  quando esiste una release maggiore. Pulsante alternativo Apri GitHub Releases.
+- Il controllo MANUALE bypassa sia le 8 ore dell'automatico sia il rinvio (Più tardi),
+  senza creare due popup sovrapposti.
+- Il controllo AUTOMATICO all'avvio resta opt-in con la tua riga .env.production.local:
+  VITE_LIONFIT_UPDATE_CHECK=ENABLED_AFTER_APK_SIGNING
+- Home atleta: corretto sfondo nella card Oggi. Ora usa l'immagine ESISTENTE
+  public/lionfit-redesign/gloves-clean.jpg, che non include piu' SETTIMANA 1 o freccia.
+
+VERIFICHE IMPORTANTI
+- Apri Impostazioni > Informazioni > Controlla aggiornamenti su un APK Android.
+- Se la versione installata coincide con la Release, deve scrivere 'gia' aggiornato'.
+- Per testare il download, PUBBLICA prima una Release PUBBLICA di versione superiore con
+  l'asset chiamato esattamente LionFit.apk (non Prerelease, non Draft).
+- Verifica che il download si apra nel browser esterno e termini correttamente.
+- NON disinstallare l'APK precedente: l'aggiornamento richiede lo stesso packageId
+  com.roundone.app e la stessa firma Android per mantenere i dati.
+- Il sito/PWA NON puo' installare un APK: la sezione manuale compare solo nell'app Android.
+- Le 8 ore restano valide SOLO per i controlli automatici.
+
+CONTROLLI ESEGUITI QUI
+- Parsing sintattico TypeScript delle parti aggiornate: PASS.
+- Coerenza package.json/package-lock.json e presenza asset: PASS.
+- Build completa Vite/Gradle e test reale Android: NON eseguiti in questo ambiente.
+
+Se il tuo progetto locale ha ulteriori modifiche successive a queste correttive,
+confronta i file prima di sovrascriverli.
