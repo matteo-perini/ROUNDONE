@@ -26,3 +26,7 @@ installRoundOneMotion(router)
 if (import.meta.env.PROD && import.meta.env.VITE_LIONFIT_UPDATE_CHECK === 'ENABLED_AFTER_APK_SIGNING') {
   void import('./features/release/nativeUpdates').then(({installNativeUpdateChecker}) => installNativeUpdateChecker())
 }
+// Correzione Home approvata: importata per ultima, sopra gli override delle PATCH 5–7.
+import './styles-home-approved-correction.css'
+// Correzione layout avatar e tasto Indietro: ultima regola, senza alterare il tema.
+import './styles-profile-back-fix.css'

@@ -1,124 +1,120 @@
-/**
- * Lion Fit Motion · PATCH 1/7.
- * Ingresso leggero e una sola volta per navigazione; nessuna animazione al
- * rientro da background o ad ogni aggiornamento realtime delle schede.
- * Nessuna interazione con Auth, Firestore o dati dell'app.
+/** LION FIT · Transizioni di pagina (correzione 08 novembre 2026).
+ * Rientrando in Home / Piano / Archivio / Coach la transizione riparte.
+ * Cambiare solamente settimana, giorno o filtro nella stessa pagina NON anima
+ * nuovamente il contenuto; non modifica dati Firebase, URL o navigazione.
  */
-import { nextTick } from 'vue'
-import type { Router } from 'vue-router'
+import {nextTick} from 'vue'
+import type {Router} from 'vue-router'
 
-export const ROUNDONE_MOTION = Object.freeze({ titleMs: 250, panelMs: 310, staggerMs: 32, maxDelayMs: 144 })
-export type MotionRole = 'title' | 'panel'
-export const ROUNDONE_TITLE_FRAMES: Keyframe[] = [
-  { opacity: 0, transform: 'translate3d(0,6px,0)' },
-  { opacity: 1, transform: 'translate3d(0,0,0)' },
+export const ROUNDONE_MOTION=Object.freeze({titleMs:620,panelMs:720,staggerMs:90,maxDelayMs:450})
+export type MotionRole='title'|'panel'
+export const ROUNDONE_TITLE_FRAMES:Keyframe[]=[
+ {opacity:0,transform:'translate3d(0,12px,0)'},
+ {opacity:1,transform:'translate3d(0,0,0)'},
 ]
-export const ROUNDONE_PANEL_FRAMES: Keyframe[] = [
-  { opacity: 0, transform: 'translate3d(0,9px,0)' },
-  { opacity: 1, transform: 'translate3d(0,0,0)' },
+export const ROUNDONE_PANEL_FRAMES:Keyframe[]=[
+ {opacity:0,transform:'translate3d(0,17px,0) scale(.987)'},
+ {opacity:1,transform:'translate3d(0,0,0) scale(1)'},
 ]
-export function roundOneMotionOptions(role: MotionRole, index: number): KeyframeAnimationOptions {
-  return {
-    duration: role === 'title' ? ROUNDONE_MOTION.titleMs : ROUNDONE_MOTION.panelMs,
-    delay: Math.min(Math.max(0,index) * ROUNDONE_MOTION.staggerMs, ROUNDONE_MOTION.maxDelayMs),
-    easing: 'cubic-bezier(.22,.72,.28,1)', fill: 'none',
-  }
+export function roundOneMotionOptions(role:MotionRole,index:number):KeyframeAnimationOptions{
+ return {duration:role==='title'?ROUNDONE_MOTION.titleMs:ROUNDONE_MOTION.panelMs,
+  delay:Math.min(Math.max(0,index)*ROUNDONE_MOTION.staggerMs,ROUNDONE_MOTION.maxDelayMs),
+  easing:'cubic-bezier(.22,.73,.25,1)',fill:'both'}
 }
+export function installRoundOneMotion(router:Router):void{
+ if(typeof window==='undefined'||typeof document==='undefined')return
+ const reduce=window.matchMedia('(prefers-reduced-motion: reduce)')
+ const active=new Set<Animation>()
+ let animated=new WeakSet<Element>()
+ let frame=0
+ let generation=0
+ let pendingUntil=0
+ let currentPath=router.currentRoute.value.path
 
-/**
- * Hook run once from main.ts; route changes replace active animations. The
- * Seleziona soltanto i componenti visibili della pagina. Le card caricate
- * asincronamente possono entrare nei primi 750ms, ma NON si rianimano in
- * seguito ad aggiornamenti Firebase o al ritorno da background.
- */
-export function installRoundOneMotion(router: Router): void {
-  if (typeof window === 'undefined' || typeof document === 'undefined') return
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)')
-  const active = new Set<Animation>()
-  let frame = 0
-  let lastCompose = 0
-  let allowNewCardsUntil = 0
-  const visible = (node: Element): node is HTMLElement => {
-    if (!(node instanceof HTMLElement) || node.closest('[hidden],[aria-hidden="true"],.hidden')) return false
-    const s = window.getComputedStyle(node)
-    if (s.display === 'none' || s.visibility === 'hidden') return false
-    const r = node.getBoundingClientRect()
-    return r.width > 0 && r.height > 0 && r.top < window.innerHeight + 110 && r.bottom > -90
+ const root=()=>document.querySelector('main.main-layout,main.booking-main,main.login-main')
+ const visible=(el:Element):el is HTMLElement=>{
+  if(!(el instanceof HTMLElement)||el.closest('[hidden],[aria-hidden="true"],.hidden,.modal-overlay'))return false
+  const style=getComputedStyle(el)
+  if(style.display==='none'||style.visibility==='hidden')return false
+  const rect=el.getBoundingClientRect()
+  return rect.width>0&&rect.height>0&&rect.bottom>-30&&rect.top<innerHeight+60
+ }
+ const abort=()=>{
+  for(const a of active){try{a.cancel()}catch{/* Element already removed */}}
+  active.clear()
+ }
+ const targets=(main:Element):HTMLElement[]=>{
+  // La Home ha quattro blocchi nella sequenza della preview approvata.
+  const home=main.querySelector('.lf-home-approved')
+  if(home)return Array.from(home.children).filter(visible).slice(0,9)
+  // Il Piano viene animato SOLO all'ingresso nella route /piano.
+  // I cambi di settimana aggiornano i suoi nodi senza una nuova animazione.
+  const plan=main.querySelector('.athlete-plan')
+  if(plan)return Array.from(plan.children).filter(visible).slice(0,12)
+  const result:HTMLElement[]=[]
+  const unwrap=(el:Element,depth:number)=>{
+   if(result.length>=12)return
+   if(depth<3&&el instanceof HTMLElement&&(
+    el.classList.contains('stack')||el.classList.contains('athlete-live-screen')||
+    el.classList.contains('booking-in-shell')
+   )){
+    for(const child of el.children)unwrap(child,depth+1)
+    return
+   }
+   if(visible(el)&&!el.classList.contains('version')&&!el.classList.contains('modal-overlay'))result.push(el)
   }
-  const abort = () => {
-    for (const a of active) { try { a.cancel() } catch { /* already ended */ } }
-    active.clear()
+  for(const child of main.children)unwrap(child,0)
+  return result.slice(0,12)
+ }
+ const compose=(epoch:number)=>{
+  if(epoch!==generation||document.hidden||reduce.matches)return
+  const main=root()
+  if(!main)return
+  for(const [index,el] of targets(main).entries()){
+   if(animated.has(el)||typeof el.animate!=='function')continue
+   animated.add(el)
+   const isTitle=el.matches('h1,h2,h3,.lf-v3-intro,.green-hero')
+   const a=el.animate(isTitle?ROUNDONE_TITLE_FRAMES:ROUNDONE_PANEL_FRAMES,
+    roundOneMotionOptions(isTitle?'title':'panel',index))
+   active.add(a)
+   a.onfinish=()=>{active.delete(a);try{a.cancel()}catch{/* Already done */}}
+   a.oncancel=()=>active.delete(a)
   }
-  const animate = (el: HTMLElement, role: MotionRole, index: number) => {
-    if (reduce.matches || document.hidden || typeof el.animate !== 'function' || !visible(el)) return
-    const animation = el.animate(role === 'title' ? ROUNDONE_TITLE_FRAMES : ROUNDONE_PANEL_FRAMES,
-      roundOneMotionOptions(role, index))
-    active.add(animation)
-    animation.onfinish = () => {
-      active.delete(animation)
-      try { animation.cancel() } catch { /* animation completed */ }
-    }
-    animation.oncancel = () => active.delete(animation)
-  }
-  const rootElement = () => document.querySelector('main.main-layout,main.booking-main,main.login-main')
-  const compose = () => {
-    if (reduce.matches || document.hidden || !('animate' in Element.prototype)) return
-    const root = rootElement()
-    if (!root) return
-    abort()
-    const sections = Array.from(root.children).flatMap(node => {
-      if (!(node instanceof HTMLElement)) return []
-      // Most Modern screens wrap their sections in one div.stack.
-      return node.matches('.stack') ? Array.from(node.children) : [node]
-    }).filter(visible).slice(0, 14)
-    sections.forEach((section, index) => {
-      const role: MotionRole = section.matches('h1,h2,h3,.eyebrow,.green-hero') ? 'title' : 'panel'
-      animate(section, role, index)
-    })
-    lastCompose = window.performance.now()
-    allowNewCardsUntil = lastCompose + 750
-  }
-  const schedule = () => {
-    if (document.hidden) return
-    if (frame) window.cancelAnimationFrame(frame)
-    void nextTick(() => {
-      frame = window.requestAnimationFrame(() => {frame = 0; compose()})
-    })
-  }
-  // Solo card entrate subito dopo il cambio pagina (caricamento asincrono).
-  // Non animare snapshot Firebase successivi o cambiamenti nella stessa pagina.
-  const observer = new MutationObserver(mutations => {
-    const now = window.performance.now()
-    if (reduce.matches || document.hidden || now > allowNewCardsUntil || now - lastCompose < 65) return
-    const root = rootElement()
-    if (!root) return
-    const additions: HTMLElement[] = []
-    for (const mutation of mutations) {
-      if (mutation.type !== 'childList') continue
-      for (const node of mutation.addedNodes) {
-        if (!(node instanceof HTMLElement) || !root.contains(node)) continue
-        if (node.matches('.action-card,.archive-card,.line-card,.coach-metric-card') && visible(node)) additions.push(node)
-        for (const card of node.querySelectorAll('.action-card,.archive-card,.line-card,.coach-metric-card')) {
-          if (visible(card)) additions.push(card)
-          if (additions.length >= 5) break
-        }
-        if (additions.length >= 5) break
-      }
-      if (additions.length >= 5) break
-    }
-    additions.slice(0,5).forEach((item,i)=>animate(item,'panel',i))
+ }
+ const schedule=()=>{
+  if(document.hidden||reduce.matches||performance.now()>pendingUntil)return
+  if(frame)cancelAnimationFrame(frame)
+  const epoch=generation
+  void nextTick(()=>{
+   if(epoch!==generation||document.hidden)return
+   frame=requestAnimationFrame(()=>{frame=0;compose(epoch)})
   })
-  observer.observe(document.getElementById('app') ?? document.body, {subtree:true,childList:true})
-  reduce.addEventListener('change', () => { if (reduce.matches) { abort(); allowNewCardsUntil=0 } })
-  // Quando WebView torna visibile, niente composizione di pagina né intro replay.
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      abort(); allowNewCardsUntil=0
-      if (frame) {window.cancelAnimationFrame(frame);frame=0}
-    }
-  })
-  router.afterEach((to,from,failure) => {
-    if (!failure && to.path !== from.path) schedule()
-  })
-  void router.isReady().then(schedule)
+ }
+ const enter=(path:string)=>{
+  currentPath=path
+  generation++
+  animated=new WeakSet<Element>()
+  abort()
+  pendingUntil=performance.now()+1900 // include async first snapshot, not all realtime updates
+  schedule()
+ }
+ // DOM async: se i dati delle schede arrivano DOPO il cambio pagina,
+ // anima i nuovi blocchi SOLO durante il breve intervallo di ingresso.
+ const observer=new MutationObserver(mutations=>{
+  if(document.hidden||reduce.matches||performance.now()>pendingUntil)return
+  if(!mutations.some(m=>m.type==='childList'&&m.addedNodes.length))return
+  schedule()
+ })
+ observer.observe(document.getElementById('app')??document.body,{childList:true,subtree:true})
+ router.afterEach((to,from,failure)=>{
+  if(failure)return
+  if(to.path!==from.path){enter(to.path);return}
+  // Query-only: /piano?week=1 → /piano?week=2. Nessun nuovo effetto.
+  if(to.fullPath!==from.fullPath){pendingUntil=0;currentPath=to.path}
+ })
+ reduce.addEventListener('change',()=>{if(reduce.matches){pendingUntil=0;abort()}})
+ document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){pendingUntil=0;abort();if(frame){cancelAnimationFrame(frame);frame=0}}
+ })
+ void router.isReady().then(()=>{if(currentPath===router.currentRoute.value.path)enter(currentPath)})
 }

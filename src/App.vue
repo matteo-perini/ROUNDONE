@@ -16,6 +16,9 @@ import appMeta from '../package.json'
 const StagingBanner=import.meta.env.MODE==='staging' ? defineAsyncComponent(()=>import('./components/StagingBanner.vue')) : null
 const lab=useLabStore();const route=useRoute();const router=useRouter()
 const webVersionLabel=`LION FIT · WEB v${appMeta.version}`
+// Usa lo stesso gestore di Indietro della WebView, senza importare una seconda volta
+// il modulo nativo e senza cambiare l'ordine dei CSS della shell.
+function requestBackFromUi(){window.dispatchEvent(new Event('lionfit:ui-back'))}
 const currentAvatar=ref('')
 const verifiedSettingsRole=ref<null|'coach'|'atleta'>(null)
 let roleSettingsRequest=0
@@ -111,7 +114,7 @@ async function goOut(){
     </aside>
     <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><button v-if="shownRole==='coach'" type="button" class="mobile-coach-menu-btn" :aria-expanded="coachMenuOpen" :aria-label="uiText('Apri il menu completo Coach')" @click="coachMenuOpen=!coachMenuOpen">☰</button><RouterLink v-if="shownRole==='coach'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Apri impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
     <nav v-if="shownRole==='atleta'" id="athlete-top-menu" class="athlete-top-nav lf-top-menu-75 lf-top-menu-76" :aria-label="uiText('Menu principale Atleta')"><RouterLink v-for="item in mobileNav" :key="item.to" :to="item.to"><LionIcon :name="item.icon" :size="17"/><span>{{uiText(item.label)}}</span></RouterLink></nav>
-    <main class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking}]"><div class="version">{{webVersionLabel}}</div><RouterView/></main>
+    <main class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking}]"><button v-if="route.path!=='/home' && route.path!=='/coach'" type="button" class="lf-route-back" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> {{uiText('Indietro')}}</button><div class="version">{{webVersionLabel}}</div><RouterView/></main>
     <!-- La navbar Atleta vive fuori dal contenitore .app: nessun CSS / overflow legacy può coprirla. -->
     <AthleteBottomNavigation v-if="shownRole==='atleta'" :items="mobileNav" :theme="lab.theme"/>
     <nav v-if="shownRole==='coach'" class="bottom-nav coach-bottom" :aria-label="uiText('Navigazione Coach')"><RouterLink v-for="item in mobileNav" :key="item.to" :to="item.to"><LionIcon :name="item.icon" :size="24"/><span>{{uiText(item.label)}}</span></RouterLink></nav>

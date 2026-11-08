@@ -1,0 +1,163 @@
+/* LION FIT · HOME ATLETA CORRETTIVA 08 NOV 2026
+ * Si applica DOPO Patch 7. Ricalca l'anteprima approvata:
+ * cerchio + settimana in una sola card, allenamento oggi, 4 accessi rapidi.
+ * Nessuna modifica a Coach, Piano, Firestore, Superset o navbar.
+ */
+.app.as-athlete .lf-home-v3.lf-home-approved{
+ --lf-home-green:#44ef98;
+ display:grid;grid-template-rows:auto auto minmax(210px,1fr) auto;
+ gap:clamp(10px,1.45vw,16px);min-width:0;max-width:900px;
+ margin-inline:auto;color:var(--text);
+}
+.app.as-athlete .lf-home-approved .lf-v3-intro{display:flex;align-items:flex-end;position:relative;min-width:0;padding:10px 9px 6px;isolation:isolate}
+.app.theme-dark.as-athlete .lf-home-approved .lf-v3-intro:after{
+ content:'';position:absolute;right:2%;top:-9px;width:31%;height:135%;z-index:-1;
+ background:radial-gradient(circle at 55% 60%,rgba(28,102,80,.24),transparent 65%);pointer-events:none;
+}
+.app.as-athlete .lf-home-approved .lf-v3-greeting h1{
+ font-size:clamp(24px,3.3vw,35px)!important;font-weight:950;line-height:1.12!important;
+ margin:0 0 5px!important;color:var(--text);letter-spacing:-.026em;
+}
+.app.as-athlete .lf-home-approved .lf-v3-greeting p{font-size:clamp(12px,1.5vw,16px);line-height:1.3;color:var(--muted)}
+.lf-home-approved .lf-v3-wave{display:inline-block;font-size:.76em;vertical-align:middle;transform-origin:72% 80%}
+.app.as-athlete .lf-home-approved .lf-v3-progress{
+ display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:clamp(13px,3vw,25px);
+ text-align:left;padding:clamp(13px,2vw,20px);min-width:0;text-decoration:none!important;
+ color:var(--text)!important;border:1px solid var(--outline);border-radius:18px;
+ background:linear-gradient(113deg,rgba(20,59,50,.33),rgba(18,32,46,.22)),var(--card);
+ box-shadow:0 1px 0 rgba(68,239,152,.21),0 9px 23px rgba(0,0,0,.09);
+}
+.app.theme-light.as-athlete .lf-home-approved .lf-v3-progress{background:linear-gradient(115deg,#fff,#eefaf2);border-color:#a6d6b8}
+.app.as-athlete .lf-home-approved .lf-v3-progress:hover{border-color:var(--mint)}
+.app.as-athlete .lf-home-approved .lf-v3-ring{
+ width:clamp(83px,11vw,118px);height:clamp(83px,11vw,118px);flex:none;
+ background:transparent;box-shadow:none;position:relative;display:grid;place-items:center;
+}
+.lf-home-approved .lf-v3-ring-svg{width:100%;height:100%;position:absolute;inset:0;overflow:visible;transform:rotate(-90deg)}
+.lf-home-approved .lf-v3-ring-track,.lf-home-approved .lf-v3-ring-value{fill:none;stroke-width:10;stroke-linecap:round}
+.lf-home-approved .lf-v3-ring-track{stroke:var(--border)}
+.lf-home-approved .lf-v3-ring-value{stroke:var(--lf-home-green);stroke-dasharray:100 100;transition:stroke-dashoffset 950ms cubic-bezier(.16,.76,.27,1)}
+.lf-home-approved .lf-v3-ring-center{width:auto;height:auto;background:transparent;position:relative;z-index:1}
+.lf-home-approved .lf-v3-ring-center strong{font-size:clamp(25px,4vw,37px);font-weight:950;color:var(--text)}
+.lf-home-approved .lf-v3-week-summary{display:flex;flex-direction:column;min-width:0;gap:4px;flex:1;line-height:1.18}
+.lf-home-approved .lf-v3-week-summary>strong{font-size:clamp(23px,3.3vw,33px);font-weight:900;overflow-wrap:anywhere}
+.lf-home-approved .lf-v3-week-summary>span{font-size:clamp(12px,1.7vw,17px);color:var(--muted)}
+.lf-home-approved .lf-v3-week-arrow{flex:none;color:var(--text)}
+.app.as-athlete .lf-home-approved .lf-v3-today{
+ min-width:0;min-height:0;display:flex;flex-direction:column;justify-content:space-between;
+ gap:10px;padding:clamp(16px,3vw,26px);border:1px solid rgba(60,218,139,.58);
+ border-radius:18px;overflow:hidden;isolation:isolate;color:var(--text);
+ background:linear-gradient(90deg,rgba(10,20,29,.95) 0%,rgba(10,21,30,.91) 45%,rgba(9,24,33,.28) 100%),url('/lionfit-redesign/gloves-banner.jpg') right center / auto 100% no-repeat,var(--card);
+ box-shadow:0 1px 0 rgba(63,239,153,.22),0 8px 26px rgba(0,0,0,.15);
+}
+.app.theme-light.as-athlete .lf-home-approved .lf-v3-today{
+ color:#133522;
+ background:linear-gradient(90deg,rgba(250,255,251,.99) 0%,rgba(247,255,251,.94) 50%,rgba(240,255,248,.37) 100%),url('/lionfit-redesign/gloves-banner.jpg') right center / auto 100% no-repeat,#fff;
+ border-color:#8fcdab;
+}
+.lf-home-approved .lf-v3-today-head{display:flex!important;align-items:center;justify-content:flex-start;gap:10px;color:var(--lf-home-green);font-size:clamp(12px,1.7vw,18px);font-weight:900}
+.app.theme-light.as-athlete .lf-home-approved .lf-v3-today-head{color:#049449}
+.lf-home-approved .lf-v3-today-head svg{flex:none}
+.app.as-athlete .lf-home-approved .lf-v3-today-main{display:flex;flex-direction:column;justify-content:center;min-height:0;flex:1}
+.app.as-athlete .lf-home-approved .lf-v3-today-main h2{
+ font-size:clamp(20px,3.25vw,32px)!important;font-style:italic;font-weight:950;
+ text-transform:none;line-height:1.16!important;letter-spacing:-.015em;
+ max-width:80%;margin:0 0 5px!important;color:inherit!important;
+ display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+.app.as-athlete .lf-home-approved .lf-v3-today-main p{color:inherit!important;opacity:.8;font-size:clamp(11px,1.5vw,14px);line-height:1.4;max-width:78%}
+.app.as-athlete .lf-home-approved .lf-v3-sheets{max-height:42px;overflow:auto;max-width:84%}
+.app.as-athlete .lf-home-approved .lf-v3-today-cta{
+ display:flex;align-items:center;justify-content:center;gap:15px;flex:none;
+ min-height:clamp(43px,6vw,55px);padding:10px 14px;border-radius:13px;
+ background:linear-gradient(106deg,#48ff9c,#0de563);border:1px solid #75ffb2;
+ box-shadow:0 4px 16px rgba(15,202,94,.14);color:#062416!important;
+ text-decoration:none;font-size:clamp(14px,2.4vw,20px);font-weight:900;
+}
+.app.as-athlete .lf-home-approved .lf-v3-today-cta:hover{filter:brightness(1.08)}
+.app.as-athlete .lf-home-approved .lf-v3-shortcuts{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.app.as-athlete .lf-home-approved .lf-v3-section-head{margin:0 3px 12px}
+.app.as-athlete .lf-home-approved .lf-v3-section-head strong{font-size:clamp(17px,2.3vw,24px);color:var(--text)}
+.app.as-athlete .lf-home-approved .lf-v3-shortcuts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.app.as-athlete .lf-home-approved .lf-v3-shortcut{
+ display:flex;align-items:center;justify-content:flex-start;gap:13px;
+ min-width:0;min-height:72px;padding:12px 16px;
+ border-radius:15px;background:var(--lf-tile);border:1px solid var(--outline);
+ color:var(--text)!important;text-decoration:none!important;
+ box-shadow:0 5px 13px rgba(0,0,0,.09);
+}
+.app.as-athlete .lf-home-approved .lf-v3-shortcut-icon{display:grid;place-items:center;background:transparent;color:var(--lf-v3-accent);width:31px;height:31px;flex:none;border:0}
+.app.as-athlete .lf-home-approved .lf-v3-shortcut-icon svg{height:26px;width:26px}
+.app.as-athlete .lf-home-approved .lf-v3-shortcut-copy strong{font-size:clamp(12px,1.7vw,17px);font-weight:850;line-height:1.2}
+.app.as-athlete .lf-home-approved .lf-v3-shortcut:hover{border-color:var(--mint);transform:translateY(-1px)}
+@media (max-width:799px){
+ /* Corregge l'height ereditata dalle Patch 5/7: nessuna scroll della Home nel viewport normale. */
+ .app.as-athlete main.main-layout.athlete-container:has(.lf-home-approved){
+  display:flex!important;flex-direction:column!important;box-sizing:border-box!important;
+  height:calc(100dvh - 152px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;
+  min-height:0!important;max-height:none!important;
+  padding:6px 12px 8px!important;margin:0!important;
+  overflow:hidden!important;
+ }
+ .app.as-athlete main.main-layout.athlete-container:has(.lf-home-approved)>.version{display:none!important}
+ .app.as-athlete main.main-layout.athlete-container:has(.lf-home-approved)>.athlete-live-screen{
+  display:flex!important;flex:1 1 auto!important;min-height:0!important;height:100%!important;gap:0!important;overflow:hidden!important;
+ }
+ .app.as-athlete .athlete-container .lf-home-approved{
+  display:grid!important;flex:1 1 auto!important;min-height:0!important;height:100%!important;width:100%!important;
+  max-width:none!important;
+  grid-template-rows:auto clamp(96px,17dvh,134px) minmax(150px,1fr) auto!important;
+  gap:clamp(7px,1.2dvh,12px)!important;
+ }
+ .app.as-athlete .lf-home-approved .lf-v3-intro{padding:3px 5px 4px;min-height:0}
+ .app.as-athlete .lf-home-approved .lf-v3-greeting h1{font-size:clamp(21px,6vw,29px)!important;margin:0 0 4px!important}
+ .app.as-athlete .lf-home-approved .lf-v3-greeting p{font-size:clamp(11px,2.7vw,13px)}
+ .app.as-athlete .lf-home-approved .lf-v3-progress{flex-direction:row!important;justify-content:flex-start!important;gap:12px!important;padding:8px 15px!important;overflow:hidden}
+ .app.as-athlete .lf-home-approved .lf-v3-ring{width:clamp(80px,23vw,104px)!important;height:clamp(80px,23vw,104px)!important}
+ .app.as-athlete .lf-home-approved .lf-v3-ring strong{font-size:clamp(22px,6vw,29px)}
+ .app.as-athlete .lf-home-approved .lf-v3-week-summary{min-width:0;gap:5px}
+ .app.as-athlete .lf-home-approved .lf-v3-week-summary>strong{font-size:clamp(18px,5vw,25px)}
+ .app.as-athlete .lf-home-approved .lf-v3-week-summary>span{font-size:clamp(11px,3vw,14px)}
+ .app.as-athlete .lf-home-approved .lf-v3-today{padding:clamp(12px,2.9vw,20px);gap:7px;background-position:center,right center}
+ .app.as-athlete .lf-home-approved .lf-v3-today-head{font-size:clamp(12px,3.6vw,17px)}
+ .app.as-athlete .lf-home-approved .lf-v3-today-main h2{font-size:clamp(18px,5.5vw,28px)!important;max-width:94%}
+ .app.as-athlete .lf-home-approved .lf-v3-today-main p{font-size:clamp(10px,2.8vw,13px);max-width:88%}
+ .app.as-athlete .lf-home-approved .lf-v3-today-cta{min-height:46px;font-size:clamp(13px,3.8vw,18px);padding:9px}
+ .app.as-athlete .lf-home-approved .lf-v3-shortcuts{padding:0!important}
+ .app.as-athlete .lf-home-approved .lf-v3-section-head{margin-bottom:8px!important}
+ .app.as-athlete .lf-home-approved .lf-v3-section-head strong{font-size:clamp(16px,4.6vw,21px)!important}
+ .app.as-athlete .lf-home-approved .lf-v3-shortcuts-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ .app.as-athlete .lf-home-approved .lf-v3-shortcut{min-height:58px!important;gap:9px!important;padding:8px 10px!important;overflow:hidden}
+ .app.as-athlete .lf-home-approved .lf-v3-shortcut-icon{width:27px!important;height:27px!important;flex:none}
+ .app.as-athlete .lf-home-approved .lf-v3-shortcut-icon svg{width:25px;height:25px}
+ .app.as-athlete .lf-home-approved .lf-v3-shortcut-copy strong{font-size:clamp(11px,3.1vw,14px)}
+}
+@media(max-width:799px) and (max-height:720px){
+ .app.as-athlete .athlete-container .lf-home-approved{grid-template-rows:auto clamp(80px,14dvh,101px) minmax(133px,1fr) auto!important;gap:6px!important}
+ .app.as-athlete .lf-home-approved .lf-v3-ring{width:76px!important;height:76px!important}
+ .app.as-athlete .lf-home-approved .lf-v3-shortcut{min-height:47px!important;padding:5px 9px!important}
+ .app.as-athlete .lf-home-approved .lf-v3-today-cta{min-height:37px;font-size:13px}
+ .app.as-athlete .lf-home-approved .lf-v3-today-main h2{font-size:18px!important}
+}
+@media(max-width:799px) and (max-height:600px){
+ .app.as-athlete .lf-home-approved .lf-v3-greeting p{display:none}
+ .app.as-athlete .lf-home-approved .lf-v3-section-head{margin-bottom:4px!important}
+ .app.as-athlete .lf-home-approved .lf-v3-shortcut{min-height:38px!important}
+ .app.as-athlete .lf-home-approved .lf-v3-shortcut-icon svg{width:19px;height:19px}
+ .app.as-athlete .lf-home-approved .lf-v3-today-main p,.app.as-athlete .lf-home-approved .lf-v3-sheets{display:none}
+}
+/* Altezza estrema o caratteri ingranditi: non tagliare i controlli essenziali.
+ * Fallback di accessibilità solo sotto il limite fisico di un layout senza scroll. */
+@media(max-width:799px) and (max-height:510px){
+ .app.as-athlete main.main-layout.athlete-container:has(.lf-home-approved){height:auto!important;min-height:calc(100dvh - 152px)!important;overflow-y:auto!important}
+ .app.as-athlete .athlete-container .lf-home-approved{height:auto!important;min-height:420px!important;grid-template-rows:auto 85px 145px auto!important}
+}
+@media(prefers-reduced-motion:no-preference){
+ .lf-home-approved .lf-v3-ring-value{transition:stroke-dashoffset 950ms cubic-bezier(.16,.76,.27,1)}
+ .lf-home-approved .lf-v3-wave{animation:lf-v3-wave .65s ease-out .35s both}
+ .app.as-athlete .lf-home-approved .lf-v3-shortcut{transition:transform .18s ease,background-color .18s ease,border-color .18s ease}
+}
+@keyframes lf-v3-wave{0%{transform:rotate(0)}35%{transform:rotate(17deg)}65%{transform:rotate(-6deg)}100%{transform:rotate(0)}}
+@media(prefers-reduced-motion:reduce){
+ .lf-home-approved .lf-v3-ring-value,.lf-home-approved .lf-v3-wave,.app.as-athlete .lf-home-approved .lf-v3-shortcut{transition:none!important;animation:none!important;transform:none!important}
+}
