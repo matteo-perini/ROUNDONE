@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#071a20">
+  <title>Scarica Lion Fit per Android</title>
+  <meta name="description" content="Scarica l'ultima versione Android di Lion Fit.">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #071a20;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .card {
+      max-width: 440px;
+      width: 100%;
+      padding: 36px 24px;
+      background: #102630;
+      border: 1px solid #23434b;
+      border-radius: 22px;
+    }
+
+    .logo { font-size: 54px; margin-bottom: 12px; }
+
+    h1 { margin: 0 0 12px; font-size: 30px; }
+
+    p { color: #bfd0d1; line-height: 1.6; }
+
+    a.button {
+      display: block;
+      margin-top: 24px;
+      background: #10b981;
+      color: #05201a;
+      padding: 16px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    small { display: block; margin-top: 22px; color: #a3b5b8; }
+  </style>
+</head>
+
+<body>
+  <main class="card">
+    <div class="logo">🦁</div>
+    <h1>LION FIT</h1>
+
+    <p>Preparazione del download per Android...</p>
+
+    <a class="button" id="downloadButton"
+       href="https://github.com/matteo-perini/ROUNDONE/releases/latest/download/LionFit.apk">
+      Scarica Lion Fit per Android
+    </a>
+
+    <small>
+      Se il download non parte automaticamente,
+      premi il pulsante qui sopra.
+    </small>
+  </main>
+
+  <script>
+    const apkUrl =
+      "https://github.com/matteo-perini/ROUNDONE/releases/latest/download/LionFit.apk";
+
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        window.location.replace(apkUrl);
+      }, 1200);
+    });
+  </script>
+</body>
+</html>

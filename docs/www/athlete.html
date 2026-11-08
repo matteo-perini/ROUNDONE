@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#090d14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lion Fit">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/www/manifest.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="/www/icons/apple-touch-icon.png">
+<title>Lion Fit · Atleta</title>
+</head>
+<body>
+<p>Sto aprendo Lion Fit Modern… <a href="/accesso">Apri l'app</a></p>
+<script>
+(function () {
+  'use strict';
+  // Il vecchio URL resta valido dopo il rilascio. Il routing e' gestito dall'app Vue.
+  // Non includere token in referer, script esterni o storage del redirect.
+  var source = new URLSearchParams(window.location.search);
+  var invite = new URLSearchParams();
+  for (var i = 0, keys = ['gym', 'athleteInvite', 'coachInvite']; i < keys.length; i++) {
+    if (source.has(keys[i])) invite.set(keys[i], source.get(keys[i]));
+  }
+  var target = "/home";
+  if (invite.toString()) target = '/accesso?' + invite.toString();
+  var dest = new URL('/', window.location.origin);
+  dest.searchParams.set('__lfRoute', target);
+  window.location.replace(dest.href);
+}());
+</script>
+</body>
+</html>
