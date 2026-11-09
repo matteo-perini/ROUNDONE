@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {uiText} from '../features/i18n/interfaceLanguage'
+import {uiText,uiFormat} from '../features/i18n/interfaceLanguage'
 /** Archivio Coach operativo LIVE/STAGING: ruoli verificati con Firebase Auth
  * e mutazioni protette da mayWriteLive() e dalle Rules Firestore. */
 import {computed,onMounted,onUnmounted,ref,shallowRef,watch} from 'vue'
@@ -26,11 +26,14 @@ import {newId} from '../model'
 import {mayWriteLive} from '../integrations/firebase/stagingConfig'
 import type {Personal} from '../features/sheets/domain'
 import SheetDetail from '../components/SheetDetail.vue'
+import {creatorFilterChoices,creatorFilterMatches,creatorDisplayName,type ArchiveCreatorCoach} from '../features/coach/archiveCreatorFilters'
 
-type Model = Sheet & {createdBy:string;revision:number;createdMs:number}
+type Model = Sheet & {createdBy:string;updatedBy:string;revision:number;createdMs:number}
 const route=useRoute(),router=useRouter()
 const session=shallowRef<StagingSession|null>(null)
 const models=ref<Model[]>([]),roster=ref<RosterAthlete[]>([]),athleteId=ref('')
+// La paternita' e' un'etichetta per i filtri, mai un permesso.
+const archiveCoaches=ref<ArchiveCreatorCoach[]>([]),creatorFilter=ref('all'),coachLookupNotice=ref('')
 const pickAssign=shallowRef<Model|null>(null)
 const coachFilter=ref<CoachRosterFilter>('tutti')
 const assignSearch=ref('')
@@ -108,12 +111,15 @@ function moveExerciseGroup(groupNumber:number,direction:-1|1){
 const currentAthlete=computed(()=>visibleRoster.value.find(a=>a.id===athleteId.value)??null)
 const writable=computed(()=>mayWriteLive() && !!session.value && ['titolare','collaboratore'].includes(session.value.role))
 const activeCount=computed(()=>models.value.filter(s=>!s.deletedAt).length)
+const authorChoices=computed(()=>creatorFilterChoices(models.value,archiveCoaches.value,session.value?.uid||''))
+const creatorName=(uid:string)=>creatorDisplayName(uid,archiveCoaches.value,session.value?.uid||'')
 const choice=computed(()=>models.value.filter(s=>(filter.value==='all'||(filter.value==='trash'?!!s.deletedAt:!s.deletedAt)) &&
+ creatorFilterMatches(s.createdBy,creatorFilter.value,session.value?.uid||'') &&
  `${s.title} ${s.category} ${s.exercises.map(e=>e.name).join(' ')}`.toLowerCase().includes(search.value.toLowerCase()))
  .slice().sort((a,b)=>sort.value==='az'?a.title.localeCompare(b.title,'it'):sort.value==='za'?b.title.localeCompare(a.title,'it'):sort.value==='more'?b.exercises.length-a.exercises.length:b.createdMs-a.createdMs))
 const lastOwnEditable=computed(()=>editingId.value && models.value.find(x=>x.id===editingId.value))
-let live=true,stopModels:Unsubscribe|null=null,stopUsers:Unsubscribe|null=null,stopPersonal:Unsubscribe|null=null,stopAuth:Unsubscribe|null=null
-const closeListeners=()=>{stopModels?.();stopModels=null;stopUsers?.();stopUsers=null;stopPersonal?.();stopPersonal=null;stopAuth?.();stopAuth=null}
+let live=true,stopModels:Unsubscribe|null=null,stopUsers:Unsubscribe|null=null,stopCoaches:Unsubscribe|null=null,stopPersonal:Unsubscribe|null=null,stopAuth:Unsubscribe|null=null
+const closeListeners=()=>{stopModels?.();stopModels=null;stopUsers?.();stopUsers=null;stopCoaches?.();stopCoaches=null;stopPersonal?.();stopPersonal=null;stopAuth?.();stopAuth=null}
 watch(athleteId,()=>{stopPersonal?.();stopPersonal=null;personal.value=[]
  if(!session.value||!maySelectLabAthlete(roster.value,session.value.gymId,athleteId.value))return
  const {db}=getStagingClients(),s=session.value,id=athleteId.value
@@ -238,8 +244,18 @@ onMounted(async()=>{
   const {db,auth}=getStagingClients()
   stopModels=onSnapshot(collection(db,'gyms',verified.gymId,'templates'),snap=>{
    if(!live)return
-   models.value=snap.docs.map(d=>{const x=d.data();return {id:d.id,title:String(x.title||''),category:String(x.category||'Allenamento'),exercises:Array.isArray(x.exercises)?x.exercises:[],createdBy:String(x.createdBy||''),revision:Number(x.revision||0),createdMs:typeof x.createdAt?.toMillis==='function'?x.createdAt.toMillis():typeof x.updatedAt?.toMillis==='function'?x.updatedAt.toMillis():0,...(x.deletedAt?{deletedAt:String(x.deletedAt)}:{})} as Model})
+   models.value=snap.docs.map(d=>{const x=d.data();return {id:d.id,title:String(x.title||''),category:String(x.category||'Allenamento'),exercises:Array.isArray(x.exercises)?x.exercises:[],createdBy:String(x.createdBy||''),updatedBy:String(x.updatedBy||''),revision:Number(x.revision||0),createdMs:typeof x.createdAt?.toMillis==='function'?x.createdAt.toMillis():typeof x.updatedAt?.toMillis==='function'?x.updatedAt.toMillis():0,...(x.deletedAt?{deletedAt:String(x.deletedAt)}:{})} as Model})
   },e=>{if(live)error.value=`Archivio Coach non leggibile: ${e.message}`})
+  // La query e' limitata alla stessa palestra e al ruolo Coach (come in Gestione Atleti).
+  // Non modifica i permessi di lettura/scrittura delle schede condivise.
+  stopCoaches=onSnapshot(query(collection(db,'users'),where('gymId','==',verified.gymId),where('role','==','admin')),snap=>{
+   if(!live)return
+   archiveCoaches.value=snap.docs.map(d=>({
+    id:d.id,
+    name:[d.data().name,d.data().surname].filter(x=>typeof x==='string'&&x.trim()).join(' ').trim()||'Coach',
+   }))
+   coachLookupNotice.value=''
+  },()=>{if(live)coachLookupNotice.value='Nomi Coach temporaneamente non disponibili; le schede restano accessibili.'})
   stopUsers=onSnapshot(query(collection(db,'users'),where('gymId','==',verified.gymId),where('role','==','athlete')),snap=>{
    if(!live)return
    roster.value=labCoachRoster(snap.docs.map(d=>({id:d.id,data:d.data()})),verified.gymId)
@@ -321,8 +337,19 @@ onUnmounted(()=>{live=false;closeListeners()})
  <section v-else-if="!loading && session" class="panel">
   <div class="row between"><div><h2 class="card-heading">{{uiText("ARCHIVIO · SCHEDE")}}</h2><span class="muted small">{{choice.length}} {{uiText("di")}} {{activeCount}} {{uiText("schede attive nell'archivio")}}</span></div><button v-if="typeof route.query.athleteId==='string'" class="secondary" :disabled="!writable||busy" @click="beginPersonal">{{uiText("+ Crea scheda personale")}}</button></div>
   <div class="coach-archive-toolbar"><input v-model="search" type="search" placeholder="Cerca una scheda…" aria-label="Cerca una scheda"/><button class="secondary" @click="filter=filter==='trash'?'active':'trash'">{{filter==='trash'?'← Archivio schede':'Apri cestino'}}</button><select v-model="sort" aria-label="Ordina schede"><option value="recent">{{uiText("Più recenti")}}</option><option value="az">{{uiText("Nome A–Z")}}</option><option value="more">{{uiText("Più esercizi")}}</option></select></div>
+  <div class="lf-creator-filter" role="group" aria-label="Filtra le schede per Coach creatore">
+   <span class="lf-creator-filter-label">{{uiText("Filtra per Coach")}}</span>
+   <div class="lf-creator-filter-options">
+    <button v-for="option in authorChoices" :key="option.value" type="button"
+     :class="['lf-creator-filter-button',{'is-selected':creatorFilter===option.value}]"
+     :aria-pressed="creatorFilter===option.value" @click="creatorFilter=option.value">{{option.value.startsWith('coach:')?uiFormat('Schede di {coach}',{coach:creatorName(option.value.slice(6))}):uiText(option.label)}}</button>
+   </div>
+  </div>
+  <p v-if="coachLookupNotice" class="muted small" role="status">{{coachLookupNotice}}</p>
   <div class="grid2"><div v-for="s in choice" :key="s.id" class="archive-card">
-   <h3 style="margin:0">{{s.title}}</h3><p class="muted small">{{s.category}} · {{s.exercises.length}} {{uiText("esercizi ·")}} {{s.deletedAt?'Nel cestino':'Attivo'}}</p><p class="small">{{s.exercises.slice(0,2).map(x=>x.name).join(' · ')}}</p><div class="divider"/>
+   <h3 style="margin:0">{{s.title}}</h3><p class="muted small">{{s.category}} · {{s.exercises.length}} {{uiText("esercizi ·")}} {{s.deletedAt?'Nel cestino':'Attivo'}}</p>
+   <p class="lf-creator-meta"><span class="lf-creator-owner">{{s.createdBy?uiFormat('Creata da {coach}',{coach:creatorName(s.createdBy)}):uiText('Scheda storica · autore non registrato')}}</span><span v-if="s.updatedBy" class="muted">{{uiFormat('Ultima modifica: {coach}',{coach:creatorName(s.updatedBy)})}}</span></p>
+   <p class="small">{{s.exercises.slice(0,2).map(x=>x.name).join(' · ')}}</p><div class="divider"/>
    <p v-if="personal.some(p=>p.id===s.id)" class="muted small">{{personal.find(p=>p.id===s.id)?.deletedAt?'Scheda personale nel cestino':'Già assegnato a questo atleta (riutilizzabile per il giorno)'}}</p>
    <div class="archive-actions"><button class="secondary" @click="preview=s">{{uiText("Visualizza")}}</button>
     <button v-if="!s.deletedAt" class="secondary" :disabled="!session||!canManageCoachModel(s.id,session.role)" @click="edit(s)">{{uiText("Modifica")}}</button>
@@ -333,6 +360,7 @@ onUnmounted(()=>{live=false;closeListeners()})
    </div>
   </div></div>
   <p v-if="!choice.length" class="muted">{{uiText("Nessuna scheda corrisponde ai filtri.")}}</p>
+  <p class="muted small lf-creator-explainer">{{uiText("I filtri indicano chi ha creato la scheda: ogni Coach autorizzato della palestra può comunque visualizzare, modificare, duplicare e assegnare tutte le schede. Duplicando e salvando una nuova copia, il creatore della copia è il Coach che l’ha salvata.")}}</p>
   <p class="notice">{{uiText("I modelli ROUNDONE vengono modificati mantenendo il loro ID. Ogni salvataggio verifica la revisione, inclusa la revisione iniziale 0 dei modelli legacy. Le copie storiche degli atleti non sono modificabili.")}}</p>
  </section>
  <div v-if="pickAssign" class="modal-overlay" @click.self="pickAssign=null"><div class="dialog coach-assign-dialog"><div class="row between"><h2>{{uiText("Assegna ·")}} {{pickAssign.title}}</h2><button class="bare" :aria-label="uiText('Chiudi')" @click="pickAssign=null">✕</button></div><p class="small muted">{{uiText("Scegli un atleta. I filtri raggruppano i coach ma non modificano le Rules pubblicate.")}}</p>
@@ -382,4 +410,17 @@ onUnmounted(()=>{live=false;closeListeners()})
 @media(max-width:1100px){.lf-exercise-editor{grid-template-columns:48px minmax(125px,2fr) repeat(2,minmax(60px,.6fr)) minmax(80px,1fr) 28px}.lf-editor-rest{grid-column:2 / -2}.lf-editor-disambiguation,.lf-editor-pair-rest{grid-column:2 / -2}}
 @media(max-width:700px){.lf-editor-panel{padding:12px!important}.lf-editor-metadata{grid-template-columns:minmax(0,1fr) 100px}.lf-editor-metadata>label:first-child{grid-column:1/-1}.lf-exercise-editor{grid-template-columns:43px minmax(0,1fr) 28px;gap:6px}.lf-editor-motion{width:42px;height:42px}.lf-editor-exercise-name{grid-column:2}.lf-editor-short,.lf-editor-load,.lf-editor-rest{grid-column:auto}.lf-editor-short:nth-of-type(2){grid-column:1}.lf-editor-short:nth-of-type(3){grid-column:2}.lf-editor-load{grid-column:1 / 3}.lf-editor-rest{grid-column:1 / -1}.lf-exercise-remove{grid-column:3;grid-row:1}.lf-editor-disambiguation,.lf-editor-pair-rest{grid-column:1/-1}.lf-exercise-editor.lf-superset-secondary{padding-left:11px}.lf-pair-line{display:none}.lf-superset-add{margin-left:0}.lf-editor-actions{justify-content:stretch}.lf-editor-actions button{flex:1}}
 @media(prefers-reduced-motion:reduce){.lf-exercise-group{transition:none}}
+/* PATCH 03: filtri grafici autore per Archivio Coach; colore originale LionFit. */
+.lf-creator-filter{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin:8px 0 14px;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:11px}
+.lf-creator-filter-label{font-size:11px;color:var(--muted);font-weight:800;white-space:nowrap;padding-top:8px}
+.lf-creator-filter-options{display:flex;flex:1;gap:7px;flex-wrap:wrap;min-width:0}
+.lf-creator-filter-button{min-height:32px;padding:6px 11px;font-size:11px;font-weight:800;line-height:1.25;border:1px solid var(--outline);border-radius:8px;color:var(--text);background:var(--field);transition:border-color .15s ease,background-color .15s ease}
+.lf-creator-filter-button:hover{border-color:var(--mint)}
+.lf-creator-filter-button.is-selected{border-color:var(--mint);color:var(--mint);background:var(--green-bg)}
+.lf-creator-filter-button:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.lf-creator-meta{display:flex;gap:4px 12px;flex-wrap:wrap;align-items:baseline;margin:7px 0 8px;font-size:10px;line-height:1.4}
+.lf-creator-owner{font-weight:850;color:var(--mint)}
+.lf-creator-explainer{margin:9px 0;font-size:11px}
+@media(max-width:700px){.lf-creator-filter{padding:9px;gap:6px}.lf-creator-filter-label{width:100%;padding-top:0}.lf-creator-filter-button{font-size:10px;min-height:34px}}
+@media(prefers-reduced-motion:reduce){.lf-creator-filter-button{transition:none}}
 </style>

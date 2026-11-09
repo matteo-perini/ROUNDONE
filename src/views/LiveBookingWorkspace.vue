@@ -354,8 +354,8 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
      </div>
      <h2 class="booking-section-title">{{uiText("2. Seleziona il Coach")}}</h2>
      <div v-if="!configs.length" class="notice">{{uiText("Nessun Coach configurato per le prenotazioni. Accedi come Coach e prepara la disponibilità.")}}</div>
-     <div class="grid2"><button v-for="c in configs.filter(x=>x.active&&x.services[service])" :key="c.coachId" class="action-card" :class="{active:chosenCoach===c.coachId}" @click="chosenCoach=c.coachId">
-      <span class="action-icon">🦁</span><div><strong>{{c.displayName}}</strong><small>{{displayService(service)}} · {{c.durations[service]}} {{uiText("minuti")}}</small></div></button></div>
+     <div class="grid2"><button v-for="c in configs.filter(x=>x.active&&x.services[service])" :key="c.coachId" class="action-card lf-booking-coach-choice" :class="{'lf-booking-coach-selected':chosenCoach===c.coachId}" :aria-pressed="chosenCoach===c.coachId" @click="chosenCoach=c.coachId">
+      <span class="action-icon">🦁</span><div><strong>{{c.displayName}}</strong><small>{{displayService(service)}} · {{c.durations[service]}} {{uiText("minuti")}}</small></div><span class="lf-booking-coach-check" aria-hidden="true">{{chosenCoach===c.coachId?'✓':'○'}}</span></button></div>
      <h2 class="booking-section-title">{{uiText("3. Tipo di incontro")}}</h2>
      <section class="panel"><h3 class="booking-reasons-title">{{service==='fighter'?'Disciplina Fighter':'Motivo della prenotazione Pesi'}}</h3><div class="booking-reasons-list" role="radiogroup" aria-label="Disciplina o motivo"><label v-for="reason in serviceReasons" :key="reason" class="booking-reason" :class="{'booking-reason-active':discipline===reason}"><input type="radio" name="booking-reason" v-model="discipline" :value="reason"/><span>{{reason}}</span></label></div></section>
      <h2 class="booking-section-title">{{uiText("4. Scegli giorno e orario")}}</h2>

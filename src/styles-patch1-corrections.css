@@ -1,0 +1,8 @@
+/* LionFit — patch funzionale 1: evidenziazione scelta Coach nelle prenotazioni. */
+.app .lf-booking-coach-choice{position:relative;min-width:0;border:2px solid var(--border)!important;transition:border-color .16s,background-color .16s,box-shadow .16s;}
+.app .lf-booking-coach-choice.lf-booking-coach-selected{border:2px solid #24da88!important;background:rgba(25,153,91,.20)!important;box-shadow:0 0 0 2px rgba(38,223,139,.16),inset 0 0 0 1px rgba(30,218,128,.22)!important;}
+.app .lf-booking-coach-choice:focus-visible{outline:3px solid #40eba2;outline-offset:2px}
+.app .lf-booking-coach-check{margin-left:auto;display:grid;place-items:center;border:1px solid var(--outline);border-radius:50%;width:28px;height:28px;flex:0 0 28px;font-size:17px;color:var(--muted);background:var(--card2);}
+.app .lf-booking-coach-selected .lf-booking-coach-check{background:#13824f;color:#fff;border-color:#4ae5a1;font-weight:900;}
+.app.theme-light .lf-booking-coach-choice.lf-booking-coach-selected{background:#d8f7e7!important;color:#123524!important;}
+.app .lf-program-form-error{border-left:3px solid #efb15f;padding:10px 12px;line-height:1.4;}

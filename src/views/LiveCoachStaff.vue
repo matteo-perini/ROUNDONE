@@ -3,7 +3,7 @@ import {uiText} from '../features/i18n/interfaceLanguage'
 /** Inviti email: token monouso creati internamente e revocabili, senza distribuzione manuale. */
 import {onMounted,onUnmounted,ref,computed} from 'vue'
 import {RouterLink} from 'vue-router'
-import {collection,doc,getDocFromServer,onSnapshot,query,where,runTransaction,serverTimestamp,Timestamp,updateDoc,type Unsubscribe} from 'firebase/firestore'
+import {collection,doc,getDocs,getDocFromServer,onSnapshot,query,where,runTransaction,serverTimestamp,Timestamp,updateDoc,type Unsubscribe} from 'firebase/firestore'
 import {readStagingSession,stagingSession} from '../integrations/firebase/stagingSession'
 import {getStagingClients} from '../integrations/firebase/stagingClient'
 import {isLiveMode,isTestMode} from '../integrations/firebase/stagingConfig'
@@ -147,6 +147,23 @@ async function reusableCoachInvite(email:string,gymId:string):Promise<string|nul
  }catch{}
  return null
 }
+/** Recupera un invito pendente valido per lo stesso destinatario senza moltiplicare
+ * i token a ogni nuovo invio. Non tocca gli inviti scaduti, usati o revocati.
+ * Solo titolare, stessa palestra e stesso creatore.
+ */
+async function existingValidCoachInvite(email:string,gymId:string,ownerUid:string):Promise<string|null>{
+ const {db}=getStagingClients()
+ const snap=await getDocs(query(collection(db,'gyms',gymId,'coach_invites'),where('status','==','pending')))
+ const match=snap.docs
+  .filter(d=>{
+   const x=d.data()
+   return typeof x.email==='string'&&x.email.trim().toLowerCase()===email &&
+    x.gymId===gymId&&x.createdBy===ownerUid && x.expiresAt?.toMillis?.()>Date.now()
+  })
+  .sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0))[0]
+ return match?invitationLink(gymId,match.id,'coach'):null
+}
+
 /** EmailJS accepts delivery for processing; it does not certify inbox reception.
  * Failed attempts reuse the same pending token instead of producing new records.
  */
@@ -161,7 +178,7 @@ async function sendCoachMail(){if(busy.value)return
  const s=stagingSession.value;if(!s){status.value='Sessione titolare assente.';return}
  busy.value=true;status.value=''
  try{
-  const link=await reusableCoachInvite(email,s.gymId)??await makeInvite('coach','coach')
+  const link=await reusableCoachInvite(email,s.gymId)??await existingValidCoachInvite(email,s.gymId,s.uid)??await makeInvite('coach','coach')
   coachUnsent={email,link,gymId:s.gymId,createdAt:Date.now()}
   sessionStorage.setItem(UNSENT_COACH_KEY,JSON.stringify(coachUnsent))
   const response=await fetch('https://api.emailjs.com/api/v1.0/email/send',{
@@ -216,14 +233,14 @@ async function revoke(x:Invite){
   <div class="staff-v1-columns">
    <div class="stack">
     <section class="panel"><h3>{{uiText("COACH PRESENTI NELLA PALESTRA")}}</h3><div v-for="c in coaches" :key="c.id" class="line-card staff-person"><span>{{c.name}}</span><span class="pill staff-role">{{c.membershipStatus==='revoked'?'REVOCATO':c.role}}</span><button v-if="owner && c.role!=='TITOLARE' && coachRevocationEnabled() && mayWriteLive()" class="secondary" :disabled="busy" @click="setMemberStatus(c.id,c.membershipStatus==='revoked'?'active':'revoked')">{{c.membershipStatus==='revoked'?'Riattiva':'Revoca accesso'}}</button></div><p v-if="owner && !coachRevocationEnabled()" class="muted small">{{uiText("La revoca dei collaboratori verra attivata solo dopo la pubblicazione delle Rules dedicate e il collaudo finale. Revocare un invito non revoca un account gia registrato.")}}</p><p v-if="!coaches.length" class="muted small">{{uiText("Nessun coach caricato.")}}</p></section>
-    <section v-if="owner" class="panel"><h3>{{uiText("INVITA UN COACH COLLABORATORE")}}</h3><p class="muted small">{{uiText("Invito personale via email, valido 7 giorni. Solo il titolare può invitarlo. L’email deve coincidere con l’account registrato.")}}</p>
+    <section v-if="owner" class="panel"><h3>{{uiText("INVITA UN COACH COLLABORATORE")}}</h3><p class="muted small">{{uiText("Invito personale via email, valido 7 giorni. Solo il titolare può invitarlo. Non è necessario un account preesistente: il collaboratore deve registrarsi usando la stessa email dell’invito.")}}</p>
      <div class="staff-email-row"><input v-model="coachEmail" type="email" placeholder="Email del nuovo coach" aria-label="Email collaboratore"/><button class="primary" :disabled="busy||!emailValid(coachEmail)" @click="sendCoachMail">{{uiText("✉ INVIA INVITO COACH")}}</button></div>
     </section>
    </div>
    <section class="panel staff-athlete-invites"><h3>{{uiText("INVITA UN ATLETA")}}</h3><p class="muted small">{{uiText("Inviti personali · validi 7 giorni.")}}</p>
     <section class="staff-invite-subcard"><h4>{{uiText("INVITO VIA EMAIL")}}</h4><label>{{uiText("EMAIL DELL'ATLETA")}}<input v-model="athleteEmail" type="email" placeholder="atleta@esempio.it"/></label><button class="primary wide" :disabled="busy||!emailValid(athleteEmail)" @click="sendAthleteMail">{{uiText("✉ INVIA INVITO ATLETA")}}</button></section>
     <details class="staff-details"><summary>{{uiText("Impostazioni email (avanzate)")}}</summary><div class="staff-email-settings"><label>SERVICE ID<input v-model="serviceId" autocomplete="off" placeholder="service_..."/></label><label>PUBLIC KEY<input v-model="publicKey" autocomplete="off" placeholder="Public Key EmailJS"/></label><label>{{uiText("TEMPLATE INVITI (COACH E ATLETI)")}}<input v-model="templateId" autocomplete="off" placeholder="template_..."/></label></div><button class="secondary" @click="saveEmailSettings">{{uiText("Salva configurazione EmailJS")}}</button><p class="muted small">{{uiText("Questi ID pubblici sono salvati solo su questo dispositivo. Usiamo un solo template neutro per entrambi i ruoli. Il ruolo e il tipo di account sono determinati esclusivamente dall’invito Firebase verificato. Non inserire password o chiavi private.")}}</p></details>
-    <details class="staff-details"><summary>{{uiText("Gestisci inviti pendenti e precedenti (")}}{{activeInvites.length}})</summary><div v-if="!activeInvites.length" class="muted small">{{uiText("Nessun invito pendente.")}}</div><div v-for="x in activeInvites" :key="x.type+x.id" class="line-card row between"><span class="small">{{x.type==='coach'?'Coach':'Atleta'}} · {{x.id.slice(0,8)}}…</span><button class="ghost" :disabled="busy" @click="revoke(x)">{{uiText("Revoca")}}</button></div></details>
+    <details class="staff-details"><summary>{{uiText("Gestisci inviti pendenti e precedenti (")}}{{activeInvites.length}})</summary><div v-if="!activeInvites.length" class="muted small">{{uiText("Nessun invito pendente.")}}</div><div v-for="x in activeInvites" :key="x.type+x.id" class="line-card row between"><span class="small">{{x.type==='coach'?'Coach':'Atleta'}} · {{x.email||x.id.slice(0,8)+'…'}}</span><button class="ghost" :disabled="busy" @click="revoke(x)">{{uiText("Revoca")}}</button></div></details>
    </section>
   </div>
   <RouterLink to="/coach" class="secondary">{{uiText("← TORNA ALLA DASHBOARD")}}</RouterLink>

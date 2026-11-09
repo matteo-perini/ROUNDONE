@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {uiText,interfaceLanguage} from '../features/i18n/interfaceLanguage'
+import {Capacitor} from '@capacitor/core'
+import {sheetPrintHtml} from '../features/print/sheetPrint'
 import {computed,onMounted,onUnmounted,ref} from 'vue'
 import type {ExerciseRecord} from '../features/sheets/domain'
 import {supersetView} from '../features/sheets/supersetView'
@@ -48,29 +50,29 @@ function escapeSheetDetail(e:KeyboardEvent){
  if(alternatives.value.length){alternatives.value=[];e.stopImmediatePropagation();return}
  emit('close');e.stopImmediatePropagation()
 }
-// Printing opens a native system view on mobile. Return to the app and close the
-// sheet overlay only AFTER the print UI has been dismissed; leave the print CSS intact.
-let printing=false,printStarted=0
-function mobilePrint(){return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(window.matchMedia?.('(pointer: coarse)').matches??false)}
-function finishMobilePrint(){if(!printing)return;printing=false;if(mobilePrint())emit('close')}
-function onPrintFocus(){if(printing && Date.now()-printStarted>800)finishMobilePrint()}
-function printSheet(){
- if(printing)return
- printing=true;printStarted=Date.now()
- try{window.print()}catch{printing=false}
+const printError=ref(''),printing=ref(false)
+/** Il browser interno Android non gestisce window.print in modo affidabile.
+ * Il plugin nativo apre PrintManager (anche "Salva come PDF").
+ * Sul sito continuiamo a usare il dialogo di stampa del browser.
+ */
+async function printSheet(){
+ if(printing.value)return
+ printError.value=''
+ printing.value=true
+ try{
+  if(Capacitor.isNativePlatform()){
+   const {Printer}=await import('@capgo/capacitor-printer')
+   await Printer.printHtml({html:sheetPrintHtml(props.sheet)})
+  }else{
+   window.print()
+  }
+ }catch(e){
+  printError.value='Impossibile aprire la stampa. Verifica il servizio di stampa Android o riprova dal sito web.'
+  console.warn('LionFit print:',e)
+ }finally{printing.value=false}
 }
-onMounted(()=>{
- window.addEventListener('keydown',escapeSheetDetail)
- window.addEventListener('afterprint',finishMobilePrint)
- window.addEventListener('focus',onPrintFocus)
- window.addEventListener('pageshow',onPrintFocus)
-})
-onUnmounted(()=>{
- window.removeEventListener('keydown',escapeSheetDetail)
- window.removeEventListener('afterprint',finishMobilePrint)
- window.removeEventListener('focus',onPrintFocus)
- window.removeEventListener('pageshow',onPrintFocus)
-})
+onMounted(()=>{window.addEventListener('keydown',escapeSheetDetail)})
+onUnmounted(()=>{window.removeEventListener('keydown',escapeSheetDetail)})
 function matchingExercise(ex:ExerciseRecord):CatalogExercise|null{
  const ids=[ex.exerciseId,ex.catalogId].filter(Boolean)
  for(const id of ids){const byId=catalog.value.find(x=>x.id===id);if(byId)return byId}
@@ -113,10 +115,11 @@ onMounted(async()=>{
    <header class="sheet-modal-head lf6-header">
     <h2>{{sheet.title}}</h2>
     <div class="lf6-head-actions">
-     <button type="button" class="lf6-print" @click="printSheet">{{uiText("Stampa / PDF")}}</button>
+     <button type="button" class="lf6-print" :disabled="printing" @click="printSheet">{{printing?uiText("Apertura stampa…"):uiText("Stampa / PDF")}}</button>
      <button type="button" class="lf6-close" :aria-label="uiText('Chiudi scheda')" @click="$emit('close')"><LionIcon name="x" :size="20"/></button>
     </div>
    </header>
+   <p v-if="printError" class="notice" role="alert">{{printError}}</p>
    <div class="sheet-modal-body lf6-body">
     <div v-if="!sheet.exercises.length" class="lf6-empty">{{uiText("Questa scheda non contiene ancora esercizi.")}}</div>
     <section v-for="(group,groupNumber) in groups" :key="sheet.exercises[group.primaryIndex]?.id||group.primaryIndex"

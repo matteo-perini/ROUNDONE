@@ -33,3 +33,6 @@ import './styles-profile-back-fix.css'
 
 // Correttiva download Android esterno e pannello aggiornamenti Info app.
 import './styles-update-download-fix.css'
+
+// PATCH 1: correzioni di feedback prenotazioni e validazione programma.
+import './styles-patch1-corrections.css'
