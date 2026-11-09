@@ -3,7 +3,7 @@ import {uiText} from '../features/i18n/interfaceLanguage'
 /** Atleta operativo 2M/K: Home/Piano/Archivio originali, SOLO emulator e sola lettura.
  * Il catalogo esercizi e la modale SheetDetail sono gli stessi della versione demo.
  */
-import { computed,ref,watch } from 'vue'
+import { computed,ref,watch,onMounted,onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import AthletePlanContent from '../components/AthletePlanContent.vue'
@@ -12,7 +12,7 @@ import AthleteHomeContent from '../components/AthleteHomeContent.vue'
 import { useAthleteLive } from '../features/athletes/useAthleteLive'
 import {isStagingMode,isLiveMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
 import { linkedSheetsForDay,liveWeekForDate } from '../features/athletes/athleteOperationalPolicy'
-import { romeParts } from '../features/bookings/bookingPolicy'
+import { romeDayIndex,romeWeekDayNumber } from '../features/athletes/romeWeekProgress'
 import { archiveCounts,visibleArchives,type ArchiveView } from '../features/athletes/archiveVisibility'
 import { groupSemanticCopies } from '../features/sheets/semanticDedup'
 import {joinArchivesWithLegacy,isArchiveCopyLinkedOrEquivalent} from '../features/athletes/legacyArchiveProjection'
@@ -35,8 +35,21 @@ async function hideCopy(id:string){
  catch(e){hideMessage.value=e instanceof Error?e.message:String(e)}
  finally{hideBusy.value=false}
 }
-const currentWeek=computed(()=>data.value?liveWeekForDate(data.value.weeks):null)
-const todayIndex=computed(()=>{const day=new Date(`${romeParts(Date.now()).date}T12:00:00Z`).getUTCDay();return(day+6)%7})
+const clock=ref(Date.now())
+let clockTimer:ReturnType<typeof setInterval>|null=null
+const refreshClock=()=>{clock.value=Date.now()}
+onMounted(()=>{
+ clockTimer=setInterval(refreshClock,30_000)
+ if(typeof document!=='undefined')document.addEventListener('visibilitychange',refreshClock)
+ if(typeof window!=='undefined')window.addEventListener('focus',refreshClock)
+})
+onUnmounted(()=>{
+ if(clockTimer!==null)clearInterval(clockTimer)
+ if(typeof document!=='undefined')document.removeEventListener('visibilitychange',refreshClock)
+ if(typeof window!=='undefined')window.removeEventListener('focus',refreshClock)
+})
+const currentWeek=computed(()=>data.value?liveWeekForDate(data.value.weeks,new Date(clock.value)):null)
+const todayIndex=computed(()=>romeDayIndex(clock.value))
 const todayDay=computed(()=>currentWeek.value?.days[todayIndex.value])
 const todaySheets=computed(()=>data.value&&currentWeek.value?linkedSheetsForDay(data.value.groups,currentWeek.value.id,todayIndex.value):[])
 const mergedArchive=computed(()=>joinArchivesWithLegacy(archive.value,data.value?.personal||[]))
@@ -56,7 +69,7 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
     <div class="panel"><RouterLink :to="livePath('/archivio')" class="ghost">{{uiText("CONSULTA IL MIO ARCHIVIO STORICO →")}}</RouterLink></div>
    </template>
    <template v-else-if="props.screen==='home'">
-    <AthleteHomeContent :name="session?.label||'Atleta'" :today-name="todayDay?.name||''" :week-name="currentWeek?.name||''" :activities="todayDay?.activities||[]" :sheets="todaySheets" :days="currentWeek?.days||[]" :plan-link="livePath('/piano')" :archive-link="livePath('/archivio')" :progress-link="livePath('/progressi')" :booking-link="livePath('/prenotazioni')" :avatar-url="avatarUrl" :profile-link="livePath('/profilo')" :day-link="dayLink"/>
+    <AthleteHomeContent :name="session?.label||'Atleta'" :today-name="todayDay?.name||''" :week-name="currentWeek?.name||''" :calendar-day="romeWeekDayNumber(clock)" :activities="todayDay?.activities||[]" :sheets="todaySheets" :days="currentWeek?.days||[]" :plan-link="livePath('/piano')" :archive-link="livePath('/archivio')" :progress-link="livePath('/progressi')" :booking-link="livePath('/prenotazioni')" :avatar-url="avatarUrl" :profile-link="livePath('/profilo')" :day-link="dayLink"/>
    </template>
    <template v-else-if="props.screen==='archive'">
     <section class="panel athlete-archive-hero"><div class="row between"><h2 class="card-heading">{{uiText("ARCHIVIO")}}</h2><span class="pill pill-neutral">{{counts.all}} {{uiText("SCHEDE E COPIE")}}</span></div><p class="muted" style="margin:20px 0 0">{{uiText("Qui ritrovi tutte le schede di allenamento ricevute dal coach, già assegnate, ritirate, protette o archiviate.")}}</p></section>

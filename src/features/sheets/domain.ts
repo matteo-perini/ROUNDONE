@@ -7,7 +7,7 @@ export type Slot = 1 | 2
 export type ActivitySlot = 1 | 2
 /** Campi nativi V1 + campi UI Modern: non restringere dati storici a kg/numero. */
 export type ExerciseRecord = { id?: string; name: string; sets: number|string; reps: string; rest?: string; kg?: number; exerciseId?: string; load?: string; notes?: string; supersetWithPrevious?: boolean; supersetRest?: string; catalogId?: string; executionMode?: 'normale'|'superset' }
-export type Personal = { id:string; title:string; category:string; exercises: ExerciseRecord[]; athleteId:string; sourceId?:string; revision?:number; deletedAt?:string; deletedBy?:string }
+export type Personal = { id:string; title:string; category:string; exercises: ExerciseRecord[]; athleteId:string; sourceId?:string; revision?:number; deletedAt?:string; deletedBy?:string; planDetached?:boolean }
 export type SharedTemplate = Omit<Personal,'athleteId'> & { athleteId?:never }
 export type ProgramDay = { name:string; activities:string[]; activity1:string; activity2:string; templateId:string; templateId2:string }
 export type ProgramWeek = { id:string; name:string; athleteId:string; days:ProgramDay[]; startDate?:string; programTitle?:string; weekIndex?:number; totalWeeks?:number; deletedAt?:string; deletedBy?:string }
@@ -58,7 +58,10 @@ export function groupSheets(personal:readonly Personal[],weeks:readonly ProgramW
  const links=linksBySheet(weeks,athleteId),available=new Set<string>()
  const programmed:GroupedSheet[]=[],unprogrammed:GroupedSheet[]=[]
  for(const sheet of personal){if(sheet.athleteId!==athleteId||!active(sheet))continue;available.add(sheet.id);const found=links.get(sheet.id)||[]
-  ;(found.length?programmed:unprogrammed).push({sheet,links:found})
+  // PATCH 04: una scheda scollegata esplicitamente non diventa una nuova
+  // assegnazione "senza programma". Se ha altri link, resta in programma.
+  if(found.length)programmed.push({sheet,links:found})
+  else if(!sheet.planDetached)unprogrammed.push({sheet,links:found})
  }
  const orphanLinks=[...links].filter(([id])=>!available.has(id)).flatMap(([,items])=>items)
  return {programmed,unprogrammed,orphanLinks}

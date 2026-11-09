@@ -7,7 +7,7 @@ import {uiText} from '../features/i18n/interfaceLanguage'
  */
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import {useRoute,useRouter} from 'vue-router'
-import {romeParts} from '../features/bookings/bookingPolicy'
+import {romeDayIndex,isDateInStoredWeek} from '../features/athletes/romeWeekProgress'
 import {forWeekRepresentative,weekDayLinkedSheetNames,exactWeekDaySlots} from '../features/sheets/athleteWeekVisual.ts'
 import SheetDetail from './SheetDetail.vue'
 import type { Groups, Personal, ProgramWeek } from '../features/sheets/domain'
@@ -34,15 +34,12 @@ const programmed = computed(() => visual.value.programmed.filter(group => group.
 const unprogrammed = computed(() => visual.value.unprogrammed)
 const sheetCount = computed(() => uniqueSemanticSheets(props.personal.filter(s => !s.deletedAt)).length)
 const weekDays = computed(() => week.value?.days ?? [])
-const currentDayIndex = computed(() => {
-  const start = week.value?.startDate
-  if (!start) return -1
-  const startDay = new Date(`${start}T12:00:00Z`)
-  if (!Number.isFinite(startDay.getTime())) return -1
-  const todayDate=romeParts(Date.now()).date
-  const diff = Math.round((Date.parse(`${todayDate}T12:00:00Z`)-startDay.getTime()) / 86400000)
-  return diff >= 0 && diff < 7 ? diff : -1
-})
+const todayClock=ref(Date.now())
+let clockTimer:ReturnType<typeof setInterval>|null=null
+const refreshClock=()=>{todayClock.value=Date.now()}
+const currentDayIndex = computed(() =>
+  isDateInStoredWeek(week.value?.startDate,todayClock.value) ? romeDayIndex(todayClock.value) : -1
+)
 const selectedDayDetails = computed(() => selectedDay.value === null ? null : weekDays.value[selectedDay.value] ?? null)
 
 function displayActivities(index:number){
@@ -68,8 +65,18 @@ function openSheet(sheet: Personal) { selectedDay.value = null; opened.value = s
 function openWeekDay(index:number){selectedDay.value=index;void router.push({query:{...route.query,week:week.value?.id,day:String(index)}})}
 function closeWeekDay(){selectedDay.value=null;if(route.query.day!==undefined)void router.replace({query:{...route.query,day:undefined}})}
 function onEscape(event:KeyboardEvent){if(event.key==='Escape'&&!opened.value&&selectedDay.value!==null)closeWeekDay()}
-onMounted(()=>window.addEventListener('keydown',onEscape))
-onUnmounted(()=>window.removeEventListener('keydown',onEscape))
+onMounted(()=>{
+ window.addEventListener('keydown',onEscape)
+ window.addEventListener('focus',refreshClock)
+ document.addEventListener('visibilitychange',refreshClock)
+ clockTimer=setInterval(refreshClock,30_000)
+})
+onUnmounted(()=>{
+ window.removeEventListener('keydown',onEscape)
+ window.removeEventListener('focus',refreshClock)
+ document.removeEventListener('visibilitychange',refreshClock)
+ if(clockTimer!==null)clearInterval(clockTimer)
+})
 watch(()=>route.query.day,day=>{selectedDay.value=typeof day==='string'&&/^[0-6]$/.test(day)?Number(day):null})
 watch(() => props.athleteKey, () => { selectedDay.value = null; opened.value = null })
 watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) selectedDay.value = null; opened.value = null })
@@ -115,7 +122,7 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
       >
         <article v-for="group in unprogrammed" :key="group.sheet.id" class="scheme-item">
           <h3>{{group.sheet.title}}</h3>
-          <span class="chip">{{uiText(activeWeeks.length ? 'Non collegata alle settimane attive' : 'Scheda personale')}}</span>
+          <span class="chip">{{uiText('Assegnata senza programmazione')}}</span>
           <p class="muted small">{{group.sheet.exercises.length}} {{uiText("esercizi · Scheda assegnata")}}</p>
           <button type="button" class="bare green athlete-sheet-open" @click="openSheet(forWeekRepresentative(group,week?.id||''))">{{uiText("APRI SCHEDA ›")}}</button>
         </article>

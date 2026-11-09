@@ -15,7 +15,7 @@ const path=(gym:string,athlete:string):[string,string,string,string]=>['gyms',pa
 const dayKey=(day:DayKey)=>{if(!DAY_KEYS.includes(day))throw new Error('Giorno non valido.');return day}
 const slotKey=(slot:1|2)=>slot===1?'templateId':slot===2?'templateId2':(()=>{throw new Error('Slot non valido.')})()
 const rawToWeek=(id:string,athleteId:string,data:DocumentData):ProgramWeek=>decodeV1Week(id,athleteId,data as V1WeekDocument)
-const rawToPersonal=(id:string,athleteId:string,d:DocumentData):Personal=>({id,athleteId,title:String(d.title||''),category:String(d.category||'Personalizzata'),exercises:Array.isArray(d.exercises)?d.exercises:[],sourceId:typeof d.sourceSharedTemplateId==='string'?d.sourceSharedTemplateId:typeof d.sourceId==='string'?d.sourceId:undefined,revision:Number(d.revision??0),...(d.deletedAt?{deletedAt:String(d.deletedAt)}:{})})
+const rawToPersonal=(id:string,athleteId:string,d:DocumentData):Personal=>({id,athleteId,title:String(d.title||''),category:String(d.category||'Personalizzata'),exercises:Array.isArray(d.exercises)?d.exercises:[],sourceId:typeof d.sourceSharedTemplateId==='string'?d.sourceSharedTemplateId:typeof d.sourceId==='string'?d.sourceId:undefined,revision:Number(d.revision??0),planDetached:!!d.planDetachedAt,...(d.deletedAt?{deletedAt:String(d.deletedAt)}:{})})
 const protectedBody=(s:Personal,uid:string)=>{
  const snapshot=protectedPayload(s,uid,new Date().toISOString())
  return {sourceTemplateId:snapshot.sourceTemplateId,title:snapshot.title,exercises:snapshot.exercises,archiveVersion:1,archivedAt:serverTimestamp(),archivedBy:uid}
@@ -125,6 +125,8 @@ export async function assignShared(db:Firestore,gym:string,athlete:string,templa
   if(existing.exists()){
    if(existing.data().deletedAt)throw new Error('La scheda personale è nel Cestino: ripristinala, non crearne una nuova.')
    if(!protectedSnapshot.exists())tx.set(archive,protectedBody(rawToPersonal(templateId,athlete,existing.data()),coachUid))
+   // Assegnazione ESPLICITA senza programma: riattiva una scheda ritirata.
+   if(existing.data().planDetachedAt)tx.update(personal,{planDetachedAt:deleteField(),planDetachedBy:deleteField()})
    return 'existing'
   }
   const d=model.data(),sheet:Personal={id:templateId,athleteId:athlete,title:String(d.title||''),category:String(d.category||'Personalizzata'),exercises:d.exercises||[],sourceId:templateId}
@@ -148,11 +150,22 @@ export async function assignSharedToDay(db:Firestore,gym:string,athlete:string,m
   const current=String(week.data().days?.[d]?.[key]||'')
   if(current!==expected && current!==modelId)throw new Error('Un altro Coach ha modificato lo slot: aggiorna prima di riprovare.')
   if(personal.exists()&&personal.data().deletedAt)throw new Error('Scheda personale nel cestino: ripristinala, non duplicarla.')
+  // Sostituire una scheda in uno slot e' anche scollegare la precedente.
+  // Non lasciarla per errore tra le schede senza programma.
+  const replacedId=current&&current!==modelId?current:''
+  const previousPersonalRef=replacedId?personalDoc(db,gym,athlete,replacedId):null
+  const previousArchiveRef=replacedId?archiveDoc(db,gym,athlete,replacedId):null
+  const [previousPersonal,previousArchive]=previousPersonalRef&&previousArchiveRef
+   ?await Promise.all([tx.get(previousPersonalRef),tx.get(previousArchiveRef)]):[null,null]
   const raw=personal.exists()?personal.data():model.data()
   const sheet:Personal={id:modelId,athleteId:athlete,title:String(raw.title||''),category:String(raw.category||'Personalizzata'),exercises:Array.isArray(raw.exercises)?raw.exercises:[],sourceId:modelId}
   if(!sheet.title.trim()||!sheet.exercises.length)throw new Error('Scheda senza contenuto: assegnazione annullata.')
   if(!personal.exists())tx.set(p,{title:sheet.title,category:sheet.category,exercises:sheet.exercises,sourceSharedTemplateId:modelId,createdAt:serverTimestamp()})
   if(!archived.exists())tx.set(a,protectedBody(sheet,uid))
+  if(previousPersonalRef&&previousPersonal?.exists()){
+   if(previousArchiveRef&&!previousArchive?.exists())tx.set(previousArchiveRef,protectedBody(rawToPersonal(replacedId,athlete,previousPersonal.data()),uid))
+   tx.update(previousPersonalRef,{planDetachedAt:serverTimestamp(),planDetachedBy:uid})
+  }
   if(current!==modelId){bump(tx,f,fs,uid);tx.update(w,{[`days.${d}.${key}`]:modelId,updatedAt:serverTimestamp()})}
   return personal.exists()?'existing':'created'
  })
@@ -168,7 +181,16 @@ export async function linkPersonalDay(db:Firestore,gym:string,athlete:string,wee
   if(!ps.exists()||ps.data().deletedAt)throw new Error('Scheda personale non attiva.')
   const found=String(ws.data().days?.[d]?.[key]||'')
   if(found!==expectedId)throw new Error('Collegamento cambiato, aggiorna la settimana.')
+  const replacedId=found&&found!==sheetId?found:''
+  const previousPersonalRef=replacedId?personalDoc(db,gym,athlete,replacedId):null
+  const previousArchiveRef=replacedId?archiveDoc(db,gym,athlete,replacedId):null
+  const [previousPersonal,previousArchive]=previousPersonalRef&&previousArchiveRef
+   ?await Promise.all([tx.get(previousPersonalRef),tx.get(previousArchiveRef)]):[null,null]
   if(!as.exists())tx.set(a,protectedBody(rawToPersonal(sheetId,athlete,ps.data()),coachUid))
+  if(previousPersonalRef&&previousPersonal?.exists()){
+   if(previousArchiveRef&&!previousArchive?.exists())tx.set(previousArchiveRef,protectedBody(rawToPersonal(replacedId,athlete,previousPersonal.data()),coachUid))
+   tx.update(previousPersonalRef,{planDetachedAt:serverTimestamp(),planDetachedBy:coachUid})
+  }
   bump(tx,f,fs,coachUid)
   tx.update(w,{[`days.${d}.${key}`]:sheetId,updatedAt:serverTimestamp()})
  })
@@ -184,6 +206,11 @@ export async function unlinkPersonalDay(db:Firestore,gym:string,athlete:string,w
   if(String(ws.data().days?.[d]?.[key]||'')!==expectedId)throw new Error('Collegamento già modificato: aggiorna prima di scollegare.')
   if(ps.exists()&&!as.exists())tx.set(a,protectedBody(rawToPersonal(expectedId,athlete,ps.data()),coachUid))
   bump(tx,f,fs,coachUid)
+  // Scritture ATOMICHE: la scheda resta recuperabile nell'Archivio Atleta,
+  // ma non viene proiettata tra le schede attive senza programma.
+  // Se l'ID e' collegato in un altro giorno, groupSheets lo mostra comunque
+  // tra quelle programmate. Il marker non cancella mai copie storiche.
+  if(ps.exists())tx.update(p,{planDetachedAt:serverTimestamp(),planDetachedBy:coachUid})
   tx.update(w,{[`days.${d}.${key}`]:'',updatedAt:serverTimestamp()})
  })
 }

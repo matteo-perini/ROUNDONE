@@ -155,7 +155,7 @@ function openProgramDatePicker(e:MouseEvent){const input=e.currentTarget as HTML
 
   <div v-if="deleting" class="modal-overlay" @click.self="deleting=null"><div class="dialog coach-delete-dialog">
     <div class="row between"><h2>Cancella collegamenti · {{deleting.title}}</h2><button class="secondary" @click="deleting=null">CHIUDI ✕</button></div>
-    <p class="muted small">Scegli il giorno da scollegare. Se rimuovi l'ultimo collegamento, la scheda passa automaticamente fra quelle senza programma; non viene cancellata.</p>
+    <p class="muted small">Scegli il giorno da scollegare. Se rimuovi l'ultimo collegamento, la scheda sparisce dal Piano dell'Atleta ma rimane nel suo Archivio storico.</p>
     <div v-for="link in deleting.links" :key="link.weekId+'-'+link.dayIndex+'-'+link.slot" class="line-card row between coach-delete-row"><span>{{link.weekName}} · <strong>{{link.dayName}}</strong> · Scheda {{link.slot}}</span><button class="danger" @click="removeLink(link)">Scollega</button></div>
   </div></div>
   <div v-if="createOpen" class="modal-overlay" @click.self="createOpen=false"><div class="dialog program-create-dialog">

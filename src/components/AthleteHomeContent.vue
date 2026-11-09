@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {uiText} from '../features/i18n/interfaceLanguage'
 /** PATCH 5/7 — Dashboard atleta V3: solo dati assegnati, senza scritture.
- * I risultati COMPLETATI non sono memorizzati nel modello operativo corrente:
- * l'indicatore mostra la copertura della programmazione, NON esecuzioni inventate.
+ * Il cerchio ora indica il giorno del calendario (lun=1, dom=7),
+ * NON gli allenamenti programmati né quelli completati.
  */
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
@@ -12,7 +12,7 @@ import type { ExerciseRecord, ProgramDay } from '../features/sheets/domain'
 
 type HomeSheet = {id:string; title:string; exercises:readonly ExerciseRecord[]}
 const props=defineProps<{
- name:string;todayName:string;weekName:string
+ name:string;todayName:string;weekName:string;calendarDay:number
  activities:readonly string[];sheets:readonly HomeSheet[]
  days?:readonly ProgramDay[]
  planLink:string;archiveLink:string;progressLink:string;bookingLink:string;profileLink:string;dayLink:string
@@ -26,13 +26,8 @@ let ringFrame=0
 onMounted(()=>{ringFrame=requestAnimationFrame(()=>{ringReady.value=true})})
 onUnmounted(()=>{if(ringFrame)cancelAnimationFrame(ringFrame)})
 const firstName=computed(()=>props.name.trim().split(/\s+/)[0]||'Atleta')
-const weekdayLabels=['LUN','MAR','MER','GIO','VEN','SAB','DOM'] as const
-const weekdaySummary=computed(()=>weekdayLabels.map((label,index)=>{
- const day=props.days?.[index]
- const hasActivity=!!day?.activities?.some(a=>a.trim()&&!/^(OFF|RIPOSO)$/i.test(a.trim()))
- return {label,index,planned:hasActivity||!!day?.templateId||!!day?.templateId2}
-}))
-const plannedDays=computed(()=>weekdaySummary.value.filter(d=>d.planned).length)
+// Il cerchio segue il calendario di Roma, anche nei giorni senza attivita'.
+const elapsedDays=computed(()=>Math.min(7,Math.max(1,Math.round(props.calendarDay))))
 const hasCurrentWeek=computed(()=>!!props.weekName)
 const shortWeekLabel=computed(()=>{
  const name=props.weekName.trim()
@@ -40,7 +35,7 @@ const shortWeekLabel=computed(()=>{
  const found=name.match(/settimana\s*\d+/i)
  return found?.[0]||name
 })
-const circlePercent=computed(()=>hasCurrentWeek.value?Math.round(plannedDays.value/7*100):0)
+const circlePercent=computed(()=>Math.round(elapsedDays.value/7*100))
 const todayDisplay=computed(()=>props.todayName.trim() || new Intl.DateTimeFormat('it-IT',{weekday:'long',timeZone:'Europe/Rome'}).format(new Date()))
 const visibleActivities=computed(()=>props.activities.map(v=>v.trim()).filter(v=>v&&!/^(OFF|RIPOSO)$/i.test(v)))
 const todayTitle=computed(()=>visibleActivities.value.join(' · ') || (props.sheets.length?'Schede assegnate per oggi':'Nessun allenamento oggi'))
@@ -65,18 +60,17 @@ function target(key:(typeof quick)[number]['key']){
   </section>
 
   <!-- La settimana resta in UNA card orizzontale con il cerchio, non con sette tessere. -->
-  <RouterLink :to="planLink" class="lf-v3-progress" :aria-label="`${shortWeekLabel}, ${hasCurrentWeek?`${plannedDays} giorni programmati su 7`:'nessuna settimana attiva'}. Apri il piano`">
+  <RouterLink :to="planLink" class="lf-v3-progress" :aria-label="`${shortWeekLabel}, giorno ${elapsedDays} di 7 della settimana. Apri il piano`">
    <span class="lf-v3-ring" aria-hidden="true">
     <svg viewBox="0 0 100 100" class="lf-v3-ring-svg">
      <circle class="lf-v3-ring-track" cx="50" cy="50" r="43" pathLength="100"/>
      <circle class="lf-v3-ring-value" cx="50" cy="50" r="43" pathLength="100" stroke-dasharray="100 100" :style="{'stroke-dashoffset':ringReady?100-circlePercent:100}"/>
     </svg>
-    <span class="lf-v3-ring-center"><strong>{{hasCurrentWeek?`${plannedDays}/7`:'—'}}</strong></span>
+    <span class="lf-v3-ring-center"><strong>{{`${elapsedDays}/7`}}</strong></span>
    </span>
    <span class="lf-v3-week-summary">
     <strong>{{shortWeekLabel}}</strong>
-    <span v-if="hasCurrentWeek">{{plannedDays}} / 7 {{uiText('giorni con attività')}}</span>
-    <span v-else>{{uiText('Consulta il piano')}}</span>
+    <span>{{uiText('Giorno')}} {{elapsedDays}} {{uiText('di')}} 7 · {{uiText('avanzamento settimanale')}}</span>
    </span>
    <LionIcon name="chevron" :size="24" class="lf-v3-week-arrow" />
   </RouterLink>

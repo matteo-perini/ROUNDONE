@@ -423,7 +423,7 @@ async function confirmDayUnlink(){
  try{
   const {db}=getStagingClients()
   await updateV1WeekSlot(db,s.gymId,a.id,w.id,p.day,p.slot,expected,'',s.uid)
-  message.value=`Scheda ${p.slot} scollegata da ${DAY_NAMES[p.day]}. La scheda rimane in archivio.`
+  message.value=`Scheda ${p.slot} scollegata da ${DAY_NAMES[p.day]}. Non apparirà tra le schede senza programma; lo storico rimane in Archivio.`
   pendingDayUnlink.value=null
  }catch(e){dayError.value=e instanceof Error?e.message:String(e)}
  finally{busy.value=false}
@@ -431,7 +431,7 @@ async function confirmDayUnlink(){
 function unlinkExact(l:Link){
  const s=session.value,a=athlete.value
  if(!s||!a)return
- if(!window.confirm('Scollegare la scheda da questo giorno? La scheda resterà nell’archivio.'))return
+ if(!window.confirm('Scollegare questa scheda dal giorno? Se non è collegata altrove sparirà dal Piano; lo storico rimarrà nell’Archivio.'))return
  void withWrite('Scollega uno slot',async()=>{
   const{db}=getStagingClients()
   await updateV1WeekSlot(db,s.gymId,a.id,l.weekId,l.dayIndex,l.slot,l.templateId,'',s.uid)
@@ -668,7 +668,7 @@ function copyToArchive(sheet:Personal){
     <div class="lf-day-activity-fields"><label>Attività 1<input v-model="activityDraft[activeDay].activity1" maxlength="200" placeholder="Scrivi attività 1…" /></label><label>Attività 2<input v-model="activityDraft[activeDay].activity2" maxlength="200" placeholder="Scrivi attività 2…" /></label></div>
     <div class="lf-day-sheet-grid"><div v-for="slot in ([1,2] as const)" :key="slot" class="lf-day-sheet-slot"><strong>Scheda {{slot}}</strong><p class="small">{{slotTitle(week.days[activeDay],slot)}}</p><div class="lf-day-sheet-buttons"><button type="button" class="secondary" :disabled="busy||!canWrite" @click="openPick(activeDay,slot)">Collega</button><button type="button" class="secondary" :disabled="busy||!canWrite" @click="linkToEditor('personal',activeDay,slot)">Crea nuova</button><button type="button" class="danger" :disabled="busy||!canWrite||!(slot===1?week.days[activeDay].templateId:week.days[activeDay].templateId2)" @click="unlink(activeDay,slot)">Scollega</button></div></div></div>
     <div v-if="pendingDayUnlink&&pendingDayUnlink.day===activeDay" class="lf-day-unlink-confirm" role="alertdialog" aria-label="Conferma scollegamento scheda">
-      <div><strong>Scollegare Scheda {{pendingDayUnlink.slot}}?</strong><p class="small muted">Rimuoveremo solo il collegamento da {{selectedDayLabel}}. La scheda rimarrà nell’archivio.</p></div>
+      <div><strong>Scollegare Scheda {{pendingDayUnlink.slot}}?</strong><p class="small muted">La scheda sarà rimossa dal Piano se non è collegata altrove. La copia storica rimane nell’Archivio Atleta.</p></div>
       <div class="row"><button type="button" class="secondary" :disabled="busy" @click="pendingDayUnlink=null">Annulla</button><button type="button" class="danger" :disabled="busy" @click="confirmDayUnlink">Conferma scollegamento</button></div>
     </div>
     <p v-if="dirty" class="small muted" role="status">Le attività modificate sono in bozza fino al salvataggio. I collegamenti alle schede vengono gestiti separatamente.</p>
@@ -702,7 +702,7 @@ function copyToArchive(sheet:Personal){
  <button class="primary wide" :disabled="!week||!importRows.length" @click="applyImport">{{uiText("Inserisci nella settimana aperta (senza salvare)")}}</button>
  </template><template v-else><label>{{uiText("Link Google Drive")}}<input v-model="driveUrl" type="url" placeholder="https://drive.google.com/…"/></label><button class="primary wide" :disabled="!canWrite||busy" @click="saveDriveUrl">{{uiText("Salva link nel profilo atleta")}}</button></template>
  </div></div>
- <div v-if="showDelete" class="modal-overlay" @click.self="showDelete=null"><div class="dialog" style="max-width:520px"><div class="row between"><h2>{{uiText("Cancella collegamenti ·")}} {{showDelete.title}}</h2><button class="bare" @click="showDelete=null">✕</button></div><p class="muted">{{uiText("Rimuovi solo il collegamento dal giorno, senza cancellare l'archivio.")}}</p><article v-for="l in showDelete.links" :key="l.weekId+l.day+l.slot" class="line-card row between"><b>{{l.weekName}} · {{l.dayName}} {{uiText("· Scheda")}} {{l.slot}}</b><button class="danger" @click="unlinkExact(l)">{{uiText("Scollega")}}</button></article></div></div>
+ <div v-if="showDelete" class="modal-overlay" @click.self="showDelete=null"><div class="dialog" style="max-width:520px"><div class="row between"><h2>{{uiText("Cancella collegamenti ·")}} {{showDelete.title}}</h2><button class="bare" @click="showDelete=null">✕</button></div><p class="muted">{{uiText("Rimuovi il collegamento dal giorno. Senza altri collegamenti, la scheda sparirà dal Piano ma resterà nell'Archivio.")}}</p><article v-for="l in showDelete.links" :key="l.weekId+l.day+l.slot" class="line-card row between"><b>{{l.weekName}} · {{l.dayName}} {{uiText("· Scheda")}} {{l.slot}}</b><button class="danger" @click="unlinkExact(l)">{{uiText("Scollega")}}</button></article></div></div>
  <div v-if="createProgramOpen" class="modal-overlay" @click.self="createProgramOpen=false"><div class="dialog" style="max-width:440px"><div class="row between"><h2>{{uiText("NUOVO PROGRAMMA FIGHTER")}}</h2><button class="bare" @click="createProgramOpen=false">✕</button></div><label>{{uiText("Nome programma")}}<input v-model="programName" maxlength="90" placeholder="Preparazione match"/></label><label class="coach-date-picker-label" @click="openDatePicker">{{uiText("Data inizio (lunedì)")}}<input v-model="monday" type="date" aria-label="Scegli la data di inizio"/></label><label>{{uiText("Numero settimane")}}<input v-model.number="weekCount" type="number" min="1" max="52"/></label><p v-if="programError" class="notice lf-program-form-error" role="alert">{{programError}}</p><button class="primary wide" :disabled="!canWrite||busy" @click="newProgram">{{busy?uiText("Salvataggio…"):uiText("Crea programma")}}</button></div></div>
  <SheetDetail v-if="opened" :sheet="opened" @close="opened=null"/>
 </div>

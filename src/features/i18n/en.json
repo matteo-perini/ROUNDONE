@@ -670,5 +670,7 @@
   "Verifica non riuscita. Riprova più tardi.": "Unable to check. Please try again later.",
   "Disponibile solo nell’APK Android.": "Only available in the Android APK.",
   "Impossibile aprire il download esterno. Usa il collegamento a GitHub Releases.": "Unable to open the external download. Use the GitHub Releases link.",
-  "Apri GitHub Releases dal browser del telefono.": "Open GitHub Releases in your phone browser."
+  "Apri GitHub Releases dal browser del telefono.": "Open GitHub Releases in your phone browser.",
+  "avanzamento settimanale": "weekly progress",
+  "Assegnata senza programmazione": "Assigned without schedule"
 }
