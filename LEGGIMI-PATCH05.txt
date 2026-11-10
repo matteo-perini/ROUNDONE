@@ -1,0 +1,53 @@
+LIONFIT MODERN — PATCH 05 — 10 NOVEMBRE 2026
+=============================================
+ARCHIVIO INCREMENTALE: NON e' il progetto intero.
+
+1. FAI BACKUP della cartella LionFit-Modern-Git sul tuo PC.
+2. ESTRAI il contenuto di questo ZIP nella RADICE della cartella LionFit-Modern-Git,
+   NON in una nuova sottocartella. Consenti la sostituzione dei file omonimi.
+3. NON cancellare .env.production.local e .env.staging.local o le chiavi Android.
+4. Da Windows, esegui VERIFICA_PATCH05_WINDOWS.cmd in questa cartella (oppure apri il tuo avvio con doppio clic consueto).
+5. Sito locale: http://localhost:5173/
+6. Prova con account titolare, collaboratore e atleta su STAGING prima di pubblicare.
+
+MODIFICHE INCLUSE
+01 Coach collaboratore: stato progressivo salvataggio disponibilita, conferma propria dell'app, errore permessi leggibile. Nessuna modifica automatica alle Firestore Rules. DA TESTARE su Firebase reale.
+02 Archivio Coach: pannello una tantum titolare per attribuzione organizzativa delle schede storiche senza autore. NON sovrascrive createdBy: usa legacyCoachUid. La migrazione e' volontaria, non parte da sola.
+03 Duplica settimana: selettore numero copie (1-12), date consecutive dopo l'ultima settimana, operazione atomica in una transazione e weeksVersion incrementato una volta, controlli dati e conflitti.
+04 Azione Progressi nel profilo singolo Atleta lato Coach (pagina Progressi ancora 'presto in arrivo'); importa tabelle spostato in Manutenzione avanzata.
+05 Home Atleta: card Oggi piu' compatta, mantiene contenuto, bottone e cerchio del giorno.
+06 Piano Atleta: sette giorni in elenco compatto, popup giorno con attività e schede, Apri allenamento del giorno (apertura diretta con una scheda; scelta se due).
+07 Archivio Atleta: una voce per contenuto identico e niente interfaccia gestione copie; documenti/archivi invariati.
+08 Prenotazioni: menu a tendina disciplina Fighter/Pesi; selezione singola invariata.
+09 Prenotazioni: card e calendario compatti, griglia orari e riepilogo, preservati servizi, Rules e prenotazioni.
+
+STATO VERIFICHE
+- vue-tsc --noEmit: PASS
+- tests/patch04-regression.mjs: 10/10 PASS
+- tests/patch05-regression.mjs: 13/13 PASS
+- npm/vite build: NON VERIFICATA nell'ambiente Linux perche' dipendenza Rollup Windows nello ZIP; da eseguire su Windows tramite script locale.
+- Firebase Emulator + salvataggio collaboratore LIVE: NON TESTATI in questa sessione; test manuale obbligatorio.
+
+COME ESEGUIRE I TEST SU WINDOWS
+- Apri CMD nella cartella LionFit-Modern-Git
+- npm run typecheck
+- node --experimental-strip-types tests/patch04-regression.mjs
+- node --experimental-strip-types tests/patch05-regression.mjs
+- npm run build
+- npm run dev
+- Apri http://localhost:5173/
+
+IMPORTANTI
+- NON viene fatta alcuna sincronizzazione Android o pubblicazione automatica.
+- I Progressi 360° sono ancora in progettazione; il tasto non finge dati che non esistono.
+- Verifica sulla tua Firebase STAGING le Rules pubblicate, soprattutto per il collaboratore; non incollare nuove Rules senza revisione.
+- I filtri/autori storici sono una informazione organizzativa, NON una limitazione di permessi di modifica delle schede.
+- Tutte le schede storiche archiviate restano salvate: cambia solo la loro rappresentazione.
+
+ROLLBACK
+Estrarre LIONFIT-PATCH05-ROLLBACK-FILE-ORIGINALI-10NOV2026.zip nella radice del progetto,
+con sostituzione. Eliminare inoltre i due nuovi file:
+  src/styles-patch05-ux.css
+  tests/patch05-regression.mjs
+Questo riporta i file di codice modificati esattamente ai byte dell'archivio originale.
+Per un ripristino completo da zero usare il backup sorgente separato e ripristinare .env e firma Android conservate privatamente.

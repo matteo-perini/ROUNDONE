@@ -6,7 +6,7 @@
  */
 import {collection,doc,getDoc,getDocs,runTransaction,serverTimestamp,type Firestore,type DocumentData} from 'firebase/firestore'
 import {DAY_KEYS,type ProgramDay} from '../../features/sheets/domain'
-import {advanceV1Monday,duplicateV1WeekDocument,initialV1WeekDocument,v1LinkedPersonalIds,type V1WeekDocument} from '../../features/sheets/v1WeekCodec'
+import {advanceV1Monday,planV1WeekCopies,initialV1WeekDocument,v1LinkedPersonalIds,type V1WeekDocument} from '../../features/sheets/v1WeekCodec'
 import {activityDelta,ensureActivityChangesCurrent,activeWeekDateConflict} from '../../features/sheets/weekDraftPolicy'
 import {ensureWeekMutationFence,trashWeek,restoreFromTrash} from './sheets'
 const segment=(value:string,label:string)=>{
@@ -62,32 +62,40 @@ export async function saveV1WeekActivities(db:Firestore,gymId:string,athleteId:s
   tx.update(w,{...Object.fromEntries(writes.map(x=>[x.path,x.value])),updatedAt:serverTimestamp()})
  })
 }
-/** La lista delle date viene letta insieme alla versione: le mutazioni Modern
- * concorrenti devono incrementare weeksVersion oppure la transazione fallisce. */
-export async function duplicateV1Week(db:Firestore,gymId:string,athleteId:string,sourceId:string,targetMonday:string,coachUid:string):Promise<string>{
+/** Duplicazione atomica in N lunedì consecutivi: una sola transazione,
+ * un solo incremento weeksVersion, nessuna copia se un controllo fallisce.
+ * Si conservano gli ID delle schede collegate e non si toccano gli archivi.
+ */
+export async function duplicateV1Weeks(db:Firestore,gymId:string,athleteId:string,sourceId:string,firstMonday:string,count:number,coachUid:string):Promise<string[]>{
  segment(coachUid,'Coach')
- // valida la data esattamente come durante la creazione del programma
- initialV1WeekDocument('Verifica',1,1,targetMonday)
+ if(!Number.isInteger(count)||count<1||count>12)throw new Error('Scegli da 1 a 12 duplicazioni per operazione.')
+ const targetsMondays=Array.from({length:count},(_,i)=>advanceV1Monday(firstMonday,i))
  const f=fence(db,gymId,athleteId),col=weeks(db,gymId,athleteId)
  await ensureWeekMutationFence(db,gymId,athleteId)
  const baseline=versionOf((await getDoc(f)).data())
  const all=await getDocs(col)
- if(activeWeekDateConflict(all.docs.map(d=>({id:d.id,startDate:d.data().startDate,deletedAt:d.data().deletedAt})),targetMonday))throw new Error('Esiste già una settimana attiva con questa data.')
- const target=doc(col),source=refWeek(db,gymId,athleteId,sourceId)
+ const known=all.docs.map(d=>({id:d.id,startDate:d.data().startDate,deletedAt:d.data().deletedAt}))
+ if(known.filter(w=>!w.deletedAt).length+count>52)throw new Error('Massimo 52 settimane attive. Riduci il numero di copie.')
+ if(targetsMondays.some(date=>activeWeekDateConflict(known,date)))throw new Error('Una data è già occupata da una settimana attiva. Nessuna copia è stata creata.')
+ const refs=targetsMondays.map(()=>doc(col)),source=refWeek(db,gymId,athleteId,sourceId)
  await runTransaction(db,async tx=>{
   const [fs,snap]=await Promise.all([tx.get(f),tx.get(source)])
-  if(versionOf(fs.data())!==baseline)throw new Error('Le settimane sono cambiate: aggiorna prima di duplicare.')
-  if(!snap.exists()||snap.data().deletedAt)throw new Error('Settimana di origine non disponibile.')
-  const body=duplicateV1WeekDocument(snap.data() as V1WeekDocument,targetMonday)
-  const ids=v1LinkedPersonalIds(body)
+  if(versionOf(fs.data())!==baseline)throw new Error('Un altro Coach ha modificato il programma. Aggiorna la pagina e riprova.')
+  if(!snap.exists()||snap.data().deletedAt)throw new Error('La settimana di origine non è più disponibile.')
+  const bodies=planV1WeekCopies(snap.data() as V1WeekDocument,firstMonday,count)
+  // Letture tutte prima delle scritture, anche con più copie.
+  const ids=v1LinkedPersonalIds(bodies[0])
   const pp=await Promise.all(ids.map(id=>tx.get(doc(db,'gyms',segment(gymId,'Palestra'),'athlete_programs',segment(athleteId,'Atleta'),'personal_templates',segment(id,'Scheda')))))
   if(pp.some(s=>!s.exists()||s.data().deletedAt))throw new Error('Una scheda collegata non è disponibile. Nessuna duplicazione eseguita.')
-  // Non inventiamo copie storiche in questo percorso: per i legacy mancanti
-  // occorre backfill idempotente separato prima del rilascio.
   bump(tx,f,baseline,coachUid)
-  tx.set(target,{...body,createdAt:serverTimestamp(),updatedAt:serverTimestamp()})
- })
- return target.id
+  for(const [i,target] of refs.entries())tx.set(target,{...bodies[i],createdAt:serverTimestamp(),updatedAt:serverTimestamp()})
+ },{maxAttempts:5})
+ return refs.map(x=>x.id)
+}
+/** Retrocompatibilità con i vecchi caller che chiedono una sola settimana. */
+export async function duplicateV1Week(db:Firestore,gymId:string,athleteId:string,sourceId:string,targetMonday:string,coachUid:string):Promise<string>{
+ const ids=await duplicateV1Weeks(db,gymId,athleteId,sourceId,targetMonday,1,coachUid)
+ return ids[0]
 }
 /** Sola lettura, tutte le settimane e non soltanto la selezione UI. */
 export async function inspectActiveV1Links(db:Firestore,gymId:string,athleteId:string,personalId:string):Promise<Array<{weekId:string;day:string;slot:1|2}>>{

@@ -36,3 +36,9 @@ import './styles-update-download-fix.css'
 
 // PATCH 1: correzioni di feedback prenotazioni e validazione programma.
 import './styles-patch1-corrections.css'
+
+// PATCH 05: UI Atleta V4 isolata, ultimo override senza cambiare dati o navbar.
+import './styles-patch05-ux.css'
+
+// PATCH 05 correttiva: una sola navigazione Atleta per viewport.
+import './styles-patch05-fix-nav.css'

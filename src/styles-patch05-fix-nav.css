@@ -1,0 +1,30 @@
+/* PATCH 05 correttiva - navigazione esclusiva Atleta.
+   Nessuna modifica a Coach/Admin e Firebase.
+   La navbar superiore Atleta e' rimossa nel template App.vue. */
+@media (min-width:800px) {
+  .app.as-athlete > .mobile-topbar { display:none!important; visibility:hidden!important; }
+  .app.as-athlete > #athlete-top-menu,
+  .app.as-athlete > .athlete-top-nav { display:none!important; visibility:hidden!important; }
+  .app.as-athlete { --lf-v3-sidebar:242px; padding-bottom:0!important; }
+  .app.as-athlete.athlete-sidebar-collapsed { --lf-v3-sidebar:70px; }
+  .app.as-athlete > .main-layout {
+    margin:0 0 0 var(--lf-v3-sidebar)!important;
+    padding:22px clamp(16px,2.2vw,34px) 38px!important;
+    max-width:none!important;
+    width:calc(100% - var(--lf-v3-sidebar))!important;
+    box-sizing:border-box!important;
+    overflow-x:clip!important;
+  }
+  .app.as-athlete > .lf-athlete-desktop-sidebar {
+    position:fixed!important; left:0!important; right:auto!important;
+    top:0!important; bottom:0!important; display:flex!important;
+    width:var(--lf-v3-sidebar)!important;
+  }
+  .lionfit-athlete-dock { display:none!important; }
+}
+@media (max-width:799px) {
+  .app.as-athlete > .lf-athlete-desktop-sidebar { display:none!important; }
+  .app.as-athlete > #athlete-top-menu,
+  .app.as-athlete > .athlete-top-nav { display:none!important; visibility:hidden!important; }
+  /* I 6 link della navbar inferiore sono quelli reali, senza menu supplementari. */
+}

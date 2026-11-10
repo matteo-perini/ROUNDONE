@@ -166,7 +166,7 @@ export async function cancelReservation(db:Firestore,caller:{uid:string;gymId:st
  * (riduce i nuovi booking durante sync) e usa transazioni CAS in blocchi.
  * Se una transazione fallisce, resta disattiva per sicurezza: ripetere.
  */
-export async function synchronizeCoachAvailability(db:Firestore,caller:{uid:string;gymId:string;role:string},desired:LiveCoachConfig,days=30):Promise<{created:number;retired:number;keptBooked:number;unchanged:number;days:number}>{
+export async function synchronizeCoachAvailability(db:Firestore,caller:{uid:string;gymId:string;role:string},desired:LiveCoachConfig,days=30,onProgress?:(finished:number,total:number)=>void):Promise<{created:number;retired:number;keptBooked:number;unchanged:number;days:number}>{
  const BOOKING_GYM=validatedGym(caller.gymId)
  validOwner(caller,desired.coachId)
  if(!Number.isInteger(days)||days<1||days>30)throw new Error('GIORNI_NON_VALIDI')
@@ -192,6 +192,7 @@ export async function synchronizeCoachAvailability(db:Firestore,caller:{uid:stri
  const read=await getDocs(query(col,where(documentId(),'>=',lower),where(documentId(),'<',upper)))
  const ids=[...new Set([...read.docs.map(d=>d.id),...expected.keys()])].sort()
  const report={created:0,retired:0,keptBooked:0,unchanged:0,days}
+ onProgress?.(0,ids.length)
  for(let i=0;i<ids.length;i+=40){
   const batch=ids.slice(i,i+40)
   const delta=await runTransaction(db,async tx=>{
@@ -216,6 +217,7 @@ export async function synchronizeCoachAvailability(db:Firestore,caller:{uid:stri
   },{maxAttempts:5})
   report.created+=delta.created;report.retired+=delta.retired
   report.keptBooked+=delta.keptBooked;report.unchanged+=delta.unchanged
+  onProgress?.(Math.min(i+batch.length,ids.length),ids.length)
  }
  // 3) riattiva solo a completamento; in caso di errore rimane inattivo.
  await saveCoachConfig(db,caller,{...desired,lastPreparedDate:romeParts(Date.now()).date})

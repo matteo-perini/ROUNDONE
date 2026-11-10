@@ -1,0 +1,1 @@
+Questa variante si applica anche sopra la vecchia PATCH05. Ripristina le due viste Coach (Archive schede/Progressi) ai file originali del tuo ZIP LionFit-Modern-Git(3).zip. Duplicazione settimane rimane aggiornata. NON aggiorna le Rules Firebase.

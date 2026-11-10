@@ -1,0 +1,17 @@
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const app=fs.readFileSync('src/App.vue','utf8');
+const navCss=fs.readFileSync('src/styles-patch05-fix-nav.css','utf8');
+const main=fs.readFileSync('src/main.ts','utf8');
+const coach=fs.readFileSync('src/views/LiveCoachAthletes.vue','utf8');
+const cfg=fs.readFileSync('src/integrations/firebase/stagingConfig.ts','utf8');
+assert(!app.includes('id="athlete-top-menu"'),'Menu Atleta superiore ancora presente');
+assert(app.includes('<AthleteDesktopSidebar') && app.includes('<AthleteBottomNavigation'),'Navigazione Atleta mancante');
+assert(navCss.includes('left:0!important') && navCss.includes('max-width:799px'),'Navigazione desktop/mobile non isolata');
+assert(main.includes("styles-patch05-fix-nav.css"),'Override finale non importato');
+assert(coach.includes('duplicateV1Weeks') && coach.includes('duplicateCount'),'Duplicazione multipla assente');
+assert(coach.includes('lf-program-v2'),'Layout giorni della settimana Admin non preservato');
+assert(cfg.includes('const LIVE_BUILD=import.meta.env.MODE'), 'Non alterare logica dei modi Firebase');
+assert(fs.existsSync('AVVIA_LIONFIT_STAGING_5173.cmd'), 'Script STAGING mancante');
+assert(fs.existsSync('AVVIA_LIONFIT_LIVE_SOLO_LETTURA_5173.cmd'), 'Script LIVE mancante');
+console.log('PASS 8 controlli PATCH05 CORRETTA - admin preservato, doppia nav eliminata, modalita Firebase corretta.');

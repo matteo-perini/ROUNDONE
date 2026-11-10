@@ -7,7 +7,7 @@ import { useLabStore } from './stores/lab'
 import LionIcon from './components/LionIcon.vue'
 import AthleteBottomNavigation from './components/AthleteBottomNavigation.vue'
 import AthleteDesktopSidebar from './components/AthleteDesktopSidebar.vue'
-import {isStagingMode} from './integrations/firebase/stagingConfig'
+import {isStagingMode,isLocalProdDev} from './integrations/firebase/stagingConfig'
 import {stagingSession,signOutStaging} from './integrations/firebase/stagingSession'
 import {demoProfiles} from './features/profile/localProfile'
 import {uiText} from './features/i18n/interfaceLanguage'
@@ -94,6 +94,7 @@ async function goOut(){
 </script>
 <template>
  <div class="app" :class="['theme-'+lab.theme,shownRole==='coach'?'as-coach':'as-athlete',{'bookings-mode':isBooking,'athlete-sidebar-collapsed':!athleteSidebarExpanded}]">
+  <div v-if="isLocalProdDev()" class="lab-banner" role="status">⚠ SVILUPPO LOCALE · FIREBASE PRODUZIONE · LE SCRITTURE POSSONO CAMBIARE DATI REALI</div>
   <component v-if="StagingBanner" :is="StagingBanner"/>
   <div v-else-if="coachEmulatorPreview || athleteEmulatorPreview || bookingEmulatorPreview" class="lab-banner">{{uiText("FIREBASE EMULATOR · DATI FITTIZI · SCRITTURE SOLO CON CONFERMA · NON È L'APP PUBBLICATA")}}</div>
   <template v-if="isDevLab">
@@ -113,7 +114,8 @@ async function goOut(){
       <div class="sidebar-foot"><button class="ghost wide" @click="goOut">{{uiText(isStagingMode()?'Esci da Lion Fit':coachEmulatorPreview ? 'Esci dal laboratorio' : 'Esci')}}</button><RouterLink v-if="shownRole==='coach' && !coachDevShell" class="invite-shortcut" to="/coach/staff">{{uiText('INVITI DELLA PALESTRA')}} <strong>{{uiText('Inviti via email →')}}</strong></RouterLink><small>{{webVersionLabel}}</small></div>
     </aside>
     <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><button v-if="shownRole==='coach'" type="button" class="mobile-coach-menu-btn" :aria-expanded="coachMenuOpen" :aria-label="uiText('Apri il menu completo Coach')" @click="coachMenuOpen=!coachMenuOpen">☰</button><RouterLink v-if="shownRole==='coach'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Apri impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
-    <nav v-if="shownRole==='atleta'" id="athlete-top-menu" class="athlete-top-nav lf-top-menu-75 lf-top-menu-76" :aria-label="uiText('Menu principale Atleta')"><RouterLink v-for="item in mobileNav" :key="item.to" :to="item.to"><LionIcon :name="item.icon" :size="17"/><span>{{uiText(item.label)}}</span></RouterLink></nav>
+
+    <!-- Navigazione Atleta esclusiva: sidebar a sinistra su desktop, dock inferiore su mobile. -->
     <main class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking}]"><button v-if="route.path!=='/home' && route.path!=='/coach'" type="button" class="lf-route-back" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> {{uiText('Indietro')}}</button><div class="version">{{webVersionLabel}}</div><RouterView/></main>
     <!-- La navbar Atleta vive fuori dal contenitore .app: nessun CSS / overflow legacy può coprirla. -->
     <AthleteBottomNavigation v-if="shownRole==='atleta'" :items="mobileNav" :theme="lab.theme"/>

@@ -120,3 +120,9 @@ export function advanceV1Monday(startMonday:string,deltaWeeks:number):string{
  const utc=Date.parse(startMonday+'T12:00:00Z')+deltaWeeks*7*86400000
  return new Date(utc).toISOString().slice(0,10)
 }
+
+/** Piano puro per la duplicazione multipla: date consecutive e ID originali invariati. */
+export function planV1WeekCopies(source:V1WeekDocument,firstMonday:string,count:number):V1WeekDocument[]{
+ if(!Number.isInteger(count)||count<1||count>12)throw new Error('Numero di copie non valido (1–12).')
+ return Array.from({length:count},(_,i)=>duplicateV1WeekDocument(source,advanceV1Monday(firstMonday,i)))
+}

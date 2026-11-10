@@ -13,9 +13,15 @@ const PRODUCTION_PROJECT='app-palestra-b0b9d'
 const LIVE_BUILD=import.meta.env.MODE==='production'
 const STAGING_BUILD=import.meta.env.MODE==='staging'
 const LIVE_WRITE_ACK='ENABLED_AFTER_RULES_REVIEW'
+/** Modalita' HMR locale: autentica utenti PROD ma mantiene NODE_ENV development.
+ * L'esplicita conferma esiste solo in un processo locale avviato da dev-live.mjs;
+ * non cambia le Rules di Firebase, non limita scritture ai profili di prova.
+ */
+export const isLocalProdDev=()=>import.meta.env.DEV && LIVE_BUILD &&
+ import.meta.env.VITE_LIONFIT_LOCAL_PROD_DEV==='LOCAL_PROD_PREVIEW_CONFIRMED'
 
 export function parseStagingConfig(env:StagingEnv):PublicStagingConfig|null {
- if(env.PROD!==true || (!LIVE_BUILD && !STAGING_BUILD))return null
+ if(!(env.PROD===true || isLocalProdDev()) || (!LIVE_BUILD && !STAGING_BUILD))return null
  // Una build "production" con .env STAGING non puo' avviarsi e viceversa.
  const live=LIVE_BUILD
  if(env.VITE_LIONFIT_MODE!==(live?'live':'staging'))throw new Error('Ambiente Firebase non coerente con la build.')
@@ -51,7 +57,7 @@ export function parseStagingConfig(env:StagingEnv):PublicStagingConfig|null {
 
 // Nomi storici mantenuti per compatibilita' con i componenti gia testati.
 // In produzione isStagingMode significa "sessione operativa Firebase LIVE".
-export const isStagingMode=()=>import.meta.env.PROD && (
+export const isStagingMode=()=> (import.meta.env.PROD || isLocalProdDev()) && (
  LIVE_BUILD
   ? (import.meta.env.VITE_LIONFIT_MODE==='live' && import.meta.env.VITE_LIONFIT_LIVE_ACK==='LIVE_FIREBASE_RULES_CONFIRMED')
   : (STAGING_BUILD && import.meta.env.VITE_LIONFIT_MODE==='staging' && import.meta.env.VITE_LIONFIT_STAGING_ACK==='STAGING_ONLY')

@@ -25,6 +25,7 @@ const emit = defineEmits<{ 'update:weekId': [id: string] }>()
 const route=useRoute(),router=useRouter()
 
 const opened = ref<Personal | null>(null)
+const showSheetChoices=ref(false)
 const selectedDay = ref<number | null>(Number.isInteger(props.initialDay) && props.initialDay! >= 0 && props.initialDay! <= 6 ? props.initialDay! : null)
 const activeWeeks = computed(() => props.weeks.filter(w => !w.deletedAt)
   .sort((a, b) => (a.startDate || a.id).localeCompare(b.startDate || b.id)))
@@ -60,10 +61,16 @@ function uniqueDaysForSheet(group: { links: { weekId: string; dayIndex: number; 
     return true
   })
 }
-function chooseWeek(id: string) { if(!activeWeeks.value.some(w=>w.id===id))return;emit('update:weekId', id); void router.replace({query:{...route.query,week:id,day:undefined}}); selectedDay.value = null; opened.value = null }
-function openSheet(sheet: Personal) { selectedDay.value = null; opened.value = sheet; if(route.query.day!==undefined)void router.replace({query:{...route.query,day:undefined}}) }
-function openWeekDay(index:number){selectedDay.value=index;void router.push({query:{...route.query,week:week.value?.id,day:String(index)}})}
-function closeWeekDay(){selectedDay.value=null;if(route.query.day!==undefined)void router.replace({query:{...route.query,day:undefined}})}
+function chooseWeek(id: string) { showSheetChoices.value=false; if(!activeWeeks.value.some(w=>w.id===id))return;emit('update:weekId', id); void router.replace({query:{...route.query,week:id,day:undefined}}); selectedDay.value = null; opened.value = null }
+function openSheet(sheet: Personal) { showSheetChoices.value=false;selectedDay.value = null; opened.value = sheet; if(route.query.day!==undefined)void router.replace({query:{...route.query,day:undefined}}) }
+function openDayTraining(){
+ if(selectedDay.value===null)return
+ const slots=linksForDay(selectedDay.value)
+ if(slots.length===1){openSheet(slots[0].sheet);return}
+ if(slots.length>1)showSheetChoices.value=true
+}
+function openWeekDay(index:number){showSheetChoices.value=false;selectedDay.value=index;void router.push({query:{...route.query,week:week.value?.id,day:String(index)}})}
+function closeWeekDay(){showSheetChoices.value=false;selectedDay.value=null;if(route.query.day!==undefined)void router.replace({query:{...route.query,day:undefined}})}
 function onEscape(event:KeyboardEvent){if(event.key==='Escape'&&!opened.value&&selectedDay.value!==null)closeWeekDay()}
 onMounted(()=>{
  window.addEventListener('keydown',onEscape)
@@ -98,19 +105,6 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
       </div>
     </section>
 
-    <section v-if="activeWeeks.length && programmed.length" class="athlete-scheduled-sheets">
-      <div class="row between"><div><h2 class="section-title">{{uiText("SCHEDE IN PROGRAMMA")}}</h2><span class="muted small">{{ week?.startDate || '' }}</span></div><span class="pill">{{ programmed.length }} {{uiText("schede diverse")}}</span></div>
-      <div class="grid2 athlete-sheet-grid">
-        <article v-for="group in programmed" :key="group.sheet.id" class="scheme-item">
-          <h3>{{ group.sheet.title }}</h3>
-          <span class="chip athlete-sheet-state">{{uiText("In programma ·")}} {{ uniqueDaysForSheet(group).length }} {{ uniqueDaysForSheet(group).length === 1 ? 'giorno' : 'giorni' }}</span>
-          <p class="muted small athlete-sheet-days">{{ uniqueDaysForSheet(group).map(l => l.dayName.slice(0,3).toLowerCase()).join(' · ') }}</p>
-          <button type="button" class="bare green athlete-sheet-open" @click="openSheet(forWeekRepresentative(group,week?.id||''))">{{uiText("APRI SCHEDA ›")}}</button>
-        </article>
-      </div>
-      <p v-if="!programmed.length" class="notice">{{uiText("Nessuna scheda collegata a questa settimana.")}}</p>
-    </section>
-
     <section v-if="unprogrammed.length" class="athlete-unscheduled-sheets">
       <div class="row between"><h2 class="section-title">{{uiText("SCHEDE SENZA PROGRAMMAZIONE")}}</h2><span class="pill pill-neutral">{{ unprogrammed.length }} {{uiText("schede diverse")}}</span></div>
       <p v-if="unprogrammed.length > 2" class="athlete-carousel-hint">{{uiText("Scorri le schede a destra e a sinistra")}} <span aria-hidden="true">↔</span></p>
@@ -135,13 +129,12 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
       <div class="panel athlete-week-program-panel">
         <div class="row between athlete-week-title"><strong>{{week?.name.toUpperCase() || uiText('NESSUNA SETTIMANA')}}</strong><span class="pill pill-neutral">{{ week?.startDate || '' }}</span></div>
         <div class="divider"/>
-        <div class="week-days">
-          <button v-for="(day,i) in weekDays" :key="`${week?.id}-${day.name}`" type="button" class="day-card" :aria-label="`Apri il programma di ${day.name}`" :class="{ 'day-card-today': i===currentDayIndex, 'day-card-selected': selectedDay===i, 'day-card-sunday': i===6 }" @click="openWeekDay(i)">
-            <h3>{{uiText(day.name.toUpperCase())}}</h3>
-            <p v-for="(activity,j) in displayActivities(i)" :key="j" class="athlete-day-activity-label">{{ activity.toUpperCase() }}</p>
-            <p v-for="(linked,i2) in weekDayLinkedSheetNames(props.groups,week?.id||'',i)" :key="'sheet-'+i2" class="day-card-sheet-activity">{{linked}}</p>
-            <p v-if="!displayActivities(i).length&&!weekDayLinkedSheetNames(props.groups,week?.id||'',i).length" class="muted">{{uiText("RIPOSO")}}</p>
-            <div class="day-card-detail">{{uiText("DETTAGLI")}} <span aria-hidden="true">›</span></div>
+        <div class="week-days lf-athlete-v4-days" aria-label="Programmazione da lunedì a domenica">
+          <button v-for="(day,i) in weekDays" :key="`${week?.id}-${day.name}`" type="button" class="lf-athlete-v4-day" :aria-label="`Apri ${day.name}, ${displayActivities(i).join(', ')||'nessuna attività'}; ${linksForDay(i).length} schede`" :class="{'lf-athlete-v4-today':i===currentDayIndex,'lf-athlete-v4-selected':selectedDay===i}" @click="openWeekDay(i)">
+            <span class="lf-athlete-v4-day-label"><strong>{{uiText(day.name.toUpperCase())}}</strong><small v-if="i===currentDayIndex" class="lf-athlete-v4-today-tag">OGGI</small></span>
+            <span class="lf-athlete-v4-day-summary"><span v-if="displayActivities(i).length">{{displayActivities(i).join(' · ')}}</span><span v-else class="muted">{{uiText('Nessuna attività')}}</span></span>
+            <span class="lf-athlete-v4-day-sheets"><span v-for="linked in linksForDay(i)" :key="linked.id" class="lf-athlete-v4-sheet-chip">{{linked.sheet.title}}</span><span v-if="!linksForDay(i).length" class="muted small">{{uiText('Nessuna scheda')}}</span></span>
+            <span class="lf-athlete-v4-chevron" aria-hidden="true">›</span>
           </button>
         </div>
         <p v-if="!weekDays.length" class="muted">{{uiText("Non è ancora stata assegnata una settimana.")}}</p>
@@ -153,13 +146,14 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
   <div v-if="selectedDayDetails" class="modal-overlay athlete-day-overlay" @click.self="closeWeekDay()">
     <div class="dialog athlete-day-dialog" role="dialog" aria-modal="true" :aria-label="'Programma del ' + selectedDayDetails.name">
       <div class="athlete-day-dialog-head"><div><h2>{{uiText(selectedDayDetails.name.toUpperCase())}}</h2><p class="muted small">{{uiText("PROGRAMMA DEL GIORNO")}}</p></div><button type="button" class="bare" :aria-label="uiText('Chiudi dettagli')" @click="closeWeekDay()">✕</button></div>
-      <div class="athlete-day-dialog-body"><h3>{{uiText("PROGRAMMAZIONE DEL GIORNO")}}</h3>
-        <p v-for="(activity,i) in selectedDay!==null?displayActivities(selectedDay):[]" :key="i" class="athlete-day-activity">{{ activity.toUpperCase() }}</p>
-        <p v-if="selectedDay!==null&&!displayActivities(selectedDay).length" class="muted">{{uiText("Nessuna attività prevista.")}}</p>
-        <div v-if="selectedDay !== null && linksForDay(selectedDay).length" class="athlete-day-linked">
-          <div v-for="link in linksForDay(selectedDay)" :key="link.id" class="athlete-day-sheet-row"><p class="athlete-day-sheet-title">{{uiText("SCHEDA")}} {{link.slot}}: {{link.sheet.title}}</p><button type="button" class="primary wide athlete-day-open-sheet" @click="openSheet(link.sheet)">{{uiText("APRI SCHEDA")}} {{link.slot}}</button></div>
-        </div>
-        <p v-else class="muted small">{{uiText("Nessuna scheda collegata a questo giorno.")}}</p>
+      <div class="athlete-day-dialog-body lf-athlete-v4-dialog-body">
+        <h3>Attività del giorno</h3>
+        <div class="lf-athlete-v4-activities"><div v-for="(activity,i) in selectedDay!==null?displayActivities(selectedDay):[]" :key="i" class="lf-athlete-v4-activity"><span>Attività {{i+1}}</span><strong>{{activity}}</strong></div><p v-if="selectedDay!==null&&!displayActivities(selectedDay).length" class="muted small">Giornata senza attività programmate.</p></div>
+        <h3>Schede assegnate</h3>
+        <div v-if="selectedDay!==null&&linksForDay(selectedDay).length" class="lf-athlete-v4-linked"><div v-for="link in linksForDay(selectedDay)" :key="link.id" class="lf-athlete-v4-linked-card"><span>Scheda {{link.slot}}</span><strong>{{link.sheet.title}}</strong><button type="button" class="secondary" @click="openSheet(link.sheet)">Apri ›</button></div></div>
+        <p v-else class="muted small">Nessuna scheda collegata a questo giorno.</p>
+        <button v-if="selectedDay!==null&&linksForDay(selectedDay).length" type="button" class="primary wide lf-athlete-v4-start" @click="openDayTraining">Apri allenamento del giorno</button>
+        <div v-if="showSheetChoices&&selectedDay!==null&&linksForDay(selectedDay).length>1" class="lf-athlete-v4-chooser" role="group" aria-label="Scegli la scheda da aprire"><strong>Scegli quale scheda aprire:</strong><button v-for="link in linksForDay(selectedDay)" :key="link.id" type="button" class="secondary wide" @click="openSheet(link.sheet)">Scheda {{link.slot}} · {{link.sheet.title}} ›</button></div>
       </div>
       <div class="athlete-day-dialog-foot"><button type="button" class="secondary" @click="closeWeekDay()">{{uiText("CHIUDI")}}</button></div>
     </div>
@@ -209,4 +203,16 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
   scroll-snap-align: start;
   scroll-snap-stop: normal;
 }
+</style>
+
+<style scoped>
+/* PATCH 05 — Piano Atleta V4. Il contenuto delle settimane è soltanto in lettura. */
+.athlete-plan .lf-athlete-v4-days{display:grid!important;grid-template-columns:1fr!important;gap:7px!important;overflow:visible!important;margin:0!important}
+.athlete-plan .lf-athlete-v4-day{width:100%;min-width:0;display:grid;grid-template-columns:minmax(88px,.75fr) minmax(0,1.4fr) minmax(0,1.5fr) 14px;align-items:center;gap:10px;min-height:58px;padding:9px 12px;border:1px solid var(--outline);border-radius:11px;background:var(--field);color:var(--text);text-align:left;box-sizing:border-box}
+.athlete-plan .lf-athlete-v4-day:hover,.athlete-plan .lf-athlete-v4-day:focus-visible{border-color:var(--mint)}
+.athlete-plan .lf-athlete-v4-today{border:2px solid var(--mint);background:var(--green-bg)}
+.lf-athlete-v4-day-label{display:flex;align-items:center;flex-wrap:wrap;gap:5px;min-width:0}.lf-athlete-v4-day-label strong{color:var(--mint);font-size:11px;font-weight:900}.lf-athlete-v4-today-tag{border:1px solid var(--mint);border-radius:5px;padding:2px 4px;font-size:8px;color:var(--mint)}
+.lf-athlete-v4-day-summary{min-width:0;font-size:11px;line-height:1.4;overflow-wrap:anywhere}.lf-athlete-v4-day-sheets{display:flex;flex-wrap:wrap;gap:4px;min-width:0}.lf-athlete-v4-sheet-chip{display:inline-block;max-width:100%;font-size:10px;color:var(--mint);font-weight:750;background:var(--green-bg);border-radius:6px;padding:4px 6px;overflow-wrap:anywhere}.lf-athlete-v4-chevron{font-size:21px;color:var(--mint)}
+.lf-athlete-v4-dialog-body{display:grid;gap:9px}.lf-athlete-v4-dialog-body h3{font-size:12px;letter-spacing:.04em;margin:6px 0 0}.lf-athlete-v4-activities,.lf-athlete-v4-linked{display:grid;gap:7px}.lf-athlete-v4-activity,.lf-athlete-v4-linked-card{display:flex;align-items:center;gap:10px;justify-content:space-between;border:1px solid var(--outline);background:var(--field);border-radius:9px;padding:9px 11px;font-size:12px}.lf-athlete-v4-activity span,.lf-athlete-v4-linked-card span{font-size:10px;color:var(--mint);flex:none}.lf-athlete-v4-activity strong,.lf-athlete-v4-linked-card strong{flex:1;overflow-wrap:anywhere;min-width:0}.lf-athlete-v4-linked-card button{padding:6px 9px;font-size:11px}.lf-athlete-v4-start{margin-top:7px}.lf-athlete-v4-chooser{display:grid;gap:7px;padding:11px;border:1px solid var(--outline);border-radius:10px}.lf-athlete-v4-chooser strong{font-size:12px}
+@media(max-width:680px){.athlete-plan .lf-athlete-v4-day{grid-template-columns:minmax(77px,1fr) minmax(0,2.1fr) 12px;min-height:54px;padding:9px 10px;gap:7px}.lf-athlete-v4-day-label strong{font-size:10px}.lf-athlete-v4-day-summary{font-size:10px}.lf-athlete-v4-day-sheets{grid-column:2;grid-row:2}.lf-athlete-v4-chevron{grid-column:3;grid-row:1/3}.lf-athlete-v4-linked-card{flex-wrap:wrap}.lf-athlete-v4-linked-card strong{min-width:100px}}
 </style>

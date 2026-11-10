@@ -56,6 +56,7 @@ const mergedArchive=computed(()=>joinArchivesWithLegacy(archive.value,data.value
 const shownArchive=computed(()=>mergedArchive.value.filter(a=>!hiddenArchiveIds.value.has(a.id)))
 const counts=computed(()=>archiveCounts(shownArchive.value,data.value?.personal||[]))
 const archiveGroups=computed(()=>groupSemanticCopies(visibleArchives(shownArchive.value,data.value?.personal||[],archiveView.value,search.value)))
+const archiveDistinctCount=computed(()=>groupSemanticCopies(shownArchive.value).length)
 const livePath=(path:string)=>isStagingMode()?path:`${path}?source=emulator`
 const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${encodeURIComponent(currentWeek.value.id)}&day=${todayIndex.value}`:`/piano?source=emulator&week=${encodeURIComponent(currentWeek.value.id)}&day=${todayIndex.value}`):livePath('/piano'))
 </script>
@@ -72,17 +73,15 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
     <AthleteHomeContent :name="session?.label||'Atleta'" :today-name="todayDay?.name||''" :week-name="currentWeek?.name||''" :calendar-day="romeWeekDayNumber(clock)" :activities="todayDay?.activities||[]" :sheets="todaySheets" :days="currentWeek?.days||[]" :plan-link="livePath('/piano')" :archive-link="livePath('/archivio')" :progress-link="livePath('/progressi')" :booking-link="livePath('/prenotazioni')" :avatar-url="avatarUrl" :profile-link="livePath('/profilo')" :day-link="dayLink"/>
    </template>
    <template v-else-if="props.screen==='archive'">
-    <section class="panel athlete-archive-hero"><div class="row between"><h2 class="card-heading">{{uiText("ARCHIVIO")}}</h2><span class="pill pill-neutral">{{counts.all}} {{uiText("SCHEDE E COPIE")}}</span></div><p class="muted" style="margin:20px 0 0">{{uiText("Qui ritrovi tutte le schede di allenamento ricevute dal coach, già assegnate, ritirate, protette o archiviate.")}}</p></section>
+    <section class="panel athlete-archive-hero"><div class="row between"><h2 class="card-heading">{{uiText("ARCHIVIO")}}</h2><span class="pill pill-neutral">{{archiveDistinctCount}} {{uiText("SCHEDE")}}</span></div><p class="muted" style="margin:20px 0 0">{{uiText("Ritrova le schede che hai ricevuto dai Coach, comprese quelle dei programmi precedenti.")}}</p></section>
     <section class="panel athlete-archive-list"><div class="row between"><h3>{{uiText("Le mie schede di allenamento")}}</h3><span class="muted">{{archiveGroups.length}} {{uiText("schede visualizzate")}}</span></div>
      <div class="grid2"><input v-model="search" type="search" aria-label="Cerca archivio personale" placeholder="Cerca nell'Archivio..."/>
-      <select v-model="archiveView" aria-label="Filtra archivio personale"><option value="active">{{uiText("Schede attive (")}}{{counts.active}})</option><option value="trashed">{{uiText("Schede cestinate (")}}{{counts.trashed}})</option><option value="historical">{{uiText("Solo storico (")}}{{counts.historical}})</option><option value="all">{{uiText("Tutte le copie (")}}{{counts.all}})</option></select>
+      <select v-model="archiveView" aria-label="Filtra archivio personale"><option value="all">Tutte le schede</option><option value="active">Schede assegnate</option><option value="historical">Schede storiche</option><option value="trashed">Schede ritirate</option></select>
      </div>
      <p v-if="!archiveReady" class="muted">{{uiText("Caricamento archivio storico…")}}</p>
      <p v-else-if="!archiveGroups.length" class="notice">{{uiText("Nessuna scheda corrisponde al filtro selezionato. Le copie protette non vengono eliminate.")}}</p>
-     <div v-for="g in archiveGroups" :key="g.sheet.id" class="line-card athlete-archive-item"><button class="wide athlete-archive-open" @click="opened=g.sheet"><b>{{g.sheet.title}}</b><p class="athlete-archive-meta">{{g.sheet.legacy?'Scheda originale legacy · copia protetta da allineare':'Copia protetta · consultabile'}}</p></button><details class="athlete-archive-copies"><summary class="muted small">{{uiText("Gestisci le copie di questa scheda")}}</summary><div v-for="copy in g.copies" :key="copy.id" class="row between" style="margin-top:8px;gap:8px"><span class="muted small">{{uiText("Copia")}} {{g.copies.indexOf(copy)+1}}</span><button class="ghost" type="button" :disabled="!mayWriteLive()||hideBusy||copy.legacy||isArchiveCopyLinkedOrEquivalent(copy.id,mergedArchive,data?.weeks||[],session?.uid||'')" @click="hideCopy(copy.id)">{{uiText("ELIMINA DALLA VISTA")}}</button></div></details></div>
-     <p v-if="hideMessage" class="muted" role="status">{{hideMessage}}</p>
-     <p v-if="!mayWriteLive()" class="muted small">{{uiText("Le modifiche all’archivio sono disabilitate in questa build.")}}</p>
-     <p class="muted small">{{uiText("Nascondere non elimina la copia protetta né modifica le schede assegnate.")}}</p>
+     <div v-for="g in archiveGroups" :key="g.sheet.id" class="line-card athlete-archive-item lf-archive-v4-item"><button class="wide athlete-archive-open" type="button" @click="opened=g.sheet"><span class="lf-archive-v4-icon" aria-hidden="true">▣</span><b>{{g.sheet.title}}</b><span class="lf-archive-v4-action">Apri scheda ›</span></button></div>
+     <p class="muted small lf-archive-v4-note">Le schede storiche rimangono conservate. Le versioni con esercizi o contenuti differenti restano separate.</p>
     </section>
    </template>
   </template>

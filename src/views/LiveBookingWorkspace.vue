@@ -28,6 +28,7 @@ const session=ref<StagingSession|null>(null)
 const configs=ref<LiveCoachConfig[]>([]),slots=ref<Slot[]>([]),allRows=ref<LiveReservation[]>([])
 const names=ref<Record<string,string>>({})
 const coachRoster=ref<{id:string;name:string}[]>([])
+const availabilityConfirmOpen=ref(false),availabilityProgress=ref('')
 const calendarWarning=ref(''),availabilityWarning=ref(''),nowMs=ref(Date.now())
 let clockTimer:ReturnType<typeof setInterval>|null=null
 const namesPending=new Set<string>()
@@ -307,13 +308,23 @@ async function prepareNextWeek(){const s=mustSession(),c=myConfig.value;if(!c)re
 
 async function persistAvailability(){const d=draft.value;if(!d)return
  const reason=validateConfig(d);if(reason){message.value=`Controlla disponibilità: ${reason}`;return}
- if(!window.confirm('Salvare la disponibilità e sincronizzare gli slot dei prossimi 30 giorni? Gli appuntamenti occupati saranno preservati.'))return
+ availabilityConfirmOpen.value=true
+}
+async function confirmAvailabilitySave(){
+ if(busy.value)return
+ availabilityConfirmOpen.value=false
+ const d=draft.value;if(!d)return
+ availabilityProgress.value='Verifica e sincronizzazione della disponibilità in corso…'
  await runWrite(async()=>{
   const {db}=getStagingClients()
-  const result=await synchronizeCoachAvailability(db,mustSession(),d,30)
+  const result=await synchronizeCoachAvailability(db,mustSession(),d,30,(finished,total)=>{
+   availabilityProgress.value=total?`Sincronizzazione slot: ${finished} di ${total} controllati…`:'Configurazione salvata. Verifica degli slot…'
+  })
   edited.value=false
   return `Disponibilità sincronizzata: ${result.created} slot nuovi, ${result.retired} aperti obsoleti rimossi, ${result.keptBooked} occupati conservati.`
  })
+ availabilityProgress.value=''
+ if(/permission|permess|autorizza|insufficient/i.test(message.value))message.value='Permessi Firebase insufficienti per la disponibilità: verifica che il collaboratore abbia ruolo admin, membershipStatus attivo e gymId corretto. Controlla le Rules pubblicate; nessuna modifica automatica alle Rules.'
 }
 async function prepareDay(){const s=mustSession(),c=myConfig.value;if(!c)return
  if(!window.confirm(`Preparare gli slot aperti del ${selectedDate.value} su Firebase?`))return
@@ -346,7 +357,7 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
    <p v-if="message&&message!=='Calendario sincronizzato.'" class="small muted" role="status">{{message}}</p>
    <template v-if="!isCoach">
     <div class="booking-tabs booking-main-tabs"><button :class="{selected:athleteTab==='prenota'}" @click="athleteTab='prenota'">{{uiText("Prenota")}}</button><button :class="{selected:athleteTab==='mie'}" @click="athleteTab='mie'">{{uiText("Le mie prenotazioni")}}</button></div>
-    <template v-if="athleteTab==='prenota'">
+    <template v-if="athleteTab==='prenota'"><div class="lf-booking-v4-flow">
      <h2 class="booking-section-title">{{uiText("1. Scegli il tuo percorso")}}</h2>
      <div class="booking-choices booking-v1-services">
       <button class="booking-choice booking-service-card" :class="{selected:service==='fighter'}" @click="service='fighter'"><BookingServiceMark kind="fighter"/><strong>FIGHTER</strong><small>{{uiText("MMA, Boxe, K-1 e discipline da combattimento")}}</small></button>
@@ -354,25 +365,25 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
      </div>
      <h2 class="booking-section-title">{{uiText("2. Seleziona il Coach")}}</h2>
      <div v-if="!configs.length" class="notice">{{uiText("Nessun Coach configurato per le prenotazioni. Accedi come Coach e prepara la disponibilità.")}}</div>
-     <div class="grid2"><button v-for="c in configs.filter(x=>x.active&&x.services[service])" :key="c.coachId" class="action-card lf-booking-coach-choice" :class="{'lf-booking-coach-selected':chosenCoach===c.coachId}" :aria-pressed="chosenCoach===c.coachId" @click="chosenCoach=c.coachId">
+     <div class="grid2 lf-booking-v4-coaches"><button v-for="c in configs.filter(x=>x.active&&x.services[service])" :key="c.coachId" class="action-card lf-booking-coach-choice" :class="{'lf-booking-coach-selected':chosenCoach===c.coachId}" :aria-pressed="chosenCoach===c.coachId" @click="chosenCoach=c.coachId">
       <span class="action-icon">🦁</span><div><strong>{{c.displayName}}</strong><small>{{displayService(service)}} · {{c.durations[service]}} {{uiText("minuti")}}</small></div><span class="lf-booking-coach-check" aria-hidden="true">{{chosenCoach===c.coachId?'✓':'○'}}</span></button></div>
      <h2 class="booking-section-title">{{uiText("3. Tipo di incontro")}}</h2>
-     <section class="panel"><h3 class="booking-reasons-title">{{service==='fighter'?'Disciplina Fighter':'Motivo della prenotazione Pesi'}}</h3><div class="booking-reasons-list" role="radiogroup" aria-label="Disciplina o motivo"><label v-for="reason in serviceReasons" :key="reason" class="booking-reason" :class="{'booking-reason-active':discipline===reason}"><input type="radio" name="booking-reason" v-model="discipline" :value="reason"/><span>{{reason}}</span></label></div></section>
+     <section class="panel"><h3 class="booking-reasons-title">{{service==='fighter'?'Disciplina Fighter':'Motivo della prenotazione Pesi'}}</h3><label class="lf-booking-v4-select-label"><select v-model="discipline" class="lf-booking-v4-select" aria-label="Seleziona disciplina o motivo"><option v-for="reason in serviceReasons" :key="reason" :value="reason">{{reason}}</option></select></label></section>
      <h2 class="booking-section-title">{{uiText("4. Scegli giorno e orario")}}</h2>
-     <section class="panel"><div class="row between"><button class="secondary" @click="moveAthleteMonth(-1)">‹</button><strong>{{monthLabel}}</strong><button class="secondary" @click="moveAthleteMonth(1)">›</button></div>
+     <section class="panel lf-booking-v4-calendar"><div class="row between"><button class="secondary" @click="moveAthleteMonth(-1)">‹</button><strong>{{monthLabel}}</strong><button class="secondary" @click="moveAthleteMonth(1)">›</button></div>
       <div class="booking-calendar" style="margin-top:20px"><div v-for="(n,i) in ['L','M','M','G','V','S','D']" :key="i" class="muted">{{n}}</div>
        <template v-for="(d,i) in monthDays" :key="i"><div v-if="!d"/><button v-else class="booking-day" :class="{selected:selectedDate===dateInMonth(d)}" :disabled="!monthDayAvailable(dateInMonth(d))" :title="monthDayAvailable(dateInMonth(d))?'Disponibile':'Nessun orario disponibile'" @click="chooseDate(dateInMonth(d))">{{Number(d)}}</button></template></div></section>
-     <section class="panel"><h2>{{selectedDate}} · {{shownDuration}} {{uiText("minuti")}}</h2>
+     <section class="panel lf-booking-v4-times"><h2>{{selectedDate}} · {{shownDuration}} {{uiText("minuti")}}</h2>
       <p v-if="!candidates.length" class="muted">{{uiText("Nessun orario preparato per questo giorno. Seleziona un altro giorno o Coach.")}}</p>
       <div v-else class="times"><button v-for="slot in candidates" :key="slot.startMs" :disabled="!slot.free" :class="{selected:chosenStart===slot.startMs,unavailable:!slot.free}" :title="slot.busy?'Occupato':slot.late?'Preavviso minimo':'Disponibile'" @click="chosenStart=slot.startMs">{{slot.time}} <small v-if="!slot.free">{{slot.busy?'Occupato':'Preavviso'}}</small></button></div>
       <p class="small muted">{{uiText("Sono ammessi solo slot consecutivi da 30 minuti, senza sovrapposizioni. L'orario è Europe/Rome.")}}</p>
      </section>
-     <section class="panel"><span class="eyebrow">{{uiText("RIEPILOGO")}}</span><h2>{{displayService(service)}} · {{chosenConfig?.displayName||'Seleziona Coach'}}</h2>
+     <section class="panel lf-booking-v4-review"><span class="eyebrow">{{uiText("RIEPILOGO")}}</span><h2>{{displayService(service)}} · {{chosenConfig?.displayName||'Seleziona Coach'}}</h2>
       <p class="muted">{{selectedDate}} · {{chosenStart!==null?romeParts(chosenStart).time:'Nessun orario selezionato'}} · {{shownDuration}} min · {{discipline}}</p>
       
       <button class="primary wide" :disabled="busy||chosenStart===null" @click="makeBooking">{{uiText("Conferma prenotazione")}}</button>
      </section>
-    </template>
+    </div></template>
     <template v-else><section class="panel"><h2>{{uiText("Le mie prenotazioni")}}</h2><div class="booking-tabs"><button :class="{selected:myHistory==='next'}" @click="myHistory='next'">{{uiText("Prossime")}}</button><button :class="{selected:myHistory==='history'}" @click="myHistory='history'">{{uiText("Storico")}}</button></div><p v-if="!visibleMyRows.length" class="muted">{{uiText("Nessuna prenotazione in questa sezione.")}}</p>
       <article v-for="b in visibleMyRows" :key="b.id" class="event-item" style="display:block;margin:9px 0"><strong>{{localStart(b.startMs)}} · {{displayService(b.service)}} · {{b.durationMinutes}} min</strong>
        <p class="small muted">{{coachLabel(b.coachId)}} · {{b.discipline}} · {{showStatus(b)}}</p>
@@ -437,7 +448,7 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
        <div v-for="(holiday,i) in draft.holidays||[]" :key="i" class="row"><small>{{uiText("Ferie")}} {{holiday.from}} — {{holiday.to}}</small><button class="bare" @click="removeHoliday(i)">{{uiText("Rimuovi")}}</button></div>
        <p class="muted small">{{uiText("Salvare sincronizza fino a 30 giorni di slot. Quelli aperti non più validi vengono ritirati; le prenotazioni confermate non vengono cancellate. In caso di errore la disponibilità resta inattiva finché non ripeti il salvataggio.")}}</p>
        
-       <button class="primary wide" :disabled="busy" @click="persistAvailability">{{uiText("Salva e sincronizza disponibilità (30 giorni)")}}</button>
+       <button class="primary wide" :disabled="busy||status!=='ready'" @click="persistAvailability">{{busy?'Sincronizzazione in corso…':uiText("Salva e sincronizza disponibilità (30 giorni)")}}</button><p v-if="availabilityProgress" class="small green lf-availability-progress" role="status" aria-live="polite">{{availabilityProgress}}</p>
        <hr/><h3>{{uiText("Prepara slot del giorno selezionato")}}</h3><p class="muted small">{{uiText("Crea soltanto slot mancanti e futuri da 30 minuti; non sovrascrive mai quelli esistenti o prenotati.")}}</p>
        <input v-model="selectedDate" type="date"/>
        <button class="primary wide" :disabled="busy||!myConfig||edited" @click="prepareDay">{{uiText("Prepara slot del")}} {{selectedDate}}</button>

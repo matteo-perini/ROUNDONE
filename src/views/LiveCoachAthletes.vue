@@ -9,7 +9,7 @@ import {getStagingClients} from '../integrations/firebase/stagingClient'
 import {readStagingSession,type StagingSession} from '../integrations/firebase/stagingSession'
 import {mayWriteLive} from '../integrations/firebase/stagingConfig'
 import {assignSharedToDay,trashPersonal,watchAthleteSheets,backfillProtectedLegacy} from '../integrations/firestore/sheets'
-import {createV1Program,saveV1WeekActivities,duplicateV1Week,trashV1Week,restoreV1Week} from '../integrations/firestore/programs'
+import {createV1Program,saveV1WeekActivities,duplicateV1Weeks,trashV1Week,restoreV1Week} from '../integrations/firestore/programs'
 import {advanceV1Monday} from '../features/sheets/v1WeekCodec'
 import {hasUnsavedActivities} from '../features/sheets/weekDraftPolicy'
 import {updateV1WeekSlot} from '../integrations/firestore/liveWeekSlots'
@@ -168,7 +168,7 @@ async function fillCardInfo(epoch:number){
  }}
  await Promise.all(Array.from({length:Math.min(3,ids.length)},()=>worker()))
 }
-const duplicateOpen=ref(false),duplicateSourceId=ref(''),duplicateTargetMonday=ref(''),duplicateError=ref(''),trashedWeeksOpen=ref(false),selectedWeekTrash=ref<string[]>([])
+const duplicateOpen=ref(false),duplicateSourceId=ref(''),duplicateTargetMonday=ref(''),duplicateCount=ref(1),duplicateError=ref(''),trashedWeeksOpen=ref(false),selectedWeekTrash=ref<string[]>([])
 const weekSelectionMode=ref<'normal'|'duplicate'|'delete'>('normal')
 const deleteConfirmOpen=ref(false)
 function setWeekSelectionMode(mode:'duplicate'|'delete'){
@@ -453,6 +453,7 @@ function openDuplicate(sourceId:string){
  try{duplicateTargetMonday.value=advanceV1Monday(last.startDate,1)}
  catch{message.value='La data finale del programma non è valida.';return}
  duplicateError.value=''
+ duplicateCount.value=1
  duplicateOpen.value=true
 }
 async function duplicateCurrentWeek(){
@@ -460,6 +461,8 @@ async function duplicateCurrentWeek(){
  if(!s||!a||!w||busy.value)return
  duplicateError.value=''
  if(!canWrite.value){duplicateError.value='Non hai i permessi per duplicare la settimana.';return}
+ if(!Number.isInteger(duplicateCount.value)||duplicateCount.value<1||duplicateCount.value>12){duplicateError.value='Inserisci un numero di copie da 1 a 12.';return}
+ if(currentWeeks.value.length+duplicateCount.value>52){duplicateError.value='La programmazione può contenere al massimo 52 settimane attive.';return}
  // Ricalcola appena prima del commit: non copiare sopra una settimana già presente.
  const last=currentWeeks.value.filter(x=>!!x.startDate).at(-1)
  if(!last?.startDate){duplicateError.value='Non è stato possibile trovare l’ultima settimana.';return}
@@ -469,12 +472,12 @@ async function duplicateCurrentWeek(){
  busy.value=true
  try{
   const {db}=getStagingClients()
-  const id=await duplicateV1Week(db,s.gymId,a.id,w.id,target,s.uid)
+  const ids=await duplicateV1Weeks(db,s.gymId,a.id,w.id,target,duplicateCount.value,s.uid)
   duplicateOpen.value=false
   weekSelectionMode.value='normal'
-  selectedWeek.value=id
+  selectedWeek.value=ids[ids.length-1]||''
   showWeek.value=true
-  message.value='Settimana duplicata nel lunedì successivo: '+target+'.'
+  message.value=`${ids.length} ${ids.length===1?'settimana duplicata':'settimane duplicate'} a partire dal lunedì ${target}. Tutte le copie sono state salvate in un'unica operazione.`
  }catch(e){duplicateError.value=e instanceof Error?e.message:String(e)}
  finally{busy.value=false}
 }
@@ -687,7 +690,7 @@ function copyToArchive(sheet:Personal){
  </div></div>
  <div v-if="deleteConfirmOpen" class="modal-overlay" @click.self="deleteConfirmOpen=false"><div class="dialog lf-weeks-confirm" role="dialog" aria-modal="true" aria-label="Conferma spostamento settimane nel Cestino"><div class="row between"><h2>Conferma eliminazione</h2><button class="bare" :disabled="busy" aria-label="Chiudi conferma" @click="deleteConfirmOpen=false">✕</button></div><p>Vuoi spostare <strong>{{selectedWeekTrash.length}} {{selectedWeekTrash.length===1?'settimana':'settimane'}}</strong> nel Cestino?</p><p class="small muted">I programmi e le schede collegate non vengono eliminati definitivamente. Potrai ripristinare le settimane.</p><div class="row lf-confirm-actions"><button class="secondary" :disabled="busy" @click="deleteConfirmOpen=false">Annulla</button><button class="danger" :disabled="busy||!canWrite" @click="trashMultipleWeeks">{{busy?'Eliminazione…':'Sposta nel Cestino'}}</button></div></div></div>
  <div v-if="duplicateOpen" class="modal-overlay" @click.self="duplicateOpen=false"><div class="dialog" style="max-width:420px" role="dialog" aria-modal="true" aria-label="Conferma duplicazione settimana"><div class="row between"><h2>{{uiText("DUPLICA SETTIMANA")}}</h2><button class="bare" aria-label="Chiudi duplicazione" :disabled="busy" @click="duplicateOpen=false">✕</button></div>
-  <p>Vuoi duplicare <strong>{{currentWeeks.findIndex(w=>w.id===duplicateSourceId)+1}}ª settimana</strong>?</p><p class="muted small">La copia sarà inserita automaticamente a partire da <strong>{{duplicateTargetMonday}}</strong>, dopo l'ultima settimana attiva. Tutte le attività e i collegamenti alle schede saranno mantenuti.</p>
+  <p>Quante volte vuoi duplicare la <strong>{{currentWeeks.findIndex(w=>w.id===duplicateSourceId)+1}}ª settimana</strong>?</p><label class="lf-duplicate-number">Numero copie consecutive <input v-model.number="duplicateCount" type="number" min="1" :max="Math.min(12,52-currentWeeks.length)" step="1" aria-label="Numero duplicazioni settimana" /></label><p class="muted small">Le {{duplicateCount===1?'copia sarà inserita':'copie saranno inserite'}} in lunedì consecutivi a partire dal <strong>{{duplicateTargetMonday}}</strong>, dopo l'ultima settimana attiva. Una sola conferma: tutto viene salvato insieme oppure non viene creata alcuna copia.</p>
   <p v-if="duplicateError" class="notice" role="alert">{{duplicateError}}</p>
   <div class="row"><button class="secondary" :disabled="busy" @click="duplicateOpen=false">Annulla</button><button class="primary" :disabled="busy||!canWrite" @click="duplicateCurrentWeek">{{busy?'Duplicazione…':'Conferma'}}</button></div>
  </div></div>
@@ -709,6 +712,7 @@ function copyToArchive(sheet:Personal){
 </template>
 
 <style scoped>
+.lf-duplicate-number{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;font-weight:850;margin:14px 0}.lf-duplicate-number input{max-width:88px;min-width:72px;text-align:center;font-size:17px;font-weight:900}
 /* PATCH 3/7 — ricreazione fedele delle card approvate: sempre due colonne desktop. */
 .lf-roster-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding:13px 15px;border-radius:13px}
 .lf-roster-toolbar .card-heading{font-size:16px;letter-spacing:.03em}

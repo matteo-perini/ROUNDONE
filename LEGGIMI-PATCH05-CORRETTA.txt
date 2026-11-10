@@ -1,0 +1,47 @@
+PATCH 05 CORRETTA - 10 NOVEMBRE 2026
+
+BASE: LionFit-Modern-Git(3).zip (cartella principale contenente package.json).
+Questa e' la PATCH 05 CUMULATIVA revisionata, NON un ulteriore strato da aggiungere alla versione pubblicata.
+
+MODIFICHE CONSENTITE (secondo richiesta piu' recente):
+- Duplicazione multipla settimane, senza modificare il layout Admin dei 7 giorni gia' corretto.
+- Feedback e diagnostica sul salvataggio disponibilita' Coach collaboratore.
+- Redesign area Atleta: Home, Piano, Archivio, Prenotazioni e dropdown discipline.
+- Desktop Atleta: UNICO menu laterale sinistro, senza nav superiore. Mobile: dock inferiore usuale.
+- Messaggio Accesso esplicito in modalita' DEV e 2 avviatori per Firebase con .env locali.
+NON INCLUSE: attribuzione storica schede Coach, sostituzione Importa tabelle con Progressi,
+redesign Profilo/Impostazioni, Twin, Gym Map e qualunque modifica alle Rules.
+
+COME APPLICARLA: creare prima una copia della cartella locale. Estrarre lo ZIP nella
+CARTELLA PRINCIPALE del progetto, sovrascrivendo src e altri file esistenti. NON
+creare una sottocartella aggiuntiva. Se avevi gia' applicato la precedente PATCH05
+completa e vuoi davvero ripartire dalla base pulita, ripristina prima lo ZIP originale
+LionFit-Modern-Git(3).zip in una cartella nuova, preservando separatamente le tue
+.env.*.local private. Gli eventuali file aggiuntivi della vecchia patch in una
+cartella gia' modificata non vengono eliminati dall'estrazione di questa.
+
+PER USARE I PROFILI FIREBASE (NON usare npm run dev):
+1. Chiudi i server precedenti (CTRL+C).
+2. Controlla che sia presente .env.staging.local oppure .env.production.local.
+3. Doppio clic AVVIA_LIONFIT_STAGING_5173.cmd per i profili TEST di STAGING.
+   In alternativa doppio clic AVVIA_LIONFIT_LIVE_SOLO_LETTURA_5173.cmd per
+   esaminare i profili reali in SOLA LETTURA APPLICATIVA. NON usare per test scritture.
+4. Apri http://localhost:5173/ . In una finestra privata se sessione precedente.
+5. Esci e rientra con un altro account dello STESSO ambiente Firebase.
+6. Test responsive mobile (<800px) e desktop (>=800px).
+
+NOTE: npm run dev avvia Vite in DEV. La configurazione originale richiede
+import.meta.env.PROD e MODE staging/production per login Firebase reale.
+Per questo su DEV compare 'Firebase non configurato': e' una protezione,
+non una perdita di utenti. Non modificare stagingConfig.ts per aggirarla.
+
+VERIFICHE: node VERIFICA_PATCH05_CORRETTA.cjs; npm run typecheck;
+poi build eseguita dagli script. Testare su STAGING i permessi collaboratore e
+la sincronizzazione slot. Nessuna garanzia di bug risolto finche' non testato.
+
+IMPORTANTE: se in passato hai pubblicato uno ZIP con i file .env su GitHub,
+verifica le esclusioni e la sicurezza: questi file NON sono inclusi nella patch.
+Non fare npm run release:build, GitHub deploy o sincronizzazione Android ancora.
+
+Se gia usavi VERIFICA_PATCH05_WINDOWS.cmd, questa patch lo aggiorna: non chiede
+piu npm run dev per provare gli account Firebase reali.

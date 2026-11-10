@@ -57,7 +57,7 @@ const router=createRouter({history:createWebHistory(),routes:[
 ]})
 router.beforeEach(async to=>{
  // La build Android normale non deve mai usare lo store fittizio.
- if(import.meta.env.PROD){
+ if(import.meta.env.PROD || isStagingMode()){
   if(!isStagingMode())return to.path==='/accesso'?true:'/accesso'
   if(to.path==='/accesso'){
    try{
