@@ -1,0 +1,111 @@
+/* LionFit Progressi 360. Scoped overrides; do not modify Coach/Admin day layouts. */
+.lf-progress360{width:100%;max-width:1100px;margin:0 auto;padding:8px 0 30px;gap:15px;min-width:0}
+.lf-progress360 .lf-p360-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:4px 0 7px}
+.lf-progress360 .lf-p360-head h1{font-size:clamp(24px,4.5vw,32px);margin:7px 0 5px;line-height:1.15}
+.lf-progress360 .lf-p360-head p{font-size:12px;line-height:1.5;margin:0}
+.lf-progress360 .lf-p360-head-icon{display:grid;place-items:center;flex:none;width:55px;height:55px;border-radius:16px;background:rgba(20,182,108,.17);color:var(--mint);font-size:30px}
+.lf-progress360 .lf-p360-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;width:100%;margin:4px 0}
+.lf-progress360 .lf-p360-tabs button{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px solid var(--border);border-radius:14px;padding:13px 4px;min-height:80px;background:var(--card);color:var(--text);font-size:14px;font-weight:850}
+.lf-progress360 .lf-p360-tabs button span{font-size:11px;font-weight:800;text-align:center}
+.lf-progress360 .lf-p360-tabs button.on{border-color:var(--mint);box-shadow:inset 0 0 0 1px var(--mint),0 0 14px rgba(44,226,131,.14);background:var(--green-bg)}
+.lf-progress360 .lf-p360-card{padding:15px;border-radius:15px;border:1px solid var(--border);background:var(--card);min-width:0}
+.lf-progress360 .lf-p360-card h2{font-size:17px;margin:4px 0 10px}
+.lf-progress360 .lf-p360-card h3{font-size:15px;margin:0 0 4px}
+.lf-progress360 .lf-p360-card input,.lf-progress360 .lf-p360-card select,.lf-progress360 .lf-p360-coach-selector select,.lf-progress360 .lf-p360-card textarea{width:100%;max-width:100%;min-width:0;min-height:43px;background:var(--field);border:1px solid var(--outline);color:var(--text);border-radius:10px;padding:10px;font-size:14px}
+.lf-progress360 .lf-p360-card textarea{resize:vertical}
+.lf-progress360 .lf-p360-card input:focus,.lf-progress360 .lf-p360-card select:focus{outline:2px solid var(--mint);outline-offset:1px}
+.lf-progress360 .lf-p360-filters{display:flex;flex-wrap:wrap;gap:6px;margin:13px 0 10px}
+.lf-progress360 .lf-p360-filters button{font-size:11px;font-weight:800;min-height:34px;padding:6px 10px;border-radius:10px;background:var(--card2);border:1px solid var(--border);color:var(--text)}
+.lf-progress360 .lf-p360-filters button.on{background:#11894f;color:#fff;border-color:#42d98a}
+.lf-progress360 .lf-p360-sheet-list{display:flex;flex-direction:column;gap:9px;margin-top:15px}
+.lf-progress360 .lf-p360-sheet{width:100%;display:flex;align-items:center;gap:11px;text-align:left;min-height:73px;padding:10px 12px;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:13px}
+.lf-progress360 .lf-p360-sheet:focus-visible{outline:2px solid var(--mint)}
+.lf-progress360 .lf-p360-square{display:grid;place-items:center;flex:none;width:46px;height:46px;background:var(--green-bg);border-radius:12px;color:var(--mint);font-size:25px}
+.lf-progress360 .lf-p360-sheet-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.lf-progress360 .lf-p360-sheet-copy b{font-size:13px;overflow-wrap:anywhere}
+.lf-progress360 .lf-p360-sheet-copy small{font-size:11px;color:var(--muted)}
+.lf-progress360 .lf-p360-arrow{font-size:28px;color:var(--mint)}
+.lf-progress360 .lf-p360-back{border:0;color:var(--mint);background:transparent;text-align:left;font-weight:800;padding:8px 2px}
+.lf-progress360 .lf-p360-date,.lf-progress360 .lf-p360-field-label{display:flex;flex-direction:column;gap:7px;font-weight:800;font-size:12px;margin:12px 0}
+.lf-progress360 .lf-p360-set-header,.lf-progress360 .lf-p360-set{display:grid;grid-template-columns:60px minmax(0,1fr) minmax(0,1fr);gap:9px;align-items:center}
+.lf-progress360 .lf-p360-set-header{font-size:11px;color:var(--muted);margin:16px 0 5px;text-align:center}
+.lf-progress360 .lf-p360-set{margin:7px 0}
+.lf-progress360 .lf-p360-set>b{display:grid;place-items:center;background:var(--card2);min-height:44px;border-radius:9px;border:1px solid var(--border)}
+.lf-progress360 .lf-p360-set input{text-align:center;min-height:44px}
+.lf-progress360 .lf-p360-row-actions{display:flex;gap:8px;justify-content:flex-start;margin-top:12px}
+.lf-progress360 .lf-p360-row-actions button,.lf-progress360 .lf-p360-skip{font-size:11px;min-height:36px;padding:7px 11px;border-radius:9px}
+.lf-progress360 .lf-p360-main-button{display:block;width:100%;min-height:49px;border-radius:12px;font-weight:850;margin:13px 0 4px;background:#008f4f;color:#fff;border:1px solid #42d68d}
+.lf-progress360 button:disabled{opacity:.55;cursor:not-allowed}
+.lf-progress360 .lf-p360-stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.lf-progress360 .lf-p360-stat{background:var(--card);border:1px solid var(--border);border-radius:13px;min-width:0;padding:13px 9px}
+.lf-progress360 .lf-p360-stat span{color:var(--muted);display:block;font-size:9px;font-weight:900;line-height:1.4}
+.lf-progress360 .lf-p360-stat strong{font-size:24px;color:var(--mint);display:block;margin-top:8px}
+.lf-progress360 .lf-p360-line-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:10px 0}
+.lf-progress360 .lf-p360-line-filters label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:750}
+.lf-progress360 .lf-p360-graph{border:1px solid var(--border);border-radius:11px;background:var(--card2);padding:13px 12px;margin:14px 0 8px;min-width:0}
+.lf-progress360 .lf-p360-graph svg{display:block;width:100%;height:180px;overflow:visible;color:var(--text)}
+.lf-progress360 .lf-p360-graph-caption{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin:7px 0 16px}
+.lf-progress360 .lf-p360-empty{border:1px dashed var(--border);padding:18px;border-radius:12px;text-align:center}
+.lf-progress360 .lf-p360-history-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding:12px 0;font-size:11px}
+.lf-progress360 .lf-p360-history-row span{color:var(--muted)}
+.lf-progress360 .lf-p360-photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:13px 0}
+.lf-progress360 .lf-p360-photo-select{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;min-height:110px;padding:13px 6px;border:1px solid var(--border);background:var(--card2);border-radius:13px;cursor:pointer}
+.lf-progress360 .lf-p360-photo-select span{font-size:28px;color:var(--mint)}
+.lf-progress360 .lf-p360-photo-select strong{font-size:12px}
+.lf-progress360 .lf-p360-photo-select small{font-size:10px;color:var(--mint);max-width:100%;overflow-wrap:anywhere;text-align:center}
+.lf-progress360 .lf-p360-photo-select input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.lf-progress360 .lf-p360-check-row{border:1px solid var(--border);border-radius:11px;padding:12px;margin:10px 0;background:var(--card2)}
+.lf-progress360 .lf-p360-check-row img{max-width:100%;max-height:220px;border-radius:9px;object-fit:contain}
+.lf-progress360 .lf-p360-error{border:1px solid #df8181;background:rgba(200,46,46,.08);overflow-wrap:anywhere}
+.lf-progress360 .lf-p360-coach-selector{display:flex;flex-direction:column;gap:9px}
+.lf-progress360 .lf-p360-back-link{display:inline-block;align-self:flex-start;margin-top:10px}
+@media(min-width:820px){.lf-progress360 .lf-p360-tabs{max-width:760px}.lf-progress360 .lf-p360-photo-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.lf-progress360 .lf-p360-card{padding:21px}.lf-progress360 .lf-p360-set{max-width:650px}.lf-progress360 .lf-p360-line-filters{max-width:520px}}
+@media(max-width:430px){.lf-progress360 .lf-p360-tabs button{min-height:73px}.lf-progress360 .lf-p360-card{padding:12px}.lf-progress360 .lf-p360-stat strong{font-size:19px}.lf-progress360 .lf-p360-head-icon{width:42px;height:42px}}
+/* Two requested booking fixes. Final override defeats previous variable card heights. */
+.app.as-athlete .booking-in-shell .lf-booking-v4-flow .booking-v1-services{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:stretch!important;gap:9px!important}
+.app.as-athlete .booking-in-shell .lf-booking-v4-flow .booking-service-card{box-sizing:border-box!important;height:clamp(205px,25vw,246px)!important;min-height:clamp(205px,25vw,246px)!important;max-height:clamp(205px,25vw,246px)!important;align-self:stretch!important;display:flex!important;flex-direction:column!important;justify-content:flex-start!important;align-items:center!important;gap:7px!important;padding:12px 9px!important;overflow:hidden}
+.app.as-athlete .booking-in-shell .lf-booking-v4-flow .booking-service-card .lf-booking-mark,.app.as-athlete .booking-in-shell .lf-booking-v4-flow .booking-service-card .booking-service-mark{height:90px!important;flex:0 0 90px!important;max-width:100%!important}
+.app.as-athlete .booking-in-shell .lf-booking-v4-flow .booking-service-card strong{font-size:clamp(15px,3.8vw,19px)!important;line-height:1.15!important;margin:3px 0 0!important;text-align:center!important}
+.app.as-athlete .booking-in-shell .lf-booking-v4-flow .booking-service-card small{font-size:10px!important;line-height:1.25!important;text-align:center!important;overflow-wrap:break-word!important}
+.app.as-athlete .booking-in-shell .lf-booking-v4-flow .lf-booking-v4-coaches{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;align-items:stretch}
+.app.as-athlete .booking-in-shell .lf-booking-v4-flow .lf-booking-v4-coaches .lf-booking-coach-choice{width:100%;min-height:79px;max-width:none;align-items:center}
+.app.as-athlete .booking-in-shell .lf-booking-v4-flow .lf-booking-v4-coaches .lf-booking-coach-choice:only-child{max-width:325px;justify-self:start}
+@media(max-width:375px){.app.as-athlete .booking-in-shell .lf-booking-v4-flow .lf-booking-v4-coaches{grid-template-columns:minmax(0,1fr)!important}.app.as-athlete .booking-in-shell .lf-booking-v4-flow .lf-booking-v4-coaches .lf-booking-coach-choice:only-child{max-width:290px}}
+
+/* PATCH 07 — 4 sezioni e annotazioni obiettivi. */
+.lf-progress360 .lf-p360-tabs button{padding:11px 4px;gap:5px}
+.lf-progress360 .lf-p360-tabs button span{font-size:clamp(10px,2.6vw,12px)}
+.lf-progress360 .lf-p360-goal-editor{border:1px solid var(--border);border-radius:13px;padding:14px;margin:15px 0;background:var(--card2)}
+.lf-progress360 .lf-p360-goal-editor h3{margin:3px 0 12px}
+.lf-progress360 .lf-p360-archived-toggle{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted);margin:14px 0;cursor:pointer}
+.lf-progress360 .lf-p360-archived-toggle input{width:17px;min-height:17px;height:17px;accent-color:var(--mint)}
+.lf-progress360 .lf-p360-goal{background:var(--card2);border:1px solid var(--border);border-radius:13px;padding:15px;margin:10px 0}
+.lf-progress360 .lf-p360-goal-heading{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.lf-progress360 .lf-p360-goal-heading h3{flex:1;min-width:130px;overflow-wrap:anywhere}
+.lf-progress360 .lf-p360-goal-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.55;margin:12px 0}
+.lf-progress360 .lf-p360-goal-status{font-size:10px;font-weight:850;padding:5px 9px;border:1px solid var(--border);border-radius:99px;color:var(--text)}
+.lf-progress360 .lf-p360-goal-status.status-active{color:#64eb9e;border-color:#288f56}
+.lf-progress360 .lf-p360-goal-status.status-reached{color:#64d8ff;border-color:#337d98}
+.lf-progress360 .lf-p360-goal-status.status-paused{color:#f7c874;border-color:#a68546}
+.lf-progress360 .lf-p360-goal-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.lf-progress360 .lf-p360-goal-actions button{min-height:35px;font-size:11px;padding:7px 10px;border-radius:9px}
+@media(max-width:430px){.lf-progress360 .lf-p360-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.lf-progress360 .lf-p360-tabs button{min-height:64px;flex-direction:row;gap:7px}}
+
+/* PATCH 08 — compact progress sheet picker before editing weights. */
+.lf-progress360 .lf-p360-sheet-picker{padding:13px;min-width:0}
+.lf-progress360 .lf-p360-picker-heading{gap:8px;align-items:center}
+.lf-progress360 .lf-p360-picker-heading h2{margin:3px 0 0}
+.lf-progress360 .lf-p360-picker-filters{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;padding:2px 1px 8px;margin:9px 0 3px}
+.lf-progress360 .lf-p360-picker-filters button{white-space:nowrap;flex:0 0 auto;padding:6px 9px;min-height:32px}
+.lf-progress360 .lf-p360-compact-list{gap:6px;margin-top:8px;display:grid;grid-template-columns:minmax(0,1fr)}
+.lf-progress360 .lf-p360-compact-sheet{min-height:57px;padding:7px 9px;gap:9px;border-radius:10px}
+.lf-progress360 .lf-p360-compact-sheet .lf-p360-square{width:36px;height:36px;border-radius:9px;font-size:19px}
+.lf-progress360 .lf-p360-compact-sheet .lf-p360-sheet-copy{gap:2px}
+.lf-progress360 .lf-p360-compact-sheet .lf-p360-sheet-copy b{font-size:13px;line-height:1.2;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.lf-progress360 .lf-p360-compact-sheet .lf-p360-sheet-copy small{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lf-progress360 .lf-p360-compact-sheet .lf-p360-arrow{font-size:22px}
+.lf-progress360 .lf-p360-photo-status{padding:9px 11px;border:1px solid var(--mint);border-radius:10px}
+/* The Coach only has three tabs, the Athlete four: avoid wide empty space. */
+.lf-progress360 .lf-p360-tabs.lf-p360-tabs-coach{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(min-width:680px){.lf-progress360 .lf-p360-compact-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:430px){.lf-progress360 .lf-p360-tabs.lf-p360-tabs-coach{grid-template-columns:repeat(3,minmax(0,1fr))}.lf-progress360 .lf-p360-sheet-picker{padding:11px}}

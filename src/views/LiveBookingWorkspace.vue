@@ -28,7 +28,7 @@ const session=ref<StagingSession|null>(null)
 const configs=ref<LiveCoachConfig[]>([]),slots=ref<Slot[]>([]),allRows=ref<LiveReservation[]>([])
 const names=ref<Record<string,string>>({})
 const coachRoster=ref<{id:string;name:string}[]>([])
-const availabilityConfirmOpen=ref(false),availabilityProgress=ref('')
+const availabilityProgress=ref(''),availabilityFeedback=ref('')
 const calendarWarning=ref(''),availabilityWarning=ref(''),nowMs=ref(Date.now())
 let clockTimer:ReturnType<typeof setInterval>|null=null
 const namesPending=new Set<string>()
@@ -261,7 +261,7 @@ async function cancelBookingRow(b:LiveReservation){
   allRows.value=allRows.value.map(row=>row.id===b.id?{...row,status:'cancelled'}:row)
  })
 }
-function editConfig(){edited.value=true}
+function editConfig(){edited.value=true;availabilityFeedback.value=''}
 function setWeeklyDay(day:string,field:'enabled'|'from'|'to',value:boolean|string){
  const d=draft.value;if(!d)return
  const info=d.weekly[day as keyof typeof d.weekly]||{enabled:false,ranges:[{from:'09:00',to:'13:00'}]}
@@ -306,25 +306,38 @@ async function prepareNextWeek(){const s=mustSession(),c=myConfig.value;if(!c)re
  })
 }
 
-async function persistAvailability(){const d=draft.value;if(!d)return
- const reason=validateConfig(d);if(reason){message.value=`Controlla disponibilità: ${reason}`;return}
- availabilityConfirmOpen.value=true
+async function persistAvailability(){
+ const d=draft.value;if(!d||busy.value)return
+ availabilityFeedback.value=''
+ const reason=validateConfig(d)
+ if(reason){availabilityFeedback.value=`Controlla disponibilità: ${reason}`;message.value=availabilityFeedback.value;return}
+ if(!window.confirm('Salvare la disponibilità e sincronizzare gli slot dei prossimi 30 giorni? Le prenotazioni confermate saranno conservate.'))return
+ await confirmAvailabilitySave()
 }
 async function confirmAvailabilitySave(){
  if(busy.value)return
- availabilityConfirmOpen.value=false
  const d=draft.value;if(!d)return
  availabilityProgress.value='Verifica e sincronizzazione della disponibilità in corso…'
+ let successMessage=''
  await runWrite(async()=>{
   const {db}=getStagingClients()
   const result=await synchronizeCoachAvailability(db,mustSession(),d,30,(finished,total)=>{
    availabilityProgress.value=total?`Sincronizzazione slot: ${finished} di ${total} controllati…`:'Configurazione salvata. Verifica degli slot…'
   })
   edited.value=false
-  return `Disponibilità sincronizzata: ${result.created} slot nuovi, ${result.retired} aperti obsoleti rimossi, ${result.keptBooked} occupati conservati.`
+  successMessage=`Disponibilità salvata e sincronizzata: ${result.created} slot nuovi, ${result.retired} aperti obsoleti rimossi, ${result.keptBooked} occupati conservati.`
+  return successMessage
  })
  availabilityProgress.value=''
- if(/permission|permess|autorizza|insufficient/i.test(message.value))message.value='Permessi Firebase insufficienti per la disponibilità: verifica che il collaboratore abbia ruolo admin, membershipStatus attivo e gymId corretto. Controlla le Rules pubblicate; nessuna modifica automatica alle Rules.'
+ if(successMessage){
+  availabilityFeedback.value=successMessage
+  coachTab.value='calendario'
+ }else{
+  const error=message.value||'Impossibile salvare la disponibilità.'
+  availabilityFeedback.value=/permission|permess|autorizza|insufficient/i.test(error)
+   ?'Salvataggio non riuscito: permessi Firebase insufficienti. Verifica ruolo collaboratore, palestra di appartenenza e Rules pubblicate.'
+   :error
+ }
 }
 async function prepareDay(){const s=mustSession(),c=myConfig.value;if(!c)return
  if(!window.confirm(`Preparare gli slot aperti del ${selectedDate.value} su Firebase?`))return
@@ -354,6 +367,7 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
   <div v-else-if="status==='error'" class="panel" role="alert">{{message}} <RouterLink to="/accesso">{{uiText("Torna all'accesso")}}</RouterLink></div>
   <template v-else>
    <p v-if="calendarWarning" class="notice" role="alert">{{calendarWarning}}</p><p v-if="availabilityWarning&&!isCoach" class="notice" role="alert">{{availabilityWarning}}</p>
+   <p v-if="availabilityFeedback" class="notice" role="status" aria-live="polite">{{availabilityFeedback}}</p>
    <p v-if="message&&message!=='Calendario sincronizzato.'" class="small muted" role="status">{{message}}</p>
    <template v-if="!isCoach">
     <div class="booking-tabs booking-main-tabs"><button :class="{selected:athleteTab==='prenota'}" @click="athleteTab='prenota'">{{uiText("Prenota")}}</button><button :class="{selected:athleteTab==='mie'}" @click="athleteTab='mie'">{{uiText("Le mie prenotazioni")}}</button></div>

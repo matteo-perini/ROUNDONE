@@ -11,7 +11,7 @@ export function photoFileSupported(file:Pick<File,'name'|'type'|'size'>){
 type Converter=(a:{blob:Blob;toType:string;quality:number})=>Promise<Blob|Blob[]>
 declare global{interface Window{heic2any?:Converter}}
 let converterTask:Promise<Converter>|null=null
-async function heicConverter():Promise<Converter>{
+export async function heicConverter():Promise<Converter>{
  if(window.heic2any)return window.heic2any
  if(!converterTask)converterTask=new Promise<Converter>((resolve,reject)=>{
   // Original V1 already used this version. External fallback only if the browser

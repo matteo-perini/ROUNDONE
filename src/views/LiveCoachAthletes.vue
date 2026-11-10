@@ -15,7 +15,6 @@ import {hasUnsavedActivities} from '../features/sheets/weekDraftPolicy'
 import {updateV1WeekSlot} from '../integrations/firestore/liveWeekSlots'
 import {createCoachModel} from '../integrations/firestore/liveCoachOperations'
 import {editorToV1,v1ToEditor} from '../features/sheets/v1ExerciseCodec'
-import {parseWeekTable,applyWeekTableDraft} from '../features/coach/weekTableImport'
 import {hasCoachAssignment} from '../features/athletes/coachMembership'
 import {activeCoaches,confirmPrimaryCoach,coachAssignmentWritesReady,type GymCoach} from '../features/athletes/primaryCoachAssignment'
 import {labCoachRoster,type RosterAthlete} from '../features/athletes/liveCoachRoster'
@@ -183,24 +182,6 @@ function setWeekSelectionMode(mode:'duplicate'|'delete'){
 }
 
 const deletedWeeks=computed(()=>data.value?.weeks.filter(w=>!!w.deletedAt)??[])
-const importOpen=ref(false),importMode=ref<'paste'|'drive'>('paste'),importText=ref(''),importRows=ref<ReturnType<typeof parseWeekTable>>([]),driveUrl=ref('')
-function previewImport(){importRows.value=parseWeekTable(importText.value)}
-function applyImport(){
- if(!week.value || !activityDraft.value.length){message.value='Apri prima una settimana.';return}
- if(!importRows.value.length){message.value='Nessun giorno riconosciuto.';return}
- if(!window.confirm('Inserire le attività nella bozza? Le schede collegate resteranno inalterate e dovrai premere Salva attività per confermare.'))return
- activityDraft.value=applyWeekTableDraft(activityDraft.value,importRows.value)
- importOpen.value=false;message.value='Tabella inserita nella bozza. Controlla i giorni e premi Salva attività per memorizzarla.'
-}
-async function saveDriveUrl(){
- const s=session.value,a=athlete.value,url=driveUrl.value.trim()
- if(!s||!a)return
- try{
-  const parsed=new URL(url)
-  if(parsed.protocol!=='https:'||!['drive.google.com','docs.google.com'].includes(parsed.hostname))throw new Error('Inserisci un link Google Drive o Fogli Google HTTPS valido.')
- }catch{message.value='Inserisci un link valido a Google Drive o Fogli Google.';return}
- await withWrite('Salva link Google Drive',async()=>{const {db}=getStagingClients();await updateDoc(doc(db,'users',a.id),{driveUrl:url});driveUrl.value='';importOpen.value=false})
-}
 const athlete=computed(()=>roster.value.find(a=>a.id===currentId.value))
 const currentWeeks=computed(()=>data.value?.weeks.filter(w=>!w.deletedAt).slice().sort((a,b)=>String(a.startDate||a.id).localeCompare(String(b.startDate||b.id)))??[])
 const week=computed(()=>currentWeeks.value.find(w=>w.id===selectedWeek.value)??currentWeeks.value.at(-1)??null)
@@ -296,6 +277,12 @@ onMounted(async()=>{window.addEventListener('beforeunload',beforeUnload);documen
  },e=>{if(alive)error.value='Elenco atleti: '+e.message})
 }catch(e){error.value=e instanceof Error?e.message:String(e)}})
 onUnmounted(()=>{window.removeEventListener('beforeunload',beforeUnload);document.removeEventListener('visibilitychange',touchClock);if(refreshClock)clearInterval(refreshClock);rosterEpoch++;alive=false;stopSharedListening();stopSelected();stopUsers?.();stopCoaches?.();stopAuth?.()})
+function openAthleteProgress(){
+ const a=athlete.value,s=session.value
+ if(!a||!s||a.gymId!==s.gymId)return
+ if(dirty.value){message.value='Salva prima le attività modificate, poi apri i Progressi dell’Atleta.';return}
+ void router.push({path:'/coach/progressi',query:{athleteId:a.id}})
+}
 function linkToEditor(kind:'personal'|'shared',day?:number,slot?:1|2){
  if(!athlete.value)return
  // Never discard one of the 14 activity fields while navigating to the archive.
@@ -611,7 +598,7 @@ function copyToArchive(sheet:Personal){
    <button class="action-card" @click="programError='';createProgramOpen=true"><LionIcon name="calendar"/><div><strong>{{uiText("Nuovo programma")}}</strong><small>{{uiText("Giorni e settimane")}}</small></div></button>
    <button class="action-card" @click="linkToEditor('personal')"><LionIcon name="plus"/><div><strong>{{uiText("Crea scheda personale")}}</strong><small>{{uiText("Parti da zero · senza programma")}}</small></div></button>
    <button class="action-card" @click="linkToEditor('shared')"><LionIcon name="book"/><div><strong>{{uiText("Assegna scheda dall'archivio")}}</strong><small>{{uiText("Scegli dall'archivio Coach")}}</small></div></button>
-   <button class="action-card" @click="importOpen=true;importRows=[]"><LionIcon name="clipboard"/><div><strong>{{uiText("Importa tabelle")}}</strong><small>{{uiText("Incolla o collega dati")}}</small></div></button>
+   <button class="action-card" type="button" @click="openAthleteProgress"><LionIcon name="progress"/><div><strong>Progressi</strong><small>Storico, carichi, check e obiettivi</small></div></button>
   </div>
  </section>
  <p v-if="message" class="notice" role="status">{{message}}</p>
@@ -693,17 +680,6 @@ function copyToArchive(sheet:Personal){
   <p>Quante volte vuoi duplicare la <strong>{{currentWeeks.findIndex(w=>w.id===duplicateSourceId)+1}}ª settimana</strong>?</p><label class="lf-duplicate-number">Numero copie consecutive <input v-model.number="duplicateCount" type="number" min="1" :max="Math.min(12,52-currentWeeks.length)" step="1" aria-label="Numero duplicazioni settimana" /></label><p class="muted small">Le {{duplicateCount===1?'copia sarà inserita':'copie saranno inserite'}} in lunedì consecutivi a partire dal <strong>{{duplicateTargetMonday}}</strong>, dopo l'ultima settimana attiva. Una sola conferma: tutto viene salvato insieme oppure non viene creata alcuna copia.</p>
   <p v-if="duplicateError" class="notice" role="alert">{{duplicateError}}</p>
   <div class="row"><button class="secondary" :disabled="busy" @click="duplicateOpen=false">Annulla</button><button class="primary" :disabled="busy||!canWrite" @click="duplicateCurrentWeek">{{busy?'Duplicazione…':'Conferma'}}</button></div>
- </div></div>
- <div v-if="importOpen" class="modal-overlay" @click.self="importOpen=false"><div class="dialog" style="max-width:600px">
- <div class="row between"><h2>{{uiText("IMPORTA PROGRAMMA")}}</h2><button class="bare" aria-label="Chiudi importazione" @click="importOpen=false">✕</button></div>
- <p class="small muted">{{uiText("Incolla una tabella o conserva un link Google Drive nel profilo dell'atleta.")}}</p>
- <div class="row"><button :class="importMode==='paste'?'primary':'secondary'" @click="importMode='paste'">{{uiText("Incolla tabella")}}</button><button :class="importMode==='drive'?'primary':'secondary'" @click="importMode='drive'">{{uiText("Link Google Drive")}}</button></div>
- <template v-if="importMode==='paste'"><p class="small muted">Giorno | Attività 1 | Attività 2 · 7 righe separate da TAB o punto e virgola. Le schede collegate non vengono modificate.</p>
- <textarea v-model="importText" rows="7" placeholder="Lunedì&#9;MMA&#9;Boxe&#10;Martedì&#9;Forza&#9;Mobilità" @input="importRows=[]"/>
- <button class="secondary wide" @click="previewImport">{{uiText("Mostra anteprima")}}</button>
- <div v-if="importRows.length" class="stack"><p class="small">{{importRows.length}} {{uiText("giorni riconosciuti:")}}</p><p v-for="r in importRows" :key="r.dayIndex" class="line-card small"><b>{{r.name}}</b> · {{r.activity1||'—'}} | {{r.activity2||'—'}}</p></div>
- <button class="primary wide" :disabled="!week||!importRows.length" @click="applyImport">{{uiText("Inserisci nella settimana aperta (senza salvare)")}}</button>
- </template><template v-else><label>{{uiText("Link Google Drive")}}<input v-model="driveUrl" type="url" placeholder="https://drive.google.com/…"/></label><button class="primary wide" :disabled="!canWrite||busy" @click="saveDriveUrl">{{uiText("Salva link nel profilo atleta")}}</button></template>
  </div></div>
  <div v-if="showDelete" class="modal-overlay" @click.self="showDelete=null"><div class="dialog" style="max-width:520px"><div class="row between"><h2>{{uiText("Cancella collegamenti ·")}} {{showDelete.title}}</h2><button class="bare" @click="showDelete=null">✕</button></div><p class="muted">{{uiText("Rimuovi il collegamento dal giorno. Senza altri collegamenti, la scheda sparirà dal Piano ma resterà nell'Archivio.")}}</p><article v-for="l in showDelete.links" :key="l.weekId+l.day+l.slot" class="line-card row between"><b>{{l.weekName}} · {{l.dayName}} {{uiText("· Scheda")}} {{l.slot}}</b><button class="danger" @click="unlinkExact(l)">{{uiText("Scollega")}}</button></article></div></div>
  <div v-if="createProgramOpen" class="modal-overlay" @click.self="createProgramOpen=false"><div class="dialog" style="max-width:440px"><div class="row between"><h2>{{uiText("NUOVO PROGRAMMA FIGHTER")}}</h2><button class="bare" @click="createProgramOpen=false">✕</button></div><label>{{uiText("Nome programma")}}<input v-model="programName" maxlength="90" placeholder="Preparazione match"/></label><label class="coach-date-picker-label" @click="openDatePicker">{{uiText("Data inizio (lunedì)")}}<input v-model="monday" type="date" aria-label="Scegli la data di inizio"/></label><label>{{uiText("Numero settimane")}}<input v-model.number="weekCount" type="number" min="1" max="52"/></label><p v-if="programError" class="notice lf-program-form-error" role="alert">{{programError}}</p><button class="primary wide" :disabled="!canWrite||busy" @click="newProgram">{{busy?uiText("Salvataggio…"):uiText("Crea programma")}}</button></div></div>

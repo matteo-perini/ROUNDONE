@@ -27,13 +27,17 @@ import {mayWriteLive} from '../integrations/firebase/stagingConfig'
 import type {Personal} from '../features/sheets/domain'
 import SheetDetail from '../components/SheetDetail.vue'
 import {creatorFilterChoices,creatorFilterMatches,creatorDisplayName,type ArchiveCreatorCoach} from '../features/coach/archiveCreatorFilters'
+import {availableLegacyCoaches,unassignedLegacyModels,checkLegacyAttribution} from '../features/coach/legacyTemplateAttribution'
+import {attributeLegacyTemplate} from '../integrations/firestore/legacyTemplateAttribution'
 
-type Model = Sheet & {createdBy:string;updatedBy:string;revision:number;createdMs:number}
+type Model = Sheet & {createdBy:string;updatedBy:string;revision:number;createdMs:number;legacyCreatorAssignedBy?:string}
 const route=useRoute(),router=useRouter()
 const session=shallowRef<StagingSession|null>(null)
 const models=ref<Model[]>([]),roster=ref<RosterAthlete[]>([]),athleteId=ref('')
 // La paternita' e' un'etichetta per i filtri, mai un permesso.
-const archiveCoaches=ref<ArchiveCreatorCoach[]>([]),creatorFilter=ref('all'),coachLookupNotice=ref('')
+const archiveCoaches=ref<(ArchiveCreatorCoach & {active:boolean})[]>([]),creatorFilter=ref('all'),coachLookupNotice=ref('')
+// One-time migration UI: only the gym Owner can attribute templates lacking createdBy.
+const legacyPanelOpen=ref(false),legacyCreatorSelections=ref<Record<string,string>>({}),legacyBusyId=ref('')
 const pickAssign=shallowRef<Model|null>(null)
 const coachFilter=ref<CoachRosterFilter>('tutti')
 const assignSearch=ref('')
@@ -113,6 +117,9 @@ const writable=computed(()=>mayWriteLive() && !!session.value && ['titolare','co
 const activeCount=computed(()=>models.value.filter(s=>!s.deletedAt).length)
 const authorChoices=computed(()=>creatorFilterChoices(models.value,archiveCoaches.value,session.value?.uid||''))
 const creatorName=(uid:string)=>creatorDisplayName(uid,archiveCoaches.value,session.value?.uid||'')
+const legacyUnassigned=computed(()=>unassignedLegacyModels(models.value))
+const legacyAvailableCoaches=computed(()=>availableLegacyCoaches(archiveCoaches.value))
+const canAssignLegacy=computed(()=>writable.value && session.value?.role==='titolare' && !editing.value)
 const choice=computed(()=>models.value.filter(s=>(filter.value==='all'||(filter.value==='trash'?!!s.deletedAt:!s.deletedAt)) &&
  creatorFilterMatches(s.createdBy,creatorFilter.value,session.value?.uid||'') &&
  `${s.title} ${s.category} ${s.exercises.map(e=>e.name).join(' ')}`.toLowerCase().includes(search.value.toLowerCase()))
@@ -232,6 +239,25 @@ async function trash(s:Model){
  if(!window.confirm(`Spostare nel cestino il modello «${s.title}»? Le schede assegnate e gli archivi degli atleti restano intatti.`))return
  await runWrite('Cestina modello',async({gym,uid})=>{const{db}=getStagingClients();await trashShared(db,gym,s.id,uid)})
 }
+async function assignLegacyCreator(model:Model){
+ const current=session.value
+ if(!current||!canAssignLegacy.value||busy.value)return
+ const coachUid=legacyCreatorSelections.value[model.id]||''
+ try{
+  checkLegacyAttribution(model,coachUid,legacyAvailableCoaches.value)
+  const selected=legacyAvailableCoaches.value.find(c=>c.id===coachUid)
+  if(!selected)return
+  if(!window.confirm(`Attribuire «${model.title}» a ${selected.name}? Questa è un'attribuzione organizzativa: non modifica scheda, atleti, storico o cestino.`))return
+  legacyBusyId.value=model.id
+  await runWrite('Attribuzione scheda storica',async({gym,uid})=>{
+   const {db}=getStagingClients()
+   await attributeLegacyTemplate(db,gym,uid,model.id,coachUid)
+   delete legacyCreatorSelections.value[model.id]
+  })
+  // onSnapshot removes this row once its createdBy is persisted.
+ }catch(e){notice.value=e instanceof Error?e.message:String(e)}
+ finally{legacyBusyId.value=''}
+}
 async function restore(s:Model){
  if(!session.value||!canManageCoachModel(s.id,session.value.role)){notice.value='Ripristino: accesso Coach non autorizzato.';return}
  await runWrite('Ripristina modello',async({gym,uid})=>{const{db}=getStagingClients();await restoreFromTrash(db,gym,'shared',s.id,uid)})
@@ -244,7 +270,8 @@ onMounted(async()=>{
   const {db,auth}=getStagingClients()
   stopModels=onSnapshot(collection(db,'gyms',verified.gymId,'templates'),snap=>{
    if(!live)return
-   models.value=snap.docs.map(d=>{const x=d.data();return {id:d.id,title:String(x.title||''),category:String(x.category||'Allenamento'),exercises:Array.isArray(x.exercises)?x.exercises:[],createdBy:String(x.createdBy||''),updatedBy:String(x.updatedBy||''),revision:Number(x.revision||0),createdMs:typeof x.createdAt?.toMillis==='function'?x.createdAt.toMillis():typeof x.updatedAt?.toMillis==='function'?x.updatedAt.toMillis():0,...(x.deletedAt?{deletedAt:String(x.deletedAt)}:{})} as Model})
+   models.value=snap.docs.map(d=>{const x=d.data();return {id:d.id,title:String(x.title||''),category:String(x.category||'Allenamento'),exercises:Array.isArray(x.exercises)?x.exercises:[],createdBy:String(x.createdBy||''),updatedBy:String(x.updatedBy||''),...(x.legacyCreatorAssignedBy?{legacyCreatorAssignedBy:String(x.legacyCreatorAssignedBy)}:{}),revision:Number(x.revision||0),createdMs:typeof x.createdAt?.toMillis==='function'?x.createdAt.toMillis():typeof x.updatedAt?.toMillis==='function'?x.updatedAt.toMillis():0,...(x.deletedAt?{deletedAt:String(x.deletedAt)}:{})} as Model})
+   if(!legacyUnassigned.value.length)legacyPanelOpen.value=false
   },e=>{if(live)error.value=`Archivio Coach non leggibile: ${e.message}`})
   // La query e' limitata alla stessa palestra e al ruolo Coach (come in Gestione Atleti).
   // Non modifica i permessi di lettura/scrittura delle schede condivise.
@@ -253,6 +280,7 @@ onMounted(async()=>{
    archiveCoaches.value=snap.docs.map(d=>({
     id:d.id,
     name:[d.data().name,d.data().surname].filter(x=>typeof x==='string'&&x.trim()).join(' ').trim()||'Coach',
+    active:d.data().membershipStatus==null||d.data().membershipStatus==='active',
    }))
    coachLookupNotice.value=''
   },()=>{if(live)coachLookupNotice.value='Nomi Coach temporaneamente non disponibili; le schede restano accessibili.'})
@@ -282,6 +310,29 @@ onUnmounted(()=>{live=false;closeListeners()})
  <section v-if="!loading && session && (!writable || notice)" class="panel">
   <p v-if="!writable" class="notice">{{uiText("Le modifiche sono temporaneamente disabilitate. Puoi consultare le schede.")}}</p>
   <p v-if="notice" class="notice" role="status">{{notice}}</p>
+ </section>
+ <section v-if="!loading && session?.role==='titolare' && !editing && legacyUnassigned.length" class="panel lf-legacy-coach-panel">
+  <div class="row between lf-legacy-coach-head">
+   <div><strong>Attribuisci schede storiche ai Coach</strong><p class="muted small">{{legacyUnassigned.length}} schede senza autore attribuito. Il pannello scomparirà automaticamente quando le avrai assegnate tutte.</p></div>
+   <button class="secondary" type="button" :aria-expanded="legacyPanelOpen" @click="legacyPanelOpen=!legacyPanelOpen">{{legacyPanelOpen?'Chiudi':'Assegna schede storiche'}}</button>
+  </div>
+  <div v-if="legacyPanelOpen" class="lf-legacy-coach-content">
+   <p class="muted small">Seleziona il Coach per ogni scheda storica. L'attribuzione organizza soltanto i filtri: non prova l'autore originale e non cambia gli accessi, gli esercizi, le schede già assegnate agli Atleti o il Cestino.</p>
+   <p v-if="!legacyAvailableCoaches.length" class="notice" role="alert">Nessun Coach attivo disponibile: impossibile procedere.</p>
+   <p v-if="!writable" class="notice">Scritture non abilitate in questo ambiente.</p>
+   <div class="lf-legacy-coach-list">
+    <div v-for="s in legacyUnassigned" :key="s.id" class="lf-legacy-coach-row">
+     <div class="lf-legacy-coach-sheet"><b :title="s.title">{{s.title}}</b><small>{{s.deletedAt?'Nel cestino · ':''}}{{s.exercises.length}} esercizi · {{s.id}}</small></div>
+     <label class="lf-legacy-coach-pick">Coach
+      <select v-model="legacyCreatorSelections[s.id]" :disabled="!canAssignLegacy||busy" :aria-label="`Coach da attribuire alla scheda ${s.title}`">
+       <option value="">Seleziona Coach…</option>
+       <option v-for="c in legacyAvailableCoaches" :key="c.id" :value="c.id">{{c.name}}</option>
+      </select>
+     </label>
+     <button type="button" class="primary lf-legacy-coach-action" :disabled="!canAssignLegacy||busy||!legacyCreatorSelections[s.id]" @click="assignLegacyCreator(s)">{{busy&&legacyBusyId===s.id?'Salvataggio…':'Attribuisci'}}</button>
+    </div>
+   </div>
+  </div>
  </section>
  <section v-if="editing && !loading && session" class="panel lf-editor-panel">
   <div class="lf-editor-heading">
@@ -348,7 +399,7 @@ onUnmounted(()=>{live=false;closeListeners()})
   <p v-if="coachLookupNotice" class="muted small" role="status">{{coachLookupNotice}}</p>
   <div class="grid2"><div v-for="s in choice" :key="s.id" class="archive-card">
    <h3 style="margin:0">{{s.title}}</h3><p class="muted small">{{s.category}} · {{s.exercises.length}} {{uiText("esercizi ·")}} {{s.deletedAt?'Nel cestino':'Attivo'}}</p>
-   <p class="lf-creator-meta"><span class="lf-creator-owner">{{s.createdBy?uiFormat('Creata da {coach}',{coach:creatorName(s.createdBy)}):uiText('Scheda storica · autore non registrato')}}</span><span v-if="s.updatedBy" class="muted">{{uiFormat('Ultima modifica: {coach}',{coach:creatorName(s.updatedBy)})}}</span></p>
+   <p class="lf-creator-meta"><span class="lf-creator-owner">{{s.createdBy?(s.legacyCreatorAssignedBy?uiFormat('Scheda storica attribuita a {coach}',{coach:creatorName(s.createdBy)}):uiFormat('Creata da {coach}',{coach:creatorName(s.createdBy)})):uiText('Scheda storica · autore non registrato')}}</span><span v-if="s.updatedBy" class="muted">{{uiFormat('Ultima modifica: {coach}',{coach:creatorName(s.updatedBy)})}}</span></p>
    <p class="small">{{s.exercises.slice(0,2).map(x=>x.name).join(' · ')}}</p><div class="divider"/>
    <p v-if="personal.some(p=>p.id===s.id)" class="muted small">{{personal.find(p=>p.id===s.id)?.deletedAt?'Scheda personale nel cestino':'Già assegnato a questo atleta (riutilizzabile per il giorno)'}}</p>
    <div class="archive-actions"><button class="secondary" @click="preview=s">{{uiText("Visualizza")}}</button>
@@ -423,4 +474,20 @@ onUnmounted(()=>{live=false;closeListeners()})
 .lf-creator-explainer{margin:9px 0;font-size:11px}
 @media(max-width:700px){.lf-creator-filter{padding:9px;gap:6px}.lf-creator-filter-label{width:100%;padding-top:0}.lf-creator-filter-button{font-size:10px;min-height:34px}}
 @media(prefers-reduced-motion:reduce){.lf-creator-filter-button{transition:none}}
+/* PATCH 09: temporary legacy creator assignment, same responsive tone as athlete migration. */
+.lf-legacy-coach-panel{border:1px solid var(--mint);padding:13px 15px}
+.lf-legacy-coach-head{align-items:center;gap:12px;flex-wrap:wrap}
+.lf-legacy-coach-head strong{font-size:13px}
+.lf-legacy-coach-head p{margin:5px 0 0}
+.lf-legacy-coach-content{padding-top:12px}
+.lf-legacy-coach-list{max-height:min(55vh,485px);overflow:auto;display:grid;gap:7px;margin-top:10px;padding-right:3px}
+.lf-legacy-coach-row{display:grid;grid-template-columns:minmax(150px,1fr) minmax(155px,.8fr) auto;gap:10px;align-items:center;padding:9px;border:1px solid var(--border);background:var(--card2);border-radius:9px}
+.lf-legacy-coach-sheet{min-width:0;display:grid;gap:4px}
+.lf-legacy-coach-sheet b{font-size:12px;overflow-wrap:anywhere}
+.lf-legacy-coach-sheet small{font-size:10px;color:var(--muted);overflow-wrap:anywhere}
+.lf-legacy-coach-pick{display:grid;gap:5px;font-size:10px;font-weight:750;color:var(--muted)}
+.lf-legacy-coach-pick select{width:100%;min-width:0;min-height:34px;padding:6px 8px;border:1px solid var(--border);border-radius:7px;background:var(--field);color:var(--text)}
+.lf-legacy-coach-action{min-height:34px;font-size:11px}
+@media(max-width:630px){.lf-legacy-coach-row{grid-template-columns:1fr auto}.lf-legacy-coach-sheet{grid-column:1/-1}.lf-legacy-coach-pick{min-width:0}.lf-legacy-coach-action{align-self:end}.lf-legacy-coach-panel{padding:10px}}
+@media(max-width:345px){.lf-legacy-coach-row{grid-template-columns:1fr}.lf-legacy-coach-pick,.lf-legacy-coach-action{grid-column:1}}
 </style>

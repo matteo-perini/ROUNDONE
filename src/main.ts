@@ -42,3 +42,6 @@ import './styles-patch05-ux.css'
 
 // PATCH 05 correttiva: una sola navigazione Atleta per viewport.
 import './styles-patch05-fix-nav.css'
+
+// Progressi 360 + due correzioni grafiche Prenotazioni.
+import './styles-progress360.css'
