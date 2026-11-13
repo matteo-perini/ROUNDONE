@@ -15,6 +15,7 @@ import { linkedSheetsForDay,liveWeekForDate } from '../features/athletes/athlete
 import { romeDayIndex,romeWeekDayNumber } from '../features/athletes/romeWeekProgress'
 import { archiveCounts,visibleArchives,type ArchiveView } from '../features/athletes/archiveVisibility'
 import { groupSemanticCopies } from '../features/sheets/semanticDedup'
+import {groupActivePrograms,programForWeek} from '../features/sheets/programFamilies'
 import {joinArchivesWithLegacy,isArchiveCopyLinkedOrEquivalent} from '../features/athletes/legacyArchiveProjection'
 import type { ExerciseRecord } from '../features/sheets/domain'
 const props=defineProps<{screen:'home'|'plan'|'archive'}>()
@@ -49,6 +50,12 @@ onUnmounted(()=>{
  if(typeof window!=='undefined')window.removeEventListener('focus',refreshClock)
 })
 const currentWeek=computed(()=>data.value?liveWeekForDate(data.value.weeks,new Date(clock.value)):null)
+const currentWeekLabel=computed(()=>{
+ const w=currentWeek.value
+ if(!w)return ''
+ const p=programForWeek(groupActivePrograms(data.value?.weeks||[]),w.id)
+ return p?`${p.title} · Settimana ${p.weeks.findIndex(x=>x.id===w.id)+1}`:w.name
+})
 const todayIndex=computed(()=>romeDayIndex(clock.value))
 const todayDay=computed(()=>currentWeek.value?.days[todayIndex.value])
 const todaySheets=computed(()=>data.value&&currentWeek.value?linkedSheetsForDay(data.value.groups,currentWeek.value.id,todayIndex.value):[])
@@ -70,7 +77,7 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
     <div class="panel"><RouterLink :to="livePath('/archivio')" class="ghost">{{uiText("CONSULTA IL MIO ARCHIVIO STORICO →")}}</RouterLink></div>
    </template>
    <template v-else-if="props.screen==='home'">
-    <AthleteHomeContent :name="session?.label||'Atleta'" :today-name="todayDay?.name||''" :week-name="currentWeek?.name||''" :calendar-day="romeWeekDayNumber(clock)" :activities="todayDay?.activities||[]" :sheets="todaySheets" :days="currentWeek?.days||[]" :plan-link="livePath('/piano')" :archive-link="livePath('/archivio')" :progress-link="livePath('/progressi')" :booking-link="livePath('/prenotazioni')" :avatar-url="avatarUrl" :profile-link="livePath('/profilo')" :day-link="dayLink"/>
+    <AthleteHomeContent :name="session?.label||'Atleta'" :today-name="todayDay?.name||''" :week-name="currentWeekLabel" :calendar-day="romeWeekDayNumber(clock)" :activities="todayDay?.activities||[]" :sheets="todaySheets" :days="currentWeek?.days||[]" :plan-link="livePath('/piano')" :archive-link="livePath('/archivio')" :progress-link="livePath('/progressi')" :booking-link="livePath('/prenotazioni')" :avatar-url="avatarUrl" :profile-link="livePath('/profilo')" :day-link="dayLink"/>
    </template>
    <template v-else-if="props.screen==='archive'">
     <section class="panel athlete-archive-hero"><div class="row between"><h2 class="card-heading">{{uiText("ARCHIVIO")}}</h2><span class="pill pill-neutral">{{archiveDistinctCount}} {{uiText("SCHEDE")}}</span></div><p class="muted" style="margin:20px 0 0">{{uiText("Ritrova le schede che hai ricevuto dai Coach, comprese quelle dei programmi precedenti.")}}</p></section>

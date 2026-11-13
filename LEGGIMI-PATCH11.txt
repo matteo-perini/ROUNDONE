@@ -1,0 +1,65 @@
+LIONFIT - PATCH 11 - PROGRAMMI MULTIPLI E DUPLICAZIONE CON DATA
+Data: 13 novembre 2026
+
+BASE OBBLIGATORIA: il progetto LionFit-Modern-Git con la PATCH 10 gia' applicata.
+E' una patch INCREMENTALE: contiene solo file aggiornati/nuovi, NON il progetto intero.
+
+INSTALLAZIONE SU WINDOWS
+1. Fai una copia di sicurezza dell'intera cartella LionFit-Modern-Git.
+2. Apri LIONFIT-PATCH11-INCREMENTALE-13NOV2026.zip.
+3. Estrai il CONTENUTO dello ZIP dentro la cartella LionFit-Modern-Git,
+   sovrascrivendo i file presenti. Non creare una sottocartella aggiuntiva.
+4. Apri la cartella LionFit-Modern-Git in VS Code.
+5. Esegui VERIFICA_PATCH11_WINDOWS.cmd dalla cartella del progetto (Node 22+).
+6. Controlla in ambiente di prova le operazioni Coach/Atleta e i permessi Firestore
+   prima di pubblicare la versione web/APK.
+
+FUNZIONI
+- Il Coach vede righe distinte per programma, ciascuna con le proprie settimane 1, 2, ...
+- "Duplica settimana": popup con numero copie e calendario per scegliere il lunedi'
+  iniziale. Le copie restano nel programma sorgente e non hanno suffisso "(Copia)".
+- Le date occupate da settimane attive dello stesso atleta vengono rifiutate.
+  Le copie consecutive vengono scritte in una sola transazione oppure nessuna.
+- "Nuovo programma": nome, data d'inizio (lunedì), numero di settimane; nuova
+  identita' programma, indipendente dalle programmazioni precedenti, e settimane da 1.
+  Il nuovo programma inizia dopo l'ultima settimana attiva gia' assegnata.
+- Nell'Area Atleta Piano si sceglie prima il programma e poi la settimana.
+- Dashboard Coach: calcolo programmi distinti anche quando hanno lo stesso titolo.
+- Calendari data per Nuovo programma e Duplica: indicatore a destra visibile
+  nei temi chiaro e scuro, apertura nativa del browser/dispositivo.
+- Nessuna cancellazione automatica di settimane, schede, collegamenti o archivi.
+- Le settimane esistenti prive di programId restano leggibili, raggruppate per titolo;
+  i nuovi programmi salvano invece un programId dedicato. Nessuna migrazione dati.
+
+CONTROLLI ESEGUITI NELL'AMBIENTE DI PREPARAZIONE
+- TypeScript + template Vue: PASS (vue-tsc --noEmit).
+- Test automatizzati: 32/32 PASS, inclusi 7 test PATCH 11.
+- Build Vite completa: NON verificata qui (mancava la dipendenza nativa Linux
+  di Rollup nello ZIP originale contenente node_modules Windows).
+- Scritture reali Firebase, browser e app smartphone: NON collaudate sul progetto
+  dell'utente; e' necessario il collaudo in ambiente controllato prima del rilascio.
+- Nessuna modifica alle Firebase Rules. Le Rules esistenti devono ammettere
+  il campo "programId" nelle settimane create da questa PATCH 11.
+
+PROVA MANUALE RACCOMANDATA
+A. Crea programma di 2 settimane, verifica date e giorni lunedi'-domenica.
+B. Duplica settimana 1 scegliendo un lunedi' libero e verifica i dati copiati.
+C. Prova un lunedi' occupato: deve apparire un errore e nessuna copia.
+D. Crea un secondo programma dopo il primo; verifica le 2 righe nel Coach.
+E. Apri il Piano Atleta sul telefono: cambia programma e settimana.
+F. Verifica i pulsanti Cestino/Apri settimana/Modifica giorno gia' esistenti,
+   e prova i calendari nei temi chiaro e scuro.
+G. Verifica un programma con una settimana di pausa e il riepilogo in Home.
+
+ROLLBACK
+Per tornare ESATTAMENTE ai sorgenti della PATCH 10 (non annulla le modifiche
+che nel frattempo sono gia' state salvate su Firebase):
+- Estrai LIONFIT-PATCH11-ROLLBACK-VERSO-PATCH10-13NOV2026.zip nella stessa
+  cartella LionFit-Modern-Git, sovrascrivendo.
+- Esegui RIMUOVI-NUOVI-FILE-PATCH11.cmd per eliminare solo i due nuovi file.
+- Se sono gia' state create settimane con la PATCH 11, il rollback delle sole
+  sorgenti non ripristina i dati. Valuta il backup prima dell'installazione.
+
+NOTE
+Nessuna modifica di file .env, password, Firestore Rules, cartelle node_modules,
+file compilati o APK. Nessuna pubblicazione automatica.

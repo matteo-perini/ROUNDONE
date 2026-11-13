@@ -15,6 +15,7 @@ export type V1DayDocument = {
 }
 export type V1WeekDocument = {
  programTitle?: string
+ programId?: string
  weekIndex?: number
  totalWeeks?: number
  startDate?: string
@@ -36,6 +37,7 @@ export function decodeV1Week(id:string,athleteId:string,raw:V1WeekDocument):Prog
  return {
   id,athleteId,name:label,startDate:str(raw.startDate),
   ...(programTitle?{programTitle}:{}),
+  ...(raw.programId?{programId:str(raw.programId)}:{}),
   ...(weekIndex?{weekIndex}:{}),
   ...(weekNumber(raw.totalWeeks)?{totalWeeks:weekNumber(raw.totalWeeks)}:{}),
   ...(raw.deletedAt?{deletedAt:str(raw.deletedAt)}:{}),
@@ -66,6 +68,7 @@ export function encodeV1Week(week:ProgramWeek,original:V1WeekDocument={}):V1Week
  return {
   ...original,
   programTitle,
+  ...((week.programId||original.programId)?{programId:week.programId||original.programId}:{}),
   ...(week.weekIndex!==undefined?{weekIndex:week.weekIndex}:{}),
   ...(week.totalWeeks!==undefined?{totalWeeks:week.totalWeeks}:{}),
   startDate:week.startDate??str(original.startDate),
@@ -111,7 +114,7 @@ export function duplicateV1WeekDocument(source:V1WeekDocument,targetMonday:strin
  if(!dateValid(targetMonday))throw new Error('Data di duplicazione non valida.')
  if(!source.days)throw new Error('La settimana origine è priva dei giorni.')
  const days=Object.fromEntries(Object.entries(object(source.days)).map(([key,v])=>[key,{...object(v)}]))
- return {programTitle:str(source.programTitle||'Programma')+' (Copia)',startDate:targetMonday,days}
+ return {programTitle:str(source.programTitle||'Programma').replace(/\s*\(Copia\)$/i,''),...(source.programId?{programId:source.programId}:{}),startDate:targetMonday,days}
 }
 
 /** Calendario puro UTC: niente salti o slittamenti al cambio ora estiva/solare. */

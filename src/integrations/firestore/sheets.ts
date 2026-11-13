@@ -103,7 +103,7 @@ export async function duplicateWeekGuarded(db:Firestore,gym:string,athlete:strin
   await readLinked(tx,db,gym,athlete,old.data().days)
   const d=old.data()
   bump(tx,f,fs,coachUid)
-  tx.set(to,{...d,programTitle:String(d.programTitle||'Programma')+' (Copia)',startDate,createdAt:serverTimestamp(),updatedAt:serverTimestamp()})
+  tx.set(to,{...d,programTitle:String(d.programTitle||'Programma').replace(/\s*\(Copia\)$/i,''),startDate,createdAt:serverTimestamp(),updatedAt:serverTimestamp()})
  })
 }
 

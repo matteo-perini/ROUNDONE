@@ -12,6 +12,7 @@ import {forWeekRepresentative,weekDayLinkedSheetNames,exactWeekDaySlots} from '.
 import SheetDetail from './SheetDetail.vue'
 import type { Groups, Personal, ProgramWeek } from '../features/sheets/domain'
 import { uniqueSemanticSheets, visualSheetGroups } from '../features/sheets/semanticDedup'
+import {groupActivePrograms,programForWeek,activeWeekOn} from '../features/sheets/programFamilies'
 
 const props = withDefaults(defineProps<{
   athleteKey: string
@@ -27,9 +28,23 @@ const route=useRoute(),router=useRouter()
 const opened = ref<Personal | null>(null)
 const showSheetChoices=ref(false)
 const selectedDay = ref<number | null>(Number.isInteger(props.initialDay) && props.initialDay! >= 0 && props.initialDay! <= 6 ? props.initialDay! : null)
-const activeWeeks = computed(() => props.weeks.filter(w => !w.deletedAt)
-  .sort((a, b) => (a.startDate || a.id).localeCompare(b.startDate || b.id)))
-const week = computed(() => activeWeeks.value.find(w => w.id === props.weekId) ?? activeWeeks.value[0])
+const allWeeks = computed(() => props.weeks.filter(w => !w.deletedAt))
+const programs=computed(()=>groupActivePrograms(allWeeks.value))
+const todayIso=()=>{
+ const parts=new Intl.DateTimeFormat('en-GB',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:'Europe/Rome'}).formatToParts(new Date())
+ const part=(type:string)=>parts.find(p=>p.type===type)?.value||''
+ return `${part('year')}-${part('month')}-${part('day')}`
+}
+const selectedFamily=computed(()=>{
+ const explicit=programForWeek(programs.value,props.weekId)
+ if(explicit)return explicit
+ const date=todayIso()
+ return programs.value.find(p=>!!activeWeekOn(p.weeks,date))||programs.value.find(p=>p.startDate>=date)||programs.value.at(-1)
+})
+const activeWeeks=computed(()=>selectedFamily.value?.weeks||[])
+const week = computed(() => activeWeeks.value.find(w => w.id === props.weekId) ?? activeWeekOn(activeWeeks.value,todayIso())??activeWeeks.value[0])
+const weekPosition=computed(()=>activeWeeks.value.findIndex(w=>w.id===week.value?.id)+1)
+const selectedWeekLabel=computed(()=>`${selectedFamily.value?.title||'Programma'} · Settimana ${weekPosition.value}`)
 const visual = computed(() => visualSheetGroups(props.groups))
 const programmed = computed(() => visual.value.programmed.filter(group => group.links.some(link => link.weekId === week.value?.id)))
 const unprogrammed = computed(() => visual.value.unprogrammed)
@@ -62,6 +77,12 @@ function uniqueDaysForSheet(group: { links: { weekId: string; dayIndex: number; 
   })
 }
 function chooseWeek(id: string) { showSheetChoices.value=false; if(!activeWeeks.value.some(w=>w.id===id))return;emit('update:weekId', id); void router.replace({query:{...route.query,week:id,day:undefined}}); selectedDay.value = null; opened.value = null }
+function chooseProgram(id:string){
+ const selected=programs.value.find(p=>p.id===id)
+ if(!selected)return
+ const target=activeWeekOn(selected.weeks,todayIso())||selected.weeks[0]
+ if(target)chooseWeek(target.id)
+}
 function openSheet(sheet: Personal) { showSheetChoices.value=false;selectedDay.value = null; opened.value = sheet; if(route.query.day!==undefined)void router.replace({query:{...route.query,day:undefined}}) }
 function openDayTraining(){
  if(selectedDay.value===null)return
@@ -94,12 +115,17 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
     <section class="panel athlete-plan-summary">
       <div class="row between">
         <div><h2 class="card-heading">{{uiText("IL MIO PIANO")}}</h2><p class="muted" style="margin:8px 0 0">{{uiText("SCHEDE E PROGRAMMI ASSEGNATI DAL TUO COACH")}}</p></div>
-        <span class="pill pill-neutral">{{ sheetCount }} {{uiText("SCHEDE")}}<span v-if="activeWeeks.length"> · {{ activeWeeks.length }} {{uiText("SETTIMANE")}}</span></span>
+        <span class="pill pill-neutral">{{ sheetCount }} {{uiText("SCHEDE")}}<span v-if="allWeeks.length"> · {{ programs.length }} PROGRAMMI</span></span>
       </div>
     </section>
 
     <section v-if="activeWeeks.length" class="panel athlete-week-picker">
-      <div class="row between"><strong>{{uiText("SELEZIONA LA SETTIMANA")}}</strong><span class="muted small">{{ week?.name || 'Nessuna settimana' }}</span></div>
+      <label class="lf-p11-athlete-select-label" for="lf-p11-athlete-program">SELEZIONA PROGRAMMA</label>
+      <select id="lf-p11-athlete-program" class="lf-p11-athlete-program-select" :value="selectedFamily?.id||''" @change="chooseProgram(($event.target as HTMLSelectElement).value)">
+        <option v-for="(p,i) in programs" :key="p.id" :value="p.id">Programma {{i+1}} · {{p.title}}</option>
+      </select>
+      <p class="lf-p11-program-dates">{{selectedFamily?.startDate}} → {{selectedFamily?.endDate}} · {{activeWeeks.length}} settimane</p>
+      <div class="row between"><strong>{{uiText("SELEZIONA LA SETTIMANA")}}</strong><span class="muted small">{{ selectedWeekLabel }}</span></div>
       <div class="week-pills" aria-label="Seleziona la settimana del piano">
         <button v-for="(w,i) in activeWeeks" :key="w.id" type="button" class="week-pill" :aria-label="`Settimana ${i+1}: ${w.name}`" :class="{ selected: week?.id === w.id }" :aria-pressed="week?.id === w.id" @click="chooseWeek(w.id)">{{ i+1 }}</button>
       </div>
@@ -127,7 +153,7 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
     <section v-if="activeWeeks.length" class="athlete-week-program">
       <div class="row between"><h2 class="section-title">{{uiText("PROGRAMMAZIONE SETTIMANALE")}}</h2><span class="pill pill-neutral">{{ activeWeeks.length }} {{uiText("SETTIMANE")}}</span></div>
       <div class="panel athlete-week-program-panel">
-        <div class="row between athlete-week-title"><strong>{{week?.name.toUpperCase() || uiText('NESSUNA SETTIMANA')}}</strong><span class="pill pill-neutral">{{ week?.startDate || '' }}</span></div>
+        <div class="row between athlete-week-title"><strong>{{selectedWeekLabel.toUpperCase()}}</strong><span class="pill pill-neutral">{{ week?.startDate || '' }}</span></div>
         <div class="divider"/>
         <div class="week-days lf-athlete-v4-days" aria-label="Programmazione da lunedì a domenica">
           <button v-for="(day,i) in weekDays" :key="`${week?.id}-${day.name}`" type="button" class="lf-athlete-v4-day" :aria-label="`Apri ${day.name}, ${displayActivities(i).join(', ')||'nessuna attività'}; ${linksForDay(i).length} schede`" :class="{'lf-athlete-v4-today':i===currentDayIndex,'lf-athlete-v4-selected':selectedDay===i}" @click="openWeekDay(i)">
@@ -215,4 +241,11 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
 .lf-athlete-v4-day-summary{min-width:0;font-size:11px;line-height:1.4;overflow-wrap:anywhere}.lf-athlete-v4-day-sheets{display:flex;flex-wrap:wrap;gap:4px;min-width:0}.lf-athlete-v4-sheet-chip{display:inline-block;max-width:100%;font-size:10px;color:var(--mint);font-weight:750;background:var(--green-bg);border-radius:6px;padding:4px 6px;overflow-wrap:anywhere}.lf-athlete-v4-chevron{font-size:21px;color:var(--mint)}
 .lf-athlete-v4-dialog-body{display:grid;gap:9px}.lf-athlete-v4-dialog-body h3{font-size:12px;letter-spacing:.04em;margin:6px 0 0}.lf-athlete-v4-activities,.lf-athlete-v4-linked{display:grid;gap:7px}.lf-athlete-v4-activity,.lf-athlete-v4-linked-card{display:flex;align-items:center;gap:10px;justify-content:space-between;border:1px solid var(--outline);background:var(--field);border-radius:9px;padding:9px 11px;font-size:12px}.lf-athlete-v4-activity span,.lf-athlete-v4-linked-card span{font-size:10px;color:var(--mint);flex:none}.lf-athlete-v4-activity strong,.lf-athlete-v4-linked-card strong{flex:1;overflow-wrap:anywhere;min-width:0}.lf-athlete-v4-linked-card button{padding:6px 9px;font-size:11px}.lf-athlete-v4-start{margin-top:7px}.lf-athlete-v4-chooser{display:grid;gap:7px;padding:11px;border:1px solid var(--outline);border-radius:10px}.lf-athlete-v4-chooser strong{font-size:12px}
 @media(max-width:680px){.athlete-plan .lf-athlete-v4-day{grid-template-columns:minmax(77px,1fr) minmax(0,2.1fr) 12px;min-height:54px;padding:9px 10px;gap:7px}.lf-athlete-v4-day-label strong{font-size:10px}.lf-athlete-v4-day-summary{font-size:10px}.lf-athlete-v4-day-sheets{grid-column:2;grid-row:2}.lf-athlete-v4-chevron{grid-column:3;grid-row:1/3}.lf-athlete-v4-linked-card{flex-wrap:wrap}.lf-athlete-v4-linked-card strong{min-width:100px}}
+</style>
+
+<style scoped>
+.lf-p11-athlete-select-label{display:block;margin-bottom:7px;font-size:11px;font-weight:850;letter-spacing:.045em;color:var(--text)}
+.as-athlete .lf-p11-athlete-program-select,.lf-p11-athlete-program-select{width:100%;max-width:100%;min-height:45px;padding:9px 12px;border:1.5px solid var(--outline);border-radius:10px;color:var(--text);background:var(--field);font-size:13px;font-weight:750;cursor:pointer;margin-bottom:5px}
+.lf-p11-athlete-program-select:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.lf-p11-program-dates{margin:3px 0 15px;font-size:11px;color:var(--muted)}
 </style>

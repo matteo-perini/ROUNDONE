@@ -11,6 +11,7 @@ import {mayWriteLive} from '../integrations/firebase/stagingConfig'
 import {assignSharedToDay,trashPersonal,watchAthleteSheets,backfillProtectedLegacy} from '../integrations/firestore/sheets'
 import {createV1Program,saveV1WeekActivities,duplicateV1Weeks,trashV1Week,restoreV1Week} from '../integrations/firestore/programs'
 import {advanceV1Monday} from '../features/sheets/v1WeekCodec'
+import {groupActivePrograms,programForWeek,firstVacantMonday} from '../features/sheets/programFamilies'
 import {hasUnsavedActivities} from '../features/sheets/weekDraftPolicy'
 import {updateV1WeekSlot} from '../integrations/firestore/liveWeekSlots'
 import {createCoachModel} from '../integrations/firestore/liveCoachOperations'
@@ -138,6 +139,7 @@ async function readCardInfo(id:string,epoch:number){
    const row=d.data()
    return {id:d.id,athleteId:id,name:String(row.name||''),programTitle:typeof row.programTitle==='string'?row.programTitle:undefined,
     startDate:typeof row.startDate==='string'?row.startDate:undefined,
+    programId:typeof row.programId==='string'?row.programId:undefined,
     weekIndex:typeof row.weekIndex==='number'?row.weekIndex:undefined,
     totalWeeks:typeof row.totalWeeks==='number'?row.totalWeeks:undefined,
     deletedAt:row.deletedAt?String(row.deletedAt):undefined,days:[]} as ProgramWeek
@@ -169,6 +171,7 @@ async function fillCardInfo(epoch:number){
 }
 const duplicateOpen=ref(false),duplicateSourceId=ref(''),duplicateTargetMonday=ref(''),duplicateCount=ref(1),duplicateError=ref(''),trashedWeeksOpen=ref(false),selectedWeekTrash=ref<string[]>([])
 const weekSelectionMode=ref<'normal'|'duplicate'|'delete'>('normal')
+const selectedProgramId=ref('')
 const deleteConfirmOpen=ref(false)
 function setWeekSelectionMode(mode:'duplicate'|'delete'){
  if(busy.value)return
@@ -183,8 +186,20 @@ function setWeekSelectionMode(mode:'duplicate'|'delete'){
 
 const deletedWeeks=computed(()=>data.value?.weeks.filter(w=>!!w.deletedAt)??[])
 const athlete=computed(()=>roster.value.find(a=>a.id===currentId.value))
-const currentWeeks=computed(()=>data.value?.weeks.filter(w=>!w.deletedAt).slice().sort((a,b)=>String(a.startDate||a.id).localeCompare(String(b.startDate||b.id)))??[])
+const allActiveWeeks=computed(()=>data.value?.weeks.filter(w=>!w.deletedAt)??[])
+const programs=computed(()=>groupActivePrograms(allActiveWeeks.value))
+const selectedProgram=computed(()=>programs.value.find(p=>p.id===selectedProgramId.value)||programForWeek(programs.value,selectedWeek.value)||programs.value.at(-1))
+const currentWeeks=computed(()=>selectedProgram.value?.weeks??[])
 const week=computed(()=>currentWeeks.value.find(w=>w.id===selectedWeek.value)??currentWeeks.value.at(-1)??null)
+function selectProgram(id:string){
+ const p=programs.value.find(p=>p.id===id)
+ if(!p||selectedProgram.value?.id===id||!discardIfDirty('Cambiare programma'))return
+ selectedProgramId.value=id;selectedWeek.value=p.weeks[0]?.id||'';showWeek.value=true
+ weekSelectionMode.value='normal';selectedWeekTrash.value=[];duplicateSourceId.value='';closeDay()
+}
+function selectedWeekLabel(){const p=selectedProgram.value,w=week.value
+ return p&&w?`${p.title} · Settimana ${p.weeks.findIndex(x=>x.id===w.id)+1}`:'Nessuna settimana'
+}
 const groups=computed(()=>data.value?visualSheetGroups(data.value.groups):null)
 const personal=computed(()=>data.value?.personal.filter(x=>!x.deletedAt)??[])
 const byId=(id:string)=>personal.value.find(x=>x.id===id)
@@ -196,7 +211,7 @@ let stopShared:Unsubscribe|null=null,sharedGeneration=0
 function stopSharedListening(){
  sharedGeneration++;stopShared?.();stopShared=null;sharedLoading.value=false
 }
-function stopSelected(){stopSheets?.();stopSheets=null;data.value=null;opened.value=null;pick.value=null;selectedWeek.value='';selectedWeekTrash.value=[];weekSelectionMode.value='normal';deleteConfirmOpen.value=false;closeDay();syncActivityDraft(null)}
+function stopSelected(){stopSheets?.();stopSheets=null;selectedProgramId.value='';data.value=null;opened.value=null;pick.value=null;selectedWeek.value='';selectedWeekTrash.value=[];weekSelectionMode.value='normal';deleteConfirmOpen.value=false;closeDay();syncActivityDraft(null)}
 function choose(id:string){if(!roster.value.some(a=>a.id===id)||id===currentId.value||!discardIfDirty('Cambiare atleta'))return;currentId.value=id;showWeek.value=true
 }
 async function assignLegacyAthlete(athleteId:string){
@@ -217,6 +232,9 @@ async function assignLegacyAthlete(athleteId:string){
 }
 function close(){if(!discardIfDirty('Tornare all’elenco atleti'))return;currentId.value='';stopSelected()}
 function chooseWeek(id:string){
+ const belonging=programForWeek(programs.value,id)
+ if(!belonging)return
+ if(weekSelectionMode.value!=='normal'&&belonging.id!==selectedProgram.value?.id){message.value='Seleziona prima il programma sul quale vuoi operare.';return}
  if(weekSelectionMode.value==='delete'){
   selectedWeekTrash.value=selectedWeekTrash.value.includes(id)?selectedWeekTrash.value.filter(x=>x!==id):[...selectedWeekTrash.value,id]
   return
@@ -227,7 +245,7 @@ function chooseWeek(id:string){
  }
  if(id===week.value?.id){showWeek.value=!showWeek.value;closeDay();return}
  if(dirty.value){message.value='Salva le attività modificate prima di cambiare settimana.';return}
- selectedWeek.value=id;showWeek.value=true;closeDay();pick.value=null;syncActivityDraft(currentWeeks.value.find(w=>w.id===id)||null)
+ selectedProgramId.value=belonging.id;selectedWeek.value=id;showWeek.value=true;closeDay();pick.value=null;syncActivityDraft(belonging.weeks.find(w=>w.id===id)||null)
 }
 const linksLabel=(links:Link[])=>{
  const m=new Map<string,Set<string>>()
@@ -347,6 +365,7 @@ async function newProgram(){
   // La finestra viene chiusa soltanto dopo il commit Firestore.
   createProgramOpen.value=false
   programError.value=''
+  selectedProgramId.value=''
   selectedWeek.value=ids[0]||''
   showWeek.value=true
   message.value=`Programma creato: ${ids.length} ${ids.length===1?'settimana':'settimane'}.`
@@ -437,7 +456,7 @@ function openDuplicate(sourceId:string){
  const last=currentWeeks.value.filter(w=>!!w.startDate).at(-1)
  if(!last?.startDate){message.value='Impossibile calcolare il lunedì successivo: manca la data dell’ultima settimana.';return}
  duplicateSourceId.value=selected.id
- try{duplicateTargetMonday.value=advanceV1Monday(last.startDate,1)}
+ try{duplicateTargetMonday.value=firstVacantMonday(allActiveWeeks.value,last.startDate,advanceV1Monday)}
  catch{message.value='La data finale del programma non è valida.';return}
  duplicateError.value=''
  duplicateCount.value=1
@@ -449,19 +468,22 @@ async function duplicateCurrentWeek(){
  duplicateError.value=''
  if(!canWrite.value){duplicateError.value='Non hai i permessi per duplicare la settimana.';return}
  if(!Number.isInteger(duplicateCount.value)||duplicateCount.value<1||duplicateCount.value>12){duplicateError.value='Inserisci un numero di copie da 1 a 12.';return}
- if(currentWeeks.value.length+duplicateCount.value>52){duplicateError.value='La programmazione può contenere al massimo 52 settimane attive.';return}
- // Ricalcola appena prima del commit: non copiare sopra una settimana già presente.
- const last=currentWeeks.value.filter(x=>!!x.startDate).at(-1)
- if(!last?.startDate){duplicateError.value='Non è stato possibile trovare l’ultima settimana.';return}
- let target=''
- try{target=advanceV1Monday(last.startDate,1)}
- catch{duplicateError.value='La data dell’ultima settimana non è valida.';return}
+ if(currentWeeks.value.length+duplicateCount.value>52){duplicateError.value='Ogni programma può contenere al massimo 52 settimane attive.';return}
+ // La data è scelta dal Coach, anche se lascia volontariamente settimane libere.
+ const target=duplicateTargetMonday.value
+ if(!validProgramMonday(target)){duplicateError.value='Scegli un lunedì valido come data di destinazione.';return}
+ let copyDates:string[]=[]
+ try{copyDates=Array.from({length:duplicateCount.value},(_,i)=>advanceV1Monday(target,i))}
+ catch{duplicateError.value='La data selezionata non è valida.';return}
+ const occupied=new Set(allActiveWeeks.value.map(x=>x.startDate))
+ if(copyDates.some(date=>occupied.has(date))){duplicateError.value='Una delle date è già occupata. Scegli un lunedì libero: nessuna copia è stata creata.';return}
  busy.value=true
  try{
   const {db}=getStagingClients()
   const ids=await duplicateV1Weeks(db,s.gymId,a.id,w.id,target,duplicateCount.value,s.uid)
   duplicateOpen.value=false
   weekSelectionMode.value='normal'
+  selectedProgramId.value=selectedProgram.value?.id||''
   selectedWeek.value=ids[ids.length-1]||''
   showWeek.value=true
   message.value=`${ids.length} ${ids.length===1?'settimana duplicata':'settimane duplicate'} a partire dal lunedì ${target}. Tutte le copie sono state salvate in un'unica operazione.`
@@ -610,25 +632,28 @@ function copyToArchive(sheet:Personal){
  <p class="muted small" v-if="groups">{{groups.unprogrammed.length}} {{uiText("schede senza programma ·")}} {{groups.programmed.length}} {{uiText("schede in programma · aggiornamento in tempo reale")}}</p>
  <details class="panel" :open="showMaintenance" @toggle="showMaintenance=($event.target as HTMLDetailsElement).open"><summary>{{uiText("⚙ Manutenzione delle schede esistenti")}}</summary><p class="small muted">{{uiText("Le vecchie schede possono essere protette nell'Archivio. La manutenzione non cancella automaticamente schede o settimane.")}}</p><button class="primary" @click="alignMaintenance">{{uiText("Allinea schede delle settimane (manutenzione)")}}</button></details>
  <section class="panel coach-program-compact lf-program-v2" aria-label="Programmazione settimanale Atleta">
-  <div class="row between lf-program-v2-heading"><div><h2>{{uiText("PROGRAMMA ATTUALE")}}</h2><p class="small muted">{{currentWeeks.length}} {{uiText("settimane attive")}} · Seleziona un numero per aprire la settimana</p></div><span class="pill pill-neutral">{{currentWeeks.length}} {{uiText("SETTIMANE")}}</span></div>
+  <div class="row between lf-program-v2-heading"><div><h2>PROGRAMMI DELL’ATLETA</h2><p class="small muted">{{programs.length}} programmi · {{allActiveWeeks.length}} settimane · Seleziona un programma e la sua settimana</p></div><span class="pill pill-neutral">{{currentWeeks.length}} SETTIMANE SELEZIONATE</span></div>
   <div class="lf-week-planner">
    <div class="lf-week-left">
-    <div class="lf-week-numbers" aria-label="Seleziona settimana">
-     <button v-for="(w,i) in currentWeeks" :key="w.id" type="button" class="lf-week-number" :class="{'is-current':weekSelectionMode==='normal'&&w.id===week?.id&&showWeek,'is-delete-mode':weekSelectionMode==='delete','is-duplicate-mode':weekSelectionMode==='duplicate','is-marked-delete':weekSelectionMode==='delete'&&selectedWeekTrash.includes(w.id),'is-marked-duplicate':weekSelectionMode==='duplicate'&&duplicateSourceId===w.id}"
-       :aria-label="`${weekSelectionMode==='delete'?'Seleziona da eliminare':weekSelectionMode==='duplicate'?'Seleziona da duplicare':'Apri'} settimana ${i+1}: ${w.name}`"
+    <div v-for="(program,programIndex) in programs" :key="program.id" class="lf-p11-program-row" :class="{'lf-p11-program-active':selectedProgram?.id===program.id}">
+      <button type="button" class="lf-p11-program-header" :aria-pressed="selectedProgram?.id===program.id" @click="selectProgram(program.id)"><strong>Programma {{programIndex+1}} · {{program.title}}</strong><small>{{program.startDate}} → {{program.endDate}} · {{program.weeks.length}} settimane</small></button>
+      <div class="lf-week-numbers" :aria-label="`Seleziona settimana di ${program.title}`">
+       <button v-for="(w,i) in program.weeks" :key="w.id" type="button" class="lf-week-number" :class="{'is-current':weekSelectionMode==='normal'&&w.id===week?.id&&showWeek,'is-delete-mode':weekSelectionMode==='delete'&&selectedProgram?.id===program.id,'is-duplicate-mode':weekSelectionMode==='duplicate'&&selectedProgram?.id===program.id,'is-marked-delete':weekSelectionMode==='delete'&&selectedWeekTrash.includes(w.id),'is-marked-duplicate':weekSelectionMode==='duplicate'&&duplicateSourceId===w.id}"
+       :aria-label="`${program.title}, settimana ${i+1}, ${w.startDate}`"
        :aria-pressed="weekSelectionMode==='delete'?selectedWeekTrash.includes(w.id):weekSelectionMode==='duplicate'?duplicateSourceId===w.id:w.id===week?.id&&showWeek"
-       @click="chooseWeek(w.id)">{{i+1}}<span v-if="weekSelectionMode==='delete'&&selectedWeekTrash.includes(w.id)" aria-hidden="true">✓</span><span v-else-if="weekSelectionMode==='duplicate'&&duplicateSourceId===w.id" aria-hidden="true">⧉</span></button>
+       @click="chooseWeek(w.id)" :title="`Dal ${w.startDate}`">{{i+1}}<span v-if="weekSelectionMode==='delete'&&selectedWeekTrash.includes(w.id)" aria-hidden="true">✓</span><span v-else-if="weekSelectionMode==='duplicate'&&duplicateSourceId===w.id" aria-hidden="true">⧉</span></button>
+      </div>
     </div>
     <div v-if="weekSelectionMode!=='normal'" class="lf-mode-notice" :class="weekSelectionMode==='delete'?'lf-mode-notice-delete':'lf-mode-notice-duplicate'" role="status">
       <strong>{{weekSelectionMode==='duplicate'?'Modalità duplicazione':'Modalità eliminazione'}}</strong>
-      <span>{{weekSelectionMode==='duplicate'?'Seleziona il numero della settimana da copiare. La copia sarà inserita dopo l’ultima settimana.':'Seleziona uno o più numeri. Le settimane scelte saranno evidenziate in rosso.'}}</span>
+      <span>{{weekSelectionMode==='duplicate'?'Seleziona il numero della settimana da copiare. Potrai scegliere il lunedì di destinazione.':'Seleziona uno o più numeri. Le settimane scelte saranno evidenziate in rosso.'}}</span>
       <div class="lf-mode-actions"><button v-if="weekSelectionMode==='delete'" type="button" class="danger" :disabled="!selectedWeekTrash.length||busy||!canWrite" @click="deleteConfirmOpen=true">Nel Cestino ({{selectedWeekTrash.length}})</button><button type="button" class="secondary" @click="weekSelectionMode='normal';selectedWeekTrash=[];duplicateSourceId='';deleteConfirmOpen=false">Annulla selezione</button></div>
     </div>
     <p v-if="message&&weekSelectionMode!=='normal'" class="small muted lf-week-selection-message" role="status">{{message}}</p>
     <div v-if="trashedWeeksOpen" class="lf-weeks-trash-list stack"><p v-if="!deletedWeeks.length" class="muted small">Nessuna settimana nel Cestino.</p><article v-for="w in deletedWeeks" :key="w.id" class="line-card row between"><span><b>{{w.name}}</b> · {{w.startDate}}</span><button class="secondary" :disabled="busy" @click="restoreWeek(w.id)">Ripristina</button></article></div>
     <p v-if="pendingRemote" class="notice" role="alert">Un altro Coach ha aggiornato la settimana. La bozza è conservata; verifica il salvataggio.</p>
     <div v-if="week" class="lf-week-workspace">
-     <div class="row between lf-week-title"><h3>{{week.name}} · {{week.startDate}}</h3><span v-if="dirty" class="lf-unsaved-label" role="status">● Attività non salvate</span></div>
+     <div class="row between lf-week-title"><h3>{{selectedWeekLabel()}} · {{week.startDate}}</h3><span v-if="dirty" class="lf-unsaved-label" role="status">● Attività non salvate</span></div>
      <p v-if="!canWrite && showWeek" class="small muted">Le modifiche non possono essere salvate finché la configurazione della palestra non consente le scritture.</p>
      <div v-if="showWeek" class="lf-compact-week-days" aria-label="Sette giorni della settimana">
       <button v-for="(d,i) in week.days" :id="'live-week-'+i" :key="week.id+'-'+i" class="lf-compact-day" type="button" :disabled="weekSelectionMode!=='normal'" :aria-label="`Modifica ${DAY_NAMES[i]}`" @click="openDay(i)">
@@ -677,12 +702,12 @@ function copyToArchive(sheet:Personal){
  </div></div>
  <div v-if="deleteConfirmOpen" class="modal-overlay" @click.self="deleteConfirmOpen=false"><div class="dialog lf-weeks-confirm" role="dialog" aria-modal="true" aria-label="Conferma spostamento settimane nel Cestino"><div class="row between"><h2>Conferma eliminazione</h2><button class="bare" :disabled="busy" aria-label="Chiudi conferma" @click="deleteConfirmOpen=false">✕</button></div><p>Vuoi spostare <strong>{{selectedWeekTrash.length}} {{selectedWeekTrash.length===1?'settimana':'settimane'}}</strong> nel Cestino?</p><p class="small muted">I programmi e le schede collegate non vengono eliminati definitivamente. Potrai ripristinare le settimane.</p><div class="row lf-confirm-actions"><button class="secondary" :disabled="busy" @click="deleteConfirmOpen=false">Annulla</button><button class="danger" :disabled="busy||!canWrite" @click="trashMultipleWeeks">{{busy?'Eliminazione…':'Sposta nel Cestino'}}</button></div></div></div>
  <div v-if="duplicateOpen" class="modal-overlay" @click.self="duplicateOpen=false"><div class="dialog" style="max-width:420px" role="dialog" aria-modal="true" aria-label="Conferma duplicazione settimana"><div class="row between"><h2>{{uiText("DUPLICA SETTIMANA")}}</h2><button class="bare" aria-label="Chiudi duplicazione" :disabled="busy" @click="duplicateOpen=false">✕</button></div>
-  <p>Quante volte vuoi duplicare la <strong>{{currentWeeks.findIndex(w=>w.id===duplicateSourceId)+1}}ª settimana</strong>?</p><label class="lf-duplicate-number">Numero copie consecutive <input v-model.number="duplicateCount" type="number" min="1" :max="Math.min(12,52-currentWeeks.length)" step="1" aria-label="Numero duplicazioni settimana" /></label><p class="muted small">Le {{duplicateCount===1?'copia sarà inserita':'copie saranno inserite'}} in lunedì consecutivi a partire dal <strong>{{duplicateTargetMonday}}</strong>, dopo l'ultima settimana attiva. Una sola conferma: tutto viene salvato insieme oppure non viene creata alcuna copia.</p>
+  <p>Quante volte vuoi duplicare la <strong>{{currentWeeks.findIndex(w=>w.id===duplicateSourceId)+1}}ª settimana</strong> di <strong>{{selectedProgram?.title}}</strong>?</p><label class="lf-duplicate-number">Numero copie consecutive <input v-model.number="duplicateCount" type="number" min="1" :max="Math.min(12,52-currentWeeks.length)" step="1" aria-label="Numero duplicazioni settimana" /></label><label class="lf-p11-date-label" @click="openDatePicker">Lunedì di destinazione<input v-model="duplicateTargetMonday" type="date" required aria-label="Lunedì da cui duplicare la settimana"/></label><p class="muted small">Le copie saranno inserite nello stesso programma, nei lunedì consecutivi scelti. Le date già occupate non possono essere utilizzate. Nessuna copia sarà chiamata «(Copia)».</p>
   <p v-if="duplicateError" class="notice" role="alert">{{duplicateError}}</p>
   <div class="row"><button class="secondary" :disabled="busy" @click="duplicateOpen=false">Annulla</button><button class="primary" :disabled="busy||!canWrite" @click="duplicateCurrentWeek">{{busy?'Duplicazione…':'Conferma'}}</button></div>
  </div></div>
  <div v-if="showDelete" class="modal-overlay" @click.self="showDelete=null"><div class="dialog" style="max-width:520px"><div class="row between"><h2>{{uiText("Cancella collegamenti ·")}} {{showDelete.title}}</h2><button class="bare" @click="showDelete=null">✕</button></div><p class="muted">{{uiText("Rimuovi il collegamento dal giorno. Senza altri collegamenti, la scheda sparirà dal Piano ma resterà nell'Archivio.")}}</p><article v-for="l in showDelete.links" :key="l.weekId+l.day+l.slot" class="line-card row between"><b>{{l.weekName}} · {{l.dayName}} {{uiText("· Scheda")}} {{l.slot}}</b><button class="danger" @click="unlinkExact(l)">{{uiText("Scollega")}}</button></article></div></div>
- <div v-if="createProgramOpen" class="modal-overlay" @click.self="createProgramOpen=false"><div class="dialog" style="max-width:440px"><div class="row between"><h2>{{uiText("NUOVO PROGRAMMA FIGHTER")}}</h2><button class="bare" @click="createProgramOpen=false">✕</button></div><label>{{uiText("Nome programma")}}<input v-model="programName" maxlength="90" placeholder="Preparazione match"/></label><label class="coach-date-picker-label" @click="openDatePicker">{{uiText("Data inizio (lunedì)")}}<input v-model="monday" type="date" aria-label="Scegli la data di inizio"/></label><label>{{uiText("Numero settimane")}}<input v-model.number="weekCount" type="number" min="1" max="52"/></label><p v-if="programError" class="notice lf-program-form-error" role="alert">{{programError}}</p><button class="primary wide" :disabled="!canWrite||busy" @click="newProgram">{{busy?uiText("Salvataggio…"):uiText("Crea programma")}}</button></div></div>
+ <div v-if="createProgramOpen" class="modal-overlay" @click.self="createProgramOpen=false"><div class="dialog" style="max-width:440px"><div class="row between"><h2>{{uiText("NUOVO PROGRAMMA FIGHTER")}}</h2><button class="bare" @click="createProgramOpen=false">✕</button></div><label>{{uiText("Nome programma")}}<input v-model="programName" maxlength="90" placeholder="Preparazione match"/></label><label class="coach-date-picker-label lf-p11-date-label" @click="openDatePicker">{{uiText("Data inizio (lunedì)")}}<input v-model="monday" type="date" required aria-label="Scegli la data di inizio"/></label><label>{{uiText("Numero settimane")}}<input v-model.number="weekCount" type="number" min="1" max="52"/></label><p v-if="programError" class="notice lf-program-form-error" role="alert">{{programError}}</p><button class="primary wide" :disabled="!canWrite||busy" @click="newProgram">{{busy?uiText("Salvataggio…"):uiText("Crea programma")}}</button></div></div>
  <SheetDetail v-if="opened" :sheet="opened" @close="opened=null"/>
 </div>
 </template>
@@ -793,4 +818,20 @@ function copyToArchive(sheet:Personal){
 @media(max-width:1080px){.lf-week-planner{grid-template-columns:minmax(0,1fr)}.lf-week-actions{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.lf-week-action{min-height:46px;font-size:9px;padding:7px 5px}.lf-compact-week-days{overflow-x:auto;grid-template-columns:repeat(7,minmax(112px,1fr));padding-bottom:5px}.lf-week-left{min-width:0}}
 @media(max-width:600px){.lf-day-activity-fields,.lf-day-sheet-grid{grid-template-columns:1fr}.lf-day-dialog{padding:13px!important}.lf-week-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.lf-compact-week-days{grid-template-columns:repeat(7,118px)}.lf-week-number{width:34px;min-width:34px}.lf-draft-actions{flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){.lf-compact-day,.lf-week-number{transition:none}}
+</style>
+
+<style scoped>
+.lf-p11-program-row{border:1px solid var(--outline);border-radius:12px;padding:9px;margin-bottom:9px;background:var(--field);min-width:0}
+.lf-p11-program-active{border-color:var(--mint);box-shadow:inset 0 0 0 1px var(--mint)}
+.lf-p11-program-header{width:100%;display:flex;align-items:flex-start;flex-direction:column;gap:4px;padding:6px 7px 11px;background:transparent;color:var(--text);border:0;text-align:left;cursor:pointer}
+.lf-p11-program-header strong{font-size:12px;overflow-wrap:anywhere}
+.lf-p11-program-header small{font-size:10px;color:var(--muted)}
+.lf-p11-program-row .lf-week-numbers{display:flex;flex-wrap:wrap;gap:7px}
+.lf-p11-date-label{display:flex!important;flex-direction:column;gap:7px;margin:11px 0;font-size:12px;font-weight:800;color:var(--text)}
+.lf-p11-date-label input[type=date]{box-sizing:border-box;width:100%;min-height:45px;padding:10px 12px;border:1.5px solid var(--outline);border-radius:9px;background:var(--field);color:var(--text);font-size:15px;font-weight:700;color-scheme:dark;cursor:pointer}
+:global(.theme-light) .lf-p11-date-label input[type=date]{color-scheme:light;background:#fff;border-color:#7c9287;color:#183b29}
+.lf-p11-date-label input[type=date]::-webkit-calendar-picker-indicator{opacity:1;cursor:pointer;width:22px;height:22px;filter:brightness(0) invert(1)}
+:global(.theme-light) .lf-p11-date-label input[type=date]::-webkit-calendar-picker-indicator{filter:brightness(0);opacity:1}
+.lf-p11-date-label input[type=date]:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+@media(max-width:550px){.lf-p11-program-row{padding:7px}.lf-p11-program-header strong{font-size:11px}}
 </style>

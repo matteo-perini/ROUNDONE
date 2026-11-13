@@ -29,15 +29,12 @@ watch(()=>[route.path,route.query.source],async()=>{
   if(request===roleSettingsRequest)verifiedSettingsRole.value=verified.role==='atleta'?'atleta':'coach'
  }catch{/* Nessuna fiducia nel parametro URL: il router rifiuta accessi non verificati. */}
 },{immediate:true})
-const coachMenuOpen=ref(false)
 const athleteSidebarExpanded=ref(true)
 try{athleteSidebarExpanded.value=window.localStorage.getItem('lionfit-athlete-sidebar-collapsed')!=='1'}catch{/* browser storage unavailable */}
 function toggleAthleteSidebar(){
  athleteSidebarExpanded.value=!athleteSidebarExpanded.value
  try{window.localStorage.setItem('lionfit-athlete-sidebar-collapsed',athleteSidebarExpanded.value?'0':'1')}catch{/* storage optional */}
 }
-// Menu Coach soltanto: la navigazione Atleta usa una barra unica per dispositivo.
-watch(()=>route.fullPath,()=>{coachMenuOpen.value=false})
 let stopAvatar:Unsubscribe|null=null
 watch(()=>stagingSession.value?.uid,(uid)=>{
  stopAvatar?.();stopAvatar=null;currentAvatar.value=''
@@ -102,18 +99,17 @@ async function goOut(){
     <main class="login-main"><RouterView/></main>
   </template>
   <template v-else-if="shownRole">
-    <div v-if="shownRole==='coach' && coachMenuOpen" class="coach-mobile-shade" @click="coachMenuOpen=false" aria-hidden="true"></div>
     <AthleteDesktopSidebar v-if="shownRole==='atleta'" :items="mobileNav" :expanded="athleteSidebarExpanded" @toggle="toggleAthleteSidebar" @logout="goOut"/>
-    <aside v-if="shownRole==='coach'" class="desktop-sidebar" :class="{'mobile-sidebar-open':coachMenuOpen}">
+    <aside v-if="shownRole==='coach'" class="desktop-sidebar">
       <div class="sidebar-head"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><strong>LION <em>FIT</em></strong><small>{{uiText("AREA COACH / ADMIN")}}</small></div></div>
-      <nav class="sidebar-nav" @click="coachMenuOpen=false">
+      <nav class="sidebar-nav">
         <template v-if="isStagingMode()"><RouterLink v-for="item in sideNav" :key="item.to" :to="item.to" :class="{'staff-nav-item':item.to==='/coach/staff'}"><LionIcon :name="item.icon" :size="17"/><span>{{uiText(item.desk||item.label)}}</span></RouterLink></template>
         <RouterLink v-if="coachDevShell" to="/coach?source=emulator"><LionIcon name="home" :size="17"/><span>DASHBOARD · FIREBASE</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/atleti?source=emulator"><LionIcon name="users" :size="17"/><span>{{uiText("GESTIONE ATLETI · FIREBASE")}}</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/archivio?source=emulator"><LionIcon name="book" :size="17"/><span>{{uiText("ARCHIVIO COACH · FIREBASE")}}</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/prenotazioni?source=emulator"><LionIcon name="calendar" :size="17"/><span>{{uiText("CALENDARIO APPUNTAMENTI · FIREBASE")}}</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/progressi?source=emulator"><LionIcon name="progress" :size="17"/><span>{{uiText("PROGRESSI · IN ARRIVO")}}</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/profilo?source=emulator"><LionIcon name="user" :size="17"/><span>{{uiText("PROFILO · FIREBASE")}}</span></RouterLink>
         <template v-else-if="!isStagingMode()"><RouterLink v-for="item in sideNav" :key="item.to" :to="item.to" :class="{'staff-nav-item':item.to==='/coach/staff'}"><LionIcon :name="item.icon" :size="17"/><span>{{uiText(item.desk||item.label)}}</span></RouterLink></template>
       </nav>
       <div class="sidebar-foot"><button class="ghost wide" @click="goOut">{{uiText(isStagingMode()?'Esci da Lion Fit':coachEmulatorPreview ? 'Esci dal laboratorio' : 'Esci')}}</button><RouterLink v-if="shownRole==='coach' && !coachDevShell" class="invite-shortcut" to="/coach/staff">{{uiText('INVITI DELLA PALESTRA')}} <strong>{{uiText('Inviti via email →')}}</strong></RouterLink><small>{{webVersionLabel}}</small></div>
     </aside>
-    <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><button v-if="shownRole==='coach'" type="button" class="mobile-coach-menu-btn" :aria-expanded="coachMenuOpen" :aria-label="uiText('Apri il menu completo Coach')" @click="coachMenuOpen=!coachMenuOpen">☰</button><RouterLink v-if="shownRole==='coach'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Apri impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
+    <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><RouterLink v-if="shownRole==='coach'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Apri impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
 
     <!-- Navigazione Atleta esclusiva: sidebar a sinistra su desktop, dock inferiore su mobile. -->
     <main class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking}]"><button v-if="route.path!=='/home' && route.path!=='/coach'" type="button" class="lf-route-back" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> {{uiText('Indietro')}}</button><div class="version">{{webVersionLabel}}</div><RouterView/></main>

@@ -1,0 +1,62 @@
+{
+  "title": "LIONFIT PATCH10 - Dashboard Admin e menu mobile",
+  "date": "2026-11-13",
+  "source_zip": "LionFit-Modern-Git (2)(1).zip",
+  "modified_files": [
+    "src/App.vue",
+    "src/views/DevCoachDashboard.vue",
+    "src/components/CoachDashboardRedesign.vue",
+    "src/styles.css",
+    "src/styles-lionfit-redesign.css"
+  ],
+  "new_files": [
+    "src/features/coach/dashboardLiveModel.ts",
+    "tests/patch10-dashboard.unit.mjs"
+  ],
+  "changes": [
+    {
+      "path": "src/App.vue",
+      "sha256_previous": "61fd166791488095b42fed2a8dcfced3c8b0a583519f322465738a07688e9d3b",
+      "sha256_new": "0b0ff2b5bc44a75816ae6896dad0bd5aa5a3f700cd068281634754db2615340a",
+      "bytes_new": 14406
+    },
+    {
+      "path": "src/views/DevCoachDashboard.vue",
+      "sha256_previous": "ff9745662269da3db23a24001ada516a53e4a971b2b9bbfb4b24b5b3631fab90",
+      "sha256_new": "2f5fa19cf5ba6bc0c9dd60e06f5c3d957cae42e5575e3967c1244a53d76c6446",
+      "bytes_new": 9263
+    },
+    {
+      "path": "src/components/CoachDashboardRedesign.vue",
+      "sha256_previous": "bb79196f85ace73683d7d72d58c42ee58b5ec4a51ed2c9eee892551d01a20921",
+      "sha256_new": "b7f6528c0e9489b8f2dabd0556b33df2c05620e2a9d8393c0223ca1710727951",
+      "bytes_new": 8901
+    },
+    {
+      "path": "src/styles.css",
+      "sha256_previous": "53bd36afaa57397b867c45e47be9703e0edb5f84b3a67420c579d45f225133a2",
+      "sha256_new": "68cf84a0c25c200c5700dde7876f58d124f7233c3bb573ce47dfcf3a123237a1",
+      "bytes_new": 110534
+    },
+    {
+      "path": "src/styles-lionfit-redesign.css",
+      "sha256_previous": "9cf1f8a5b25532e42f64de86716e8c446ea5d05c75857328e8af619912476445",
+      "sha256_new": "a6ff6fa0a1cea53fa7b5666d1e57621c466919231ee9c132b9187bc909a91f86",
+      "bytes_new": 21267
+    },
+    {
+      "path": "src/features/coach/dashboardLiveModel.ts",
+      "status": "new",
+      "sha256_new": "c68a593d3b338d6992448183024e9cdf0029e222c029fc2131733641c89e048b"
+    },
+    {
+      "path": "tests/patch10-dashboard.unit.mjs",
+      "status": "new",
+      "sha256_new": "5e84cf96b66b8de41a843e3689872b4c3fb77c2c2680de72a1160a2741a9d8c1"
+    }
+  ],
+  "firebase_rules_changes": false,
+  "prod_data_changes": false,
+  "tests": "vue-tsc PASS, 25 test .mjs PASS, static layout 7 widths PASS",
+  "vite_full_build": "NOT VERIFIED - Linux Rollup native optional dependency missing in user Windows bundle"
+}

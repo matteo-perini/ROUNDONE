@@ -677,13 +677,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .booking-in-shell .coach-month-dots{gap:4px}
 
 /* 2M/S: navigation menu completa anche su smartphone Coach */
-.mobile-coach-menu-btn,.coach-mobile-shade{display:none}
-@media(max-width:900px){
- .mobile-coach-menu-btn{display:grid;font-size:23px;font-weight:700}
- .coach-mobile-shade{display:block;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:78}
- .as-coach .desktop-sidebar.mobile-sidebar-open{display:flex;position:fixed;z-index:79;top:0;left:0;bottom:0;width:min(285px,88vw);box-shadow:12px 0 40px rgba(0,0,0,.5)}
- .as-coach .desktop-sidebar.mobile-sidebar-open .sidebar-nav{overflow-y:auto;overscroll-behavior:contain}
-}
+/* PATCH10: no overlapping Coach drawer; mobile uses the existing bottom navigation. */
+.mobile-coach-menu-btn,.coach-mobile-shade{display:none!important}
+@media(max-width:900px){.as-coach .desktop-sidebar{display:none!important}}
+
 
 
 /* 2M/T · Rifinitura finale del pannello Coach: compattezza e allineamenti. */
@@ -1073,3 +1070,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .booking-compact-toolbar .booking-coach-chips button{font-size:10px;padding:5px 7px}
  .booking-in-shell .coach-month-day{min-height:43px}
  .booking-in-shell .coach-month-day small{font-size:7px}}
+
+/* PATCH10: one stable Coach navigation on phones, with safe-area support. */
+@media(max-width:900px){
+ .as-coach .bottom-nav.coach-bottom{position:fixed;left:0;right:0;bottom:0;width:100%;max-width:100vw;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;align-items:stretch;padding:4px max(3px,env(safe-area-inset-right,0px)) calc(7px + env(safe-area-inset-bottom,0px)) max(3px,env(safe-area-inset-left,0px));z-index:85;box-sizing:border-box}
+ .as-coach .bottom-nav.coach-bottom a{min-width:0;max-width:none;width:100%;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 1px;min-height:56px;gap:3px;font-size:clamp(7px,1.9vw,9px);line-height:1.12;white-space:normal;overflow-wrap:anywhere;text-align:center;border-radius:10px}
+ .as-coach .bottom-nav.coach-bottom a svg{width:19px;height:19px;flex:none}
+ .as-coach .bottom-nav.coach-bottom a span{width:100%;max-width:100%;display:block;overflow:hidden;text-overflow:ellipsis}
+ .as-coach .main-layout{min-width:0;overflow-x:clip;padding-bottom:calc(108px + env(safe-area-inset-bottom,0px))}
+}
+@media(max-width:370px){.as-coach .bottom-nav.coach-bottom a{font-size:7px;letter-spacing:-.015em}.as-coach .bottom-nav.coach-bottom a svg{width:18px;height:18px}}

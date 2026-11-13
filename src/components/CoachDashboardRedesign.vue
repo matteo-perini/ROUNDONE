@@ -1,13 +1,20 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { RouterLink } from 'vue-router'
+import {computed} from 'vue'
+import {RouterLink} from 'vue-router'
 import LionIcon from './LionIcon.vue'
-const props=defineProps<{name:string;athletes:number|null;templates:number|null;bookings?:number|null;programs?:number|null;assigned?:number|null;unassigned?:number|null;source:string;athletesUrl:string;createUrl:string;calendarUrl:string;inviteUrl:string;libraryUrl:string;profileUrl:string;loading?:boolean;error?:string}>()
+import type {DashboardAppointment,DashboardActivity,DashboardDay} from '../features/coach/dashboardLiveModel'
+const props=defineProps<{
+ name:string;athletes:number|null;templates:number|null;bookings?:number|null;programs?:number|null;assigned?:number|null;unassigned?:number|null;
+ source:string;athletesUrl:string;createUrl:string;calendarUrl:string;inviteUrl:string;libraryUrl:string;profileUrl:string;
+ staffUrl?:string;trashUrl?:string;appointments?:DashboardAppointment[];activityDays?:DashboardDay[];recentEvents?:DashboardActivity[];
+ historyComplete?:boolean;dataWarnings?:string[];programLoading?:boolean;loading?:boolean;error?:string
+}>()
+const emit=defineEmits<{(e:'refresh-programs'):void}>()
 const metrics=computed(()=>[
- {label:'Atleti iscritti',value:props.athletes,icon:'users',sub:'Atleti della palestra'},
- {label:'Schede create',value:props.templates,icon:'dumbbell',sub:'Modelli attivi in archivio'},
- {label:'Prenotazioni',value:props.bookings??null,icon:'calendar',sub:'Conteggio da verificare'},
- {label:'Programmi',value:props.programs??null,icon:'clipboard',sub:'Programmi settimanali'}
+ {label:'Atleti iscritti',value:props.athletes,icon:'users',sub:'Atleti attivi della palestra'},
+ {label:'Schede create',value:props.templates,icon:'dumbbell',sub:'Modelli non cestinati'},
+ {label:'Prenotazioni',value:props.bookings??null,icon:'calendar',sub:'Confermate nei prossimi 60 giorni'},
+ {label:'Programmi',value:props.programs??null,icon:'clipboard',sub:'Titoli distinti per Atleta'}
 ])
 const actions=computed(()=>[
  {label:'Atleti',to:props.athletesUrl,icon:'users'},
@@ -15,19 +22,71 @@ const actions=computed(()=>[
  {label:'Calendario',to:props.calendarUrl,icon:'calendar'},
  {label:'Invita atleta',to:props.inviteUrl,icon:'mail'}
 ])
+const shortcuts=computed(()=>[
+ {label:'Gestione atleti',to:props.athletesUrl,icon:'users'},
+ {label:'Libreria esercizi',to:props.libraryUrl,icon:'book'},
+ {label:'Profilo e palestra',to:props.profileUrl,icon:'settings'},
+ ...(props.staffUrl?[{label:'Coach e Staff',to:props.staffUrl,icon:'users'}]:[]),
+ ...(props.trashUrl?[{label:'Cestino',to:props.trashUrl,icon:'bin'}]:[])
+])
+const upcoming=computed(()=>props.appointments?.slice(0,5)||[])
+const recent=computed(()=>props.recentEvents?.slice(0,6)||[])
+const days=computed(()=>props.activityDays||[])
+const hasActivity=computed(()=>days.value.some(d=>d.total>0))
+const tallest=computed(()=>Math.max(1,...days.value.map(d=>d.total)))
+const barHeight=(count:number)=>count?`${Math.max(3,Math.round(count/tallest.value*100))}%`:'0%'
+const eventUrl=(url:string)=>props.source==='Firebase Emulator'?`${url}?source=emulator`:url
+const formatDate=(ms:number)=>new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'}).format(ms)
 </script>
 <template>
  <div class="lf-coach-dashboard">
   <header class="lf-coach-greeting"><div><h1>Bentornato, {{name}}! 👊</h1><p>Gestisci atleti, schede, programmi e prenotazioni della tua palestra.</p></div><span class="lf-source-tag">{{source}}</span></header>
   <p v-if="loading" role="status" class="muted">Caricamento dati della palestra…</p>
   <p v-if="error" role="alert" class="notice">{{error}}</p>
-  <section class="lf-kpi-grid" aria-label="Statistiche palestra"><article v-for="metric in metrics" :key="metric.label" class="lf-kpi-card"><span class="lf-kpi-icon"><LionIcon :name="metric.icon" :size="24"/></span><div><h2>{{metric.label}}</h2><strong>{{metric.value===null?'—':metric.value}}</strong><small>{{metric.value===null?'Dato non disponibile':metric.sub}}</small></div></article></section>
+  <div v-if="dataWarnings?.length" class="lf-dashboard-warnings" role="status">
+   <p v-for="(warning,i) in dataWarnings" :key="i">{{warning}}</p>
+  </div>
+  <section class="lf-kpi-grid" aria-label="Statistiche palestra">
+   <article v-for="metric in metrics" :key="metric.label" class="lf-kpi-card"><span class="lf-kpi-icon"><LionIcon :name="metric.icon" :size="24"/></span><div><h2>{{metric.label}}</h2><strong>{{metric.value===null||metric.value===undefined?'—':metric.value}}</strong><small>{{metric.value===null||metric.value===undefined?'Dato non disponibile':metric.sub}}</small></div></article>
+  </section>
   <section class="lf-coach-hero-row"><div class="lf-coach-banner"><div><strong>LION <em>FIT</em></strong><span>PANNELLO COACH</span><p>ALLENATI <b>•</b> PIANIFICA <b>•</b> GESTISCI <b>•</b> CRESCI</p></div></div><div class="lf-dashboard-panel lf-coach-actions"><h2><LionIcon name="plus" :size="19"/> Azioni rapide</h2><div class="lf-action-grid"><RouterLink v-for="action in actions" :key="action.label" :to="action.to"><LionIcon :name="action.icon" :size="27"/><span>{{action.label}}</span></RouterLink></div></div></section>
   <section class="lf-coach-detail-grid">
-   <article class="lf-dashboard-panel lf-activity-panel"><h2><LionIcon name="dumbbell" :size="18"/> Attività palestra</h2><p class="lf-widget-desc">Prenotazioni, schede e programmi · ultimi 30 giorni</p><div class="lf-no-trend"><LionIcon name="calendar" :size="24"/><strong>Cronologia non ancora disponibile</strong><span>Mostreremo un grafico soltanto quando i dati per giorno saranno verificati.</span></div></article>
-   <article class="lf-dashboard-panel"><h2><LionIcon name="clipboard" :size="18"/> Distribuzione contenuti</h2><p class="lf-widget-desc">Conteggi effettivi, senza percentuali inventate</p><div class="lf-distribution-list"><div><span class="lf-legend-dot"></span>Programmi creati <strong>{{programs??'—'}}</strong></div><div><span class="lf-legend-dot lf-dot-light"></span>Schede abbinate a programmi <strong>{{assigned??'—'}}</strong></div><div><span class="lf-legend-dot lf-dot-neutral"></span>Schede non abbinate <strong>{{unassigned??'—'}}</strong></div></div><p class="lf-widget-desc">Le schede e i programmi hanno conteggi distinti.</p></article>
-   <article class="lf-dashboard-panel"><div class="lf-widget-head"><h2><LionIcon name="calendar" :size="18"/> Prossimi appuntamenti</h2><RouterLink :to="calendarUrl">Vedi calendario →</RouterLink></div><div class="lf-empty-state">Apri il calendario per consultare gli appuntamenti effettivi della palestra.</div></article>
+   <article class="lf-dashboard-panel lf-activity-panel">
+    <h2><LionIcon name="dumbbell" :size="18"/> Attività palestra</h2>
+    <p class="lf-widget-desc">Ultimi 30 giorni · prenotazioni in calendario, nuove schede e settimane create</p>
+    <div v-if="hasActivity" class="lf-chart-area" role="img" aria-label="Grafico attività palestra negli ultimi 30 giorni, con eventi datati presenti su Firebase">
+     <div v-for="day in days" :key="day.date" class="lf-chart-day" :title="`${day.date}: ${day.booking} prenotazioni confermate, ${day.template} schede create, ${day.week} settimane create`">
+      <div class="lf-chart-column"><span class="lf-chart-bar lf-chart-booking" :style="{height:barHeight(day.booking)}"></span><span class="lf-chart-bar lf-chart-template" :style="{height:barHeight(day.template)}"></span><span class="lf-chart-bar lf-chart-week" :style="{height:barHeight(day.week)}"></span></div>
+      <small>{{day.label}}</small>
+     </div>
+    </div>
+    <p v-else class="lf-no-trend"><LionIcon name="calendar" :size="24"/><strong>{{historyComplete?'Nessun evento datato negli ultimi 30 giorni':'Dati in caricamento o parziali'}}</strong><span>Non vengono creati valori artificiali.</span></p>
+    <div class="lf-chart-legend"><span><i class="lf-chart-key lf-chart-booking"></i> Prenotazioni</span><span><i class="lf-chart-key lf-chart-template"></i> Schede</span><span><i class="lf-chart-key lf-chart-week"></i> Settimane</span></div>
+    <p v-if="!historyComplete" class="lf-widget-desc">Alcuni dati non sono ancora disponibili: il grafico può essere parziale.</p>
+   </article>
+   <article class="lf-dashboard-panel">
+    <div class="lf-widget-head"><h2><LionIcon name="clipboard" :size="18"/> Distribuzione contenuti</h2><button type="button" class="lf-link-button" :disabled="programLoading||athletes===null" @click="emit('refresh-programs')">{{programLoading?'Aggiorno…':'Aggiorna'}}</button></div>
+    <p class="lf-widget-desc">Conteggi reali delle schede personali nei programmi degli Atleti</p>
+    <div class="lf-distribution-list">
+     <div><span class="lf-legend-dot"></span> Programmi per Atleta <strong>{{programs??'—'}}</strong></div>
+     <div><span class="lf-legend-dot lf-dot-light"></span> Schede personali collegate <strong>{{assigned??'—'}}</strong></div>
+     <div><span class="lf-legend-dot lf-dot-neutral"></span> Schede personali non collegate <strong>{{unassigned??'—'}}</strong></div>
+    </div>
+    <p class="lf-widget-desc">Un programma è contato per titolo distinto e Atleta, non per singola settimana. Le schede personali sono contate una sola volta per Atleta; il Cestino è escluso.</p>
+   </article>
+   <article class="lf-dashboard-panel">
+    <div class="lf-widget-head"><h2><LionIcon name="calendar" :size="18"/> Prossimi appuntamenti</h2><RouterLink :to="calendarUrl">Vedi calendario →</RouterLink></div>
+    <p class="lf-widget-desc">Prenotazioni confermate nei prossimi 60 giorni</p>
+    <div v-if="upcoming.length" class="lf-appointments-list">
+     <RouterLink v-for="booking in upcoming" :key="booking.id" :to="calendarUrl" class="lf-appointment-row"><span class="lf-appointment-date">{{formatDate(booking.startMs)}}</span><span class="lf-appointment-text"><strong>{{booking.athleteName}}</strong><small>{{booking.discipline||booking.service}} · {{booking.coachName}}</small></span><LionIcon name="calendar" :size="16"/></RouterLink>
+    </div>
+    <p v-else class="lf-empty-state">{{bookings===null||bookings===undefined?'Prenotazioni non disponibili.':'Nessun appuntamento confermato nei prossimi 60 giorni.'}}</p>
+   </article>
   </section>
-  <section class="lf-coach-bottom-grid"><article class="lf-dashboard-panel"><h2>Stato palestra</h2><div class="lf-summary-line">Atleti iscritti <strong>{{athletes??'—'}}</strong></div><div class="lf-summary-line">Schede archiviate attive <strong>{{templates??'—'}}</strong></div><div class="lf-summary-line">Programmi settimanali <strong>{{programs??'—'}}</strong></div></article><article class="lf-dashboard-panel"><h2>Attività recenti</h2><div class="lf-empty-state">La cronologia verrà mostrata soltanto se presente e autorizzata dalla fonte dati.</div></article><article class="lf-dashboard-panel"><h2>Accesso veloce</h2><div class="lf-access-grid"><RouterLink :to="athletesUrl"><LionIcon name="users"/>Gestione atleti</RouterLink><RouterLink :to="libraryUrl"><LionIcon name="book"/>Libreria esercizi</RouterLink><RouterLink :to="profileUrl"><LionIcon name="settings"/>Profilo e palestra</RouterLink></div></article></section>
+  <section class="lf-coach-bottom-grid">
+   <article class="lf-dashboard-panel"><h2>Stato palestra</h2><div class="lf-summary-line">Atleti iscritti <strong>{{athletes??'—'}}</strong></div><div class="lf-summary-line">Schede archivio attive <strong>{{templates??'—'}}</strong></div><div class="lf-summary-line">Programmi per Atleta <strong>{{programs??'—'}}</strong></div></article>
+   <article class="lf-dashboard-panel"><h2>Attività recenti</h2><div v-if="recent.length" class="lf-recent-events"><RouterLink v-for="event in recent" :key="event.id" :to="eventUrl(event.url)" class="lf-recent-event"><span>{{event.label}}</span><small>{{formatDate(event.at)}}</small></RouterLink></div><p v-else class="lf-empty-state">{{historyComplete?'Nessun nuovo evento datato negli ultimi 30 giorni.':'Cronologia in caricamento o incompleta.'}}</p></article>
+   <article class="lf-dashboard-panel"><h2>Accesso veloce</h2><div class="lf-access-grid"><RouterLink v-for="link in shortcuts" :key="link.to" :to="link.to"><LionIcon :name="link.icon"/>{{link.label}}</RouterLink></div></article>
+  </section>
  </div>
 </template>

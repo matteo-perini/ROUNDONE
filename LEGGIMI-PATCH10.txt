@@ -1,0 +1,73 @@
+LIONFIT — PATCH 10 | Dashboard Admin LIVE e navigazione mobile | 13 novembre 2026
+================================================================================
+BASE ESATTA: LionFit-Modern-Git (2)(1).zip inviato in questa chat.
+PATCH INCREMENTALE: NON e' il progetto completo; estrai nella cartella che contiene package.json.
+
+RISULTATI
+- Gestione Atleti > Programma > Collega scheda: controllo gia' presente, NESSUNA MODIFICA.
+  Il selettore esclude le schede Archivio con deletedAt e la transazione Firebase
+  blocca comunque i modelli cestinati. Test di regressione incluso.
+- Dashboard Coach/Admin: prenotazioni confermate future (60 giorni) ordinate,
+  collegate al calendario. Non si mostrano prenotazioni cancellate.
+- Distribuzione contenuti: conteggi per programma (titolo distinto per Atleta),
+  schede personali collegate/non collegate ai programmi, esclusi dati cestinati.
+  Le settimane di un programma non vengono conteggiate come programmi distinti.
+- Attivita' palestra: grafico degli ultimi 30 giorni, basato su appuntamenti
+  calendarizzati, nuove schede e settimane con timestamp valido. Non e' un
+  registro presenze. Gli eventi senza timestamp vengono omessi, non inventati.
+- Attivita' recenti: ultimi eventi datati disponibili con link alla sezione.
+- Dashboard mobile: card responsive e pulsanti adatti ai telefoni da 320 px.
+- Menu hamburger Coach e drawer laterale mobile rimossi; navbar inferiore confermata.
+  Il menu sinistro desktop resta immutato. Staff e Cestino sono raggiungibili
+  dall'area "Accesso veloce" nella Home Coach (insieme alla Libreria).
+- Letture SOLO nella propria palestra verificata, senza nuovi permessi o Rules.
+
+IMPORTANTE
+- I dati dei programmi vengono letti dalla struttura esistente per ogni
+  Atleta (weeks e personal_templates). Una lettura fallita interrompe il
+  conteggio, mostrando un trattino e un avviso invece di uno zero falso.
+  Le letture avvengono una volta all'apertura o quando cambia il roster,
+  con 3 richieste parallele al massimo per il caricamento per-Atleta.
+  Il bottone "Aggiorna" ricarica i conteggi. Oltre 200 atleti compare
+  un avviso e servira' un contatore aggregato lato server.
+- La prenotazione puo' essere visualizzata ma non rappresenta presenza
+  confermata in palestra. Il grafico non inventa dati per le vecchie schede
+  prive di createdAt. Attivita' recenti mostra SOLO eventi datati.
+- Le prenotazioni attive sono limitate alla finestra della query
+  ultimi 30 giorni / prossimi 60 giorni, per leggerezza e coerenza con il
+  calendario esistente. Per i Coach si rispettano le Rules Firebase correnti.
+- Non sono stati modificati Firebase, dati, Security Rules, Android,
+  package.json, .env, dev mode, script Web/Docs, login, archivio, programma.
+
+INSTALLAZIONE
+1. Fai il BACKUP dell'intera cartella LionFit corrente (sorgenti + .env e config,
+   in un backup PRIVATO, MAI su GitHub pubblico). Ferma npm run dev (Ctrl+C).
+2. Estrai PATCH10 ZIP nella RADICE del progetto, allo stesso livello di
+   package.json e src. Sostituisci soltanto i file con percorso uguale.
+   NON estrarre dentro una cartella PATCH10 annidata.
+3. Doppio clic su VERIFICA_PATCH10_WINDOWS.cmd. Richiede Node e npm installati.
+4. Apri localhost con npm run dev, accedi come Coach/Titolare di test e controlla:
+   - Home: KPI, Appuntamenti reali, Distribuzione, Grafico e Attivita' recenti.
+   - Se un conteggio e' "—", leggi l'avviso: NON e' un valore zero.
+   - Sul telefono: hamburger assente, navbar in basso, Staff e Cestino accessibili
+     dalla Home, menu laterale disponibile SOLO su desktop.
+   - Gestione Atleti > Programma > Collega: nessuna scheda cestinata visibile.
+5. Solo DOPO questi controlli, usa il tuo doppio clic Web/Docs e pubblica
+   con GitHub Desktop; per Android usa npm run android:sync e npx cap open android.
+   La compilazione deve leggere .env.production.local corretto, non STAGING.
+
+TEST REALIZZATI IN QUESTO AMBIENTE
+- PASS: vue-tsc --noEmit
+- PASS: compilazione template Vue dei componenti modificati
+- PASS: 25 test automatici .mjs (8 nuovi e 17 preesistenti / wrapper test)
+- PASS: smoke test layout browser Chromium statico a 320,360,390,430,768,1024,1440 px
+- BUILD VITE COMPLETA: NON ESEGUITA con successo nell'ambiente Linux di lavoro
+  a causa della dipendenza nativa Rollup per Linux assente nell'archivio Windows.
+  Non e' una bocciatura della compilazione sul tuo Windows: verifica il build
+  tramite script originale in VS Code dopo il controllo locale.
+- Firebase PROD / account reali / APK firmato: NON TESTATI o MODIFICATI qui.
+
+ROLLBACK
+Estrai LIONFIT-PATCH10-ROLLBACK-ORIGINALI-13NOV2026.zip nella radice
+sovrascrivendo i cinque file originali, poi esegui RIMUOVI-NUOVI-FILE-PATCH10.cmd
+(incluso nel rollback) per pulire i due nuovi file. Nessuna migrazione dati.
