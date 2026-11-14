@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {randomBytes} from 'node:crypto';import {allowed,calendarScope,authUrl,hash,nonce,code,seal,open,equalHash,fresh,publicState,REDIRECT,SCOPE,keyFrom} from './model.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {randomBytes} from 'node:crypto';import {allowed,calendarScope,calendarMemberEligible,authUrl,hash,nonce,code,seal,open,equalHash,fresh,publicState,REDIRECT,SCOPE,keyFrom} from './model.mjs';
 const env={LF_CALENDAR_ENABLED:'true',LF_CALENDAR_PILOT_GYM:'gym_test',LF_CALENDAR_PILOT_ADMIN_UID:'admin123',LF_CALENDAR_PILOT_ATHLETE_UID:'athlete123'},admin={gymId:'gym_test',role:'admin'},athlete={gymId:'gym_test',role:'athlete'};
 test('only explicitly enabled pilot accounts',()=>{assert.equal(allowed(env,'admin123',admin),true);assert.equal(allowed(env,'athlete123',athlete),true);assert.equal(allowed({...env,LF_CALENDAR_ENABLED:'false'},'admin123',admin),false);assert.equal(allowed(env,'other123',admin),false);});
 test('wrong tenant or role or revoked fail closed',()=>{for(const p of [{...admin,gymId:'gym_other'},{...admin,role:'athlete'},{...admin,membershipStatus:'revoked'}])assert.equal(allowed(env,'admin123',p),false);});
@@ -13,3 +13,18 @@ const globalEnv={LF_CALENDAR_ENABLED:'true',LF_CALENDAR_SCOPE:'all'};
 test('global access explicit, invalid scope and off fail closed',()=>{assert.equal(calendarScope(globalEnv),'all');assert.equal(calendarScope({...globalEnv,LF_CALENDAR_SCOPE:'ALL'}),'off');assert.equal(calendarScope({...globalEnv,LF_CALENDAR_ENABLED:'false'}),'off');assert.equal(calendarScope(env),'pilot');assert.equal(calendarScope({...env,LF_CALENDAR_SCOPE:'pilot'}),'pilot');assert.equal(calendarScope({LF_CALENDAR_ENABLED:'true'}),'off');});
 test('global mode supports different gyms and roles with active memberships',()=>{assert.ok(allowed(globalEnv,'new_coach',{gymId:'gym_new',role:'admin'}));assert.ok(allowed(globalEnv,'new_athlete',{gymId:'gym_second',role:'athlete',membershipStatus:'active'}));for(const p of [undefined,{role:'admin'},{gymId:'gym_new',role:'superadmin'},{gymId:'gym_new',role:'athlete',membershipStatus:'revoked'}])assert.equal(allowed(globalEnv,'new_coach',p),false);assert.equal(allowed(globalEnv,'x',admin),false);});
 test('pilot rollback still admits only original accounts',()=>{const e={...env,LF_CALENDAR_SCOPE:'pilot'};assert.ok(allowed(e,'admin123',admin));assert.equal(allowed(e,'new_coach',{gymId:'gym_new',role:'admin'}),false);});
+
+// Legacy and invited users are not required to verify the LionFit email to link Calendar.
+test('active invited and legacy accounts can link Calendar regardless of email verification',()=>{
+ for(const [uid,p] of [['admin123',admin],['athlete123',athlete]])for(const emailVerified of [false,true,undefined])assert.equal(calendarMemberEligible(globalEnv,uid,p,{uid,disabled:false,emailVerified}),true);
+});
+test('Calendar still rejects disabled, missing or mismatched Auth users and invalid memberships',()=>{
+ const u={uid:'athlete123',disabled:false,emailVerified:false};
+ for(const x of [undefined,{...u,disabled:true},{...u,uid:'other123'}])assert.equal(calendarMemberEligible(globalEnv,'athlete123',athlete,x),false);
+ for(const p of [undefined,{...athlete,membershipStatus:'revoked'},{...athlete,gymId:''},{...athlete,role:'superadmin'}])assert.equal(calendarMemberEligible(globalEnv,'athlete123',p,u),false);
+ assert.equal(calendarMemberEligible({...globalEnv,LF_CALENDAR_ENABLED:'false'},'athlete123',athlete,u),false);
+});
+test('Calendar pilot rollback remains restricted even for unverified accounts',()=>{
+ assert.equal(calendarMemberEligible(env,'athlete123',athlete,{uid:'athlete123',disabled:false,emailVerified:false}),true);
+ assert.equal(calendarMemberEligible(env,'other123',athlete,{uid:'other123',disabled:false,emailVerified:false}),false);
+});

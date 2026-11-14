@@ -675,5 +675,13 @@
   "Impossibile aprire il download esterno. Usa il collegamento a GitHub Releases.": "Unable to open the external download. Use the GitHub Releases link.",
   "Apri GitHub Releases dal browser del telefono.": "Open GitHub Releases in your phone browser.",
   "avanzamento settimanale": "weekly progress",
-  "Assegnata senza programmazione": "Assigned without schedule"
+  "Assegnata senza programmazione": "Assigned without schedule",
+  "Apri libreria": "Open library",
+  "Chiudi libreria": "Close library",
+  "Premi Seleziona per inserire un esercizio nella scheda.": "Press Select to add an exercise to the workout.",
+  "Inserire questo esercizio?": "Add this exercise?",
+  "L’esercizio verrà inserito nella riga selezionata della scheda.": "The exercise will be added to the selected workout row.",
+  "Conferma selezione": "Confirm selection",
+  "Nome alternativa": "Alternative name",
+  "Inserisci esercizio…": "Enter exercise…"
 }

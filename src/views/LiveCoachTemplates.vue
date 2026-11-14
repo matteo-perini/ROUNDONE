@@ -2,7 +2,7 @@
 import {uiText,uiFormat} from '../features/i18n/interfaceLanguage'
 /** Archivio Coach operativo LIVE/STAGING: ruoli verificati con Firebase Auth
  * e mutazioni protette da mayWriteLive() e dalle Rules Firestore. */
-import {computed,onMounted,onUnmounted,ref,shallowRef,watch} from 'vue'
+import {computed,onMounted,onUnmounted,ref,shallowRef,watch,nextTick} from 'vue'
 import {useRoute,useRouter,RouterLink} from 'vue-router'
 import {onAuthStateChanged} from 'firebase/auth'
 import {collection,onSnapshot,query,where,type Unsubscribe} from 'firebase/firestore'
@@ -10,7 +10,7 @@ import {readStagingSession,type StagingSession} from '../integrations/firebase/s
 import {getStagingClients} from '../integrations/firebase/stagingClient'
 import {labCoachRoster,maySelectLabAthlete,type RosterAthlete} from '../features/athletes/liveCoachRoster'
 import {verifyCoachEditor,verifyCoachArchiveEditor,canManageCoachModel} from '../features/coach/liveCoachPolicy'
-import {createCoachModel,createCoachPersonal,updateCoachModel,updateCoachPersonal} from '../integrations/firestore/liveCoachOperations'
+import {createCoachModel,createCoachModelForDay,createCoachPersonal,updateCoachModel,updateCoachPersonal} from '../integrations/firestore/liveCoachOperations'
 import {assignShared,assignSharedToDay,restoreFromTrash,trashShared,watchAthleteSheets} from '../integrations/firestore/sheets'
 import {updateV1WeekSlot} from '../integrations/firestore/liveWeekSlots'
 import {belongsToCoach,hasCoachAssignment,type CoachRosterFilter} from '../features/athletes/coachMembership'
@@ -18,9 +18,14 @@ import {blankAlternative} from '../features/sheets/approvedAlternatives'
 import {editorToV1,v1ToEditor} from '../features/sheets/v1ExerciseCodec'
 import {supersetView} from '../features/sheets/supersetView'
 import {groupExerciseRows,primaryExerciseCount,ensurePrimaryExerciseCount,insertSuperset,removeExercise} from '../features/sheets/supersetEditor'
-import {loadCatalog,rankedExercises,searchKey,exactCatalogMatches,type CatalogExercise} from '../features/exercises/catalog'
+import {loadCatalog,exactCatalogMatches,type CatalogExercise} from '../features/exercises/catalog'
 import ExerciseMotion from '../components/ExerciseMotion.vue'
-import {DAY_KEYS} from '../features/sheets/domain'
+import Library from './Library.vue'
+import {applyLibraryChoice,clearManualIdentity,type LibraryTarget} from '../features/exercises/librarySelection'
+import {interfaceLanguage} from '../features/i18n/interfaceLanguage'
+import type {ApprovedAlternative} from '../features/sheets/domain'
+import {DAY_KEYS,DAY_NAMES} from '../features/sheets/domain'
+import {hasDayEditorIntent,parseDayEditorIntent,resolveEditorAthlete} from '../features/sheets/dayEditorContext'
 import {readLegacyExerciseCatalog} from '../integrations/firestore/legacyExerciseCatalog'
 import type {Exercise,Sheet} from '../model'
 import {newId} from '../model'
@@ -46,35 +51,41 @@ let coachFilterInitialized=false
 const visibleRoster=computed(()=>roster.value.filter(a=>belongsToCoach(a,session.value?.uid||'',coachFilter.value)))
 const searchedRoster=computed(()=>visibleRoster.value.filter(a=>a.name.toLocaleLowerCase('it').includes(assignSearch.value.trim().toLocaleLowerCase('it'))))
 const hasAnyMembership=computed(()=>roster.value.some(a=>hasCoachAssignment(a)))
-function linkIntent():{weekId:string;day:number;slot:1|2;expected:string}|null{
- const w=route.query.weekId,d=route.query.day,s=route.query.slot,ath=route.query.athleteId
- if(typeof w!=='string'||typeof d!=='string'||typeof s!=='string'||typeof ath!=='string'||ath!==athleteId.value)return null
- const day=Number(d),slot=Number(s)
- if(!w||w.includes('/')||!Number.isInteger(day)||day<0||day>6||(slot!==1&&slot!==2))return null
- return {weekId:w,day,slot:slot as 1|2,expected:typeof route.query.expectedSlotId==='string'?route.query.expectedSlotId:''}
+const dayContext=computed(()=>hasDayEditorIntent(route.query))
+const requestedDay=computed(()=>parseDayEditorIntent(route.query))
+function linkIntent(){
+ const intent=requestedDay.value
+ return intent&&currentAthlete.value?.id===intent.athleteId?intent:null
 }
 const personal=ref<Personal[]>([]),error=ref(''),notice=ref(''),loading=ref(true),busy=ref(false)
 const editing=ref(false),editingId=ref(''),revision=ref(0),isPersonal=ref(false)
-const saveAlsoShared=ref(false),pendingSharedLink=ref('')
 const personalEdit=ref(false),draftNameNotice=ref('')
 const title=ref(''),category=ref('Allenamento'),exercises=ref<Exercise[]>([])
 const search=ref(''),sort=ref('recent'),filter=ref<'active'|'trash'|'all'>('active'),preview=shallowRef<Model|null>(null)
 let lastSearchSheet=''
 watch([()=>route.query.sheetId,models],()=>{const id=route.query.sheetId;if(typeof id!=='string'||id===lastSearchSheet)return;const found=models.value.find(x=>x.id===id&&!x.deletedAt);if(found){lastSearchSheet=id;preview.value=found;search.value=found.title}}, {immediate:true})
-const exerciseCounter=ref('0'),focusedExerciseName=ref('')
+const exerciseCounter=ref('0')
 const catalog=ref<CatalogExercise[]>([])
 const supersetBadges=computed(()=>supersetView(exercises.value))
 const supersetCount=computed(()=>supersetBadges.value.filter(x=>x?.position==='second').length)
 const exerciseGroups=computed(()=>groupExerciseRows(exercises.value))
-const suggest=computed(()=>focusedExerciseName.value.trim()?rankedExercises(catalog.value,focusedExerciseName.value,'',14):[])
 const availableMax=computed(()=>250-exercises.value.length)
 const catalogForRow=(e:Exercise):CatalogExercise|null=>{if(e.exerciseId||e.catalogId)return catalog.value.find(c=>c.id===(e.exerciseId||e.catalogId))||null;const matches=exactCatalogMatches(catalog.value,e.name);return matches.length===1?matches[0]:null}
-function onEditedNameInput(e:Exercise){
- const matches=exactCatalogMatches(catalog.value,e.name)
- const found=matches.length===1?matches[0]:null
- // Prevent preserving a stale foreign exerciseId after manual rename.
- e.exerciseId=found?.id||'';e.catalogId=found?.id||''
+// Picker stays in the editor: no navigation and no draft reset.
+const libraryTarget=shallowRef<LibraryTarget|null>(null)
+let pickerOpener:HTMLElement|null=null
+function openLibrary(row:Exercise,alternative?:ApprovedAlternative){
+ if(busy.value||!editing.value)return
+ pickerOpener=document.activeElement instanceof HTMLElement?document.activeElement:null
+ libraryTarget.value={row,alternative}
 }
+function closeLibrary(){libraryTarget.value=null;const opener=pickerOpener;pickerOpener=null;void nextTick(()=>opener?.focus())}
+function selectLibraryExercise(exercise:CatalogExercise){
+ const target=libraryTarget.value
+ if(target&&!busy.value&&editing.value&&!applyLibraryChoice(exercises.value,target,exercise,interfaceLanguage.value))notice.value='La riga originale non è più disponibile. Nessun esercizio è stato sostituito.'
+ closeLibrary()
+}
+watch(editing,active=>{if(!active&&libraryTarget.value)closeLibrary()})
 
 function blankExercise():Exercise{return {id:newId(),name:'',sets:'',reps:'',load:'',rest:'',notes:'',exerciseId:'',catalogId:'',supersetWithPrevious:false,supersetRest:'',executionMode:'normale'}}
 function alignCount(){exerciseCounter.value=String(primaryExerciseCount(exercises.value))}
@@ -100,7 +111,6 @@ function addLinkedSuperset(e:Exercise){
  alignCount();notice.value=''
 }
 function removeExerciseNow(e:Exercise){exercises.value=removeExercise(exercises.value,e.id);alignCount();notice.value=''}
-function selectCatalogId(e:Exercise,event:Event){const id=(event.target as HTMLSelectElement).value;e.exerciseId=id;e.catalogId=id}
 /** Muove un gruppo intero: le coppie superset restano contigue e l'ID non cambia. */
 function moveExerciseGroup(groupNumber:number,direction:-1|1){
  const groups=exerciseGroups.value
@@ -115,7 +125,8 @@ function moveExerciseGroup(groupNumber:number,direction:-1|1){
  exercises.value=[...exercises.value.slice(0,start),...ordered.flat(),...exercises.value.slice(end)]
 }
 
-const currentAthlete=computed(()=>visibleRoster.value.find(a=>a.id===athleteId.value)??null)
+const fixedAthleteContext=computed(()=>dayContext.value||(!pickAssign.value&&((editing.value&&isPersonal.value)||(!editing.value&&typeof route.query.editPersonalId==='string'))&&route.query.athleteId!==undefined))
+const currentAthlete=computed(()=>resolveEditorAthlete(roster.value,visibleRoster.value,session.value?.gymId||'',athleteId.value,route.query.athleteId,fixedAthleteContext.value))
 const writable=computed(()=>mayWriteLive() && !!session.value && ['titolare','collaboratore'].includes(session.value.role))
 const activeCount=computed(()=>models.value.filter(s=>!s.deletedAt).length)
 const authorChoices=computed(()=>creatorFilterChoices(models.value,archiveCoaches.value,session.value?.uid||''))
@@ -130,21 +141,21 @@ const choice=computed(()=>models.value.filter(s=>(filter.value==='all'||(filter.
 const lastOwnEditable=computed(()=>editingId.value && models.value.find(x=>x.id===editingId.value))
 let live=true,stopModels:Unsubscribe|null=null,stopUsers:Unsubscribe|null=null,stopCoaches:Unsubscribe|null=null,stopPersonal:Unsubscribe|null=null,stopAuth:Unsubscribe|null=null
 const closeListeners=()=>{stopModels?.();stopModels=null;stopUsers?.();stopUsers=null;stopCoaches?.();stopCoaches=null;stopPersonal?.();stopPersonal=null;stopAuth?.();stopAuth=null}
-watch(athleteId,()=>{stopPersonal?.();stopPersonal=null;personal.value=[]
- if(!session.value||!maySelectLabAthlete(roster.value,session.value.gymId,athleteId.value))return
- const {db}=getStagingClients(),s=session.value,id=athleteId.value
- stopPersonal=watchAthleteSheets(db,s.gymId,id,sheets=>{if(live && athleteId.value===id)personal.value=sheets.personal},e=>{if(live)error.value=`Schede personali non leggibili: ${e.message}`})
+watch(()=>currentAthlete.value?.id||'',id=>{stopPersonal?.();stopPersonal=null;personal.value=[]
+ if(!session.value||!maySelectLabAthlete(roster.value,session.value.gymId,id))return
+ const {db}=getStagingClients(),s=session.value
+ stopPersonal=watchAthleteSheets(db,s.gymId,id,sheets=>{if(live && currentAthlete.value?.id===id)personal.value=sheets.personal},e=>{if(live)error.value=`Schede personali non leggibili: ${e.message}`})
 })
-function beginPersonal(){isPersonal.value=true;personalEdit.value=false;saveAlsoShared.value=!!linkIntent();editing.value=true;editingId.value='';revision.value=0;title.value='';category.value='Personalizzata';exercises.value=[];alignCount();notice.value=''}
+function beginPersonal(){isPersonal.value=true;personalEdit.value=false;editing.value=true;editingId.value='';revision.value=0;title.value='';category.value='Personalizzata';exercises.value=[];alignCount();notice.value=''}
 function beginEditPersonal(sheet:Personal){
- if(!session.value||!currentAthlete.value||sheet.deletedAt)return
- isPersonal.value=true;personalEdit.value=true;saveAlsoShared.value=false;editing.value=true;editingId.value=sheet.id;
+ if(!session.value||!currentAthlete.value||sheet.athleteId!==currentAthlete.value.id||sheet.deletedAt)return
+ isPersonal.value=true;personalEdit.value=true;editing.value=true;editingId.value=sheet.id;
  // Legacy personal records have no revision; watchAthleteSheets exposes it when present.
  revision.value=Number((sheet as Personal & {revision?:number}).revision||0)
  title.value=sheet.title;category.value=sheet.category;exercises.value=v1ToEditor(sheet.exercises);alignCount();notice.value='La copia storica non viene mai modificata.'
 }
-watch(personal,rows=>{const id=route.query.editPersonalId;if(typeof id!=='string'||editing.value)return;const sheet=rows.find(r=>r.id===id&&!r.deletedAt);if(sheet)beginEditPersonal(sheet)})
-function beginModel(){isPersonal.value=false;personalEdit.value=false;editing.value=true;editingId.value='';revision.value=0;title.value='';category.value='Allenamento';exercises.value=[];alignCount();notice.value=''}
+watch(personal,rows=>{const id=route.query.editPersonalId;if(typeof id!=='string'||editing.value||pickAssign.value)return;const sheet=rows.find(r=>r.id===id&&!r.deletedAt);if(sheet)beginEditPersonal(sheet)})
+function beginModel(){if(dayContext.value){beginPersonal();return}isPersonal.value=false;personalEdit.value=false;editing.value=true;editingId.value='';revision.value=0;title.value='';category.value='Allenamento';exercises.value=[];alignCount();notice.value=''}
 function edit(s:Model){
  if(!session.value||!canManageCoachModel(s.id,session.value.role)||s.deletedAt){notice.value='Modello non attivo o Coach non autorizzato.';return}
  isPersonal.value=false;personalEdit.value=false;editing.value=true;editingId.value=s.id;revision.value=s.revision;title.value=s.title;category.value=s.category
@@ -167,21 +178,9 @@ async function runWrite(label:string,fn:(ctx:{gym:string;uid:string;athlete:stri
  }catch(e){if(live)notice.value=`${label}: ${e instanceof Error?e.message:String(e)}`}
  finally{busy.value=false}
 }
-/** Retry the already-created shared template; NEVER create a second model ID. */
-async function retryPendingLink(){
- const id=pendingSharedLink.value,intent=linkIntent(),s=session.value,a=currentAthlete.value
- if(!id||!s||!a){notice.value='Contesto scaduto: ritrova la scheda nell Archivio e assegnala manualmente.';return}
- await runWrite('Riprendi collegamento',async({gym,uid,athlete})=>{
-  const {db}=getStagingClients()
-  if(intent)await assignSharedToDay(db,gym,athlete,id,uid,intent.weekId,DAY_KEYS[intent.day],intent.slot,intent.expected)
-  else await assignShared(db,gym,athlete,id,uid)
-  pendingSharedLink.value=''
-  editing.value=false
-  await router.push({path:'/coach/atleti',query:{athleteId:athlete,...(intent?{weekId:intent.weekId}:{})}})
- },true)
-}
 async function save(){
- if(!editing.value)return
+ if(!editing.value||busy.value)return
+ if(dayContext.value&&isPersonal.value&&!linkIntent()){notice.value='Impossibile identificare atleta, giorno o slot. La bozza resta aperta: verifica il contesto prima di salvare.';return}
  // All rows are edited in place; no hidden unsaved draft exercise exists.
  let rows
  try{rows=editorToV1(exercises.value)}catch(e){notice.value=e instanceof Error?e.message:String(e);return}
@@ -190,17 +189,9 @@ async function save(){
   const{db}=getStagingClients(),intent=linkIntent()
   if(wasPersonalEdit){
    await updateCoachPersonal(db,gym,athlete,uid,wasId,rev,name,cat,rows)
-  }else if(wasPersonal && (saveAlsoShared.value||intent)){
-   // The model is created only once. If the next transaction fails, hold the
-   // model ID and make retry an explicit user action, NEVER rerun create.
-   const id=await createCoachModel(db,gym,uid,name,cat,rows)
-   pendingSharedLink.value=id
-   if(intent){
-    await assignSharedToDay(db,gym,athlete,id,uid,intent.weekId,DAY_KEYS[intent.day],intent.slot,intent.expected)
-   }else{
-    await assignShared(db,gym,athlete,id,uid)
-   }
-   pendingSharedLink.value=''
+  }else if(wasPersonal && intent){
+   // Dal giorno: modello, copia personale, archivio protetto e slot nello stesso commit.
+   await createCoachModelForDay(db,gym,athlete,uid,name,cat,rows,intent.weekId,DAY_KEYS[intent.day],intent.slot,intent.expected)
   }else if(wasPersonal){
    await createCoachPersonal(db,gym,athlete,uid,name,cat,rows)
   }else if(wasId)await updateCoachModel(db,gym,uid,wasId,rev,name,cat,rows)
@@ -214,9 +205,10 @@ function openAssign(s:Model){
  pickAssign.value=s
  assignSearch.value=''
  const fromRoute=typeof route.query.athleteId==='string'?route.query.athleteId:''
- if(!currentAthlete.value)athleteId.value=roster.value.some(a=>a.id===fromRoute)?fromRoute:''
+ if(dayContext.value||!currentAthlete.value)athleteId.value=roster.value.some(a=>a.id===fromRoute)?fromRoute:''
 }
 async function assign(s:Model){
+ if(dayContext.value&&!linkIntent()){notice.value='Giorno, slot o atleta non validi: collegamento non effettuato.';return}
  if(s.deletedAt||!currentAthlete.value){notice.value='Seleziona un atleta prima di assegnare.';return}
  if(personal.value.some(p=>p.id===s.id&&p.deletedAt)) {notice.value='Scheda personale nel cestino: ripristinala prima di assegnarla.';return}
  await runWrite('Assegna modello',async({gym,uid,athlete})=>{
@@ -293,7 +285,7 @@ onMounted(async()=>{
    if(!coachFilterInitialized){coachFilterInitialized=true;if(roster.value.some(a=>a.primaryCoachUid===verified.uid))coachFilter.value='miei'}
    if(!maySelectLabAthlete(roster.value,verified.gymId,athleteId.value)){
     const requested=typeof route.query.athleteId==='string'?route.query.athleteId:''
-    athleteId.value=roster.value.find(a=>a.id===requested)?.id||roster.value[0]?.id||''
+    athleteId.value=requested?(roster.value.find(a=>a.id===requested)?.id||''):(roster.value[0]?.id||'')
    }
    loading.value=false
   },e=>{if(live){loading.value=false;error.value=`Elenco atleti non leggibile: ${e.message}`}})
@@ -337,12 +329,13 @@ onUnmounted(()=>{live=false;closeListeners()})
    </div>
   </div>
  </section>
- <section v-if="editing && !loading && session" class="panel lf-editor-panel">
+ <section v-if="editing && !loading && session" class="panel lf-editor-panel" :inert="!!libraryTarget">
   <div class="lf-editor-heading">
    <div><span class="lf-editor-kicker">{{uiText("LION FIT · EDITOR COACH")}}</span><h2>{{isPersonal?(personalEdit?'MODIFICA SCHEDA PERSONALE':'CREA SCHEDA PERSONALE'):editingId?'MODIFICA SCHEDA DELL’ARCHIVIO':'CREA NUOVA SCHEDA DELL’ARCHIVIO'}}</h2></div>
-   <button class="secondary" type="button" @click="editing=false">{{uiText("← Torna all'archivio")}}</button>
+   <button class="secondary" type="button" :disabled="busy" @click="editing=false">{{uiText("← Torna all'archivio")}}</button>
   </div>
-  <div class="lf-editor-metadata">
+  <p v-if="isPersonal && fixedAthleteContext" class="notice" role="status">{{currentAthlete ? `Atleta: ${currentAthlete.name}${requestedDay ? ` · ${DAY_NAMES[requestedDay.day]} · Scheda ${requestedDay.slot}` : ''}` : 'Atleta del programma non disponibile: nessun dato verrà salvato su un altro atleta.'}}</p>
+ <div class="lf-editor-metadata">
    <label>{{uiText("Nome scheda")}}<input v-model="title" maxlength="200" placeholder="Es. Potenza Esplosiva 1, Ipertrofia A"/></label>
    <label>{{uiText("Categoria")}}<input v-model="category" maxlength="100" placeholder="Allenamento"/></label>
    <label class="lf-count-field">{{uiText("Esercizi principali")}}<input :value="exerciseCounter" type="number" inputmode="numeric" min="0" max="250" step="1" aria-label="Numero esercizi principali" @input="onExerciseCountInput" @blur="onExerciseCountBlur"/></label>
@@ -352,7 +345,6 @@ onUnmounted(()=>{live=false;closeListeners()})
    <span>{{exerciseGroups.length}} {{uiText("esercizi ·")}} {{supersetCount}} {{uiText("superset ·")}} {{exercises.length}} {{uiText("righe")}}</span>
   </div>
   <p class="muted small lf-editor-hint">{{uiText("Aumentando il numero si aggiungono righe vuote; diminuendolo non elimini esercizi già compilati. Le note tecniche delle schede condivise non devono contenere dati sanitari.")}}</p>
-  <datalist id="lf-superset-exercise-names"><option v-for="item in suggest" :key="item.id" :value="item.name_it||item.name">{{item.name}}</option></datalist>
   <div class="lf-editor-groups">
    <div v-for="(group,groupNumber) in exerciseGroups" :key="exercises[group.primaryIndex].id" class="lf-exercise-group" :class="{'lf-has-superset':group.secondaryIndex!==null}">
     <div class="lf-exercise-group-head">
@@ -368,20 +360,20 @@ onUnmounted(()=>{live=false;closeListeners()})
      <div v-if="part===1" class="lf-pair-line" aria-hidden="true">↳ B</div>
      <span v-else-if="group.secondaryIndex!==null" class="lf-pair-line" aria-hidden="true">A</span>
      <div class="lf-editor-motion"><ExerciseMotion v-if="catalogForRow(exercises[index])" :exercise="catalogForRow(exercises[index])!"/><span v-else class="lf-editor-motion-fallback" aria-hidden="true">✚</span></div>
-     <label class="lf-editor-exercise-name">{{uiText("Esercizio")}}<input v-model="exercises[index].name" list="lf-superset-exercise-names" placeholder="Cerca o scrivi esercizio…" autocomplete="off" @focus="focusedExerciseName=exercises[index].name" @input="onEditedNameInput(exercises[index]);focusedExerciseName=exercises[index].name"/></label>
-     <label class="lf-editor-short">{{uiText("Serie")}}<input v-model="exercises[index].sets" inputmode="numeric" placeholder="—"/></label>
-     <label class="lf-editor-short">{{uiText("Ripetizioni")}}<input v-model="exercises[index].reps" placeholder="—"/></label>
+     <div class="lf-editor-exercise-name"><label :for="'lf-exercise-name-'+exercises[index].id">{{uiText("Esercizio")}}</label><div class="lf-inline-library"><input :id="'lf-exercise-name-'+exercises[index].id" v-model="exercises[index].name" :placeholder="uiText('Inserisci esercizio…')" autocomplete="off" @input="clearManualIdentity(exercises[index])"/><button type="button" class="lf-open-library" @click="openLibrary(exercises[index])">{{uiText("Apri libreria")}}</button></div></div>
+     <label class="lf-editor-short lf-editor-sets">{{uiText("Serie")}}<input v-model="exercises[index].sets" inputmode="numeric" placeholder="—"/></label>
+     <label class="lf-editor-short lf-editor-reps">{{uiText("Ripetizioni")}}<input v-model="exercises[index].reps" placeholder="—"/></label>
      <label class="lf-editor-load">{{uiText("Carico / intensità")}}<input v-model="exercises[index].load" placeholder="—"/></label>
      <label class="lf-editor-rest">{{uiText("Recupero / note")}}<input v-model="exercises[index].rest" placeholder="—"/></label>
      <button type="button" class="lf-exercise-remove" :aria-label="'Elimina '+(part===1?'superset':'esercizio')+' '+exercises[index].name" title="Rimuovi questa riga" @click="removeExerciseNow(exercises[index])">✕</button>
-     <div v-if="exactCatalogMatches(catalog,exercises[index].name).length>1" class="lf-editor-disambiguation"><label>{{uiText("Nome ambiguo: scegli l'esercizio corretto")}}<select :value="exercises[index].exerciseId||''" @change="selectCatalogId(exercises[index],$event)"><option value="">{{uiText("Nessuna illustrazione selezionata")}}</option><option v-for="candidate in exactCatalogMatches(catalog,exercises[index].name)" :key="candidate.id" :value="candidate.id">{{candidate.name_it||candidate.name}} · ID {{candidate.id}}</option></select></label></div>
+
      <details class="lf-editor-disambiguation" v-if="exercises[index].alternatives?.length"><summary>Alternative approvate ({{exercises[index].alternatives?.length}})</summary>
       <div v-for="(alt,ai) in exercises[index].alternatives" :key="ai" class="panel stack">
-       <label>Nome alternativa<input v-model="alt.name" list="lf-superset-exercise-names" maxlength="180" @input="alt.exerciseId=exactCatalogMatches(catalog,alt.name).length===1?exactCatalogMatches(catalog,alt.name)[0].id:''"/></label>
+       <div><label :for="'lf-alt-name-'+exercises[index].id+'-'+ai">{{uiText("Nome alternativa")}}</label><div class="lf-inline-library"><input :id="'lf-alt-name-'+exercises[index].id+'-'+ai" v-model="alt.name" maxlength="180" :placeholder="uiText('Inserisci esercizio…')" autocomplete="off" @input="clearManualIdentity(alt)"/><button type="button" class="lf-open-library" @click="openLibrary(exercises[index],alt)">{{uiText("Apri libreria")}}</button></div></div>
        <label>Serie (vuoto = come originale)<input v-model="alt.sets"/></label><label>Ripetizioni (vuoto = come originale)<input v-model="alt.reps"/></label><label>Carico<input v-model="alt.load"/></label><label>Recupero<input v-model="alt.rest"/></label><label>Note<input v-model="alt.notes"/></label>
        <button type="button" class="secondary" @click="exercises[index].alternatives?.splice(ai,1)">Rimuovi alternativa</button>
       </div></details>
-     <button v-if="(exercises[index].alternatives?.length||0)<2" type="button" class="secondary lf-editor-disambiguation" @click="exercises[index].alternatives=[...(exercises[index].alternatives||[]),blankAlternative()]">＋ Alternativa</button>
+     <button v-if="(exercises[index].alternatives?.length||0)<2" type="button" class="lf-superset-add lf-alt-add lf-editor-disambiguation" @click="exercises[index].alternatives=[...(exercises[index].alternatives||[]),blankAlternative()]">＋ Alternativa</button>
      <label v-if="part===1" class="lf-editor-pair-rest">{{uiText("Recupero dopo la coppia")}}<input v-model="exercises[index].supersetRest" placeholder="Es. 90 sec"/></label>
     </div>
     <button v-if="group.secondaryIndex===null && availableMax>0" type="button" class="lf-superset-add" @click="addLinkedSuperset(exercises[group.primaryIndex])">{{uiText("＋ Aggiungi superset")}}</button>
@@ -389,11 +381,8 @@ onUnmounted(()=>{live=false;closeListeners()})
   </div>
   <p v-if="!exerciseGroups.length" class="muted small">{{uiText("Imposta il numero di esercizi principali per iniziare.")}}</p>
   <p v-if="notice" class="notice" role="alert">{{notice}}</p>
-  <label v-if="isPersonal && !personalEdit && !linkIntent()" class="checkline"><input v-model="saveAlsoShared" type="checkbox"/> {{uiText("Salva anche nell’Archivio Coach e assegna allo stesso atleta (stesso ID)")}}</label>
-  <p class="muted small" v-if="isPersonal">{{personalEdit?'Aggiorna solo la copia personale. La copia protetta resta immutabile.':linkIntent()?'Creazione dal giorno: il nuovo modello va anche in Archivio Coach, poi personale+protetta+giorno con lo stesso ID.':'La scheda personale mantiene una copia storica protetta immutabile.'}}</p>
-  <p v-if="pendingSharedLink" class="notice" role="alert">{{uiText("Scheda creata con ID")}} {{pendingSharedLink}}{{uiText("; collegamento incompleto. Non premere di nuovo Salva: premi Riprendi collegamento.")}}</p>
-  <button v-if="pendingSharedLink" class="secondary wide" :disabled="busy" @click="retryPendingLink">{{uiText("Riprendi collegamento senza creare duplicati")}}</button>
-  <div class="lf-editor-actions"><button type="button" class="secondary" @click="editing=false">{{uiText("← Indietro")}}</button><button class="primary" :disabled="busy||!!pendingSharedLink||!writable||!title.trim()||!exercises.length" @click="save">{{isPersonal?(personalEdit?'SALVA MODIFICHE PERSONALI':'SALVA SCHEDA PERSONALE'):editingId?'SALVA MODIFICHE':'SALVA SCHEDA'}}</button></div>
+  <p class="muted small" v-if="isPersonal">{{personalEdit?'Aggiorna solo la copia personale. La copia protetta resta immutabile.':linkIntent()?'La scheda verrà salvata nell’Archivio Coach e collegata al giorno in un’unica operazione.':'La scheda sarà salvata automaticamente nell’Archivio Coach e assegnata all’atleta, con copia storica protetta.'}}</p>
+  <div class="lf-editor-actions"><button type="button" class="secondary" :disabled="busy" @click="editing=false">{{uiText("← Indietro")}}</button><button class="primary" :disabled="busy||!writable||!title.trim()||!exercises.length||(isPersonal&&(!currentAthlete||(dayContext&&!requestedDay)))" @click="save">{{busy?'SALVATAGGIO…':isPersonal?(personalEdit?'SALVA MODIFICHE PERSONALI':'SALVA SCHEDA PERSONALE'):editingId?'SALVA MODIFICHE':'SALVA SCHEDA'}}</button></div>
  </section>
  <section v-else-if="!loading && session" class="panel">
   <div class="row between"><div><h2 class="card-heading">{{uiText("ARCHIVIO · SCHEDE")}}</h2><span class="muted small">{{choice.length}} {{uiText("di")}} {{activeCount}} {{uiText("schede attive nell'archivio")}}</span></div><button v-if="typeof route.query.athleteId==='string'" class="secondary" :disabled="!writable||busy" @click="beginPersonal">{{uiText("+ Crea scheda personale")}}</button></div>
@@ -425,9 +414,11 @@ onUnmounted(()=>{live=false;closeListeners()})
   <p class="notice">{{uiText("I modelli ROUNDONE vengono modificati mantenendo il loro ID. Ogni salvataggio verifica la revisione, inclusa la revisione iniziale 0 dei modelli legacy. Le copie storiche degli atleti non sono modificabili.")}}</p>
  </section>
  <div v-if="pickAssign" class="modal-overlay" @click.self="pickAssign=null"><div class="dialog coach-assign-dialog"><div class="row between"><h2>{{uiText("Assegna ·")}} {{pickAssign.title}}</h2><button class="bare" :aria-label="uiText('Chiudi')" @click="pickAssign=null">✕</button></div><p class="small muted">{{uiText("Scegli un atleta. I filtri raggruppano i coach ma non modificano le Rules pubblicate.")}}</p>
- <label>{{uiText("Visualizza atleti")}}<select v-model="coachFilter" aria-label="Filtra atleti per coach"><option value="miei">{{uiText("I miei")}}</option><option value="condivisi">{{uiText("Condivisi")}}</option><option value="tutti">{{uiText("Tutti")}}</option></select></label>
+ <p v-if="dayContext" class="notice">{{currentAthlete&&requestedDay ? `Atleta: ${currentAthlete.name} · ${DAY_NAMES[requestedDay.day]} · Scheda ${requestedDay.slot}` : 'Contesto del giorno non valido.'}}</p>
+ <template v-else><label>{{uiText("Visualizza atleti")}}<select v-model="coachFilter" aria-label="Filtra atleti per coach"><option value="miei">{{uiText("I miei")}}</option><option value="condivisi">{{uiText("Condivisi")}}</option><option value="tutti">{{uiText("Tutti")}}</option></select></label>
  <p v-if="!hasAnyMembership" class="small muted">{{uiText("Atleti storici senza assegnazione coach: disponibili in Tutti.")}}</p>
- <label class="lfp-search-label">{{uiText("Cerca atleta")}} <input class="lfp-inline-lookup" v-model="assignSearch" type="search" autocomplete="off" aria-label="Cerca atleta per nome" placeholder="Nome o cognome…"/></label><label>{{uiText("Atleta")}}<select v-model="athleteId" :disabled="busy"><option value="">{{uiText("Seleziona atleta…")}}</option><option v-for="a in searchedRoster" :key="a.id" :value="a.id">{{a.name}}</option></select></label><p v-if="!searchedRoster.length" class="muted small">{{uiText("Nessun atleta corrisponde alla ricerca nei filtri attivi.")}}</p><p v-if="currentAthlete&&personal.some(p=>p.id===pickAssign?.id)" class="notice">{{uiText("Scheda già assegnata a questo atleta.")}}</p><button class="primary wide" :disabled="busy||!writable||!currentAthlete||personal.some(p=>p.id===pickAssign?.id&&p.deletedAt)" @click="assign(pickAssign)">{{uiText("Assegna scheda")}}</button></div></div>
+ <label class="lfp-search-label">{{uiText("Cerca atleta")}} <input class="lfp-inline-lookup" v-model="assignSearch" type="search" autocomplete="off" aria-label="Cerca atleta per nome" placeholder="Nome o cognome…"/></label><label>{{uiText("Atleta")}}<select v-model="athleteId" :disabled="busy"><option value="">{{uiText("Seleziona atleta…")}}</option><option v-for="a in searchedRoster" :key="a.id" :value="a.id">{{a.name}}</option></select></label><p v-if="!searchedRoster.length" class="muted small">{{uiText("Nessun atleta corrisponde alla ricerca nei filtri attivi.")}}</p></template><p v-if="currentAthlete&&personal.some(p=>p.id===pickAssign?.id)" class="notice">{{uiText("Scheda già assegnata a questo atleta.")}}</p><p v-if="notice" class="notice" role="alert">{{notice}}</p><button class="primary wide" :disabled="busy||!writable||!currentAthlete||(dayContext&&!requestedDay)||personal.some(p=>p.id===pickAssign?.id&&p.deletedAt)" @click="assign(pickAssign)">{{uiText("Assegna scheda")}}</button></div></div>
+ <Library v-if="editing&&libraryTarget" selection-mode @select="selectLibraryExercise" @close="closeLibrary"/>
  <SheetDetail v-if="preview" :sheet="preview" @close="preview=null"/>
 </div>
 </template>
@@ -455,7 +446,7 @@ onUnmounted(()=>{live=false;closeListeners()})
 .lf-group-reorder{margin-left:auto;display:flex;gap:4px}
 .lf-mini-button{border:1px solid var(--border);border-radius:6px;min-width:24px;min-height:24px;padding:0 4px;background:var(--card);color:var(--text);font-size:14px}
 .lf-mini-button:disabled{opacity:.3}
-.lf-exercise-editor{display:grid;grid-template-columns:50px minmax(115px,2.4fr) minmax(52px,.48fr) minmax(70px,.7fr) minmax(80px,.75fr) minmax(90px,1.05fr) 28px;align-items:center;gap:7px;min-width:0;padding:6px 5px;border:1px solid transparent;border-radius:8px;position:relative}
+.lf-exercise-editor{display:grid;grid-template-columns:50px minmax(145px,2.4fr) minmax(52px,.48fr) minmax(70px,.7fr) minmax(80px,.75fr) minmax(90px,1.05fr) 28px;align-items:center;gap:7px;min-width:0;padding:6px 5px;border:1px solid transparent;border-radius:8px;position:relative}
 .lf-exercise-editor.lf-superset-secondary{border:1px solid var(--mint);background:var(--green-bg);margin-top:4px;padding-left:17px}
 .lf-editor-motion{width:48px;height:48px;border:1px solid var(--border);border-radius:8px;background:var(--card);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .lf-editor-motion :deep(> *){width:100%!important;height:100%!important;min-width:0!important;min-height:0!important}
@@ -466,10 +457,14 @@ onUnmounted(()=>{live=false;closeListeners()})
 .lf-editor-disambiguation,.lf-editor-pair-rest{grid-column:2 / -2}
 .lf-editor-pair-rest{max-width:260px}
 .lf-superset-add{margin:5px 0 0 55px;min-height:29px;padding:4px 12px;border:1px solid var(--mint);border-radius:8px;background:var(--green-bg);color:var(--mint);font-weight:800;font-size:10px}
+.lf-inline-library{display:flex;align-items:center;gap:3px;min-width:0;height:35px;margin-top:5px;border:1px solid var(--border);border-radius:8px;background:var(--field);padding:2px}
+.lf-editor-panel .lf-inline-library input{flex:1;width:0;min-width:0;height:29px;min-height:29px;margin:0;border:0;background:transparent;padding:3px 5px;font-size:12px}
+.lf-open-library{flex:none;min-height:27px;padding:3px 5px;border:0;border-radius:6px;background:var(--green,#15803d);color:#fff;font-size:10px;font-weight:800;white-space:nowrap}
+.lf-alt-add{margin:0;justify-self:start}
 .lf-editor-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:15px;padding-top:12px;border-top:1px solid var(--border)}
 .lf-editor-actions button{min-height:37px}
-@media(max-width:1100px){.lf-exercise-editor{grid-template-columns:48px minmax(125px,2fr) repeat(2,minmax(60px,.6fr)) minmax(80px,1fr) 28px}.lf-editor-rest{grid-column:2 / -2}.lf-editor-disambiguation,.lf-editor-pair-rest{grid-column:2 / -2}}
-@media(max-width:700px){.lf-editor-panel{padding:12px!important}.lf-editor-metadata{grid-template-columns:minmax(0,1fr) 100px}.lf-editor-metadata>label:first-child{grid-column:1/-1}.lf-exercise-editor{grid-template-columns:43px minmax(0,1fr) 28px;gap:6px}.lf-editor-motion{width:42px;height:42px}.lf-editor-exercise-name{grid-column:2}.lf-editor-short,.lf-editor-load,.lf-editor-rest{grid-column:auto}.lf-editor-short:nth-of-type(2){grid-column:1}.lf-editor-short:nth-of-type(3){grid-column:2}.lf-editor-load{grid-column:1 / 3}.lf-editor-rest{grid-column:1 / -1}.lf-exercise-remove{grid-column:3;grid-row:1}.lf-editor-disambiguation,.lf-editor-pair-rest{grid-column:1/-1}.lf-exercise-editor.lf-superset-secondary{padding-left:11px}.lf-pair-line{display:none}.lf-superset-add{margin-left:0}.lf-editor-actions{justify-content:stretch}.lf-editor-actions button{flex:1}}
+@media(max-width:1100px){.lf-exercise-editor{grid-template-columns:48px minmax(145px,2fr) repeat(2,minmax(60px,.6fr)) minmax(80px,1fr) 28px}.lf-editor-rest{grid-column:2 / -2}.lf-editor-disambiguation,.lf-editor-pair-rest{grid-column:2 / -2}}
+@media(max-width:700px){.lf-editor-panel{padding:12px!important}.lf-editor-metadata{grid-template-columns:minmax(0,1fr) 100px}.lf-editor-metadata>label:first-child{grid-column:1/-1}.lf-exercise-editor{grid-template-columns:43px minmax(0,1fr) 28px;gap:6px}.lf-editor-motion{width:42px;height:42px}.lf-editor-exercise-name{grid-column:2}.lf-editor-short,.lf-editor-load,.lf-editor-rest{grid-column:auto}.lf-editor-sets{grid-column:1}.lf-editor-reps{grid-column:2}.lf-editor-load{grid-column:1 / 3}.lf-editor-rest{grid-column:1 / -1}.lf-exercise-remove{grid-column:3;grid-row:1}.lf-editor-disambiguation,.lf-editor-pair-rest{grid-column:1/-1}.lf-exercise-editor.lf-superset-secondary{padding-left:11px}.lf-pair-line{display:none}.lf-superset-add{margin-left:0}.lf-editor-actions{justify-content:stretch}.lf-editor-actions button{flex:1}}
 @media(prefers-reduced-motion:reduce){.lf-exercise-group{transition:none}}
 /* PATCH 03: filtri grafici autore per Archivio Coach; colore originale LionFit. */
 .lf-creator-filter{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin:8px 0 14px;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:11px}

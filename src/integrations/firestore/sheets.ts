@@ -140,12 +140,23 @@ export async function assignShared(db:Firestore,gym:string,athlete:string,templa
  * Same templateId across all three docs and week; repeated call with the already
  * assigned ID is idempotent. The protected archive is NEVER overwritten. */
 export async function assignSharedToDay(db:Firestore,gym:string,athlete:string,modelId:string,uid:string,weekId:string,day:DayKey,slot:1|2,expected:string):Promise<'created'|'existing'>{
+ return writeSharedToDay(db,gym,athlete,modelId,uid,weekId,day,slot,expected)
+}
+
+/** Create only: model + athlete copy + immutable archive + selected day in one transaction. */
+export async function createSharedToDay(db:Firestore,gym:string,athlete:string,modelId:string,uid:string,weekId:string,day:DayKey,slot:1|2,expected:string,body:DocumentData):Promise<void>{
+ await writeSharedToDay(db,gym,athlete,modelId,uid,weekId,day,slot,expected,body)
+}
+
+async function writeSharedToDay(db:Firestore,gym:string,athlete:string,modelId:string,uid:string,weekId:string,day:DayKey,slot:1|2,expected:string,newModel?:DocumentData):Promise<'created'|'existing'>{
  const t=templateDoc(db,gym,modelId),p=personalDoc(db,gym,athlete,modelId),a=archiveDoc(db,gym,athlete,modelId)
  const w=weekDoc(db,gym,athlete,weekId),f=root(db,gym,athlete),d=dayKey(day),key=slotKey(slot)
  await ensureWeekMutationFence(db,gym,athlete)
  return runTransaction(db,async tx=>{
   const [fs,model,personal,archived,week]=await Promise.all([tx.get(f),tx.get(t),tx.get(p),tx.get(a),tx.get(w)])
-  if(!model.exists()||model.data().deletedAt)throw new Error('Modello non presente nell Archivio o cestinato.')
+  if(newModel){
+   if(model.exists()||personal.exists()||archived.exists())throw new Error('ID scheda già presente: nessun dato sovrascritto.')
+  }else if(!model.exists()||model.data()?.deletedAt)throw new Error('Modello non presente nell Archivio o cestinato.')
   if(!week.exists()||week.data().deletedAt)throw new Error('Settimana non attiva.')
   const current=String(week.data().days?.[d]?.[key]||'')
   if(current!==expected && current!==modelId)throw new Error('Un altro Coach ha modificato lo slot: aggiorna prima di riprovare.')
@@ -157,9 +168,11 @@ export async function assignSharedToDay(db:Firestore,gym:string,athlete:string,m
   const previousArchiveRef=replacedId?archiveDoc(db,gym,athlete,replacedId):null
   const [previousPersonal,previousArchive]=previousPersonalRef&&previousArchiveRef
    ?await Promise.all([tx.get(previousPersonalRef),tx.get(previousArchiveRef)]):[null,null]
-  const raw=personal.exists()?personal.data():model.data()
+  const raw=personal.exists()?personal.data():(newModel??model.data())
+  if(!raw)throw new Error('Modello non disponibile.')
   const sheet:Personal={id:modelId,athleteId:athlete,title:String(raw.title||''),category:String(raw.category||'Personalizzata'),exercises:Array.isArray(raw.exercises)?raw.exercises:[],sourceId:modelId}
   if(!sheet.title.trim()||!sheet.exercises.length)throw new Error('Scheda senza contenuto: assegnazione annullata.')
+  if(newModel)tx.set(t,newModel)
   if(!personal.exists())tx.set(p,{title:sheet.title,category:sheet.category,exercises:sheet.exercises,sourceSharedTemplateId:modelId,createdAt:serverTimestamp()})
   if(!archived.exists())tx.set(a,protectedBody(sheet,uid))
   if(previousPersonalRef&&previousPersonal?.exists()){

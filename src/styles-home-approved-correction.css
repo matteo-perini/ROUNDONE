@@ -161,3 +161,28 @@
 @media(prefers-reduced-motion:reduce){
  .lf-home-approved .lf-v3-ring-value,.lf-home-approved .lf-v3-wave,.app.as-athlete .lf-home-approved .lf-v3-shortcut{transition:none!important;animation:none!important;transform:none!important}
 }
+
+/* PATCH 18: Home mobile a dimensione naturale, senza tagliare l'Accesso rapido.
+ * Un solo scroll del documento; dock invariata. Le cinque righe includono la card
+ * palestra quando presente, senza attribuirle l'altezza prevista per il ring. */
+@media(max-width:799px){
+ .app.as-athlete main.main-layout.athlete-container:has(.lf-home-approved){
+  height:auto!important;min-height:calc(100dvh - 76px - env(safe-area-inset-top,0px))!important;
+  flex:1 0 auto!important;overflow:visible!important;
+  padding:6px 12px calc(84px + env(safe-area-inset-bottom,0px))!important;
+ }
+ .app.as-athlete main.main-layout.athlete-container:has(.lf-home-approved)>.athlete-live-screen{
+  height:auto!important;min-height:0!important;flex:1 0 auto!important;overflow:visible!important;
+ }
+ .app.as-athlete .athlete-container .lf-home-approved{
+  height:auto!important;min-height:0!important;flex:1 0 auto!important;
+  grid-template-rows:auto auto minmax(153px,1fr) auto!important;
+ }
+ .app.as-athlete .athlete-container .lf-home-approved:has(>.lf14-gym-identity){
+  grid-template-rows:auto auto auto minmax(153px,1fr) auto!important;
+ }
+ .app.as-athlete .lf-home-approved .lf-v3-progress{min-height:0!important;overflow:visible!important}
+ .app.as-athlete .lf-home-approved .lf-v3-shortcuts-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .app.as-athlete .lf-home-approved .lf-v3-shortcut{height:auto!important;scroll-margin-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+ .app.as-athlete:has(.lf-home-approved){padding-bottom:0!important}
+}

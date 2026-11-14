@@ -8,13 +8,13 @@ import {logger} from 'firebase-functions';
 import {randomUUID} from 'node:crypto';
 import {participants,plan,eventId,sameConnection,refreshAccess,applyEvent,retryAt} from './sync.mjs';
 import {defineSecret} from 'firebase-functions/params';
-import {PROJECT,REGION,SCOPE,REDIRECT,hash,nonce,code,validId,allowed,calendarScope,keyFrom,seal,open,equalHash,authUrl,fresh,publicState} from './model.mjs';
+import {PROJECT,REGION,SCOPE,REDIRECT,hash,nonce,code,validId,allowed,calendarScope,calendarMemberEligible,keyFrom,seal,open,equalHash,authUrl,fresh,publicState} from './model.mjs';
 initializeApp();const db=getFirestore(),links=db.collection('lf_calendar_links');
 const client=defineSecret('LF_CALENDAR_CLIENT_ID'),secret=defineSecret('LF_CALENDAR_CLIENT_SECRET'),encryption=defineSecret('LF_CALENDAR_TOKEN_KEY');
 const base={region:REGION,invoker:'public',maxInstances:2,timeoutSeconds:60};const withSecrets={...base,secrets:[client,secret,encryption]};
 const ttl=15*60*1000;
 function guard(){if((process.env.GCLOUD_PROJECT||process.env.GOOGLE_CLOUD_PROJECT)!==PROJECT)throw new HttpsError('failed-precondition','Progetto non autorizzato.');}
-async function membership(uid,pilot=true){if(!validId(uid))throw new HttpsError('unauthenticated','Accedi a LionFit.');const [snap,user]=await Promise.all([db.doc(`users/${uid}`).get(),getAuth().getUser(uid)]);const p=snap.data();if(user.disabled||!user.emailVerified||!p||!validId(p.gymId)||!['admin','athlete'].includes(p.role)||(p.membershipStatus!==undefined&&p.membershipStatus!=='active')||(pilot&&!allowed(process.env,uid,p)))throw new HttpsError('permission-denied','Google Calendar non è disponibile per questo account.');return p;}
+async function membership(uid,pilot=true){if(!validId(uid))throw new HttpsError('unauthenticated','Accedi a LionFit.');const [snap,user]=await Promise.all([db.doc(`users/${uid}`).get(),getAuth().getUser(uid)]);const p=snap.data();if(!calendarMemberEligible(process.env,uid,p,user,pilot))throw new HttpsError('permission-denied','Google Calendar non è disponibile per questo account.');return p;}
 async function member(req,pilot=true){guard();const uid=req.auth?.uid;const p=await membership(uid,pilot);return {uid,gym:p.gymId,role:p.role,ref:links.doc(uid)};}
 function same(d,u){return d?.gym===u.gym&&d?.role===u.role;}
 async function json(url,init){const r=await fetch(url,{...init,signal:AbortSignal.timeout(15000),redirect:'error'});if(!r.ok)throw new Error(`Google HTTP ${r.status}`);return r.json();}

@@ -21,6 +21,11 @@ export function allowed(env,uid,p){
  if(scope==='all')return true;
  return p.gymId===env.LF_CALENDAR_PILOT_GYM&&((uid===env.LF_CALENDAR_PILOT_ADMIN_UID&&p.role==='admin')||(uid===env.LF_CALENDAR_PILOT_ATHLETE_UID&&p.role==='athlete'));
 }
+// Calendar linkage belongs to the authenticated LionFit UID. Google separately
+// authorizes the calendar account, which need not share the LionFit email.
+export function calendarMemberEligible(env,uid,p,user,checkScope=true){
+ return validId(uid)&&user?.uid===uid&&user.disabled===false&&validId(p?.gymId)&&['admin','athlete'].includes(p.role)&&(p.membershipStatus===undefined||p.membershipStatus==='active')&&(!checkScope||allowed(env,uid,p));
+}
 export function keyFrom(s){if(typeof s!=='string'||! /^[0-9a-f]{64}$/i.test(s))throw new Error('invalid encryption key');return Buffer.from(s,'hex');}
 export function seal(value,key,uid){const iv=randomBytes(12),c=createCipheriv('aes-256-gcm',keyFrom(key),iv);c.setAAD(Buffer.from(`lf-calendar-v1:${uid}`));const data=Buffer.concat([c.update(value,'utf8'),c.final()]);return [iv,c.getAuthTag(),data].map(x=>x.toString('base64url')).join('.');}
 export function open(value,key,uid){const parts=value.split('.');if(parts.length!==3)throw new Error('invalid ciphertext');const [iv,tag,data]=parts.map(v=>Buffer.from(v,'base64url'));const d=createDecipheriv('aes-256-gcm',keyFrom(key),iv);d.setAAD(Buffer.from(`lf-calendar-v1:${uid}`));d.setAuthTag(tag);return Buffer.concat([d.update(data),d.final()]).toString('utf8');}

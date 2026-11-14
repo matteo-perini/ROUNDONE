@@ -81,7 +81,7 @@ function beforeUnload(e:BeforeUnloadEvent){if(dirty.value){e.preventDefault();e.
 onBeforeRouteLeave(()=>discardIfDirty('Uscire dalla schermata'))
 
 // PATCH 3/7: i filtri sono esclusivamente organizzativi, mai un ACL per-atleta.
-const membershipFilter=ref('tutti') // tutti | miei | coach:<UID> (UID dal roster reale)
+const membershipFilter=ref('miei') // default all’ingresso; tutti | miei | coach:<UID> (filtro solo organizzativo)
 const programFilter=ref<'tutti'|'con'|'senza'>('tutti')
 const coachRoster=ref<GymCoach[]>([])
 const canManagePrimaryCoach=computed(()=>session.value?.role==='titolare' && coachAssignmentWritesReady())
@@ -407,7 +407,7 @@ function assignFromShared(s:SharedChoice){
   pick.value=null;showWeek.value=true;activeDay.value=slot.day
  })
 }
-function openPick(day:number,slot:1|2){activeDay.value=day;pickSearch.value='';pick.value={day,slot};void refreshSharedChoices()}
+function openPick(day:number,slot:1|2){activeDay.value=day;message.value='';pickSearch.value='';pick.value={day,slot};void refreshSharedChoices()}
 function applySlot(nextId:string){const s=session.value,a=athlete.value,w=week.value,p=pick.value;if(!s||!a||!w||!p)return
  const expected=p.slot===1?w.days[p.day].templateId:w.days[p.day].templateId2
  void withWrite(nextId?'Collega la scheda':'Scollega la scheda',async()=>{
@@ -697,8 +697,9 @@ function copyToArchive(sheet:Personal){
   </div>
  </div>
  <div v-if="pick&&week" class="modal-overlay" @click.self="pick=null"><div class="dialog coach-picker-dialog" role="dialog" aria-modal="true" :aria-label="`Collega scheda ${pick.slot} · ${DAY_NAMES[pick.day]}`" style="max-width:540px"><div class="row between"><h2>{{uiText("COLLEGA SCHEDA")}} {{pick.slot}} · {{DAY_NAMES[pick.day].toUpperCase()}}</h2><button class="bare" :aria-label="uiText('Chiudi')" @click="pick=null">✕</button></div>
-  <input v-model="pickSearch" type="search" placeholder="Cerca scheda…" aria-label="Cerca nell’Archivio Coach"/><button class="secondary wide" @click="linkToEditor('shared',pick.day,pick.slot);pick=null">{{uiText("Apri Archivio Coach · Visualizza / Assegna")}}</button>
+  <input v-model="pickSearch" type="search" placeholder="Cerca scheda…" aria-label="Cerca nell’Archivio Coach"/><button class="secondary wide" @click="linkToEditor('shared',pick.day,pick.slot)">{{uiText("Apri Archivio Coach · Visualizza / Assegna")}}</button>
   <div class="row between"><strong>{{uiText("ARCHIVIO COACH ·")}} {{visibleShared.length}} {{uiText("schede")}}</strong><button class="secondary" :disabled="sharedLoading" @click="refreshSharedChoices(true)">{{sharedLoading?'Caricamento…':'Aggiorna'}}</button></div>
+  <p v-if="message" class="notice" role="alert">{{message}}</p>
   <p v-if="sharedError" class="notice" role="alert">{{uiText("Archivio non leggibile:")}} {{sharedError}}</p>
   <div class="coach-v1-pick-list"><article v-for="s in visibleShared" :key="s.id" class="line-card coach-pick-row"><div class="coach-pick-row-info"><b>{{s.title}}</b><p class="muted small">{{s.category}} · {{s.exercises.length}} {{uiText("esercizi")}}</p></div><div class="row coach-pick-row-actions"><button class="secondary" @click="openSharedPreview(s)">{{uiText("Visualizza")}}</button><button class="primary" :disabled="busy||!canWrite" @click="assignFromShared(s)">{{uiText("Assegna")}}</button></div></article><p v-if="!sharedLoading&&!visibleShared.length" class="muted">{{uiText("Nessuna scheda nell’Archivio Coach corrisponde alla ricerca.")}}</p></div>
   <p class="small muted">{{uiText("Per una nuova scheda usa «Crea nuova» nel giorno. Le schede personali già assegnate e quelle storiche restano conservate ma non compaiono in questa scelta.")}}</p>

@@ -3,6 +3,8 @@
  * Never delete a document. No Firebase init here.
  */
 import { collection,doc,runTransaction,serverTimestamp,type Firestore } from 'firebase/firestore'
+import {createSharedToDay} from './sheets'
+import type {DayKey} from '../../features/sheets/domain'
 import type {V1ExerciseRow} from '../../features/sheets/v1ExerciseCodec'
 import {canManageCoachModel,safeTitle,safeExerciseRows,COACH_EDITOR_PREFIX} from '../../features/coach/liveCoachPolicy'
 
@@ -20,6 +22,13 @@ export async function createCoachModel(db:Firestore,gym:string,uid:string,title:
   if((await tx.get(target)).exists())throw new Error('ID modello già presente.')
   tx.set(target,{...body,createdAt:serverTimestamp(),createdBy:uid,updatedAt:serverTimestamp(),updatedBy:uid,revision:1})
  })
+ return id
+}
+/** Create from either of the two day slots, never leave a partial shared model. */
+export async function createCoachModelForDay(db:Firestore,gym:string,athlete:string,uid:string,title:string,category:string,rows:readonly V1ExerciseRow[],weekId:string,day:DayKey,slot:1|2,expected:string):Promise<string>{
+ const id=COACH_EDITOR_PREFIX+doc(collection(db,'gyms',gym,'templates')).id
+ const body={...modelBody(title,category,rows),createdAt:serverTimestamp(),createdBy:uid,updatedAt:serverTimestamp(),updatedBy:uid,revision:1}
+ await createSharedToDay(db,gym,athlete,id,uid,weekId,day,slot,expected,body)
  return id
 }
 /** Edit the same document ID, including ROUNDONE legacy templates without revision.
@@ -47,18 +56,19 @@ export async function duplicateCoachModel(db:Firestore,gym:string,uid:string,sou
  })
  return newId
 }
-/** Personal new sheet + historical copy in same transaction: never modify historical copy. */
+/** New personal sheet: reusable Coach model + athlete copy + immutable history, one transaction. */
 export async function createCoachPersonal(db:Firestore,gym:string,athleteId:string,uid:string,title:string,category:string,rows:readonly V1ExerciseRow[]):Promise<string>{
  const raw=doc(collection(db,'gyms',gym,'athlete_programs',athleteId,'personal_templates'))
  const id=COACH_EDITOR_PREFIX+raw.id
  const personal=doc(db,'gyms',gym,'athlete_programs',athleteId,'personal_templates',id)
  const archived=doc(db,'gyms',gym,'athlete_programs',athleteId,'archive_templates',id)
- const body=modelBody(title,category,rows)
+ const body=modelBody(title,category,rows),model=refTemplate(db,gym,id)
  await runTransaction(db,async tx=>{
-  const [p,a]=await Promise.all([tx.get(personal),tx.get(archived)])
-  if(p.exists() || a.exists())throw new Error('ID scheda personale già presente.')
+  const [m,p,a]=await Promise.all([tx.get(model),tx.get(personal),tx.get(archived)])
+  if(m.exists() || p.exists() || a.exists())throw new Error('ID scheda già presente: nessun dato sovrascritto.')
+  tx.set(model,{...body,createdAt:serverTimestamp(),createdBy:uid,updatedAt:serverTimestamp(),updatedBy:uid,revision:1})
   tx.set(archived,{sourceTemplateId:id,title:body.title,exercises:body.exercises,archiveVersion:1,archivedAt:serverTimestamp(),archivedBy:uid})
-  tx.set(personal,{...body,createdBy:uid,createdAt:serverTimestamp()})
+  tx.set(personal,{...body,sourceSharedTemplateId:id,createdBy:uid,createdAt:serverTimestamp()})
  })
  return id
 }

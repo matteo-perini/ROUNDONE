@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {accountKey,storedPrefs,defaultPrefs,sameAccount} from './accountPrefs.mjs';
+const u={uid:'athlete',gym:'gym_a'},a={booked:false,cancelled:true,leads:[60]},b={booked:true,cancelled:false,leads:[30]};
+const device=(p,updated,who=u)=>({...who,prefs:p,updated});
+test('account preference survives removal of all devices',()=>assert.deepEqual(storedPrefs(device(a,1),[],u),a));
+test('returning devices cannot override account preference with defaults',()=>assert.deepEqual(storedPrefs(device(a,1),[device(defaultPrefs(),99)],u),a));
+test('legacy migration selects most recent legitimate same-gym device',()=>assert.deepEqual(storedPrefs(null,[device(a,1),device(b,2),device(defaultPrefs(),3,{uid:'other',gym:u.gym})],u),b));
+test('tenant and uid are independent',()=>{assert.notEqual(accountKey(u),accountKey({...u,gym:'gym_b'}));assert.notEqual(accountKey(u),accountKey({...u,uid:'other'}));assert.equal(storedPrefs(device(a,1,{...u,gym:'gym_b'}),[],u),null);assert.equal(sameAccount(null,u),false)});
+test('new account has no stored prefs; defaults are independent',()=>{assert.equal(storedPrefs(null,[],u),null);const d=defaultPrefs();d.leads.pop();assert.deepEqual(defaultPrefs().leads,[1440,30])});
+test('invalid legacy values do not migrate',()=>assert.equal(storedPrefs(null,[device({booked:false,cancelled:true,leads:[17]},1)],u),null));

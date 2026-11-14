@@ -1,4 +1,4 @@
-import {collection,doc,onSnapshot,serverTimestamp,writeBatch,setDoc,query,where,orderBy,limit,startAfter,getDocsFromServer,getCountFromServer,updateDoc,addDoc,documentId,type QueryDocumentSnapshot} from 'firebase/firestore'
+import {collection,doc,onSnapshot,serverTimestamp,runTransaction,getDocFromServer,setDoc,query,where,orderBy,limit,startAfter,getDocsFromServer,getCountFromServer,updateDoc,addDoc,documentId,type QueryDocumentSnapshot} from 'firebase/firestore'
 import {getStagingClients} from '../firebase/stagingClient'
 import {mayWriteLive,isStagingMode} from '../firebase/stagingConfig'
 import {readStagingSession,type StagingSession} from '../firebase/stagingSession'
@@ -7,9 +7,48 @@ import {accountKey,cleanHidden,gymName,safeImage,ticketTypes,ticketStates,type W
 const ensureWrite=()=>{if(!mayWriteLive())throw new Error('Scritture non abilitate in questo ambiente.')}
 const db=()=>getStagingClients().db
 export type Identity={name:string;logo:string;cover:string}
+export type IdentityField=keyof Identity
+export type IdentityPart='gym'|'appearance'
+export type IdentityStatus={state:'loading'|'ready'|'error';message?:string}
+export type IdentityRead={identity:Identity;gym:IdentityStatus;appearance:IdentityStatus}
 export const emptyIdentity=():Identity=>({name:'',logo:'',cover:''})
-export function watchGymIdentity(s:StagingSession,next:(v:Identity)=>void,fail:(e:Error)=>void){let data=emptyIdentity(),nameLoaded=false,brandLoaded=false; const update=(v:Partial<Identity>)=>{data={...data,...v};if(nameLoaded&&brandLoaded)next(data)};const a=onSnapshot(doc(db(),'gyms',s.gymId),{includeMetadataChanges:true},snap=>{if(snap.metadata.fromCache)return;nameLoaded=true;update({name:gymName(snap.data()?.name)})},fail);const b=onSnapshot(doc(db(),'gyms',s.gymId,'identity','appearance'),{includeMetadataChanges:true},snap=>{if(snap.metadata.fromCache)return;brandLoaded=true;update({logo:safeImage(snap.data()?.logo,120000),cover:safeImage(snap.data()?.cover,420000)})},e=>{brandLoaded=true;update({logo:'',cover:''});fail(e)});return()=>{a();b()}}
-export async function saveGymIdentity(d:Identity,expected:string){ensureWrite();const s=await readStagingSession();if(accountKey(s)!==expected)throw new Error('Account cambiato: riapri le impostazioni.');if(s.role!=='titolare')throw new Error('Solo il titolare può modificare l’identità.');const name=d.name.trim();if(!name||name.length>100)throw new Error('Inserisci un nome da 1 a 100 caratteri.');if(d.logo&&!safeImage(d.logo,120000)||d.cover&&!safeImage(d.cover,420000))throw new Error('Immagine non valida o troppo grande.');const store=db(),batch=writeBatch(store);batch.update(doc(store,'gyms',s.gymId),{name});batch.set(doc(store,'gyms',s.gymId,'identity','appearance'),{logo:d.logo,cover:d.cover,updatedAt:serverTimestamp()});await batch.commit()}
+export const emptyIdentityRead=():IdentityRead=>({identity:emptyIdentity(),gym:{state:'loading'},appearance:{state:'loading'}})
+export function watchGymIdentity(s:StagingSession,next:(v:IdentityRead)=>void){
+ let state=emptyIdentityRead(),active=true
+ const stops:(()=>void)[]=[]
+ function publish(part:IdentityPart,status:IdentityStatus,values:Partial<Identity>){if(!active)return;state={...state,[part]:status,identity:{...state.identity,...values}};next(state)}
+ const sources=[{part:'gym' as const,ref:doc(db(),'gyms',s.gymId)}, {part:'appearance' as const,ref:doc(db(),'gyms',s.gymId,'identity','appearance')}]
+ for(const {part,ref} of sources){
+  const blank=part==='gym'?{name:''}:{logo:'',cover:''}
+  const error=(e:unknown)=>publish(part,{state:'error',message:String((e as {code?:string})?.code||'lettura-non-riuscita')},blank)
+  const accept=(snap:Awaited<ReturnType<typeof getDocFromServer>>)=>{
+   if(!active||snap.metadata.fromCache||snap.metadata.hasPendingWrites)return
+   if(part==='gym'&&!snap.exists()){publish(part,{state:'error',message:'palestra-non-trovata'},blank);return}
+   const d=snap.data() as Record<string,unknown>|undefined
+   publish(part,{state:'ready'},part==='gym'?{name:gymName(d?.name)||gymName(d?.gymName)}:{logo:safeImage(d?.logo,120000),cover:safeImage(d?.cover,420000)})
+  }
+  // Independent server reads: an absent appearance document is valid, not a failure.
+  // Subscribe after the authorized read; snapshots catch subsequent changes.
+  void getDocFromServer(ref).then(snap=>{if(!active)return;accept(snap);stops.push(onSnapshot(ref,{includeMetadataChanges:true},accept,error))}).catch(error)
+ }
+ return()=>{active=false;stops.forEach(stop=>stop())}
+}
+export async function saveGymIdentity(d:Identity,expected:string,fields:readonly IdentityField[]){
+ ensureWrite();const s=await readStagingSession();if(accountKey(s)!==expected)throw new Error('Account cambiato: riapri le impostazioni.');if(s.role!=='titolare')throw new Error('Solo il titolare può modificare la palestra.');
+ const name=d.name.trim(),changeName=fields.includes('name'),changeLogo=fields.includes('logo'),changeCover=fields.includes('cover'),changeBrand=changeLogo||changeCover
+ if(!changeName&&!changeBrand)return
+ if(changeName&&(!name||name.length>100))throw new Error('Inserisci un nome da 1 a 100 caratteri.')
+ if((changeLogo&&d.logo&&!safeImage(d.logo,120000))||(changeCover&&d.cover&&!safeImage(d.cover,420000)))throw new Error('Immagine non valida o troppo grande.')
+ const store=db(),gym=doc(store,'gyms',s.gymId),brand=doc(store,'gyms',s.gymId,'identity','appearance')
+ // Never replace an unedited image with stale data. If only the name changed,
+ // no read/write of the optional appearance document is necessary.
+ await runTransaction(store,async tx=>{
+  const root=await tx.get(gym);if(!root.exists()||root.data().ownerUid!==s.uid)throw new Error('Solo il titolare verificato può modificare la palestra.')
+  const old=changeBrand?(await tx.get(brand)).data():undefined
+  if(changeName)tx.update(gym,{name})
+  if(changeBrand)tx.set(brand,{logo:changeLogo?d.logo:safeImage(old?.logo,120000),cover:changeCover?d.cover:safeImage(old?.cover,420000),updatedAt:serverTimestamp()})
+ })
+}
 export function watchDashboard(s:StagingSession,next:(v:WidgetId[])=>void,fail:(e:Error)=>void){return onSnapshot(doc(db(),'gyms',s.gymId,'dashboard_preferences',s.uid),{includeMetadataChanges:true},p=>{if(!p.metadata.fromCache)next(cleanHidden(p.data()?.hidden))},fail)}
 export async function saveDashboard(hidden:WidgetId[],expected:string){ensureWrite();const s=await readStagingSession();if(accountKey(s)!==expected)throw new Error('Account cambiato: riapri le impostazioni.');if(s.role==='atleta')throw new Error('Solo Coach.');await setDoc(doc(db(),'gyms',s.gymId,'dashboard_preferences',s.uid),{hidden:cleanHidden(hidden),updatedAt:serverTimestamp()})}
 export async function platformGuard(write=false){if(write)ensureWrite();if(!isStagingMode()||!await verifyPlatformAccess())throw new Error('Accesso piattaforma non autorizzato.');return db()}

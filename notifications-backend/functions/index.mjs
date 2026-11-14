@@ -7,6 +7,7 @@ import {onSchedule} from 'firebase-functions/v2/scheduler';
 import {logger} from 'firebase-functions';
 import {pilotScope,pilotMatches,scopeGym,recipientAllowed} from './pilot.mjs';
 import {randomUUID} from 'node:crypto';
+import {accountKey,defaultPrefs,sameAccount,storedPrefs} from './accountPrefs.mjs';
 import {DAY,MINUTE,hash,prefs,validToken,validId,validDeviceId,activeProfile,jobsForChange,stillValid,wants,message} from './model.mjs';
 initializeApp();
 const db=getFirestore();
@@ -23,23 +24,41 @@ async function member(req){
 }
 function deviceKey(data){if(!validDeviceId(data?.id))throw new HttpsError('invalid-argument','Dispositivo non valido.');return data.id;}
 const publicInfo=d=>({prefs:d.prefs,expires:d.expires,platform:d.platform});
+const accountRef=u=>db.collection('lf_push_preferences').doc(accountKey(u));
+const accountData=(u,p,now)=>({uid:u.uid,gym:u.gym,prefs:p,updated:now});
+function validatedPrefs(value){try{return prefs(value)}catch{throw new HttpsError('invalid-argument','Preferenze non valide.');}}
 export const lfPushRegister=onCall(options,async req=>{
  const u=await member(req),d=req.data;if(!validToken(d?.token)||!['web','android'].includes(d?.platform))throw new HttpsError('invalid-argument','Registrazione non valida.');
- let p;try{p=prefs(d.prefs)}catch{throw new HttpsError('invalid-argument','Preferenze non valide.');}
- const id=hash(d.token),ref=devices.doc(id),now=Date.now();
- // A token has one owner only; switching account replaces the association.
- // Bound number of active devices per account, allowing refresh of the same token.
- await db.runTransaction(async tx=>{const q=await tx.get(devices.where('uid','==',u.uid).limit(25));const existing=await tx.get(ref);const active=q.docs.filter(s=>s.id!==id&&s.data().expires>now);if(active.length>=10)throw new HttpsError('resource-exhausted','Troppi dispositivi attivi: disattiva quelli inutilizzati.');for(const s of q.docs){if(s.id!==id&&s.data().expires<=now)tx.delete(s.ref)}tx.set(ref,{...u,token:d.token,platform:d.platform,prefs:p,expires:now+90*DAY,updated:now,revision:randomUUID()});});
- return {id,prefs:p,expires:now+90*DAY};
+ const proposed=validatedPrefs(d.prefs),id=hash(d.token),ref=devices.doc(id),prefRef=accountRef(u),now=Date.now();
+ const p=await db.runTransaction(async tx=>{const [q,existing,account]=await Promise.all([tx.get(devices.where('uid','==',u.uid).limit(25)),tx.get(ref),tx.get(prefRef)]);
+  const records=q.docs.map(s=>s.data());if(existing.exists&&!q.docs.some(s=>s.id===id))records.push(existing.data());
+  const chosen=storedPrefs(account.data(),records,u)||proposed;
+  const active=q.docs.filter(s=>s.id!==id&&s.data().expires>now);if(active.length>=10)throw new HttpsError('resource-exhausted','Troppi dispositivi attivi: disattiva quelli inutilizzati.');
+  tx.set(prefRef,accountData(u,chosen,now));
+  for(const s of q.docs){if(s.id===id)continue;const v=s.data();if(v.expires<=now)tx.delete(s.ref);else if(sameAccount(v,u))tx.update(s.ref,{prefs:chosen});}
+  tx.set(ref,{...u,token:d.token,platform:d.platform,prefs:chosen,expires:now+90*DAY,updated:now,revision:randomUUID()});return chosen;
+ });return {id,prefs:p,expires:now+90*DAY};
 });
 export const lfPushSettings=onCall(options,async req=>{
- const u=await member(req),id=deviceKey(req.data),ref=devices.doc(id);let p;
- if(req.data?.prefs!==undefined){try{p=prefs(req.data.prefs)}catch{throw new HttpsError('invalid-argument','Preferenze non valide.');}}
- return db.runTransaction(async tx=>{const d=(await tx.get(ref)).data();if(!d||d.uid!==u.uid||d.gym!==u.gym||d.expires<=Date.now())return {active:false};if(p){tx.update(ref,{prefs:p,updated:Date.now(),expires:Date.now()+90*DAY});return {active:true,...publicInfo({...d,prefs:p,expires:Date.now()+90*DAY})}}return {active:true,...publicInfo(d)};});
+ const u=await member(req),input=req.data||{},accountMode=input.mode==='account';
+ const id=accountMode&&input.id===undefined?null:deviceKey(input),ref=id?devices.doc(id):null,prefRef=accountRef(u);
+ const p=input.prefs===undefined?null:validatedPrefs(input.prefs),now=Date.now();
+ return db.runTransaction(async tx=>{
+  const [account,q,device]=await Promise.all([tx.get(prefRef),tx.get(devices.where('uid','==',u.uid).limit(25)),ref?tx.get(ref):Promise.resolve(null)]);
+  const d=device?.data(),active=sameAccount(d,u)&&d.expires>now;
+  if(!accountMode&&!active)return {active:false};
+  const records=q.docs.map(s=>s.data());if(d&&!q.docs.some(s=>s.id===id))records.push(d);
+  const saved=storedPrefs(account.data(),records,u),chosen=p||saved||defaultPrefs();
+  // First read migrates legacy settings only if a real saved device existed.
+  if(p||(!account.exists&&saved)){tx.set(prefRef,accountData(u,chosen,now));for(const s of q.docs){const v=s.data();if(sameAccount(v,u)&&v.expires>now&&!(active&&p&&s.id===id))tx.update(s.ref,{prefs:chosen});}}
+  // A device-specific legacy save may extend that device's registration, not other devices.
+  if(active&&p&&ref)tx.update(ref,{prefs:chosen,updated:now,expires:now+90*DAY});
+  return {active,...(active?publicInfo(p?{...d,expires:now+90*DAY}:d):{}),prefs:chosen};
+ });
 });
 export const lfPushUnregister=onCall(options,async req=>{
  projectGuard();const uid=req.auth?.uid,id=deviceKey(req.data);if(!uid)throw new HttpsError('unauthenticated','Accedi a LionFit.');
- const ref=devices.doc(id);await db.runTransaction(async tx=>{const d=(await tx.get(ref)).data();if(d?.uid===uid)tx.delete(ref)});return {ok:true};
+ const ref=devices.doc(id);await db.runTransaction(async tx=>{const d=(await tx.get(ref)).data();if(d?.uid!==uid)return; if(validId(d.gym)){const u={uid,gym:d.gym},prefRef=accountRef(u),account=await tx.get(prefRef);const saved=storedPrefs(account.data(),[d],u);if(saved&&!account.exists)tx.set(prefRef,accountData(u,saved,Date.now()));}tx.delete(ref)});return {ok:true};
 });
 async function removeInvalid(ref,revision){await db.runTransaction(async tx=>{const d=(await tx.get(ref)).data();if(d?.revision===revision)tx.delete(ref)});}
 async function sendToDevice(snap,kind,lead=0){

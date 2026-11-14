@@ -4,9 +4,9 @@ import CalendarPilotSettings from '../components/CalendarPilotSettings.vue'
 import {calendarPilotEnabled} from '../integrations/firebase/calendarPilot'
 const calendarOpen=ref(false)
 import PushSettings from '../components/PushSettings.vue'
-import {pushSupported} from '../integrations/firebase/pushNotifications'
+import {pushFeatureEnabled} from '../integrations/firebase/pushNotifications'
 const pushAvailable=ref(false),pushOpen=ref(false)
-onMounted(async()=>{pushAvailable.value=await pushSupported()})
+onMounted(()=>{pushAvailable.value=pushFeatureEnabled()})
 import BillingSandbox from '../components/BillingSandbox.vue'
 import {billingSandboxEnabled} from '../integrations/firebase/billingSandbox'
 import GymIdentity from '../components/GymIdentity.vue'
@@ -112,7 +112,7 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
     <div class="lfsettings-entry lfsettings-static"><LionIcon name="dumbbell"/><span><b>{{uiText("Unità di misura")}}</b><small>{{uiText("Valori del profilo")}}</small></span><strong>kg, cm</strong></div>
    </section>
    <section v-if="isStagingMode()&&stagingSession&&stagingSession.role!=='atleta'" class="lfsettings-group"><h2>Personalizzazione</h2>
-    <button v-if="stagingSession.role==='titolare'" type="button" class="lfsettings-entry" :aria-expanded="identityOpen" @click="identityOpen=!identityOpen"><LionIcon name="gym"/><span><b>Identità palestra</b><small>Nome, logo e copertina</small></span><LionIcon name="chevron" :size="17"/></button>
+    <button v-if="stagingSession.role==='titolare'" type="button" class="lfsettings-entry" :aria-expanded="identityOpen" @click="identityOpen=!identityOpen"><LionIcon name="gym"/><span><b>Personalizza palestra</b><small>Nome, logo e copertina</small></span><LionIcon name="chevron" :size="17"/></button>
     <GymIdentity v-if="identityOpen&&stagingSession.role==='titolare'" edit/>
     <button type="button" class="lfsettings-entry" :aria-expanded="dashboardOpen" @click="dashboardOpen=!dashboardOpen"><LionIcon name="settings"/><span><b>Personalizza dashboard</b><small>Seleziona i tuoi riquadri</small></span><LionIcon name="chevron" :size="17"/></button>
     <DashboardPreferences v-if="dashboardOpen"/>
@@ -120,7 +120,7 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
    <section v-if="billingSandboxEnabled()&&stagingSession?.role==='titolare'" class="lfsettings-group"><h2>Abbonamento · Ambiente di test</h2><button type="button" class="lfsettings-entry" :aria-expanded="billingOpen" @click="billingOpen=!billingOpen"><LionIcon name="clipboard"/><span><b>Abbonamento LionFit (Sandbox)</b><small>Prova gratuita, piani e rinnovi simulati</small></span><LionIcon name="chevron" :size="17"/></button><BillingSandbox v-if="billingOpen"/></section>
    <section v-if="platformAllowed" class="lfsettings-group"><h2>LionFit · Gestione piattaforma</h2><RouterLink class="lfsettings-entry" to="/lionfit-control"><LionIcon name="shield"/><span><b>Control Center</b><small>Accesso riservato Super Admin</small></span><LionIcon name="chevron" :size="17"/></RouterLink></section>
    <section v-if="competitionAvailable" class="lfsettings-group"><h2>Moduli palestra</h2><button type="button" class="lfsettings-entry" :disabled="competitionBusy||!mayWriteLive()" @click="toggleCompetition"><LionIcon name="calendar"/><span><b>Competizioni e gare</b><small>Mostra o nascondi il modulo della palestra, senza cancellare gli eventi.</small></span><strong>{{competitionEnabled?'Attivo':'Disattivo'}}</strong></button><p v-if="competitionMessage" class="notice" role="status">{{competitionMessage}}</p></section>
-   <section v-if="pushAvailable&&stagingSession" class="lfsettings-group"><h2>Notifiche</h2><button class="lfsettings-entry" type="button" :aria-expanded="pushOpen" @click="pushOpen=!pushOpen"><LionIcon name="calendar"/><span><b>Avvisi e promemoria Agenda</b><small>Personalizza questo dispositivo</small></span><LionIcon name="chevron" :size="17"/></button><PushSettings v-if="pushOpen"/></section>
+   <section v-if="pushAvailable&&stagingSession" class="lfsettings-group"><h2>Notifiche</h2><button class="lfsettings-entry" type="button" :aria-expanded="pushOpen" @click="pushOpen=!pushOpen"><LionIcon name="calendar"/><span><b>Avvisi e promemoria Agenda</b><small>Preferenze account e dispositivi</small></span><LionIcon name="chevron" :size="17"/></button><PushSettings v-if="pushOpen"/></section>
    <section v-if="calendarPilotEnabled()&&stagingSession" class="lfsettings-group"><h2>Integrazioni</h2><button class="lfsettings-entry" type="button" :aria-expanded="calendarOpen" @click="calendarOpen=!calendarOpen"><LionIcon name="calendar"/><span><b>Google Calendar</b><small>Collegamento facoltativo</small></span><LionIcon name="chevron" :size="17"/></button><CalendarPilotSettings v-if="calendarOpen" :key="stagingSession.uid"/></section>
    <section class="lfsettings-group"><h2>{{uiText("Privacy e account")}}</h2>
     <RouterLink v-if="!isStagingMode()||stagingSession" class="lfsettings-entry" :to="profilePath+(emulator?'&edit=1':'?edit=1')"><LionIcon name="edit"/><span><b>{{uiText("Modifica profilo")}}</b><small>{{uiText("I tuoi dati personali")}}</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
