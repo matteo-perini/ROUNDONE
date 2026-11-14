@@ -97,5 +97,7 @@ onUnmounted(()=>{if(props.selectionMode)document.documentElement.classList.remov
 .lf-library-picker-scroll > *{flex-shrink:0}
 .lf-library-picker-overlay .lf-library-nested{z-index:1610!important}
 .lf-library-confirm{width:min(100%,420px)}
+/* Fit five previews per row on wide desktop screens, only in the selector. */
+@media(min-width:1200px){.lf-library-picker-dialog .library-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-width:600px){.lf-library-picker-top{padding:calc(8px + env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) 8px max(10px,env(safe-area-inset-left,0px))}.lf-library-picker-scroll{padding:10px max(10px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}.lf-library-picker-dialog .library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.lf-library-choice .lf-library-meta{flex-wrap:wrap}.lf-library-choice .lf-library-meta-copy{flex:1 1 100%}.lf-library-choice .lf-library-select{margin-left:auto;min-height:40px}}
 </style>
