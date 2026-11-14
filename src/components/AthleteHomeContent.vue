@@ -7,6 +7,7 @@ import {uiText} from '../features/i18n/interfaceLanguage'
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import LionIcon from './LionIcon.vue'
+import GymIdentity from './GymIdentity.vue'
 import SheetDetail from './SheetDetail.vue'
 import type { ExerciseRecord, ProgramDay } from '../features/sheets/domain'
 
@@ -59,6 +60,7 @@ function target(key:(typeof quick)[number]['key']){
    </div>
   </section>
 
+  <GymIdentity/>
   <!-- La settimana resta in UNA card orizzontale con il cerchio, non con sette tessere. -->
   <RouterLink :to="planLink" class="lf-v3-progress" :aria-label="`${shortWeekLabel}, giorno ${elapsedDays} di 7 della settimana. Apri il piano`">
    <span class="lf-v3-ring" aria-hidden="true">

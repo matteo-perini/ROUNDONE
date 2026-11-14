@@ -6,7 +6,8 @@ export type DayKey = typeof DAY_KEYS[number]
 export type Slot = 1 | 2
 export type ActivitySlot = 1 | 2
 /** Campi nativi V1 + campi UI Modern: non restringere dati storici a kg/numero. */
-export type ExerciseRecord = { id?: string; name: string; sets: number|string; reps: string; rest?: string; kg?: number; exerciseId?: string; load?: string; notes?: string; supersetWithPrevious?: boolean; supersetRest?: string; catalogId?: string; executionMode?: 'normale'|'superset' }
+export type ApprovedAlternative = {name:string;exerciseId:string;sets:string;reps:string;load:string;rest:string;notes:string}
+export type ExerciseRecord = { id?: string; name: string; sets: number|string; reps: string; rest?: string; kg?: number; exerciseId?: string; load?: string; notes?: string; supersetWithPrevious?: boolean; supersetRest?: string; catalogId?: string; executionMode?: 'normale'|'superset'; alternatives?:ApprovedAlternative[] }
 export type Personal = { id:string; title:string; category:string; exercises: ExerciseRecord[]; athleteId:string; sourceId?:string; revision?:number; deletedAt?:string; deletedBy?:string; planDetached?:boolean }
 export type SharedTemplate = Omit<Personal,'athleteId'> & { athleteId?:never }
 export type ProgramDay = { name:string; activities:string[]; activity1:string; activity2:string; templateId:string; templateId2:string }

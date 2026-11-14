@@ -1,0 +1,97 @@
+// PATCH 13 — blocco candidato da inserire DENTRO match /gyms/{gymId}.
+// Usa gli helper ESISTENTI inGym/coach/owner/isAthleteOf/uid; non sostituisce le regole Spark.
+      function agendaCompetitionsEnabled() {
+        return exists(/databases/$(database)/documents/gyms/$(gymId)/agenda_config/competitions)
+          && get(/databases/$(database)/documents/gyms/$(gymId)/agenda_config/competitions).data.enabled == true;
+      }
+      match /agenda_config/competitions {
+        allow get: if inGym(gymId);
+        allow list: if false;
+        allow create, update: if owner(gymId)
+          && request.resource.data.keys().hasOnly(['enabled','updatedBy','updatedAt'])
+          && request.resource.data.keys().hasAll(['enabled','updatedBy','updatedAt'])
+          && request.resource.data.enabled is bool
+          && request.resource.data.updatedBy == uid()
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if false;
+      }
+      match /competitions/{eventId} {
+        function validEvent(d) {
+          return d.keys().hasOnly(['title','category','discipline','location','notes','startAt','status','createdBy','createdAt','updatedBy','updatedAt','coverId'])
+            && d.keys().hasAll(['title','category','discipline','location','notes','startAt','status','createdBy','createdAt','updatedBy','updatedAt'])
+            && d.title is string && d.title.size() > 0 && d.title.size() <= 100
+            && d.category in ['combattimento','forza','altro']
+            && d.discipline is string && d.discipline.size() > 0 && d.discipline.size() <= 60
+            && d.location is string && d.location.size() > 0 && d.location.size() <= 160
+            && d.notes is string && d.notes.size() <= 1500
+            && d.get('coverId','') is string && (d.get('coverId','') == '' || d.get('coverId','').matches('^[a-f0-9-]{36}$'))
+            && d.startAt is timestamp && d.status in ['published','cancelled']
+            && d.createdBy is string && d.createdAt is timestamp
+            && d.updatedBy == uid() && d.updatedAt == request.time;
+        }
+        function validFutureEvent(d) {
+          return d.startAt > request.time && d.startAt <= request.time + duration.value(730,'d');
+        }
+        allow get, list: if inGym(gymId) && agendaCompetitionsEnabled();
+        allow create: if coach(gymId) && agendaCompetitionsEnabled()
+          && eventId.matches('^[A-Za-z0-9]{20}$')
+          && validEvent(request.resource.data) && request.resource.data.status == 'published'
+          && request.resource.data.createdBy == uid() && request.resource.data.createdAt == request.time
+          && validFutureEvent(request.resource.data);
+        allow update: if coach(gymId) && agendaCompetitionsEnabled()
+          && resource.data.status == 'published' && resource.data.startAt > request.time
+          && validEvent(request.resource.data)
+          && ((request.resource.data.status == 'published' && validFutureEvent(request.resource.data)
+                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title','category','discipline','location','notes','startAt','coverId','updatedBy','updatedAt']))
+            || (request.resource.data.status == 'cancelled'
+                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedBy','updatedAt'])));
+        allow delete: if false;
+      }
+      match /competition_entries/{entryId} {
+        function targetEvent(eid) {
+          return get(/databases/$(database)/documents/gyms/$(gymId)/competitions/$(eid)).data;
+        }
+        function validEntry(d) {
+          return d.keys().hasOnly(['eventId','athleteId','status','result','createdAt','updatedAt','updatedBy'])
+            && d.keys().hasAll(['eventId','athleteId','status','result','createdAt','updatedAt','updatedBy'])
+            && d.eventId is string && d.eventId.matches('^[A-Za-z0-9]{20}$')
+            && d.athleteId is string && d.athleteId.matches('^[A-Za-z0-9_-]{1,128}$')
+            && entryId == d.eventId + '_' + d.athleteId
+            && d.status in ['pending','approved','rejected','withdrawn']
+            && d.result is string && d.result.size() <= 1000
+            && d.createdAt is timestamp && d.updatedBy == uid() && d.updatedAt == request.time;
+        }
+        function upcomingEvent(d) {
+          let e = targetEvent(d.eventId);
+          return e.status == 'published' && e.startAt > request.time;
+        }
+        function finishedEvent(d) {
+          let e = targetEvent(d.eventId);
+          return e.status == 'published' && e.startAt <= request.time;
+        }
+        // Missing get permits transactionally creating a new own request; no other existing request is exposed.
+        allow get: if inGym(gymId) && agendaCompetitionsEnabled()
+          && (coach(gymId) || (resource == null && isAthleteOf(gymId,uid())
+             && uid().matches('^[A-Za-z0-9_-]{1,128}$') && entryId.matches('^[A-Za-z0-9]{20}_' + uid() + '$'))
+            || (resource != null && resource.data.athleteId == uid()));
+        allow list: if inGym(gymId) && agendaCompetitionsEnabled()
+          && (coach(gymId) || resource.data.athleteId == uid());
+        allow create: if inGym(gymId) && agendaCompetitionsEnabled()
+          && isAthleteOf(gymId, uid()) && validEntry(request.resource.data)
+          && request.resource.data.athleteId == uid() && request.resource.data.status == 'pending'
+          && request.resource.data.result == '' && request.resource.data.createdAt == request.time
+          && upcomingEvent(request.resource.data);
+        allow update: if inGym(gymId) && agendaCompetitionsEnabled()
+          && validEntry(request.resource.data)
+          && ((isAthleteOf(gymId,uid()) && resource.data.athleteId == uid() && upcomingEvent(resource.data)
+                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedBy','updatedAt'])
+                && ((resource.data.status in ['pending','approved'] && request.resource.data.status == 'withdrawn')
+                  || (resource.data.status == 'withdrawn' && request.resource.data.status == 'pending')))
+             || (coach(gymId) && isAthleteOf(gymId,resource.data.athleteId)
+                && ((resource.data.status == 'pending' && request.resource.data.status in ['approved','rejected']
+                     && upcomingEvent(resource.data)
+                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedBy','updatedAt']))
+                  || (resource.data.status == 'approved' && finishedEvent(resource.data)
+                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['result','updatedBy','updatedAt'])))));
+        allow delete: if false;
+      }

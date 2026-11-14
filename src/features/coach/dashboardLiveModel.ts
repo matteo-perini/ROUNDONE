@@ -3,7 +3,7 @@
  */
 export type DashboardTemplate={id:string;title:string;deletedAt?:unknown;createdMs?:number}
 export type DashboardWeek={id:string;name:string;programTitle?:string;programId?:string;deletedAt?:unknown;createdMs?:number;days:Record<string,unknown>}
-export type DashboardPersonal={id:string;deletedAt?:unknown}
+export type DashboardPersonal={id:string;title?:string;deletedAt?:unknown}
 export type DashboardAthleteWeeks={athleteId:string;weeks:DashboardWeek[];personal:DashboardPersonal[]}
 export type DashboardBooking={id:string;athleteId:string;coachId:string;startMs:number;createdMs?:number;discipline:string;service:string;status:'confirmed'|'cancelled'}
 export type DashboardAppointment=DashboardBooking &{athleteName:string;coachName:string}

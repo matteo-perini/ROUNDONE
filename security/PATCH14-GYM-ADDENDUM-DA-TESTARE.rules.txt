@@ -1,0 +1,26 @@
+      // PATCH 14 - inside match /gyms/{gymId}. Branding is tenant-private.
+      match /identity/{identityId} {
+        allow get: if identityId == 'appearance' && inGym(gymId);
+        allow list: if false;
+        allow create, update: if identityId == 'appearance' && owner(gymId)
+          && request.resource.data.keys().hasAll(['logo','cover','updatedAt'])
+          && request.resource.data.keys().hasOnly(['logo','cover','updatedAt'])
+          && request.resource.data.logo is string && request.resource.data.logo.size() <= 120000
+          && (request.resource.data.logo == '' || request.resource.data.logo.matches('^data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/]+=*$'))
+          && request.resource.data.cover is string && request.resource.data.cover.size() <= 420000
+          && (request.resource.data.cover == '' || request.resource.data.cover.matches('^data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/]+=*$'))
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if false;
+      }
+      match /dashboard_preferences/{coachId} {
+        allow get: if coach(gymId) && uid() == coachId;
+        allow list: if false;
+        allow create, update: if coach(gymId) && uid() == coachId
+          && request.resource.data.keys().hasAll(['hidden','updatedAt'])
+          && request.resource.data.keys().hasOnly(['hidden','updatedAt'])
+          && request.resource.data.hidden is list
+          && request.resource.data.hidden.size() <= 9
+          && request.resource.data.hidden.hasOnly(['metrics','banner','actions','activity','distribution','appointments','summary','recent','shortcuts'])
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if false;
+      }

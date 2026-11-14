@@ -1,0 +1,45 @@
+    // PATCH 14 - inside match /databases/{database}/documents.
+    // This claim is assigned ONLY via Firebase Admin SDK on a trusted machine.
+    function lfPlatformAdmin() { return verified() && request.auth.token.get('lionfitSuperAdmin',false) == true; }
+    function lfTicketPath(id) { return /databases/$(database)/documents/support_tickets/$(id); }
+    function lfOwnTicket(t) { return signed() && t.requesterId == uid() && inGym(t.gymId); }
+    match /support_tickets/{ticketId} {
+      allow get, list: if lfPlatformAdmin() || lfOwnTicket(resource.data);
+      allow create: if signed() && inGym(request.resource.data.gymId)
+        && request.resource.data.requesterId == uid()
+        && request.resource.data.keys().hasAll(['gymId','requesterId','requesterName','type','subject','message','status','createdAt','updatedAt'])
+        && request.resource.data.keys().hasOnly(['gymId','requesterId','requesterName','type','subject','message','status','createdAt','updatedAt'])
+        && request.resource.data.requesterName is string && request.resource.data.requesterName.size() <= 80
+        && request.resource.data.type in ['problema','suggerimento','account','altro']
+        && request.resource.data.subject is string && request.resource.data.subject.size() > 0 && request.resource.data.subject.size() <= 100
+        && request.resource.data.message is string && request.resource.data.message.size() >= 2 && request.resource.data.message.size() <= 1800
+        && request.resource.data.status == 'open'
+        && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;
+      allow update: if lfPlatformAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+        && request.resource.data.status in ['open','working','resolved']
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+      match /replies/{replyId} {
+        function parentTicket() { return get(lfTicketPath(ticketId)).data; }
+        allow get, list: if lfPlatformAdmin() || lfOwnTicket(parentTicket());
+        allow create: if exists(lfTicketPath(ticketId)) && parentTicket().status != 'resolved'
+          && ((lfPlatformAdmin() && request.resource.data.author == 'platform')
+              || (lfOwnTicket(parentTicket()) && request.resource.data.author == 'requester'))
+          && request.resource.data.keys().hasAll(['author','message','createdAt'])
+          && request.resource.data.keys().hasOnly(['author','message','createdAt'])
+          && request.resource.data.message is string && request.resource.data.message.size() >= 2 && request.resource.data.message.size() <= 1800
+          && request.resource.data.createdAt == request.time;
+        allow update, delete: if false;
+      }
+    }
+    // Commercial preference only. No billing enforcement or payment data yet.
+    match /platform_billing/{gymId} {
+      allow get: if lfPlatformAdmin();
+      allow list: if false;
+      allow create, update: if lfPlatformAdmin() && exists(gymPath(gymId))
+        && request.resource.data.keys().hasAll(['exempt','updatedAt'])
+        && request.resource.data.keys().hasOnly(['exempt','updatedAt'])
+        && request.resource.data.exempt is bool && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }

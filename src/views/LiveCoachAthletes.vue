@@ -28,6 +28,7 @@ const route=useRoute(),router=useRouter(),session=shallowRef<StagingSession|null
 const roster=ref<RosterAthlete[]>([]),search=ref(''),currentId=ref(''),selectedWeek=ref('')
 const status=ref('Caricamento dati palestra…'),error=ref(''),busy=ref(false)
 const data=shallowRef<{personal:Personal[];weeks:ProgramWeek[];groups:Groups}|null>(null)
+let openedSearchId=''
 const opened=shallowRef<Personal|null>(null),pick=ref<{day:number;slot:1|2}|null>(null),pickSearch=ref('')
 type SharedChoice={id:string;title:string;category:string;exercises:Personal['exercises']}
 const sharedChoices=ref<SharedChoice[]>([]),sharedLoading=ref(false),sharedError=ref('')
@@ -265,6 +266,8 @@ watch(currentId,id=>{
  const {db}=getStagingClients()
  stopSheets=watchAthleteSheets(db,s.gymId,id,change=>{if(!alive||currentId.value!==id)return;data.value=change;
   weekCache.set(id,change.weeks);cardInfo.value={...cardInfo.value,[id]:{loading:false,overview:programOverview(change.weeks,new Date(now.value)),hasPersonal:change.personal.some(p=>!p.deletedAt)}};
+  const personalRequested=route.query.personalSheetId
+  if(typeof personalRequested==='string'&&personalRequested!==openedSearchId&&route.query.athleteId===id){const found=change.personal.find(p=>p.id===personalRequested&&!p.deletedAt);if(found){opened.value=found;openedSearchId=personalRequested}}
   const requested=route.query.weekId
   if(typeof requested==='string' && change.weeks.some(w=>w.id===requested&&!w.deletedAt)){
    if(!dirty.value||selectedWeek.value===requested)selectedWeek.value=requested
@@ -620,7 +623,7 @@ function copyToArchive(sheet:Personal){
    <button class="action-card" @click="programError='';createProgramOpen=true"><LionIcon name="calendar"/><div><strong>{{uiText("Nuovo programma")}}</strong><small>{{uiText("Giorni e settimane")}}</small></div></button>
    <button class="action-card" @click="linkToEditor('personal')"><LionIcon name="plus"/><div><strong>{{uiText("Crea scheda personale")}}</strong><small>{{uiText("Parti da zero · senza programma")}}</small></div></button>
    <button class="action-card" @click="linkToEditor('shared')"><LionIcon name="book"/><div><strong>{{uiText("Assegna scheda dall'archivio")}}</strong><small>{{uiText("Scegli dall'archivio Coach")}}</small></div></button>
-   <button class="action-card" type="button" @click="openAthleteProgress"><LionIcon name="progress"/><div><strong>Progressi</strong><small>Storico, carichi, check e obiettivi</small></div></button>
+   <button class="action-card" type="button" @click="openAthleteProgress"><LionIcon name="progress"/><div><strong>Allenamenti</strong><small>Storico, progressi, check e obiettivi</small></div></button>
   </div>
  </section>
  <p v-if="message" class="notice" role="status">{{message}}</p>

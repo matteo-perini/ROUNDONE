@@ -1,0 +1,19 @@
+// CANDIDATO: aggiungere questo match separato dentro match /b/{bucket}/o.
+// NON sostituire le regole originali. I match sovrapposti sono OR: verificare
+// che nessun match precedente conceda accessi più ampi alle foto private.
+// Richiede accesso Firestore dalle regole Storage (database default).
+match /progress_photos/{gid}/{aid}/{checkId}/{fileName} {
+  function lf15CoachProfile() {
+    return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data;
+  }
+  function lf15GrantExists() {
+    return firestore.exists(/databases/(default)/documents/gyms/$(gid)/progress/$(aid)/check_shares/$(checkId));
+  }
+  allow get: if request.auth != null
+    && fileName.matches('^(front|back|left|right)[.]jpg$')
+    && lf15CoachProfile().gymId == gid
+    && lf15CoachProfile().role == 'admin'
+    && lf15CoachProfile().get('membershipStatus','active') == 'active'
+    && lf15GrantExists();
+  // No list, write or deletion grant here; existing owner-only rules remain authoritative.
+}

@@ -4,6 +4,7 @@ import {signInWithEmailAndPassword,signOut,browserLocalPersistence,browserSessio
 import {doc,getDocFromServer} from 'firebase/firestore'
 import {getStagingClients} from './stagingClient'
 import {isTestMode,stagingTestGym} from './stagingConfig'
+import {clearOfflineForUser} from '../../features/progress/offlineWorkouts'
 import {resolveLegacyGymRole} from '../../features/auth/legacyRole'
 export type StagingSession={uid:string;email:string;gymId:string;role:'atleta'|'titolare'|'collaboratore';label:string}
 export const stagingSession=shallowRef<StagingSession|null>(null)
@@ -52,7 +53,11 @@ export async function signInStaging(email:string,password:string,remember=true){
  try{return await readStagingSession()}catch(error){await signOut(auth);stagingSession.value=null;throw error}
 }
 export async function signOutStaging(){
+ const {auth,db}=getStagingClients()
+ const user=auth.currentUser
+ if(user){const {disconnectPushBeforeLogout}=await import('./pushNotifications');if(!await disconnectPushBeforeLogout())return false}
+ if(user&&!clearOfflineForUser(localStorage,db.app.options.projectId||'',user.uid,()=>window.confirm('Uscendo perderai le bozze e gli allenamenti non sincronizzati salvati sul dispositivo. Continuare?')))return false
  stagingSession.value=null
- const {auth}=getStagingClients()
  await signOut(auth)
+ return true
 }

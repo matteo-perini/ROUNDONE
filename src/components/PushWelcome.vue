@@ -1,0 +1,11 @@
+<script setup lang="ts">
+import {onMounted,onUnmounted,ref} from 'vue'
+import {activatePush,connectPushSession,defaultPushPrefs,readPushSettings,pushSupported,shouldOfferPush,declinePush} from '../integrations/firebase/pushNotifications'
+const props=defineProps<{uid:string;openAgenda:()=>void}>();const show=ref(false),busy=ref(false),message=ref('');let alive=true
+onMounted(async()=>{try{if(!shouldOfferPush(props.uid)||!await pushSupported())return;const state=await readPushSettings();if(alive&&!state.active&&shouldOfferPush(props.uid))show.value=true}catch{/* settings remain available */}})
+onUnmounted(()=>{alive=false})
+function later(){declinePush(props.uid);show.value=false}
+async function enable(){if(busy.value)return;busy.value=true;message.value='';try{await activatePush(defaultPushPrefs());if(!alive)return;await connectPushSession(props.uid,props.openAgenda);if(alive)show.value=false}catch(e){if(alive)message.value=e instanceof Error?e.message:'Notifiche non attivate.'}finally{if(alive)busy.value=false}}
+</script>
+<template><Teleport to="body"><section v-if="show" class="panel lf17-push-welcome"><strong>Non perdere i tuoi appuntamenti</strong><p class="muted small">Attiva gli avvisi sul dispositivo. Puoi modificare o disattivare le preferenze nelle Impostazioni in qualsiasi momento.</p><div><button type="button" class="primary" :disabled="busy" @click="enable">Attiva notifiche</button><button type="button" class="secondary" :disabled="busy" @click="later">Non ora</button></div><p v-if="message" role="status" class="small">{{message}}</p></section></Teleport></template>
+<style scoped>.lf17-push-welcome{position:fixed;z-index:9990;right:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));width:min(430px,calc(100vw - 24px));display:grid;gap:8px;padding:16px;background:#ffffff;color:#182b20;border:1px solid #b0d4bd;border-radius:14px;box-shadow:0 8px 35px #0003;box-sizing:border-box}.lf17-push-welcome .primary{--green:#16874f;--border:#16874f}.lf17-push-welcome .secondary{--card2:#f2f8f4;--text:#183529;--outline:#9abdab}.lf17-push-welcome .muted,.lf17-push-welcome .small{color:#475b50}.lf17-push-welcome p{margin:2px 0}.lf17-push-welcome>div{display:flex;gap:8px;flex-wrap:wrap}</style>

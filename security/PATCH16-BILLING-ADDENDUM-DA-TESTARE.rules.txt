@@ -1,0 +1,3 @@
+    // PATCH 16 - Stripe Sandbox state and catalog are exclusively server-side.
+    match /billing_sandbox_private/{document=**} { allow read, write: if false; }
+    match /billing_sandbox_config/{document=**} { allow read, write: if false; }

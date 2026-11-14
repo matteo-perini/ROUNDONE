@@ -1,6 +1,6 @@
-import type { ProgramDay, ProgramWeek, ProtectedCopy, ArchiveExclusion } from './features/sheets/domain'
+import type { ProgramDay, ProgramWeek, ProtectedCopy, ArchiveExclusion, ApprovedAlternative } from './features/sheets/domain'
 export type Role = 'atleta' | 'coach'
-export type Exercise = { id: string; name: string; sets: number|string; reps: string; rest: string; kg?: number; catalogId?:string; executionMode?:'normale'|'superset'; exerciseId?:string; load?:string; notes?:string; supersetWithPrevious?:boolean; supersetRest?:string }
+export type Exercise = { id: string; name: string; sets: number|string; reps: string; rest: string; kg?: number; catalogId?:string; executionMode?:'normale'|'superset'; exerciseId?:string; load?:string; notes?:string; supersetWithPrevious?:boolean; supersetRest?:string; alternatives?:ApprovedAlternative[] }
 export type Sheet = { id: string; title: string; category: string; exercises: Exercise[]; athleteId?: string; sourceId?: string; deletedAt?:string; deletedBy?:string }
 export type Athlete = { id: string; name: string; email: string }
 export type Day = ProgramDay

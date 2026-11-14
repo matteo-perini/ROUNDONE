@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import {ref,computed,onMounted} from 'vue'
+import {ref,computed,onMounted,watch} from 'vue'
+import {useRoute} from 'vue-router'
 import LionIcon from '../components/LionIcon.vue'
 import ExerciseMotion from '../components/ExerciseMotion.vue'
 import {loadCatalog,rankedExercises} from '../features/exercises/catalog'
 import {readLegacyExerciseCatalog} from '../integrations/firestore/legacyExerciseCatalog'
 import type {CatalogExercise} from '../features/exercises/catalog'
 import {uiText,interfaceLanguage} from '../features/i18n/interfaceLanguage'
+const route=useRoute()
 const all=ref<CatalogExercise[]>([]),terms=ref(''),muscle=ref(''),state=ref('Caricamento catalogo V1...'),picked=ref<CatalogExercise|null>(null),lang=ref<'it'|'en'>(interfaceLanguage.value),limit=ref(80)
 onMounted(async()=>{try{all.value=await loadCatalog(readLegacyExerciseCatalog);state.value=all.value.length+' ESERCIZI'}catch(e){state.value=(e as Error).message}})
 const muscles=computed(()=>[...new Set(all.value.flatMap(e=>[e.target,e.bodyPart]).filter((x):x is string=>!!x).map(x=>x.toUpperCase()))].sort())
@@ -13,6 +15,7 @@ const matches=computed(()=>rankedExercises(all.value,terms.value,muscle.value,13
 const results=computed(()=>matches.value.slice(0,limit.value))
 const title=(e:CatalogExercise)=>interfaceLanguage.value==='en'?e.name:(e.name_it||e.name)
 function open(e:CatalogExercise){picked.value=e;lang.value=interfaceLanguage.value}
+watch([()=>route.query.exerciseId,all],()=>{const id=route.query.exerciseId;if(typeof id!=='string')return;const exercise=all.value.find(e=>e.id===id);if(exercise){terms.value=title(exercise);open(exercise)}},{immediate:true})
 </script>
 <template><div class="stack" style="gap:14px"><section class="panel library-header"><div class="row between"><div><h2 class="card-heading"><LionIcon name="book" :size="20"/> {{uiText("LIBRERIA ESERCIZI")}}</h2><p class="muted small" style="margin:5px 0 0">{{uiText("CATALOGO ESERCIZI CONDIVISO LION FIT")}}</p></div><span class="pill">{{uiText(state)}}</span></div><div class="library-filters"><input v-model="terms" :placeholder="uiText('Cerca in italiano o inglese (es. panca, bench)...')" @input="limit=80"/><select v-model="muscle" @change="limit=80"><option value="">{{uiText("Tutti i Muscoli")}}</option><option v-for="m in muscles" :key="m" :value="m">{{m}}</option></select></div></section>
 <div class="notice notice-success library-explain">{{interfaceLanguage==='en'?'Animated exercise previews start automatically. Open an exercise for instructions and playback controls.':'Le anteprime SVG si animano automaticamente: scorri per vedere gli esercizi in movimento senza aprirli.'}}</div>

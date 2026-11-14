@@ -1,0 +1,13 @@
+        // PATCH 15: inside match /gyms/{gymId}/progress/{athleteId}.
+        // Default private; athlete alone may grant or revoke read access to active coaches.
+        match /check_shares/{checkId} {
+          allow get, list: if coach(gymId) || (inGym(gymId) && uid() == athleteId);
+          allow create: if inGym(gymId) && uid() == athleteId && isAthleteOf(gymId, athleteId)
+            && exists(/databases/$(database)/documents/gyms/$(gymId)/progress/$(athleteId)/checks/$(checkId))
+            && request.resource.data.keys().hasAll(['athleteId','checkId','sharedBy','sharedAt'])
+            && request.resource.data.keys().hasOnly(['athleteId','checkId','sharedBy','sharedAt'])
+            && request.resource.data.athleteId == athleteId && request.resource.data.checkId == checkId
+            && request.resource.data.sharedBy == uid() && request.resource.data.sharedAt == request.time;
+          allow update: if false;
+          allow delete: if inGym(gymId) && uid() == athleteId && isAthleteOf(gymId, athleteId);
+        }

@@ -37,7 +37,7 @@ onMounted(async()=>{try{
  if(!alive)return
  if(!isStagingMode()&&s.gymId!=='gym_lab2c_a')throw new Error('Palestra non autorizzata')
  session.value=s;email.value=s.email||''
- if(s.role!=='atleta')try{const gym=await getDocFromServer(doc((isStagingMode()?getStagingClients():getLocalEmulatorClients()).db,'gyms',s.gymId));if(gym.exists())gymName.value=String(gym.data().name||gym.data().gymName||'Lion Fit')}catch{}
+ try{const gym=await getDocFromServer(doc((isStagingMode()?getStagingClients():getLocalEmulatorClients()).db,'gyms',s.gymId));if(gym.exists())gymName.value=String(gym.data().name||gym.data().gymName||'Lion Fit')}catch{}
  const {db}=isStagingMode()?getStagingClients():getLocalEmulatorClients()
  if(s.role!=='atleta')void readCoachMetrics(db,s.gymId,s.uid,s.role==='titolare').then(values=>{if(alive)metrics.value=values}).catch(()=>{})
  stop=onSnapshot(doc(db,'users',s.uid),snap=>{
@@ -77,7 +77,7 @@ function link(route:string){return isStagingMode()?route:route+'?source=emulator
 </script>
 <template>
 <div class="lfp-container" :class="session?.role==='atleta'?'athlete-profile':'coach-profile'">
- <ProfileOverview v-if="!editing" :role="session?.role||'atleta'" :name="fullName" :gym-name="gymName" :email="email" :photo="photo" :bio="bio" :location="displayLocation" :height="height" :weight="weight" :settings-to="link('/impostazioni')" :athlete-to="link('/coach/atleti')" :coach-staff-to="link('/coach/staff')" :staff-enabled="isStagingMode()" :bookings-to="link('/coach/prenotazioni')" :coach-metrics="metrics" @edit="editing=true" @photo="editing=true"/>
+ <ProfileOverview v-if="!editing" :role="session?.role||'atleta'" :name="fullName" :gym-name="gymName" :email="email" :photo="photo" :bio="bio" :location="displayLocation" :height="height" :weight="weight" :settings-to="link('/impostazioni')" :athlete-to="link('/coach/atleti')" :coach-staff-to="link('/coach/staff')" :staff-enabled="isStagingMode()" :workouts-enabled="isStagingMode()" :bookings-to="link('/coach/prenotazioni')" :coach-metrics="metrics" @edit="editing=true" @photo="editing=true"/>
  <section v-else class="panel profile-edit-screen lfp-form-wrap"><header class="row between"><button class="bare" @click="editing=false">✕</button><h2>MODIFICA PROFILO</h2><button class="bare green" :disabled="busy||!canSave" @click="save">SALVA</button></header>
   <button class="profile-photo-editor" type="button" @click="fileInput?.click()" :disabled="busy" aria-label="Carica o modifica foto"><img v-if="newPhoto||photo" :src="newPhoto||photo" alt="Anteprima foto"/><span v-else>🦁</span><small>CAMBIA FOTO</small></button>
   <input ref="fileInput" type="file" accept="image/*,.heic,.heif" class="visually-hidden" @change="choosePhoto"/>

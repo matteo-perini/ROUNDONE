@@ -1,10 +1,11 @@
 /** Progressi data isolated from worksheets. Backend Rules must be installed separately. */
-import {collection,doc,onSnapshot,query,limit,orderBy,serverTimestamp,setDoc,updateDoc,type Firestore,type Unsubscribe} from 'firebase/firestore'
+import {collection,doc,onSnapshot,query,limit,orderBy,serverTimestamp,setDoc,updateDoc,runTransaction,deleteDoc,type Firestore,type Unsubscribe} from 'firebase/firestore'
 import {getApp} from 'firebase/app'
 import {getStorage,ref as storageRef,uploadBytes,getBlob,deleteObject} from 'firebase/storage'
 import type {ProgressSession,ProgressCheck,RecordedExercise,CheckPhoto} from '../../features/progress/progressModel'
-import {normalizeEntries,validDate} from '../../features/progress/progressModel'
+import {normalizeEntries,validDate,correctedSession,applyCorrectionHeads,correctionValues,sameValues,type CorrectionHead} from '../../features/progress/progressModel'
 import {normalizeGoal,type ProgressGoal,type ProgressGoalStatus,type GoalInput} from '../../features/progress/goalsModel'
+import {sameWorkout,type PendingWorkout} from '../../features/progress/offlineWorkouts'
 import {MAX_CHECK_PHOTO_BYTES} from '../../features/progress/checkPhotoCompression'
 function privateStorage(){
  const bucket=String(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET||'').trim()
@@ -32,8 +33,8 @@ export async function setGoalStatus(db:Firestore,gym:string,athlete:string,goalI
  if(!['active','reached','paused','archived'].includes(status))throw new Error('Stato obiettivo non valido.')
  await updateDoc(doc(goalCollection(db,gym,athlete),segment(goalId)),{status,updatedAt:serverTimestamp()})
 }
-export function watchProgress(db:Firestore,gym:string,athlete:string,cb:(rows:ProgressSession[])=>void,err:(e:Error)=>void):Unsubscribe{
- return onSnapshot(query(sessionCollection(db,gym,athlete),orderBy('performedOn','desc'),limit(250)),snap=>cb(snap.docs.map(d=>({id:d.id,...d.data()} as ProgressSession))),err)
+export function watchProgress(db:Firestore,gym:string,athlete:string,cb:(rows:ProgressSession[])=>void,err:(e:Error)=>void,count=250):Unsubscribe{
+ return onSnapshot(query(sessionCollection(db,gym,athlete),orderBy('performedOn','desc'),limit(count)),snap=>cb(snap.docs.map(d=>({id:d.id,...d.data()} as ProgressSession))),err)
 }
 export function watchChecks(db:Firestore,gym:string,athlete:string,cb:(rows:ProgressCheck[])=>void,err:(e:Error)=>void):Unsubscribe{
  return onSnapshot(query(checkCollection(db,gym,athlete),orderBy('performedOn','desc'),limit(80)),snap=>cb(snap.docs.map(d=>({id:d.id,...d.data()} as ProgressCheck))),err)
@@ -73,3 +74,50 @@ export async function removeStagedPhoto(storagePath:string):Promise<void>{
  if(!/^progress_photos\/[\w-]+\/[\w-]+\/[\w-]+\/(front|back|left|right)\.jpg$/.test(storagePath))return
  try{await deleteObject(storageRef(privateStorage(),storagePath))}catch{/* orphan handling via admin cleanup */}
 }
+
+/** Original sessions stay immutable. One overlay per set; previous heads are appended verbatim. */
+const correctionCollection=(db:Firestore,gym:string,athlete:string)=>collection(root(db,gym,athlete),'session_corrections')
+export function watchCorrectionHeads(db:Firestore,gym:string,athlete:string,cb:(rows:CorrectionHead[])=>void,err:(e:Error)=>void){return onSnapshot(correctionCollection(db,gym,athlete),snap=>cb(snap.docs.map(d=>({...d.data(),id:d.id} as CorrectionHead))),err)}
+export async function correctWorkout(db:Firestore,gym:string,athlete:string,sessionId:string,exerciseIndex:number,setIndex:number,kg:number|null,reps:number|null,actor:string,expected:{kg:number|null;reps:number|null}){
+ if(actor!==athlete)throw new Error('Solo l’Atleta può correggere il proprio allenamento.')
+ if(!Number.isInteger(exerciseIndex)||exerciseIndex<0||exerciseIndex>=90||!Number.isInteger(setIndex)||setIndex<0||setIndex>=30)throw new Error('Serie non valida.')
+ const target=doc(sessionCollection(db,gym,athlete),segment(sessionId))
+ const overlay=doc(correctionCollection(db,gym,athlete),`${sessionId}_${exerciseIndex}_${setIndex}`)
+ await runTransaction(db,async tx=>{
+  const [snap,head]=await Promise.all([tx.get(target),tx.get(overlay)]);if(!snap.exists())throw new Error('Allenamento non disponibile.')
+  const original={...snap.data(),id:snap.id} as ProgressSession
+  const previous=head.exists()?{...head.data(),id:head.id} as CorrectionHead:null
+  const row=previous?applyCorrectionHeads([original],[previous])[0]:original
+  const old=row.exercises[exerciseIndex]?.sets[setIndex];if(!old||!sameValues(old,expected))throw new Error('I valori sono cambiati: riapri la registrazione.')
+  correctedSession(row,exerciseIndex,setIndex,kg,reps,actor,new Date().toISOString()) // validate shape, role, values and limits
+  const history=previous?[...previous.history,previous.latest]:[]
+  if(history.length>=100)throw new Error('Limite correzioni raggiunto per questa serie.')
+  tx.set(overlay,{sessionId,exerciseIndex,setIndex,history,latest:{previous:correctionValues(old),next:{kg,reps},author:actor,at:serverTimestamp()}})
+ })
+}
+export type RevisionStatus='pending'|'working'|'completed'
+export type ProgramRevision={id:string;athleteId:string;sheetId:string;sheetTitle:string;reason:string;notes:string;status:RevisionStatus;createdBy:string;createdAt?:unknown;updatedAt?:unknown;updatedBy?:string}
+const revisionCollection=(db:Firestore,gym:string,athlete:string)=>collection(root(db,gym,athlete),'revision_requests')
+export function watchRevisions(db:Firestore,gym:string,athlete:string,cb:(r:ProgramRevision[])=>void,err:(e:Error)=>void){return onSnapshot(query(revisionCollection(db,gym,athlete),orderBy('createdAt','desc'),limit(100)),snap=>cb(snap.docs.map(d=>({...d.data(),id:d.id} as ProgramRevision))),err)}
+export async function requestRevision(db:Firestore,gym:string,athlete:string,sheet:{id:string;title:string},reason:string,notes:string,actor:string){
+ if(actor!==athlete)throw new Error('Richiesta riservata all’Atleta.')
+ if(!['Disponibilità','Attrezzatura','Difficoltà','Altro'].includes(reason)||notes.trim().length<1||notes.trim().length>1000)throw new Error('Indica motivo e descrizione (massimo 1000 caratteri).')
+ await setDoc(doc(revisionCollection(db,gym,athlete)),{athleteId:athlete,sheetId:segment(sheet.id),sheetTitle:sheet.title.slice(0,160),reason,notes:notes.trim(),status:'pending',createdBy:actor,createdAt:serverTimestamp()})
+}
+export async function changeRevisionStatus(db:Firestore,gym:string,athlete:string,id:string,status:RevisionStatus,actor:string){
+ if(actor===athlete||!actor)throw new Error('Operazione riservata al Coach.')
+ const target=doc(revisionCollection(db,gym,athlete),segment(id))
+ await runTransaction(db,async tx=>{const snap=await tx.get(target);if(!snap.exists())throw new Error('Richiesta non disponibile.');const row=snap.data();if(row.athleteId!==athlete||!((row.status==='pending'&&status==='working')||(row.status==='working'&&status==='completed')))throw new Error('Stato non valido.');tx.update(target,{status,updatedBy:actor,updatedAt:serverTimestamp()})})
+}
+
+/** Fixed document ID and server transaction: retry after lost acknowledgement is idempotent. */
+export async function syncPendingWorkout(db:Firestore,gym:string,athlete:string,p:PendingWorkout,actor:string){
+ if(actor!==athlete||!validDate(p.date)||p.date>new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()))throw new Error('Registrazione non valida.')
+ const target=doc(sessionCollection(db,gym,athlete),segment(p.id)), exercises=normalizeEntries(p.entries)
+ if(!exercises.some(e=>e.skipped||e.sets.length))throw new Error('Registrazione vuota.')
+ await runTransaction(db,async tx=>{const snap=await tx.get(target);if(snap.exists()){if(!sameWorkout(snap.data(),athlete,{...p,entries:exercises}))throw new Error('Conflitto sul salvataggio: non sovrascrivo.');return}tx.set(target,{schemaVersion:1,athleteId:athlete,sheetId:segment(p.sheet.id),sheetTitle:p.sheet.title.slice(0,160),performedOn:p.date,createdBy:actor,createdAt:serverTimestamp(),exercises})})
+}
+export const checkSharingEnabled=()=>import.meta.env.VITE_LIONFIT_CHECK_SHARING_ENABLED==='true'
+const shareCollection=(db:Firestore,gym:string,athlete:string)=>collection(root(db,gym,athlete),'check_shares')
+export function watchCheckShares(db:Firestore,gym:string,athlete:string,cb:(ids:string[])=>void,err:(e:Error)=>void){return onSnapshot(shareCollection(db,gym,athlete),snap=>cb(snap.docs.map(d=>d.id)),err)}
+export async function changeCheckShare(db:Firestore,gym:string,athlete:string,checkId:string,enabled:boolean,actor:string){if(!checkSharingEnabled()||actor!==athlete)throw new Error('Condivisione non disponibile.');const target=doc(shareCollection(db,gym,athlete),segment(checkId));if(enabled)await setDoc(target,{athleteId:athlete,checkId,sharedBy:actor,sharedAt:serverTimestamp()});else await deleteDoc(target)}

@@ -45,3 +45,6 @@ import './styles-patch05-fix-nav.css'
 
 // Progressi 360 + due correzioni grafiche Prenotazioni.
 import './styles-progress360.css'
+
+// PATCH 14: identity, search and platform settings.
+import './styles-patch14.css'

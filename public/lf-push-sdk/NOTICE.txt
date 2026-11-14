@@ -1,0 +1,4 @@
+Firebase JavaScript SDK 12.19.0 (Firebase App and Messaging compatibility bundles, unmodified).
+Copyright Google LLC and Firebase contributors. Apache License 2.0:
+https://www.apache.org/licenses/LICENSE-2.0
+Source: https://github.com/firebase/firebase-js-sdk

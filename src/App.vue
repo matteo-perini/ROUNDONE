@@ -5,16 +5,22 @@ import {getStagingClients} from './integrations/firebase/stagingClient'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useLabStore } from './stores/lab'
 import LionIcon from './components/LionIcon.vue'
+import InboxBell from './components/InboxBell.vue'
+import PushWelcome from './components/PushWelcome.vue'
+import {coachInboxEnabled} from './integrations/firebase/coachInbox'
 import AthleteBottomNavigation from './components/AthleteBottomNavigation.vue'
 import AthleteDesktopSidebar from './components/AthleteDesktopSidebar.vue'
 import {isStagingMode,isLocalProdDev} from './integrations/firebase/stagingConfig'
 import {stagingSession,signOutStaging} from './integrations/firebase/stagingSession'
+import {connectPushSession,pushNotice} from './integrations/firebase/pushNotifications'
 import {demoProfiles} from './features/profile/localProfile'
 import {uiText} from './features/i18n/interfaceLanguage'
 import appMeta from '../package.json'
 // Chunk di avviso STAGING caricato solo in `vite build --mode staging`, mai in LIVE.
 const StagingBanner=import.meta.env.MODE==='staging' ? defineAsyncComponent(()=>import('./components/StagingBanner.vue')) : null
 const lab=useLabStore();const route=useRoute();const router=useRouter()
+function openPushAgenda(){pushNotice.value=null;void router.push(stagingSession.value?.role==='atleta'?'/prenotazioni':'/coach/prenotazioni')}
+watch(()=>stagingSession.value?.uid,uid=>{void connectPushSession(uid||null,openPushAgenda).catch(()=>{})},{immediate:true})
 const webVersionLabel=`LION FIT · WEB v${appMeta.version}`
 // Usa lo stesso gestore di Indietro della WebView, senza importare una seconda volta
 // il modulo nativo e senza cambiare l'ordine dei CSS della shell.
@@ -49,6 +55,7 @@ watch(()=>stagingSession.value?.uid,(uid)=>{
 },{immediate:true})
 onUnmounted(()=>{stopAvatar?.()})
 
+const platformPage=computed(()=>route.path==='/lionfit-control')
 const isBooking=computed(()=>route.path.includes('prenotazioni'))
 // Le schermate di laboratorio DEV non devono ereditare la shell demo anche se lab.role rimane valorizzato.
 const isDevLab = computed(() => import.meta.env.DEV && route.path.startsWith('/dev/'))
@@ -68,17 +75,17 @@ const shownRole = computed(() => isStagingMode()
      : athleteEmulatorPreview.value || bookingEmulatorPreview.value ? 'atleta'
      : demoRouteRole.value??lab.role)
    : null)
-const athleteNav=[{to:'/home',label:'HOME',icon:'home'},{to:'/piano',label:'PIANO',icon:'calendar'},{to:'/archivio',label:'ARCHIVIO',icon:'archive'},{to:'/progressi',label:'PROGRESSI',icon:'progress'},{to:'/prenotazioni',label:'PRENOTA',icon:'calendar-plus'},{to:'/profilo',label:'PROFILO',icon:'user'}]
+const athleteNav=[{to:'/home',label:'HOME',icon:'home'},{to:'/piano',label:'PIANO',icon:'calendar'},{to:'/archivio',label:'ARCHIVIO',icon:'archive'},{to:'/progressi',label:'ALLENAMENTI',icon:'progress'},{to:'/prenotazioni',label:'AGENDA',icon:'calendar-plus'},{to:'/profilo',label:'PROFILO',icon:'user'}]
 const coachNav=[{to:'/coach',label:'HOME',desk:'DASHBOARD',icon:'home'},{to:'/coach/atleti',label:'ATLETI',desk:'GESTIONE ATLETI',icon:'users'},{to:'/coach/libreria',label:'ESERCIZI',desk:'LIBRERIA ESERCIZI',icon:'clipboard'},{to:'/coach/archivio',label:'ARCHIVIO',desk:'ARCHIVIO SCHEDE',icon:'book'},{to:'/coach/profilo',label:'PROFILO',desk:'PROFILO & PALESTRA',icon:'settings'}]
 type SideNavItem = {to:string;label:string;icon:string;desk?:string}
-const sideNav:SideNavItem[]=[coachNav[0],coachNav[1],coachNav[3],coachNav[2],{to:'/coach/prenotazioni',label:'CALENDARIO APPUNTAMENTI',icon:'calendar'},{to:'/coach/cestino',label:'CESTINO',icon:'bin'},{to:'/coach/progressi',label:'PROGRESSI',icon:'progress'},{to:'/coach/staff',label:'COACH DELLA PALESTRA',icon:'users'},coachNav[4]]
-const athleteEmulatorNav=[{to:'/home?source=emulator',label:'HOME',icon:'home'},{to:'/piano?source=emulator',label:'PIANO',icon:'calendar'},{to:'/archivio?source=emulator',label:'ARCHIVIO',icon:'archive'},{to:'/progressi?source=emulator',label:'PROGRESSI',icon:'progress'},{to:'/prenotazioni?source=emulator',label:'PRENOTA',icon:'calendar-plus'},{to:'/profilo?source=emulator',label:'PROFILO',icon:'user'}]
-const coachEmulatorNav=[{to:'/coach?source=emulator',label:'HOME',icon:'home'},{to:'/coach/atleti?source=emulator',label:'ATLETI',icon:'users'},{to:'/coach/archivio?source=emulator',label:'ARCHIVIO',icon:'book'},{to:'/coach/prenotazioni?source=emulator',label:'PRENOTAZIONI',icon:'calendar'},{to:'/coach/progressi?source=emulator',label:'PROGRESSI',icon:'progress'},{to:'/coach/profilo?source=emulator',label:'PROFILO',icon:'user'}]
-const stagingAthleteNav=[{to:'/home',label:'HOME',icon:'home'},{to:'/piano',label:'PIANO',icon:'calendar'},{to:'/archivio',label:'ARCHIVIO',icon:'archive'},{to:'/progressi',label:'PROGRESSI',icon:'progress'},{to:'/prenotazioni',label:'PRENOTA',icon:'calendar-plus'},{to:'/profilo',label:'PROFILO',icon:'user'}]
-const stagingCoachNav=[{to:'/coach',label:'HOME',icon:'home'},{to:'/coach/atleti',label:'ATLETI',icon:'users'},{to:'/coach/archivio',label:'ARCHIVIO',icon:'book'},{to:'/coach/prenotazioni',label:'CALENDARIO',icon:'calendar'},{to:'/coach/progressi',label:'PROGRESSI',icon:'progress'},{to:'/coach/profilo',label:'PROFILO',icon:'user'}]
+const sideNav:SideNavItem[]=[coachNav[0],coachNav[1],coachNav[3],coachNav[2],{to:'/coach/prenotazioni',label:'AGENDA',icon:'calendar'},{to:'/coach/cestino',label:'CESTINO',icon:'bin'},{to:'/coach/progressi',label:'ALLENAMENTI',icon:'progress'},{to:'/coach/staff',label:'COACH DELLA PALESTRA',icon:'users'},coachNav[4]]
+const athleteEmulatorNav=[{to:'/home?source=emulator',label:'HOME',icon:'home'},{to:'/piano?source=emulator',label:'PIANO',icon:'calendar'},{to:'/archivio?source=emulator',label:'ARCHIVIO',icon:'archive'},{to:'/progressi?source=emulator',label:'ALLENAMENTI',icon:'progress'},{to:'/prenotazioni?source=emulator',label:'AGENDA',icon:'calendar-plus'},{to:'/profilo?source=emulator',label:'PROFILO',icon:'user'}]
+const coachEmulatorNav=[{to:'/coach?source=emulator',label:'HOME',icon:'home'},{to:'/coach/atleti?source=emulator',label:'ATLETI',icon:'users'},{to:'/coach/archivio?source=emulator',label:'ARCHIVIO',icon:'book'},{to:'/coach/prenotazioni?source=emulator',label:'AGENDA',icon:'calendar'},{to:'/coach/progressi?source=emulator',label:'ALLENAMENTI',icon:'progress'},{to:'/coach/profilo?source=emulator',label:'PROFILO',icon:'user'}]
+const stagingAthleteNav=[{to:'/home',label:'HOME',icon:'home'},{to:'/piano',label:'PIANO',icon:'calendar'},{to:'/archivio',label:'ARCHIVIO',icon:'archive'},{to:'/progressi',label:'ALLENAMENTI',icon:'progress'},{to:'/prenotazioni',label:'AGENDA',icon:'calendar-plus'},{to:'/profilo',label:'PROFILO',icon:'user'}]
+const stagingCoachNav=[{to:'/coach',label:'HOME',icon:'home'},{to:'/coach/atleti',label:'ATLETI',icon:'users'},{to:'/coach/archivio',label:'ARCHIVIO',icon:'book'},{to:'/coach/prenotazioni',label:'AGENDA',icon:'calendar'},{to:'/coach/progressi',label:'ALLENAMENTI',icon:'progress'},{to:'/coach/profilo',label:'PROFILO',icon:'user'}]
 const mobileNav=computed(()=>isStagingMode()?(shownRole.value==='coach'?stagingCoachNav:stagingAthleteNav):coachDevShell.value?coachEmulatorNav:athleteDevShell.value?athleteEmulatorNav:shownRole.value==='coach'?coachNav:athleteNav)
 async function goOut(){
- if(isStagingMode()){await signOutStaging();await router.replace('/accesso');return}
+ if(isStagingMode()){if(await signOutStaging())await router.replace('/accesso');return}
  if(coachEmulatorPreview.value || athleteEmulatorPreview.value || bookingEmulatorPreview.value){
   const { leaveDevSession } = await import('./integrations/firebase/devSession')
   await leaveDevSession()
@@ -90,6 +97,7 @@ async function goOut(){
 }
 </script>
 <template>
+  <Teleport to="body"><aside v-if="pushNotice" role="status" style="position:fixed;inset:auto 12px max(85px,env(safe-area-inset-bottom)) 12px;z-index:9999;max-width:440px;margin:auto;padding:14px;border-radius:12px;background:#162720;color:#fff;box-shadow:0 6px 24px #0008"><strong>{{pushNotice.title}}</strong><p>{{pushNotice.body}}</p><button type="button" class="secondary" @click="openPushAgenda">Apri Agenda</button> <button type="button" class="bare" style="color:#fff" @click="pushNotice=null">Chiudi</button></aside></Teleport>
  <div class="app" :class="['theme-'+lab.theme,shownRole==='coach'?'as-coach':'as-athlete',{'bookings-mode':isBooking,'athlete-sidebar-collapsed':!athleteSidebarExpanded}]">
   <div v-if="isLocalProdDev()" class="lab-banner" role="status">⚠ SVILUPPO LOCALE · FIREBASE PRODUZIONE · LE SCRITTURE POSSONO CAMBIARE DATI REALI</div>
   <component v-if="StagingBanner" :is="StagingBanner"/>
@@ -98,21 +106,22 @@ async function goOut(){
     <header class="login-header"><img src="/v1-preview/LOGO-APP.png" alt=""/><span>LION <b>FIT</b></span></header>
     <main class="login-main"><RouterView/></main>
   </template>
+  <template v-else-if="platformPage&&shownRole"><header class="login-header"><img src="/v1-preview/LOGO-APP.png" alt="LionFit"/><span>LION <b>FIT</b> · Control Center</span></header><main class="lf14-platform-shell"><RouterView/></main></template>
   <template v-else-if="shownRole">
     <AthleteDesktopSidebar v-if="shownRole==='atleta'" :items="mobileNav" :expanded="athleteSidebarExpanded" @toggle="toggleAthleteSidebar" @logout="goOut"/>
     <aside v-if="shownRole==='coach'" class="desktop-sidebar">
       <div class="sidebar-head"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><strong>LION <em>FIT</em></strong><small>{{uiText("AREA COACH / ADMIN")}}</small></div></div>
       <nav class="sidebar-nav">
         <template v-if="isStagingMode()"><RouterLink v-for="item in sideNav" :key="item.to" :to="item.to" :class="{'staff-nav-item':item.to==='/coach/staff'}"><LionIcon :name="item.icon" :size="17"/><span>{{uiText(item.desk||item.label)}}</span></RouterLink></template>
-        <RouterLink v-if="coachDevShell" to="/coach?source=emulator"><LionIcon name="home" :size="17"/><span>DASHBOARD · FIREBASE</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/atleti?source=emulator"><LionIcon name="users" :size="17"/><span>{{uiText("GESTIONE ATLETI · FIREBASE")}}</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/archivio?source=emulator"><LionIcon name="book" :size="17"/><span>{{uiText("ARCHIVIO COACH · FIREBASE")}}</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/prenotazioni?source=emulator"><LionIcon name="calendar" :size="17"/><span>{{uiText("CALENDARIO APPUNTAMENTI · FIREBASE")}}</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/progressi?source=emulator"><LionIcon name="progress" :size="17"/><span>{{uiText("PROGRESSI · IN ARRIVO")}}</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/profilo?source=emulator"><LionIcon name="user" :size="17"/><span>{{uiText("PROFILO · FIREBASE")}}</span></RouterLink>
+        <RouterLink v-if="coachDevShell" to="/coach?source=emulator"><LionIcon name="home" :size="17"/><span>DASHBOARD · FIREBASE</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/atleti?source=emulator"><LionIcon name="users" :size="17"/><span>{{uiText("GESTIONE ATLETI · FIREBASE")}}</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/archivio?source=emulator"><LionIcon name="book" :size="17"/><span>{{uiText("ARCHIVIO COACH · FIREBASE")}}</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/prenotazioni?source=emulator"><LionIcon name="calendar" :size="17"/><span>{{uiText("CALENDARIO APPUNTAMENTI · FIREBASE")}}</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/progressi?source=emulator"><LionIcon name="progress" :size="17"/><span>{{uiText("ALLENAMENTI")}}</span></RouterLink><RouterLink v-if="coachDevShell" to="/coach/profilo?source=emulator"><LionIcon name="user" :size="17"/><span>{{uiText("PROFILO · FIREBASE")}}</span></RouterLink>
         <template v-else-if="!isStagingMode()"><RouterLink v-for="item in sideNav" :key="item.to" :to="item.to" :class="{'staff-nav-item':item.to==='/coach/staff'}"><LionIcon :name="item.icon" :size="17"/><span>{{uiText(item.desk||item.label)}}</span></RouterLink></template>
       </nav>
       <div class="sidebar-foot"><button class="ghost wide" @click="goOut">{{uiText(isStagingMode()?'Esci da Lion Fit':coachEmulatorPreview ? 'Esci dal laboratorio' : 'Esci')}}</button><RouterLink v-if="shownRole==='coach' && !coachDevShell" class="invite-shortcut" to="/coach/staff">{{uiText('INVITI DELLA PALESTRA')}} <strong>{{uiText('Inviti via email →')}}</strong></RouterLink><small>{{webVersionLabel}}</small></div>
     </aside>
-    <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><RouterLink v-if="shownRole==='coach'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Apri impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
+    <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><span id="lf17-mobile-bell" style="display:contents"/><RouterLink v-if="shownRole==='coach'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Apri impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
 
     <!-- Navigazione Atleta esclusiva: sidebar a sinistra su desktop, dock inferiore su mobile. -->
-    <main class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking}]"><button v-if="route.path!=='/home' && route.path!=='/coach'" type="button" class="lf-route-back" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> {{uiText('Indietro')}}</button><div class="version">{{webVersionLabel}}</div><RouterView/></main>
+    <main class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking}]"><button v-if="route.path!=='/home' && route.path!=='/coach'" type="button" class="lf-route-back" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> {{uiText('Indietro')}}</button><div class="version">{{webVersionLabel}}</div><template v-if="coachInboxEnabled()&&stagingSession"><InboxBell :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><PushWelcome :key="stagingSession.uid" :uid="stagingSession.uid" :open-agenda="openPushAgenda"/></template><RouterView/></main>
     <!-- La navbar Atleta vive fuori dal contenitore .app: nessun CSS / overflow legacy può coprirla. -->
     <AthleteBottomNavigation v-if="shownRole==='atleta'" :items="mobileNav" :theme="lab.theme"/>
     <nav v-if="shownRole==='coach'" class="bottom-nav coach-bottom" :aria-label="uiText('Navigazione Coach')"><RouterLink v-for="item in mobileNav" :key="item.to" :to="item.to"><LionIcon :name="item.icon" :size="24"/><span>{{uiText(item.label)}}</span></RouterLink></nav>

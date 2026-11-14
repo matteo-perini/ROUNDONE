@@ -15,6 +15,8 @@ import {toReservation,bookingPaths} from '../integrations/firestore/liveBookings
 import {reservationQueryPredicates} from '../features/security/phase1QueryScope'
 import {buildDashboardActivity,summarizeAthletePrograms,upcomingDashboardBookings,DASHBOARD_DAY_MS,
  type DashboardTemplate,type DashboardBooking,type DashboardWeek,type DashboardAthleteWeeks} from '../features/coach/dashboardLiveModel'
+import type {SearchItem} from '../features/platform/platformModel'
+import {romeDay} from '../features/coach/dashboardLiveModel'
 import CoachDashboardRedesign from '../components/CoachDashboardRedesign.vue'
 
 const router=useRouter()
@@ -44,6 +46,7 @@ const activity=computed(()=>{
 const dataWarnings=computed(()=>Object.values(warnings.value).filter(Boolean))
 const pathFor=(path:string)=>isStagingMode()?path:`${path}?source=emulator`
 
+const searchRows=computed<SearchItem[]>(()=>[...Object.entries(athletesById.value).map(([id,title]):SearchItem=>({id,kind:'Atleta',title,to:pathFor('/coach/atleti')+(isStagingMode()?'?':'&')+'athleteId='+encodeURIComponent(id)})),...templateRows.value.filter(t=>!t.deletedAt).map((t):SearchItem=>({id:t.id,kind:'Scheda',title:t.title,to:pathFor('/coach/archivio')+(isStagingMode()?'?':'&')+'sheetId='+encodeURIComponent(t.id)})),...programRows.value.flatMap(r=>r.personal.filter(t=>!t.deletedAt&&t.title).map((t):SearchItem=>({id:r.athleteId+':'+t.id,kind:'Scheda',title:t.title||'Scheda',detail:'Personale · '+(athletesById.value[r.athleteId]||'Atleta'),to:pathFor('/coach/atleti')+(isStagingMode()?'?':'&')+'athleteId='+encodeURIComponent(r.athleteId)+'&personalSheetId='+encodeURIComponent(t.id)}))),...bookingRows.value.map((b):SearchItem=>({id:b.id,kind:'Appuntamento',title:athletesById.value[b.athleteId]||b.discipline,detail:b.discipline+' · '+romeDay(b.startMs),to:pathFor('/coach/prenotazioni')+(isStagingMode()?'?':'&')+'date='+romeDay(b.startMs)+'&bookingId='+encodeURIComponent(b.id)}))])
 async function refreshPrograms(){
  if(!gymId||!alive||athletes.value===null)return
  const epoch=++programEpoch
@@ -71,7 +74,7 @@ async function refreshPrograms(){
      const w=d.data();return {id:d.id,name:String(w.name||''),programTitle:typeof w.programTitle==='string'?w.programTitle:undefined,programId:typeof w.programId==='string'?w.programId:undefined,
       deletedAt:w.deletedAt,createdMs:toMs(w.createdAt),days:w.days&&typeof w.days==='object'&&!Array.isArray(w.days)?w.days:{}}
     })
-    result.push({athleteId,weeks,personal:personalSnap.docs.map(d=>({id:d.id,deletedAt:d.data().deletedAt}))})
+    result.push({athleteId,weeks,personal:personalSnap.docs.map(d=>({id:d.id,title:String(d.data().title||''),deletedAt:d.data().deletedAt}))})
    }catch{failed=true}
   }
  }
@@ -98,7 +101,7 @@ onMounted(async()=>{
    if(!alive)return
    const activeUsers=snap.docs.filter(d=>d.data().membershipStatus!=='revoked')
    athletes.value=activeUsers.length
-   athletesById.value=Object.fromEntries(activeUsers.map(d=>[d.id,String(d.data().name||'Atleta')]))
+   athletesById.value=Object.fromEntries(activeUsers.map(d=>[d.id,[d.data().name,d.data().surname].filter(x=>typeof x==='string'&&x.trim()).join(' ').trim()||'Atleta']))
    status.value='ready';warnings.value={...warnings.value,athletes:''}
    const keys=activeUsers.map(d=>d.id).sort().join('|')
    if(lastRosterKeys!==keys){lastRosterKeys=keys;void refreshPrograms()}
@@ -127,7 +130,7 @@ onUnmounted(()=>{alive=false;programEpoch++;unsub.forEach(stop=>stop())})
 <template>
  <CoachDashboardRedesign :name="coachName" :athletes="athletes" :templates="templates" :bookings="bookingCount"
   :programs="programTotals?.programs??null" :assigned="programTotals?.assigned??null" :unassigned="programTotals?.unassigned??null"
-  :appointments="bookingReady?upcoming:[]" :activity-days="activity.days" :recent-events="activity.recent"
+  :search-items="searchRows" :search-partial="!templateReady||!bookingReady||!programReady||athletes===null" :appointments="bookingReady?upcoming:[]" :activity-days="activity.days" :recent-events="activity.recent"
   :history-complete="templateReady&&bookingReady&&programReady" :data-warnings="dataWarnings"
   :loading="status==='loading'" :program-loading="readingPrograms" :error="status==='error'?message:undefined"
   :source="isLiveMode()?'Firebase Lion Fit':isStagingMode()?'Firebase STAGING':'Firebase Emulator'"

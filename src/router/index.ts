@@ -3,6 +3,7 @@ import {isStagingMode,isOperationalMode} from '../integrations/firebase/stagingC
 import {readNavigationSession,stagingSession} from '../integrations/firebase/stagingSession'
 import { useLabStore } from '../stores/lab'
 import Access from '../views/Access.vue'
+const PlatformAdmin=()=>import('../views/PlatformAdmin.vue')
 const Home = () => import('../views/Home.vue')
 const Program = () => import('../views/Program.vue')
 const Archive = () => import('../views/Archive.vue')
@@ -26,9 +27,10 @@ const router=createRouter({history:createWebHistory(),routes:[
  {path:'/archivio',component:Archive,meta:{title:'Archivio Atleta'}},
  {path:'/staging',redirect:'/accesso'},
  {path:'/team',redirect:to=>({path:'/progressi',query:to.query})},
- {path:'/progressi',component:AthleteProgress,meta:{title:'Progressi Atleta'}},
+ {path:'/progressi',component:AthleteProgress,meta:{title:'Allenamenti Atleta'}},
  {path:'/profilo',component:Profile,meta:{title:'Profilo'}},
  {path:'/impostazioni',component:Settings,meta:{title:'Impostazioni'}},
+ {path:'/lionfit-control',component:PlatformAdmin,meta:{title:'LionFit Control Center'}},
  {path:'/prenotazioni',component:Bookings,meta:{title:'Prenotazioni'}},
  {path:'/coach',component:Coach,meta:{title:'Dashboard Coach',coachOnly:true}},
  {path:'/coach/atleti',component:CoachAthletes,meta:{title:'Gestione Atleti',coachOnly:true}},
@@ -37,7 +39,7 @@ const router=createRouter({history:createWebHistory(),routes:[
  {path:'/coach/schede',redirect:'/coach/archivio'},
  {path:'/coach/libreria',component:Library,meta:{title:'Libreria Esercizi',coachOnly:true}},
  {path:'/coach/cestino',component:CoachTrash,meta:{title:'Cestino',coachOnly:true}},
- {path:'/coach/progressi',component:CoachProgress,meta:{title:'Progressi Coach',coachOnly:true}},
+ {path:'/coach/progressi',component:CoachProgress,meta:{title:'Allenamenti Coach',coachOnly:true}},
  {path:'/coach/staff',component:CoachStaff,meta:{title:'Coach e Inviti',coachOnly:true}},
  {path:'/coach/profilo',component:Profile,meta:{title:'Profilo Coach',coachOnly:true}},
  {path:'/coach/prenotazioni',component:Bookings,meta:{title:'Calendario Appuntamenti',coachOnly:true}},
@@ -69,6 +71,7 @@ router.beforeEach(async to=>{
   let s
   try{s=await readNavigationSession()}
   catch{stagingSession.value=null;return '/accesso'}
+  if(to.path==='/lionfit-control'){const {verifyPlatformAccess}=await import('../integrations/firebase/platformAccess');return await verifyPlatformAccess()?true:'/impostazioni'}
   const athletes=['/home','/piano','/archivio','/progressi','/profilo']
   const coaches=['/coach','/coach/profilo']
   if(isOperationalMode()) {
@@ -80,6 +83,7 @@ router.beforeEach(async to=>{
   return coaches.includes(to.path)?true:'/coach'
  }
 
+ if(to.path==='/lionfit-control')return '/accesso'
  // Il diagnostico DEV non richiede il login demo. Non e' mai registrato in build produzione.
  if (import.meta.env.DEV && to.path === '/dev/emulatore') return true
  if (import.meta.env.DEV && to.path === '/dev/ruoli') return true

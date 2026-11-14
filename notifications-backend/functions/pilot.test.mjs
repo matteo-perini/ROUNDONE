@@ -1,0 +1,23 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {pilotScope,pilotMatches,scopeGym,recipientAllowed} from './pilot.mjs';
+const env={LF_PUSH_EVENTS_ENABLED:'true',LF_PUSH_PILOT_GYM:'gym1',LF_PUSH_PILOT_ADMIN_UID:'coach1',LF_PUSH_PILOT_ATHLETE_UID:'athlete1'};
+const booking={coachId:'coach1',athleteId:'athlete1'};
+test('disabled or missing flag fails closed',()=>{for(const v of [undefined,'false','TRUE'])assert.equal(pilotScope({...env,LF_PUSH_EVENTS_ENABLED:v}),null)});
+test('missing pilot values fail closed',()=>{for(const k of ['LF_PUSH_PILOT_GYM','LF_PUSH_PILOT_ADMIN_UID','LF_PUSH_PILOT_ATHLETE_UID'])assert.equal(pilotScope({...env,[k]:undefined}),null)});
+test('placeholder, bad id and identical accounts denied',()=>{for(const v of ['INSERISCI_UID','a/b','coach1',''])assert.equal(pilotScope({...env,LF_PUSH_PILOT_ATHLETE_UID:v}),null)});
+test('exact gym and pair allowed',()=>assert.equal(pilotMatches(pilotScope(env),'gym1',booking),true));
+test('other gym denied',()=>assert.equal(pilotMatches(pilotScope(env),'gym2',booking),false));
+test('other athlete denied',()=>assert.equal(pilotMatches(pilotScope(env),'gym1',{...booking,athleteId:'athlete2'}),false));
+test('other admin denied',()=>assert.equal(pilotMatches(pilotScope(env),'gym1',{...booking,coachId:'coach2'}),false));
+test('missing booking or scope denied',()=>{assert.equal(pilotMatches(pilotScope(env),'gym1',null),false);assert.equal(pilotMatches(null,'gym1',booking),false)});
+
+test('global mode needs explicit flag and exact value',()=>{assert.deepEqual(pilotScope({LF_PUSH_EVENTS_ENABLED:'true',LF_PUSH_SCOPE:'all'}),{mode:'all'});for(const mode of ['ALL','', 'global','typo'])assert.equal(pilotScope({...env,LF_PUSH_SCOPE:mode}),null);assert.equal(pilotScope({LF_PUSH_EVENTS_ENABLED:'false',LF_PUSH_SCOPE:'all'}),null)});
+test('global accepts distinct tenants, rejects invalid or identical participant IDs',()=>{const s=pilotScope({LF_PUSH_EVENTS_ENABLED:'true',LF_PUSH_SCOPE:'all'});assert.ok(pilotMatches(s,'gym1',booking));assert.ok(pilotMatches(s,'gym2',{coachId:'c2',athleteId:'a2'}));for(const b of [null,{coachId:'x',athleteId:'x'},{coachId:'x/y',athleteId:'a'},{}])assert.equal(pilotMatches(s,'gym1',b),false);assert.equal(pilotMatches(s,'gym/other',booking),false)});
+test('explicit pilot mode preserves exact pilot pair even when global was previously configured',()=>{const s=pilotScope({...env,LF_PUSH_SCOPE:'pilot'});assert.ok(pilotMatches(s,'gym1',booking));assert.equal(pilotMatches(s,'gym2',booking),false)});
+const now=1760000000000,job={kind:'reminder',lead:30},athleteProfile={gymId:'gym1',role:'athlete'},device={uid:'athlete1',gym:'gym1',role:'athlete',expires:now+1000,prefs:{booked:true,cancelled:true,leads:[30]}};
+const eligible=(p=athleteProfile,d=device,b=booking,uid='athlete1',role='athlete',gym='gym1')=>recipientAllowed(gym,b,uid,role,p,d,job,now);
+test('global claim respects the job tenant in pilot and allows valid tenants in all',()=>{assert.ok(scopeGym(pilotScope(env),'gym1'));assert.equal(scopeGym(pilotScope(env),'gym2'),false);assert.ok(scopeGym({mode:'all'},'gym2'));assert.equal(scopeGym({mode:'all'},'a/b'),false);assert.equal(scopeGym(null,'gym1'),false)});
+test('eligible recipient receives only own appointment and matching active device',()=>{assert.ok(eligible());assert.equal(eligible(athleteProfile,{...device,uid:'other'}),false);assert.equal(eligible(athleteProfile,device,{...booking,athleteId:'other'}),false);assert.equal(eligible({...athleteProfile,gymId:'gym2'}),false);assert.equal(eligible(athleteProfile,{...device,gym:'gym2'}),false);assert.equal(eligible({...athleteProfile,role:'admin'}),false);assert.equal(eligible(athleteProfile,{...device,role:'admin'}),false)});
+test('revoked, expired or opted-out recipient is denied',()=>{assert.equal(eligible({...athleteProfile,membershipStatus:'revoked'}),false);assert.equal(eligible(athleteProfile,{...device,expires:now}),false);assert.equal(eligible(athleteProfile,{...device,prefs:{...device.prefs,leads:[]}}),false);assert.equal(eligible(athleteProfile,{...device,prefs:null}),false)});
+test('coach can receive own booking only with matching member and device',()=>{const p={gymId:'gym1',role:'admin'},d={...device,uid:'coach1',role:'admin'};assert.ok(eligible(p,d,booking,'coach1','admin'));assert.equal(eligible(p,d,{...booking,coachId:'coach2'},'coach1','admin'),false)});

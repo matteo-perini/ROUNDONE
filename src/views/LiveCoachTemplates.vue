@@ -14,6 +14,7 @@ import {createCoachModel,createCoachPersonal,updateCoachModel,updateCoachPersona
 import {assignShared,assignSharedToDay,restoreFromTrash,trashShared,watchAthleteSheets} from '../integrations/firestore/sheets'
 import {updateV1WeekSlot} from '../integrations/firestore/liveWeekSlots'
 import {belongsToCoach,hasCoachAssignment,type CoachRosterFilter} from '../features/athletes/coachMembership'
+import {blankAlternative} from '../features/sheets/approvedAlternatives'
 import {editorToV1,v1ToEditor} from '../features/sheets/v1ExerciseCodec'
 import {supersetView} from '../features/sheets/supersetView'
 import {groupExerciseRows,primaryExerciseCount,ensurePrimaryExerciseCount,insertSuperset,removeExercise} from '../features/sheets/supersetEditor'
@@ -58,6 +59,8 @@ const saveAlsoShared=ref(false),pendingSharedLink=ref('')
 const personalEdit=ref(false),draftNameNotice=ref('')
 const title=ref(''),category=ref('Allenamento'),exercises=ref<Exercise[]>([])
 const search=ref(''),sort=ref('recent'),filter=ref<'active'|'trash'|'all'>('active'),preview=shallowRef<Model|null>(null)
+let lastSearchSheet=''
+watch([()=>route.query.sheetId,models],()=>{const id=route.query.sheetId;if(typeof id!=='string'||id===lastSearchSheet)return;const found=models.value.find(x=>x.id===id&&!x.deletedAt);if(found){lastSearchSheet=id;preview.value=found;search.value=found.title}}, {immediate:true})
 const exerciseCounter=ref('0'),focusedExerciseName=ref('')
 const catalog=ref<CatalogExercise[]>([])
 const supersetBadges=computed(()=>supersetView(exercises.value))
@@ -372,6 +375,13 @@ onUnmounted(()=>{live=false;closeListeners()})
      <label class="lf-editor-rest">{{uiText("Recupero / note")}}<input v-model="exercises[index].rest" placeholder="—"/></label>
      <button type="button" class="lf-exercise-remove" :aria-label="'Elimina '+(part===1?'superset':'esercizio')+' '+exercises[index].name" title="Rimuovi questa riga" @click="removeExerciseNow(exercises[index])">✕</button>
      <div v-if="exactCatalogMatches(catalog,exercises[index].name).length>1" class="lf-editor-disambiguation"><label>{{uiText("Nome ambiguo: scegli l'esercizio corretto")}}<select :value="exercises[index].exerciseId||''" @change="selectCatalogId(exercises[index],$event)"><option value="">{{uiText("Nessuna illustrazione selezionata")}}</option><option v-for="candidate in exactCatalogMatches(catalog,exercises[index].name)" :key="candidate.id" :value="candidate.id">{{candidate.name_it||candidate.name}} · ID {{candidate.id}}</option></select></label></div>
+     <details class="lf-editor-disambiguation" v-if="exercises[index].alternatives?.length"><summary>Alternative approvate ({{exercises[index].alternatives?.length}})</summary>
+      <div v-for="(alt,ai) in exercises[index].alternatives" :key="ai" class="panel stack">
+       <label>Nome alternativa<input v-model="alt.name" list="lf-superset-exercise-names" maxlength="180" @input="alt.exerciseId=exactCatalogMatches(catalog,alt.name).length===1?exactCatalogMatches(catalog,alt.name)[0].id:''"/></label>
+       <label>Serie (vuoto = come originale)<input v-model="alt.sets"/></label><label>Ripetizioni (vuoto = come originale)<input v-model="alt.reps"/></label><label>Carico<input v-model="alt.load"/></label><label>Recupero<input v-model="alt.rest"/></label><label>Note<input v-model="alt.notes"/></label>
+       <button type="button" class="secondary" @click="exercises[index].alternatives?.splice(ai,1)">Rimuovi alternativa</button>
+      </div></details>
+     <button v-if="(exercises[index].alternatives?.length||0)<2" type="button" class="secondary lf-editor-disambiguation" @click="exercises[index].alternatives=[...(exercises[index].alternatives||[]),blankAlternative()]">＋ Alternativa</button>
      <label v-if="part===1" class="lf-editor-pair-rest">{{uiText("Recupero dopo la coppia")}}<input v-model="exercises[index].supersetRest" placeholder="Es. 90 sec"/></label>
     </div>
     <button v-if="group.secondaryIndex===null && availableMax>0" type="button" class="lf-superset-add" @click="addLinkedSuperset(exercises[group.primaryIndex])">{{uiText("＋ Aggiungi superset")}}</button>

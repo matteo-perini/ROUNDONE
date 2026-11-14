@@ -1,0 +1,66 @@
+// PATCH 12 — addendum candidato; NON è un ruleset completo.
+// Inserire solo DENTRO match /gyms/{gymId} { match /progress/{athleteId} { ... } }
+// dopo aver confrontato le regole effettivamente pubblicate. Non sostituire /sessions.
+// Dipende dagli helper inGym, uid, coach, isAthleteOf del ruleset Progressi 10/11/2026.
+// Il documento sessione rimane sempre immutabile. Una correzione è una sovrapposizione per serie.
+        match /session_corrections/{correctionId} {
+          function ownsWorkout() {
+            return inGym(gymId) && uid() == athleteId && isAthleteOf(gymId, athleteId);
+          }
+          function validValues(v) {
+            return v is map && v.keys().hasOnly(['kg','reps']) && v.keys().hasAll(['kg','reps'])
+              && (v.kg == null || (v.kg is number && v.kg >= 0 && v.kg <= 2000))
+              && (v.reps == null || (v.reps is int && v.reps >= 1 && v.reps <= 300));
+          }
+          function validCorrection(d) {
+            return d.keys().hasOnly(['sessionId','exerciseIndex','setIndex','history','latest'])
+              && d.keys().hasAll(['sessionId','exerciseIndex','setIndex','history','latest'])
+              && d.sessionId is string && d.sessionId.matches('^[A-Za-z0-9_-]{3,128}$')
+              && d.exerciseIndex is int && d.exerciseIndex >= 0 && d.exerciseIndex < 90
+              && d.setIndex is int && d.setIndex >= 0 && d.setIndex < 30
+              && correctionId == d.sessionId + '_' + string(d.exerciseIndex) + '_' + string(d.setIndex)
+              && d.history is list && d.history.size() < 100
+              && d.latest is map && d.latest.keys().hasOnly(['previous','next','author','at'])
+              && d.latest.keys().hasAll(['previous','next','author','at'])
+              && d.latest.author == uid() && d.latest.at == request.time
+              && validValues(d.latest.previous) && validValues(d.latest.next)
+              && (d.latest.next.kg != null || d.latest.next.reps != null)
+              && d.latest.previous != d.latest.next;
+          }
+          function originalMatches(d) {
+            let source = get(/databases/$(database)/documents/gyms/$(gymId)/progress/$(athleteId)/sessions/$(d.sessionId)).data;
+            return source.athleteId == athleteId && source.createdBy == athleteId
+              && source.exercises is list && d.exerciseIndex < source.exercises.size()
+              && source.exercises[d.exerciseIndex].skipped == false
+              && d.setIndex < source.exercises[d.exerciseIndex].sets.size()
+              && d.latest.previous.kg == source.exercises[d.exerciseIndex].sets[d.setIndex].kg
+              && d.latest.previous.reps == source.exercises[d.exerciseIndex].sets[d.setIndex].reps;
+          }
+          allow get, list: if (inGym(gymId) && uid() == athleteId) || coach(gymId);
+          allow create: if ownsWorkout() && validCorrection(request.resource.data)
+            && request.resource.data.history.size() == 0 && originalMatches(request.resource.data);
+          allow update: if ownsWorkout() && validCorrection(request.resource.data)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['history','latest'])
+            && request.resource.data.history == resource.data.history.concat([resource.data.latest])
+            && request.resource.data.latest.previous == resource.data.latest.next;
+          allow delete: if false;
+        }
+        match /revision_requests/{revisionId} {
+          allow get, list: if (inGym(gymId) && uid() == athleteId) || coach(gymId);
+          allow create: if inGym(gymId) && uid() == athleteId && isAthleteOf(gymId, athleteId)
+            && request.resource.data.keys().hasOnly(['athleteId','sheetId','sheetTitle','reason','notes','status','createdBy','createdAt'])
+            && request.resource.data.keys().hasAll(['athleteId','sheetId','sheetTitle','reason','notes','status','createdBy','createdAt'])
+            && request.resource.data.athleteId == athleteId && request.resource.data.createdBy == uid()
+            && request.resource.data.createdAt == request.time && request.resource.data.status == 'pending'
+            && request.resource.data.sheetId is string && request.resource.data.sheetId.matches('^[A-Za-z0-9_-]{3,128}$')
+            && request.resource.data.sheetTitle is string && request.resource.data.sheetTitle.size() <= 160
+            && request.resource.data.reason in ['Disponibilità','Attrezzatura','Difficoltà','Altro']
+            && request.resource.data.notes is string && request.resource.data.notes.size() > 0 && request.resource.data.notes.size() <= 1000;
+          allow update: if coach(gymId) && isAthleteOf(gymId, athleteId)
+            && resource.data.athleteId == athleteId
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedBy','updatedAt'])
+            && request.resource.data.updatedBy == uid() && request.resource.data.updatedAt == request.time
+            && ((resource.data.status == 'pending' && request.resource.data.status == 'working')
+               || (resource.data.status == 'working' && request.resource.data.status == 'completed'));
+          allow delete: if false;
+        }

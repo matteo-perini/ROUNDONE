@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import {useRoute,useRouter} from 'vue-router'
+import {substituteExercise} from '../features/sheets/approvedAlternatives'
 import {uiText,interfaceLanguage} from '../features/i18n/interfaceLanguage'
 import {Capacitor} from '@capacitor/core'
 import {sheetPrintHtml} from '../features/print/sheetPrint'
@@ -16,9 +18,14 @@ import {isStagingMode} from '../integrations/firebase/stagingConfig'
 import ExerciseMotion from './ExerciseMotion.vue'
 import LionIcon from './LionIcon.vue'
 /** Stessa vista, per schede assegnate, archivio e demo. Solo lettura. */
-type SheetForDisplay={title:string;exercises:readonly ExerciseRecord[]}
+type SheetForDisplay={id?:string;title:string;exercises:readonly ExerciseRecord[]}
 type VideoRecord=ExerciseVideo
 const props=defineProps<{sheet:SheetForDisplay}>()
+const route=useRoute(),router=useRouter()
+const athleteView=computed(()=>['/home','/piano','/archivio'].includes(route.path))
+const approvedChoices=ref<Record<number,number>>({})
+const displayExercises=computed(()=>props.sheet.exercises.map((e,i)=>{const a=e.alternatives?.[approvedChoices.value[i]];return a?{...substituteExercise(e,a),id:e.id}:e}))
+function startTraining(){if(!props.sheet.id||!athleteView.value)return;emit('close');void router.push({path:'/progressi',query:{...route.query,sheetId:props.sheet.id}})}
 const supersets=computed(()=>supersetView(props.sheet.exercises))
 const notesOpen=ref<number[]>([])
 function hasData(value:unknown):boolean{return value!==null&&value!==undefined&&String(value).trim().length>0}
@@ -98,7 +105,7 @@ function viewExercise(ex:ExerciseRecord,index?:number){
  }
 }
 function chooseAlternative(ex:CatalogExercise){detail.value=ex;language.value=interfaceLanguage.value;alternatives.value=[]}
-const resolved=computed(()=>props.sheet.exercises.map(ex=>matchingExercise(ex)))
+const resolved=computed(()=>displayExercises.value.map(ex=>matchingExercise(ex)))
 
 onMounted(async()=>{
  void loadCatalog(isStagingMode()?readLegacyExerciseCatalog:undefined).then(xs=>{catalog.value=xs}).catch(()=>{})
@@ -130,35 +137,36 @@ onMounted(async()=>{
       <small>{{uiText("Due esercizi collegati")}}</small>
      </header>
      <article v-for="(i,part) in (group.secondaryIndex===null?[group.primaryIndex]:[group.primaryIndex,group.secondaryIndex])"
-       :key="sheet.exercises[i].id||i" class="lf6-exercise" :class="{'lf6-exercise-second':part===1}">
+       :key="displayExercises[i].id||i" class="lf6-exercise" :class="{'lf6-exercise-second':part===1}">
       <div class="lf6-preview-wrap">
        <ExerciseMotion v-if="resolved[i]" :exercise="resolved[i]!" controls class="lf6-preview"/>
-       <div v-else class="lf6-preview-empty" :aria-label="'Nessuna illustrazione disponibile per '+sheet.exercises[i].name">
+       <div v-else class="lf6-preview-empty" :aria-label="'Nessuna illustrazione disponibile per '+displayExercises[i].name">
         <LionIcon name="dumbbell" :size="31"/>
        </div>
-       <button v-if="resolved[i]" type="button" class="lf6-enlarge" :aria-label="'Ingrandisci '+sheet.exercises[i].name" @click="viewExercise(sheet.exercises[i],i)">
+       <button v-if="resolved[i]" type="button" class="lf6-enlarge" :aria-label="'Ingrandisci '+displayExercises[i].name" @click="viewExercise(displayExercises[i],i)">
         <LionIcon name="search" :size="15"/> {{uiText("Ingrandisci")}}
        </button>
       </div>
       <div class="lf6-content">
        <div class="lf6-name-line">
         <span class="lf6-sequence">{{group.secondaryIndex!==null?(part===0?'A':'B'):String(groupNumber+1).padStart(2,'0')}}</span>
-        <h3>{{exerciseDisplayName(sheet.exercises[i])}}</h3>
-        <button v-if="hasData(sheet.exercises[i].notes)" type="button" class="lf6-more"
-         :aria-label="'Note del Coach per '+sheet.exercises[i].name" :aria-expanded="notesOpen.includes(i)"
+        <h3>{{exerciseDisplayName(displayExercises[i])}}</h3>
+        <button v-if="hasData(displayExercises[i].notes)" type="button" class="lf6-more"
+         :aria-label="'Note del Coach per '+displayExercises[i].name" :aria-expanded="notesOpen.includes(i)"
          :title="notesOpen.includes(i)?'Chiudi note del Coach':'Leggi note del Coach'" @click="toggleNotes(i)">•••</button>
        </div>
+       <details v-if="sheet.exercises[i].alternatives?.length" class="lf6-extra-actions"><summary>Visualizza alternativa</summary><button type="button" class="secondary" @click="approvedChoices={...approvedChoices,[i]:-1}">Originale</button><button v-for="(a,ai) in sheet.exercises[i].alternatives" :key="ai" class="secondary" type="button" @click="approvedChoices={...approvedChoices,[i]:ai}">{{a.name}}</button></details>
        <div class="lf6-values">
-        <span v-if="hasData(sheet.exercises[i].sets)" class="lf6-chip"><b>{{uiText("Serie")}}</b> {{sheet.exercises[i].sets}}</span>
-        <span v-if="hasData(sheet.exercises[i].reps)" class="lf6-chip"><b>{{uiText("Rip.")}}</b> {{sheet.exercises[i].reps}}</span>
-        <span v-if="prescribedLoad(sheet.exercises[i])" class="lf6-chip"><b>{{uiText("Carico previsto")}}</b> {{prescribedLoad(sheet.exercises[i])}}</span>
-        <span v-if="hasData(sheet.exercises[i].rest)" class="lf6-chip"><b>{{uiText("Recupero")}}</b> {{sheet.exercises[i].rest}}</span>
+        <span v-if="hasData(displayExercises[i].sets)" class="lf6-chip"><b>{{uiText("Serie")}}</b> {{displayExercises[i].sets}}</span>
+        <span v-if="hasData(displayExercises[i].reps)" class="lf6-chip"><b>{{uiText("Rip.")}}</b> {{displayExercises[i].reps}}</span>
+        <span v-if="prescribedLoad(displayExercises[i])" class="lf6-chip"><b>{{uiText("Carico previsto")}}</b> {{prescribedLoad(displayExercises[i])}}</span>
+        <span v-if="hasData(displayExercises[i].rest)" class="lf6-chip"><b>{{uiText("Recupero")}}</b> {{displayExercises[i].rest}}</span>
        </div>
        <p v-if="illustrationUnavailableAt===i" class="lf6-illustration-unavailable">{{uiText("Nessuna illustrazione corrispondente trovata nel catalogo. La scheda non è stata modificata.")}}</p>
-       <p v-if="hasData(sheet.exercises[i].notes)" v-show="notesOpen.includes(i)" class="lf6-coach-note"><strong>{{uiText("Note del Coach")}}</strong>{{sheet.exercises[i].notes}}</p>
-       <div v-if="videoFor(sheet.exercises[i])||(!resolved[i]&&catalog.length)" class="lf6-extra-actions">
-        <button v-if="!resolved[i]&&catalog.length" type="button" class="lf6-text-link" @click="viewExercise(sheet.exercises[i],i)">{{uiText("Cerca illustrazione")}}</button>
-        <button v-if="videoFor(sheet.exercises[i])" type="button" class="lf6-text-link" @click="playing=videoFor(sheet.exercises[i])">{{uiText("Apri video del Coach")}}</button>
+       <p v-if="hasData(displayExercises[i].notes)" v-show="notesOpen.includes(i)" class="lf6-coach-note"><strong>{{uiText("Note del Coach")}}</strong>{{displayExercises[i].notes}}</p>
+       <div v-if="videoFor(displayExercises[i])||(!resolved[i]&&catalog.length)" class="lf6-extra-actions">
+        <button v-if="!resolved[i]&&catalog.length" type="button" class="lf6-text-link" @click="viewExercise(displayExercises[i],i)">{{uiText("Cerca illustrazione")}}</button>
+        <button v-if="videoFor(displayExercises[i])" type="button" class="lf6-text-link" @click="playing=videoFor(displayExercises[i])">{{uiText("Apri video del Coach")}}</button>
        </div>
       </div>
      </article>
@@ -167,7 +175,7 @@ onMounted(async()=>{
      </div>
     </section>
    </div>
-   <footer class="sheet-modal-foot lf6-footer"><button type="button" class="primary" @click="$emit('close')">{{uiText("Chiudi scheda")}}</button></footer>
+   <footer class="sheet-modal-foot lf6-footer"><button v-if="athleteView&&sheet.id" type="button" class="primary" @click="startTraining">Inizia allenamento</button><button type="button" class="primary" @click="$emit('close')">{{uiText("Chiudi scheda")}}</button></footer>
   </div>
   <div v-if="alternatives.length" class="modal-overlay lf6-dialog-layer" @click.self="alternatives=[]">
    <div class="dialog" role="dialog" aria-modal="true" :aria-label="uiText('Seleziona esercizio')">

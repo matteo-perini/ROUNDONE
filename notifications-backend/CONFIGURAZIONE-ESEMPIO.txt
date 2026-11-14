@@ -1,0 +1,9 @@
+NOTIFICHE SPENTE FINCHE NON COMPLETIAMO I TEST
+Frontend: aggiungere, NON sovrascrivere .env.production.local
+VITE_LIONFIT_PUSH_ENABLED=false
+# VITE_LIONFIT_PUSH_VAPID_KEY=CHIAVE_VAPID_PUBBLICA
+
+Backend: creare functions/.env.app-palestra-b0b9d solo dopo conferma regione e collaudo
+LF_PUSH_EVENTS_ENABLED=false
+
+Non inserire chiavi private qui o su GitHub. Le credenziali FCM server sono gestite da Firebase Admin SDK.

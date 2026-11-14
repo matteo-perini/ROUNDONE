@@ -1,0 +1,14 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "support_tickets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {"fieldPath": "requesterId", "order": "ASCENDING"},
+        {"fieldPath": "gymId", "order": "ASCENDING"},
+        {"fieldPath": "createdAt", "order": "DESCENDING"}
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

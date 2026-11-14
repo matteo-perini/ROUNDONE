@@ -3,6 +3,7 @@
  * nelle copie originali dell'archivio storico salvo se già erano nei dati sorgente.
  * Le stringhe di carico e ripetizioni sono intenzionali (75%, AMRAP, 2'). */
 import type { Exercise } from '../../model'
+import {validateAlternatives} from './approvedAlternatives.ts'
 
 export type V1ExerciseRow = {
  name: string
@@ -51,10 +52,12 @@ export function editorToV1(exercises: readonly Exercise[]): V1ExerciseRow[] {
  if (!Array.isArray(exercises)) throw new Error('Gli esercizi devono essere un elenco.')
  const saved = exercises.map((exercise) => {
   const { id: _id, rest, catalogId, kg, executionMode, _lfHadRest, ...original } = exercise as Exercise & {_lfHadRest?:boolean}
+  const approved=validateAlternatives(exercise.alternatives)
   const connect = typeof exercise.supersetWithPrevious === 'boolean'
     ? exercise.supersetWithPrevious : executionMode === 'superset'
   return {
    ...original,
+   ...(exercise.alternatives!==undefined?{alternatives:approved}:{}),
    name: text(exercise.name).trim(),
    exerciseId: text(exercise.exerciseId || catalogId),
    sets: text(exercise.sets),

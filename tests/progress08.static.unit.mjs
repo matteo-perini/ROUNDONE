@@ -13,7 +13,7 @@ test('Atleta: selezione scheda precede editor carichi',()=>{
  assert.match(component,/lf-p360-picker-filters/)
 })
 test('Coach senza Registro carichi; Check Zone nominata ovunque',()=>{
- assert.match(component,/v-if="role==='athlete'" type="button" :class="\{on:tab==='record'\}"/)
+ assert.match(component,/v-if="role==='athlete'" class="lf-p12-hero"/)
  assert.match(component,/tab==='record'&&role==='athlete'/)
  assert.match(component,/Check Zone/)
  assert.doesNotMatch(component,/Check fisico/)

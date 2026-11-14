@@ -2,6 +2,7 @@
  * Non esporta client produzione e non crea client all'importazione.
  */
 import { collection, doc, documentId, getDocFromServer, getDocs, query, where, runTransaction, serverTimestamp, Timestamp, type Firestore } from 'firebase/firestore'
+import { disjointMove } from '../../features/bookings/agendaOverview.ts'
 import { candidateSlots, romeParts, slotId, validateConfig, workingRanges, disciplineAllowed, SLOT_MS,
   type CoachConfig, type Service, type Slot, type Booking } from '../../features/bookings/bookingPolicy.ts'
 
@@ -9,7 +10,7 @@ import { candidateSlots, romeParts, slotId, validateConfig, workingRanges, disci
 export const bookingPaths = {
  config: 'spark_booking_coaches', slots:'spark_booking_slots', reservations:'spark_booking_reservations'
 } as const
-export type LiveReservation=Booking & { discipline:string }
+export type LiveReservation=Booking & { discipline:string;createdByCoach?:boolean;note?:string }
 export type LiveCoachConfig=CoachConfig & { displayName:string;lastPreparedDate:string }
 export function toReservation(id:string,raw:Record<string,unknown>):LiveReservation|null {
  const start=(raw.startAt as {toMillis?:()=>number}|undefined)?.toMillis?.()
@@ -19,7 +20,7 @@ export function toReservation(id:string,raw:Record<string,unknown>):LiveReservat
   !['confirmed','cancelled'].includes(String(raw.status)))return null
  return {id,startMs:start,athleteId:String(raw.athleteId||''),coachId:String(raw.coachId||''),
   service:raw.service as Service,durationMinutes:raw.durationMinutes as 60|120,
-  status:raw.status as 'confirmed'|'cancelled',discipline:String(raw.discipline||'')}
+  status:raw.status as 'confirmed'|'cancelled',discipline:String(raw.discipline||''),createdByCoach:typeof raw.createdBy==='string'&&raw.createdBy===raw.coachId,note:typeof raw.note==='string'?raw.note.slice(0,300):''}
 }
 export function toSlot(raw:Record<string,unknown>):Slot|null {
  const start=(raw.startAt as {toMillis?:()=>number}|undefined)?.toMillis?.()
@@ -160,6 +161,39 @@ export async function cancelReservation(db:Firestore,caller:{uid:string;gymId:st
   tx.update(bookingRef,{status:'cancelled',cancelledAt:serverTimestamp()})
   refs.forEach(ref=>tx.update(ref,{status:'open',bookingId:''}))
  },{maxAttempts:5})
+}
+/** Move only to a fully free, non-overlapping appointment of the same coach/service.
+ * Firestore validates both booking changes and all slots in one transaction; on any denial nothing changes.
+ * Test against the deployed production Rules in an isolated emulator before enabling writes publicly.
+ */
+export async function rescheduleReservation(db:Firestore,caller:{uid:string;gymId:string;role:string},id:string,newStart:number){
+ const gid=validatedGym(caller.gymId)
+ if(caller.role!=='atleta'||!caller.uid||!id||id.includes('/'))throw new Error('OPERAZIONE_NON_AUTORIZZATA')
+ const base=collection(db,'gyms',gid,bookingPaths.reservations),oldRef=doc(base,id),newRef=doc(base)
+ await runTransaction(db,async tx=>{
+  const oldSnap=await tx.get(oldRef),old=oldSnap.exists()?toReservation(id,oldSnap.data()):null
+  if(!old||old.status!=='confirmed'||old.athleteId!==caller.uid||!disjointMove(old,newStart))throw new Error('SPOSTAMENTO_NON_VALIDO')
+  const cfgSnap=await tx.get(doc(db,'gyms',gid,bookingPaths.config,old.coachId))
+  const cfg=cfgSnap.exists()?toCoachConfig(old.coachId,cfgSnap.data()):null
+  const now=Date.now()
+  if(!cfg||!cfg.active||!cfg.services[old.service]||cfg.durations[old.service]!==old.durationMinutes||!disciplineAllowed(old.service,old.discipline))throw new Error('CONFIGURAZIONE_COACH_CAMBIATA')
+  if(old.startMs-now<=cfg.cancelHours*3_600_000||old.startMs<=now)throw new Error('PREAVVISO_DISDETTA_SCADUTO')
+  const starts=(start:number)=>Array.from({length:old.durationMinutes/30},(_,i)=>start+i*SLOT_MS)
+  const oldTimes=starts(old.startMs),newTimes=starts(newStart)
+  const refs=(times:number[])=>times.map(ms=>doc(db,'gyms',gid,bookingPaths.slots,slotId(old.coachId,ms)))
+  const oldRefs=refs(oldTimes),newRefs=refs(newTimes)
+  const oldSlots=[];for(const r of oldRefs){const snap=await tx.get(r);oldSlots.push(snap.exists()?toSlot(snap.data()):null)}
+  const newSlots=[];for(const r of newRefs){const snap=await tx.get(r);newSlots.push(snap.exists()?toSlot(snap.data()):null)}
+  if(oldSlots.some((x,i)=>!x||x.coachId!==old.coachId||x.startMs!==oldTimes[i]||x.status!=='booked'||x.bookingId!==id))throw new Error('SLOT_ORIGINALI_NON_COERENTI')
+  if(newSlots.some((x,i)=>!x||x.coachId!==old.coachId||x.startMs!==newTimes[i]||x.status!=='open'||x.bookingId!==''))throw new Error('NUOVO_ORARIO_OCCUPATO')
+  if(!candidateSlots(cfg,newSlots as Slot[],old.service,romeParts(newStart).date,now).some(x=>x.startMs===newStart&&x.free))throw new Error('NUOVO_ORARIO_NON_DISPONIBILE')
+  // Only after all reads and validations: atomic change, not two commits.
+  newSlots.forEach((_,i)=>tx.update(newRefs[i],{status:'booked',bookingId:newRef.id}))
+  tx.set(newRef,{athleteId:caller.uid,coachId:old.coachId,service:old.service,discipline:old.discipline,startAt:Timestamp.fromMillis(newStart),durationMinutes:old.durationMinutes,status:'confirmed',createdAt:serverTimestamp()})
+  tx.update(oldRef,{status:'cancelled',cancelledAt:serverTimestamp()})
+  oldRefs.forEach(r=>tx.update(r,{status:'open',bookingId:''}))
+ },{maxAttempts:5})
+ return newRef.id
 }
 /** PATCH-5: sync disponibilità simile a V1, senza toccare gli appuntamenti booked.
  * Non fa delete fisico di prenotazioni. Temporaneamente disattiva la config

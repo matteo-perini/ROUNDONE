@@ -1,0 +1,30 @@
+// SOLO candidato. Inserire dentro match /b/{bucket}/o del ruleset Storage REALE.
+// Non sostituire il ruleset Storage: lasciare inalterate le regole di Check Zone e profili.
+// Richiede abilitazione accesso Firestore dalle Rules Storage e prova emulator/progetto isolato.
+    match /agenda_covers/{gid}/{eventId}/{fileName} {
+      function agendaProfile() {
+        return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data;
+      }
+      function agendaMember() {
+        return request.auth != null && agendaProfile().gymId == gid
+          && agendaProfile().get('membershipStatus','active') == 'active';
+      }
+      function agendaCoach() {
+        return agendaMember() && agendaProfile().role == 'admin';
+      }
+      function agendaPhotoModule() {
+        return firestore.get(/databases/(default)/documents/gyms/$(gid)/agenda_config/competitions).data.enabled == true;
+      }
+      function validCoverName() {
+        return gid.matches('^[A-Za-z0-9_-]{1,128}$') && eventId.matches('^[A-Za-z0-9_-]{1,128}$')
+          && fileName.matches('^[a-f0-9-]{36}[.]jpg$');
+      }
+      allow get: if agendaMember() && agendaPhotoModule() && validCoverName();
+      allow list: if false;
+      allow create: if agendaCoach() && agendaPhotoModule() && validCoverName()
+        && request.resource.contentType == 'image/jpeg' && request.resource.size > 0 && request.resource.size < 1000000;
+      allow update: if false;
+      // Delete only unreferenced media (the event is never physically deleted by the client).
+      allow delete: if agendaCoach() && validCoverName()
+        && firestore.get(/databases/(default)/documents/gyms/$(gid)/competitions/$(eventId)).data.get('coverId','') + '.jpg' != fileName;
+    }

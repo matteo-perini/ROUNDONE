@@ -1,0 +1,873 @@
+// LION FIT - FIRESTORE SECURITY RULES — STEP 3S.2 / PROD
+// COACH-ASSIGNMENT 08/11/2026 — VERSIONE DEFINITIVA DA PUBBLICARE IN PROD.
+// Base: Rules attualmente pubblicate, incollate dall'utente il 07/11/2026.
+// Compatibilita': palestre legacy gym_179..., ownerUid, profili senza coachRole/membershipStatus.
+// Le differenze sono circoscritte a stato account, inviti e lettura profilo assente.
+// Coach e collaboratori gestiscono le schede. Archivio protetto non cancellabile dal client.
+// L'atleta puo' nascondere irreversibilmente dalla SUA vista una propria copia archivio,
+// creando un marker dedicato. Il contenuto archivio e il programma NON sono eliminati.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signed() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    function verified() { return signed() && request.auth.token.email_verified == true; }
+    function profilePath(id) { return /databases/$(database)/documents/users/$(id); }
+    function gymPath(gid) { return /databases/$(database)/documents/gyms/$(gid); }
+    function coachInvitePath(gid, iid) { return /databases/$(database)/documents/gyms/$(gid)/coach_invites/$(iid); }
+    function athleteInvitePath(gid, iid) { return /databases/$(database)/documents/gyms/$(gid)/athlete_invites/$(iid); }
+    function athletePersonalTemplatePath(gid, aid, tid) {
+      return /databases/$(database)/documents/gyms/$(gid)/athlete_programs/$(aid)/personal_templates/$(tid);
+    }
+    function athleteArchiveTemplatePath(gid, aid, tid) {
+      return /databases/$(database)/documents/gyms/$(gid)/athlete_programs/$(aid)/archive_templates/$(tid);
+    }
+    function isSelf(id) { return signed() && uid() == id; }
+    function hasProfile() { return signed() && exists(profilePath(uid())); }
+    // Un profilo vecchio privo di membershipStatus resta attivo.
+    // 'revoked' o qualunque stato inatteso non accede alle risorse palestra.
+    function inGym(gid) {
+      return hasProfile()
+        && get(profilePath(uid())).data.gymId == gid
+        && get(profilePath(uid())).data.get('membershipStatus', 'active') == 'active';
+    }
+    function coach(gid) { return inGym(gid) && get(profilePath(uid())).data.role == 'admin'; }
+    function owner(gid) { return coach(gid) && get(gymPath(gid)).data.ownerUid == uid(); }
+    // Un documento puo' essere eliminato definitivamente soltanto dopo lo
+    // spostamento nel Cestino; il timestamp viene aggiunto dai coach autorizzati.
+    function isTrashedDocument() {
+      return resource.data.keys().hasAll(['deletedAt']) && resource.data.deletedAt is timestamp;
+    }
+    function isAthleteOf(gid, id) {
+      return exists(profilePath(id))
+        && get(profilePath(id)).data.gymId == gid
+        && get(profilePath(id)).data.role == 'athlete';
+    }
+    function validToken(token) { return token.matches('^[a-f0-9]{48}$'); }
+    function profileEmailMatches() {
+      return signed() && request.resource.data.email == request.auth.token.email;
+    }
+    function ownerSignup() {
+      let gid = request.resource.data.gymId;
+      return request.resource.data.role == 'admin'
+        && request.resource.data.coachRole == 'owner'
+        && request.resource.data.keys().hasOnly(['name','email','role','coachRole','gymId','gymName'])
+        && gid == 'gym_' + uid()
+        && existsAfter(gymPath(gid))
+        && getAfter(gymPath(gid)).data.ownerUid == uid()
+        && getAfter(gymPath(gid)).data.name == request.resource.data.gymName;
+    }
+    function athleteSignup() {
+      // Verificare prima il ruolo: le altre registrazioni non hanno athleteInviteId.
+      return request.resource.data.role == 'athlete' && validAthleteSignup();
+    }
+    function validAthleteSignup() {
+      let gid = request.resource.data.gymId;
+      let token = request.resource.data.athleteInviteId;
+      let before = get(athleteInvitePath(gid, token)).data;
+      let after = getAfter(athleteInvitePath(gid, token)).data;
+      // Mantieni il formato legacy senza associazioni per i vecchi APK.
+      // Il formato aggiornato deve registrare sia chi ha invitato l'atleta,
+      // sia il suo Coach principale, in modo coerente con l'invito originale.
+      return request.resource.data.keys().hasOnly([
+          'name','email','role','gymId','gymName','athleteInviteId',
+          'invitedByUid','primaryCoachUid'
+        ])
+        && (
+          (!('invitedByUid' in request.resource.data)
+            && !('primaryCoachUid' in request.resource.data))
+          || (
+            'invitedByUid' in request.resource.data
+            && 'primaryCoachUid' in request.resource.data
+            && before.createdBy is string
+            && request.resource.data.invitedByUid == before.createdBy
+            && request.resource.data.primaryCoachUid == before.createdBy
+            && exists(profilePath(before.createdBy))
+            && get(profilePath(before.createdBy)).data.role == 'admin'
+            && get(profilePath(before.createdBy)).data.gymId == gid
+            && get(profilePath(before.createdBy)).data.get('membershipStatus','active') == 'active'
+          )
+        )
+        && validToken(token)
+        && before.status == 'pending'
+        && before.gymId == gid
+        && before.gymName == request.resource.data.gymName
+        && before.expiresAt > request.time
+        && after.status == 'claimed'
+        && after.claimedBy == uid()
+        && after.claimedAt == request.time;
+    }
+    function coachSignup() {
+      // Prima il ruolo, poi l'invito: evita letture di campi non presenti.
+      return request.resource.data.role == 'admin'
+        && request.resource.data.coachRole == 'collaborator'
+        && validCoachSignup();
+    }
+    function validCoachSignup() {
+      let gid = request.resource.data.gymId;
+      let token = request.resource.data.coachInviteId;
+      let before = get(coachInvitePath(gid, token)).data;
+      let after = getAfter(coachInvitePath(gid, token)).data;
+      return verified()
+        && request.resource.data.keys().hasOnly(['name','email','role','coachRole','gymId','gymName','coachInviteId'])
+        && validToken(token)
+        && before.status == 'pending'
+        && before.gymId == gid
+        && before.email == request.auth.token.email
+        && before.gymName == request.resource.data.gymName
+        && before.expiresAt > request.time
+        && after.status == 'claimed'
+        && after.claimedBy == uid()
+        && after.claimedAt == request.time;
+    }
+
+    // ID canonici: evita che due documenti diversi rappresentino la stessa
+    // mezz'ora dello stesso coach. Timestamp in millisecondi UTC.
+    function lfSparkSlotId(coachId, startAt) {
+      return coachId + '_' + string(startAt.toMillis());
+    }
+    function lfSparkSlotPath(gid, sid) {
+      return /databases/$(database)/documents/gyms/$(gid)/spark_booking_slots/$(sid);
+    }
+    function lfSparkCoachConfigPath(gid, cid) {
+      return /databases/$(database)/documents/gyms/$(gid)/spark_booking_coaches/$(cid);
+    }
+    function lfSparkMayBook(gid, b) {
+      let cfg = get(lfSparkCoachConfigPath(gid,b.coachId)).data;
+      // "service" e' una parola riservata nelle Security Rules.
+      // Non usare b.service: verificare esplicitamente le due alternative.
+      return cfg.active == true
+        && ((b['service'] == 'fighter'
+               && cfg.services.fighter == true
+               && cfg.durations.fighter == b.durationMinutes)
+            || (b['service'] == 'pesi'
+               && cfg.services.pesi == true
+               && cfg.durations.pesi == b.durationMinutes))
+        && b.startAt > request.time + duration.value(cfg.noticeHours, 'h')
+        && b.startAt < request.time + duration.value(cfg.maxDays, 'd');
+    }
+    function lfSparkBookingPath(gid, bookingId) {
+      return /databases/$(database)/documents/gyms/$(gid)/spark_booking_reservations/$(bookingId);
+    }
+    function lfSparkSlotIncluded(slotId, b) {
+      return slotId == lfSparkSlotId(b.coachId,b.startAt)
+        || slotId == lfSparkSlotId(b.coachId,b.startAt + duration.value(30,'m'))
+        || (b.durationMinutes == 120 && (
+          slotId == lfSparkSlotId(b.coachId,b.startAt + duration.value(60,'m'))
+          || slotId == lfSparkSlotId(b.coachId,b.startAt + duration.value(90,'m'))
+        ));
+    }
+    function lfSparkBooked(gid, bookingId, b, offsetMinutes) {
+      let start = b.startAt + duration.value(offsetMinutes,'m');
+      let slot = getAfter(lfSparkSlotPath(gid,lfSparkSlotId(b.coachId,start))).data;
+      return slot.coachId == b.coachId
+        && slot.startAt == start
+        && slot.endAt == start + duration.value(30,'m')
+        && slot.status == 'booked'
+        && slot.bookingId == bookingId;
+    }
+    function lfSparkOpen(gid, b, offsetMinutes) {
+      let start = b.startAt + duration.value(offsetMinutes,'m');
+      let slot = getAfter(lfSparkSlotPath(gid,lfSparkSlotId(b.coachId,start))).data;
+      return slot.startAt == start
+        && slot.endAt == start + duration.value(30,'m')
+        && slot.status == 'open'
+        && slot.bookingId == '';
+    }
+    function lfSparkAllBooked(gid, bookingId, b) {
+      return lfSparkBooked(gid,bookingId,b,0)
+        && lfSparkBooked(gid,bookingId,b,30)
+        && (b.durationMinutes == 60
+          || (lfSparkBooked(gid,bookingId,b,60) && lfSparkBooked(gid,bookingId,b,90)));
+    }
+    function lfSparkAllOpen(gid, b) {
+      return lfSparkOpen(gid,b,0)
+        && lfSparkOpen(gid,b,30)
+        && (b.durationMinutes == 60
+          || (lfSparkOpen(gid,b,60) && lfSparkOpen(gid,b,90)));
+    }
+    function lfSparkCanCancel(gid, b) {
+      // Un coach puo' annullare i propri appuntamenti; il titolare tutti.
+      return (coach(gid) && (uid() == b.coachId || owner(gid)))
+        || (inGym(gid) && b.athleteId == uid()
+          && b.startAt > request.time + duration.value(get(lfSparkCoachConfigPath(gid,b.coachId)).data.cancelHours, 'h'));
+    }
+
+    match /users/{userId} {
+      // Solo il proprietario o un coach della stessa palestra leggono un profilo privato.
+      // Gli atleti leggono SOLO il proprio: per Team utilizzare /team_public.
+      // STEP 3I: primo accesso di un utente Auth non ancora registrato.
+      // Il get del PROPRIO documento mancante e' ammesso; nessun dato di terzi e' esposto.
+      allow get: if (isSelf(userId) && resource == null)
+        || (resource != null && (isSelf(userId) || (signed() && coach(resource.data.gymId))));
+      allow list: if signed() && coach(resource.data.gymId);
+      allow create: if isSelf(userId) && profileEmailMatches()
+        && (ownerSignup() || athleteSignup() || coachSignup());
+      allow update: if (
+        isSelf(userId)
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['name','surname','photoURL','bio','gender','height','weight','location','country'])
+      ) || (
+        coach(resource.data.gymId) && resource.data.role == 'athlete'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['driveUrl'])
+      ) || (
+        // PATCH COACH-ASSIGNMENT: solo il titolare puo impostare o cambiare
+        // l'associazione ORGANIZZATIVA. Nessun permesso e legato al singolo
+        // primaryCoachUid: tutti i Coach attivi della palestra collaborano.
+        userId != uid()
+        && resource.data.role == 'athlete'
+        && resource.data.gymId is string
+        && owner(resource.data.gymId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['primaryCoachUid'])
+        && request.resource.data.primaryCoachUid is string
+        && exists(profilePath(request.resource.data.primaryCoachUid))
+        && get(profilePath(request.resource.data.primaryCoachUid)).data.role == 'admin'
+        && get(profilePath(request.resource.data.primaryCoachUid)).data.gymId == resource.data.gymId
+        && get(profilePath(request.resource.data.primaryCoachUid)).data.get('membershipStatus','active') == 'active'
+      ) || (
+        // Revoca/riattivazione SOLO da titolare, SOLO collaboratore esplicito.
+        // No cancellazione Auth, no modifica ruoli/email/palestra/ownerUid.
+        userId != uid()
+        && resource.data.gymId is string
+        && owner(resource.data.gymId)
+        && resource.data.role == 'admin'
+        && resource.data.get('coachRole', '') == 'collaborator'
+        && resource.data.get('membershipStatus', 'active') in ['active','revoked']
+        && request.resource.data.get('membershipStatus', '') in ['active','revoked']
+        && request.resource.data.get('membershipStatus', '') != resource.data.get('membershipStatus', 'active')
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['membershipStatus'])
+      );
+      allow delete: if false;
+    }
+
+    match /gyms/{gymId} {
+      // Vietata qualsiasi query pubblica di palestre/codici. Un utente legge la propria.
+      allow get: if inGym(gymId);
+      allow list: if false;
+      // Solo l'utente proprietario del NUOVO ID deterministico puo' creare una palestra.
+      // Per palestre legacy utilizzare migrazione amministrativa sicura di ownerUid.
+      allow create: if signed() && gymId == 'gym_' + uid()
+        && request.resource.data.keys().hasOnly(['name','ownerUid','createdAt','inviteCode'])
+        && request.resource.data.ownerUid == uid()
+        && request.resource.data.name is string
+        && request.resource.data.createdAt == request.time;
+      allow update: if owner(gymId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name']);
+      allow delete: if false;
+
+      // PATCH 13 — Agenda, modulo gare disattivato in assenza di configurazione.
+      function agendaCompetitionsEnabled() {
+        return exists(/databases/$(database)/documents/gyms/$(gymId)/agenda_config/competitions)
+          && get(/databases/$(database)/documents/gyms/$(gymId)/agenda_config/competitions).data.enabled == true;
+      }
+      match /agenda_config/competitions {
+        allow get: if inGym(gymId);
+        allow list: if false;
+        allow create, update: if owner(gymId)
+          && request.resource.data.keys().hasOnly(['enabled','updatedBy','updatedAt'])
+          && request.resource.data.keys().hasAll(['enabled','updatedBy','updatedAt'])
+          && request.resource.data.enabled is bool
+          && request.resource.data.updatedBy == uid()
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if false;
+      }
+      match /competitions/{eventId} {
+        function validEvent(d) {
+          return d.keys().hasOnly(['title','category','discipline','location','notes','startAt','status','createdBy','createdAt','updatedBy','updatedAt','coverId'])
+            && d.keys().hasAll(['title','category','discipline','location','notes','startAt','status','createdBy','createdAt','updatedBy','updatedAt'])
+            && d.title is string && d.title.size() > 0 && d.title.size() <= 100
+            && d.category in ['combattimento','forza','altro']
+            && d.discipline is string && d.discipline.size() > 0 && d.discipline.size() <= 60
+            && d.location is string && d.location.size() > 0 && d.location.size() <= 160
+            && d.notes is string && d.notes.size() <= 1500
+            && d.get('coverId','') is string && (d.get('coverId','') == '' || d.get('coverId','').matches('^[a-f0-9-]{36}$'))
+            && d.startAt is timestamp && d.status in ['published','cancelled']
+            && d.createdBy is string && d.createdAt is timestamp
+            && d.updatedBy == uid() && d.updatedAt == request.time;
+        }
+        function validFutureEvent(d) {
+          return d.startAt > request.time && d.startAt <= request.time + duration.value(730,'d');
+        }
+        allow get, list: if inGym(gymId) && agendaCompetitionsEnabled();
+        allow create: if coach(gymId) && agendaCompetitionsEnabled()
+          && eventId.matches('^[A-Za-z0-9]{20}$')
+          && validEvent(request.resource.data) && request.resource.data.status == 'published'
+          && request.resource.data.createdBy == uid() && request.resource.data.createdAt == request.time
+          && validFutureEvent(request.resource.data);
+        allow update: if coach(gymId) && agendaCompetitionsEnabled()
+          && resource.data.status == 'published' && resource.data.startAt > request.time
+          && validEvent(request.resource.data)
+          && ((request.resource.data.status == 'published' && validFutureEvent(request.resource.data)
+                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title','category','discipline','location','notes','startAt','coverId','updatedBy','updatedAt']))
+            || (request.resource.data.status == 'cancelled'
+                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedBy','updatedAt'])));
+        allow delete: if false;
+      }
+      match /competition_entries/{entryId} {
+        function targetEvent(eid) {
+          return get(/databases/$(database)/documents/gyms/$(gymId)/competitions/$(eid)).data;
+        }
+        function validEntry(d) {
+          return d.keys().hasOnly(['eventId','athleteId','status','result','createdAt','updatedAt','updatedBy'])
+            && d.keys().hasAll(['eventId','athleteId','status','result','createdAt','updatedAt','updatedBy'])
+            && d.eventId is string && d.eventId.matches('^[A-Za-z0-9]{20}$')
+            && d.athleteId is string && d.athleteId.matches('^[A-Za-z0-9_-]{1,128}$')
+            && entryId == d.eventId + '_' + d.athleteId
+            && d.status in ['pending','approved','rejected','withdrawn']
+            && d.result is string && d.result.size() <= 1000
+            && d.createdAt is timestamp && d.updatedBy == uid() && d.updatedAt == request.time;
+        }
+        function upcomingEvent(d) {
+          let e = targetEvent(d.eventId);
+          return e.status == 'published' && e.startAt > request.time;
+        }
+        function finishedEvent(d) {
+          let e = targetEvent(d.eventId);
+          return e.status == 'published' && e.startAt <= request.time;
+        }
+        // Missing get permits transactionally creating a new own request; no other existing request is exposed.
+        allow get: if inGym(gymId) && agendaCompetitionsEnabled()
+          && (coach(gymId) || (resource == null && isAthleteOf(gymId,uid())
+             && uid().matches('^[A-Za-z0-9_-]{1,128}$') && entryId.matches('^[A-Za-z0-9]{20}_' + uid() + '$'))
+            || (resource != null && resource.data.athleteId == uid()));
+        allow list: if inGym(gymId) && agendaCompetitionsEnabled()
+          && (coach(gymId) || resource.data.athleteId == uid());
+        allow create: if inGym(gymId) && agendaCompetitionsEnabled()
+          && isAthleteOf(gymId, uid()) && validEntry(request.resource.data)
+          && request.resource.data.athleteId == uid() && request.resource.data.status == 'pending'
+          && request.resource.data.result == '' && request.resource.data.createdAt == request.time
+          && upcomingEvent(request.resource.data);
+        allow update: if inGym(gymId) && agendaCompetitionsEnabled()
+          && validEntry(request.resource.data)
+          && ((isAthleteOf(gymId,uid()) && resource.data.athleteId == uid() && upcomingEvent(resource.data)
+                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedBy','updatedAt'])
+                && ((resource.data.status in ['pending','approved'] && request.resource.data.status == 'withdrawn')
+                  || (resource.data.status == 'withdrawn' && request.resource.data.status == 'pending')))
+             || (coach(gymId) && isAthleteOf(gymId,resource.data.athleteId)
+                && ((resource.data.status == 'pending' && request.resource.data.status in ['approved','rejected']
+                     && upcomingEvent(resource.data)
+                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedBy','updatedAt']))
+                  || (resource.data.status == 'approved' && finishedEvent(resource.data)
+                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['result','updatedBy','updatedAt'])))));
+        allow delete: if false;
+      }
+
+      match /coach_invites/{inviteId} {
+        // Il codice nel link deve avere 48 caratteri esadecimali casuali (192 bit).
+        // Lettura di un invito coach solo dopo login e verifica della email invitata.
+        allow get: if owner(gymId) || (
+          verified() && resource.data.email == request.auth.token.email
+        );
+        allow list: if owner(gymId);
+        allow create: if owner(gymId) && validToken(inviteId)
+          && request.resource.data.keys().hasAll(['email','gymId','gymName','status','createdBy','createdAt','expiresAt'])
+          && request.resource.data.keys().hasOnly(['email','gymId','gymName','status','createdBy','createdAt','expiresAt'])
+          && request.resource.data.gymId == gymId
+          && request.resource.data.status == 'pending'
+          && request.resource.data.createdBy == uid()
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.email is string
+          && request.resource.data.expiresAt > request.time;
+        allow update: if (
+          // Ramo revoca prima di controllare il ruolo: importante per il batch claim.
+          resource.data.status == 'pending'
+          && request.resource.data.status == 'revoked'
+          && owner(gymId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        ) || (
+          verified()
+          && resource.data.status == 'pending'
+          && resource.data.email == request.auth.token.email
+          && resource.data.expiresAt > request.time
+          && request.resource.data.status == 'claimed'
+          && request.resource.data.claimedBy == uid()
+          && request.resource.data.claimedAt == request.time
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','claimedBy','claimedAt'])
+          && getAfter(profilePath(uid())).data.role == 'admin'
+          && getAfter(profilePath(uid())).data.coachRole == 'collaborator'
+          && getAfter(profilePath(uid())).data.gymId == gymId
+          && getAfter(profilePath(uid())).data.coachInviteId == inviteId
+        );
+        allow delete: if false;
+      }
+
+      match /athlete_invites/{inviteId} {
+        // Link monouso lungo, non piu' codice pubblico a 4 cifre.
+        // Possessore del token puo' vedere solo il documento specifico dell'invito.
+        allow get: if validToken(inviteId);
+        allow list: if coach(gymId);
+        allow create: if coach(gymId) && validToken(inviteId)
+          && request.resource.data.keys().hasAll(['gymId','gymName','status','createdBy','createdAt','expiresAt'])
+          && request.resource.data.keys().hasOnly(['gymId','gymName','status','createdBy','createdAt','expiresAt'])
+          && request.resource.data.gymId == gymId
+          && request.resource.data.status == 'pending'
+          && request.resource.data.createdBy == uid()
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.expiresAt > request.time;
+        allow update: if (
+          resource.data.status == 'pending'
+          && request.resource.data.status == 'revoked'
+          && coach(gymId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        ) || (
+          signed()
+          && resource.data.status == 'pending'
+          && resource.data.expiresAt > request.time
+          && request.resource.data.status == 'claimed'
+          && request.resource.data.claimedBy == uid()
+          && request.resource.data.claimedAt == request.time
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','claimedBy','claimedAt'])
+          && getAfter(profilePath(uid())).data.role == 'athlete'
+          && getAfter(profilePath(uid())).data.gymId == gymId
+          && getAfter(profilePath(uid())).data.athleteInviteId == inviteId
+        );
+        allow delete: if false;
+      }
+
+      match /templates/{templateId} {
+        // L'archivio e' riservato ai coach; il Cestino e' un update, non un delete.
+        allow read, create, update: if coach(gymId);
+        allow delete: if owner(gymId) && isTrashedDocument();
+      }
+      match /exercise_videos/{videoId} {
+        allow read: if inGym(gymId);
+        allow write: if coach(gymId);
+      }
+      match /support_feedback/{feedbackId} {
+        allow create: if inGym(gymId);
+        allow read: if coach(gymId);
+        allow update, delete: if false;
+      }
+      // LION FIT SPARK BOOKING 0.29 - regole gia' attive nel progetto PROD
+      // Disponibilita' Spark del coach: solo il coach proprietario puo' scrivere.
+      // Le eccezioni e fasce sono mappe, non array annidati (vietati da Firestore).
+      match /spark_booking_coaches/{coachId} {
+        allow get, list: if inGym(gymId);
+        allow create, update: if coach(gymId) && uid() == coachId
+          && request.resource.data.keys().hasOnly([
+            'coachId','displayName','active','services','durations','noticeHours',
+            'cancelHours','maxDays','mode','from','to','weekly','exceptions',
+            'holidays','lastPreparedDate','updatedAt'
+          ])
+          && request.resource.data.keys().hasAll([
+            'coachId','displayName','active','services','durations','noticeHours',
+            'cancelHours','maxDays','mode','from','to','weekly','exceptions',
+            'holidays','lastPreparedDate','updatedAt'
+          ])
+          && request.resource.data.coachId == coachId
+          && request.resource.data.displayName is string
+          && request.resource.data.displayName.size() <= 100
+          && request.resource.data.active is bool
+          && request.resource.data.services is map
+          && request.resource.data.services.keys().hasOnly(['fighter','pesi'])
+          && request.resource.data.services.fighter is bool
+          && request.resource.data.services.pesi is bool
+          && request.resource.data.durations is map
+          && request.resource.data.durations.keys().hasOnly(['fighter','pesi'])
+          && (request.resource.data.durations.fighter == 60 || request.resource.data.durations.fighter == 120)
+          && (request.resource.data.durations.pesi == 60 || request.resource.data.durations.pesi == 120)
+          && request.resource.data.noticeHours is int
+          && request.resource.data.noticeHours >= 0
+          && request.resource.data.noticeHours <= 168
+          && request.resource.data.cancelHours is int
+          && request.resource.data.cancelHours >= 0
+          && request.resource.data.cancelHours <= 168
+          && request.resource.data.maxDays is int
+          && request.resource.data.maxDays >= 1
+          && request.resource.data.maxDays <= 30
+          && (request.resource.data.mode == 'always' || request.resource.data.mode == 'period')
+          && request.resource.data.from is string
+          && request.resource.data.to is string
+          && request.resource.data.weekly is map
+          && request.resource.data.weekly.size() <= 7
+          && request.resource.data.exceptions is map
+          && request.resource.data.exceptions.size() <= 60
+          && request.resource.data.holidays is list
+          && request.resource.data.holidays.size() <= 30
+          && request.resource.data.lastPreparedDate is string
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if false;
+      }
+
+      // LION FIT SPARK: SLOT IN BLOCCO ATOMICO SENZA CLOUD FUNCTIONS.
+      // Percorsi presenti nelle Rules PROD originali.
+      // Un documento slot equivale a 30 minuti; 60 e 120 minuti prenotano
+      // rispettivamente 2 o 4 slot con un'unica transazione.
+      match /spark_booking_slots/{slotId} {
+        allow get, list: if inGym(gymId);
+
+        // Il coach crea solo disponibilita' APERTE. Non puo' prenotare al posto
+        // degli atleti. Gli slot usano ID canonici coachUid_epochMillisUTC.
+        allow create: if coach(gymId)
+          && (request.resource.data.coachId == uid() || owner(gymId))
+          && request.resource.data.keys().hasOnly(['coachId','startAt','endAt','status','bookingId'])
+          && request.resource.data.keys().hasAll(['coachId','startAt','endAt','status','bookingId'])
+          && request.resource.data.coachId is string
+          && get(profilePath(request.resource.data.coachId)).data.gymId == gymId
+          && get(profilePath(request.resource.data.coachId)).data.role == 'admin'
+          && request.resource.data.startAt is timestamp
+          && request.resource.data.endAt is timestamp
+          && request.resource.data.startAt > request.time
+          && request.resource.data.startAt < request.time + duration.value(60, 'd')
+          && request.resource.data.startAt.minutes() % 30 == 0
+          && request.resource.data.startAt.seconds() == 0
+          && request.resource.data.startAt.nanos() == 0
+          && request.resource.data.endAt == request.resource.data.startAt + duration.value(30, 'm')
+          && slotId == lfSparkSlotId(request.resource.data.coachId, request.resource.data.startAt)
+          && request.resource.data.status == 'open'
+          && request.resource.data.bookingId == '';
+
+        // La prenotazione e' l'unica causa legittima di blocco di uno slot.
+        // Deve comparire nello stesso commit e contenere questo slot.
+        allow update: if inGym(gymId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','bookingId'])
+          && (
+            (resource.data.status == 'open'
+              && resource.data.bookingId == ''
+              && request.resource.data.status == 'booked'
+              && request.resource.data.bookingId is string
+              && uid() == getAfter(lfSparkBookingPath(gymId, request.resource.data.bookingId)).data.athleteId
+              && getAfter(lfSparkBookingPath(gymId, request.resource.data.bookingId)).data.status == 'confirmed'
+              && getAfter(lfSparkBookingPath(gymId, request.resource.data.bookingId)).data.coachId == resource.data.coachId
+              && lfSparkSlotIncluded(slotId, getAfter(lfSparkBookingPath(gymId, request.resource.data.bookingId)).data))
+            ||
+            (resource.data.status == 'booked'
+              && resource.data.bookingId is string
+              && request.resource.data.status == 'open'
+              && request.resource.data.bookingId == ''
+              && getAfter(lfSparkBookingPath(gymId, resource.data.bookingId)).data.status == 'cancelled'
+              && getAfter(lfSparkBookingPath(gymId, resource.data.bookingId)).data.coachId == resource.data.coachId
+              && lfSparkSlotIncluded(slotId, getAfter(lfSparkBookingPath(gymId, resource.data.bookingId)).data)
+              && lfSparkCanCancel(gymId, getAfter(lfSparkBookingPath(gymId, resource.data.bookingId)).data))
+          );
+
+        // Il coach puo' ritirare uno slot NON occupato.
+        allow delete: if coach(gymId) && resource.data.status == 'open'
+          && (resource.data.coachId == uid() || owner(gymId));
+      }
+
+      match /spark_booking_reservations/{bookingId} {
+        allow get, list: if coach(gymId)
+          || (inGym(gymId) && resource.data.athleteId == uid());
+
+        allow create: if inGym(gymId)
+          && get(profilePath(uid())).data.role == 'athlete'
+          && request.resource.data.keys().hasOnly([
+            'athleteId','coachId','service','discipline','startAt',
+            'durationMinutes','status','createdAt'
+          ])
+          && request.resource.data.keys().hasAll([
+            'athleteId','coachId','service','discipline','startAt',
+            'durationMinutes','status','createdAt'
+          ])
+          && request.resource.data.athleteId == uid()
+          && request.resource.data.coachId is string
+          && get(profilePath(request.resource.data.coachId)).data.gymId == gymId
+          && get(profilePath(request.resource.data.coachId)).data.role == 'admin'
+          && (request.resource.data['service'] == 'fighter' || request.resource.data['service'] == 'pesi')
+          && request.resource.data.discipline is string
+          && request.resource.data.discipline.size() > 0
+          && request.resource.data.discipline.size() <= 64
+          && (request.resource.data.durationMinutes == 60 || request.resource.data.durationMinutes == 120)
+          && request.resource.data.startAt is timestamp
+          && request.resource.data.startAt > request.time + duration.value(15, 'm')
+          && request.resource.data.startAt < request.time + duration.value(30, 'd')
+          && request.resource.data.status == 'confirmed'
+          && lfSparkMayBook(gymId, request.resource.data)
+          && request.resource.data.createdAt == request.time
+          && lfSparkAllBooked(gymId, bookingId, request.resource.data);
+
+        // Annullamento atomico: la prenotazione passa a cancelled
+        // e TUTTI i 2/4 slot devono tornare open nello stesso commit.
+        allow update: if lfSparkCanCancel(gymId, resource.data)
+          && resource.data.status == 'confirmed'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','cancelledAt'])
+          && request.resource.data.status == 'cancelled'
+          && request.resource.data.cancelledAt == request.time
+          && lfSparkAllOpen(gymId, resource.data);
+        allow delete: if false;
+      }
+
+      // PATCH 06/07/08: progressi e check zone, percorso isolato.
+      match /progress/{athleteId} {
+        allow read, write: if false; // Il documento padre non serve.
+
+        match /sessions/{sessionId} {
+          // Solo atleta proprietario e coach attivi della medesima palestra.
+          allow get, list: if (inGym(gymId) && uid() == athleteId)
+            || coach(gymId);
+          // I risultati sono APPEND-ONLY: nessuna sovrascrittura o cancellazione client.
+          allow create: if inGym(gymId)
+            && uid() == athleteId
+            && isAthleteOf(gymId, athleteId)
+            && request.resource.data.keys().hasOnly([
+              'schemaVersion','athleteId','sheetId','sheetTitle',
+              'performedOn','createdBy','createdAt','exercises'
+            ])
+            && request.resource.data.keys().hasAll([
+              'schemaVersion','athleteId','sheetId','sheetTitle',
+              'performedOn','createdBy','createdAt','exercises'
+            ])
+            && request.resource.data.schemaVersion == 1
+            && request.resource.data.athleteId == athleteId
+            && request.resource.data.createdBy == uid()
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.sheetId is string
+            && request.resource.data.sheetId.size() > 0
+            && request.resource.data.sheetId.size() <= 128
+            && request.resource.data.sheetTitle is string
+            && request.resource.data.sheetTitle.size() <= 160
+            && request.resource.data.performedOn is string
+            && request.resource.data.performedOn.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+            && request.resource.data.exercises is list
+            && request.resource.data.exercises.size() > 0
+            && request.resource.data.exercises.size() <= 90;
+          allow update, delete: if false;
+        }
+
+        // PATCH 12 — correzioni e richieste di revisione (sessioni immutabili).
+        match /session_corrections/{correctionId} {
+          function ownsWorkout() {
+            return inGym(gymId) && uid() == athleteId && isAthleteOf(gymId, athleteId);
+          }
+          function validValues(v) {
+            return v is map && v.keys().hasOnly(['kg','reps']) && v.keys().hasAll(['kg','reps'])
+              && (v.kg == null || (v.kg is number && v.kg >= 0 && v.kg <= 2000))
+              && (v.reps == null || (v.reps is int && v.reps >= 1 && v.reps <= 300));
+          }
+          function validCorrection(d) {
+            return d.keys().hasOnly(['sessionId','exerciseIndex','setIndex','history','latest'])
+              && d.keys().hasAll(['sessionId','exerciseIndex','setIndex','history','latest'])
+              && d.sessionId is string && d.sessionId.matches('^[A-Za-z0-9_-]{3,128}$')
+              && d.exerciseIndex is int && d.exerciseIndex >= 0 && d.exerciseIndex < 90
+              && d.setIndex is int && d.setIndex >= 0 && d.setIndex < 30
+              && correctionId == d.sessionId + '_' + string(d.exerciseIndex) + '_' + string(d.setIndex)
+              && d.history is list && d.history.size() < 100
+              && d.latest is map && d.latest.keys().hasOnly(['previous','next','author','at'])
+              && d.latest.keys().hasAll(['previous','next','author','at'])
+              && d.latest.author == uid() && d.latest.at == request.time
+              && validValues(d.latest.previous) && validValues(d.latest.next)
+              && (d.latest.next.kg != null || d.latest.next.reps != null)
+              && d.latest.previous != d.latest.next;
+          }
+          function originalMatches(d) {
+            let source = get(/databases/$(database)/documents/gyms/$(gymId)/progress/$(athleteId)/sessions/$(d.sessionId)).data;
+            return source.athleteId == athleteId && source.createdBy == athleteId
+              && source.exercises is list && d.exerciseIndex < source.exercises.size()
+              && source.exercises[d.exerciseIndex].skipped == false
+              && d.setIndex < source.exercises[d.exerciseIndex].sets.size()
+              && d.latest.previous.kg == source.exercises[d.exerciseIndex].sets[d.setIndex].kg
+              && d.latest.previous.reps == source.exercises[d.exerciseIndex].sets[d.setIndex].reps;
+          }
+          allow get, list: if (inGym(gymId) && uid() == athleteId) || coach(gymId);
+          allow create: if ownsWorkout() && validCorrection(request.resource.data)
+            && request.resource.data.history.size() == 0 && originalMatches(request.resource.data);
+          allow update: if ownsWorkout() && validCorrection(request.resource.data)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['history','latest'])
+            && request.resource.data.history == resource.data.history.concat([resource.data.latest])
+            && request.resource.data.latest.previous == resource.data.latest.next;
+          allow delete: if false;
+        }
+        match /revision_requests/{revisionId} {
+          allow get, list: if (inGym(gymId) && uid() == athleteId) || coach(gymId);
+          allow create: if inGym(gymId) && uid() == athleteId && isAthleteOf(gymId, athleteId)
+            && request.resource.data.keys().hasOnly(['athleteId','sheetId','sheetTitle','reason','notes','status','createdBy','createdAt'])
+            && request.resource.data.keys().hasAll(['athleteId','sheetId','sheetTitle','reason','notes','status','createdBy','createdAt'])
+            && request.resource.data.athleteId == athleteId && request.resource.data.createdBy == uid()
+            && request.resource.data.createdAt == request.time && request.resource.data.status == 'pending'
+            && request.resource.data.sheetId is string && request.resource.data.sheetId.matches('^[A-Za-z0-9_-]{3,128}$')
+            && request.resource.data.sheetTitle is string && request.resource.data.sheetTitle.size() <= 160
+            && request.resource.data.reason in ['Disponibilità','Attrezzatura','Difficoltà','Altro']
+            && request.resource.data.notes is string && request.resource.data.notes.size() > 0 && request.resource.data.notes.size() <= 1000;
+          allow update: if coach(gymId) && isAthleteOf(gymId, athleteId)
+            && resource.data.athleteId == athleteId
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedBy','updatedAt'])
+            && request.resource.data.updatedBy == uid() && request.resource.data.updatedAt == request.time
+            && ((resource.data.status == 'pending' && request.resource.data.status == 'working')
+               || (resource.data.status == 'working' && request.resource.data.status == 'completed'));
+          allow delete: if false;
+        }
+
+        match /checks/{checkId} {
+          // Metadati consultabili dall'atleta e dai Coach: foto NON rese visibili al Coach in questa V1.
+          allow get, list: if (inGym(gymId) && uid() == athleteId)
+            || coach(gymId);
+          allow create: if inGym(gymId)
+            && uid() == athleteId
+            && isAthleteOf(gymId, athleteId)
+            && request.resource.data.keys().hasOnly([
+              'schemaVersion','athleteId','performedOn','notes',
+              'createdBy','createdAt','photos'
+            ])
+            && request.resource.data.keys().hasAll([
+              'schemaVersion','athleteId','performedOn','notes',
+              'createdBy','createdAt','photos'
+            ])
+            && request.resource.data.schemaVersion == 1
+            && request.resource.data.athleteId == athleteId
+            && request.resource.data.createdBy == uid()
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.performedOn is string
+            && request.resource.data.performedOn.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+            && request.resource.data.notes is string
+            && request.resource.data.notes.size() <= 500
+            && request.resource.data.photos is list
+            && request.resource.data.photos.size() > 0
+            && request.resource.data.photos.size() <= 4;
+          allow update, delete: if false;
+        }
+
+        // PATCH 07 — Obiettivi: il Coach crea annotazioni; l'Atleta le legge.
+        match /goals/{goalId} {
+          allow get, list: if coach(gymId) || (inGym(gymId) && uid() == athleteId);
+          allow create: if coach(gymId)
+            && isAthleteOf(gymId, athleteId)
+            && request.resource.data.keys().hasOnly([
+              'schemaVersion','athleteId','title','notes','dueDate','status',
+              'createdBy','createdAt','updatedAt'
+            ])
+            && request.resource.data.keys().hasAll([
+              'schemaVersion','athleteId','title','notes','dueDate','status',
+              'createdBy','createdAt','updatedAt'
+            ])
+            && request.resource.data.schemaVersion == 1
+            && request.resource.data.athleteId == athleteId
+            && request.resource.data.createdBy == uid()
+            && request.resource.data.status == 'active'
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.updatedAt == request.time
+            && request.resource.data.title is string
+            && request.resource.data.title.size() > 0
+            && request.resource.data.title.size() <= 100
+            && request.resource.data.notes is string
+            && request.resource.data.notes.size() <= 1000
+            && request.resource.data.dueDate is string
+            && (request.resource.data.dueDate == '' ||
+                request.resource.data.dueDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$'));
+          allow update: if coach(gymId)
+            && isAthleteOf(gymId, athleteId)
+            && resource.data.status != 'archived'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+            && request.resource.data.status in ['active','reached','paused','archived']
+            && request.resource.data.updatedAt == request.time;
+          allow delete: if false; // Archivio logico, nessuna cancellazione fisica.
+        }
+
+      }
+
+      match /athlete_programs/{athleteId} {
+        allow read: if coach(gymId) || (inGym(gymId) && uid() == athleteId);
+        allow create, update: if coach(gymId) && isAthleteOf(gymId, athleteId);
+        allow delete: if false;
+        match /weeks/{weekId} {
+          allow read: if coach(gymId) || (inGym(gymId) && uid() == athleteId);
+          allow create, update: if coach(gymId) && isAthleteOf(gymId, athleteId);
+          allow delete: if owner(gymId) && isAthleteOf(gymId, athleteId) && isTrashedDocument();
+        }
+        match /personal_templates/{templateId} {
+          allow read: if coach(gymId) || (inGym(gymId) && uid() == athleteId);
+          allow create, update: if coach(gymId) && isAthleteOf(gymId, athleteId);
+          allow delete: if owner(gymId) && isAthleteOf(gymId, athleteId) && isTrashedDocument();
+        }
+        // Beta 0.27.7 - ARCHIVIO IMMUTABILE DELLE SOLE SCHEDE.
+        // Percorso: gyms/{gymId}/athlete_programs/{athleteId}/archive_templates/{archiveId}
+        // NON conserva settimane, giorni o calendari: una copia completa di title + exercises.
+        // La nuova app salva le copie con writeBatch al momento dell'assegnazione.
+        // Le copie antecedenti sono migrate manualmente dal coach.
+        // ATTENZIONE: le vecchie versioni client possono ancora creare personal_templates
+        // senza archivio; imporre il vincolo su create solo dopo averle aggiornate tutte.
+        match /archive_templates/{archiveId} {
+          // Solo il proprietario dell'archivio e i coach della sua palestra.
+          allow get, list: if coach(gymId) || (inGym(gymId) && uid() == athleteId);
+
+          // SOLO creazione da parte di un coach della palestra, con lo STESSO ID
+          // della scheda personale originale e copia verificata del contenuto.
+          // Il serverTimestamp() lato client deve produrre archivedAt == request.time.
+          allow create: if coach(gymId)
+            && isAthleteOf(gymId, athleteId)
+            && archiveId == request.resource.data.sourceTemplateId
+            && request.resource.data.keys().hasAll([
+              'sourceTemplateId','title','exercises','archiveVersion','archivedAt','archivedBy'
+            ])
+            && request.resource.data.keys().hasOnly([
+              'sourceTemplateId','title','exercises','archiveVersion','archivedAt','archivedBy'
+            ])
+            && request.resource.data.archiveVersion == 1
+            && request.resource.data.archivedBy == uid()
+            && request.resource.data.archivedAt == request.time
+            && request.resource.data.title is string
+            && request.resource.data.title.size() > 0
+            && request.resource.data.title.size() <= 200
+            && request.resource.data.exercises is list
+            && request.resource.data.exercises.size() > 0
+            && request.resource.data.exercises.size() <= 250
+            && existsAfter(athletePersonalTemplatePath(gymId, athleteId, archiveId))
+            && getAfter(athletePersonalTemplatePath(gymId, athleteId, archiveId)).data.title
+               == request.resource.data.title
+            && getAfter(athletePersonalTemplatePath(gymId, athleteId, archiveId)).data.exercises
+               == request.resource.data.exercises;
+
+          // Un backup gia' creato non puo' essere sovrascritto o eliminato
+          // dai client (nemmeno dal proprietario della palestra).
+          allow update, delete: if false;
+        }
+        // Beta 0.28.9: segnalibri permanenti di rimozione dalla SOLA vista dell'Archivio.
+        // Il documento archive_templates originale rimane intatto: non puo' essere
+        // distrutto dall'atleta. Una rimozione e' dunque permanente per la UI,
+        // ma non equivale a cancellare fisicamente il dato da Firestore.
+        // Non tentare di validare l'assenza di assegnazioni con una scansione
+        // delle weeks: le security rules non supportano ricerche arbitrarie.
+        match /archive_exclusions/{archiveId} {
+          // Solo il coach della stessa palestra e il proprietario atleta.
+          allow get, list: if coach(gymId) || (inGym(gymId) && uid() == athleteId);
+          allow create: if inGym(gymId)
+            && uid() == athleteId
+            && isAthleteOf(gymId, athleteId)
+            && exists(athleteArchiveTemplatePath(gymId, athleteId, archiveId))
+            && get(athleteArchiveTemplatePath(gymId, athleteId, archiveId)).data.sourceTemplateId == archiveId
+            && request.resource.data.keys().hasOnly(['sourceTemplateId','hiddenBy','hiddenAt'])
+            && request.resource.data.keys().hasAll(['sourceTemplateId','hiddenBy','hiddenAt'])
+            && request.resource.data.sourceTemplateId == archiveId
+            && request.resource.data.hiddenBy == uid()
+            && request.resource.data.hiddenAt == request.time;
+          // Il client non puo' recuperare o cancellare il marker.
+          allow update, delete: if false;
+        }
+      }
+    }
+
+    match /team_public/{userId} {
+      // Team visibile esclusivamente ai membri della stessa palestra.
+      // L'Admin V24.2 puo' sincronizzare SOLO i profili degli atleti della propria palestra.
+      function safeTeamData() {
+        return request.resource.data.keys().hasOnly(['gymId','role','name','surname','bio','photoURL'])
+          && request.resource.data.keys().hasAll(['gymId','role','name'])
+          && request.resource.data.role == 'athlete'
+          && request.resource.data.name is string
+          && request.resource.data.name.size() <= 90
+          && request.resource.data.gymId is string;
+      }
+      function teamWriterAllowed(gid) {
+        return signed() && isAthleteOf(gid,userId)
+          && (coach(gid) || (isSelf(userId) && inGym(gid)));
+      }
+      allow get, list: if signed() && inGym(resource.data.gymId)
+        && resource.data.role == 'athlete';
+      allow create: if safeTeamData()
+        && teamWriterAllowed(request.resource.data.gymId);
+      allow update: if safeTeamData()
+        && request.resource.data.gymId == resource.data.gymId
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['name','surname','bio','photoURL'])
+        && teamWriterAllowed(resource.data.gymId);
+      allow delete: if false;
+    }
+
+    // Catalogo legacy, sola lettura autenticata; nessuna scrittura pubblica.
+    match /exercises/{exerciseId} { allow read: if signed(); allow write: if false; }
+    match /templates/{templateId} { allow read, write: if false; }
+    match /exercise_videos/{videoId} { allow read, write: if false; }
+    match /athlete_programs/{athleteId}/{document=**} { allow read, write: if false; }
+  }
+}

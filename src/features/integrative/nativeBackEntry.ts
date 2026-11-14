@@ -27,6 +27,8 @@ void router.isReady().then(async()=>{
 
 async function goToPrevious(nav:Router):Promise<boolean>{
  if(navigating)return true
+ // A mounted page may own nested screens that are not router entries.
+ if(!window.dispatchEvent(new Event('lionfit:local-back',{cancelable:true})))return true
  const current=nav.currentRoute.value
  const currentScope=sessionScope()==='none'?history.currentScope():sessionScope()
  const root=appRoot(current.path,current.fullPath,currentScope)
