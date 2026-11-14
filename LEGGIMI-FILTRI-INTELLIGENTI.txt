@@ -1,0 +1,9 @@
+LIONFIT - MICRO PATCH 18 - FILTRI INTELLIGENTI
+Incrementale dopo la micro patch Libreria Schermo Intero del 14/11/2026.
+Estrarre nella root LionFit-Modern-Git, sovrascrivendo i file.
+Non modifica catalogo, dati Firestore, ID o Cloud Functions.
+Test da CMD nella root:
+node --experimental-strip-types --test tests/patch18-library-groups.unit.mjs tests/patch18-library-selection.unit.mjs tests/patch18a-day-sheet.unit.mjs tests/patch11-programs.unit.mjs tests/patch12-workouts.unit.mjs
+npm run typecheck
+La categoria Altro appare solo per esercizi non classificabili. Ogni esercizio appartiene a un solo gruppo principale, con fallback per parte del corpo.
+Verificare in anteprima sia la libreria normale sia il selettore nella scheda.

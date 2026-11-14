@@ -373,10 +373,12 @@ onUnmounted(()=>{live=false;closeListeners()})
        <label>Serie (vuoto = come originale)<input v-model="alt.sets"/></label><label>Ripetizioni (vuoto = come originale)<input v-model="alt.reps"/></label><label>Carico<input v-model="alt.load"/></label><label>Recupero<input v-model="alt.rest"/></label><label>Note<input v-model="alt.notes"/></label>
        <button type="button" class="secondary" @click="exercises[index].alternatives?.splice(ai,1)">Rimuovi alternativa</button>
       </div></details>
-     <button v-if="(exercises[index].alternatives?.length||0)<2" type="button" class="lf-superset-add lf-alt-add lf-editor-disambiguation" @click="exercises[index].alternatives=[...(exercises[index].alternatives||[]),blankAlternative()]">＋ Alternativa</button>
+     <div v-if="(part===0 && group.secondaryIndex===null && availableMax>0)||(exercises[index].alternatives?.length||0)<2" class="lf-editor-row-actions lf-editor-disambiguation">
+      <button v-if="part===0 && group.secondaryIndex===null && availableMax>0" type="button" class="lf-superset-add" @click="addLinkedSuperset(exercises[group.primaryIndex])">{{uiText("＋ Aggiungi superset")}}</button>
+      <button v-if="(exercises[index].alternatives?.length||0)<2" type="button" class="lf-superset-add lf-alt-add" @click="exercises[index].alternatives=[...(exercises[index].alternatives||[]),blankAlternative()]">＋ Alternativa</button>
+     </div>
      <label v-if="part===1" class="lf-editor-pair-rest">{{uiText("Recupero dopo la coppia")}}<input v-model="exercises[index].supersetRest" placeholder="Es. 90 sec"/></label>
     </div>
-    <button v-if="group.secondaryIndex===null && availableMax>0" type="button" class="lf-superset-add" @click="addLinkedSuperset(exercises[group.primaryIndex])">{{uiText("＋ Aggiungi superset")}}</button>
    </div>
   </div>
   <p v-if="!exerciseGroups.length" class="muted small">{{uiText("Imposta il numero di esercizi principali per iniziare.")}}</p>
@@ -460,7 +462,12 @@ onUnmounted(()=>{live=false;closeListeners()})
 .lf-inline-library{display:flex;align-items:center;gap:3px;min-width:0;height:35px;margin-top:5px;border:1px solid var(--border);border-radius:8px;background:var(--field);padding:2px}
 .lf-editor-panel .lf-inline-library input{flex:1;width:0;min-width:0;height:29px;min-height:29px;margin:0;border:0;background:transparent;padding:3px 5px;font-size:12px}
 .lf-open-library{flex:none;min-height:27px;padding:3px 5px;border:0;border-radius:6px;background:var(--green,#15803d);color:#fff;font-size:10px;font-weight:800;white-space:nowrap}
-.lf-alt-add{margin:0;justify-self:start}
+/* Micro UX: stessi pulsanti, affiancati; ogni alternativa resta legata alla propria riga. */
+.lf-editor-row-actions{display:flex;align-items:center;flex-wrap:wrap;gap:6px;min-width:0;justify-self:stretch}
+.lf-editor-row-actions .lf-superset-add{margin:0;white-space:nowrap}
+/* Solo il campo nome esercizio (anche alternativa/superset): niente cornice verde. */
+.lf-editor-panel .lf-inline-library input:focus,.lf-editor-panel .lf-inline-library input:focus-visible{outline:none!important;box-shadow:none!important;border-color:transparent!important}
+.lf-editor-panel .lf-inline-library input:focus-visible{box-shadow:inset 0 -1px 0 var(--muted)!important}
 .lf-editor-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:15px;padding-top:12px;border-top:1px solid var(--border)}
 .lf-editor-actions button{min-height:37px}
 @media(max-width:1100px){.lf-exercise-editor{grid-template-columns:48px minmax(145px,2fr) repeat(2,minmax(60px,.6fr)) minmax(80px,1fr) 28px}.lf-editor-rest{grid-column:2 / -2}.lf-editor-disambiguation,.lf-editor-pair-rest{grid-column:2 / -2}}
