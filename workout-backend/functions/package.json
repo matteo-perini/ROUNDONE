@@ -1,0 +1,16 @@
+{
+  "name": "lionfit-workout",
+  "private": true,
+  "type": "module",
+  "main": "index.mjs",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "test": "node --test model.test.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.1",
+    "firebase-functions": "^7.0.0"
+  }
+}

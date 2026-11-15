@@ -1,7 +1,7 @@
 /** LionFit Progressi 360: pure helpers; no writes to legacy sheets. */
 import type {ExerciseRecord,Personal} from '../sheets/domain'
 import type {HistoricalArchive} from '../athletes/labArchive'
-export type WorkoutSet = {kg:number|null;reps:number|null;position?:number}
+export type WorkoutSet = {kg:number|null;reps:number|null;position?:number;editIndex?:number}
 export type RecordedExercise = {key:string;name:string;plannedSets:string;plannedReps:string;skipped:boolean;sets:WorkoutSet[];plannedKey?:string}
 export type ProgressSession = {id:string;athleteId:string;sheetId:string;sheetTitle:string;performedOn:string;createdBy:string;exercises:RecordedExercise[];createdAt?:unknown;corrections?:WorkoutCorrection[]}
 export type WorkoutCorrection={exerciseIndex:number;setIndex:number;previous:WorkoutSet;next:WorkoutSet;author:string;at:string}
@@ -94,7 +94,7 @@ export function sheetPerformanceTimeline(sessions:readonly ProgressSession[],she
 }
 
 /** Old records compressed empty rows: never infer their original set position. */
-export function setLabel(s:WorkoutSet,index:number){return s.position===undefined?`Voce ${index+1}`:`Serie ${s.position}`}
+export function setLabel(s:WorkoutSet,index:number){return s.position===undefined?`Voce ${(s.editIndex??index)+1}`:`Serie ${s.position}`}
 export function historySheets(sessions:readonly ProgressSession[]){const m=new Map<string,string>();for(const s of sessions)if(!m.has(s.sheetId))m.set(s.sheetId,s.sheetTitle);return [...m].map(([id,title])=>({id,title}))}
 export function historyExercises(sessions:readonly ProgressSession[],sheetId:string){const m=new Map<string,string>();for(const s of sessions)if(s.sheetId===sheetId)for(const e of s.exercises)if(!m.has(historyExerciseKey(e)))m.set(historyExerciseKey(e),e.name);return [...m].map(([key,name])=>({key,name}))}
 export function lastSet(sessions:readonly ProgressSession[],key:string,index:number,date:string,name?:string){
@@ -118,7 +118,47 @@ export type CorrectionHead={id:string;sessionId:string;exerciseIndex:number;setI
 export function correctionValues(s:WorkoutSet):CorrectionValues{return {kg:s.kg,reps:s.reps}}
 export function sameValues(a:CorrectionValues,b:CorrectionValues){return a.kg===b.kg&&a.reps===b.reps}
 function correctionDate(at:unknown):string{if(typeof at==='string')return at;const t=at as {toDate?:()=>Date}|null;return t?.toDate?.().toISOString()||''}
+/** The original set offset is immutable; additions use separate slots 30–59.
+ * Removed rows never enter the effective session, charts, or report. */
+export function hasWorkoutValues(v:CorrectionValues){return v.kg!==null||v.reps!==null}
+export function validWorkoutValues(v:CorrectionValues){return (v.kg===null||(Number.isFinite(v.kg)&&v.kg>=0&&v.kg<=2000))&&(v.reps===null||(Number.isInteger(v.reps)&&v.reps>=1&&v.reps<=300))}
+export const EMPTY_WORKOUT_VALUES:CorrectionValues={kg:null,reps:null}
+export function workoutSlot(ex:RecordedExercise,index:number):WorkoutSet|null{
+ if(!Number.isInteger(index)||index<0||index>=60)return null
+ if(index<30)return ex.sets[index]||null
+ const position=index-29
+ if(ex.sets.some(s=>s.position===position))return null // never duplicate an original known position
+ return {...EMPTY_WORKOUT_VALUES,position}
+}
+export function availableWorkoutSlots(original:ProgressSession,heads:readonly CorrectionHead[],exerciseIndex:number){
+ const ex=original.exercises[exerciseIndex];if(!ex)return []
+ const relevant=new Map(heads.filter(h=>h.sessionId===original.id&&h.exerciseIndex===exerciseIndex).map(h=>[h.setIndex,h.latest.next]))
+ const active=Array.from({length:60},(_,i)=>i).filter(i=>{const initial=workoutSlot(ex,i);return initial&&hasWorkoutValues(relevant.get(i)||initial)}).length
+ if(active>=30)return []
+ const result:{index:number;label:string}[]=[]
+ for(let i=0;i<60;i++){
+  const initial=workoutSlot(ex,i);if(!initial||hasWorkoutValues(relevant.get(i)||initial))continue
+  result.push({index:i,label:initial.position===undefined?`Voce ${i+1} (ripristina)`:`Serie ${initial.position}`})
+ }
+ return result.sort((a,b)=>(workoutSlot(ex,a.index)?.position??100+a.index)-(workoutSlot(ex,b.index)?.position??100+b.index))
+}
 export function applyCorrectionHeads(sessions:readonly ProgressSession[],heads:readonly CorrectionHead[]):ProgressSession[]{
  const bySession=new Map<string,CorrectionHead[]>();for(const h of heads){const arr=bySession.get(h.sessionId)||[];arr.push(h);bySession.set(h.sessionId,arr)}
- return sessions.map(s=>{const entries=bySession.get(s.id);if(!entries?.length)return s;const exercises=s.exercises.map(e=>({...e,sets:e.sets.map(r=>({...r}))}));const corrections:WorkoutCorrection[]=[];for(const h of entries){const row=exercises[h.exerciseIndex]?.sets[h.setIndex];if(!row||!h.latest)continue;const initial={...row};Object.assign(row,h.latest.next);for(const ev of [...(h.history||[]),h.latest])corrections.push({exerciseIndex:h.exerciseIndex,setIndex:h.setIndex,previous:{...initial,...ev.previous},next:{...initial,...ev.next},author:ev.author,at:correctionDate(ev.at)})}return {...s,exercises,corrections:corrections.sort((a,b)=>a.at.localeCompare(b.at))}})
+ return sessions.map(s=>{
+  const entries=bySession.get(s.id);if(!entries?.length)return s;const corrections:WorkoutCorrection[]=[]
+  const exercises=s.exercises.map((e,ei)=>{
+   const relevant=new Map(entries.filter(h=>h.exerciseIndex===ei).map(h=>[h.setIndex,h]));const sets:WorkoutSet[]=[]
+   const indices=[...e.sets.keys(),...[...relevant.keys()].filter(i=>i>=30).sort((a,b)=>a-b)]
+   for(const i of indices){
+    const initial=workoutSlot(e,i);if(!initial)continue
+    const h=relevant.get(i),row={...initial,...(h?.latest?.next||{}),editIndex:i}
+    if(hasWorkoutValues(row))sets.push(row)
+    if(h?.latest)for(const ev of [...(h.history||[]),h.latest])corrections.push({exerciseIndex:ei,setIndex:i,previous:{...initial,...ev.previous},next:{...initial,...ev.next},author:ev.author,at:correctionDate(ev.at)})
+   }
+   // Legacy entries have no known ordinal: keep their original order, then explicit positions.
+   sets.sort((a,b)=>(a.position??0)-(b.position??0)||((a.editIndex??0)-(b.editIndex??0)))
+   return {...e,skipped:e.skipped&&!sets.length,sets}
+  })
+  return {...s,exercises,corrections:corrections.sort((a,b)=>a.at.localeCompare(b.at))}
+ })
 }

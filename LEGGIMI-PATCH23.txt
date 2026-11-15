@@ -1,9 +1,0 @@
-LIONFIT PATCH 23 – Profilo e Impostazioni Atleta (mobile)
-Prerequisiti: PATCH 21 R3 e PATCH 22 R3 già estratte.
-- Profilo mobile: intestazione essenziale, avatar circolare, card misura compatte, Modifica profilo a tutta larghezza; una sola voce Impostazioni nel contenuto profilo e collegamento Allenamenti mantenuto.
-- Impostazioni mobile: righe compatte, lingua con etichetta corretta, nessuna unità di misura non interattiva. Tutti i comandi esistenti e le condizioni di ruolo restano intatti. La voce Modifica profilo nelle impostazioni resta operativa.
-- Layout desktop e coach non modificato, salvo la correzione del testo della lingua e traduzioni.
-- Nessuna modifica a Firebase, account o regole; nessuna nuova dipendenza; nessuna modifica al codice di versione Android.
-- Estrai sopra la cartella del progetto. Esegui npm run typecheck e node --experimental-strip-types --test tests/patch23-athlete-profile.unit.mjs tests/patch21-r3-bell.unit.mjs tests/patch22-multisport.unit.mjs
-- Verificato qui: typecheck e 43 test unitari/regressione, CSS su markup dimostrativo Chromium 320,360,390,430 px, chiaro/scuro. Non è un collaudo autenticato o Android reale.
-- Dopo il controllo, build web e sincronizzazione Android con la procedura abituale. Incrementa versionCode rispetto all'ultima APK pubblicata e usa lo stesso applicationId e firma. Verifica che i nuovi sorgenti siano realmente inclusi nella build.
