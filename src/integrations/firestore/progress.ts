@@ -1,5 +1,6 @@
 /** Progressi data isolated from worksheets. Backend Rules must be installed separately. */
-import {collection,doc,onSnapshot,query,limit,orderBy,serverTimestamp,setDoc,updateDoc,runTransaction,deleteDoc,type Firestore,type Unsubscribe} from 'firebase/firestore'
+import {collection,doc,onSnapshot,query,limit,orderBy,serverTimestamp,setDoc,updateDoc,runTransaction,deleteDoc,type Firestore,type Unsubscribe,type QueryDocumentSnapshot} from 'firebase/firestore'
+import {createSnapshotProjection} from './snapshotProjection'
 import {getApp} from 'firebase/app'
 import {getAuth} from 'firebase/auth'
 import {getFunctions,httpsCallable} from 'firebase/functions'
@@ -23,7 +24,7 @@ export const checkCollection=(db:Firestore,gym:string,athlete:string)=>collectio
 /** Obiettivi del Coach: append-only + cambi di stato, nessuna cancellazione fisica. */
 export const goalCollection=(db:Firestore,gym:string,athlete:string)=>collection(root(db,gym,athlete),'goals')
 export function watchGoals(db:Firestore,gym:string,athlete:string,cb:(rows:ProgressGoal[])=>void,err:(e:Error)=>void):Unsubscribe{
- return onSnapshot(query(goalCollection(db,gym,athlete),orderBy('createdAt','desc'),limit(150)),snap=>cb(snap.docs.map(d=>({id:d.id,...d.data()} as ProgressGoal))),err)
+ const project=createSnapshotProjection((d:QueryDocumentSnapshot)=>({id:d.id,...d.data()} as ProgressGoal));return onSnapshot(query(goalCollection(db,gym,athlete),orderBy('createdAt','desc'),limit(150)),snap=>cb(project(snap)),err)
 }
 export async function addGoal(db:Firestore,gym:string,athlete:string,input:GoalInput,coachUid:string){
  if(!coachUid||coachUid===athlete)throw new Error('Solo il Coach può assegnare un obiettivo.')
@@ -38,10 +39,10 @@ export async function setGoalStatus(db:Firestore,gym:string,athlete:string,goalI
  await updateDoc(doc(goalCollection(db,gym,athlete),segment(goalId)),{status,updatedAt:serverTimestamp()})
 }
 export function watchProgress(db:Firestore,gym:string,athlete:string,cb:(rows:ProgressSession[])=>void,err:(e:Error)=>void,count=250):Unsubscribe{
- return onSnapshot(query(sessionCollection(db,gym,athlete),orderBy('performedOn','desc'),limit(count)),snap=>cb(snap.docs.map(d=>({id:d.id,...d.data()} as ProgressSession))),err)
+ const project=createSnapshotProjection((d:QueryDocumentSnapshot)=>({id:d.id,...d.data()} as ProgressSession));return onSnapshot(query(sessionCollection(db,gym,athlete),orderBy('performedOn','desc'),limit(count)),snap=>cb(project(snap)),err)
 }
 export function watchChecks(db:Firestore,gym:string,athlete:string,cb:(rows:ProgressCheck[])=>void,err:(e:Error)=>void):Unsubscribe{
- return onSnapshot(query(checkCollection(db,gym,athlete),orderBy('performedOn','desc'),limit(80)),snap=>cb(snap.docs.map(d=>({id:d.id,...d.data()} as ProgressCheck))),err)
+ const project=createSnapshotProjection((d:QueryDocumentSnapshot)=>({id:d.id,...d.data()} as ProgressCheck));return onSnapshot(query(checkCollection(db,gym,athlete),orderBy('performedOn','desc'),limit(80)),snap=>cb(project(snap)),err)
 }
 export async function recordSession(db:Firestore,gym:string,athlete:string,sheet:{id:string;title:string},date:string,entries:readonly RecordedExercise[],actor:string,requestId?:string){
  const id=requestId?segment(requestId):doc(sessionCollection(db,gym,athlete)).id
@@ -87,7 +88,7 @@ export async function removeStagedPhoto(storagePath:string):Promise<void>{
 
 /** Original sessions stay immutable. One overlay per set; previous heads are appended verbatim. */
 const correctionCollection=(db:Firestore,gym:string,athlete:string)=>collection(root(db,gym,athlete),'session_corrections')
-export function watchCorrectionHeads(db:Firestore,gym:string,athlete:string,cb:(rows:CorrectionHead[])=>void,err:(e:Error)=>void){return onSnapshot(correctionCollection(db,gym,athlete),snap=>cb(snap.docs.map(d=>({...d.data(),id:d.id} as CorrectionHead))),err)}
+export function watchCorrectionHeads(db:Firestore,gym:string,athlete:string,cb:(rows:CorrectionHead[])=>void,err:(e:Error)=>void){const project=createSnapshotProjection((d:QueryDocumentSnapshot)=>({...d.data(),id:d.id} as CorrectionHead));return onSnapshot(correctionCollection(db,gym,athlete),snap=>cb(project(snap)),err)}
 const deletionRef=(db:Firestore,gym:string,athlete:string,id:string)=>doc(root(db,gym,athlete),'session_deletions',segment(id))
 /** Server-authorized permanent deletion, including all correction heads. */
 export async function deleteWorkout(db:Firestore,gym:string,athlete:string,sessionId:string,actor:string){
@@ -119,7 +120,7 @@ export async function correctWorkout(db:Firestore,gym:string,athlete:string,sess
 export type RevisionStatus='pending'|'working'|'completed'
 export type ProgramRevision={id:string;athleteId:string;sheetId:string;sheetTitle:string;reason:string;notes:string;status:RevisionStatus;createdBy:string;createdAt?:unknown;updatedAt?:unknown;updatedBy?:string}
 const revisionCollection=(db:Firestore,gym:string,athlete:string)=>collection(root(db,gym,athlete),'revision_requests')
-export function watchRevisions(db:Firestore,gym:string,athlete:string,cb:(r:ProgramRevision[])=>void,err:(e:Error)=>void){return onSnapshot(query(revisionCollection(db,gym,athlete),orderBy('createdAt','desc'),limit(100)),snap=>cb(snap.docs.map(d=>({...d.data(),id:d.id} as ProgramRevision))),err)}
+export function watchRevisions(db:Firestore,gym:string,athlete:string,cb:(r:ProgramRevision[])=>void,err:(e:Error)=>void){const project=createSnapshotProjection((d:QueryDocumentSnapshot)=>({...d.data(),id:d.id} as ProgramRevision));return onSnapshot(query(revisionCollection(db,gym,athlete),orderBy('createdAt','desc'),limit(100)),snap=>cb(project(snap)),err)}
 export async function requestRevision(db:Firestore,gym:string,athlete:string,sheet:{id:string;title:string},reason:string,notes:string,actor:string){
  if(actor!==athlete)throw new Error('Richiesta riservata all’Atleta.')
  if(!['Disponibilità','Attrezzatura','Difficoltà','Altro'].includes(reason)||notes.trim().length<1||notes.trim().length>1000)throw new Error('Indica motivo e descrizione (massimo 1000 caratteri).')

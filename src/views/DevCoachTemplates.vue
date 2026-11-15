@@ -12,7 +12,7 @@ import {getLocalEmulatorClients} from '../integrations/firebase/emulatorClient'
 import {labCoachRoster,maySelectLabAthlete,type RosterAthlete} from '../features/athletes/coachRoster'
 import {verifyCoachEditor,editableModel} from '../features/coach/coachOperationalPolicy'
 import {createCoachModel,createCoachPersonal,duplicateCoachModel,updateCoachModel} from '../integrations/firestore/coachOperations'
-import {assignShared,restoreFromTrash,trashShared,watchAthleteSheets} from '../integrations/firestore/sheets'
+import {assignShared,restoreFromTrash,trashShared,watchPersonalSheets} from '../integrations/firestore/sheets'
 import {editorToV1,v1ToEditor} from '../features/sheets/v1ExerciseCodec'
 import {supersetView} from '../features/sheets/supersetView'
 import {loadCatalog,rankedExercises,searchKey,type CatalogExercise} from '../features/exercises/catalog'
@@ -48,7 +48,7 @@ function resetConsent(){consent.value=false}
 watch(athleteId,()=>{resetConsent();stopPersonal?.();stopPersonal=null;personal.value=[]
  if(!session.value||!maySelectLabAthlete(roster.value,session.value.gymId,athleteId.value))return
  const {db}=getLocalEmulatorClients(),s=session.value,id=athleteId.value
- stopPersonal=watchAthleteSheets(db,s.gymId,id,sheets=>{if(live && athleteId.value===id)personal.value=sheets.personal},e=>{if(live)error.value=`Schede personali non leggibili: ${e.message}`})
+ stopPersonal=watchPersonalSheets(db,s.gymId,id,sheets=>{if(live && athleteId.value===id)personal.value=sheets},e=>{if(live)error.value=`Schede personali non leggibili: ${e.message}`})
 })
 function beginPersonal(){isPersonal.value=true;editing.value=true;editingId.value='';revision.value=0;title.value='';category.value='Personalizzata';exercises.value=[];notice.value='';resetConsent()}
 function beginModel(){isPersonal.value=false;editing.value=true;editingId.value='';revision.value=0;title.value='';category.value='Allenamento';exercises.value=[];notice.value='';resetConsent()}

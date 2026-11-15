@@ -11,7 +11,7 @@ import {getStagingClients} from '../integrations/firebase/stagingClient'
 import {labCoachRoster,maySelectLabAthlete,type RosterAthlete} from '../features/athletes/liveCoachRoster'
 import {verifyCoachEditor,verifyCoachArchiveEditor,canManageCoachModel} from '../features/coach/liveCoachPolicy'
 import {createCoachModel,createCoachModelForDay,createCoachPersonal,updateCoachModel,updateCoachPersonal} from '../integrations/firestore/liveCoachOperations'
-import {assignShared,assignSharedToDay,restoreFromTrash,trashShared,watchAthleteSheets} from '../integrations/firestore/sheets'
+import {assignShared,assignSharedToDay,restoreFromTrash,trashShared,watchPersonalSheets} from '../integrations/firestore/sheets'
 import {updateV1WeekSlot} from '../integrations/firestore/liveWeekSlots'
 import {belongsToCoach,hasCoachAssignment,type CoachRosterFilter} from '../features/athletes/coachMembership'
 import {blankAlternative} from '../features/sheets/approvedAlternatives'
@@ -146,13 +146,13 @@ const closeListeners=()=>{stopModels?.();stopModels=null;stopUsers?.();stopUsers
 watch(()=>currentAthlete.value?.id||'',id=>{stopPersonal?.();stopPersonal=null;personal.value=[]
  if(!session.value||!maySelectLabAthlete(roster.value,session.value.gymId,id))return
  const {db}=getStagingClients(),s=session.value
- stopPersonal=watchAthleteSheets(db,s.gymId,id,sheets=>{if(live && currentAthlete.value?.id===id)personal.value=sheets.personal},e=>{if(live)error.value=`Schede personali non leggibili: ${e.message}`})
+ stopPersonal=watchPersonalSheets(db,s.gymId,id,sheets=>{if(live && currentAthlete.value?.id===id)personal.value=sheets},e=>{if(live)error.value=`Schede personali non leggibili: ${e.message}`})
 })
 function beginPersonal(){isPersonal.value=true;personalEdit.value=false;editing.value=true;editingId.value='';revision.value=0;title.value='';category.value='Personalizzata';exercises.value=[];alignCount();notice.value=''}
 function beginEditPersonal(sheet:Personal){
  if(!session.value||!currentAthlete.value||sheet.athleteId!==currentAthlete.value.id||sheet.deletedAt)return
  isPersonal.value=true;personalEdit.value=true;editing.value=true;editingId.value=sheet.id;
- // Legacy personal records have no revision; watchAthleteSheets exposes it when present.
+ // Legacy personal records have no revision; watchPersonalSheets exposes it when present.
  revision.value=Number((sheet as Personal & {revision?:number}).revision||0)
  title.value=sheet.title;category.value=sheet.category;exercises.value=v1ToEditor(sheet.exercises);alignCount();notice.value='La copia storica non viene mai modificata.'
 }

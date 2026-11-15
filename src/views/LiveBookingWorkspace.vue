@@ -30,6 +30,7 @@ import {
 import {mayWriteLive} from '../integrations/firebase/stagingConfig'
 import {reservationQueryPredicates,canListPrivateCoachProfiles} from '../features/security/phase1QueryScope'
 import {athleteSlotMonthWindow} from '../features/bookings/monthQueryWindow'
+import {createBoundedLookup} from '../features/bookings/boundedLookup'
 const router=useRouter(),route=useRoute(),lab=useLabStore()
 const status=ref<'loading'|'ready'|'error'>('loading'),message=ref('Verifica account reale…')
 const session=ref<StagingSession|null>(null)
@@ -39,7 +40,15 @@ const coachRoster=ref<{id:string;name:string}[]>([])
 const availabilityProgress=ref(''),availabilityFeedback=ref('')
 const calendarWarning=ref(''),availabilityWarning=ref(''),nowMs=ref(Date.now())
 let clockTimer:ReturnType<typeof setInterval>|null=null
-const namesPending=new Set<string>()
+let lookupClosed=false
+const nameLookup=createBoundedLookup<string>(4,async id=>{
+ const s=session.value;if(!alive||lookupClosed||!s||s.role==='atleta'||names.value[id])return
+ const {db,auth}=getStagingClients(),gid=s.gymId
+ if(auth.currentUser?.uid!==s.uid)return
+ const r=await getDocFromServer(doc(db,'users',id))
+ if(alive&&!lookupClosed&&session.value?.uid===s.uid&&session.value?.gymId===gid&&auth.currentUser?.uid===s.uid&&r.exists()&&r.data().gymId===gid)
+  names.value={...names.value,[id]:[r.data().name,r.data().surname].filter(Boolean).join(' ')||'Atleta'}
+})
 const selectedDate=ref(romeParts(Date.now()).date),month=ref(selectedDate.value.slice(0,7))
 const service=ref<Service>('fighter'),chosenCoach=ref(''),discipline=ref('MMA'),chosenStart=ref<number|null>(null)
 const athleteTab=ref<AthleteAgendaScreen>('agenda'),coachTab=ref<'calendario'|'disponibilita'|'competizioni'>('calendario')
@@ -203,7 +212,7 @@ function canRemove(b:LiveReservation){
  return canCancel({role:s.role==='atleta'?'athlete':s.role==='titolare'?'owner':'coach',uid:s.uid,gymId:s.gymId},
   b,bookingGym,configs.value.find(c=>c.coachId===b.coachId)?.cancelHours??12,nowMs.value)
 }
-function close(){clearCompetitionData();stops.forEach(stop=>stop());stops=[];reservationStop?.();reservationStop=null;slotStop?.();slotStop=null}
+function close(){lookupClosed=true;nameLookup.close();clearCompetitionData();stops.forEach(stop=>stop());stops=[];reservationStop?.();reservationStop=null;slotStop?.();slotStop=null}
 function localMonthWindow():{from:number;to:number}{
  // Mese visibile con margine 8 giorni per settimane al confine e ora legale.
  const first=Date.parse(month.value+'-01T00:00:00Z')
@@ -227,7 +236,7 @@ function listenReservations(){
   if(!alive)return
   calendarWarning.value='';rowsLoading.value=false
   allRows.value=snap.docs.map(d=>toReservation(d.id,d.data())).filter((b):b is LiveReservation=>!!b)
-  snapshots.value++;void resolveNames(db,allRows.value)
+  snapshots.value++;resolveNames(allRows.value)
  },e=>{if(alive){rowsLoading.value=false;allRows.value=[];calendarWarning.value='Prenotazioni non aggiornate: '+e.message}})
 }
 function listenSlots(){
@@ -246,15 +255,9 @@ function listenSlots(){
   snapshots.value++
  },e=>{if(alive)availabilityWarning.value='Slot non aggiornati: '+e.message})
 }
-async function resolveNames(db:ReturnType<typeof getStagingClients>['db'],rows:LiveReservation[]){
- if(!isCoach.value)return
- for(const id of [...new Set(rows.map(b=>b.athleteId))]){
-  if(!alive||names.value[id]||namesPending.has(id))continue
-  namesPending.add(id)
-  try{const r=await getDocFromServer(doc(db,'users',id));if(alive&&r.exists()&&r.data().gymId===bookingGym)
-    names.value={...names.value,[id]:[r.data().name,r.data().surname].filter(Boolean).join(' ')||'Atleta'}}catch{ /* Nessuna esposizione di altri profili. */ }
-  finally{namesPending.delete(id)}
- }
+function resolveNames(rows:LiveReservation[]){
+ if(!isCoach.value||lookupClosed)return
+ nameLookup.add(rows.map(b=>b.athleteId).filter(id=>!names.value[id]))
 }
 onMounted(async()=>{
  clockTimer=setInterval(()=>{nowMs.value=Date.now()},60_000)

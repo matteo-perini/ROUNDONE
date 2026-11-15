@@ -1,0 +1,20 @@
+LIONFIT — PATCH 28 R1: FIREBASE / ULTRA PERFORMANCE
+Data: 15 novembre 2026
+Base: LionFit-Modern-Git(7).zip + PATCH24 definitiva/R2 + PATCH25/R2 + PATCH26 + PATCH27 R2.
+Requisito: installare PATCH 27 R2 prima di questa patch. Non sovrascrivere eventuali modifiche locali agli stessi file senza confronto.
+
+INSTALLAZIONE
+Estrarre nella cartella principale LionFit-Modern-Git, sovrascrivendo i file richiesti. Non cambiare le variabili locali e non applicare altre Rules.
+CMD nella cartella principale:
+  npm run typecheck
+  node --experimental-strip-types --test tests/patch28-performance.unit.mjs tests/patch18-identity.unit.mjs
+  (poi lo script abituale di preparazione docs, con la configurazione production locale già in uso)
+Nessuna nuova dipendenza, Cloud Function, migrazione dati o modifica delle Rules. Non distribuire nuove funzioni per questa patch.
+
+RISULTATI LOCALI
+- TypeScript --noEmit: exit 0.
+- Suite unit su src e model/report Work e Workout backend: 305 test / 305 pass, 0 fail.
+- Suite mirata precedente all'ultimo controllo complessivo: 15/15.
+- Regole Firestore R2: file security e fixture emulator identici al TXT R2 consegnato in precedenza; non modificati.
+- Build Vite tentata, bloccata dal modulo nativo @rollup/rollup-linux-x64-gnu assente nelle dipendenze Windows del progetto. Nessun risultato build reale. Fare la build sul PC originale. Non rimuovere il lockfile.
+- Emulator non rieseguito in questa sessione: Rules invariate. Il precedente test R2 dell'utente risultava 26/26; i test foto Storage online non sono riprodotti qui.

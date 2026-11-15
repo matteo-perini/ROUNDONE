@@ -146,8 +146,11 @@ export function applyCorrectionHeads(sessions:readonly ProgressSession[],heads:r
  const bySession=new Map<string,CorrectionHead[]>();for(const h of heads){const arr=bySession.get(h.sessionId)||[];arr.push(h);bySession.set(h.sessionId,arr)}
  return sessions.map(s=>{
   const entries=bySession.get(s.id);if(!entries?.length)return s;const corrections:WorkoutCorrection[]=[]
+  // Index once per session instead of scanning the same heads for every exercise.
+  const byExercise=new Map<number,Map<number,CorrectionHead>>()
+  for(const h of entries){let rows=byExercise.get(h.exerciseIndex);if(!rows){rows=new Map();byExercise.set(h.exerciseIndex,rows)}rows.set(h.setIndex,h)}
   const exercises=s.exercises.map((e,ei)=>{
-   const relevant=new Map(entries.filter(h=>h.exerciseIndex===ei).map(h=>[h.setIndex,h]));const sets:WorkoutSet[]=[]
+   const relevant=byExercise.get(ei)||new Map<number,CorrectionHead>();const sets:WorkoutSet[]=[]
    const indices=[...e.sets.keys(),...[...relevant.keys()].filter(i=>i>=30).sort((a,b)=>a-b)]
    for(const i of indices){
     const initial=workoutSlot(e,i);if(!initial)continue

@@ -29,8 +29,10 @@ const route=useRoute()
 const context=shallowRef<StagingSession|null>(null)
 const athleteId=ref(''),athletes=ref<Array<{id:string;name:string}>>([]),loading=ref(true),error=ref(''),writeError=ref(''),notice=ref('')
 const sheetData=shallowRef<{personal:Personal[];weeks:ProgramWeek[];groups:Groups}|null>(null)
-const archived=ref<HistoricalArchive[]>([]),rawSessions=ref<ProgressSession[]>([]),checks=ref<ProgressCheck[]>([]),goals=ref<ProgressGoal[]>([])
-const correctionHeads=ref<CorrectionHead[]>([]),correctionReady=ref(false),correctionError=ref('')
+const archived=shallowRef<HistoricalArchive[]>([]),rawSessions=shallowRef<ProgressSession[]>([]),checks=shallowRef<ProgressCheck[]>([]),goals=shallowRef<ProgressGoal[]>([])
+const checksState=ref<'idle'|'loading'|'ready'|'error'>('idle'),goalsState=ref<'idle'|'loading'|'ready'|'error'>('idle')
+let childEpoch=0,checksStarted=false,shareStarted=false,goalsStarted=false
+const correctionHeads=shallowRef<CorrectionHead[]>([]),correctionReady=ref(false),correctionError=ref('')
 const sessions=computed(()=>applyCorrectionHeads(rawSessions.value,correctionHeads.value))
 const tab=ref<'home'|'history'|'record'|'check'|'goals'|'trend'|'report'|'review'|'multisport'>('home'),sheetFilter=ref<'all'|'programmed'|'unprogrammed'|'historical'>('all'),search=ref('')
 const chosenSheetId=ref(''),editor=ref<RecordedExercise[]>([]),performedOn=ref(localDate()),busy=ref(false),lastSaved=ref(false)
@@ -117,13 +119,12 @@ let stops:Unsubscribe[]=[],stopChild:Unsubscribe[]=[],alive=true,stopProgress:Un
 function localDate(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 function withinPeriod(value:string,p:string){if(p==='all')return true;const n=Number(p);if(!Number.isInteger(n))return true;const after=new Date();after.setUTCMonth(after.getUTCMonth()-n);return value>=after.toISOString().slice(0,10)}
 function exerciseKeyLocal(ex:{exerciseId?:string;catalogId?:string;id?:string},i:number){return String(ex.exerciseId||ex.catalogId||ex.id||`position:${i}`)}
-function stopCurrent(){restoring=true;onlineWorkoutRequest.value='';offlineScope.value=null;offlineState.value=null;downloadedMode.value=false;shareIds.value=[];shareReady.value=false;selectedPhotos.value={};stopProgress?.();stopProgress=null;stopDirect?.();stopDirect=null;clearTimer();pageSize.value=250;detailId.value='';directSession.value=null;savedSessionId.value='';correction.value=null;revisions.value=[];revisionError.value='';historyListFilter.value='';activePrescription.value=[];tab.value='home';photoStatus.value='';for(const f of stopChild)f();stopChild=[];sheetData.value=null;archived.value=[];rawSessions.value=[];revisionSheet.value='';revisionNotes.value='';reportNotes.value='';correctionHeads.value=[];correctionReady.value=false;correctionError.value='';workoutConfirm.value=null;checks.value=[];goals.value=[];goalError.value='';goalTitle.value='';goalNotes.value='';goalDate.value='';chosenSheetId.value='';selectedSheet.value=null;editor.value=[];historySheetId.value='';historyKey.value='';restoring=false}
+function stopCurrent(){childEpoch++;checksStarted=false;shareStarted=false;goalsStarted=false;checksState.value='idle';goalsState.value='idle';restoring=true;onlineWorkoutRequest.value='';offlineScope.value=null;offlineState.value=null;downloadedMode.value=false;shareIds.value=[];shareReady.value=false;selectedPhotos.value={};stopProgress?.();stopProgress=null;stopDirect?.();stopDirect=null;clearTimer();pageSize.value=250;detailId.value='';directSession.value=null;savedSessionId.value='';correction.value=null;revisions.value=[];revisionError.value='';historyListFilter.value='';activePrescription.value=[];tab.value='home';photoStatus.value='';for(const f of stopChild)f();stopChild=[];sheetData.value=null;archived.value=[];rawSessions.value=[];revisionSheet.value='';revisionNotes.value='';reportNotes.value='';correctionHeads.value=[];correctionReady.value=false;correctionError.value='';workoutConfirm.value=null;checks.value=[];goals.value=[];goalError.value='';goalTitle.value='';goalNotes.value='';goalDate.value='';chosenSheetId.value='';selectedSheet.value=null;editor.value=[];historySheetId.value='';historyKey.value='';restoring=false}
 function bindAthlete(id:string){
  stopCurrent();athleteId.value=id
  const s=context.value;if(!s||!id)return
  const {db}=getStagingClients();loading.value=true;error.value='';let loadedSheets=false
  if(props.role==='athlete'&&s.uid===id){offlineScope.value={project:db.app.options.projectId||'',gym:s.gymId,uid:s.uid};try{offlineState.value=readOffline(localStorage,offlineScope.value);if(offlineState.value){if(!online.value){downloadedMode.value=true;loading.value=false;loadedSheets=true}restoreLocalDraft();if(online.value)void flushOffline()}}catch(e){offlineError.value=String(e)}}
- if(shareEnabled)stopChild.push(watchCheckShares(db,s.gymId,id,(v,confirmed)=>{if(alive&&athleteId.value===id){shareReady.value=confirmed;shareIds.value=confirmed?v:[]}},()=>{if(alive&&athleteId.value===id){shareReady.value=false;shareIds.value=[]}}))
  stopChild.push(watchAthleteSheets(db,s.gymId,id,result=>{
   if(!alive||athleteId.value!==id)return
   sheetData.value=result;loadedSheets=true;loading.value=false
@@ -135,10 +136,29 @@ function bindAthlete(id:string){
  bindProgress()
  stopChild.push(watchCorrectionHeads(db,s.gymId,id,v=>{if(alive&&athleteId.value===id){correctionHeads.value=v;correctionReady.value=true;correctionError.value=''}},e=>{if(alive&&athleteId.value===id){correctionReady.value=false;correctionError.value='Correzioni non attive: verificare le nuove Rules Firestore.'}}))
  stopChild.push(watchRevisions(db,s.gymId,id,v=>{if(alive&&athleteId.value===id)revisions.value=v},e=>{if(alive&&athleteId.value===id)revisionError.value='Richieste non disponibili: '+e.message}))
- stopChild.push(watchChecks(db,s.gymId,id,v=>{if(alive&&athleteId.value===id)checks.value=v},e=>{if(alive)writeError.value='Check Zone: '+e.message+' (controllare Firestore Rules Progressi)'}))
- stopChild.push(watchGoals(db,s.gymId,id,v=>{if(alive&&athleteId.value===id)goals.value=v},e=>{if(alive)goalError.value='Obiettivi non disponibili: '+e.message+' (verifica Firestore Rules Progressi)'}))
+ // Secondary tabs subscribe only when opened. Once started, they stay live for this athlete.
+ bindSecondaryTabs()
+
  if(!loadedSheets)loading.value=true
 }
+function bindSecondaryTabs(){
+ const s=context.value,id=athleteId.value,epoch=childEpoch
+ if(!s||!id||!alive)return
+ const {db}=getStagingClients(),valid=()=>alive&&epoch===childEpoch&&context.value?.uid===s.uid&&context.value?.gymId===s.gymId&&athleteId.value===id
+ if((tab.value==='check'||(tab.value==='report'&&props.role==='athlete'))&&!checksStarted){
+  checksStarted=true;checksState.value='loading'
+  stopChild.push(watchChecks(db,s.gymId,id,v=>{if(valid()){checks.value=v;checksState.value='ready'}},e=>{if(valid()){checks.value=[];checksState.value='error';if(tab.value==='check'||tab.value==='report')writeError.value='Check Zone: '+e.message}}))
+ }
+ if(tab.value==='check'&&shareEnabled&&!shareStarted){
+  shareStarted=true
+  stopChild.push(watchCheckShares(db,s.gymId,id,(v,confirmed)=>{if(valid()){shareReady.value=confirmed;shareIds.value=confirmed?v:[]}},()=>{if(valid()){shareReady.value=false;shareIds.value=[]}}))
+ }
+ if(tab.value==='goals'&&!goalsStarted){
+  goalsStarted=true;goalsState.value='loading'
+  stopChild.push(watchGoals(db,s.gymId,id,v=>{if(valid()){goals.value=v;goalsState.value='ready'}},e=>{if(valid()){goals.value=[];goalsState.value='error';goalError.value='Obiettivi non disponibili: '+e.message}}))
+ }
+}
+watch(tab,bindSecondaryTabs)
 onMounted(async()=>{window.addEventListener('online',networkChanged);window.addEventListener('offline',networkChanged);window.addEventListener('storage',externalStorage); 
  if(!isOperationalMode()){loading.value=false;error.value='Progressi LIVE disponibile solo con accesso Firebase configurato.';return}
  try{
@@ -382,7 +402,7 @@ function switchToHistory(s:ProgressSheet){historySheetId.value=s.id;tab.value='t
     <section v-else class="panel lf-p360-card"><h2>Storico allenamenti</h2><p class="muted small">Apri qualsiasi allenamento, anche con una sola serie registrata.</p><p v-if="correctionError" class="muted small">{{correctionError}}</p><p v-else-if="!correctionReady" class="muted small">Sincronizzazione delle correzioni…</p><p v-if="role==='athlete'&&!online" class="muted small">Per correggere o eliminare un allenamento serve una connessione.</p><div class="lf-p360-line-filters"><label>Scheda<select v-model="historyListFilter"><option value="">Tutte</option><option v-for="s in historicalSheets" :key="s.id" :value="s.id">{{s.title}}</option></select></label><label>Periodo<select v-model="historyPeriod"><option value="all">Tutto</option><option value="1">1 mese</option><option value="3">3 mesi</option><option value="6">6 mesi</option><option value="12">1 anno</option></select></label></div><button v-for="row in filteredHistory" :key="row.id" class="lf-p360-sheet" @click="openHistory(row.id)"><span class="lf-p360-sheet-copy"><b>{{row.sheetTitle}}</b><small>{{displayDate(row.performedOn)}}<template v-if="recordedAt(row.createdAt)"> · {{recordedAt(row.createdAt)}}</template> · {{row.exercises.filter(e=>!e.skipped&&e.sets.length).length}} esercizi registrati</small></span><span class="lf-p360-arrow">›</span></button><p v-if="!filteredHistory.length" class="muted small">Nessun allenamento con questi filtri.</p><button v-if="rawSessions.length>=pageSize" class="secondary wide" :disabled="progressLoading" @click="loadOlder">{{progressLoading?'Caricamento…':'Carica allenamenti più vecchi'}}</button></section>
    </template>
    <template v-if="tab==='review'"><section class="panel lf-p360-card"><h2>Revisione programma</h2><p v-if="revisionError" class="notice lf-p360-error" role="alert">{{revisionError}}</p><template v-if="role==='athlete'"><label class="lf-p360-field-label">Scheda<select v-model="revisionSheet"><option value="">Seleziona scheda</option><option v-for="s in sheets" :key="s.id" :value="s.id">{{s.title}}</option></select></label><label class="lf-p360-field-label">Motivo<select v-model="revisionReason"><option>Disponibilità</option><option>Attrezzatura</option><option>Difficoltà</option><option>Altro</option></select></label><label class="lf-p360-field-label">Descrizione<textarea v-model="revisionNotes" maxlength="1000" rows="4"/></label><button type="button" class="primary wide" :disabled="busy||!canWrite||!!revisionError&&revisionError.startsWith('Richieste non disponibili')||!revisionSheet||!revisionNotes.trim()" @click="sendRevision">Invia richiesta</button></template><div v-for="r in revisions" :key="r.id" class="lf-p12-detail-exercise"><b>{{r.sheetTitle}} · {{revisionLabels[r.status]}}</b><p>{{r.reason}} — {{r.notes}}</p><button v-if="role==='coach'&&r.status!=='completed'" class="secondary" :disabled="busy||!canManageGoals" @click="updateRevision(r,r.status==='pending'?'working':'completed')">{{r.status==='pending'?'Prendi in carico':'Completa'}}</button></div><p v-if="!revisions.length" class="muted">Nessuna richiesta.</p></section></template>
-   <template v-if="tab==='report'"><section class="panel lf-p360-card"><h2>Report allenamenti · Stampa / PDF</h2><p class="muted small">Include le registrazioni disponibili caricate nello storico. Le foto sono facoltative e non selezionate inizialmente.</p><div class="lf-p360-line-filters"><label>Da<input type="date" v-model="reportFrom"/></label><label>A<input type="date" v-model="reportTo"/></label></div><label class="lf-p360-field-label">Osservazioni nel report<textarea v-model="reportNotes" maxlength="1000" rows="3"/></label><template v-if="role==='athlete'&&reportPhotos.length&&online"><details><summary>Includi foto (facoltativo, massimo 4)</summary><label v-for="row in reportPhotos" :key="row.p.storagePath" class="lf-p360-archived-toggle"><input type="checkbox" v-model="reportPhotoPaths" :value="row.p.storagePath" :disabled="reportPhotoPaths.length>=4&&!reportPhotoPaths.includes(row.p.storagePath)"/>{{displayDate(row.date)}} · {{sideLabel(row.p.side)}}</label></details></template><p>{{reportRows.length}} allenamenti disponibili nel periodo.</p><p v-if="rawSessions.length>=pageSize" class="muted small">Lo storico può contenere dati più vecchi: caricali prima di esportare un periodo completo.</p><p v-if="correctionError" class="muted small">{{correctionError}}</p><button v-if="rawSessions.length>=pageSize" class="secondary wide" :disabled="progressLoading" @click="loadOlder">Carica dati precedenti</button><button class="primary wide" :disabled="reportBusy||!reportRows.length||(reportFrom!==''&&reportTo!==''&&reportFrom>reportTo)" @click="printReport">Stampa / salva PDF</button></section></template>
+   <template v-if="tab==='report'"><section class="panel lf-p360-card"><h2>Report allenamenti · Stampa / PDF</h2><p class="muted small">Include le registrazioni disponibili caricate nello storico. Le foto sono facoltative e non selezionate inizialmente.</p><div class="lf-p360-line-filters"><label>Da<input type="date" v-model="reportFrom"/></label><label>A<input type="date" v-model="reportTo"/></label></div><label class="lf-p360-field-label">Osservazioni nel report<textarea v-model="reportNotes" maxlength="1000" rows="3"/></label><p v-if="role==='athlete'&&checksState==='loading'&&online" class="muted small" role="status">Sincronizzazione foto per il report…</p><template v-if="role==='athlete'&&reportPhotos.length&&online"><details><summary>Includi foto (facoltativo, massimo 4)</summary><label v-for="row in reportPhotos" :key="row.p.storagePath" class="lf-p360-archived-toggle"><input type="checkbox" v-model="reportPhotoPaths" :value="row.p.storagePath" :disabled="reportPhotoPaths.length>=4&&!reportPhotoPaths.includes(row.p.storagePath)"/>{{displayDate(row.date)}} · {{sideLabel(row.p.side)}}</label></details></template><p>{{reportRows.length}} allenamenti disponibili nel periodo.</p><p v-if="rawSessions.length>=pageSize" class="muted small">Lo storico può contenere dati più vecchi: caricali prima di esportare un periodo completo.</p><p v-if="correctionError" class="muted small">{{correctionError}}</p><button v-if="rawSessions.length>=pageSize" class="secondary wide" :disabled="progressLoading" @click="loadOlder">Carica dati precedenti</button><button class="primary wide" :disabled="reportBusy||!reportRows.length||(reportFrom!==''&&reportTo!==''&&reportFrom>reportTo)" @click="printReport">Stampa / salva PDF</button></section></template>
    <MultiSportProgress v-if="tab==='multisport'&&context" :key="`${context.uid}:${context.gymId}:${athleteId}`" :gym="context.gymId" :athlete="athleteId" :actor="context.uid" :role="role"/>
    <template v-if="tab==='trend'">
     <div class="lf-p360-stat-grid"><div class="lf-p360-stat"><span>ALLENAMENTI</span><strong>{{totalSessions}}</strong></div><div class="lf-p360-stat"><span>ESERCIZI REGISTRATI</span><strong>{{uniqueRecords}}</strong></div><div class="lf-p360-stat"><span>SCHEDE DISPONIBILI</span><strong>{{sheets.length}}</strong></div></div>
@@ -403,7 +423,7 @@ function switchToHistory(s:ProgressSheet){historySheetId.value=s.id;tab.value='t
    </template>
    <template v-if="tab==='goals'">
     <section class="panel lf-p360-card">
-     <div class="row between"><h2>Obiettivi dell’Atleta</h2><span class="pill">{{goals.filter(g=>g.status==='active').length}} attivi</span></div>
+     <div class="row between"><h2>Obiettivi dell’Atleta</h2><span class="pill">{{goalsState==='ready'?goals.filter(g=>g.status==='active').length+' attivi':'—'}}</span></div>
      <p class="muted small">Annotazioni e traguardi assegnati dai Coach. L’Atleta può leggerli, ma non modificarli.</p>
      <div v-if="role==='coach'" class="lf-p360-goal-editor">
       <h3>Assegna un obiettivo</h3>
@@ -427,7 +447,7 @@ function switchToHistory(s:ProgressSheet){historySheetId.value=s.id;tab.value='t
        <button type="button" class="secondary" :disabled="goalBusy||!canManageGoals" @click="changeGoalStatus(goal,'archived')">Archivia</button>
       </div>
      </div>
-     <p v-if="!visibleGoals.length" class="muted small lf-p360-empty">Nessun obiettivo {{showArchivedGoals?'registrato':'attivo o raggiunto'}} per questo Atleta.</p>
+     <p v-if="goalsState==='loading'" class="muted small" role="status">Sincronizzazione obiettivi…</p><p v-if="goalsState==='ready'&&!visibleGoals.length" class="muted small lf-p360-empty">Nessun obiettivo {{showArchivedGoals?'registrato':'attivo o raggiunto'}} per questo Atleta.</p>
      <p v-if="role!=='coach'&&goalError" class="notice lf-p360-error" role="alert">{{goalError}}</p>
     </section>
    </template>
@@ -436,8 +456,10 @@ function switchToHistory(s:ProgressSheet){historySheetId.value=s.id;tab.value='t
       <template v-if="role==='athlete'"><div class="lf-p360-date"><label for="lf-p360-checkdate">Data check</label><input id="lf-p360-checkdate" v-model="checkDate" type="date" :max="localDate()"/></div><div class="lf-p360-photo-grid"><label v-for="side in checkSides.map(s=>[s.id,s.label] as const)" :key="side[0]" class="lf-p360-photo-select"><span>▧</span><strong>{{side[1]}}</strong><small>{{cleanFile(selectedPhotos[side[0]])||'＋ Aggiungi'}}</small><input type="file" accept="image/*,.heic,.heif,.avif,.bmp,.tif,.tiff" :disabled="busy" @change="chooseFile(side[0],$event)"/></label></div><label class="lf-p360-field-label">Note facoltative <textarea v-model="checkNotes" maxlength="500" rows="2" placeholder="Come ti senti, dettagli utili…"/></label><p v-if="photoStatus" class="muted small lf-p360-photo-status" role="status">{{photoStatus}}</p><p class="muted small">Formati comuni e HEIC/HEIF supportati dove decodificabili. Le fotografie originali non vengono caricate; la compressione può ridurre leggermente i dettagli. HEIC può richiedere internet per il convertitore.</p><button class="primary lf-p360-main-button" :disabled="!canWrite||busy||!online" @click="saveCheck">{{busy?'Ottimizzazione e caricamento…':'＋ Salva nuovo check'}}</button><p v-if="!canWrite" class="muted small">Upload disponibile soltanto quando le regole Firebase Progressi saranno autorizzate.</p></template>
      <p v-else class="muted small">Consultazione Coach: puoi vedere soltanto i check fotografici condivisi esplicitamente dall'Atleta.</p>
     </section>
-    <CheckGallery :checks="checks" :allowed="sharedChecks" :scope="checkScope" :role="role" :share-ids="shareIds" :share-enabled="shareEnabled" :share-ready="shareReady" :online="online" :busy="busy" @share="toggleShare"/>
-    <CheckComparison v-if="online&&(role==='athlete'||(shareEnabled&&shareReady))" :checks="sharedChecks" :scope="checkScope"/>
+    <p v-if="checksState==='loading'" class="muted small" role="status">Sincronizzazione Check Zone…</p>
+    <p v-if="checksState==='error'" class="notice" role="alert">Check non disponibili. Riapri Allenamenti per riprovare.</p>
+    <CheckGallery v-if="checksState==='ready'" :checks="checks" :allowed="sharedChecks" :scope="checkScope" :role="role" :share-ids="shareIds" :share-enabled="shareEnabled" :share-ready="shareReady" :online="online" :busy="busy" @share="toggleShare"/>
+    <CheckComparison v-if="checksState==='ready'&&online&&(role==='athlete'||(shareEnabled&&shareReady))" :checks="sharedChecks" :scope="checkScope"/>
    </template>
   </template>
   <RouterLink v-if="role==='coach'" to="/coach/atleti" class="secondary lf-p360-back-link">← Gestione Atleti</RouterLink>

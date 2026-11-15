@@ -5,10 +5,11 @@
  */
 import {
  collection, doc, getDoc, getDocs, onSnapshot, runTransaction, serverTimestamp,
- deleteField, type Firestore, type Unsubscribe, type DocumentData, type Transaction, type DocumentSnapshot,
+ deleteField, type Firestore, type Unsubscribe, type DocumentData, type Transaction, type DocumentSnapshot, type QueryDocumentSnapshot,
 } from 'firebase/firestore'
 import {DAY_KEYS, type DayKey, type ProgramWeek, type Personal, groupSheets, protectedPayload} from '../../features/sheets/domain'
 import {decodeV1Week, type V1WeekDocument} from '../../features/sheets/v1WeekCodec'
+import {createSnapshotProjection} from './snapshotProjection'
 
 const part=(v:string,label:string)=>{if(!v||v.includes('/')||v.trim()!==v)throw new Error(`${label} non valido.`);return v}
 const path=(gym:string,athlete:string):[string,string,string,string]=>['gyms',part(gym,'Palestra'),'athlete_programs',part(athlete,'Atleta')]
@@ -111,9 +112,19 @@ export function watchAthleteSheets(db:Firestore,gym:string,athlete:string,emit:(
  let left:Personal[]|null=null,right:ProgramWeek[]|null=null,disposed=false
  const update=()=>{if(!disposed&&left&&right)emit({personal:left,weeks:right,groups:groupSheets(left,right,athlete)})}
  const error=(e:Error)=>{if(!disposed)onError(e)}
- const stopPersonal=onSnapshot(collection(root(db,gym,athlete),'personal_templates'),snapshot=>{left=snapshot.docs.map(x=>rawToPersonal(x.id,athlete,x.data()));update()},error)
- const stopWeeks=onSnapshot(collection(root(db,gym,athlete),'weeks'),snapshot=>{right=snapshot.docs.map(x=>rawToWeek(x.id,athlete,x.data()));update()},error)
+ const projectPersonal=createSnapshotProjection((x:QueryDocumentSnapshot)=>rawToPersonal(x.id,athlete,x.data()))
+ const projectWeeks=createSnapshotProjection((x:QueryDocumentSnapshot)=>rawToWeek(x.id,athlete,x.data()))
+ const stopPersonal=onSnapshot(collection(root(db,gym,athlete),'personal_templates'),snapshot=>{left=projectPersonal(snapshot);update()},error)
+ const stopWeeks=onSnapshot(collection(root(db,gym,athlete),'weeks'),snapshot=>{right=projectWeeks(snapshot);update()},error)
  return ()=>{disposed=true;stopPersonal();stopWeeks()}
+}
+
+/** Archive editor needs personal documents only, not the athlete's program weeks. */
+export function watchPersonalSheets(db:Firestore,gym:string,athlete:string,emit:(s:Personal[])=>void,onError:(error:Error)=>void):Unsubscribe{
+ let disposed=false
+ const project=createSnapshotProjection((x:QueryDocumentSnapshot)=>rawToPersonal(x.id,athlete,x.data()))
+ const stop=onSnapshot(collection(root(db,gym,athlete),'personal_templates'),snapshot=>{if(!disposed)emit(project(snapshot))},e=>{if(!disposed)onError(e)})
+ return ()=>{disposed=true;stop()}
 }
 
 /** Id modello riutilizzato come id personale per atleta: nessun doppione con stesso modello. */

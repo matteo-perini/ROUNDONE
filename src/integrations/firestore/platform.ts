@@ -28,9 +28,9 @@ export function watchGymIdentity(s:StagingSession,next:(v:IdentityRead)=>void){
    const d=snap.data() as Record<string,unknown>|undefined
    publish(part,{state:'ready'},part==='gym'?{name:gymName(d?.name)||gymName(d?.gymName)}:{logo:safeImage(d?.logo,120000),cover:safeImage(d?.cover,420000)})
   }
-  // Independent server reads: an absent appearance document is valid, not a failure.
-  // Subscribe after the authorized read; snapshots catch subsequent changes.
-  void getDocFromServer(ref).then(snap=>{if(!active)return;accept(snap);stops.push(onSnapshot(ref,{includeMetadataChanges:true},accept,error))}).catch(error)
+  // A single listener delivers the first server-confirmed snapshot and future changes.
+  // Cached or pending writes are still rejected by accept(); absence is valid for branding.
+  stops.push(onSnapshot(ref,{includeMetadataChanges:true},accept,error))
  }
  return()=>{active=false;stops.forEach(stop=>stop())}
 }

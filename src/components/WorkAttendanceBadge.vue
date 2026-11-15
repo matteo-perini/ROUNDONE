@@ -15,7 +15,8 @@ const open=computed(()=>active.value?.open||null)
 const siteName=(id:WorkSiteId)=>active.value?.sites.find(s=>s.id===id)?.name||id
 const total=computed(()=>{const v=active.value;if(!v)return 0;return v.closedMs.site1+v.closedMs.site2+v.openTodayMs+(v.open?Math.max(0,clock.value-received.value):0)})
 const format=(n:number)=>{const sec=Math.max(0,Math.floor(n/1000));return [Math.floor(sec/3600),Math.floor(sec%3600/60),sec%60].map(v=>String(v).padStart(2,'0')).join(':')}
-const rome=(n:number)=>new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',day:'2-digit',month:'2-digit',year:'numeric'}).format(n)
+const romeFormatter=new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',day:'2-digit',month:'2-digit',year:'numeric'})
+const rome=(n:number)=>romeFormatter.format(n)
 async function read(){const v=await workStatus(props.uid);if(!same())return;data.value=v;received.value=clock.value=performance.now()}
 function err(e:unknown){if(same()){error.value=true;message.value=e instanceof Error?e.message:'Operazione non riuscita.'}}
 async function refresh(){if(busy.value)return;busy.value=true;choices.value=[];message.value='';error.value=false;try{await read()}catch(e){data.value=null;err(e)}finally{if(alive)busy.value=false}}
