@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import {computed,ref,watch,onUnmounted} from 'vue'
+import {Capacitor} from '@capacitor/core'
+import {isLiveMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
+import {pilotAvailable,pilotMobileDevice} from '../features/work/gpsPilot'
+import {badgeEnabled} from '../features/work/devicePreference'
+import WorkAttendanceBadge from './WorkAttendanceBadge.vue'
 import GymIdentity from './GymIdentity.vue'
 import DashboardSearch from './DashboardSearch.vue'
 import {stagingSession} from '../integrations/firebase/stagingSession'
@@ -15,6 +20,8 @@ const props=defineProps<{
  staffUrl?:string;trashUrl?:string;appointments?:DashboardAppointment[];activityDays?:DashboardDay[];recentEvents?:DashboardActivity[];
  historyComplete?:boolean;dataWarnings?:string[];programLoading?:boolean;loading?:boolean;error?:string
 }>()
+const mobile=pilotMobileDevice(navigator.userAgent,navigator.maxTouchPoints,Capacitor.isNativePlatform()&&['android','ios'].includes(Capacitor.getPlatform()))
+const badgeSession=computed(()=>{const s=stagingSession.value;return isLiveMode()&&mayWriteLive()&&mobile&&s&&pilotAvailable(s)&&badgeEnabled(s.uid,s.gymId)?s:null})
 const hidden=ref<WidgetId[]>([]);let stopPrefs:(()=>void)|undefined
 watch(()=>accountKey(stagingSession.value),()=>{const s=stagingSession.value;stopPrefs?.();hidden.value=[];if(isStagingMode()&&s&&s.role!=='atleta')stopPrefs=watchDashboard(s,v=>hidden.value=v,()=>hidden.value=[])},{immediate:true});onUnmounted(()=>stopPrefs?.())
 const visible=(id:WidgetId)=>!hidden.value.includes(id)
@@ -49,6 +56,7 @@ const formatDate=(ms:number)=>new Intl.DateTimeFormat('it-IT',{day:'2-digit',mon
 </script>
 <template>
  <div class="lf-coach-dashboard">
+  <WorkAttendanceBadge v-if="badgeSession" :key="`${badgeSession.uid}:${badgeSession.gymId}`" :uid="badgeSession.uid" :gym-id="badgeSession.gymId"/>
   <header class="lf-coach-greeting"><div><h1>Bentornato, {{name}}! 👊</h1><p>Gestisci atleti, schede, programmi e prenotazioni della tua palestra.</p></div><div class="lf14-header-actions"><DashboardSearch v-if="searchItems" :items="searchItems" :partial="searchPartial" :emulator="source==='Firebase Emulator'"/><span class="lf-source-tag">{{source}}</span></div></header>
 
   <p v-if="loading" role="status" class="muted">Caricamento dati della palestra…</p>

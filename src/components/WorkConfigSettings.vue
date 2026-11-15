@@ -5,6 +5,7 @@ import {readStagingSession,stagingSession,type StagingSession} from '../integrat
 import {isLiveMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
 import {readWorkConfig,saveWorkConfig,type StoredWorkConfig} from '../integrations/firestore/workConfig'
 import {DEFAULT_WORK_RADIUS,validWorkCenter,validWorkConfig,workConfigEditable,workSites,type WorkConfig,type WorkSite,type WorkSiteId} from '../features/work/workConfig'
+import {badgeEnabled,setBadgeEnabled} from '../features/work/devicePreference'
 import {getWorkFix,checkWorkArea,type WorkFix} from '../features/work/gpsPilot'
 const props=defineProps<{gymId:string;uid:string;mobile:boolean}>()
 type Draft={name:string;radius:number;center:WorkFix|null;testOk:boolean}
@@ -12,6 +13,8 @@ const newDraft=():Draft=>({name:'',radius:DEFAULT_WORK_RADIUS,center:null,testOk
 const count=ref<1|2>(1),drafts=ref<[Draft,Draft]>([newDraft(),newDraft()]),busy=ref(false),ready=ref(false),message=ref(''),failure=ref(false)
 const confirmStep=ref<0|1|2>(0),accepted=ref(false),stored=ref<StoredWorkConfig|null>(null),results=ref<Partial<Record<WorkSiteId,ReturnType<typeof checkWorkArea>>>>({})
 const editable=computed(()=>workConfigEditable(stagingSession.value?.role||'')&&mayWriteLive()&&!stored.value)
+const showBadge=ref(badgeEnabled(props.uid,props.gymId))
+function toggleBadge(){const next=!showBadge.value;if(setBadgeEnabled(props.uid,props.gymId,next))showBadge.value=next;else{failure.value=true;message.value='Impossibile salvare la preferenza sul dispositivo.'}}
 const finalSites=computed(()=>stored.value?workSites(stored.value.config):[])
 function toSite(d:Draft):WorkSite|null{return d.center?{name:d.name.trim(),radius:d.radius,latitude:d.center.latitude,longitude:d.center.longitude,centerAccuracy:d.center.accuracy}:null}
 const draft=computed<WorkConfig|null>(()=>{const a=toSite(drafts.value[0]),b=count.value===2?toSite(drafts.value[1]):null;return a&&(count.value===1||b)?{enabled:true,site1:a,site2:b}:null})
@@ -41,6 +44,7 @@ async function save(){if(!canSave.value||!draft.value||confirmStep.value!==2||!a
  <p v-if="!ready&&busy" role="status">Caricamento configurazione…</p>
  <template v-if="ready">
  <template v-if="stored">
+ <label v-if="mobile" class="lf-work-site"><input type="checkbox" :checked="showBadge" @change="toggleBadge"/> Mostra badge nella Home su questo dispositivo</label>
  <p class="muted small">LionFit Work è attivo. Le sedi sono bloccate: nessun admin o collaboratore può modificarle.</p>
  <article v-for="entry in finalSites" :key="entry.id" class="lf-work-site">
  <div class="lf-work-site-head"><strong>{{entry.site.name}}</strong><span>🔒 Definitiva</span></div>

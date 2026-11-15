@@ -1,0 +1,26 @@
+LIONFIT — PATCH 20A.1B — BADGE GPS / CANDIDATA
+Prerequisito: PATCH 20A.1A R2 estratta e regole R2 pubblicate. Nessuna migrazione o modifica delle sedi.
+
+1) Dalla cartella principale:
+   npm run typecheck
+   node --experimental-strip-types --test tests/patch20a-gps-pilot.unit.mjs tests/patch20a1a-work-config.unit.mjs
+   node --test work-backend/functions/model.test.mjs
+2) Test regole (locale, demo):
+   cd test-work-emulator
+   npm test
+   cd ..
+3) Non pubblicare finché i risultati sono stati controllati. Non serve sostituire le regole R2: work_staff_private non ha alcun allow e le regole negano per default. Il test aggiunto lo verifica per profili diversi.
+4) Dopo revisione, installare e verificare le dipendenze del nuovo backend isolato:
+   cd work-backend\functions
+   npm ci
+   npm test
+   cd ..
+   firebase deploy --only functions:lionfit-work --project app-palestra-b0b9d
+   cd ..
+   (Non eseguire ancora il deploy, né la build web.)
+
+Collaudo successivo: attivare la preferenza sul dispositivo da Impostazioni > LionFit Work > Timbratura GPS > Mostra badge nella Home su questo dispositivo. Entrata/uscita, fuori zona, precisione scarsa, sovrapposizione, orari multipli e due dispositivi/account; usare account e sedi autorizzati per test, non presenze di lavoro reali finché non conclusa la verifica.
+
+Backend: codebase separata, due callable in europe-west1. Verifica email, profilo, gym, stato membership e ruolo server-side; no tenant allowlist; esclude Control. Stato e intervalli privati, transazione con revisione e ricevuta idempotente. Orario calcolato sul server, non dal telefono. GPS acquisito su richiesta, non salvato nelle presenze. In uscita è richiesta la stessa sede dell'entrata; se due zone si sovrappongono, l'entrata chiede quale sede e acquisisce un nuovo fix. Intervalli oltre mezzanotte calcolati rispettando Europe/Rome, turni aperti oltre 16 ore segnalati ma non chiusi artificialmente. Il contatore di un turno in corso è indicativo; rinnovo stato al ritorno in foreground e al cambio giorno. Nessuna timbratura offline. App nativa da collaudare quando verrà generato il prossimo APK.
+
+Limiti: GPS del dispositivo non è prova infalsificabile; nessun tracciamento in background. Prima di uso lavorativo effettivo verificare regole privacy, policy aziendali e normativa applicabile. Nessuna correzione manuale, storico dettagliato, esportazione o report di altri collaboratori in questa patch; previsti nella fase successiva. Non è attivo alcun nuovo sistema Stripe. Il collaudo end-to-end Cloud Functions/Firestore e i test dell'emulatore sul PC sono ancora necessari. Nessun deploy effettuato qui.
