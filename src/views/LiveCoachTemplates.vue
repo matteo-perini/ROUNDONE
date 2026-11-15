@@ -39,7 +39,7 @@ import {attributeLegacyTemplate} from '../integrations/firestore/legacyTemplateA
 type Model = Sheet & {createdBy:string;updatedBy:string;revision:number;createdMs:number;legacyCreatorAssignedBy?:string}
 const route=useRoute(),router=useRouter()
 const session=shallowRef<StagingSession|null>(null)
-const models=ref<Model[]>([]),roster=ref<RosterAthlete[]>([]),athleteId=ref('')
+const models=ref<Model[]>([]),modelsReady=ref(false),roster=ref<RosterAthlete[]>([]),athleteId=ref('')
 // La paternita' e' un'etichetta per i filtri, mai un permesso.
 const archiveCoaches=ref<(ArchiveCreatorCoach & {active:boolean})[]>([]),creatorFilter=ref('all'),coachLookupNotice=ref('')
 // One-time migration UI: only the gym Owner can attribute templates lacking createdBy.
@@ -129,6 +129,8 @@ const fixedAthleteContext=computed(()=>dayContext.value||(!pickAssign.value&&((e
 const currentAthlete=computed(()=>resolveEditorAthlete(roster.value,visibleRoster.value,session.value?.gymId||'',athleteId.value,route.query.athleteId,fixedAthleteContext.value))
 const writable=computed(()=>mayWriteLive() && !!session.value && ['titolare','collaboratore'].includes(session.value.role))
 const activeCount=computed(()=>models.value.filter(s=>!s.deletedAt).length)
+const personalById=computed(()=>new Map(personal.value.map(p=>[p.id,p])))
+const modelSearch=computed(()=>new Map(models.value.map(s=>[s.id,`${s.title} ${s.category} ${s.exercises.map(e=>e.name).join(' ')}`.toLowerCase()])))
 const authorChoices=computed(()=>creatorFilterChoices(models.value,archiveCoaches.value,session.value?.uid||''))
 const creatorName=(uid:string)=>creatorDisplayName(uid,archiveCoaches.value,session.value?.uid||'')
 const legacyUnassigned=computed(()=>unassignedLegacyModels(models.value))
@@ -136,7 +138,7 @@ const legacyAvailableCoaches=computed(()=>availableLegacyCoaches(archiveCoaches.
 const canAssignLegacy=computed(()=>writable.value && session.value?.role==='titolare' && !editing.value)
 const choice=computed(()=>models.value.filter(s=>(filter.value==='all'||(filter.value==='trash'?!!s.deletedAt:!s.deletedAt)) &&
  creatorFilterMatches(s.createdBy,creatorFilter.value,session.value?.uid||'') &&
- `${s.title} ${s.category} ${s.exercises.map(e=>e.name).join(' ')}`.toLowerCase().includes(search.value.toLowerCase()))
+ (modelSearch.value.get(s.id)||'').includes(search.value.toLowerCase()))
  .slice().sort((a,b)=>sort.value==='az'?a.title.localeCompare(b.title,'it'):sort.value==='za'?b.title.localeCompare(a.title,'it'):sort.value==='more'?b.exercises.length-a.exercises.length:b.createdMs-a.createdMs))
 const lastOwnEditable=computed(()=>editingId.value && models.value.find(x=>x.id===editingId.value))
 let live=true,stopModels:Unsubscribe|null=null,stopUsers:Unsubscribe|null=null,stopCoaches:Unsubscribe|null=null,stopPersonal:Unsubscribe|null=null,stopAuth:Unsubscribe|null=null
@@ -257,6 +259,7 @@ async function restore(s:Model){
  if(!session.value||!canManageCoachModel(s.id,session.value.role)){notice.value='Ripristino: accesso Coach non autorizzato.';return}
  await runWrite('Ripristina modello',async({gym,uid})=>{const{db}=getStagingClients();await restoreFromTrash(db,gym,'shared',s.id,uid)})
 }
+watch(editing,open=>{if(open&&catalog.value.length===0)void loadCatalog(readLegacyExerciseCatalog).then(data=>{if(live)catalog.value=data}).catch(()=>{})})
 onMounted(async()=>{
  try{
   const verified=await readStagingSession();if(!live)return
@@ -266,8 +269,9 @@ onMounted(async()=>{
   stopModels=onSnapshot(collection(db,'gyms',verified.gymId,'templates'),snap=>{
    if(!live)return
    models.value=snap.docs.map(d=>{const x=d.data();return {id:d.id,title:String(x.title||''),category:String(x.category||'Allenamento'),exercises:Array.isArray(x.exercises)?x.exercises:[],createdBy:String(x.createdBy||''),updatedBy:String(x.updatedBy||''),...(x.legacyCreatorAssignedBy?{legacyCreatorAssignedBy:String(x.legacyCreatorAssignedBy)}:{}),revision:Number(x.revision||0),createdMs:typeof x.createdAt?.toMillis==='function'?x.createdAt.toMillis():typeof x.updatedAt?.toMillis==='function'?x.updatedAt.toMillis():0,...(x.deletedAt?{deletedAt:String(x.deletedAt)}:{})} as Model})
+   modelsReady.value=true
    if(!legacyUnassigned.value.length)legacyPanelOpen.value=false
-  },e=>{if(live)error.value=`Archivio Coach non leggibile: ${e.message}`})
+  },e=>{if(live){modelsReady.value=false;models.value=[];error.value=`Archivio Coach non leggibile: ${e.message}`}})
   // La query e' limitata alla stessa palestra e al ruolo Coach (come in Gestione Atleti).
   // Non modifica i permessi di lettura/scrittura delle schede condivise.
   stopCoaches=onSnapshot(query(collection(db,'users'),where('gymId','==',verified.gymId),where('role','==','admin')),snap=>{
@@ -290,7 +294,6 @@ onMounted(async()=>{
    loading.value=false
   },e=>{if(live){loading.value=false;error.value=`Elenco atleti non leggibile: ${e.message}`}})
   stopAuth=onAuthStateChanged(auth,u=>{if(!live)return;if(!u||u.uid!==verified.uid){closeListeners();void router.replace('/accesso')}})
-  void loadCatalog(readLegacyExerciseCatalog).then(data=>{if(live)catalog.value=data}).catch(()=>{})
   if(route.query.mode==='personal' && typeof route.query.editPersonalId!=='string')beginPersonal()
  }catch(e){if(live){error.value=e instanceof Error?e.message:String(e);loading.value=false}}
 })
@@ -301,7 +304,7 @@ onUnmounted(()=>{live=false;closeListeners()})
  <div class="notice coach-archive-guide" role="status"><strong>{{uiText("ARCHIVIO DEL COACH")}}</strong> {{uiText("· Gestisci le schede e assegnale tramite il pulsante della scheda.")}} <RouterLink :to="{path:'/coach/atleti',query:{...(athleteId?{athleteId}:{}),...(typeof route.query.weekId==='string'?{weekId:route.query.weekId}:{})}}">{{uiText("← Torna alla settimana dell’atleta")}}</RouterLink></div>
  <section class="panel"><div class="row between"><div><h2 class="card-heading">{{uiText("ARCHIVIO SCHEDE")}}</h2><p class="muted" style="margin:7px 0 0">{{uiText("CREA SCHEDE RIUTILIZZABILI E ASSEGNALE AI TUOI ATLETI")}}</p></div><button v-if="!editing" class="primary" :disabled="!writable||busy" @click="beginModel">{{uiText("＋ Crea nuova scheda dell'archivio")}}</button></div></section>
  <p v-if="error" class="notice" role="alert">{{error}}</p>
- <p v-if="loading" class="muted">{{uiText("Verifica del Coach e lettura degli archivi…")}}</p>
+ <p v-if="loading" class="muted lf27-delayed-loading" role="status">{{uiText("Verifica del Coach e lettura degli archivi…")}}</p>
  <section v-if="!loading && session && (!writable || notice)" class="panel">
   <p v-if="!writable" class="notice">{{uiText("Le modifiche sono temporaneamente disabilitate. Puoi consultare le schede.")}}</p>
   <p v-if="notice" class="notice" role="status">{{notice}}</p>
@@ -387,7 +390,7 @@ onUnmounted(()=>{live=false;closeListeners()})
   <div class="lf-editor-actions"><button type="button" class="secondary" :disabled="busy" @click="editing=false">{{uiText("← Indietro")}}</button><button class="primary" :disabled="busy||!writable||!title.trim()||!exercises.length||(isPersonal&&(!currentAthlete||(dayContext&&!requestedDay)))" @click="save">{{busy?'SALVATAGGIO…':isPersonal?(personalEdit?'SALVA MODIFICHE PERSONALI':'SALVA SCHEDA PERSONALE'):editingId?'SALVA MODIFICHE':'SALVA SCHEDA'}}</button></div>
  </section>
  <section v-else-if="!loading && session" class="panel lf-mobile-archive">
-  <div class="row between"><div><h2 class="card-heading">{{uiText("ARCHIVIO · SCHEDE")}}</h2><span class="muted small">{{choice.length}} {{uiText("di")}} {{activeCount}} {{uiText("schede attive nell'archivio")}}</span></div><button v-if="typeof route.query.athleteId==='string'" class="secondary" :disabled="!writable||busy" @click="beginPersonal">{{uiText("+ Crea scheda personale")}}</button></div>
+  <div class="row between"><div><h2 class="card-heading">{{uiText("ARCHIVIO · SCHEDE")}}</h2><span class="muted small">{{modelsReady?choice.length:'—'}} {{uiText("di")}} {{modelsReady?activeCount:'—'}} {{uiText("schede attive nell'archivio")}}</span></div><button v-if="typeof route.query.athleteId==='string'" class="secondary" :disabled="!writable||busy" @click="beginPersonal">{{uiText("+ Crea scheda personale")}}</button></div>
   <div class="coach-archive-toolbar"><input v-model="search" type="search" placeholder="Cerca una scheda…" aria-label="Cerca una scheda"/><button class="secondary" @click="filter=filter==='trash'?'active':'trash'">{{filter==='trash'?'← Archivio schede':'Apri cestino'}}</button><select v-model="sort" aria-label="Ordina schede"><option value="recent">{{uiText("Più recenti")}}</option><option value="az">{{uiText("Nome A–Z")}}</option><option value="more">{{uiText("Più esercizi")}}</option></select></div>
   <div class="lf-creator-filter" role="group" aria-label="Filtra le schede per Coach creatore">
    <span class="lf-creator-filter-label">{{uiText("Filtra per Coach")}}</span>
@@ -398,11 +401,12 @@ onUnmounted(()=>{live=false;closeListeners()})
    </div>
   </div>
   <p v-if="coachLookupNotice" class="muted small" role="status">{{coachLookupNotice}}</p>
-  <div class="grid2 lf-mobile-archive-grid"><div v-for="s in choice" :key="s.id" class="archive-card">
+  <p v-if="!modelsReady&&!error" class="muted lf27-delayed-loading" role="status">{{uiText("Caricamento schede…")}}</p>
+  <div v-if="modelsReady" class="grid2 lf-mobile-archive-grid" v-lf-entrance="{id:'coach-archive',rows:[{match:'.archive-card'}]}"><div v-for="s in choice" :key="s.id" class="archive-card">
    <h3 style="margin:0">{{s.title}}</h3><p class="muted small">{{s.category}} · {{s.exercises.length}} {{uiText("esercizi ·")}} {{s.deletedAt?'Nel cestino':'Attivo'}}</p>
    <p class="lf-creator-meta"><span class="lf-creator-owner">{{s.createdBy?(s.legacyCreatorAssignedBy?uiFormat('Scheda storica attribuita a {coach}',{coach:creatorName(s.createdBy)}):uiFormat('Creata da {coach}',{coach:creatorName(s.createdBy)})):uiText('Scheda storica · autore non registrato')}}</span><span v-if="s.updatedBy" class="muted lf-archive-secondary-meta">{{uiFormat('Ultima modifica: {coach}',{coach:creatorName(s.updatedBy)})}}</span></p>
    <p class="small lf-archive-preview">{{s.exercises.slice(0,2).map(x=>x.name).join(' · ')}}</p><div class="divider lf-archive-divider"/>
-   <p v-if="personal.some(p=>p.id===s.id)" class="muted small">{{personal.find(p=>p.id===s.id)?.deletedAt?'Scheda personale nel cestino':'Già assegnato a questo atleta (riutilizzabile per il giorno)'}}</p>
+   <p v-if="personalById.has(s.id)" class="muted small">{{personalById.get(s.id)?.deletedAt?'Scheda personale nel cestino':'Già assegnato a questo atleta (riutilizzabile per il giorno)'}}</p>
    <div class="archive-actions lf-archive-desktop-actions"><button class="secondary" @click="preview=s">{{uiText("Visualizza")}}</button>
     <button v-if="!s.deletedAt" class="secondary" :disabled="!session||!canManageCoachModel(s.id,session.role)" @click="edit(s)">{{uiText("Modifica")}}</button>
     <button v-if="!s.deletedAt" class="secondary" :disabled="busy||!writable" @click="duplicate(s)">{{uiText("Duplica")}}</button>
@@ -412,7 +416,7 @@ onUnmounted(()=>{live=false;closeListeners()})
    </div>
    <div class="lf-archive-mobile-actions"><button v-if="!s.deletedAt" class="primary" :disabled="busy||!writable" @click="openAssign(s)">{{uiText("Assegna")}}</button><button class="secondary" @click="preview=s">{{uiText("Visualizza")}}</button><button v-if="!s.deletedAt" class="secondary" :disabled="!session||!canManageCoachModel(s.id,session.role)" @click="edit(s)">{{uiText("Modifica")}}</button><button v-if="s.deletedAt" class="secondary" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="restore(s)">{{uiText("Ripristina")}}</button><details v-if="!s.deletedAt" class="lf-archive-more"><summary :aria-label="'Altre azioni: '+s.title">⋮</summary><div><button class="secondary" :disabled="busy||!writable" @click="duplicate(s)">{{uiText("Duplica")}}</button><button class="danger" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="trash(s)">{{uiText("Nel Cestino")}}</button></div></details></div>
   </div></div>
-  <p v-if="!choice.length" class="muted">{{uiText("Nessuna scheda corrisponde ai filtri.")}}</p>
+  <p v-if="modelsReady&&!choice.length" class="muted">{{uiText("Nessuna scheda corrisponde ai filtri.")}}</p>
   <p class="muted small lf-creator-explainer">{{uiText("I filtri indicano chi ha creato la scheda: ogni Coach autorizzato della palestra può comunque visualizzare, modificare, duplicare e assegnare tutte le schede. Duplicando e salvando una nuova copia, il creatore della copia è il Coach che l’ha salvata.")}}</p>
   <p class="notice lf-archive-technical">{{uiText("I modelli ROUNDONE vengono modificati mantenendo il loro ID. Ogni salvataggio verifica la revisione, inclusa la revisione iniziale 0 dei modelli legacy. Le copie storiche degli atleti non sono modificabili.")}}</p>
  </section>

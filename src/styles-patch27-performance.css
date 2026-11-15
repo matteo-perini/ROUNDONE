@@ -1,0 +1,16 @@
+/* PATCH 27 · Fast feedback without animated layout or blank-page transitions. */
+.lf27-delayed-loading { animation: lf27-show-loading 1ms linear 160ms both; }
+@keyframes lf27-show-loading { from { visibility:hidden; opacity:0 } to { visibility:visible; opacity:1 } }
+@media(prefers-reduced-motion:no-preference){
+ .app .lf-home-approved .lf-v3-wave{animation-duration:220ms;animation-delay:0ms}
+ .lf-home-approved .lf-v3-ring-value{transition-duration:300ms}
+ .app :is(.bottom-nav,.athlete-bottom-nav) a {touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+}
+@media(prefers-reduced-motion:reduce){.lf27-delayed-loading{animation:none}}
+/* R2: local feedback only, no layout shift, no permanent layer promotion. */
+@media(prefers-reduced-motion:no-preference){
+ .app :is(button.primary,button.secondary,button.ghost,button.lf-roster-card,button.lf-athlete-v4-day,.lf-v3-shortcut,.lf-v3-today-cta,.lf-v3-progress):active:not(:disabled):not([aria-disabled="true"]){opacity:.88}
+}
+@media(prefers-reduced-motion:reduce){
+ .app :is(button.primary,button.secondary,button.ghost,button.lf-roster-card,button.lf-athlete-v4-day,.lf-v3-shortcut,.lf-v3-today-cta,.lf-v3-progress){transition:none!important;animation:none!important}
+}

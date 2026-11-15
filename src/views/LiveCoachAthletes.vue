@@ -4,9 +4,9 @@ import {uiText} from '../features/i18n/interfaceLanguage'
 import {onMounted,onUnmounted,ref,computed,shallowRef,watch,nextTick} from 'vue'
 import {RouterLink,useRouter,useRoute,onBeforeRouteLeave} from 'vue-router'
 import {onAuthStateChanged} from 'firebase/auth'
-import {collection,doc,getDocs,getDocFromServer,onSnapshot,query,where,updateDoc,type Unsubscribe} from 'firebase/firestore'
+import {collection,doc,getDocs,onSnapshot,query,where,updateDoc,type Unsubscribe} from 'firebase/firestore'
 import {getStagingClients} from '../integrations/firebase/stagingClient'
-import {readStagingSession,type StagingSession} from '../integrations/firebase/stagingSession'
+import {readStagingDetails,type StagingSession} from '../integrations/firebase/stagingSession'
 import {mayWriteLive} from '../integrations/firebase/stagingConfig'
 import {assignSharedToDay,trashPersonal,watchAthleteSheets,backfillProtectedLegacy} from '../integrations/firestore/sheets'
 import {createV1Program,saveV1WeekActivities,duplicateV1Weeks,trashV1Week,restoreV1Week} from '../integrations/firestore/programs'
@@ -96,6 +96,7 @@ type CardInfo={loading:boolean;overview?:ProgramOverview;hasPersonal?:boolean;er
 const cardInfo=ref<Record<string,CardInfo>>({})
 const now=ref(Date.now())
 let rosterEpoch=0
+let cardPoolRunning=false
 let refreshClock:ReturnType<typeof setInterval>|null=null
 function touchClock(){now.value=Date.now()}
 function coachMatches(a:RosterAthlete):boolean{
@@ -122,15 +123,19 @@ function displayOverview(a:RosterAthlete):ProgramOverview|undefined{
 }
 // Conserviamo i documenti già letti, non solo il risultato temporaneo.
 const weekCache=new Map<string,ProgramWeek[]>()
+const overviewMemo=new Map<string,{weeks:ProgramWeek[];clock:number;value:ProgramOverview}>()
 function programOverviewCache(cached:ProgramOverview,id:string):ProgramOverview{
- const weeks=weekCache.get(id);return weeks?programOverview(weeks,new Date(now.value)):cached
+ const weeks=weekCache.get(id);if(!weeks)return cached
+ const clock=now.value,old=overviewMemo.get(id)
+ if(old&&old.weeks===weeks&&old.clock===clock)return old.value
+ const value=programOverview(weeks,new Date(clock));overviewMemo.set(id,{weeks,clock,value});return value
 }
 function barColor(percent:number){return `hsl(${Math.round(Math.max(0,Math.min(100,percent))*1.4)}, 88%, 48%)`}
 function barStyle(percent:number){return {width:percent<=0?'3px':`${Math.max(0,Math.min(100,percent))}%`,backgroundColor:barColor(percent)}}
 // Tre richieste al massimo in parallelo; nessun listener per ogni Atleta.
 async function readCardInfo(id:string,epoch:number){
  const s=session.value
- if(!s||!roster.value.some(a=>a.id===id))return
+ if(!s||cardInfo.value[id]?.loading!==true||!roster.value.some(a=>a.id===id))return
  try{
   const {db}=getStagingClients()
   const root=['gyms',s.gymId,'athlete_programs',id] as const
@@ -151,24 +156,33 @@ async function readCardInfo(id:string,epoch:number){
    const personalSnap=await getDocs(collection(db,...root,'personal_templates'))
    hasPersonal=personalSnap.docs.some(x=>!x.data().deletedAt)
   }
-  if(!alive||epoch!==rosterEpoch)return
+  if(!alive||epoch!==rosterEpoch||!roster.value.some(a=>a.id===id)||cardInfo.value[id]?.loading!==true)return
   weekCache.set(id,weeks)
-  cardInfo.value={...cardInfo.value,[id]:{loading:false,overview:programOverview(weeks,new Date(now.value)),hasPersonal}}
+  cardInfo.value[id]={loading:false,overview:programOverview(weeks,new Date(now.value)),hasPersonal}
  }catch(e){
-  if(!alive||epoch!==rosterEpoch)return
-  cardInfo.value={...cardInfo.value,[id]:{loading:false,error:true}}
+  if(!alive||epoch!==rosterEpoch||cardInfo.value[id]?.loading!==true)return
+  cardInfo.value[id]={loading:false,error:true}
   // L'errore NON viene interpretato come "Nessuna programmazione".
   console.warn('Riepilogo settimane non disponibile per un atleta della palestra.',e)
  }
 }
 async function fillCardInfo(epoch:number){
- const ids=roster.value.map(a=>a.id).filter(id=>!cardInfo.value[id])
- for(const id of ids)cardInfo.value={...cardInfo.value,[id]:{loading:true}}
- let index=0
- async function worker(){while(alive&&epoch===rosterEpoch&&index<ids.length){
-  const id=ids[index++];if(id)await readCardInfo(id,epoch)
- }}
- await Promise.all(Array.from({length:Math.min(3,ids.length)},()=>worker()))
+ if(cardPoolRunning)return
+ cardPoolRunning=true
+ try{
+  // Let the roster paint before the secondary summaries compete with navigation.
+  await new Promise<void>(resolve=>setTimeout(resolve,80))
+  while(alive&&epoch===rosterEpoch){
+   const ids=roster.value.map(a=>a.id).filter(id=>!cardInfo.value[id])
+   if(!ids.length)break
+   for(const id of ids)cardInfo.value[id]={loading:true}
+   let index=0
+   async function worker(){while(alive&&epoch===rosterEpoch&&index<ids.length){
+    const id=ids[index++];if(id&&roster.value.some(a=>a.id===id))await readCardInfo(id,epoch)
+   }}
+   await Promise.all(Array.from({length:Math.min(3,ids.length)},()=>worker()))
+  }
+ }finally{cardPoolRunning=false}
 }
 const duplicateOpen=ref(false),duplicateSourceId=ref(''),duplicateTargetMonday=ref(''),duplicateCount=ref(1),duplicateError=ref(''),trashedWeeksOpen=ref(false),selectedWeekTrash=ref<string[]>([])
 const weekSelectionMode=ref<'normal'|'duplicate'|'delete'>('normal')
@@ -265,7 +279,7 @@ watch(currentId,id=>{
  if(!s||!id||!roster.value.some(a=>a.id===id&&a.gymId===s.gymId))return
  const {db}=getStagingClients()
  stopSheets=watchAthleteSheets(db,s.gymId,id,change=>{if(!alive||currentId.value!==id)return;data.value=change;
-  weekCache.set(id,change.weeks);cardInfo.value={...cardInfo.value,[id]:{loading:false,overview:programOverview(change.weeks,new Date(now.value)),hasPersonal:change.personal.some(p=>!p.deletedAt)}};
+  weekCache.set(id,change.weeks);cardInfo.value[id]={loading:false,overview:programOverview(change.weeks,new Date(now.value)),hasPersonal:change.personal.some(p=>!p.deletedAt)};
   const personalRequested=route.query.personalSheetId
   if(typeof personalRequested==='string'&&personalRequested!==openedSearchId&&route.query.athleteId===id){const found=change.personal.find(p=>p.id===personalRequested&&!p.deletedAt);if(found){opened.value=found;openedSearchId=personalRequested}}
   const requested=route.query.weekId
@@ -275,9 +289,9 @@ watch(currentId,id=>{
   status.value='Sincronizzato con Firebase';},e=>{if(alive)error.value='Schede atleta: '+e.message})
 })
 onMounted(async()=>{window.addEventListener('beforeunload',beforeUnload);document.addEventListener('visibilitychange',touchClock);refreshClock=setInterval(touchClock,15*60*1000);try{
- const s=await readStagingSession();if(!alive)return
+ const {session:s,profile:p}=await readStagingDetails();if(!alive)return
  if(s.role==='atleta')throw new Error('Accesso Coach non autorizzato');session.value=s
- const {db,auth}=getStagingClients();const p=await getDocFromServer(doc(db,'users',s.uid))
+ const {db,auth}=getStagingClients()
  if(!p.exists()||p.data().gymId!==s.gymId||p.data().role!=='admin')throw new Error('Identità Coach non verificata')
  stopAuth=onAuthStateChanged(auth,u=>{if(alive&&u?.uid!==s.uid){stopSharedListening();close();void router.replace('/accesso')}})
  const usersCollection=collection(db,'users')
@@ -290,6 +304,8 @@ onMounted(async()=>{window.addEventListener('beforeunload',beforeUnload);documen
  },e=>{if(alive)error.value='Elenco coach: '+e.message})
  stopUsers=onSnapshot(athletesQuery,sn=>{
  if(!alive)return;roster.value=labCoachRoster(sn.docs.map(d=>({id:d.id,data:d.data()})),s.gymId)
+ const currentIds=new Set(roster.value.map(a=>a.id))
+ for(const id of Object.keys(cardInfo.value))if(!currentIds.has(id)){delete cardInfo.value[id];weekCache.delete(id);overviewMemo.delete(id)}
  // Dati di ogni atleta letti una volta, con concorrenza limitata.
  void fillCardInfo(rosterEpoch)
  if(currentId.value&&!roster.value.some(a=>a.id===currentId.value))close();
@@ -591,7 +607,7 @@ function copyToArchive(sheet:Personal){
  </section>
  <p v-if="!athlete&&waitingCardCount" class="small muted lf-roster-loading" role="status">{{uiText("Caricamento riepiloghi delle programmazioni:")}} {{waitingCardCount}}…</p>
  <p v-if="!athlete&&!visibleAthletes.length&&!waitingCardCount" class="small muted" role="status">{{uiText("Nessun Atleta corrisponde ai filtri selezionati.")}}</p>
- <div v-if="!athlete" class="grid2 lf-roster-grid">
+ <div v-if="!athlete" v-lf-entrance="{id:'coach-roster',ready:status==='Atleti aggiornati da Firebase',rows:[{match:'.lf-roster-card'}]}" class="grid2 lf-roster-grid">
   <button v-for="a in visibleAthletes" :key="a.id" type="button" class="lf-roster-card" :title="a.email" @click="choose(a.id)">
    <span class="lf-roster-avatar" aria-hidden="true">{{initials(a)}}</span>
    <span class="lf-roster-details">

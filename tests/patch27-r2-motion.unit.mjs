@@ -1,0 +1,37 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {readFileSync} from 'node:fs'
+import vm from 'node:vm'
+import ts from 'typescript'
+import {parse,compileScript,compileTemplate} from '@vue/compiler-sfc'
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8')
+const compiled=ts.transpileModule(read('src/features/motion/roundOneMotion.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText
+function harness({reduced=false,translate=true,path='/home',legacyMedia=false}={}){
+ let clock=10,id=0,nav,dir,mediaFn
+ const calls=[],ticks=[],frames=new Map(),events=new Map()
+ class Element{
+  constructor(tag,classes=[],children=[]){this.tag=tag;this.classes=classes;this.children=children;this.isConnected=true;this.hidden=false;this.queries=new Map()}
+  matches(s){return s.split(',').some(x=>x.startsWith('.')?this.classes.includes(x.slice(1)):x==='[hidden]'?this.hidden:x===this.tag)}
+  querySelector(s){return this.queries.get(s)||null}
+  animate(frames,options){const a={el:this,frames,options,cancelled:false,cancel(){this.cancelled=true;this.oncancel?.()},finish(){this.onfinish?.()}};calls.push(a);return a}
+ }
+ const doc={hidden:false,querySelector:()=>null,addEventListener:(e,f)=>events.set(e,f)}
+ const media={matches:reduced,...(legacyMedia?{addListener:f=>mediaFn=f}:{addEventListener:(_,f)=>mediaFn=f})}
+ const app={directive:(name,value)=>{assert.equal(name,'lf-entrance');dir=value}}
+ const router={currentRoute:{value:{path,fullPath:path}},afterEach:f=>nav=f}
+ const mod={exports:{}}
+ vm.runInNewContext(compiled,{exports:mod.exports,module:mod,require:id=>{assert.equal(id,'vue');return {nextTick:f=>{ticks.push(f);return Promise.resolve()}}},HTMLElement:Element,window:{matchMedia:()=>media},document:doc,CSS:{supports:()=>translate},performance:{now:()=>clock},requestAnimationFrame:f=>{frames.set(++id,f);return id},cancelAnimationFrame:i=>frames.delete(i)})
+ mod.exports.installRoundOneMotion(router,app)
+ const mount=(el,value)=>dir.mounted(el,{value}),update=(el,oldValue,value)=>dir.updated(el,{oldValue,value}),unmount=el=>{el.isConnected=false;dir.beforeUnmount(el)}
+ const flush=()=>{while(ticks.length)ticks.shift()();for(const [id,f] of [...frames]){frames.delete(id);f(clock)}}
+ const navigate=(path,fullPath=path,failure)=>{const to={path,fullPath},from=router.currentRoute.value;if(!failure)router.currentRoute.value=to;nav(to,from,failure)}
+ const group=(id,ready=true)=>({id,ready,rows:[{match:'.card'}]})
+ const list=n=>new Element('div',[],Array.from({length:n},()=>new Element('article',['card'])))
+ return {Element,calls,mount,update,unmount,flush,navigate,group,list,doc,events,frames,advance:n=>clock+=n,reduce:()=>{media.matches=true;mediaFn()},show:()=>{doc.hidden=false;events.get('visibilitychange')()},hide:()=>{doc.hidden=true;events.get('visibilitychange')()},setFallback:el=>doc.querySelector=()=>new Element('main',[],[el])}
+}
+test('initial page entrance is visible, staggered, short and bounded across groups',()=>{const x=harness();x.mount(x.list(100),x.group('first'));x.mount(x.list(100),x.group('second'));x.flush();assert.equal(x.calls.length,8);assert.deepEqual(x.calls.map(a=>a.options.delay),[0,12,24,36,36,36,36,36]);for(const a of x.calls){assert.equal(a.frames[0].translate,'0 9px');assert.ok(a.frames[0].opacity>=.8);assert.ok(a.options.duration+a.options.delay<=250);assert.equal(a.options.fill,'backwards')}x.flush();assert.equal(x.calls.length,8)})
+test('first late snapshot animates only once; realtime, empty data, filters and remount do not replay it',()=>{const x=harness(),el=x.list(0),initial=x.group('archive',false),ready=x.group('archive');x.mount(el,initial);x.flush();assert.equal(x.calls.length,0);el.children=x.list(3).children;x.advance(300);x.update(el,initial,ready);x.flush();assert.equal(x.calls.length,3);el.children=x.list(5).children;x.update(el,ready,ready);x.flush();assert.equal(x.calls.length,3);x.unmount(el);x.mount(x.list(4),ready);x.flush();assert.equal(x.calls.length,3);const empty=x.list(0);x.mount(empty,x.group('empty'));x.flush();empty.children=x.list(2).children;x.update(empty,x.group('empty'),x.group('empty'));x.flush();assert.equal(x.calls.length,3)})
+test('successful path change cancels prior animation, query and failed navigation do not replay',()=>{const x=harness(),el=x.list(2),g=x.group('home');x.mount(el,g);x.flush();x.navigate('/home','/home?day=2');x.flush();assert.equal(x.calls.length,2);x.navigate('/piano','/piano',new Error('failed'));x.flush();assert.equal(x.calls.length,2);x.navigate('/piano');x.unmount(el);const plan=x.list(3);x.mount(plan,x.group('plan'));x.flush();assert.equal(x.calls.length,5);assert.ok(x.calls.slice(0,2).every(a=>a.cancelled));x.navigate('/home');x.unmount(plan);x.mount(x.list(1),g);x.flush();assert.equal(x.calls.length,6)})
+test('no stale or late motion after deadline, scroll, touch, background or reduced motion',()=>{for(const action of [x=>x.advance(1601),x=>x.events.get('wheel')(),x=>x.events.get('touchstart')(),x=>x.hide(),x=>x.reduce()]){const x=harness(),el=x.list(2),g=x.group('async',false);x.mount(el,g);x.flush();action(x);x.update(el,g,x.group('async'));x.flush();assert.equal(x.calls.length,0)}const x=harness();x.mount(x.list(2),x.group('a'));x.flush();x.reduce();assert.ok(x.calls.every(a=>a.cancelled));const y=harness({reduced:true,legacyMedia:true});y.mount(y.list(3),y.group('a'));y.flush();assert.equal(y.calls.length,0)})
+test('older WebView uses fade only, generic routes retain short safe fade, unsupported animation is harmless',()=>{const x=harness({translate:false});x.mount(x.list(1),x.group('home'));x.flush();assert.equal(x.calls.length,1);assert.equal(x.calls[0].frames[0].translate,undefined);const y=harness({path:'/profilo'});y.setFallback(new y.Element('div'));y.flush();assert.equal(y.calls.length,1);assert.equal(y.calls[0].frames[0].translate,undefined);const z=harness(),el=z.list(1);el.children[0].animate=()=>{throw Error('not supported')};z.mount(el,z.group('home'));assert.doesNotThrow(z.flush)})
+test('direct groups compile and do not attach directives to dialogs, or change backend',()=>{for(const f of ['src/components/AthleteHomeContent.vue','src/components/AthletePlanContent.vue','src/views/AthleteLiveWorkspace.vue','src/components/CoachDashboardRedesign.vue','src/views/LiveCoachAthletes.vue','src/views/LiveCoachTemplates.vue']){const source=read(f);assert.match(source,/v-lf-entrance=/);assert.doesNotMatch(source,/<[^>]*modal-overlay[^>]*v-lf-entrance/);const {descriptor,errors}=parse(source,{filename:f});assert.deepEqual(errors,[],f);const script=compileScript(descriptor,{id:f});assert.deepEqual(compileTemplate({id:f,filename:f,source:descriptor.template.content,compilerOptions:{bindingMetadata:script.bindings}}).errors,[],f)}assert.ok(read('src/main.ts').indexOf('installRoundOneMotion(router,app)')<read('src/main.ts').indexOf("app.mount('#app')"))})

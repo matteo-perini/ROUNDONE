@@ -26,7 +26,7 @@ function changeCount(v:1|2){count.value=v;if(v===1)drafts.value[1]=newDraft();re
 function radiusChanged(i:0|1){drafts.value[i].testOk=false;resetConfirmation()}
 function same(s:StagingSession|null){return alive&&!!s&&s.uid===props.uid&&s.gymId===props.gymId&&(s.role==='titolare'||s.role==='collaboratore')&&getStagingClients().auth.currentUser?.uid===props.uid}
 async function session(owner=false){const s=await readStagingSession();if(!isLiveMode()||!same(s)||(owner&&(!workConfigEditable(s.role)||!mayWriteLive())))throw new Error('Accesso non autorizzato.');return s}
-function error(e:unknown){if(alive){failure.value=true;message.value=e instanceof Error?e.message:'Operazione non riuscita.'}}
+function error(e:unknown){if(alive){failure.value=true;const code=(e as {code?:string}|null)?.code;message.value=code==='permission-denied'||code==='firestore/permission-denied'? 'Accesso alla configurazione Firebase negato (non è un errore GPS). Verifica l’email dell’account e, per impostare le sedi, accedi come titolare della palestra. Se persiste contatta l’assistenza.':e instanceof Error?e.message:'Operazione non riuscita.'}}
 async function load(){if(busy.value)return;busy.value=true;ready.value=false;failure.value=false;message.value='';results.value={};resetConfirmation();try{const s=await session();const v=await readWorkConfig(getStagingClients().db,s);if(!same(stagingSession.value))return;stored.value=v;if(v)drafts.value=[newDraft(),newDraft()];ready.value=true}catch(e){error(e)}finally{if(alive)busy.value=false}}
 onMounted(load)
 async function measure(i:0|1,mode:'center'|'draftTest'|'storedTest'){

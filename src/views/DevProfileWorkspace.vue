@@ -4,7 +4,7 @@ import {ref,onMounted,onUnmounted,computed,watch} from 'vue'
 import {doc,getDocFromServer,onSnapshot,updateDoc,setDoc,type Unsubscribe} from 'firebase/firestore'
 import {readVerifiedDevSession,type VerifiedDevSession} from '../integrations/firebase/devSession'
 import {isStagingMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
-import {readStagingSession} from '../integrations/firebase/stagingSession'
+import {readStagingDetails} from '../integrations/firebase/stagingSession'
 import {getStagingClients} from '../integrations/firebase/stagingClient'
 import {getLocalEmulatorClients} from '../integrations/firebase/emulatorClient'
 import {RouterLink,useRoute} from 'vue-router'
@@ -33,11 +33,12 @@ function readProfile(p:Record<string,unknown>){
  photo.value=safePhoto(p.photoURL||p.photoUrl);newPhoto.value=''
 }
 onMounted(async()=>{try{
- const s=isStagingMode()?await readStagingSession():await readVerifiedDevSession()
+ const details=isStagingMode()?await readStagingDetails():null
+ const s=details?.session??await readVerifiedDevSession()
  if(!alive)return
  if(!isStagingMode()&&s.gymId!=='gym_lab2c_a')throw new Error('Palestra non autorizzata')
  session.value=s;email.value=s.email||''
- try{const gym=await getDocFromServer(doc((isStagingMode()?getStagingClients():getLocalEmulatorClients()).db,'gyms',s.gymId));if(gym.exists())gymName.value=String(gym.data().name||gym.data().gymName||'Lion Fit')}catch{}
+ try{const gym=details?.gym??await getDocFromServer(doc((isStagingMode()?getStagingClients():getLocalEmulatorClients()).db,'gyms',s.gymId));if(gym.exists())gymName.value=String(gym.data().name||gym.data().gymName||'Lion Fit')}catch{}
  const {db}=isStagingMode()?getStagingClients():getLocalEmulatorClients()
  if(s.role!=='atleta')void readCoachMetrics(db,s.gymId,s.uid,s.role==='titolare').then(values=>{if(alive)metrics.value=values}).catch(()=>{})
  stop=onSnapshot(doc(db,'users',s.uid),snap=>{

@@ -1,7 +1,7 @@
 /** Sessione staging verificata dal server, mai dal ruolo scelto nella UI. */
 import {shallowRef} from 'vue'
 import {signInWithEmailAndPassword,signOut,browserLocalPersistence,browserSessionPersistence,setPersistence} from 'firebase/auth'
-import {doc,getDocFromServer} from 'firebase/firestore'
+import {doc,getDocFromServer,type DocumentSnapshot} from 'firebase/firestore'
 import {getStagingClients} from './stagingClient'
 import {isLiveMode,isTestMode,stagingTestGym} from './stagingConfig'
 import {clearOfflineForUser} from '../../features/progress/offlineWorkouts'
@@ -10,15 +10,19 @@ import {resolveLegacyGymRole} from '../../features/auth/legacyRole'
 export type StagingSession={uid:string;email:string;gymId:string;role:'atleta'|'titolare'|'collaboratore';label:string}
 export const stagingSession=shallowRef<StagingSession|null>(null)
 function safeId(x:unknown){return typeof x==='string' && x.length>=3 && x.length<=120 && !x.includes('/') && !x.includes('..')}
-let sessionRead:{uid:string;promise:Promise<StagingSession>}|null=null
-export async function readStagingSession():Promise<StagingSession>{
+type VerifiedDetails={session:StagingSession;profile:DocumentSnapshot;gym:DocumentSnapshot}
+let sessionRead:{uid:string;promise:Promise<VerifiedDetails>}|null=null
+export async function readStagingSession():Promise<StagingSession>{return (await readStagingDetails()).session}
+// The profile and gym snapshots are the same server reads used to verify identity.
+// Callers that need those documents must not fetch them again. No persisted cache.
+export async function readStagingDetails():Promise<VerifiedDetails>{
  const {auth}=getStagingClients();await auth.authStateReady();const user=auth.currentUser
  if(!user?.email)throw new Error('Accedi con un account Firebase.')
  if(sessionRead?.uid===user.uid)return sessionRead.promise
  const entry={uid:user.uid,promise:verifyStagingSession(user.uid)};sessionRead=entry
  try{return await entry.promise}finally{if(sessionRead===entry)sessionRead=null}
 }
-async function verifyStagingSession(expectedUid:string):Promise<StagingSession>{
+async function verifyStagingSession(expectedUid:string):Promise<VerifiedDetails>{
  const {auth,db}=getStagingClients()
  await auth.authStateReady()
  const user=auth.currentUser
@@ -34,9 +38,9 @@ async function verifyStagingSession(expectedUid:string):Promise<StagingSession>{
  if(!g.exists())throw new Error('Palestra non trovata su Firebase.')
  const role=resolveLegacyGymRole(user.uid,d,g.data())
  if(auth.currentUser?.uid!==user.uid)throw new Error('Account cambiato durante la verifica. Riprova.')
- const result={uid:user.uid,email:user.email,gymId,role,label:String(d.name||user.email).slice(0,80)}
+ const result:StagingSession={uid:user.uid,email:user.email,gymId,role,label:String(d.name||user.email).slice(0,80)}
  stagingSession.value=result
- return result
+ return {session:result,profile:p,gym:g}
 }
 /**
  * Navigazione tra le pagine: evita due letture Firestore ad ogni tocco.

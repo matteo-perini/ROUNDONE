@@ -111,7 +111,7 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
 </script>
 
 <template>
-  <div class="stack athlete-plan" style="gap:20px">
+  <div v-lf-entrance="{id:'athlete-plan',rows:[{match:'.athlete-plan-summary,.athlete-week-picker'},{within:'.athlete-sheet-grid',match:'.scheme-item'},{within:'.lf-athlete-v4-days',match:'.lf-athlete-v4-day'}]}" class="stack athlete-plan" style="gap:20px">
     <section class="panel athlete-plan-summary">
       <div class="row between">
         <div><h2 class="card-heading">{{uiText("IL MIO PIANO")}}</h2><p class="muted" style="margin:8px 0 0">{{uiText("SCHEDE E PROGRAMMI ASSEGNATI DAL TUO COACH")}}</p></div>

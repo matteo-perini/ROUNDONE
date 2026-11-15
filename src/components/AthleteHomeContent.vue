@@ -52,7 +52,7 @@ function target(key:(typeof quick)[number]['key']){
 }
 </script>
 <template>
- <div class="lf-home-v3 lf-home-approved" aria-label="Dashboard Atleta">
+ <div v-lf-entrance="{id:'athlete-home',rows:[{match:'.lf-v3-intro,.lf-v3-progress,.lf-v3-today,.lf-v3-shortcuts,.lf14-gym-identity'}]}" class="lf-home-v3 lf-home-approved" aria-label="Dashboard Atleta">
   <section class="lf-v3-intro">
    <div class="lf-v3-greeting">
     <h1>{{uiText('Ciao,')}} {{firstName}}! <span class="lf-v3-wave" aria-hidden="true">👋</span></h1>

@@ -1,120 +1,97 @@
-/** LION FIT · Transizioni di pagina (correzione 08 novembre 2026).
- * Rientrando in Home / Piano / Archivio / Coach la transizione riparte.
- * Cambiare solamente settimana, giorno o filtro nella stessa pagina NON anima
- * nuovamente il contenuto; non modifica dati Firebase, URL o navigazione.
- */
-import {nextTick} from 'vue'
+/** PATCH 27 R2: short, progressive entrance on explicit page groups.
+ * No subtree observer, synchronous layout reads, or animation-dependent data flow. */
+import {nextTick,type App,type Directive} from 'vue'
 import type {Router} from 'vue-router'
-
-export const ROUNDONE_MOTION=Object.freeze({titleMs:620,panelMs:720,staggerMs:90,maxDelayMs:450})
+export const ROUNDONE_MOTION=Object.freeze({titleMs:170,panelMs:210,staggerMs:12,maxDelayMs:36,maxPanels:8,entryWindowMs:1600})
 export type MotionRole='title'|'panel'
-export const ROUNDONE_TITLE_FRAMES:Keyframe[]=[
- {opacity:0,transform:'translate3d(0,12px,0)'},
- {opacity:1,transform:'translate3d(0,0,0)'},
-]
-export const ROUNDONE_PANEL_FRAMES:Keyframe[]=[
- {opacity:0,transform:'translate3d(0,17px,0) scale(.987)'},
- {opacity:1,transform:'translate3d(0,0,0) scale(1)'},
-]
+export const ROUNDONE_TITLE_FRAMES:Keyframe[]=[{opacity:.84,translate:'0 5px'},{opacity:1,translate:'0 0'}]
+export const ROUNDONE_PANEL_FRAMES:Keyframe[]=[{opacity:.82,translate:'0 9px'},{opacity:1,translate:'0 0'}]
+const FADE:Keyframe[]=[{opacity:.94},{opacity:1}]
 export function roundOneMotionOptions(role:MotionRole,index:number):KeyframeAnimationOptions{
- return {duration:role==='title'?ROUNDONE_MOTION.titleMs:ROUNDONE_MOTION.panelMs,
-  delay:Math.min(Math.max(0,index)*ROUNDONE_MOTION.staggerMs,ROUNDONE_MOTION.maxDelayMs),
-  easing:'cubic-bezier(.22,.73,.25,1)',fill:'both'}
+ return {duration:role==='title'?ROUNDONE_MOTION.titleMs:ROUNDONE_MOTION.panelMs,delay:Math.min(Math.max(0,index)*ROUNDONE_MOTION.staggerMs,ROUNDONE_MOTION.maxDelayMs),easing:'cubic-bezier(.22,.72,.24,1)',fill:'backwards'}
 }
-export function installRoundOneMotion(router:Router):void{
+export type EntranceRows={within?:string;match:string}
+export type EntranceGroup={id:string;ready?:boolean;rows:EntranceRows[]}
+// Explicit direct-child selectors only. Stop walking when the animation budget is exhausted.
+export function entranceTargets(root:HTMLElement,group:EntranceGroup,limit:number):HTMLElement[]{
+ const out:HTMLElement[]=[]
+ for(const row of group.rows){
+  if(out.length>=limit)break
+  const host=row.within?root.querySelector(row.within):root
+  if(!host)continue
+  // Bound even when the requested rows are absent (large lists or a hidden section).
+  for(let i=0;i<Math.min(host.children.length,16)&&out.length<limit;i++){
+   const e=host.children[i]
+   if(e instanceof HTMLElement&&e.matches(row.match)&&!e.matches('[hidden],[aria-hidden="true"],.hidden,.modal-overlay,.notice,[role="alert"],[role="status"]')&&!out.includes(e))out.push(e)
+  }
+ }
+ return out
+}
+export function installRoundOneMotion(router:Router,app:App):void{
  if(typeof window==='undefined'||typeof document==='undefined')return
  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)')
- const active=new Set<Animation>()
- let animated=new WeakSet<Element>()
- let frame=0
- let generation=0
- let pendingUntil=0
- let currentPath=router.currentRoute.value.path
-
- const root=()=>document.querySelector('main.main-layout,main.booking-main,main.login-main')
- const visible=(el:Element):el is HTMLElement=>{
-  if(!(el instanceof HTMLElement)||el.closest('[hidden],[aria-hidden="true"],.hidden,.modal-overlay'))return false
-  const style=getComputedStyle(el)
-  if(style.display==='none'||style.visibility==='hidden')return false
-  const rect=el.getBoundingClientRect()
-  return rect.width>0&&rect.height>0&&rect.bottom>-30&&rect.top<innerHeight+60
+ const active=new Set<Animation>(),groups=new Map<HTMLElement,EntranceGroup>(),seen=new Set<string>()
+ const explicitRoutes=new Set(['/home','/piano','/archivio','/coach','/coach/atleti','/coach/archivio'])
+ let generation=0,frame=0,queued=false,deadline=0,used=0,firstFrame=false,path=router.currentRoute.value.path
+ const allowed=()=>!document.hidden&&!reduce.matches&&performance.now()<=deadline
+ function stop(){generation++;queued=false;deadline=0;firstFrame=false;if(frame){cancelAnimationFrame(frame);frame=0}for(const a of active){try{a.cancel()}catch{/* optional visual enhancement */}}active.clear()}
+ function animate(el:HTMLElement,role:MotionRole,index:number,fadeOnly=false){
+  if(typeof el.animate!=='function')return
+  try{
+   // Individual translate composes with existing card transforms; older WebViews fade only.
+   const canTranslate=typeof CSS!=='undefined'&&CSS.supports('translate','0 9px')
+   const frames=fadeOnly||!canTranslate?FADE:role==='title'?ROUNDONE_TITLE_FRAMES:ROUNDONE_PANEL_FRAMES
+   const a=el.animate(frames,roundOneMotionOptions(role,index));active.add(a)
+   a.onfinish=a.oncancel=()=>{active.delete(a)}
+  }catch{/* A browser without animation support must still render the page normally. */}
  }
- const abort=()=>{
-  for(const a of active){try{a.cancel()}catch{/* Element already removed */}}
-  active.clear()
- }
- const targets=(main:Element):HTMLElement[]=>{
-  // La Home ha quattro blocchi nella sequenza della preview approvata.
-  const home=main.querySelector('.lf-home-approved')
-  if(home)return Array.from(home.children).filter(visible).slice(0,9)
-  // Il Piano viene animato SOLO all'ingresso nella route /piano.
-  // I cambi di settimana aggiornano i suoi nodi senza una nuova animazione.
-  const plan=main.querySelector('.athlete-plan')
-  if(plan)return Array.from(plan.children).filter(visible).slice(0,12)
-  const result:HTMLElement[]=[]
-  const unwrap=(el:Element,depth:number)=>{
-   if(result.length>=12)return
-   if(depth<3&&el instanceof HTMLElement&&(
-    el.classList.contains('stack')||el.classList.contains('athlete-live-screen')||
-    el.classList.contains('booking-in-shell')
-   )){
-    for(const child of el.children)unwrap(child,depth+1)
-    return
+ function flush(){
+  if(!allowed())return
+  const isFirst=firstFrame;firstFrame=false
+  // Map contains only explicitly registered groups, not individual cards or the entire DOM.
+  for(const [el,group] of groups){
+   if(!el.isConnected||group.ready===false||seen.has(group.id))continue
+   seen.add(group.id) // even an empty first snapshot is consumed; filters do not replay the entrance
+   for(const target of entranceTargets(el,group,ROUNDONE_MOTION.maxPanels-used)){
+    animate(target,target.matches('h1,h2,h3,header,.lf-v3-intro')?'title':'panel',used++)
    }
-   if(visible(el)&&!el.classList.contains('version')&&!el.classList.contains('modal-overlay'))result.push(el)
   }
-  for(const child of main.children)unwrap(child,0)
-  return result.slice(0,12)
- }
- const compose=(epoch:number)=>{
-  if(epoch!==generation||document.hidden||reduce.matches)return
-  const main=root()
-  if(!main)return
-  for(const [index,el] of targets(main).entries()){
-   if(animated.has(el)||typeof el.animate!=='function')continue
-   animated.add(el)
-   const isTitle=el.matches('h1,h2,h3,.lf-v3-intro,.green-hero')
-   const a=el.animate(isTitle?ROUNDONE_TITLE_FRAMES:ROUNDONE_PANEL_FRAMES,
-    roundOneMotionOptions(isTitle?'title':'panel',index))
-   active.add(a)
-   a.onfinish=()=>{active.delete(a);try{a.cancel()}catch{/* Already done */}}
-   a.oncancel=()=>active.delete(a)
+  if(isFirst&&used===0&&!explicitRoutes.has(path)){
+   const main=document.querySelector('main.main-layout,main.booking-main')
+   const target=main&&Array.from(main.children).find(e=>!e.matches('.lf-route-back,.version,.lf17-bell-wrap,.notice,.modal-overlay,.lf27-delayed-loading,[role="alert"],[role="status"],button,aside')&&!e.querySelector('.modal-overlay'))
+   if(target instanceof HTMLElement)animate(target,'panel',0,true)
   }
  }
- const schedule=()=>{
-  if(document.hidden||reduce.matches||performance.now()>pendingUntil)return
-  if(frame)cancelAnimationFrame(frame)
-  const epoch=generation
+ function schedule(){
+  if(queued||!allowed())return
+  queued=true;const epoch=generation
   void nextTick(()=>{
-   if(epoch!==generation||document.hidden)return
-   frame=requestAnimationFrame(()=>{frame=0;compose(epoch)})
+   if(epoch!==generation)return
+   frame=requestAnimationFrame(()=>{frame=0;queued=false;if(epoch===generation)flush()})
   })
  }
- const enter=(path:string)=>{
-  currentPath=path
-  generation++
-  animated=new WeakSet<Element>()
-  abort()
-  pendingUntil=performance.now()+1900 // include async first snapshot, not all realtime updates
-  schedule()
+ function ready(el:HTMLElement,group:EntranceGroup){groups.set(el,group);if(group.ready!==false&&!seen.has(group.id))schedule()}
+ const directive:Directive<HTMLElement,EntranceGroup>={
+  mounted(el,b){ready(el,b.value)},
+  updated(el,b){
+   groups.set(el,b.value)
+   // Only the initial explicit data-ready edge can schedule a later first entrance.
+   if(b.oldValue?.ready===false&&b.value.ready!==false&&!seen.has(b.value.id))schedule()
+  },
+  beforeUnmount(el){groups.delete(el)}
  }
- // DOM async: se i dati delle schede arrivano DOPO il cambio pagina,
- // anima i nuovi blocchi SOLO durante il breve intervallo di ingresso.
- const observer=new MutationObserver(mutations=>{
-  if(document.hidden||reduce.matches||performance.now()>pendingUntil)return
-  if(!mutations.some(m=>m.type==='childList'&&m.addedNodes.length))return
-  schedule()
- })
- observer.observe(document.getElementById('app')??document.body,{childList:true,subtree:true})
- router.afterEach((to,from,failure)=>{
-  if(failure)return
-  if(to.path!==from.path){enter(to.path);return}
-  // Query-only: /piano?week=1 → /piano?week=2. Nessun nuovo effetto.
-  if(to.fullPath!==from.fullPath){pendingUntil=0;currentPath=to.path}
- })
- reduce.addEventListener('change',()=>{if(reduce.matches){pendingUntil=0;abort()}})
- document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){pendingUntil=0;abort();if(frame){cancelAnimationFrame(frame);frame=0}}
- })
- void router.isReady().then(()=>{if(currentPath===router.currentRoute.value.path)enter(currentPath)})
+ app.directive('lf-entrance',directive)
+ function enter(nextPath:string){stop();path=nextPath;seen.clear();used=0;deadline=performance.now()+ROUNDONE_MOTION.entryWindowMs;firstFrame=true;schedule()}
+ router.afterEach((to,from,failure)=>{if(failure)return;if(to.path!==from.path)enter(to.path);else if(to.fullPath!==from.fullPath)deadline=0})
+ // Legacy embedded WebViews use addListener rather than addEventListener.
+ const changed=()=>{if(reduce.matches)stop()}
+ if(typeof reduce.addEventListener==='function')reduce.addEventListener('change',changed);else reduce.addListener?.(changed)
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()})
+ // When the user starts scrolling or tapping, do not animate additional async rows.
+ function finishEntrance(){deadline=0;firstFrame=false}
+ document.addEventListener('pointerdown',finishEntrance,{passive:true,capture:true})
+ document.addEventListener('touchstart',finishEntrance,{passive:true,capture:true})
+ document.addEventListener('wheel',finishEntrance,{passive:true,capture:true})
+ document.addEventListener('keydown',finishEntrance,{capture:true})
+ enter(path)
 }

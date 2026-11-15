@@ -9,6 +9,7 @@ import {normalizeEntries,validDate,correctionValues,sameValues,workoutSlot,valid
 import {normalizeGoal,type ProgressGoal,type ProgressGoalStatus,type GoalInput} from '../../features/progress/goalsModel'
 import {sameWorkout,type PendingWorkout} from '../../features/progress/offlineWorkouts'
 import type {PhotoScope,PhotoRequest} from '../../features/progress/checkGallery'
+import {withCheckPhotoDeadline} from '../../features/progress/checkPhotoDownload'
 import {MAX_CHECK_PHOTO_BYTES} from '../../features/progress/checkPhotoCompression'
 function privateStorage(){
  const bucket=String(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET||'').trim()
@@ -67,7 +68,7 @@ export async function loadPhoto(storagePath:string):Promise<string>{
  if(!/^progress_photos\/[\w-]+\/[\w-]+\/[\w-]+\/(front|back|left|right)\.jpg$/.test(storagePath))throw new Error('Riferimento foto non valido')
  const storage=privateStorage()
  // Keep reading older Check Zone photos uploaded under the previous 2 MiB limit.
- const blob=await getBlob(storageRef(storage,storagePath),2*1024*1024)
+ const blob=await withCheckPhotoDeadline(getBlob(storageRef(storage,storagePath),2*1024*1024))
  return URL.createObjectURL(blob)
 }
 /** Authenticated blob, canonical path and current account checked on both sides of download. */

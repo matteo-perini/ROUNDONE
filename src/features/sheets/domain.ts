@@ -50,7 +50,7 @@ export function linksBySheet(weeks:readonly ProgramWeek[],athleteId:string):Map<
   const day=w.days[dayIndex];if(!day)continue
   for(const slot of [1,2] as const){const id=String(slot===1?day.templateId:day.templateId2||'').trim();if(!id)continue
    const entry:Link={weekId:w.id,weekName:w.name,weekDate:w.startDate||'',weekNumber:i+1,day:DAY_KEYS[dayIndex],dayName:DAY_NAMES[dayIndex],dayIndex,slot,templateId:id}
-   map.set(id,[...(map.get(id)||[]),entry])
+   const existing=map.get(id);if(existing)existing.push(entry);else map.set(id,[entry])
   }
  }
  return map

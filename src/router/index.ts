@@ -1,13 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import {installNavigationTiming} from '../features/motion/navigationTiming'
 import {isStagingMode,isOperationalMode} from '../integrations/firebase/stagingConfig'
 import {readNavigationSession,stagingSession} from '../integrations/firebase/stagingSession'
 import { useLabStore } from '../stores/lab'
 import Access from '../views/Access.vue'
 const PlatformAdmin=()=>import('../views/PlatformAdmin.vue')
+const LiveAthlete = () => import('../views/AthleteLiveWorkspace.vue')
 const Home = () => import('../views/Home.vue')
 const Program = () => import('../views/Program.vue')
 const Archive = () => import('../views/Archive.vue')
 const Coach = () => import('../views/Coach.vue')
+const LiveCoach = () => import('../views/DevCoachDashboard.vue')
+const LiveRoster = () => import('../views/LiveCoachAthletes.vue')
+const LiveCoachArchive = () => import('../views/LiveCoachTemplates.vue')
 const CoachAthletes = () => import('../views/CoachAthletes.vue')
 const CoachProgram = () => import('../views/CoachProgram.vue')
 const CoachSheets = () => import('../views/CoachSheets.vue')
@@ -21,10 +26,10 @@ const CoachProgress = () => import('../views/CoachProgress.vue')
 const CoachStaff = () => import('../views/CoachStaff.vue')
 const router=createRouter({history:createWebHistory(),routes:[
  {path:'/',redirect:'/accesso'},{path:'/accesso',component:Access,meta:{title:'Accesso'}},
- {path:'/home',component:Home,meta:{title:'Home Atleta'}},
- {path:'/piano',component:Program,meta:{title:'Piano Atleta'}},
+ {path:'/home',component:isStagingMode()?LiveAthlete:Home,props:isStagingMode()?{screen:'home'}:false,meta:{title:'Home Atleta'}},
+ {path:'/piano',component:isStagingMode()?LiveAthlete:Program,props:isStagingMode()?{screen:'plan'}:false,meta:{title:'Piano Atleta'}},
  {path:'/schede',redirect:'/piano'},
- {path:'/archivio',component:Archive,meta:{title:'Archivio Atleta'}},
+ {path:'/archivio',component:isStagingMode()?LiveAthlete:Archive,props:isStagingMode()?{screen:'archive'}:false,meta:{title:'Archivio Atleta'}},
  {path:'/staging',redirect:'/accesso'},
  {path:'/team',redirect:to=>({path:'/progressi',query:to.query})},
  {path:'/progressi',component:AthleteProgress,meta:{title:'Allenamenti Atleta'}},
@@ -32,10 +37,10 @@ const router=createRouter({history:createWebHistory(),routes:[
  {path:'/impostazioni',component:Settings,meta:{title:'Impostazioni'}},
  {path:'/lionfit-control',component:PlatformAdmin,meta:{title:'LionFit Control Center'}},
  {path:'/prenotazioni',component:Bookings,meta:{title:'Prenotazioni'}},
- {path:'/coach',component:Coach,meta:{title:'Dashboard Coach',coachOnly:true}},
- {path:'/coach/atleti',component:CoachAthletes,meta:{title:'Gestione Atleti',coachOnly:true}},
+ {path:'/coach',component:isOperationalMode()?LiveCoach:Coach,meta:{title:'Dashboard Coach',coachOnly:true}},
+ {path:'/coach/atleti',component:isOperationalMode()?LiveRoster:CoachAthletes,meta:{title:'Gestione Atleti',coachOnly:true}},
  {path:'/coach/programmi',component:CoachProgram,meta:{title:'Programmazione',coachOnly:true}},
- {path:'/coach/archivio',component:CoachSheets,meta:{title:'Archivio Coach',coachOnly:true}},
+ {path:'/coach/archivio',component:isOperationalMode()?LiveCoachArchive:CoachSheets,meta:{title:'Archivio Coach',coachOnly:true}},
  {path:'/coach/schede',redirect:'/coach/archivio'},
  {path:'/coach/libreria',component:Library,meta:{title:'Libreria Esercizi',coachOnly:true}},
  {path:'/coach/cestino',component:CoachTrash,meta:{title:'Cestino',coachOnly:true}},
@@ -58,6 +63,7 @@ const router=createRouter({history:createWebHistory(),routes:[
  ] : []),
  {path:'/:pathMatch(.*)*',redirect:'/accesso'}
 ]})
+installNavigationTiming(router)
 router.beforeEach(async to=>{
  // La build Android normale non deve mai usare lo store fittizio.
  if(import.meta.env.PROD || isStagingMode()){

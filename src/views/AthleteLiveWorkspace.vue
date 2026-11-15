@@ -20,13 +20,15 @@ import {joinArchivesWithLegacy,isArchiveCopyLinkedOrEquivalent} from '../feature
 import type { ExerciseRecord } from '../features/sheets/domain'
 const props=defineProps<{screen:'home'|'plan'|'archive'}>()
 const route=useRoute()
-const {status,message,session,data,avatarUrl,archive,archiveReady,hiddenArchiveIds,snapshots,updatedAt,hideArchiveCopy}=useAthleteLive()
+const {status,message,session,data,avatarUrl,archive,archiveReady,hiddenArchiveIds,snapshots,updatedAt,hideArchiveCopy}=useAthleteLive(()=>props.screen==='archive')
 const selectedWeek=ref(typeof route.query.week==='string'?route.query.week:'')
 const requestedDay=computed(()=>typeof route.query.day==='string'&&/^[0-6]$/.test(route.query.day)?Number(route.query.day):undefined)
 watch(()=>route.query.week,next=>{selectedWeek.value=typeof next==='string'?next:''})
 const opened=ref<{title:string;exercises:readonly ExerciseRecord[]}|null>(null)
 const search=ref(''), archiveView=ref<ArchiveView>('all')
 const hideBusy=ref(false),hideMessage=ref('')
+// Reuse the live subscriptions, not local dialogs or selection between pages.
+watch(()=>props.screen,()=>{opened.value=null;search.value='';archiveView.value='all';hideMessage.value='';selectedWeek.value=typeof route.query.week==='string'?route.query.week:''},{flush:'sync'})
 async function hideCopy(id:string){
  if(!mayWriteLive()||hideBusy.value||!session.value)return
  if(isArchiveCopyLinkedOrEquivalent(id,mergedArchive.value,data.value?.weeks||[],session.value.uid)){hideMessage.value='Questa scheda (o una sua copia equivalente) è ancora collegata a un giorno: non può essere nascosta.';return}
@@ -64,13 +66,14 @@ const shownArchive=computed(()=>mergedArchive.value.filter(a=>!hiddenArchiveIds.
 const counts=computed(()=>archiveCounts(shownArchive.value,data.value?.personal||[]))
 const archiveGroups=computed(()=>groupSemanticCopies(visibleArchives(shownArchive.value,data.value?.personal||[],archiveView.value,search.value)))
 const archiveDistinctCount=computed(()=>groupSemanticCopies(shownArchive.value).length)
+const retryWorkspace=()=>window.location.reload()
 const livePath=(path:string)=>isStagingMode()?path:`${path}?source=emulator`
 const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${encodeURIComponent(currentWeek.value.id)}&day=${todayIndex.value}`:`/piano?source=emulator&week=${encodeURIComponent(currentWeek.value.id)}&day=${todayIndex.value}`):livePath('/piano'))
 </script>
 <template>
  <div class="stack athlete-live-screen" :aria-label="'Area Atleta'">
-  <div v-if="status==='loading'" class="panel" role="status">{{uiText("Caricamento schede e settimane…")}}</div>
-  <div v-else-if="status==='error'" class="notice" role="alert">{{message}} <RouterLink :to="isStagingMode()?'/accesso':'/dev/accesso'">{{uiText("Torna all'accesso")}}</RouterLink></div>
+  <div v-if="status==='loading'" class="panel lf27-delayed-loading" role="status">{{uiText("Caricamento schede e settimane…")}}</div>
+  <div v-else-if="status==='error'" class="notice" role="alert">{{message}} <button type="button" class="secondary" @click="retryWorkspace">{{uiText("Riprova")}}</button> <RouterLink :to="isStagingMode()?'/accesso':'/dev/accesso'">{{uiText("Torna all'accesso")}}</RouterLink></div>
   <template v-else-if="data">
    <template v-if="props.screen==='plan'">
     <AthletePlanContent :athlete-key="session?.uid||''" :personal="data.personal" :weeks="data.weeks" :groups="data.groups" :week-id="selectedWeek||currentWeek?.id||''" :initial-day="requestedDay" @update:week-id="id => { selectedWeek=id }" />
@@ -80,14 +83,14 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
     <AthleteHomeContent :name="session?.label||'Atleta'" :today-name="todayDay?.name||''" :week-name="currentWeekLabel" :calendar-day="romeWeekDayNumber(clock)" :activities="todayDay?.activities||[]" :sheets="todaySheets" :days="currentWeek?.days||[]" :plan-link="livePath('/piano')" :archive-link="livePath('/archivio')" :progress-link="livePath('/progressi')" :booking-link="livePath('/prenotazioni')" :avatar-url="avatarUrl" :profile-link="livePath('/profilo')" :day-link="dayLink"/>
    </template>
    <template v-else-if="props.screen==='archive'">
-    <section class="panel athlete-archive-hero"><div class="row between"><h2 class="card-heading">{{uiText("ARCHIVIO")}}</h2><span class="pill pill-neutral">{{archiveDistinctCount}} {{uiText("SCHEDE")}}</span></div><p class="muted" style="margin:20px 0 0">{{uiText("Ritrova le schede che hai ricevuto dai Coach, comprese quelle dei programmi precedenti.")}}</p></section>
-    <section class="panel athlete-archive-list"><div class="row between"><h3>{{uiText("Le mie schede di allenamento")}}</h3><span class="muted">{{archiveGroups.length}} {{uiText("schede visualizzate")}}</span></div>
+    <section class="panel athlete-archive-hero"><div class="row between"><h2 class="card-heading">{{uiText("ARCHIVIO")}}</h2><span class="pill pill-neutral">{{archiveReady?archiveDistinctCount:'—'}} {{uiText("SCHEDE")}}</span></div><p class="muted" style="margin:20px 0 0">{{uiText("Ritrova le schede che hai ricevuto dai Coach, comprese quelle dei programmi precedenti.")}}</p></section>
+    <section v-lf-entrance="{id:'athlete-archive',ready:archiveReady,rows:[{match:'.lf-archive-v4-item'}]}" class="panel athlete-archive-list"><div class="row between"><h3>{{uiText("Le mie schede di allenamento")}}</h3><span class="muted">{{archiveReady?archiveGroups.length:'—'}} {{uiText("schede visualizzate")}}</span></div>
      <div class="grid2"><input v-model="search" type="search" aria-label="Cerca archivio personale" placeholder="Cerca nell'Archivio..."/>
       <select v-model="archiveView" aria-label="Filtra archivio personale"><option value="all">Tutte le schede</option><option value="active">Schede assegnate</option><option value="historical">Schede storiche</option><option value="trashed">Schede ritirate</option></select>
      </div>
-     <p v-if="!archiveReady" class="muted">{{uiText("Caricamento archivio storico…")}}</p>
+     <p v-if="!archiveReady" class="muted lf27-delayed-loading" role="status">{{uiText("Caricamento archivio storico…")}}</p>
      <p v-else-if="!archiveGroups.length" class="notice">{{uiText("Nessuna scheda corrisponde al filtro selezionato. Le copie protette non vengono eliminate.")}}</p>
-     <div v-for="g in archiveGroups" :key="g.sheet.id" class="line-card athlete-archive-item lf-archive-v4-item"><button class="wide athlete-archive-open" type="button" @click="opened=g.sheet"><span class="lf-archive-v4-icon" aria-hidden="true">▣</span><b>{{g.sheet.title}}</b><span class="lf-archive-v4-action">Apri scheda ›</span></button></div>
+     <template v-if="archiveReady"><div v-for="g in archiveGroups" :key="g.sheet.id" class="line-card athlete-archive-item lf-archive-v4-item"><button class="wide athlete-archive-open" type="button" @click="opened=g.sheet"><span class="lf-archive-v4-icon" aria-hidden="true">▣</span><b>{{g.sheet.title}}</b><span class="lf-archive-v4-action">Apri scheda ›</span></button></div></template>
      <p class="muted small lf-archive-v4-note">Le schede storiche rimangono conservate. Le versioni con esercizi o contenuti differenti restano separate.</p>
     </section>
    </template>

@@ -55,11 +55,11 @@ const eventUrl=(url:string)=>props.source==='Firebase Emulator'?`${url}?source=e
 const formatDate=(ms:number)=>new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'}).format(ms)
 </script>
 <template>
- <div class="lf-coach-dashboard">
+ <div v-lf-entrance="{id:'coach-dashboard',rows:[{match:'.lf-coach-greeting'},{within:'.lf-kpi-grid',match:'.lf-kpi-card'},{within:'.lf-coach-hero-row',match:'.lf14-brand-container,.lf-coach-actions'},{within:'.lf-coach-detail-grid',match:'.lf-dashboard-panel'},{within:'.lf-coach-bottom-grid',match:'.lf-dashboard-panel'}]}" class="lf-coach-dashboard">
   <WorkAttendanceBadge v-if="badgeSession" :key="`${badgeSession.uid}:${badgeSession.gymId}`" :uid="badgeSession.uid" :gym-id="badgeSession.gymId"/>
   <header class="lf-coach-greeting"><div><h1>Bentornato, {{name}}! 👊</h1><p>Gestisci atleti, schede, programmi e prenotazioni della tua palestra.</p></div><div class="lf14-header-actions"><DashboardSearch v-if="searchItems" :items="searchItems" :partial="searchPartial" :emulator="source==='Firebase Emulator'"/><span class="lf-source-tag">{{source}}</span></div></header>
 
-  <p v-if="loading" role="status" class="muted">Caricamento dati della palestra…</p>
+  <p v-if="loading" role="status" class="muted lf27-delayed-loading">Caricamento dati della palestra…</p>
   <p v-if="error" role="alert" class="notice">{{error}}</p>
   <div v-if="dataWarnings?.length" class="lf-dashboard-warnings" role="status">
    <p v-for="(warning,i) in dataWarnings" :key="i">{{warning}}</p>

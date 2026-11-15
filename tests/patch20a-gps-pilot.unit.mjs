@@ -10,7 +10,7 @@ test('settings exposes work configuration without a tenant allowlist; GPS still 
 import {ref,shallowRef,watch,nextTick} from 'vue';
 test('GPS settings stays open on verified session refresh and closes on actual identity changes',async()=>{
  const settings=readFileSync(new URL('../src/views/Settings.vue',import.meta.url),'utf8');
- const watcher='watch([()=>stagingSession.value?.uid,()=>stagingSession.value?.gymId,()=>stagingSession.value?.role],()=>{workPilotOpen.value=false})';
+ const watcher='watch([()=>stagingSession.value?.uid,()=>stagingSession.value?.gymId,()=>stagingSession.value?.role],()=>{workPilotOpen.value=false;workReportOpen.value=false})';
  assert.ok(settings.includes(watcher));
  const initial={uid:'user1',gymId:'gym1',role:'titolare',label:'Coach'};
  const stagingSession=shallowRef(initial),workPilotOpen=ref(true);

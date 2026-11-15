@@ -30,8 +30,8 @@ async function bootstrap(){
  installNavigationRecovery(router)
  const app=createApp(App).use(createPinia()).use(router)
  try{await router.isReady()}catch{if(!navigationFailure.value)navigationFailure.value={kind:'navigation',path:router.currentRoute.value.fullPath}}
+ installRoundOneMotion(router,app)
  app.mount('#app')
- installRoundOneMotion(router)
 }
 void bootstrap().catch(()=>{
  const root=document.getElementById('app');if(!root)return
@@ -67,3 +67,5 @@ import './styles-progress360.css'
 import './styles-patch14.css'
 
 import "./styles-patch20b2-mobile.css"
+
+import "./styles-patch27-performance.css"
