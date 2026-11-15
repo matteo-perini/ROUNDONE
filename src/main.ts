@@ -48,3 +48,5 @@ import './styles-progress360.css'
 
 // PATCH 14: identity, search and platform settings.
 import './styles-patch14.css'
+
+import "./styles-patch20b2-mobile.css"

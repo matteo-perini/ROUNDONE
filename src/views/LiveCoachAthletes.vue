@@ -559,9 +559,9 @@ function copyToArchive(sheet:Personal){
   <div class="coach-team-title"><h2 class="card-heading">{{uiText("GESTIONE ATLETI")}}</h2><span class="muted">{{uiText("SELEZIONA UN ATLETA")}}</span></div>
   <div class="coach-team-tools"><RouterLink to="/coach/staff" class="primary">{{uiText("+ Invita atleta")}}</RouterLink><input v-model="search" type="search" :aria-label="uiText('Cerca atleta')" :placeholder="uiText('Cerca atleta per nome…')"/></div>
  </section>
- <p v-if="error" class="notice" role="alert">{{error}}</p><p class="small muted" role="status">{{status}}</p>
- <section v-if="!athlete" class="lf-roster-summary">
-   <span class="small muted">{{visibleAthletes.length}} {{uiText('atleti ·')}} {{uiText(currentFilterLabel)}}</span>
+ <p v-if="error" class="notice" role="alert">{{error}}</p><p class="small muted" :class="{'lf-roster-mobile-quiet':status==='Atleti aggiornati da Firebase'}" role="status">{{status}}</p>
+ <section v-if="!athlete" class="lf-roster-summary" :class="{'lf-roster-mobile-quiet':!(session?.role==='titolare'&&unassignedAthletes.length)}">
+   <span class="small muted lf-roster-mobile-quiet">{{visibleAthletes.length}} {{uiText('atleti ·')}} {{uiText(currentFilterLabel)}}</span>
    <button v-if="session?.role==='titolare'&&unassignedAthletes.length" type="button" class="secondary lf-assign-legacy" @click="legacyPanelOpen=!legacyPanelOpen">{{uiText(legacyPanelOpen?'Chiudi assegnazioni':'Riassegna atleti storici')}}</button>
  </section>
  <p v-if="!athlete" class="small muted lf-roster-help">{{uiText("Tutti i Coach autorizzati possono gestire gli Atleti della stessa palestra. L’associazione al Coach serve soltanto per organizzare i filtri.")}}</p>
@@ -578,12 +578,12 @@ function copyToArchive(sheet:Personal){
   </div>
  </section>
  <section v-if="!athlete" class="lf-roster-filters" aria-label="Filtri elenco atleti">
-  <div class="lf-roster-filter-group"><strong>{{uiText("Filtro per Coach")}}</strong><div class="lf-filter-buttons">
+  <div class="lf-roster-filter-group"><strong>{{uiText("Filtro per Coach")}}</strong><select class="lf-roster-mobile-select" v-model="membershipFilter" :aria-label="uiText('Filtro per Coach')"><option value="miei">{{uiText("I miei Atleti")}}</option><option v-for="c in otherCoaches" :key="c.id" :value="'coach:'+c.id">{{uiText("Atleti di")}} {{c.name}}</option><option value="tutti">{{uiText("Tutti gli Atleti")}}</option></select><div class="lf-filter-buttons lf-roster-desktop-coaches">
    <button type="button" :class="{selected:membershipFilter==='miei'}" :aria-pressed="membershipFilter==='miei'" @click="membershipFilter='miei'">{{uiText("I miei Atleti")}}</button>
    <button v-for="c in otherCoaches" :key="c.id" type="button" :class="{selected:membershipFilter==='coach:'+c.id}" :aria-pressed="membershipFilter==='coach:'+c.id" @click="membershipFilter='coach:'+c.id">{{uiText("Atleti di")}} {{c.name}}</button>
    <button type="button" :class="{selected:membershipFilter==='tutti'}" :aria-pressed="membershipFilter==='tutti'" @click="membershipFilter='tutti'">{{uiText("Tutti gli Atleti")}}</button>
   </div></div>
-  <div class="lf-roster-filter-group"><strong>{{uiText("Programmazione")}}</strong><div class="lf-filter-buttons">
+  <div class="lf-roster-filter-group lf-roster-program-filters"><strong>{{uiText("Programmazione")}}</strong><div class="lf-filter-buttons">
    <button type="button" :class="{selected:programFilter==='tutti'}" :aria-pressed="programFilter==='tutti'" @click="programFilter='tutti'">{{uiText("Tutti")}}</button>
    <button type="button" :class="{selected:programFilter==='con'}" :aria-pressed="programFilter==='con'" @click="programFilter='con'">{{uiText("Con programmazione")}}</button>
    <button type="button" :class="{selected:programFilter==='senza'}" :aria-pressed="programFilter==='senza'" @click="programFilter='senza'">{{uiText("Senza programmazione")}}</button>

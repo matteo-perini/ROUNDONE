@@ -1,0 +1,10 @@
+LIONFIT PATCH 20B.2 — Restyling Admin Mobile e correzioni report
+Prerequisiti: PATCH 20A.2 report e PATCH 20B.1 impostazioni; include anche il badge chiuso della R2.
+Estrarre nella radice del progetto, sovrascrivendo i file.
+Nessuna nuova dipendenza, nessuna modifica al backend, alle Rules, al database o alla release Android.
+Test: npm run typecheck
+node --experimental-strip-types --test tests/patch20b2-mobile.unit.mjs tests/patch20a2-report.unit.mjs tests/patch20b-settings.unit.mjs tests/patch20a2-badge-collapse.unit.mjs
+Generare e pubblicare la build web con procedura consueta.
+Verificare su mobile Home/ricerca inline, Atleti, Archivio e permessi delle azioni, Profilo e accesso Impostazioni/Coach, report apri/chiudi e selettore unico, badge chiuso al ritorno in Home.
+Le nuove regole visive sono limitate a viewport fino a 767 px; report apribile/chiudibile anche su desktop.
+TypeScript exit 0; 16 test passati nel nostro ambiente. Non collaudato su dispositivo reale autenticato.

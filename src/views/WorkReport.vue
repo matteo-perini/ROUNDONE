@@ -9,6 +9,7 @@ import {workReport,type WorkReport} from '../integrations/firebase/workAttendanc
 import {pilotAvailable} from '../features/work/gpsPilot'
 import {dayState,dayTitle,duration,monthNow,monthTitle,partState,rangeLabel,siteName} from '../features/work/reportFormat'
 import LionIcon from '../components/LionIcon.vue'
+defineProps<{embedded?:boolean}>()
 const month=ref(monthNow()),r=ref<WorkReport|null>(null),busy=ref(false),error=ref(''),notice=ref(''),notEnabled=ref(false),exporting=ref(false),files=ref<File[]>([]),expanded=ref<string[]>([])
 const scope=computed(()=>`${stagingSession.value?.uid||''}:${stagingSession.value?.gymId||''}:${stagingSession.value?.role||''}`)
 let alive=true,seq=0;const same=(s:string)=>alive&&scope.value===s&&getStagingClients().auth.currentUser?.uid===stagingSession.value?.uid&&pilotAvailable(stagingSession.value)
@@ -27,8 +28,8 @@ onMounted(()=>{if(isLiveMode())stopAuth=onAuthStateChanged(getStagingClients().a
 </script>
 <template>
  <section class="work-report" aria-label="Report lavorativi">
-  <div class="wr-head"><RouterLink to="/impostazioni" class="wr-back"><LionIcon name="back" :size="18"/> Impostazioni</RouterLink><h1>Report lavorativi</h1><span>Storico personale · LionFit Work</span></div>
-  <section class="wr-month" aria-label="Seleziona mese"><button type="button" aria-label="Mese precedente" :disabled="busy||month<='2000-01'" @click="move(-1)">‹</button><div><strong>{{monthTitle(month)}}</strong><input type="month" :value="month" min="2000-01" :max="monthNow()" aria-label="Mese del report" :disabled="busy" @change="choose"/></div><button type="button" aria-label="Mese successivo" :disabled="busy||month>=monthNow()" @click="move(1)">›</button><button type="button" aria-label="Aggiorna report" :disabled="busy" @click="load"><LionIcon name="repeat"/></button></section>
+  <div v-if="!embedded" class="wr-head"><RouterLink to="/impostazioni" class="wr-back"><LionIcon name="back" :size="18"/> Impostazioni</RouterLink><h1>Report lavorativi</h1><span>Storico personale · LionFit Work</span></div>
+  <section class="wr-month" aria-label="Seleziona mese"><button type="button" aria-label="Mese precedente" :disabled="busy||month<='2000-01'" @click="move(-1)">‹</button><div><input type="month" :value="month" min="2000-01" :max="monthNow()" aria-label="Mese del report" :disabled="busy" @change="choose"/></div><button type="button" aria-label="Mese successivo" :disabled="busy||month>=monthNow()" @click="move(1)">›</button><button type="button" aria-label="Aggiorna report" :disabled="busy" @click="load"><LionIcon name="repeat"/></button></section>
   <p v-if="busy" role="status">Caricamento report…</p><p v-if="error" class="wr-alert" role="alert">{{error}}</p><p v-if="notEnabled" class="wr-panel">LionFit Work non è ancora configurato per la tua palestra. <RouterLink to="/impostazioni">Vai alle impostazioni</RouterLink></p>
   <template v-if="r">
    <section class="wr-panel wr-summary"><div class="wr-person"><img v-if="r.logo" :src="r.logo" alt="Logo palestra"/><div><b>{{r.gymName}}</b><small>{{r.person}}</small></div></div><small>Totale ore confermate</small><strong class="wr-total">{{duration(r.totalMs)}}</strong><div class="wr-sites" :style="{gridTemplateColumns:`repeat(${r.sites.length},minmax(0,1fr))`}"><div v-for="s in r.sites" :key="s.id"><span>{{s.name}}</span><b>{{duration(r.totals[s.id])}}</b></div></div><div class="wr-kpis"><span>Giorni lavorati <b>{{r.workedDays}}</b></span><span>Media/giorno <b>{{duration(r.workedDays?r.totalMs/r.workedDays:0)}}</b></span></div><p v-if="r.pendingMs||r.flaggedDays" class="wr-alert">{{r.flaggedDays}} giorni da verificare. Ore in attesa: {{duration(r.pendingMs)}} (escluse dal totale).</p></section>
