@@ -1,0 +1,10 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {validWorkRadius,validWorkCenter,validWorkSite,validWorkConfig,workConfigRole,workConfigEditable,DEFAULT_WORK_RADIUS,workSites} from '../src/features/work/workConfig.ts'
+const site={name:'Sede A',latitude:45,longitude:12,radius:80,centerAccuracy:10}
+const c={enabled:true,site1:site,site2:null}
+test('integer radius 20-300',()=>{assert.equal(DEFAULT_WORK_RADIUS,80);for(const x of [20,80,300])assert.equal(validWorkRadius(x),true);for(const x of [19,301,80.1,NaN,Infinity,'80',null])assert.equal(validWorkRadius(x),false)})
+test('center accuracy <=25m',()=>{for(const accuracy of [1,25])assert.equal(validWorkCenter({latitude:45,longitude:12,accuracy}),true);for(const accuracy of [0,26,NaN,Infinity,-1])assert.equal(validWorkCenter({latitude:45,longitude:12,accuracy}),false);assert.equal(validWorkCenter({latitude:91,longitude:12,accuracy:1}),false)})
+test('one or two named sites with stable identifiers',()=>{assert.equal(validWorkConfig(c),true);assert.deepEqual(workSites(c).map(x=>x.id),['site1']);const other={...c,site2:{...site,name:'Sede B',latitude:46,radius:100}};assert.equal(validWorkConfig(other),true);assert.deepEqual(workSites(other).map(x=>x.id),['site1','site2']);assert.equal(workSites(other)[1].site.radius,100)})
+test('reject malformed configurations',()=>{for(const x of [null,{},false,{...c,enabled:false},{...c,site1:null},{...c,site2:undefined},{...c,site2:{}},{...c,site1:{...site,radius:19}}])assert.equal(validWorkConfig(x),false);for(const x of [{...site,name:''},{...site,name:'   '},{...site,name:' x '},{...site,name:'a'.repeat(61)},{...site,longitude:'12'},{...site,centerAccuracy:30}])assert.equal(validWorkSite(x),false)})
+test('read staff only, initial creation owner only',()=>{for(const role of ['titolare','collaboratore'])assert.equal(workConfigRole(role),true);for(const role of ['atleta','platform','admin',''])assert.equal(workConfigRole(role),false);assert.equal(workConfigEditable('titolare'),true);for(const role of ['collaboratore','atleta','platform','admin'])assert.equal(workConfigEditable(role),false)})

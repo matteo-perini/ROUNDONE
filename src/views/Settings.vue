@@ -10,7 +10,7 @@ onMounted(()=>{pushAvailable.value=pushFeatureEnabled()})
 import BillingSandbox from '../components/BillingSandbox.vue'
 import {billingSandboxEnabled} from '../integrations/firebase/billingSandbox'
 import GymIdentity from '../components/GymIdentity.vue'
-import WorkGpsPilot from '../components/WorkGpsPilot.vue'
+import WorkConfigSettings from '../components/WorkConfigSettings.vue'
 import {pilotAvailable,pilotMobileDevice} from '../features/work/gpsPilot'
 import DashboardPreferences from '../components/DashboardPreferences.vue'
 import SupportTickets from '../components/SupportTickets.vue'
@@ -33,7 +33,7 @@ import LionIcon from '../components/LionIcon.vue'
 import {interfaceLanguage,setInterfaceLanguage,uiText} from '../features/i18n/interfaceLanguage'
 const workPilotOpen=ref(false)
 const workPilotMobile=pilotMobileDevice(navigator.userAgent,navigator.maxTouchPoints,Capacitor.isNativePlatform()&&['android','ios'].includes(Capacitor.getPlatform()))
-const workPilotAllowed=computed(()=>isLiveMode()&&workPilotMobile&&pilotAvailable(stagingSession.value))
+const workPilotAllowed=computed(()=>isLiveMode()&&pilotAvailable(stagingSession.value))
 // A refreshed session is a new object even when its identity is unchanged.
 // Watch each primitive separately: close only on an actual account, gym or role change.
 watch([()=>stagingSession.value?.uid,()=>stagingSession.value?.gymId,()=>stagingSession.value?.role],()=>{workPilotOpen.value=false})
@@ -128,7 +128,7 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
    </section>
    <section v-if="billingSandboxEnabled()&&stagingSession?.role==='titolare'" class="lfsettings-group"><h2>Abbonamento · Ambiente di test</h2><button type="button" class="lfsettings-entry" :aria-expanded="billingOpen" @click="billingOpen=!billingOpen"><LionIcon name="clipboard"/><span><b>Abbonamento LionFit (Sandbox)</b><small>Prova gratuita, piani e rinnovi simulati</small></span><LionIcon name="chevron" :size="17"/></button><BillingSandbox v-if="billingOpen"/></section>
    <section v-if="platformAllowed" class="lfsettings-group"><h2>LionFit · Gestione piattaforma</h2><RouterLink class="lfsettings-entry" to="/lionfit-control"><LionIcon name="shield"/><span><b>Control Center</b><small>Accesso riservato Super Admin</small></span><LionIcon name="chevron" :size="17"/></RouterLink></section>
-   <section v-if="workPilotAllowed" class="lfsettings-group"><h2>LionFit Work · Collaudo</h2><button type="button" class="lfsettings-entry" :aria-expanded="workPilotOpen" @click="workPilotOpen=!workPilotOpen"><LionIcon name="clipboard"/><span><b>Prova GPS sede</b><small>Solo collaudo, nessuna presenza registrata</small></span><LionIcon name="chevron" :size="17"/></button><WorkGpsPilot v-if="workPilotOpen" :key="`${stagingSession?.uid}:${stagingSession?.gymId}`" :gym-id="stagingSession?.gymId||''"/></section>
+   <section v-if="workPilotAllowed" class="lfsettings-group"><h2>LionFit Work</h2><button type="button" class="lfsettings-entry" :aria-expanded="workPilotOpen" @click="workPilotOpen=!workPilotOpen"><LionIcon name="clipboard"/><span><b>Timbratura GPS</b><small>Gestione sedi e blocco definitivo</small></span><LionIcon name="chevron" :size="17"/></button><WorkConfigSettings v-if="workPilotOpen" :key="`${stagingSession?.uid}:${stagingSession?.gymId}:${stagingSession?.role}`" :gym-id="stagingSession?.gymId||''" :uid="stagingSession?.uid||''" :mobile="workPilotMobile"/></section>
    <section v-if="competitionAvailable" class="lfsettings-group"><h2>Moduli palestra</h2><button type="button" class="lfsettings-entry" :disabled="competitionBusy||!mayWriteLive()" @click="toggleCompetition"><LionIcon name="calendar"/><span><b>Competizioni e gare</b><small>Mostra o nascondi il modulo della palestra, senza cancellare gli eventi.</small></span><strong>{{competitionEnabled?'Attivo':'Disattivo'}}</strong></button><p v-if="competitionMessage" class="notice" role="status">{{competitionMessage}}</p></section>
    <section v-if="pushAvailable&&stagingSession" class="lfsettings-group"><h2>Notifiche</h2><button class="lfsettings-entry" type="button" :aria-expanded="pushOpen" @click="pushOpen=!pushOpen"><LionIcon name="calendar"/><span><b>Avvisi e promemoria Agenda</b><small>Preferenze account e dispositivi</small></span><LionIcon name="chevron" :size="17"/></button><PushSettings v-if="pushOpen"/></section>
    <section v-if="calendarPilotEnabled()&&stagingSession" class="lfsettings-group"><h2>Integrazioni</h2><button class="lfsettings-entry" type="button" :aria-expanded="calendarOpen" @click="calendarOpen=!calendarOpen"><LionIcon name="calendar"/><span><b>Google Calendar</b><small>Collegamento facoltativo</small></span><LionIcon name="chevron" :size="17"/></button><CalendarPilotSettings v-if="calendarOpen" :key="stagingSession.uid"/></section>

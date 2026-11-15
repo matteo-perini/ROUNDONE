@@ -1,0 +1,24 @@
+      // PATCH 20A.1A R2 - una configurazione atomica, fino a due sedi immutabili.
+      match /work_config/site {
+        function validSite(s) {
+          return s is map && s.keys().hasAll(['name','latitude','longitude','radius','centerAccuracy'])
+            && s.keys().hasOnly(['name','latitude','longitude','radius','centerAccuracy'])
+            && s.name is string && s.name.size() >= 1 && s.name.size() <= 60 && s.name.matches('.*[^ ].*')
+            && s.latitude is number && s.latitude >= -90 && s.latitude <= 90
+            && s.longitude is number && s.longitude >= -180 && s.longitude <= 180
+            && s.radius is int && s.radius >= 20 && s.radius <= 300
+            && s.centerAccuracy is number && s.centerAccuracy > 0 && s.centerAccuracy <= 25;
+        }
+        allow get: if verified() && !lfControlUid() && coach(gymId);
+        allow list: if false;
+        allow create: if verified() && !lfControlUid() && owner(gymId)
+          && request.resource.data.keys().hasAll(['schemaVersion','enabled','locked','site1','site2','lockedBy','lockedAt'])
+          && request.resource.data.keys().hasOnly(['schemaVersion','enabled','locked','site1','site2','lockedBy','lockedAt'])
+          && request.resource.data.schemaVersion == 2
+          && request.resource.data.enabled == true && request.resource.data.locked == true
+          && validSite(request.resource.data.site1)
+          && (request.resource.data.site2 == null || validSite(request.resource.data.site2))
+          && request.resource.data.lockedBy == uid()
+          && request.resource.data.lockedAt == request.time;
+        allow update, delete: if false;
+      }
