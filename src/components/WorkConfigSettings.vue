@@ -40,11 +40,16 @@ async function save(){if(!canSave.value||!draft.value||confirmStep.value!==2||!a
 </script>
 <template>
  <section class="lf-work-config" aria-label="LionFit Work gestione sedi">
- <h3>Gestione sedi</h3>
+ <h3 v-if="!stored">Gestione sedi</h3>
  <p v-if="!ready&&busy" role="status">Caricamento configurazione…</p>
  <template v-if="ready">
  <template v-if="stored">
- <label v-if="mobile" class="lf-work-site"><input type="checkbox" :checked="showBadge" @change="toggleBadge"/> Mostra badge nella Home su questo dispositivo</label>
+ <label v-if="mobile" class="lf-work-badge-pref">
+  <span class="lf-work-badge-copy"><strong>Mostra badge nella Home</strong><small>Solo su questo dispositivo mobile</small></span>
+  <input type="checkbox" role="switch" aria-label="Mostra badge nella Home su questo dispositivo" :checked="showBadge" @change="toggleBadge"/>
+  <span aria-hidden="true" class="lf-work-switch"></span>
+ </label>
+ <h3>Gestione sedi</h3>
  <p class="muted small">LionFit Work è attivo. Le sedi sono bloccate: nessun admin o collaboratore può modificarle.</p>
  <article v-for="entry in finalSites" :key="entry.id" class="lf-work-site">
  <div class="lf-work-site-head"><strong>{{entry.site.name}}</strong><span>🔒 Definitiva</span></div>
@@ -82,9 +87,12 @@ async function save(){if(!canSave.value||!draft.value||confirmStep.value!==2||!a
  </template>
  <p v-if="message" :role="failure?'alert':'status'" class="muted small">{{message}}</p>
  <button v-if="!ready||stored" type="button" class="secondary wide" :disabled="busy" @click="load">Ricarica configurazione</button>
- <p class="muted small">In questa fase nessuna timbratura viene registrata. La posizione è richiesta solo al tocco.</p>
+ <p class="muted small">Qui non vengono registrate presenze. La posizione è richiesta solo quando premi un pulsante.</p>
  </section>
 </template>
 <style scoped>
 .lf-work-config{display:grid;gap:12px;padding:14px;border-top:1px solid var(--border);min-width:0}.lf-work-config h3,.lf-work-config p{margin:0}.lf-work-config label{display:grid;gap:5px}.lf-work-config input:not([type=checkbox]){width:100%;box-sizing:border-box}.lf-work-config .lf-work-toggle{display:flex;gap:10px;align-items:center}.lf-work-toggle input{width:20px;height:20px;flex:none}.lf-work-result,.lf-work-site{display:grid;gap:8px;border:1px solid var(--border);border-radius:10px;padding:12px;min-width:0}.lf-work-result span{font-size:.9em}.lf-work-choice{display:grid;grid-template-columns:1fr 1fr;gap:8px}.lf-work-site-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.lf-work-site-head span,.lf-work-success{color:#55dca0}
+
+.lf-work-config .lf-work-badge-pref{position:relative;display:flex;gap:12px;align-items:center;justify-content:space-between;min-height:48px;padding:9px 0 12px;border-bottom:1px solid var(--border);cursor:pointer}
+.lf-work-badge-copy{display:grid;gap:4px;min-width:0;flex:1}.lf-work-badge-copy small{color:var(--muted);font-size:.8em}.lf-work-badge-pref input{position:absolute;right:0;width:48px;height:32px;opacity:0;margin:0;cursor:pointer}.lf-work-switch{width:46px;height:26px;border-radius:20px;background:#596575;flex:none;position:relative;pointer-events:none}.lf-work-switch::after{content:'';position:absolute;width:20px;height:20px;top:3px;left:3px;border-radius:50%;background:white;transition:transform .15s ease}.lf-work-badge-pref input:checked+.lf-work-switch{background:#16834c}.lf-work-badge-pref input:checked+.lf-work-switch::after{transform:translateX(20px)}.lf-work-badge-pref input:focus-visible+.lf-work-switch{outline:2px solid var(--mint);outline-offset:3px}@media(prefers-reduced-motion:reduce){.lf-work-switch::after{transition:none}}
 </style>

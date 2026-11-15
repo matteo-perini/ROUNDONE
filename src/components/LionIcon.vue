@@ -35,6 +35,10 @@ const paths:Record<string,string>={
  progress:'M3 19h18M4 16l5-5 4 3 7-8M16 6h4v4',
  filter:'M4 7h16M7 12h10M10 17h4',
  edit:'M4 20l5-1 11-11-4-4L5 15l-1 5Zm10-14 4 4',
+ bell:'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4',
+ globe:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM2 12h20M12 2c5 5 5 15 0 20M12 2c-5 5-5 15 0 20',
+ fingerprint:'M3 12a9 9 0 0 1 18 0M6 15v-3a6 6 0 0 1 12 0v4M9 20v-8a3 3 0 0 1 6 0v5c0 2-1 4-2 5M12 12v5c0 2-1 4-2 5M3 16v2M21 15v4',
+ trophy:'M8 3h8v6a4 4 0 0 1-8 0V3ZM8 5H4v2a4 4 0 0 0 4 4M16 5h4v2a4 4 0 0 1-4 4M12 13v5M8 21h8M10 18h4',
  info:'M12 12v5m0-9v1M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z'
 }
 const path=computed(()=>paths[props.name]??paths.info)
