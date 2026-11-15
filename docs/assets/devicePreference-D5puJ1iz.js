@@ -1,0 +1,1 @@
+const a=(e,t)=>`lionfit.work.badge.v1:${e}:${t}`;function n(e,t){try{return localStorage.getItem(a(e,t))==="1"}catch{return!1}}function o(e,t,r){try{return localStorage.setItem(a(e,t),r?"1":"0"),!0}catch{return!1}}export{n as b,o as s};

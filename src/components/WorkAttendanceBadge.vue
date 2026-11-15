@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import {computed,onMounted,onUnmounted,ref} from 'vue'
+import {RouterLink} from 'vue-router'
 import {workStatus,workPunch,type WorkStatus} from '../integrations/firebase/workAttendance'
 import {getWorkFix} from '../features/work/gpsPilot'
 import type {WorkSiteId} from '../features/work/workConfig'
 import {stagingSession} from '../integrations/firebase/stagingSession'
 import {getStagingClients} from '../integrations/firebase/stagingClient'
 const props=defineProps<{uid:string;gymId:string}>()
-const data=ref<WorkStatus|null>(null),expanded=ref(true),busy=ref(false),message=ref(''),error=ref(false),choices=ref<WorkSiteId[]>([]),received=ref(0),clock=ref(0)
+const data=ref<WorkStatus|null>(null),expanded=ref(false),busy=ref(false),message=ref(''),error=ref(false),choices=ref<WorkSiteId[]>([]),received=ref(0),clock=ref(0)
 let alive=true,interval:ReturnType<typeof setInterval>|undefined
 const same=()=>alive&&stagingSession.value?.uid===props.uid&&stagingSession.value?.gymId===props.gymId&&getStagingClients().auth.currentUser?.uid===props.uid
 const active=computed(()=>data.value?.enabled?data.value:null)
@@ -30,10 +31,11 @@ onUnmounted(()=>{alive=false;if(interval)clearInterval(interval);document.remove
   <div v-if="expanded" class="lf-work-body">
    <template v-if="active"><div class="lf-work-total"><small>{{open?'Ore lavorate oggi · turno in corso':'Ore lavorate oggi'}}</small><strong>{{format(total)}}</strong></div><div class="lf-work-buttons"><button type="button" class="lf-work-in" :disabled="busy||!!open||choices.length>0" @click="punch('in')">Timbra entrata</button><button type="button" class="lf-work-out" :disabled="busy||!open" @click="punch('out')">Timbra uscita</button></div><p v-if="open&&active.now-open.startMs>16*3600000" class="lf-work-msg">Turno aperto da oltre 16 ore. Verifica eventuale uscita dimenticata.</p></template>
    <div v-if="choices.length" class="lf-work-choice"><button v-for="id in choices" :key="id" type="button" :disabled="busy" @click="punch('in',id)">{{siteName(id)}}</button><button type="button" @click="choices=[];message=''">Annulla</button></div>
-   <p v-if="message" :role="error?'alert':'status'" class="lf-work-msg" :class="{'lf-work-error':error}">{{message}}</p><p v-if="!data&&busy" role="status">Caricamento…</p><button v-if="!data&&!busy" type="button" class="lf-work-reload" @click="refresh">Aggiorna stato</button>
+   <RouterLink v-if="active" class="lf-work-report" to="/coach/work">Storico e report lavorativi →</RouterLink><p v-if="message" :role="error?'alert':'status'" class="lf-work-msg" :class="{'lf-work-error':error}">{{message}}</p><p v-if="!data&&busy" role="status">Caricamento…</p><button v-if="!data&&!busy" type="button" class="lf-work-reload" @click="refresh">Aggiorna stato</button>
   </div>
  </section>
 </template>
 <style scoped>
 .lf-work-badge{width:100%;border:1px solid #315344;border-radius:16px;background:#111d1a;color:#e7f8ee;overflow:hidden;margin-bottom:12px}.lf-work-head{display:flex;width:100%;justify-content:space-between;align-items:center;text-align:left;padding:13px 15px;background:transparent;color:inherit;border:0;cursor:pointer}.lf-work-head span:first-child{display:grid;gap:3px}.lf-work-head small,.lf-work-total small{font-size:.78rem;color:#a4bbaf}.lf-work-body{display:grid;gap:12px;padding:0 14px 14px}.lf-work-total{display:grid;gap:3px;text-align:center}.lf-work-total strong{font-size:1.9rem;font-variant-numeric:tabular-nums;letter-spacing:.04em}.lf-work-buttons,.lf-work-choice{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.lf-work-buttons button,.lf-work-choice button,.lf-work-reload{min-height:48px;border:1px solid #3a6b52;border-radius:10px;color:#f2fff7;background:#177947;font-weight:700;padding:8px}.lf-work-buttons .lf-work-out,.lf-work-choice button,.lf-work-reload{background:#26343c;border-color:#53616c}.lf-work-buttons button:disabled{opacity:.42;cursor:not-allowed}.lf-work-msg{margin:0;font-size:.85rem;color:#bddec9}.lf-work-error{color:#ffb8b8}
+.lf-work-report{display:block;color:#a9efc7;text-align:center;padding:10px;border-top:1px solid #315344;font-weight:700;text-decoration:none}
 </style>

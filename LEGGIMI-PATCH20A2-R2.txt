@@ -1,0 +1,7 @@
+PATCH 20A.2 R2 – badge chiuso per default
+Applicare DOPO PATCH 20A.2 – REPORT LAVORATIVI.
+Estrarre nella radice del progetto, sovrascrivere.
+Il badge torna chiuso a ogni ingresso in Home; si apre solo con il suo pulsante.
+Nessuna modifica a Firebase, timbrature o report.
+Test: node --test tests/patch20a2-badge-collapse.unit.mjs
+Poi npm run typecheck, build web e pubblicazione abituale.

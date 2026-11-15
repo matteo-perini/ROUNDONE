@@ -40,6 +40,7 @@ const router=createRouter({history:createWebHistory(),routes:[
  {path:'/coach/libreria',component:Library,meta:{title:'Libreria Esercizi',coachOnly:true}},
  {path:'/coach/cestino',component:CoachTrash,meta:{title:'Cestino',coachOnly:true}},
  {path:'/coach/progressi',component:CoachProgress,meta:{title:'Allenamenti Coach',coachOnly:true}},
+ {path:'/coach/work',component:()=>import('../views/WorkReport.vue'),meta:{title:'Report lavorativi',coachOnly:true}},
  {path:'/coach/staff',component:CoachStaff,meta:{title:'Coach e Inviti',coachOnly:true}},
  {path:'/coach/profilo',component:Profile,meta:{title:'Profilo Coach',coachOnly:true}},
  {path:'/coach/prenotazioni',component:Bookings,meta:{title:'Calendario Appuntamenti',coachOnly:true}},
@@ -83,7 +84,7 @@ router.beforeEach(async to=>{
   const coaches=['/coach','/coach/profilo']
   if(isOperationalMode()) {
    const liveAthletes=[...athletes,'/prenotazioni','/impostazioni']
-   const liveCoaches=[...coaches,'/impostazioni','/coach/atleti','/coach/programmi','/coach/archivio','/coach/libreria','/coach/cestino','/coach/progressi','/coach/staff','/coach/prenotazioni']
+   const liveCoaches=[...coaches,'/impostazioni','/coach/atleti','/coach/programmi','/coach/archivio','/coach/libreria','/coach/cestino','/coach/progressi','/coach/staff','/coach/prenotazioni','/coach/work']
    return (s.role==='atleta'?liveAthletes:liveCoaches).includes(to.path)?true:(s.role==='atleta'?'/home':'/coach')
   }
   if(s.role==='atleta')return athletes.includes(to.path)?true:'/home'
