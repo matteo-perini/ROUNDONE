@@ -6,3 +6,21 @@ test('inside, outside, uncertain incl. weak fixes',()=>{assert.equal(checkWorkAr
 
 import {readFileSync} from 'node:fs';
 test('optional settings UI has no tenant allowlist and GPS rechecks live staff session',()=>{const settings=readFileSync(new URL('../src/views/Settings.vue',import.meta.url),'utf8'),component=readFileSync(new URL('../src/components/WorkGpsPilot.vue',import.meta.url),'utf8');assert.ok(!settings.includes('VITE_LIONFIT_WORK_PILOT_GYM_ID'));assert.match(settings,/isLiveMode\(\)&&workPilotMobile&&pilotAvailable\(stagingSession.value\)/);assert.match(settings,/workPilotOpen=ref\(false\)/);assert.match(component,/await readStagingSession\(\)/);assert.match(component,/s.gymId!==props.gymId/);assert.match(component,/navigator.geolocation.getCurrentPosition/);assert.doesNotMatch(component,/watchPosition|setDoc|addDoc|localStorage/)});
+
+import {ref,shallowRef,watch,nextTick} from 'vue';
+test('GPS settings stays open on verified session refresh and closes on actual identity changes',async()=>{
+ const settings=readFileSync(new URL('../src/views/Settings.vue',import.meta.url),'utf8');
+ const watcher='watch([()=>stagingSession.value?.uid,()=>stagingSession.value?.gymId,()=>stagingSession.value?.role],()=>{workPilotOpen.value=false})';
+ assert.ok(settings.includes(watcher));
+ const initial={uid:'user1',gymId:'gym1',role:'titolare',label:'Coach'};
+ const stagingSession=shallowRef(initial),workPilotOpen=ref(true);
+ const stop=watch([()=>stagingSession.value?.uid,()=>stagingSession.value?.gymId,()=>stagingSession.value?.role],()=>{workPilotOpen.value=false});
+ try{
+  stagingSession.value={...initial};await nextTick();assert.equal(workPilotOpen.value,true);
+  stagingSession.value={...initial,label:'Coach updated'};await nextTick();assert.equal(workPilotOpen.value,true);
+  for(const changed of [{...initial,uid:'user2'},{...initial,gymId:'gym2'},{...initial,role:'collaboratore'},null]){
+   stagingSession.value={...initial};await nextTick();workPilotOpen.value=true;
+   stagingSession.value=changed;await nextTick();assert.equal(workPilotOpen.value,false);
+  }
+ }finally{stop()}
+});

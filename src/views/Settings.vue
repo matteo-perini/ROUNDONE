@@ -34,7 +34,9 @@ import {interfaceLanguage,setInterfaceLanguage,uiText} from '../features/i18n/in
 const workPilotOpen=ref(false)
 const workPilotMobile=pilotMobileDevice(navigator.userAgent,navigator.maxTouchPoints,Capacitor.isNativePlatform()&&['android','ios'].includes(Capacitor.getPlatform()))
 const workPilotAllowed=computed(()=>isLiveMode()&&workPilotMobile&&pilotAvailable(stagingSession.value))
-watch(()=>[stagingSession.value?.uid,stagingSession.value?.gymId,stagingSession.value?.role],()=>{workPilotOpen.value=false})
+// A refreshed session is a new object even when its identity is unchanged.
+// Watch each primitive separately: close only on an actual account, gym or role change.
+watch([()=>stagingSession.value?.uid,()=>stagingSession.value?.gymId,()=>stagingSession.value?.role],()=>{workPilotOpen.value=false})
 const router = useRouter()
 const route=useRoute()
 const emulator=computed(()=>import.meta.env.DEV&&route.query.source==='emulator')

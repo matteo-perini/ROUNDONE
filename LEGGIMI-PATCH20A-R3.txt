@@ -1,0 +1,11 @@
+LIONFIT — PATCH 20A.0 R3 — FIX CHIUSURA PANNELLO GPS
+Prerequisito: PATCH 20A.0 R2 già applicata.
+Correzione mirata: il refresh del profilo Firebase non deve chiudere il pannello se UID, palestra e ruolo sono invariati. Il pannello si chiude ancora se cambia uno di questi valori o si esce dall’account.
+1. Estrarre nella radice del progetto e sovrascrivere i file.
+2. Dalla radice eseguire:
+   npm run typecheck
+   node --experimental-strip-types --test tests/patch20a-gps-pilot.unit.mjs
+3. Build web LIVE e pubblicazione abituale con GitHub. Nessun APK, nessun deploy Firebase.
+4. Da smartphone, aprire Impostazioni > LionFit Work > Prova GPS sede. Premere Usa la posizione attuale come centro sede di prova. Attendere il risultato, anche se il permesso GPS viene negato o la precisione è insufficiente. Il pannello deve restare visibile. Se viene acquisito il centro, provare la posizione GPS.
+5. Il test è solo in memoria: nessuna presenza reale o coordinata viene salvata. Precisione di 25 m per impostare il centro e altre soglie invariate.
+Verificato in ambiente di lavoro: typecheck riuscito, 6 test unitari superati (inclusa regressione Vue con refresh sessione e cambio identità). Non collaudato su dispositivo reale.
