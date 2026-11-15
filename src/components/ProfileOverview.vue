@@ -44,10 +44,43 @@ function show(id:string){active.value=active.value===id?'':id}
      <template v-else-if="item.id==='palestra'"><p><b>{{uiText("Palestra:")}}</b> {{gymName}}</p><p class="muted">{{uiText("Il titolare può modificare il nome, il logo e la copertina dalle impostazioni della palestra.")}}</p></template>
     </div>
    </section>
-   <RouterLink v-if="athlete && workoutsEnabled" class="lfp-section-button" to="/progressi"><span class="lfp-section-icon"><LionIcon name="dumbbell" :size="21"/></span><span class="lfp-section-copy"><strong>Allenamenti</strong><small>Storico, andamento e obiettivi</small></span><LionIcon name="chevron" :size="18"/></RouterLink>
+   <RouterLink v-if="athlete && workoutsEnabled" class="lfp-section-button" to="/progressi"><span class="lfp-section-icon"><LionIcon name="dumbbell" :size="21"/></span><span class="lfp-section-copy"><strong>{{uiText("Allenamenti")}}</strong><small>{{uiText("Storico, andamento e obiettivi")}}</small></span><LionIcon name="chevron" :size="18"/></RouterLink>
    <RouterLink v-if="!athlete && staffEnabled && (role==='titolare'||role==='coach-demo')" class="lfp-section-button lfp-mobile-staff" :to="coachStaffTo"><span class="lfp-section-icon"><LionIcon name="users" :size="21"/></span><span class="lfp-section-copy"><strong>{{uiText("Coach della palestra")}}</strong></span><LionIcon name="chevron" :size="18"/></RouterLink>
    <RouterLink class="lfp-section-button lfp-settings-link" :to="settingsTo"><span class="lfp-section-icon"><LionIcon name="settings" :size="21"/></span><span class="lfp-section-copy"><strong>{{uiText("Impostazioni")}}</strong><small>{{uiText("Tema, privacy, sicurezza e supporto")}}</small></span><LionIcon name="chevron" :size="18"/></RouterLink>
   </div>
   <div v-if="!athlete" class="lfp-actions"><h3>{{uiText("Azioni rapide")}}</h3><div class="lfp-action-grid"><RouterLink :to="athleteTo"><LionIcon name="users"/> {{uiText("Gestisci atleti")}}</RouterLink><RouterLink :to="bookingsTo"><LionIcon name="calendar"/> {{uiText("Prenotazioni")}}</RouterLink><RouterLink v-if="staffEnabled&&(role==='titolare'||role==='coach-demo')" :to="coachStaffTo"><LionIcon name="gym"/> {{uiText("Coach della palestra")}}</RouterLink><RouterLink :to="settingsTo"><LionIcon name="shield"/> {{uiText("Impostazioni")}}</RouterLink></div></div>
  </section>
 </template>
+
+<style>
+/* PATCH 23: profilo atleta compatto; desktop e coach conservano il layout. */
+@media(max-width:767px){
+ .app.as-athlete .lfp-athlete{gap:10px;min-width:0}
+ .app.as-athlete .lfp-athlete .lfp-heading{margin:0}
+ .app.as-athlete .lfp-athlete .lfp-heading :is(.eyebrow,p,.lfp-gear),
+ .app.as-athlete .lfp-athlete .lfp-hero-actions>.lfp-outline{display:none}
+ .app.as-athlete .lfp-athlete .lfp-heading h1{font-size:24px;margin:0}
+ .app.as-athlete .lfp-athlete .lfp-hero{padding:14px;gap:12px;min-width:0;border-radius:16px}
+ .app.as-athlete .lfp-athlete .lfp-hero .lfp-avatar{width:72px!important;height:72px!important;min-width:72px!important;min-height:72px!important;max-width:72px!important;max-height:72px!important;flex:0 0 72px!important}
+ .app.as-athlete .lfp-athlete .lfp-identity h2{font-size:18px;line-height:1.25;overflow-wrap:anywhere;margin-bottom:4px}
+ .app.as-athlete .lfp-athlete .lfp-identity p{margin-bottom:4px;font-size:12px;overflow-wrap:anywhere}
+ .app.as-athlete .lfp-athlete .lfp-gym{max-width:100%;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere;padding:4px 7px;font-size:11px}
+ .app.as-athlete .lfp-athlete .lfp-gym svg{flex:none}
+ .app.as-athlete .lfp-athlete .lfp-location{margin-top:6px!important;margin-bottom:0}
+ .app.as-athlete .lfp-athlete .lfp-hero-actions{width:100%;min-width:0;flex-direction:row;gap:0}
+ .app.as-athlete .lfp-athlete .lfp-edit-button{width:100%;min-height:44px;font-size:13px}
+ .app.as-athlete .lfp-athlete .lfp-facts{gap:8px}
+ .app.as-athlete .lfp-athlete .lfp-facts>div{min-height:64px;padding:8px;gap:3px}
+ .app.as-athlete .lfp-athlete .lfp-facts b{font-size:14px}
+ .app.as-athlete .lfp-athlete .lfp-facts small{font-size:11px}
+ .app.as-athlete .lfp-athlete .lfp-sections{grid-template-columns:minmax(0,1fr);gap:0;padding:0 10px;background:var(--card);border:1px solid var(--border);border-radius:14px}
+ .app.as-athlete .lfp-athlete .lfp-sections>.lfp-section,.app.as-athlete .lfp-athlete .lfp-sections>.lfp-section-button{border:0;border-radius:0;background:transparent;box-shadow:none}
+ .app.as-athlete .lfp-athlete .lfp-sections>*+*{border-top:1px solid var(--border)}
+ .app.as-athlete .lfp-athlete .lfp-section-button{padding:8px 3px;min-height:52px;gap:10px;box-sizing:border-box}
+ .app.as-athlete .lfp-athlete .lfp-section-icon{width:34px;height:34px}
+ .app.as-athlete .lfp-athlete .lfp-section-copy strong{font-size:14px}
+ .app.as-athlete .lfp-athlete .lfp-section-copy small{font-size:11px;line-height:1.35;margin-top:2px}
+ .app.as-athlete .lfp-athlete .lfp-section-content{padding:10px 8px 12px;overflow-wrap:anywhere}
+ .app.as-athlete .lfp-athlete .lfp-section-button:focus-visible,.app.as-athlete .lfp-athlete .lfp-edit-button:focus-visible{outline:2px solid var(--mint);outline-offset:-2px}
+}
+</style>

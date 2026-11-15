@@ -119,13 +119,13 @@ const profilePath = computed(() => { const coach=isStagingMode()?stagingSession.
 async function exit() { if(isStagingMode()){if(await signOutStaging())await router.replace('/accesso');return}if(emulator.value){const {leaveDevSession}=await import('../integrations/firebase/devSession');await leaveDevSession();await router.push('/dev/accesso')}else{lab.logout();await router.push('/accesso')} }
 </script>
 <template>
- <div class="lfsettings lfsettings-compact">
+ <div class="lfsettings lfsettings-compact lfsettings-v23">
   <header class="lfsettings-header"><div><span class="eyebrow">{{uiText("LION FIT · ACCOUNT")}}</span><h1>{{uiText("Impostazioni")}}</h1></div></header>
   <div class="lfsettings-categories">
    <section class="lfsettings-group"><h2>{{uiText("Generali")}}</h2>
     <button class="lfsettings-entry" type="button" @click="lab.toggleTheme()"><LionIcon name="sun"/><span><b>{{uiText("Tema")}}</b><small>{{uiText("Personalizza l’aspetto dell’app")}}</small></span><strong>{{uiText(lab.theme==='dark'?'Scuro':'Chiaro')}}</strong><LionIcon name="chevron" :size="17"/></button>
 
-    <label class="lfsettings-entry lfsettings-language"><LionIcon name="globe"/><span><b>{{uiText('Lingua')}}</b><small>{{uiText("Interface language · impostazione locale")}}</small></span><select :value="interfaceLanguage" aria-label="Lingua interfaccia" @change="setInterfaceLanguage(($event.target as HTMLSelectElement).value)"><option value="it">🇮🇹 Italiano</option><option value="en">{{uiText("🇬🇧 English")}}</option></select></label>
+    <label class="lfsettings-entry lfsettings-language"><LionIcon name="globe"/><span><b>{{uiText('Lingua')}}</b><small>{{uiText("Lingua dell’interfaccia")}}</small></span><select :value="interfaceLanguage" :aria-label="uiText('Lingua dell’interfaccia')" @change="setInterfaceLanguage(($event.target as HTMLSelectElement).value)"><option value="it">🇮🇹 Italiano</option><option value="en">{{uiText("🇬🇧 English")}}</option></select></label>
    </section>
    <section v-if="isStagingMode()&&stagingSession&&stagingSession.role!=='atleta'" class="lfsettings-group"><h2>Personalizzazione</h2>
     <button v-if="stagingSession.role==='titolare'" type="button" class="lfsettings-entry" :aria-expanded="identityOpen" @click="identityOpen=!identityOpen"><LionIcon name="gym"/><span><b>Personalizza palestra</b><small>Nome, logo e copertina</small></span><LionIcon name="chevron" :size="17"/></button>
@@ -211,6 +211,19 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
  .app .lfsettings-compact .lfsettings-language select{margin:0!important;min-width:0!important;max-width:48%!important;min-height:44px!important;font-size:12px!important}
  .app .lfsettings-compact .lfsettings-group>:not(h2):not(.lfsettings-entry){margin-block:8px 12px;min-width:0}
  .app .lfsettings-compact .lfsettings-exit{min-height:48px;border-radius:12px}
+}
+/* More specific athlete variant, independent of global theme card overrides. */
+@media (max-width: 767px){
+ .app.as-athlete .lfsettings-v23{gap:10px}
+ .app.as-athlete .lfsettings-v23 .lfsettings-header h1{font-size:24px;margin:0}
+ .app.as-athlete .lfsettings-v23 .lfsettings-categories{padding:0 12px;border-radius:14px}
+ .app.as-athlete .lfsettings-v23 .lfsettings-group{padding:0;background:transparent;border:0}
+ .app.as-athlete .lfsettings-v23 .lfsettings-group>.lfsettings-entry{display:flex;align-items:center;min-height:49px;margin:0;padding:8px 2px;border:0;border-bottom:1px solid var(--border);border-radius:0;background:transparent;box-shadow:none;gap:10px}
+ .app.as-athlete .lfsettings-v23 .lfsettings-group:last-child>.lfsettings-entry:last-child{border-bottom:0}
+ .app.as-athlete .lfsettings-v23 .lfsettings-entry>span>b{font-size:14px;line-height:1.3}
+ .app.as-athlete .lfsettings-v23 .lfsettings-entry>span>small{display:none}
+ .app.as-athlete .lfsettings-v23 .lfsettings-language select{max-width:46%!important;min-width:0!important;width:auto!important;min-height:44px!important;flex:0 1 46%}
+ .app.as-athlete .lfsettings-v23 .lfsettings-exit{padding:10px;min-height:48px;font-size:14px}
 }
 @media(prefers-reduced-motion:reduce){.app .lfsettings-compact .lfsettings-entry>svg:last-child{transition:none}}
 </style>

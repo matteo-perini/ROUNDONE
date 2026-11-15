@@ -27,6 +27,13 @@ import appMeta from '../package.json'
 // Chunk di avviso STAGING caricato solo in `vite build --mode staging`, mai in LIVE.
 const StagingBanner=import.meta.env.MODE==='staging' ? defineAsyncComponent(()=>import('./components/StagingBanner.vue')) : null
 const lab=useLabStore();const route=useRoute();const router=useRouter()
+// Match the actual shell breakpoints. Render exactly one inbox at a stable location.
+const athleteHeaderMedia=window.matchMedia('(max-width: 799px)')
+const coachHeaderMedia=window.matchMedia('(max-width: 900px)')
+const athleteHeaderVisible=ref(athleteHeaderMedia.matches),coachHeaderVisible=ref(coachHeaderMedia.matches)
+function syncHeaderViewport(){athleteHeaderVisible.value=athleteHeaderMedia.matches;coachHeaderVisible.value=coachHeaderMedia.matches}
+athleteHeaderMedia.addEventListener('change',syncHeaderViewport);coachHeaderMedia.addEventListener('change',syncHeaderViewport)
+onUnmounted(()=>{athleteHeaderMedia.removeEventListener('change',syncHeaderViewport);coachHeaderMedia.removeEventListener('change',syncHeaderViewport)})
 function openPushAgenda(){pushNotice.value=null;void router.push(stagingSession.value?.role==='atleta'?'/prenotazioni':'/coach/prenotazioni')}
 watch(()=>stagingSession.value?.uid,uid=>{void connectPushSession(uid||null,openPushAgenda).catch(()=>{})},{immediate:true})
 const webVersionLabel=`LION FIT · WEB v${appMeta.version}`
@@ -83,6 +90,7 @@ const shownRole = computed(() => isStagingMode()
      : athleteEmulatorPreview.value || bookingEmulatorPreview.value ? 'atleta'
      : demoRouteRole.value??lab.role)
    : null)
+const inboxInHeader=computed(()=>shownRole.value==='atleta'?athleteHeaderVisible.value:coachHeaderVisible.value)
 const athleteNav=[{to:'/home',label:'HOME',icon:'home'},{to:'/piano',label:'PIANO',icon:'calendar'},{to:'/archivio',label:'ARCHIVIO',icon:'archive'},{to:'/progressi',label:'ALLENAMENTI',icon:'progress'},{to:'/prenotazioni',label:'AGENDA',icon:'calendar-plus'},{to:'/profilo',label:'PROFILO',icon:'user'}]
 const coachNav=[{to:'/coach',label:'HOME',desk:'DASHBOARD',icon:'home'},{to:'/coach/atleti',label:'ATLETI',desk:'GESTIONE ATLETI',icon:'users'},{to:'/coach/libreria',label:'ESERCIZI',desk:'LIBRERIA ESERCIZI',icon:'clipboard'},{to:'/coach/archivio',label:'ARCHIVIO',desk:'ARCHIVIO SCHEDE',icon:'book'},{to:'/coach/profilo',label:'PROFILO',desk:'PROFILO & PALESTRA',icon:'settings'}]
 type SideNavItem = {to:string;label:string;icon:string;desk?:string}
@@ -127,10 +135,10 @@ async function goOut(){
       </nav>
       <div class="sidebar-foot"><QuickProfileSwitch/><button class="ghost wide" @click="goOut">{{uiText(isStagingMode()?'Esci da Lion Fit':coachEmulatorPreview ? 'Esci dal laboratorio' : 'Esci')}}</button><RouterLink v-if="shownRole==='coach' && !coachDevShell" class="invite-shortcut" to="/coach/staff">{{uiText('INVITI DELLA PALESTRA')}} <strong>{{uiText('Inviti via email →')}}</strong></RouterLink><small>{{webVersionLabel}}</small></div>
     </aside>
-    <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><QuickProfileSwitch compact/><span id="lf17-mobile-bell" style="display:contents"/><RouterLink v-if="shownRole==='coach'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Apri impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
+    <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><QuickProfileSwitch compact/><InboxBell v-if="inboxInHeader&&coachInboxEnabled()&&stagingSession" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><RouterLink v-if="shownRole==='coach'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Apri impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
 
     <!-- Navigazione Atleta esclusiva: sidebar a sinistra su desktop, dock inferiore su mobile. -->
-    <main class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking}]"><button v-if="route.path!=='/home' && route.path!=='/coach'" type="button" class="lf-route-back" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> {{uiText('Indietro')}}</button><div class="version">{{webVersionLabel}}</div><template v-if="coachInboxEnabled()&&stagingSession"><InboxBell :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><PushWelcome :key="stagingSession.uid" :uid="stagingSession.uid" :open-agenda="openPushAgenda"/></template><p v-if="linkedNotice" class="notice" role="alert">{{linkedNotice}} <button type="button" class="bare" @click="linkedNotice=''">Chiudi</button></p><RouterView/></main>
+    <main class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking}]"><button v-if="route.path!=='/home' && route.path!=='/coach'" type="button" class="lf-route-back" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> {{uiText('Indietro')}}</button><div class="version">{{webVersionLabel}}</div><template v-if="coachInboxEnabled()&&stagingSession"><InboxBell v-if="!inboxInHeader" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><PushWelcome :key="stagingSession.uid" :uid="stagingSession.uid" :open-agenda="openPushAgenda"/></template><p v-if="linkedNotice" class="notice" role="alert">{{linkedNotice}} <button type="button" class="bare" @click="linkedNotice=''">Chiudi</button></p><RouterView/></main>
     <!-- La navbar Atleta vive fuori dal contenitore .app: nessun CSS / overflow legacy può coprirla. -->
     <AthleteBottomNavigation v-if="shownRole==='atleta'" :items="mobileNav" :theme="lab.theme"/>
     <nav v-if="shownRole==='coach'" class="bottom-nav coach-bottom" :aria-label="uiText('Navigazione Coach')"><RouterLink v-for="item in mobileNav" :key="item.to" :to="item.to"><LionIcon :name="item.icon" :size="24"/><span>{{uiText(item.label)}}</span></RouterLink></nav>
@@ -142,4 +150,26 @@ async function goOut(){
 
 <style scoped>
 .lf21-nav-recovery{position:fixed;inset:auto 12px max(82px,calc(76px + env(safe-area-inset-bottom,0px))) 12px;z-index:11000;max-width:460px;margin:auto;padding:14px;background:#17212e;color:#f2f6fb;border:1px solid #587067;border-radius:13px;box-shadow:0 8px 30px #0006}.lf21-nav-recovery p{margin:6px 0 10px;color:#c4d2dc;font-size:14px}.lf21-nav-recovery button{min-height:42px;border:1px solid #587067;border-radius:9px;color:#fff;background:#16854f;padding:8px 14px;margin-right:6px}.lf21-nav-recovery button+button{background:#263641}
+</style>
+
+<style>
+/* PATCH 21 R3: four action buttons must remain one row, including the unread badge. */
+@media(max-width:799px){
+ .app.as-athlete > .mobile-topbar{padding-inline:clamp(8px,2.5vw,16px)!important;gap:6px;overflow:visible}
+ .app.as-athlete > .mobile-topbar .brand{flex:1 1 auto;min-width:0;gap:6px}
+ .app.as-athlete > .mobile-topbar .brand img{width:32px;height:32px;flex:none}
+ .app.as-athlete > .mobile-topbar .brand>div{min-width:0}
+ .app.as-athlete > .mobile-topbar .brand-name{font-size:clamp(14px,4vw,21px);white-space:nowrap}
+ .app.as-athlete > .mobile-topbar .brand-subtitle{font-size:clamp(8px,2.2vw,11px);white-space:nowrap;letter-spacing:.03em}
+ .app.as-athlete > .mobile-topbar .top-actions{display:flex;flex:0 0 auto;flex-wrap:nowrap;align-items:center;gap:5px;overflow:visible}
+ .app.as-athlete > .mobile-topbar .top-actions :is(.theme-square,.header-avatar){width:44px;height:44px;min-width:44px;min-height:44px;flex:0 0 44px;padding:0;box-sizing:border-box}
+ .app.as-athlete > .mobile-topbar .top-actions .lf17-bell-wrap{flex:0 0 auto;position:relative;overflow:visible}
+ .app.as-athlete > .mobile-topbar .top-actions .lf17-bell{pointer-events:auto;touch-action:manipulation}
+ .app.as-athlete > .mobile-topbar .top-actions .lf17-badge{pointer-events:none}
+}
+@media(max-width:359px){
+ .app.as-athlete > .mobile-topbar .top-actions{gap:4px}
+ .app.as-athlete > .mobile-topbar .top-actions :is(.theme-square,.header-avatar){width:40px;height:40px;min-width:40px;min-height:40px;flex-basis:40px}
+ .app.as-athlete > .mobile-topbar .brand img{width:28px;height:28px}
+}
 </style>
