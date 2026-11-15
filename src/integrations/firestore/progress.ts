@@ -8,6 +8,7 @@ import type {ProgressSession,ProgressCheck,RecordedExercise,CheckPhoto} from '..
 import {normalizeEntries,validDate,correctionValues,sameValues,workoutSlot,validWorkoutValues,type CorrectionHead} from '../../features/progress/progressModel'
 import {normalizeGoal,type ProgressGoal,type ProgressGoalStatus,type GoalInput} from '../../features/progress/goalsModel'
 import {sameWorkout,type PendingWorkout} from '../../features/progress/offlineWorkouts'
+import type {PhotoScope,PhotoRequest} from '../../features/progress/checkGallery'
 import {MAX_CHECK_PHOTO_BYTES} from '../../features/progress/checkPhotoCompression'
 function privateStorage(){
  const bucket=String(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET||'').trim()
@@ -68,6 +69,15 @@ export async function loadPhoto(storagePath:string):Promise<string>{
  // Keep reading older Check Zone photos uploaded under the previous 2 MiB limit.
  const blob=await getBlob(storageRef(storage,storagePath),2*1024*1024)
  return URL.createObjectURL(blob)
+}
+/** Authenticated blob, canonical path and current account checked on both sides of download. */
+export async function loadScopedCheckPhoto(scope:PhotoScope,p:PhotoRequest):Promise<string>{
+ if(!['front','back','left','right'].includes(p.side)||p.storagePath!==`progress_photos/${segment(scope.gymId)}/${segment(scope.athleteId)}/${segment(p.checkId)}/${p.side}.jpg`)throw new Error('Riferimento foto non valido.')
+ const auth=getAuth(getApp('lionfit-verified-staging'))
+ if(auth.currentUser?.uid!==scope.actorId)throw new Error('Sessione cambiata.')
+ const url=await loadPhoto(p.storagePath)
+ if(auth.currentUser?.uid!==scope.actorId){URL.revokeObjectURL(url);throw new Error('Sessione cambiata.')}
+ return url
 }
 export async function removeStagedPhoto(storagePath:string):Promise<void>{
  if(!/^progress_photos\/[\w-]+\/[\w-]+\/[\w-]+\/(front|back|left|right)\.jpg$/.test(storagePath))return
@@ -135,5 +145,5 @@ export async function syncPendingWorkout(db:Firestore,gym:string,athlete:string,
 }
 export const checkSharingEnabled=()=>import.meta.env.VITE_LIONFIT_CHECK_SHARING_ENABLED==='true'
 const shareCollection=(db:Firestore,gym:string,athlete:string)=>collection(root(db,gym,athlete),'check_shares')
-export function watchCheckShares(db:Firestore,gym:string,athlete:string,cb:(ids:string[])=>void,err:(e:Error)=>void){return onSnapshot(shareCollection(db,gym,athlete),snap=>cb(snap.docs.map(d=>d.id)),err)}
+export function watchCheckShares(db:Firestore,gym:string,athlete:string,cb:(ids:string[],confirmed:boolean)=>void,err:(e:Error)=>void){return onSnapshot(shareCollection(db,gym,athlete),{includeMetadataChanges:true},snap=>cb(snap.docs.map(d=>d.id),!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites),err)}
 export async function changeCheckShare(db:Firestore,gym:string,athlete:string,checkId:string,enabled:boolean,actor:string){if(!checkSharingEnabled()||actor!==athlete)throw new Error('Condivisione non disponibile.');const target=doc(shareCollection(db,gym,athlete),segment(checkId));if(enabled)await setDoc(target,{athleteId:athlete,checkId,sharedBy:actor,sharedAt:serverTimestamp()});else await deleteDoc(target)}

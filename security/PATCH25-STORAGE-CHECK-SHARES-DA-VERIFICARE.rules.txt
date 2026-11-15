@@ -1,0 +1,18 @@
+// PATCH 25: PROPOSTA ADDITIVA - NON INCOLLARE / PUBBLICARE SENZA CONFRONTO DELLE RULES LIVE.
+// Inserire come match separato in match /b/{bucket}/o soltanto dopo verifica.
+// Mantiene tutte le allow owner esistenti; niente list/write/delete per i Coach.
+// Al massimo due documenti Firestore consultati: profilo del Coach + consenso del singolo check.
+match /progress_photos/{gid}/{aid}/{checkId}/{fileName} {
+  function lf25CoachInGym() {
+    let p = firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data;
+    return p.gymId == gid && p.role == 'admin'
+      && p.get('membershipStatus','active') == 'active';
+  }
+  allow get: if request.auth != null
+    && request.auth.uid != aid
+    && request.auth.token.email_verified == true
+    && request.auth.token.get('lionfitSuperAdmin',false) != true
+    && fileName.matches('^(front|back|left|right)[.]jpg$')
+    && lf25CoachInGym()
+    && firestore.exists(/databases/(default)/documents/gyms/$(gid)/progress/$(aid)/check_shares/$(checkId));
+}

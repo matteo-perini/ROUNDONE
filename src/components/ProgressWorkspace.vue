@@ -17,6 +17,8 @@ import {groupExerciseRows} from '../features/sheets/supersetEditor'
 import {substituteExercise} from '../features/sheets/approvedAlternatives'
 import {Capacitor} from '@capacitor/core'
 import CheckComparison from './CheckComparison.vue'
+import CheckGallery from './CheckGallery.vue'
+import {permittedChecks} from '../features/progress/checkGallery'
 import MultiSportProgress from './MultiSportProgress.vue'
 import {checkSides,sideLabel} from '../features/progress/checkComparison'
 import {blankOffline,readOffline,saveOffline,cacheSheet,queueWorkout,acknowledgeWorkout,type OfflineScope,type OfflineState,type WorkoutDraft} from '../features/progress/offlineWorkouts'
@@ -56,10 +58,11 @@ const prescribedTimer=computed(()=>{const g=exerciseGroups.value[stepIndex.value
 const visibleExerciseIndices=computed(()=>{const g=exerciseGroups.value[stepIndex.value];return g?(g.secondaryIndex===null?[g.primaryIndex]:[g.primaryIndex,g.secondaryIndex]):[]})
 const displayEditorRows=computed(()=>editor.value.map((exercise,i)=>({exercise,i})).filter(({i})=>!guided.value||(!showSummary.value&&visibleExerciseIndices.value.includes(i))))
 const historySheetId=ref(''),historyKey=ref(''),metric=ref<'kg'|'volume'|'estimate'>('kg'),repFilter=ref('all'),period=ref('all'),sheetGraph=ref<'volume'|'completion'|'performance'>('volume')
-const checkDate=ref(localDate()),checkNotes=ref(''),selectedPhotos=ref<Partial<Record<CheckPhoto['side'],File>>>({}),photoUrls=ref<Record<string,string>>({}),photoStatus=ref('')
+const checkDate=ref(localDate()),checkNotes=ref(''),selectedPhotos=ref<Partial<Record<CheckPhoto['side'],File>>>({}),photoStatus=ref('')
 const online=ref(navigator.onLine),offlineState=shallowRef<OfflineState|null>(null),offlineError=ref(''),syncing=ref(false),offlineScope=shallowRef<OfflineScope|null>(null),downloadedMode=ref(false),shareIds=ref<string[]>([]),shareReady=ref(false),shareEnabled=checkSharingEnabled()
 let restoring=false
-const sharedChecks=computed(()=>props.role==='athlete'?checks.value:checks.value.filter(c=>shareIds.value.includes(c.id)))
+const checkScope=computed(()=>({gymId:context.value?.gymId||'',athleteId:athleteId.value,actorId:context.value?.uid||''}))
+const sharedChecks=computed(()=>permittedChecks(checks.value,props.role,checkScope.value,shareIds.value,shareEnabled&&shareReady.value,online.value))
 const photoScope=computed(()=>`${context.value?.gymId||''}:${athleteId.value}`)
 const canWrite=computed(()=>props.role==='athlete'&&mayWriteLive()&&context.value?.uid===athleteId.value)
 const canEditHistory=computed(()=>canWrite.value&&online.value&&correctionReady.value)
@@ -114,14 +117,13 @@ let stops:Unsubscribe[]=[],stopChild:Unsubscribe[]=[],alive=true,stopProgress:Un
 function localDate(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 function withinPeriod(value:string,p:string){if(p==='all')return true;const n=Number(p);if(!Number.isInteger(n))return true;const after=new Date();after.setUTCMonth(after.getUTCMonth()-n);return value>=after.toISOString().slice(0,10)}
 function exerciseKeyLocal(ex:{exerciseId?:string;catalogId?:string;id?:string},i:number){return String(ex.exerciseId||ex.catalogId||ex.id||`position:${i}`)}
-function stopCurrent(){restoring=true;onlineWorkoutRequest.value='';offlineScope.value=null;offlineState.value=null;downloadedMode.value=false;shareIds.value=[];shareReady.value=false;selectedPhotos.value={};stopProgress?.();stopProgress=null;stopDirect?.();stopDirect=null;clearTimer();pageSize.value=250;detailId.value='';directSession.value=null;savedSessionId.value='';correction.value=null;revisions.value=[];revisionError.value='';historyListFilter.value='';activePrescription.value=[];tab.value='home';photoStatus.value='';for(const f of stopChild)f();stopChild=[];sheetData.value=null;archived.value=[];rawSessions.value=[];revisionSheet.value='';revisionNotes.value='';reportNotes.value='';correctionHeads.value=[];correctionReady.value=false;correctionError.value='';workoutConfirm.value=null;checks.value=[];goals.value=[];goalError.value='';goalTitle.value='';goalNotes.value='';goalDate.value='';chosenSheetId.value='';selectedSheet.value=null;editor.value=[];historySheetId.value='';historyKey.value='';clearUrls();restoring=false}
-function clearUrls(){Object.values(photoUrls.value).forEach(url=>URL.revokeObjectURL(url));photoUrls.value={}}
+function stopCurrent(){restoring=true;onlineWorkoutRequest.value='';offlineScope.value=null;offlineState.value=null;downloadedMode.value=false;shareIds.value=[];shareReady.value=false;selectedPhotos.value={};stopProgress?.();stopProgress=null;stopDirect?.();stopDirect=null;clearTimer();pageSize.value=250;detailId.value='';directSession.value=null;savedSessionId.value='';correction.value=null;revisions.value=[];revisionError.value='';historyListFilter.value='';activePrescription.value=[];tab.value='home';photoStatus.value='';for(const f of stopChild)f();stopChild=[];sheetData.value=null;archived.value=[];rawSessions.value=[];revisionSheet.value='';revisionNotes.value='';reportNotes.value='';correctionHeads.value=[];correctionReady.value=false;correctionError.value='';workoutConfirm.value=null;checks.value=[];goals.value=[];goalError.value='';goalTitle.value='';goalNotes.value='';goalDate.value='';chosenSheetId.value='';selectedSheet.value=null;editor.value=[];historySheetId.value='';historyKey.value='';restoring=false}
 function bindAthlete(id:string){
  stopCurrent();athleteId.value=id
  const s=context.value;if(!s||!id)return
  const {db}=getStagingClients();loading.value=true;error.value='';let loadedSheets=false
  if(props.role==='athlete'&&s.uid===id){offlineScope.value={project:db.app.options.projectId||'',gym:s.gymId,uid:s.uid};try{offlineState.value=readOffline(localStorage,offlineScope.value);if(offlineState.value){if(!online.value){downloadedMode.value=true;loading.value=false;loadedSheets=true}restoreLocalDraft();if(online.value)void flushOffline()}}catch(e){offlineError.value=String(e)}}
- if(shareEnabled)stopChild.push(watchCheckShares(db,s.gymId,id,v=>{if(alive&&athleteId.value===id){shareIds.value=v;shareReady.value=true;if(props.role==='coach')clearUrls()}},()=>{if(alive&&athleteId.value===id){shareReady.value=false;shareIds.value=[];clearUrls()}}))
+ if(shareEnabled)stopChild.push(watchCheckShares(db,s.gymId,id,(v,confirmed)=>{if(alive&&athleteId.value===id){shareReady.value=confirmed;shareIds.value=confirmed?v:[]}},()=>{if(alive&&athleteId.value===id){shareReady.value=false;shareIds.value=[]}}))
  stopChild.push(watchAthleteSheets(db,s.gymId,id,result=>{
   if(!alive||athleteId.value!==id)return
   sheetData.value=result;loadedSheets=true;loading.value=false
@@ -246,7 +248,7 @@ async function saveWorkout(){
   restoring=true;onlineWorkoutRequest.value='';tab.value='home';historySheetId.value=s.id;chosenSheetId.value='';selectedSheet.value=null;editor.value=[];clearTimer();restoring=false;if(offlineState.value&&online.value)void flushOffline()
  }catch(e){writeError.value=e instanceof Error?e.message:String(e)}finally{busy.value=false}
 }
-async function toggleShare(c:ProgressCheck){const s=context.value;if(!s||!online.value||!canWrite.value||!shareReady.value||busy.value)return;const enable=!shareIds.value.includes(c.id);if(enable&&!window.confirm('Condividere tutte le foto di questo check con i Coach attivi della tua palestra? Potranno visualizzarle finché non revochi la condivisione. Non è possibile revocare copie già effettuate.'))return;busy.value=true;try{await changeCheckShare(getStagingClients().db,s.gymId,s.uid,c.id,enable,s.uid)}catch(e){writeError.value=String(e)}finally{busy.value=false}}
+async function toggleShare(c:ProgressCheck,enable:boolean){const s=context.value;if(!s||!online.value||!canWrite.value||!shareReady.value||busy.value)return;if(!checks.value.some(row=>row.id===c.id)||c.athleteId!==s.uid)return;if(shareIds.value.includes(c.id)===enable)return;busy.value=true;try{await changeCheckShare(getStagingClients().db,s.gymId,s.uid,c.id,enable,s.uid);if(context.value?.uid===s.uid)notice.value=enable?'Check condiviso con i Coach attivi.':'Condivisione revocata.'}catch(e){writeError.value=String(e)}finally{busy.value=false}}
 function chooseFile(side:CheckPhoto['side'],event:Event){
  const input=event.target as HTMLInputElement
  const file=input.files?.[0]
@@ -273,13 +275,8 @@ async function saveCheck(){
    uploaded.push(await uploadCheckPhoto(context.value.gymId,context.value.uid,id,side,resized))
   }
   await recordCheck(getStagingClients().db,context.value.gymId,context.value.uid,checkDate.value,checkNotes.value,uploaded,context.value.uid,id)
-  selectedPhotos.value={};checkNotes.value='';notice.value='Check Zone salvato. Foto ottimizzate sotto 1 MB e archiviate privatamente.'
+  selectedPhotos.value={};checkNotes.value='';notice.value='Check Zone salvato. Foto archiviate privatamente. Apri lo storico per condividerle con i Coach, se desideri.'
  }catch(e){writeError.value=e instanceof Error?e.message:String(e);for(const p of uploaded)await removeStagedPhoto(p.storagePath)}finally{busy.value=false;photoStatus.value=''}
-}
-async function showCheckPhoto(p:CheckPhoto){
- if(photoUrls.value[p.storagePath])return
- try{const scope=photoScope.value;const url=await loadPhoto(p.storagePath);if(!alive||scope!==photoScope.value||!sharedChecks.value.some(c=>c.photos.some(x=>x.storagePath===p.storagePath))){URL.revokeObjectURL(url);return}photoUrls.value={...photoUrls.value,[p.storagePath]:url}}
- catch(e){writeError.value='Foto non disponibile: '+(e instanceof Error?e.message:String(e))}
 }
 async function saveGoal(){
  const s=context.value,id=athleteId.value
@@ -439,7 +436,8 @@ function switchToHistory(s:ProgressSheet){historySheetId.value=s.id;tab.value='t
       <template v-if="role==='athlete'"><div class="lf-p360-date"><label for="lf-p360-checkdate">Data check</label><input id="lf-p360-checkdate" v-model="checkDate" type="date" :max="localDate()"/></div><div class="lf-p360-photo-grid"><label v-for="side in checkSides.map(s=>[s.id,s.label] as const)" :key="side[0]" class="lf-p360-photo-select"><span>▧</span><strong>{{side[1]}}</strong><small>{{cleanFile(selectedPhotos[side[0]])||'＋ Aggiungi'}}</small><input type="file" accept="image/*,.heic,.heif,.avif,.bmp,.tif,.tiff" :disabled="busy" @change="chooseFile(side[0],$event)"/></label></div><label class="lf-p360-field-label">Note facoltative <textarea v-model="checkNotes" maxlength="500" rows="2" placeholder="Come ti senti, dettagli utili…"/></label><p v-if="photoStatus" class="muted small lf-p360-photo-status" role="status">{{photoStatus}}</p><p class="muted small">Formati comuni e HEIC/HEIF supportati dove decodificabili. Le fotografie originali non vengono caricate; la compressione può ridurre leggermente i dettagli. HEIC può richiedere internet per il convertitore.</p><button class="primary lf-p360-main-button" :disabled="!canWrite||busy||!online" @click="saveCheck">{{busy?'Ottimizzazione e caricamento…':'＋ Salva nuovo check'}}</button><p v-if="!canWrite" class="muted small">Upload disponibile soltanto quando le regole Firebase Progressi saranno autorizzate.</p></template>
      <p v-else class="muted small">Consultazione Coach: puoi vedere soltanto i check fotografici condivisi esplicitamente dall'Atleta.</p>
     </section>
-    <CheckComparison v-if="role==='athlete'||(shareEnabled&&shareReady)" :checks="sharedChecks" :scope="photoScope"/><section class="panel lf-p360-card"><h2>I check precedenti</h2><div v-for="c in checks" :key="c.id" class="lf-p360-check-row"><strong>{{displayDate(c.performedOn)}}</strong><span class="muted small">{{c.photos.length}} foto</span><p v-if="c.notes" class="muted small">{{c.notes}}</p><button v-if="role==='athlete'&&shareEnabled&&shareReady" class="secondary" :disabled="busy||!online" @click="toggleShare(c)">{{shareIds.includes(c.id)?'Revoca condivisione Coach':'Condividi con i Coach'}}</button><div v-if="role==='athlete'||(shareEnabled&&shareReady&&shareIds.includes(c.id))" class="lf-p360-photo-grid"><div v-for="p in c.photos" :key="p.storagePath"><button class="secondary" type="button" @click="showCheckPhoto(p)">{{sideLabel(p.side)}} · Visualizza</button><img v-if="photoUrls[p.storagePath]" :src="photoUrls[p.storagePath]" :alt="sideLabel(p.side)"/></div></div></div><p v-if="!checks.length" class="muted small">Nessun check ancora registrato.</p></section>
+    <CheckGallery :checks="checks" :allowed="sharedChecks" :scope="checkScope" :role="role" :share-ids="shareIds" :share-enabled="shareEnabled" :share-ready="shareReady" :online="online" :busy="busy" @share="toggleShare"/>
+    <CheckComparison v-if="online&&(role==='athlete'||(shareEnabled&&shareReady))" :checks="sharedChecks" :scope="checkScope"/>
    </template>
   </template>
   <RouterLink v-if="role==='coach'" to="/coach/atleti" class="secondary lf-p360-back-link">← Gestione Atleti</RouterLink>
