@@ -19,8 +19,14 @@ import './styles-patch7-final.css' // PATCH 7: safe-area, temi e testi IT/EN res
 import { installRoundOneMotion } from './features/motion/roundOneMotion'
 // Rispetta lingua memorizzata: accessibilita' e formati anche dopo il riavvio dell'APK.
 watch(interfaceLanguage,lang=>{document.documentElement.lang=lang},{immediate:true})
-createApp(App).use(createPinia()).use(router).mount('#app')
-installRoundOneMotion(router)
+import {finishProfileSwitchAtBoot,startLinkedProfileObserver} from './integrations/firebase/linkedProfiles'
+async function bootstrap(){
+ await finishProfileSwitchAtBoot()
+ startLinkedProfileObserver()
+ createApp(App).use(createPinia()).use(router).mount('#app')
+ installRoundOneMotion(router)
+}
+void bootstrap()
 
 // PATCH-7: updater opt-in soltanto per APK Android firmato e validato.
 if (import.meta.env.PROD && import.meta.env.VITE_LIONFIT_UPDATE_CHECK === 'ENABLED_AFTER_APK_SIGNING') {

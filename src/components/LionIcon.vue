@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 const props=withDefaults(defineProps<{name:string;size?:number}>(),{size:22})
 const paths:Record<string,string>={
+ switch:'M3 7h17m-5-4 5 4-5 4M21 17H4m5-4-5 4 5 4',
  menu:'M4 6h16M4 12h16M4 18h16',
  home:'M3 10.5 12 3l9 7.5V21h-6v-7H9v7H3V10.5Z',
  calendar:'M7 2v4M17 2v4M3 9h18M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z',

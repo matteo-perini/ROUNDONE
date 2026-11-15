@@ -3,7 +3,7 @@ import {shallowRef} from 'vue'
 import {signInWithEmailAndPassword,signOut,browserLocalPersistence,browserSessionPersistence,setPersistence} from 'firebase/auth'
 import {doc,getDocFromServer} from 'firebase/firestore'
 import {getStagingClients} from './stagingClient'
-import {isTestMode,stagingTestGym} from './stagingConfig'
+import {isLiveMode,isTestMode,stagingTestGym} from './stagingConfig'
 import {clearOfflineForUser} from '../../features/progress/offlineWorkouts'
 import {isCurrentControlAccount,verifyPlatformAccess} from './platformAccess'
 import {resolveLegacyGymRole} from '../../features/auth/legacyRole'
@@ -25,6 +25,7 @@ export async function readStagingSession():Promise<StagingSession>{
  const g=await getDocFromServer(doc(db,'gyms',gymId))
  if(!g.exists())throw new Error('Palestra non trovata su Firebase.')
  const role=resolveLegacyGymRole(user.uid,d,g.data())
+ if(auth.currentUser?.uid!==user.uid)throw new Error('Account cambiato durante la verifica. Riprova.')
  const result={uid:user.uid,email:user.email,gymId,role,label:String(d.name||user.email).slice(0,80)}
  stagingSession.value=result
  return result
@@ -50,6 +51,7 @@ export async function readNavigationSession():Promise<StagingSession>{
 }
 export async function signInStaging(email:string,password:string,remember=true){
  const {auth}=getStagingClients()
+ if(isLiveMode()){const {clearLinkedProfiles}=await import('./linkedProfiles');await clearLinkedProfiles()}
  await setPersistence(auth,remember?browserLocalPersistence:browserSessionPersistence)
  await signInWithEmailAndPassword(auth,email,password)
  try{
@@ -67,6 +69,7 @@ export async function signOutStaging(){
  const user=auth.currentUser
  if(user){const {disconnectPushBeforeLogout}=await import('./pushNotifications');if(!await disconnectPushBeforeLogout())return false}
  if(user&&!clearOfflineForUser(localStorage,db.app.options.projectId||'',user.uid,()=>window.confirm('Uscendo perderai le bozze e gli allenamenti non sincronizzati salvati sul dispositivo. Continuare?')))return false
+ if(isLiveMode()){try{const {clearLinkedProfiles}=await import('./linkedProfiles');await clearLinkedProfiles()}catch(e){window.alert(e instanceof Error?e.message:'Impossibile scollegare i profili. Riprova.');return false}}
  stagingSession.value=null
  await signOut(auth)
  return true

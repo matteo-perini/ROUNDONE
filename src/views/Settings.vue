@@ -33,6 +33,11 @@ import {readStagingSession} from '../integrations/firebase/stagingSession'
 import {signOutStaging,stagingSession} from '../integrations/firebase/stagingSession'
 import { useLabStore } from '../stores/lab'
 import LionIcon from '../components/LionIcon.vue'
+import LinkedProfileSettings from '../components/LinkedProfileSettings.vue'
+import {linkedPair} from '../integrations/firebase/linkedProfiles'
+import {sideOf} from '../features/auth/linkedProfileModel'
+const linkedOpen=ref(false)
+const linkedAllowed=computed(()=>isLiveMode()&&!!stagingSession.value&&(stagingSession.value.role!=='atleta'||!!sideOf(linkedPair.value,stagingSession.value)))
 import {interfaceLanguage,setInterfaceLanguage,uiText} from '../features/i18n/interfaceLanguage'
 const workPilotOpen=ref(false)
 const workPilotMobile=pilotMobileDevice(navigator.userAgent,navigator.maxTouchPoints,Capacitor.isNativePlatform()&&['android','ios'].includes(Capacitor.getPlatform()))
@@ -135,6 +140,8 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
    <section v-if="pushAvailable&&stagingSession" class="lfsettings-group"><h2>Notifiche</h2><button class="lfsettings-entry" type="button" :aria-expanded="pushOpen" @click="pushOpen=!pushOpen"><LionIcon name="bell"/><span><b class="lfsettings-desktop-label">Avvisi e promemoria Agenda</b><b class="lfsettings-mobile-label">{{uiText("Notifiche")}}</b><small>Preferenze account e dispositivi</small></span><LionIcon name="chevron" :size="17"/></button><PushSettings v-if="pushOpen"/></section>
    <section v-if="calendarPilotEnabled()&&stagingSession" class="lfsettings-group"><h2>Integrazioni</h2><button class="lfsettings-entry" type="button" :aria-expanded="calendarOpen" @click="calendarOpen=!calendarOpen"><LionIcon name="calendar"/><span><b>Google Calendar</b><small>Collegamento facoltativo</small></span><LionIcon name="chevron" :size="17"/></button><CalendarPilotSettings v-if="calendarOpen" :key="stagingSession.uid"/></section>
    <section class="lfsettings-group"><h2>{{uiText("Privacy e account")}}</h2>
+    <button v-if="linkedAllowed" type="button" class="lfsettings-entry" :aria-expanded="linkedOpen" @click="linkedOpen=!linkedOpen"><LionIcon name="switch"/><span><b>Cambio rapido profilo</b><small>Account collegati su questo dispositivo</small></span><LionIcon name="chevron" :size="17"/></button>
+    <LinkedProfileSettings v-if="linkedAllowed&&linkedOpen" :key="stagingSession?.uid"/>
     <RouterLink v-if="!isStagingMode()||stagingSession" class="lfsettings-entry" :to="profilePath+(emulator?'&edit=1':'?edit=1')"><LionIcon name="user"/><span><b>{{uiText("Modifica profilo")}}</b><small>{{uiText("I tuoi dati personali")}}</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
     <button v-if="canResetPassword" class="lfsettings-entry" type="button" @click="securityOpen=true;securityStatus=''"><LionIcon name="shield"/><span><b>{{uiText("Sicurezza")}}</b><small>{{uiText("Password e accessi")}}</small></span><strong class="lfsettings-desktop-label">{{uiText("Gestisci")}}</strong><LionIcon name="chevron" :size="17"/></button>
     <a class="lfsettings-entry"  :href="privacyHref" target="_blank" rel="noopener noreferrer"><LionIcon name="shield"/><span><b>{{uiText("Privacy")}}</b><small>{{uiText("Informativa, cookie e tecnologie locali")}}</small></span><LionIcon name="chevron" :size="17"/></a>

@@ -64,7 +64,7 @@ export async function disconnectPushBeforeLogout(){if(!pushFeatureEnabled())retu
 export async function connectPushSession(uid:string|null,openAgenda:()=>void,restore=true){const turn=++generation;detach?.();detach=undefined;pushNotice.value=null;if(!uid||!pushFeatureEnabled()){restorePending=Promise.resolve();return;}
  if(restore){restorePending=(async()=>{if(deviceChoice(uid)!=='enabled')return;rememberChoice(uid,'enabled');
   // No operating-system prompt on subsequent logins. Only explicit activation can prompt.
-  try{if(await pushSupported()&&turn===generation&&getStagingClients().auth.currentUser?.uid===uid&&await permissionGranted()&&turn===generation){await activatePush(localBinding()?.uid===uid?localBinding()!.prefs:defaultPushPrefs(),false)}}catch{/* keep saved choice; Settings can retry */}
+  try{if(await pushSupported()&&turn===generation&&getStagingClients().auth.currentUser?.uid===uid&&await permissionGranted()&&turn===generation){const current=localBinding();const prefs=current?.uid===uid?current.prefs:(await call<{active:boolean;prefs:PushPreferences}>('lfPushSettings',{mode:'account'})).prefs;if(turn===generation&&getStagingClients().auth.currentUser?.uid===uid)await activatePush(prefs,false)}}catch{/* keep saved choice; Settings can retry */}
  })();await restorePending;}
  const b=localBinding();if(!b||b.uid!==uid||turn!==generation)return;
  if(!(await pushSupported())||turn!==generation)return;
