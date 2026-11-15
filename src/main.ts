@@ -19,14 +19,25 @@ import './styles-patch7-final.css' // PATCH 7: safe-area, temi e testi IT/EN res
 import { installRoundOneMotion } from './features/motion/roundOneMotion'
 // Rispetta lingua memorizzata: accessibilita' e formati anche dopo il riavvio dell'APK.
 watch(interfaceLanguage,lang=>{document.documentElement.lang=lang},{immediate:true})
+import {installNavigationRecovery,navigationFailure} from './features/auth/navigationRecovery'
 import {finishProfileSwitchAtBoot,startLinkedProfileObserver} from './integrations/firebase/linkedProfiles'
 async function bootstrap(){
+ // Do not render a half-initialized shell or the preceding user's interface.
+ const root=document.getElementById('app')
+ if(root){const status=document.createElement('div');status.setAttribute('role','status');status.textContent='Caricamento LionFit…';status.style.cssText='min-height:100dvh;display:grid;place-items:center;background:#0c1118;color:#eaf4f0;font:600 16px system-ui';root.replaceChildren(status)}
  await finishProfileSwitchAtBoot()
  startLinkedProfileObserver()
- createApp(App).use(createPinia()).use(router).mount('#app')
+ installNavigationRecovery(router)
+ const app=createApp(App).use(createPinia()).use(router)
+ try{await router.isReady()}catch{if(!navigationFailure.value)navigationFailure.value={kind:'navigation',path:router.currentRoute.value.fullPath}}
+ app.mount('#app')
  installRoundOneMotion(router)
 }
-void bootstrap()
+void bootstrap().catch(()=>{
+ const root=document.getElementById('app');if(!root)return
+ const panel=document.createElement('div');panel.style.cssText='min-height:100dvh;background:#0c1118;color:#eaf4f0;padding:32px;font:600 16px system-ui';panel.setAttribute('role','alert');panel.textContent='Impossibile inizializzare LionFit. Controlla la connessione e ricarica la pagina.'
+ const retry=document.createElement('button');retry.textContent='Ricarica';retry.style.cssText='display:block;margin-top:16px;padding:12px 18px';retry.onclick=()=>window.location.reload();panel.append(retry);root.replaceChildren(panel)
+})
 
 // PATCH-7: updater opt-in soltanto per APK Android firmato e validato.
 if (import.meta.env.PROD && import.meta.env.VITE_LIONFIT_UPDATE_CHECK === 'ENABLED_AFTER_APK_SIGNING') {

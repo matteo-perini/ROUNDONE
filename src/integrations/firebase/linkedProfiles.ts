@@ -1,12 +1,13 @@
 import { getApps, initializeApp } from 'firebase/app'
 import { browserLocalPersistence, initializeAuth, getAuth, setPersistence, signInWithEmailAndPassword, signOut, updateCurrentUser, type Auth } from 'firebase/auth'
-import { doc, getDocFromServer, getFirestore } from 'firebase/firestore'
+import { doc, getDocFromServer, getFirestore, waitForPendingWrites } from 'firebase/firestore'
 import { shallowRef, ref } from 'vue'
 import { getStagingClients } from './stagingClient'
 import { isLiveMode } from './stagingConfig'
 import { isControlIdentity } from '../../features/platform/controlAccess'
 import { resolveLegacyGymRole } from '../../features/auth/legacyRole'
 import { makePair, parsePair, parseSwitch, sideOf, opposite, uidFor, switchIntent, matchesIntent, type ProfilePair, type LinkIdentity, type LinkSide } from '../../features/auth/linkedProfileModel'
+import { stagingSession } from './stagingSession'
 import { readOffline } from '../../features/progress/offlineWorkouts'
 
 export const linkedPair=shallowRef<ProfilePair|null>(null)
@@ -90,6 +91,9 @@ export async function requestProfileSwitch(){
   const to=opposite(from),target=named(to);assertSide(p,to,await verified(target))
   const offline=readOffline(localStorage,{project:main.app.options.projectId||'',gym:s.gymId,uid:s.uid})
   if(offline?.queue.length||offline?.draft)throw new Error('Completa e sincronizza gli allenamenti in corso prima di cambiare profilo.')
+  // Do not switch while Firestore still has local writes queued for the current user.
+  let timer:ReturnType<typeof setTimeout>|undefined
+  try{await Promise.race([waitForPendingWrites(getStagingClients().db),new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(new Error('Sincronizzazione in corso. Riprova tra poco.')),8000)})])}finally{clearTimeout(timer)}
   const sourceBackup=named(from);await sourceBackup.authStateReady();await updateCurrentUser(sourceBackup,main.currentUser);assertSide(p,from,await verified(sourceBackup))
   const intent=switchIntent(p,from)
   const {pushFeatureEnabled,deactivatePush}=await import('./pushNotifications')
@@ -110,6 +114,6 @@ export async function finishProfileSwitchAtBoot(){
   // Firebase officially clones a user from another Auth in the same project.
   const previous=main.currentUser
   await updateCurrentUser(main,target.currentUser)
-  try{assertSide(p,intent.to,await verified(main))}catch(e){try{await updateCurrentUser(main,previous)}catch{await signOut(main)}throw e}
+  try{const confirmed=await verified(main);assertSide(p,intent.to,confirmed);stagingSession.value=confirmed}catch(e){stagingSession.value=null;try{await updateCurrentUser(main,previous);const restored=await verified(main);assertSide(p,intent.from,restored);stagingSession.value=restored}catch{await signOut(main)}throw e}
  })}catch(e){linkedNotice.value=e instanceof Error?e.message:'Cambio profilo non riuscito.'}
 }

@@ -7,6 +7,7 @@ import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useLabStore } from './stores/lab'
 import LionIcon from './components/LionIcon.vue'
 import QuickProfileSwitch from './components/QuickProfileSwitch.vue'
+import {navigationFailure,reloadNavigation} from './features/auth/navigationRecovery'
 import {linkedNotice} from './integrations/firebase/linkedProfiles'
 // A different tab can change Firebase local persistence. Destroy this UI instead of retaining old account data.
 let stopIdentity: (()=>void)|undefined
@@ -104,6 +105,7 @@ async function goOut(){
 }
 </script>
 <template>
+  <Teleport to="body"><aside v-if="navigationFailure" class="lf21-nav-recovery" role="alert"><strong>{{navigationFailure.kind==='assets'?'Pagina non caricata':'Navigazione non riuscita'}}</strong><p>{{navigationFailure.kind==='assets'?'Potrebbe essere disponibile una nuova versione. Ricarica per riprovare.':'Riprova a cambiare pagina o ricarica LionFit.'}}</p><button type="button" @click="reloadNavigation">Ricarica</button><button type="button" @click="navigationFailure=null">Chiudi</button></aside></Teleport>
   <Teleport to="body"><aside v-if="pushNotice" role="status" style="position:fixed;inset:auto 12px max(85px,env(safe-area-inset-bottom)) 12px;z-index:9999;max-width:440px;margin:auto;padding:14px;border-radius:12px;background:#162720;color:#fff;box-shadow:0 6px 24px #0008"><strong>{{pushNotice.title}}</strong><p>{{pushNotice.body}}</p><button type="button" class="secondary" @click="openPushAgenda">Apri Agenda</button> <button type="button" class="bare" style="color:#fff" @click="pushNotice=null">Chiudi</button></aside></Teleport>
  <div class="app" :class="['theme-'+lab.theme,shownRole==='coach'?'as-coach':'as-athlete',{'bookings-mode':isBooking,'athlete-sidebar-collapsed':!athleteSidebarExpanded}]">
   <div v-if="isLocalProdDev()" class="lab-banner" role="status">⚠ SVILUPPO LOCALE · FIREBASE PRODUZIONE · LE SCRITTURE POSSONO CAMBIARE DATI REALI</div>
@@ -137,3 +139,7 @@ async function goOut(){
   <template v-else><header class="login-header login-modern-header"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div class="login-brand-title"><strong>LION <b>FIT</b></strong><small>{{uiText("AREA ACCESSO")}}</small></div></header><main class="login-main"><RouterView/></main></template>
  </div>
 </template>
+
+<style scoped>
+.lf21-nav-recovery{position:fixed;inset:auto 12px max(82px,calc(76px + env(safe-area-inset-bottom,0px))) 12px;z-index:11000;max-width:460px;margin:auto;padding:14px;background:#17212e;color:#f2f6fb;border:1px solid #587067;border-radius:13px;box-shadow:0 8px 30px #0006}.lf21-nav-recovery p{margin:6px 0 10px;color:#c4d2dc;font-size:14px}.lf21-nav-recovery button{min-height:42px;border:1px solid #587067;border-radius:9px;color:#fff;background:#16854f;padding:8px 14px;margin-right:6px}.lf21-nav-recovery button+button{background:#263641}
+</style>

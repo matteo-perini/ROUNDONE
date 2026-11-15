@@ -10,11 +10,19 @@ import {resolveLegacyGymRole} from '../../features/auth/legacyRole'
 export type StagingSession={uid:string;email:string;gymId:string;role:'atleta'|'titolare'|'collaboratore';label:string}
 export const stagingSession=shallowRef<StagingSession|null>(null)
 function safeId(x:unknown){return typeof x==='string' && x.length>=3 && x.length<=120 && !x.includes('/') && !x.includes('..')}
+let sessionRead:{uid:string;promise:Promise<StagingSession>}|null=null
 export async function readStagingSession():Promise<StagingSession>{
+ const {auth}=getStagingClients();await auth.authStateReady();const user=auth.currentUser
+ if(!user?.email)throw new Error('Accedi con un account Firebase.')
+ if(sessionRead?.uid===user.uid)return sessionRead.promise
+ const entry={uid:user.uid,promise:verifyStagingSession(user.uid)};sessionRead=entry
+ try{return await entry.promise}finally{if(sessionRead===entry)sessionRead=null}
+}
+async function verifyStagingSession(expectedUid:string):Promise<StagingSession>{
  const {auth,db}=getStagingClients()
  await auth.authStateReady()
  const user=auth.currentUser
- if(!user?.email)throw new Error('Accedi con un account Firebase.')
+ if(!user?.email||user.uid!==expectedUid)throw new Error('Account cambiato durante la verifica. Riprova.')
  if(await isCurrentControlAccount()){stagingSession.value=null;throw new Error('L’account Control non appartiene a una palestra.')}
  const p=await getDocFromServer(doc(db,'users',user.uid))
  if(!p.exists())throw new Error('Profilo utente non presente su Firebase.')

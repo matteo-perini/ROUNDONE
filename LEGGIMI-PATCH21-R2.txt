@@ -1,0 +1,26 @@
+LIONFIT — PATCH 21 R2 — Cambio profili e navigazione
+Applicare dopo PATCH 21 candidata e tutte le precedenti (20A.2, 20B.2).
+Estrarre nella radice LionFit-Modern-Git sovrascrivendo i file.
+
+- Popup cambio profilo: palette opaca autonoma dal tema .app (Teleport su body),
+  un'unica conferma, stato di attesa, pulsante Annulla, chiusura al cambio route.
+- Bootstrap: attende la verifica del cambio identita' e il router prima di montare la UI.
+  Mantiene il reload isolante tra account; inizializza la sessione verificata prima della route.
+- Attende scritture Firestore in coda per massimo 8 secondi; in caso di timeout non cambia utente.
+  Mantiene i blocchi su bozze offline, ruoli/palestra e notifiche; rollback verificato.
+- Deduplica soltanto letture server concorrenti dello stesso UID (nessuna cache persistente nuova).
+- Recupero errori lazy loading/router: avviso leggibile e ricaricamento esplicito, non automatico.
+  Non elimina bozza o cache, non cambia ruoli, rotte, regole Firebase o backend.
+
+TEST (CMD in radice):
+  npm run typecheck
+  node --experimental-strip-types --test tests/patch21-linked-profiles.unit.mjs tests/patch21-r2.unit.mjs
+  firebase emulators:exec --config tests/patch21-firebase.json --project demo-lionfit-linked --only auth "node --test tests/patch21-auth-emulator.mjs"
+
+Collaudo locale: TypeScript OK, 16 test OK (inclusi 10 precedenti).
+CSS scoped compilato e verificato con fixture statica Chromium 360x640: tema chiaro/scuro,
+  sfondi opachi e dialog leggibile/intercettazione del tocco. Non e' un test reale di autenticazione.
+Il problema grafico e' stato identificato; la causa della navigazione intermittente non e' stata
+riprodotta in produzione. Il recupero gestisce gli errori di caricamento dinamico e del router.
+Restano da eseguire l'emulatore Auth sul PC e il collaudo su smartphone/browser reale.
+Nessun deploy Firebase, nessuna modifica rules. Dopo test OK: solita build web.
