@@ -61,6 +61,13 @@ router.beforeEach(async to=>{
  // La build Android normale non deve mai usare lo store fittizio.
  if(import.meta.env.PROD || isStagingMode()){
   if(!isStagingMode())return to.path==='/accesso'?true:'/accesso'
+  const {isCurrentControlAccount,verifyPlatformAccess}=await import('../integrations/firebase/platformAccess')
+  if(await isCurrentControlAccount()){
+   stagingSession.value=null
+   const allowed=await verifyPlatformAccess()
+   if(allowed)return to.path==='/lionfit-control'?true:'/lionfit-control'
+   return to.path==='/accesso'?true:'/accesso'
+  }
   if(to.path==='/accesso'){
    try{
     const s=await readNavigationSession()
@@ -71,7 +78,7 @@ router.beforeEach(async to=>{
   let s
   try{s=await readNavigationSession()}
   catch{stagingSession.value=null;return '/accesso'}
-  if(to.path==='/lionfit-control'){const {verifyPlatformAccess}=await import('../integrations/firebase/platformAccess');return await verifyPlatformAccess()?true:'/impostazioni'}
+  if(to.path==='/lionfit-control'){return await verifyPlatformAccess()?true:'/impostazioni'}
   const athletes=['/home','/piano','/archivio','/progressi','/profilo']
   const coaches=['/coach','/coach/profilo']
   if(isOperationalMode()) {

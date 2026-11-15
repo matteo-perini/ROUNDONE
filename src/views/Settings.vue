@@ -12,6 +12,7 @@ import {billingSandboxEnabled} from '../integrations/firebase/billingSandbox'
 import GymIdentity from '../components/GymIdentity.vue'
 import DashboardPreferences from '../components/DashboardPreferences.vue'
 import SupportTickets from '../components/SupportTickets.vue'
+import {LIONFIT_CONTACT_EMAIL,LIONFIT_CONTACT_MAILTO} from '../features/platform/contact'
 import {verifyPlatformAccess} from '../integrations/firebase/platformAccess'
 import {Capacitor} from '@capacitor/core'
 import type {NativeUpdateStatus} from '../features/release/nativeUpdates'
@@ -142,7 +143,8 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
    <p>{{uiText("LionFit è una piattaforma digitale pensata per semplificare la gestione degli allenamenti e l'organizzazione delle attività sportive, collegando palestre, allenatori e atleti in un ambiente condiviso.")}}</p>
    <p>{{uiText("Permette di consultare programmi e schede di allenamento, esplorare la libreria degli esercizi, seguire la programmazione e gestire le prenotazioni secondo le autorizzazioni del proprio ruolo.")}}</p>
    <p><strong>{{uiText("Ideazione e sviluppo:")}}</strong> Matteo Perini</p>
-   <p><strong>{{uiText("Versione del progetto web:")}}</strong> {{appVersion}}</p>
+   <p><strong>{{uiText("Contatto ufficiale LionFit:")}}</strong> <a :href="LIONFIT_CONTACT_MAILTO">{{LIONFIT_CONTACT_EMAIL}}</a></p>
+    <p><strong>{{uiText("Versione del progetto web:")}}</strong> {{appVersion}}</p>
    <p class="muted small">{{uiText("La versione Android installata può essere diversa da quella dei sorgenti web e si verifica nelle informazioni di sistema dell'app.")}}</p>
    <section v-if="nativeAndroid" class="lf-android-update-box" aria-label="Aggiornamenti Android">
     <h3>{{uiText('Aggiornamenti Android')}}</h3>

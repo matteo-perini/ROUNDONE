@@ -5,6 +5,7 @@ import {doc,getDocFromServer} from 'firebase/firestore'
 import {getStagingClients} from './stagingClient'
 import {isTestMode,stagingTestGym} from './stagingConfig'
 import {clearOfflineForUser} from '../../features/progress/offlineWorkouts'
+import {isCurrentControlAccount,verifyPlatformAccess} from './platformAccess'
 import {resolveLegacyGymRole} from '../../features/auth/legacyRole'
 export type StagingSession={uid:string;email:string;gymId:string;role:'atleta'|'titolare'|'collaboratore';label:string}
 export const stagingSession=shallowRef<StagingSession|null>(null)
@@ -14,6 +15,7 @@ export async function readStagingSession():Promise<StagingSession>{
  await auth.authStateReady()
  const user=auth.currentUser
  if(!user?.email)throw new Error('Accedi con un account Firebase.')
+ if(await isCurrentControlAccount()){stagingSession.value=null;throw new Error('L’account Control non appartiene a una palestra.')}
  const p=await getDocFromServer(doc(db,'users',user.uid))
  if(!p.exists())throw new Error('Profilo utente non presente su Firebase.')
  const d=p.data(),gymId=d.gymId
@@ -50,7 +52,15 @@ export async function signInStaging(email:string,password:string,remember=true){
  const {auth}=getStagingClients()
  await setPersistence(auth,remember?browserLocalPersistence:browserSessionPersistence)
  await signInWithEmailAndPassword(auth,email,password)
- try{return await readStagingSession()}catch(error){await signOut(auth);stagingSession.value=null;throw error}
+ try{
+  if(await isCurrentControlAccount()){
+   stagingSession.value=null
+   await setPersistence(auth,browserSessionPersistence)
+   if(!await verifyPlatformAccess())throw new Error('Accesso Control non ancora autorizzato.')
+   return {role:'platform' as const}
+  }
+  return await readStagingSession()
+ }catch(error){await signOut(auth);stagingSession.value=null;throw error}
 }
 export async function signOutStaging(){
  const {auth,db}=getStagingClients()

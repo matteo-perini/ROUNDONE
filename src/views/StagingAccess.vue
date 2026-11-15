@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import {LIONFIT_CONTACT_EMAIL,LIONFIT_CONTACT_MAILTO} from '../features/platform/contact'
 import {uiText} from '../features/i18n/interfaceLanguage'
 /** Registrazione V1 portata in Vue: stessi documenti, ruoli e inviti monouso.
  * La conferma del server e' affidata alle Security Rules pubblicate, mai al solo client. */
@@ -49,7 +50,7 @@ function signedInDestination(role:'atleta'|'titolare'|'collaboratore'){
 }
 async function login(){if(busy.value)return
  busy.value=true;error.value='';info.value=''
- try{const s=await signInStaging(email.value.trim(),password.value,remember.value);password.value='';await router.replace(signedInDestination(s.role))}
+ try{const s=await signInStaging(email.value.trim(),password.value,remember.value);password.value='';await router.replace(s.role==='platform'?'/lionfit-control':signedInDestination(s.role))}
  catch(e){error.value=e instanceof Error?e.message:'Accesso non riuscito.'}finally{busy.value=false}
 }
 async function reset(){if(!email.value.trim()){error.value='Inserisci la tua email.';return}
@@ -198,6 +199,7 @@ async function register(){if(busy.value)return;if(!mayWriteLive()){error.value='
     <div v-if="canRecover && !verifyCoach" class="register-verification"><p class="muted small">{{uiText("Se l'account Firebase è stato creato ma la registrazione non è terminata, puoi riprenderla usando la stessa email, password e invito. Non sarà creato un secondo UID.")}}</p><button class="secondary wide" type="button" :disabled="busy" @click="recoverRegistration">{{uiText("RECUPERA REGISTRAZIONE INTERROTTA")}}</button></div>
    </form>
    <p v-if="error" class="notice" role="alert">{{error}}</p><p v-if="info" class="notice" role="status">{{info}}</p>
+   <p class="muted small">{{uiText("Contatto ufficiale LionFit:")}} <a :href="LIONFIT_CONTACT_MAILTO">{{LIONFIT_CONTACT_EMAIL}}</a></p>
   </section>
  </div>
 </template>
