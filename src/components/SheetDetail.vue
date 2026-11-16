@@ -134,7 +134,7 @@ onMounted(async()=>{
      <header v-if="group.secondaryIndex!==null" class="lf6-superset-head">
       <span class="lf6-pair-mark">A + B</span>
       <strong>SUPERSET {{String(groupNumber+1).padStart(2,'0')}}</strong>
-      <small>{{uiText("Due esercizi collegati")}}</small>
+      
      </header>
      <article v-for="(i,part) in (group.secondaryIndex===null?[group.primaryIndex]:[group.primaryIndex,group.secondaryIndex])"
        :key="displayExercises[i].id||i" class="lf6-exercise" :class="{'lf6-exercise-second':part===1}">
@@ -162,7 +162,7 @@ onMounted(async()=>{
         <span v-if="prescribedLoad(displayExercises[i])" class="lf6-chip"><b>{{uiText("Carico previsto")}}</b> {{prescribedLoad(displayExercises[i])}}</span>
         <span v-if="hasData(displayExercises[i].rest)" class="lf6-chip"><b>{{uiText("Recupero")}}</b> {{displayExercises[i].rest}}</span>
        </div>
-       <p v-if="illustrationUnavailableAt===i" class="lf6-illustration-unavailable">{{uiText("Nessuna illustrazione corrispondente trovata nel catalogo. La scheda non è stata modificata.")}}</p>
+       <p v-if="illustrationUnavailableAt===i" class="lf6-illustration-unavailable">{{uiText("Illustrazione non disponibile.")}}</p>
        <p v-if="hasData(displayExercises[i].notes)" v-show="notesOpen.includes(i)" class="lf6-coach-note"><strong>{{uiText("Note del Coach")}}</strong>{{displayExercises[i].notes}}</p>
        <div v-if="videoFor(displayExercises[i])||(!resolved[i]&&catalog.length)" class="lf6-extra-actions">
         <button v-if="!resolved[i]&&catalog.length" type="button" class="lf6-text-link" @click="viewExercise(displayExercises[i],i)">{{uiText("Cerca illustrazione")}}</button>
@@ -180,9 +180,9 @@ onMounted(async()=>{
   <div v-if="alternatives.length" class="modal-overlay lf6-dialog-layer" @click.self="alternatives=[]">
    <div class="dialog" role="dialog" aria-modal="true" :aria-label="uiText('Seleziona esercizio')">
     <div class="row between"><h2>{{uiText("Seleziona l'esercizio corretto")}}</h2><button class="secondary" @click="alternatives=[]">{{uiText("CHIUDI ✕")}}</button></div>
-    <p class="muted small">{{uiText("Il nome potrebbe riferirsi a più movimenti. La scelta mostra soltanto l'illustrazione e non modifica la scheda.")}}</p>
+    <p class="muted small">{{uiText("Scegli solo l’illustrazione: la scheda non cambia.")}}</p>
     <div v-for="option in alternatives" :key="option.id" class="line-card row between">
-     <span>{{catalogName(option)}} <small class="muted">{{option.id}}</small></span>
+     <span>{{catalogName(option)}} </span>
      <button class="primary" @click="chooseAlternative(option)">{{uiText("Visualizza")}}</button>
     </div>
    </div>

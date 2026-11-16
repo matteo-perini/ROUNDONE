@@ -59,7 +59,7 @@ onUnmounted(()=>{alive=false;stop?.()})
 </script>
 <template>
  <div v-if="allowed" class="stack lf14-platform lf19c-control" v-lf-entrance="{id:'control-center',premiumOnly:true,rows:[{match:'header'},{within:'.lf19c-kpis',match:'.panel'}]}">
-  <header class="panel lf19c-header"><div><span class="eyebrow">LIONFIT · ACCESSO RISERVATO</span><h1>Control Center</h1><p class="muted">Amministrazione della piattaforma, separata dal ruolo di Coach.</p></div><button v-if="independent" type="button" class="secondary" @click="leave">Esci dal Control Center</button><RouterLink v-else to="/impostazioni" class="secondary">Torna alle impostazioni</RouterLink></header>
+  <header class="panel lf19c-header"><div><h1>Control Center</h1><p class="muted">Gestione piattaforma.</p></div><button v-if="independent" type="button" class="secondary" @click="leave">Esci dal Control Center</button><RouterLink v-else to="/impostazioni" class="secondary">Torna alle impostazioni</RouterLink></header>
   <div class="lf19c-kpis">
    <section class="panel"><small>Palestre registrate</small><h2>{{counts?.gyms??'—'}}</h2><small>Totale piattaforma</small></section>
    <section class="panel"><small>Esenti · non pagano</small><h2 class="lf19c-green">{{totals.exempt}}</h2><small>Tra le caricate</small></section>
@@ -77,7 +77,7 @@ onUnmounted(()=>{alive=false;stop?.()})
    <div class="lf19c-search"><label>Ricerca palestra<input v-model="search" placeholder="Nome o identificativo" type="search"/></label><label>Stato commerciale<select v-model="filter"><option v-for="f in filters" :key="f" :value="f">{{f==='all'?'Tutte':commercialLabels[f]}}</option></select></label></div>
    <p class="muted small">{{visibleGyms.length}} risultati · {{gyms.length}} palestre caricate{{counts?' su '+counts.gyms:''}}. La ricerca e i conteggi commerciali riguardano le palestre caricate.</p>
    <section v-if="selected" class="lf14-ticket-detail lf19c-detail" aria-label="Preferenza commerciale palestra">
-    <div class="lf19c-header"><div><small class="eyebrow">PALESTRA SELEZIONATA</small><h3>{{selected.name}}</h3><small class="muted">{{selected.id}}</small></div><button type="button" class="secondary" :disabled="busy" @click="dismiss">Chiudi</button></div>
+    <div class="lf19c-header"><div><h3>{{selected.name}}</h3><small class="muted">{{selected.id}}</small></div><button type="button" class="secondary" :disabled="busy" @click="dismiss">Chiudi</button></div>
     <p>Stato attuale: <strong :class="['lf19c-tag',selected.commercial]">{{commercialLabels[selected.commercial]}}</strong></p>
     <fieldset class="lf19c-choices" :disabled="busy||!ready||!mayWriteLive()"><legend>Regime del futuro abbonamento</legend>
      <label :class="{'is-selected':choice==='exempt'}"><input type="radio" name="lf19c-commercial" value="exempt" v-model="choice"/><span><strong>Esente · non paga</strong><small>Esenzione senza scadenza; revocabile dal Control Center.</small></span></label>

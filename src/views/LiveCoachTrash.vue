@@ -101,7 +101,7 @@ onMounted(async()=>{
  <div class="stack lf-trash" aria-label="Cestino Coach">
   <section class="lf-trash-hero">
    <div class="lf-trash-hero-icon"><LionIcon name="bin" :size="36"/></div>
-   <div><span class="lf-trash-eyebrow">{{uiText("FIREBASE · RIPRISTINO CONSERVATIVO")}}</span><h1>{{uiText("Cestino")}}</h1><p>{{uiText("Elementi rimossi in modo conservativo. Puoi ripristinarli nella loro posizione originale, senza perdere ID e collegamenti.")}}</p></div>
+   <div><h1>{{uiText("Cestino")}}</h1><p>{{uiText("Ripristina gli elementi nella posizione originale.")}}</p></div>
   </section>
   <section class="lf-trash-panel">
    <header class="lf-trash-panel-head">
@@ -111,20 +111,20 @@ onMounted(async()=>{
    <p v-if="!mayWriteLive()" class="muted small">{{uiText("Ripristino non disponibile in questa build. Gli elementi restano consultabili.")}}</p>
    <p v-if="error" class="notice" role="alert">{{error}}</p>
    <p v-if="notice" class="notice" role="status">{{notice}}</p>
-   <p v-lf-quiet-loading v-if="loading" role="status" class="lf-trash-empty lf-quiet-status">{{uiText("Caricamento di modelli, schede personali e settimane della palestra…")}}</p>
+   <p v-lf-quiet-loading v-if="loading" role="status" class="lf-trash-empty lf-quiet-status">{{uiText("Caricamento cestino…")}}</p>
    <p v-else-if="!error&&!deleted.length" class="lf-trash-empty">{{uiText("Il Cestino è vuoto. Nessun elemento da ripristinare.")}}</p>
    <div v-if="!loading && deleted.length" class="lf-trash-items">
     <article v-for="item in deleted" :key="item.kind+'-'+item.athleteId+'-'+item.id" class="lf-trash-item">
      <div class="lf-trash-type-icon"><LionIcon :name="item.kind==='week'?'calendar':item.kind==='personal'?'book':'archive'" :size="22"/></div>
      <div class="lf-trash-main"><h3>{{item.title}}</h3><div class="lf-trash-tags"><span>{{kindLabel(item.kind)}}</span><span v-if="item.athleteName">{{uiText("Atleta:")}} {{item.athleteName}}</span></div></div>
      <div class="lf-trash-meta"><span>{{uiText("Spostato nel Cestino")}}</span><strong>{{fmtDate(item.deletedAt)}}</strong></div>
-     <div class="lf-trash-id"><span>{{uiText("ID originale")}}</span><small :title="item.id">{{item.id}}</small></div>
+     
      <button type="button" class="primary lf-trash-restore" :disabled="busy||!mayWriteLive()" @click="restore(item)"><LionIcon name="repeat" :size="16"/> {{uiText("Ripristina")}}</button>
     </article>
    </div>
   </section>
-  <section class="lf-trash-footer"><LionIcon name="info" :size="22"/><p><strong>{{uiText("Gli ID originali restano invariati.")}}</strong> {{uiText("Nessuna eliminazione definitiva: i collegamenti delle settimane vengono verificati prima del ripristino.")}}</p></section>
-  <RouterLink class="lf-trash-back" to="/coach/atleti">{{uiText("← Torna alla gestione atleti")}}</RouterLink>
+  
+  
  </div>
 </template>
 <style scoped>
@@ -139,7 +139,7 @@ onMounted(async()=>{
 .lf-trash-panel-title{display:flex;align-items:center;gap:10px;min-width:0}.lf-trash-panel-title>svg{color:var(--mint);flex-shrink:0}.lf-trash-panel-title h2{font-size:17px;margin:0}
 .lf-trash-count{font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:4px 9px}
 .lf-trash-items{display:grid;gap:9px}
-.lf-trash-item{display:grid;grid-template-columns:50px minmax(145px,1.9fr) minmax(145px,.9fr) minmax(105px,.85fr) auto;gap:12px;align-items:center;padding:13px;border:1px solid var(--border);border-radius:12px;background:var(--card2);min-width:0;transition:border-color .15s ease,transform .15s ease}
+.lf-trash-item{display:grid;grid-template-columns:50px minmax(145px,1.9fr) minmax(145px,.9fr) auto;gap:12px;align-items:center;padding:13px;border:1px solid var(--border);border-radius:12px;background:var(--card2);min-width:0;transition:border-color .15s ease,transform .15s ease}
 .lf-trash-item:hover{border-color:var(--mint);transform:translateY(-1px)}
 .lf-trash-type-icon{height:46px;width:46px;display:grid;place-items:center;border-radius:11px;background:var(--green-bg);color:var(--mint)}
 .lf-trash-main{min-width:0}.lf-trash-main h3{font-size:13px;margin:0 0 6px;overflow-wrap:anywhere}.lf-trash-tags{display:flex;flex-wrap:wrap;gap:6px}.lf-trash-tags span{font-size:10px;color:var(--muted)}

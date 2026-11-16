@@ -20,7 +20,7 @@ watch(()=>requests.value.map(p=>p.storagePath).join('|'),()=>{zoom.value=1;viewe
 const viewerUrl=computed(()=>urls.value[viewer.value]||'')
 function date(c:ProgressCheck){return c.performedOn.split('-').reverse().join('/')+' · '+(rows.value.length-rows.value.indexOf(c))}
 </script>
-<template><section class="panel lf-p360-card lf-p15-compare lf25-compare"><h2>Prima e dopo</h2><p class="muted small">Seleziona due check e passa da un’inquadratura all’altra. Solo le pose presenti in entrambi sono confrontabili.</p>
+<template><section class="panel lf-p360-card lf-p15-compare lf25-compare"><h2>Prima e dopo</h2><p class="muted small">Scegli due check con pose in comune.</p>
 <p v-if="rows.length<2" class="muted small">Servono almeno due check fotografici disponibili.</p>
 <template v-else><div class="lf-p15-pair"><label>PRIMA<select v-model="before"><option value="">Seleziona check</option><option v-for="c in rows" :key="c.id" :value="c.id">{{date(c)}}</option></select></label><label>DOPO<select v-model="after" :disabled="!first"><option value="">Seleziona check</option><option v-for="c in later" :key="c.id" :value="c.id">{{date(c)}}</option></select></label></div>
 <p v-if="first&&last&&!sides.length" class="muted small">Questi check non hanno inquadrature in comune.</p>

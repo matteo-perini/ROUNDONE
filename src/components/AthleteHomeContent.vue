@@ -56,7 +56,7 @@ function target(key:(typeof quick)[number]['key']){
   <section class="lf-v3-intro">
    <div class="lf-v3-greeting">
     <h1>{{uiText('Ciao,')}} {{firstName}}! <span class="lf-v3-wave" aria-hidden="true">👋</span></h1>
-    <p>{{uiText('Il tuo allenamento, tutto sotto controllo.')}}</p>
+    
    </div>
   </section>
 

@@ -16,8 +16,8 @@ async function act(which:'enable'|'disable'){if(busy.value||!loaded.value)return
 </script>
 <template>
  <section class="card lf-push-settings" aria-label="Notifiche Agenda">
-  <h3>Notifiche Agenda</h3><p class="muted small">Le preferenze sono salvate nel tuo account. Attiva le notifiche sui dispositivi su cui desideri riceverle.</p>
-  <p class="small" role="status">{{active?'Notifiche attive su questo dispositivo':'Notifiche non attive su questo dispositivo'}}</p>
+  <h3>Notifiche Agenda</h3><p class="muted small">Attiva le notifiche sui dispositivi che utilizzi.</p>
+  <p v-if="loaded" class="small" role="status">{{active?'Notifiche attive':'Notifiche disattivate'}}</p>
   <template v-if="loaded">
    <div class="lf-push-choices"><label><input v-model="prefs.booked" type="checkbox" :disabled="busy" @change="save"> Nuovo appuntamento</label>
    <label><input v-model="prefs.cancelled" type="checkbox" :disabled="busy" @change="save"> Annullamento o spostamento</label></div>
@@ -27,7 +27,7 @@ async function act(which:'enable'|'disable'){if(busy.value||!loaded.value)return
    <button v-else-if="active" type="button" class="secondary wide" :disabled="busy" @click="act('disable')">Disattiva su questo dispositivo</button>
   </template>
   <button v-else-if="!busy" type="button" class="secondary wide" @click="load">Riprova</button>
-  <p v-if="busy" role="status" class="small muted">{{loaded?'Salvataggio o verifica in corso…':'Caricamento preferenze…'}}</p>
+  <p v-if="busy&&!loaded" v-lf-quiet-loading class="lf-quiet-status" role="status">Caricamento preferenze…</p><p v-else-if="busy" role="status" class="small muted">Salvataggio o verifica…</p>
   <p v-if="message" :role="isError?'alert':'status'" class="notice">{{message}}</p>
  </section>
 </template>

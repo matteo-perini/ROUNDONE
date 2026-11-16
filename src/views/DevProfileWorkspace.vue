@@ -59,16 +59,16 @@ async function choosePhoto(ev:Event){const input=ev.target as HTMLInputElement;c
 }
 
 async function save(){const s=session.value;if(!s||busy.value)return
- if(!canSave.value){notice.value='Salvataggio profilo non disponibile: le scritture Firebase non sono ancora abilitate per questo ambiente.';return}
+ if(!canSave.value){notice.value='Salvataggio profilo non disponibile.';return}
  if(!first.value.trim()||first.value.trim().length>80||surname.value.length>80||bio.value.length>160||!validMeasurement(height.value,280)||!validMeasurement(weight.value,500)){
   notice.value='Controlla nome, bio (160 caratteri), altezza e peso.';return
  }
- if(!window.confirm('Salvare le modifiche del tuo profilo Firebase?'))return
+ if(!window.confirm('Salvare le modifiche del profilo?'))return
  busy.value=true;try{
   const {db}=isStagingMode()?getStagingClients():getLocalEmulatorClients()
   const payload={name:first.value.trim(),surname:surname.value.trim(),gender:gender.value,location:location.value.trim().slice(0,80)||'Italia',bio:bio.value.trim(),height:normalizeMeasurement(height.value),weight:normalizeMeasurement(weight.value),...(newPhoto.value?{photoURL:newPhoto.value}:{})}
   await updateDoc(doc(db,'users',s.uid),payload)
-  height.value=payload.height;weight.value=payload.weight;photo.value=newPhoto.value||photo.value;newPhoto.value='';editing.value=false;notice.value='Profilo aggiornato su Firebase.'
+  height.value=payload.height;weight.value=payload.weight;photo.value=newPhoto.value||photo.value;newPhoto.value='';editing.value=false;notice.value='Profilo aggiornato.'
   // Team pubblico ha regole indipendenti: l'errore qui non invalida il salvataggio del profilo.
   if(s.role==='atleta')try{await setDoc(doc(db,'team_public',s.uid),{gymId:s.gymId,role:'athlete',name:payload.name,surname:payload.surname,bio:payload.bio,...(payload.photoURL?{photoURL:payload.photoURL}:{})},{merge:true})}
    catch{notice.value+=' L’aggiornamento foto nel Team richiede permessi team_public.'}
@@ -79,17 +79,17 @@ function link(route:string){return isStagingMode()?route:route+'?source=emulator
 <template>
 <div class="lfp-container" :class="session?.role==='atleta'?'athlete-profile':'coach-profile'">
  <ProfileOverview v-if="!editing" :role="session?.role||'atleta'" :name="fullName" :gym-name="gymName" :email="email" :photo="photo" :bio="bio" :location="displayLocation" :height="height" :weight="weight" :settings-to="link('/impostazioni')" :athlete-to="link('/coach/atleti')" :coach-staff-to="link('/coach/staff')" :staff-enabled="isStagingMode()" :workouts-enabled="isStagingMode()" :bookings-to="link('/coach/prenotazioni')" :coach-metrics="metrics" @edit="editing=true" @photo="editing=true"/>
- <section v-else class="panel profile-edit-screen lfp-form-wrap"><header class="row between"><button class="bare" @click="editing=false">✕</button><h2>MODIFICA PROFILO</h2><button class="bare green" :disabled="busy||!canSave" @click="save">SALVA</button></header>
+ <section v-else class="panel profile-edit-screen lfp-form-wrap"><header class="row between"><button class="bare" type="button" aria-label="Chiudi modifica profilo" @click="editing=false">✕</button><h2>MODIFICA PROFILO</h2></header>
   <button class="profile-photo-editor" type="button" @click="fileInput?.click()" :disabled="busy" aria-label="Carica o modifica foto"><img v-if="newPhoto||photo" :src="newPhoto||photo" alt="Anteprima foto"/><span v-else>🦁</span><small>CAMBIA FOTO</small></button>
   <input ref="fileInput" type="file" accept="image/*,.heic,.heif" class="visually-hidden" @change="choosePhoto"/>
   <div class="grid2 profile-edit-fields"><label>NOME<input v-model="first" maxlength="80" autocomplete="given-name"/></label><label>COGNOME<input v-model="surname" maxlength="80" autocomplete="family-name"/></label>
    <label>SESSO<select v-model="gender"><option>Non specificare</option><option>Uomo</option><option>Donna</option><option>Altro</option></select></label>
-   <label>EMAIL <input :value="email" type="email" readonly aria-label="Email account Firebase"/><small class="muted">Per cambiare email serve la verifica Firebase Auth.</small></label>
+   <label>EMAIL <input :value="email" type="email" readonly aria-label="Email account Firebase"/><small class="muted">Email non modificabile da qui.</small></label>
    <label>POSIZIONE<input v-model="location" maxlength="80"/></label><label>BIO / DISCIPLINA<input v-model="bio" maxlength="160"/></label>
    <label>ALTEZZA (CM)<input v-model="height" inputmode="decimal" type="text" autocomplete="off" placeholder="Es. 175,5" aria-label="Altezza in centimetri"/></label>
    <label>PESO (KG)<input v-model="weight" inputmode="decimal" type="text" autocomplete="off" placeholder="Es. 70,5" aria-label="Peso in chilogrammi"/></label>
-  </div><button class="primary wide" :disabled="busy||!canSave" @click="save">{{busy?'SALVATAGGIO…':'SALVA PROFILO'}}</button><p class="small muted">Foto ottimizzate automaticamente (JPG/PNG/WebP/HEIC/HEIF). Compatibilità V1: avatar piccolo nel documento Firestore, sempre sotto 1 MiB.</p>
+  </div><button class="primary wide" :disabled="busy||!canSave" @click="save">{{busy?'SALVATAGGIO…':'SALVA PROFILO'}}</button><p class="small muted">Formati: JPG, PNG, WebP, HEIC/HEIF.</p>
  </section>
- <p v-if="notice" class="small muted lfp-notice" role="status">{{notice}}</p>
+ <p v-if="notice==='Caricamento profilo…'" v-lf-quiet-loading class="lf-quiet-status" role="status">{{notice}}</p><p v-else-if="notice" class="small muted lfp-notice" role="status">{{notice}}</p>
 </div>
 </template>

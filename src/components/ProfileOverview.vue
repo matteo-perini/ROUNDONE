@@ -25,11 +25,11 @@ function show(id:string){active.value=active.value===id?'':id}
 </script>
 <template>
  <section class="lfp-profile" :class="athlete?'lfp-athlete':'lfp-coach'" :aria-label="uiText('Il mio profilo')">
-  <div class="lfp-heading"><div><span class="eyebrow">{{uiText("LION FIT · PROFILO")}}</span><h1>{{uiText(athlete?'Il mio profilo':'Profilo & Palestra')}}</h1><p class="muted">{{uiText(athlete?'La tua identità sportiva, in un unico posto.':'Gestisci il tuo profilo e le informazioni della palestra.')}}</p></div><RouterLink :to="settingsTo" class="lfp-gear" :aria-label="uiText('Impostazioni')"><LionIcon name="settings" :size="20"/></RouterLink></div>
+  <div class="lfp-heading"><div><h1>{{uiText(athlete?'Il mio profilo':'Profilo & Palestra')}}</h1></div></div>
   <div class="lfp-hero">
    <button class="lfp-avatar" type="button" aria-label="Modifica foto profilo" @click="emit('photo')"><span class="lfp-avatar-crop"><img v-if="photo" :src="photo" alt="Foto del profilo"/><img v-else src="/v1-preview/LOGO-APP.png" alt="Logo Lion Fit"/></span><span class="lfp-camera"><LionIcon name="camera" :size="15"/></span></button>
    <div class="lfp-identity"><h2>{{name||'Profilo'}}</h2><p>{{title}}</p><span class="lfp-gym"><LionIcon name="gym" :size="15"/> {{uiText("Palestra:")}} {{gymName}}</span><p v-if="athlete" class="lfp-location">{{displayCountry(location)}}<span v-if="bio"> · {{bio}}</span></p></div>
-   <div class="lfp-hero-actions"><button type="button" class="lfp-edit-button" @click="emit('edit')"><LionIcon name="edit" :size="16"/> {{uiText("Modifica profilo")}}</button><RouterLink :to="settingsTo" class="lfp-outline"><LionIcon name="settings" :size="16"/> {{uiText("Impostazioni")}}</RouterLink></div>
+   <div class="lfp-hero-actions"><button type="button" class="lfp-edit-button" @click="emit('edit')"><LionIcon name="edit" :size="16"/> {{uiText("Modifica profilo")}}</button></div>
   </div>
   <div class="lfp-facts" :style="athlete?{gridTemplateColumns:'repeat(2,minmax(0,1fr))'}:undefined" aria-label="Dati disponibili">
    <div v-if="athlete"><LionIcon name="calendar"/><b>{{height?height+' cm':uiText('Non registrato')}}</b><small>{{uiText("Altezza")}}</small></div>
@@ -38,7 +38,7 @@ function show(id:string){active.value=active.value===id?'':id}
   </div>
   <div class="lfp-sections">
    <section class="lfp-section" :class="{'lfp-section-open':active===item.id}" v-for="item in menu" :key="item.id">
-    <button type="button" class="lfp-section-button" :aria-expanded="active===item.id" @click="show(item.id)"><span class="lfp-section-icon"><LionIcon :name="item.icon" :size="21"/></span><span class="lfp-section-copy"><strong>{{uiText(item.title)}}</strong><small>{{uiText(item.subtitle)}}</small></span><LionIcon name="chevron" :size="18"/></button>
+    <button type="button" class="lfp-section-button" :aria-expanded="active===item.id" @click="show(item.id)"><span class="lfp-section-icon"><LionIcon :name="item.icon" :size="21"/></span><span class="lfp-section-copy"><strong>{{uiText(item.title)}}</strong></span><LionIcon name="chevron" :size="18"/></button>
     <div v-if="active===item.id" class="lfp-section-content">
      <template v-if="item.id==='dati'"><p><b>{{uiText("Nome:")}}</b> {{name}}</p><p v-if="email"><b>Email:</b> {{email}}</p><p v-if="athlete"><b>{{uiText("Paese:")}}</b> {{displayCountry(location)}}</p><p v-if="height"><b>{{uiText("Altezza:")}}</b> {{height}} cm</p><p v-if="weight"><b>{{uiText("Peso:")}}</b> {{weight}} kg</p><button class="lfp-inline-edit" type="button" @click="emit('edit')">{{uiText("Modifica i miei dati →")}}</button></template>
      <template v-else-if="item.id==='palestra'"><p><b>{{uiText("Palestra:")}}</b> {{gymName}}</p><p class="muted">{{uiText("Il titolare può modificare il nome, il logo e la copertina dalle impostazioni della palestra.")}}</p></template>
@@ -46,9 +46,9 @@ function show(id:string){active.value=active.value===id?'':id}
    </section>
    <RouterLink v-if="athlete && workoutsEnabled" class="lfp-section-button" to="/progressi"><span class="lfp-section-icon"><LionIcon name="dumbbell" :size="21"/></span><span class="lfp-section-copy"><strong>{{uiText("Allenamenti")}}</strong><small>{{uiText("Storico, andamento e obiettivi")}}</small></span><LionIcon name="chevron" :size="18"/></RouterLink>
    <RouterLink v-if="!athlete && staffEnabled && (role==='titolare'||role==='coach-demo')" class="lfp-section-button lfp-mobile-staff" :to="coachStaffTo"><span class="lfp-section-icon"><LionIcon name="users" :size="21"/></span><span class="lfp-section-copy"><strong>{{uiText("Coach della palestra")}}</strong></span><LionIcon name="chevron" :size="18"/></RouterLink>
-   <RouterLink class="lfp-section-button lfp-settings-link" :to="settingsTo"><span class="lfp-section-icon"><LionIcon name="settings" :size="21"/></span><span class="lfp-section-copy"><strong>{{uiText("Impostazioni")}}</strong><small>{{uiText("Tema, privacy, sicurezza e supporto")}}</small></span><LionIcon name="chevron" :size="18"/></RouterLink>
+   <RouterLink class="lfp-section-button lfp-settings-link" :to="settingsTo"><span class="lfp-section-icon"><LionIcon name="settings" :size="21"/></span><span class="lfp-section-copy"><strong>{{uiText("Impostazioni")}}</strong></span><LionIcon name="chevron" :size="18"/></RouterLink>
   </div>
-  <div v-if="!athlete" class="lfp-actions"><h3>{{uiText("Azioni rapide")}}</h3><div class="lfp-action-grid"><RouterLink :to="athleteTo"><LionIcon name="users"/> {{uiText("Gestisci atleti")}}</RouterLink><RouterLink :to="bookingsTo"><LionIcon name="calendar"/> {{uiText("Prenotazioni")}}</RouterLink><RouterLink v-if="staffEnabled&&(role==='titolare'||role==='coach-demo')" :to="coachStaffTo"><LionIcon name="gym"/> {{uiText("Coach della palestra")}}</RouterLink><RouterLink :to="settingsTo"><LionIcon name="shield"/> {{uiText("Impostazioni")}}</RouterLink></div></div>
+  <div v-if="!athlete" class="lfp-actions"><h3>{{uiText("Azioni rapide")}}</h3><div class="lfp-action-grid"><RouterLink :to="athleteTo"><LionIcon name="users"/> {{uiText("Gestisci atleti")}}</RouterLink><RouterLink :to="bookingsTo"><LionIcon name="calendar"/> {{uiText("Prenotazioni")}}</RouterLink><RouterLink v-if="staffEnabled&&(role==='titolare'||role==='coach-demo')" :to="coachStaffTo"><LionIcon name="gym"/> {{uiText("Coach della palestra")}}</RouterLink></div></div>
  </section>
 </template>
 

@@ -12,7 +12,7 @@ onMounted(()=>void act('status'));onUnmounted(()=>{alive=false;code.value='';url
 </script>
 <template>
  <section class="card" style="display:grid;gap:12px;padding:14px">
- <h3>Google Calendar</h3><p class="muted small">Collegamento facoltativo. Crea un calendario LionFit senza leggere gli altri calendari. Sincronizza le nuove prenotazioni e gli annullamenti. Gli appuntamenti precedenti non vengono importati.</p>
+ <h3>Google Calendar</h3><p class="muted small">Sincronizza nuove prenotazioni e annullamenti in un calendario LionFit dedicato. Gli altri calendari e gli appuntamenti precedenti non vengono letti o importati.</p>
  <template v-if="loaded">
  <p role="status">{{state==='connected'?'Collegato':state==='review'?'Verifica necessaria':state==='authorized'?'In attesa di conferma':state==='pending'?'Autorizzazione in corso':'Non collegato'}}</p>
  <button v-if="state==='disconnected'||state==='pending'" class="primary wide" :disabled="busy" @click="act('start')">{{state==='pending'?'Genera un nuovo collegamento':'Collega Google Calendar'}}</button>

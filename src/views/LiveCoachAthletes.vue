@@ -572,7 +572,7 @@ function copyToArchive(sheet:Personal){
 <template>
 <div class="stack coach-athletes-screen">
  <section v-if="!athlete" class="panel coach-team-toolbar lf-roster-toolbar">
-  <div class="coach-team-title"><h2 class="card-heading">{{uiText("GESTIONE ATLETI")}}</h2><span class="muted">{{uiText("SELEZIONA UN ATLETA")}}</span></div>
+  <div class="coach-team-title"><h2 class="card-heading">{{uiText("GESTIONE ATLETI")}}</h2></div>
   <div class="coach-team-tools"><RouterLink to="/coach/staff" class="primary">{{uiText("+ Invita atleta")}}</RouterLink><input v-model="search" type="search" :aria-label="uiText('Cerca atleta')" :placeholder="uiText('Cerca atleta per nome…')"/></div>
  </section>
  <p v-if="error" class="notice" role="alert">{{error}}</p><p v-if="!rosterReady&&!error" v-lf-quiet-loading class="lf-quiet-status" role="status">{{status}}</p><p v-else-if="status.startsWith('Coach principale associato')" class="small muted" role="status">{{status}}</p>
@@ -580,12 +580,12 @@ function copyToArchive(sheet:Personal){
    <span class="small muted lf-roster-mobile-quiet">{{rosterReady?visibleAthletes.length:'—'}} {{uiText('atleti ·')}} {{uiText(currentFilterLabel)}}</span>
    <button v-if="session?.role==='titolare'&&unassignedAthletes.length" type="button" class="secondary lf-assign-legacy" @click="legacyPanelOpen=!legacyPanelOpen">{{uiText(legacyPanelOpen?'Chiudi assegnazioni':'Riassegna atleti storici')}}</button>
  </section>
- <p v-if="!athlete" class="small muted lf-roster-help">{{uiText("Tutti i Coach autorizzati possono gestire gli Atleti della stessa palestra. L’associazione al Coach serve soltanto per organizzare i filtri.")}}</p>
- <p v-if="!athlete&&!hasAssignedMembers" class="small muted lf-roster-help">{{uiText("Gli Atleti storici senza Coach principale restano visibili nel filtro «Tutti gli Atleti».")}}</p>
+ 
+ 
  <section v-if="!athlete&&session?.role==='titolare'&&unassignedAthletes.length&&legacyPanelOpen" class="panel">
   <div class="row between"><div><strong>{{uiText("Atleti storici senza Coach principale")}}</strong><p class="small muted">{{unassignedAthletes.length}} {{uiText("profili ancora da associare. Le schede e gli inviti non cambiano.")}}</p></div><button class="secondary" @click="legacyPanelOpen=false">{{uiText("Chiudi")}}</button></div>
   <div class="stack">
-   <p v-if="!canManagePrimaryCoach" class="muted small">{{uiText("Questa migrazione sarà attiva dopo la pubblicazione delle Rules aggiornate e l'abilitazione del flag di associazione. Nessuna modifica viene effettuata ora.")}}</p>
+   <p v-if="!canManagePrimaryCoach" class="muted small">{{uiText("Assegnazione non ancora disponibile.")}}</p>
    <div v-for="a in unassignedAthletes" :key="a.id" class="row between line-card" style="gap:12px;flex-wrap:wrap">
     <div><b>{{a.name}}</b><p class="small muted">{{a.email}}</p></div>
     <label class="small">{{uiText("Coach principale")}}<select v-model="legacyPrimary[a.id]" :disabled="!canManagePrimaryCoach"><option value="">{{uiText("Seleziona")}}</option><option v-for="c in availableCoaches" :key="c.id" :value="c.id">{{c.name}}</option></select></label>
@@ -634,21 +634,21 @@ function copyToArchive(sheet:Personal){
   </button>
  </div>
  <template v-if="athlete">
- <section class="panel coach-selected-athlete"><div class="row between coach-selected-head"><div><span class="eyebrow">{{uiText("GESTIONE ATLETA")}}</span><h2>{{athlete.name.toUpperCase()}}</h2></div><button class="secondary" @click="close">{{uiText("CHIUDI ✕")}}</button></div><div class="divider"/>
+ <section class="panel coach-selected-athlete"><div class="row between coach-selected-head"><div><h2>{{athlete.name.toUpperCase()}}</h2></div><button class="secondary" @click="close">{{uiText("CHIUDI ✕")}}</button></div><div class="divider"/>
   <div class="grid2 coach-athlete-quick-actions">
-   <button class="action-card" @click="programError='';createProgramOpen=true"><LionIcon name="calendar"/><div><strong>{{uiText("Nuovo programma")}}</strong><small>{{uiText("Giorni e settimane")}}</small></div></button>
-   <button class="action-card" @click="linkToEditor('personal')"><LionIcon name="plus"/><div><strong>{{uiText("Crea scheda personale")}}</strong><small>{{uiText("Parti da zero · senza programma")}}</small></div></button>
-   <button class="action-card" @click="linkToEditor('shared')"><LionIcon name="book"/><div><strong>{{uiText("Assegna scheda dall'archivio")}}</strong><small>{{uiText("Scegli dall'archivio Coach")}}</small></div></button>
-   <button class="action-card" type="button" @click="openAthleteProgress"><LionIcon name="progress"/><div><strong>Allenamenti</strong><small>Storico, progressi, check e obiettivi</small></div></button>
+   <button class="action-card" @click="programError='';createProgramOpen=true"><LionIcon name="calendar"/><div><strong>{{uiText("Nuovo programma")}}</strong></div></button>
+   <button class="action-card" @click="linkToEditor('personal')"><LionIcon name="plus"/><div><strong>{{uiText("Crea scheda personale")}}</strong></div></button>
+   <button class="action-card" @click="linkToEditor('shared')"><LionIcon name="book"/><div><strong>{{uiText("Assegna scheda dall'archivio")}}</strong></div></button>
+   <button class="action-card" type="button" @click="openAthleteProgress"><LionIcon name="progress"/><div><strong>Allenamenti</strong></div></button>
   </div>
  </section>
  <p v-if="message" class="notice" role="status">{{message}}</p>
- <div v-if="data" class="grid2 assignment-columns"><section class="panel assignment-panel"><h3>{{uiText("📄 SCHEDE SINGOLE SENZA PROGRAMMA")}}</h3><p class="muted small">{{uiText("Assegnate ma non collegate a giorni attivi.")}}</p>
+ <div v-if="data" class="grid2 assignment-columns"><section class="panel assignment-panel"><h3>{{uiText("📄 SCHEDE SINGOLE SENZA PROGRAMMA")}}</h3>
   <div class="assignment-scroll"><div v-if="!groups?.unprogrammed.length" class="line-card">{{uiText("Nessuna scheda singola senza programma.")}}</div><div v-for="g in groups?.unprogrammed||[]" :key="g.sheet.id" class="line-card coach-v1-assignment-card"><b>🏋️ {{g.sheet.title}}</b><div class="assignment-actions"><button class="secondary" @click="opened=g.sheet">{{uiText("Visualizza")}}</button><button class="secondary" @click="editPersonal(g.sheet)">{{uiText("Modifica")}}</button><button class="secondary" @click="copyToArchive(g.sheet)">{{uiText("Copia nell'Archivio schede")}}</button><button class="danger" @click="trashUnusedPersonal(g.sheet)">{{uiText("Nel Cestino")}}</button></div></div></div>
- </section><section class="panel assignment-panel"><h3>{{uiText("🗓️ SCHEDE IN PROGRAMMA")}}</h3><p class="muted small">{{uiText("Una sola card per scheda; settimane e giorni rimangono visibili.")}}</p>
+ </section><section class="panel assignment-panel"><h3>{{uiText("🗓️ SCHEDE IN PROGRAMMA")}}</h3>
   <div class="assignment-scroll"><div v-if="!groups?.programmed.length" class="line-card">{{uiText("Nessuna scheda in programma.")}}</div><div v-for="g in groups?.programmed||[]" :key="g.sheet.id" class="line-card coach-v1-assignment-card"><b>🏋️ {{g.sheet.title}}</b><p class="small green">{{linksLabel(g.links)}}</p><div class="assignment-actions"><button class="secondary" @click="opened=g.sheet">{{uiText("Visualizza")}}</button><button class="secondary" @click="editPersonal(g.sheet)">{{uiText("Modifica")}}</button><button class="secondary" @click="copyToArchive(g.sheet)">{{uiText("Copia nell'Archivio schede")}}</button><button class="secondary" @click="manageDays(g.links)">{{uiText("Gestisci giorni")}}</button><button class="danger" @click="showDelete={title:g.sheet.title,links:g.links}">{{uiText("Cancella")}}</button></div></div></div>
  </section></div>
- <p class="muted small" v-if="groups">{{groups.unprogrammed.length}} {{uiText("schede senza programma ·")}} {{groups.programmed.length}} {{uiText("schede in programma · aggiornamento in tempo reale")}}</p>
+ 
  <details class="panel" :open="showMaintenance" @toggle="showMaintenance=($event.target as HTMLDetailsElement).open"><summary>{{uiText("⚙ Manutenzione delle schede esistenti")}}</summary><p class="small muted">{{uiText("Le vecchie schede possono essere protette nell'Archivio. La manutenzione non cancella automaticamente schede o settimane.")}}</p><button class="primary" @click="alignMaintenance">{{uiText("Allinea schede delle settimane (manutenzione)")}}</button></details>
  <section class="panel coach-program-compact lf-program-v2" aria-label="Programmazione settimanale Atleta">
   <div class="row between lf-program-v2-heading"><div><h2>PROGRAMMI DELL’ATLETA</h2><p class="small muted">{{programs.length}} programmi · {{allActiveWeeks.length}} settimane · Seleziona un programma e la sua settimana</p></div><span class="pill pill-neutral">{{currentWeeks.length}} SETTIMANE SELEZIONATE</span></div>
@@ -673,7 +673,7 @@ function copyToArchive(sheet:Personal){
     <p v-if="pendingRemote" class="notice" role="alert">Un altro Coach ha aggiornato la settimana. La bozza è conservata; verifica il salvataggio.</p>
     <div v-if="week" class="lf-week-workspace">
      <div class="row between lf-week-title"><h3>{{selectedWeekLabel()}} · {{week.startDate}}</h3><span v-if="dirty" class="lf-unsaved-label" role="status">● Attività non salvate</span></div>
-     <p v-if="!canWrite && showWeek" class="small muted">Le modifiche non possono essere salvate finché la configurazione della palestra non consente le scritture.</p>
+     <p v-if="!canWrite && showWeek" class="small muted">Salvataggio non disponibile.</p>
      <div v-if="showWeek" class="lf-compact-week-days" aria-label="Sette giorni della settimana">
       <button v-for="(d,i) in week.days" :id="'live-week-'+i" :key="week.id+'-'+i" class="lf-compact-day" type="button" :disabled="weekSelectionMode!=='normal'" :aria-label="`Modifica ${DAY_NAMES[i]}`" @click="openDay(i)">
        <span class="lf-compact-day-header"><strong>{{DAY_NAMES[i]}}</strong><small>{{dayDate(week.startDate,i)}}</small><span aria-hidden="true">›</span></span>
@@ -683,7 +683,7 @@ function copyToArchive(sheet:Personal){
        <span class="lf-compact-day-data lf-compact-day-sheet"><small>Scheda 2</small><b :title="slotTitle(d,2)">{{slotTitle(d,2)}}</b></span>
       </button>
      </div>
-     <div v-if="dirty&&showWeek" class="lf-draft-actions row"><span class="small muted">Bozza non salvata: puoi aprire un giorno per completarla.</span><button class="primary" :disabled="busy||!canWrite" @click="saveActivities()">{{busy?'Salvataggio…':'Salva attività'}}</button></div>
+     <div v-if="dirty&&showWeek" class="lf-draft-actions row"><span class="small muted">Bozza non salvata.</span><button class="primary" :disabled="busy||!canWrite" @click="saveActivities()">{{busy?'Salvataggio…':'Salva attività'}}</button></div>
     </div><p v-else class="muted small">Nessuna settimana attiva. Crea un programma per iniziare.</p>
    </div>
    <aside class="lf-week-actions" aria-label="Azioni settimane">
@@ -718,7 +718,7 @@ function copyToArchive(sheet:Personal){
   <p v-if="message" class="notice" role="alert">{{message}}</p>
   <p v-if="sharedError" class="notice" role="alert">{{uiText("Archivio non leggibile:")}} {{sharedError}}</p>
   <div class="coach-v1-pick-list"><article v-for="s in visibleShared" :key="s.id" class="line-card coach-pick-row"><div class="coach-pick-row-info"><b>{{s.title}}</b><p class="muted small">{{s.category}} · {{s.exercises.length}} {{uiText("esercizi")}}</p></div><div class="row coach-pick-row-actions"><button class="secondary" @click="openSharedPreview(s)">{{uiText("Visualizza")}}</button><button class="primary" :disabled="busy||!canWrite" @click="assignFromShared(s)">{{uiText("Assegna")}}</button></div></article><p v-if="!sharedLoading&&!visibleShared.length" class="muted">{{uiText("Nessuna scheda nell’Archivio Coach corrisponde alla ricerca.")}}</p></div>
-  <p class="small muted">{{uiText("Per una nuova scheda usa «Crea nuova» nel giorno. Le schede personali già assegnate e quelle storiche restano conservate ma non compaiono in questa scelta.")}}</p>
+  <p class="small muted">{{uiText("Per creare una scheda, usa «Crea nuova» nel giorno.")}}</p>
  </div></div>
  <div v-if="deleteConfirmOpen" class="modal-overlay" @click.self="deleteConfirmOpen=false"><div class="dialog lf-weeks-confirm" role="dialog" aria-modal="true" aria-label="Conferma spostamento settimane nel Cestino"><div class="row between"><h2>Conferma eliminazione</h2><button class="bare" :disabled="busy" aria-label="Chiudi conferma" @click="deleteConfirmOpen=false">✕</button></div><p>Vuoi spostare <strong>{{selectedWeekTrash.length}} {{selectedWeekTrash.length===1?'settimana':'settimane'}}</strong> nel Cestino?</p><p class="small muted">I programmi e le schede collegate non vengono eliminati definitivamente. Potrai ripristinare le settimane.</p><div class="row lf-confirm-actions"><button class="secondary" :disabled="busy" @click="deleteConfirmOpen=false">Annulla</button><button class="danger" :disabled="busy||!canWrite" @click="trashMultipleWeeks">{{busy?'Eliminazione…':'Sposta nel Cestino'}}</button></div></div></div>
  <div v-if="duplicateOpen" class="modal-overlay" @click.self="duplicateOpen=false"><div class="dialog" style="max-width:420px" role="dialog" aria-modal="true" aria-label="Conferma duplicazione settimana"><div class="row between"><h2>{{uiText("DUPLICA SETTIMANA")}}</h2><button class="bare" aria-label="Chiudi duplicazione" :disabled="busy" @click="duplicateOpen=false">✕</button></div>

@@ -299,11 +299,11 @@ onUnmounted(()=>{live=false;closeListeners()})
 <template>
 <div class="stack" style="gap:20px">
  <div class="notice coach-archive-guide" role="status"><strong>{{uiText("ARCHIVIO DEL COACH")}}</strong> {{uiText("· Gestisci le schede e assegnale tramite il pulsante della scheda.")}} <RouterLink :to="{path:'/coach/atleti',query:{...(athleteId?{athleteId}:{}),...(typeof route.query.weekId==='string'?{weekId:route.query.weekId}:{})}}">{{uiText("← Torna alla settimana dell’atleta")}}</RouterLink></div>
- <section class="panel"><div class="row between"><div><h2 class="card-heading">{{uiText("ARCHIVIO SCHEDE")}}</h2><p class="muted" style="margin:7px 0 0">{{uiText("CREA SCHEDE RIUTILIZZABILI E ASSEGNALE AI TUOI ATLETI")}}</p></div><button v-if="!editing" class="primary" :disabled="!writable||busy" @click="beginModel">{{uiText("＋ Crea nuova scheda dell'archivio")}}</button></div></section>
+ <section class="panel"><div class="row between"><div><h2 class="card-heading">{{uiText("ARCHIVIO SCHEDE")}}</h2></div><button v-if="!editing" class="primary" :disabled="!writable||busy" @click="beginModel">{{uiText("＋ Crea nuova scheda dell'archivio")}}</button></div></section>
  <p v-if="error" class="notice" role="alert">{{error}}</p>
- <p v-lf-quiet-loading v-if="loading" class="muted lf-quiet-status" role="status">{{uiText("Verifica del Coach e lettura degli archivi…")}}</p>
+ <p v-lf-quiet-loading v-if="loading" class="muted lf-quiet-status" role="status">{{uiText("Caricamento archivio…")}}</p>
  <section v-if="!loading && session && (!writable || notice)" class="panel">
-  <p v-if="!writable" class="notice">{{uiText("Le modifiche sono temporaneamente disabilitate. Puoi consultare le schede.")}}</p>
+  <p v-if="!writable" class="notice">{{uiText("Archivio in sola lettura.")}}</p>
   <p v-if="notice" class="notice" role="status" :class="{'lf-premium-confirmed':notice===confirmedNotice}"><svg v-if="notice===confirmedNotice" class="lf-premium-success-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12 L9 17 L20 6" pathLength="100"/></svg>{{notice}}</p>
  </section>
  <section v-if="!loading && session?.role==='titolare' && !editing && legacyUnassigned.length" class="panel lf-legacy-coach-panel">
@@ -331,7 +331,7 @@ onUnmounted(()=>{live=false;closeListeners()})
  </section>
  <section v-if="editing && !loading && session" class="panel lf-editor-panel" :inert="!!libraryTarget">
   <div class="lf-editor-heading">
-   <div><span class="lf-editor-kicker">{{uiText("LION FIT · EDITOR COACH")}}</span><h2>{{isPersonal?(personalEdit?'MODIFICA SCHEDA PERSONALE':'CREA SCHEDA PERSONALE'):editingId?'MODIFICA SCHEDA DELL’ARCHIVIO':'CREA NUOVA SCHEDA DELL’ARCHIVIO'}}</h2></div>
+   <div><h2>{{isPersonal?(personalEdit?'MODIFICA SCHEDA PERSONALE':'CREA SCHEDA PERSONALE'):editingId?'MODIFICA SCHEDA DELL’ARCHIVIO':'CREA NUOVA SCHEDA DELL’ARCHIVIO'}}</h2></div>
    <button class="secondary" type="button" :disabled="busy" @click="editing=false">{{uiText("← Torna all'archivio")}}</button>
   </div>
   <p v-if="isPersonal && fixedAthleteContext" class="notice" role="status">{{currentAthlete ? `Atleta: ${currentAthlete.name}${requestedDay ? ` · ${DAY_NAMES[requestedDay.day]} · Scheda ${requestedDay.slot}` : ''}` : 'Atleta del programma non disponibile: nessun dato verrà salvato su un altro atleta.'}}</p>
@@ -344,7 +344,7 @@ onUnmounted(()=>{live=false;closeListeners()})
    <strong>{{uiText("ESERCIZI DELLA SCHEDA")}}</strong>
    <span>{{exerciseGroups.length}} {{uiText("esercizi ·")}} {{supersetCount}} {{uiText("superset ·")}} {{exercises.length}} {{uiText("righe")}}</span>
   </div>
-  <p class="muted small lf-editor-hint">{{uiText("Aumentando il numero si aggiungono righe vuote; diminuendolo non elimini esercizi già compilati. Le note tecniche delle schede condivise non devono contenere dati sanitari.")}}</p>
+  <p class="muted small lf-editor-hint">{{uiText("Nelle note condivise inserisci solo indicazioni tecniche, non dati sanitari.")}}</p>
   <div v-if="exerciseGroups.length>1&&canReorder" class="lf-r5-editor-toolbar"><button type="button" class="secondary" :disabled="busy||!writable" :aria-expanded="reorderOpen" @click="reorderOpen=!reorderOpen">{{uiText(reorderOpen?'Termina riordino':'Riordina esercizi')}}</button></div>
   <ExerciseReorder v-if="reorderOpen" :rows="reorderRows" :disabled="busy||!writable||!canReorder" :can-insert="availableMax>0" @move="moveGroup" @insert="insertGroupAfter"/>
   <div v-show="!reorderOpen" class="lf-editor-groups">
@@ -416,13 +416,13 @@ onUnmounted(()=>{live=false;closeListeners()})
    <div class="lf-archive-mobile-actions"><button v-if="!s.deletedAt" class="primary" :disabled="busy||!writable" @click="openAssign(s)">{{uiText("Assegna")}}</button><button class="secondary" @click="preview=s">{{uiText("Visualizza")}}</button><button v-if="!s.deletedAt" class="secondary" :disabled="!session||!canManageCoachModel(s.id,session.role)" @click="edit(s)">{{uiText("Modifica")}}</button><button v-if="s.deletedAt" class="secondary" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="restore(s)">{{uiText("Ripristina")}}</button><details v-if="!s.deletedAt" class="lf-archive-more"><summary :aria-label="'Altre azioni: '+s.title">⋮</summary><div><button class="secondary" :disabled="busy||!writable" @click="duplicate(s)">{{uiText("Duplica")}}</button><button class="danger" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="trash(s)">{{uiText("Nel Cestino")}}</button></div></details></div>
   </div></div>
   <p v-if="modelsReady&&!choice.length" class="muted">{{uiText("Nessuna scheda corrisponde ai filtri.")}}</p>
-  <p class="muted small lf-creator-explainer">{{uiText("I filtri indicano chi ha creato la scheda: ogni Coach autorizzato della palestra può comunque visualizzare, modificare, duplicare e assegnare tutte le schede. Duplicando e salvando una nuova copia, il creatore della copia è il Coach che l’ha salvata.")}}</p>
-  <p class="notice lf-archive-technical">{{uiText("I modelli ROUNDONE vengono modificati mantenendo il loro ID. Ogni salvataggio verifica la revisione, inclusa la revisione iniziale 0 dei modelli legacy. Le copie storiche degli atleti non sono modificabili.")}}</p>
+  
+  
  </section>
- <div v-if="pickAssign" class="modal-overlay" @click.self="pickAssign=null"><div class="dialog coach-assign-dialog"><div class="row between"><h2>{{uiText("Assegna ·")}} {{pickAssign.title}}</h2><button class="bare" :aria-label="uiText('Chiudi')" @click="pickAssign=null">✕</button></div><p class="small muted">{{uiText("Scegli un atleta. I filtri raggruppano i coach ma non modificano le Rules pubblicate.")}}</p>
+ <div v-if="pickAssign" class="modal-overlay" @click.self="pickAssign=null"><div class="dialog coach-assign-dialog"><div class="row between"><h2>{{uiText("Assegna ·")}} {{pickAssign.title}}</h2><button class="bare" :aria-label="uiText('Chiudi')" @click="pickAssign=null">✕</button></div>
  <p v-if="dayContext" class="notice">{{currentAthlete&&requestedDay ? `Atleta: ${currentAthlete.name} · ${DAY_NAMES[requestedDay.day]} · Scheda ${requestedDay.slot}` : 'Contesto del giorno non valido.'}}</p>
  <template v-else><label>{{uiText("Visualizza atleti")}}<select v-model="coachFilter" aria-label="Filtra atleti per coach"><option value="miei">{{uiText("I miei")}}</option><option value="condivisi">{{uiText("Condivisi")}}</option><option value="tutti">{{uiText("Tutti")}}</option></select></label>
- <p v-if="!hasAnyMembership" class="small muted">{{uiText("Atleti storici senza assegnazione coach: disponibili in Tutti.")}}</p>
+ <p v-if="!hasAnyMembership" class="small muted">{{uiText("Atleti senza coach: filtro «Tutti».")}}</p>
  <label class="lfp-search-label">{{uiText("Cerca atleta")}} <input class="lfp-inline-lookup" v-model="assignSearch" type="search" autocomplete="off" aria-label="Cerca atleta per nome" placeholder="Nome o cognome…"/></label><label>{{uiText("Atleta")}}<select v-model="athleteId" :disabled="busy"><option value="">{{uiText("Seleziona atleta…")}}</option><option v-for="a in searchedRoster" :key="a.id" :value="a.id">{{a.name}}</option></select></label><p v-if="!searchedRoster.length" class="muted small">{{uiText("Nessun atleta corrisponde alla ricerca nei filtri attivi.")}}</p></template><p v-if="currentAthlete&&personal.some(p=>p.id===pickAssign?.id)" class="notice">{{uiText("Scheda già assegnata a questo atleta.")}}</p><p v-if="notice" class="notice" role="alert">{{notice}}</p><button class="primary wide" :disabled="busy||!writable||!currentAthlete||(dayContext&&!requestedDay)||personal.some(p=>p.id===pickAssign?.id&&p.deletedAt)" @click="assign(pickAssign)">{{uiText("Assegna scheda")}}</button></div></div>
  <Library v-if="editing&&libraryTarget" selection-mode @select="selectLibraryExercise" @close="closeLibrary"/>
  <SheetDetail v-if="preview" :sheet="preview" @close="preview=null"/>

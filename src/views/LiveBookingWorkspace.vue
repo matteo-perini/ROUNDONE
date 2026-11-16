@@ -426,16 +426,11 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
 </script>
 <template>
  <div class="stack lf-agenda13" aria-label="Agenda Lion Fit">
-  <div class="booking-intro"><span class="eyebrow">{{uiText("LION FIT · AGENDA")}}</span>
+  <div class="booking-intro">
    <h1 style="margin:4px 0">{{uiText("Agenda")}}</h1>
-   <p class="muted">{{isCoach?'Lezioni private e disponibilità':'I tuoi impegni sportivi'}}</p>
-   <div class="row booking-top-controls">
-    
-    <RouterLink class="ghost booking-return booking-control" :to="isCoach?'/coach/atleti':'/home'">{{uiText("← Torna all'app")}}</RouterLink>
-    <span v-if="status==='ready'" class="pill booking-live-pill">● Online</span>
-   </div>
+   
   </div>
-  <div v-lf-quiet-loading v-if="status==='loading'" class="panel lf-quiet-status" role="status">{{uiText("Connessione al Firebase Lion Fit…")}}</div>
+  <div v-lf-quiet-loading v-if="status==='loading'" class="panel lf-quiet-status" role="status">{{uiText("Caricamento agenda…")}}</div>
   <div v-else-if="status==='error'" class="panel" role="alert">{{message}} <RouterLink to="/accesso">{{uiText("Torna all'accesso")}}</RouterLink></div>
   <template v-else>
    <p v-if="calendarWarning" class="notice" role="alert">{{calendarWarning}}</p><p v-if="competitionWarning" class="notice" role="alert">{{competitionWarning}}</p><p v-if="availabilityWarning&&!isCoach" class="notice" role="alert">{{availabilityWarning}}</p>
@@ -443,13 +438,13 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
    <p v-if="message&&message!=='Calendario sincronizzato.'" class="small muted" role="status">{{message}}</p>
    <template v-if="!isCoach">
     <div v-if="athleteTab==='agenda'" class="lf-agenda-athlete-home">
-      <div class="lf-agenda-hero"><div class="lf-agenda-hero-cover"><CompetitionCover :gym="session?.gymId||''" :event-id="heroEvent?.id" :cover-id="heroEvent?.coverId"/></div><span class="eyebrow">{{heroEvent?'PROSSIMO EVENTO':'LIONFIT'}}</span><h2>{{heroEvent?.title||'La tua agenda sportiva'}}</h2><p>{{heroEvent?dateTitle(romeParts(heroEvent.startMs).date)+' · '+formatTime(heroEvent.startMs)+' · '+heroEvent.location:'Organizza le lezioni e consulta i tuoi impegni.'}}</p><button v-if="heroEvent" class="secondary" @click="openCompetition(heroEvent.id)">Scopri l’evento</button></div>
+      <div class="lf-agenda-hero"><div class="lf-agenda-hero-cover"><CompetitionCover :gym="session?.gymId||''" :event-id="heroEvent?.id" :cover-id="heroEvent?.coverId"/></div><span class="eyebrow">{{heroEvent?'PROSSIMO EVENTO':'LIONFIT'}}</span><h2>{{heroEvent?.title||'La tua agenda sportiva'}}</h2><p v-if="heroEvent">{{dateTitle(romeParts(heroEvent.startMs).date)+' · '+formatTime(heroEvent.startMs)+' · '+heroEvent.location}}</p><button v-if="heroEvent" class="secondary" @click="openCompetition(heroEvent.id)">Scopri l’evento</button></div>
       <div class="lf-agenda-tiles"><button class="action-card" @click="athleteTab='calendario'"><LionIcon name="calendar" :size="25"/><strong>Calendario</strong></button><button class="action-card" @click="athleteTab='prenota'"><LionIcon name="calendar-plus" :size="25"/><strong>Prenota lezione</strong></button><button class="action-card" @click="athleteTab='mie';myHistory='next'"><LionIcon name="calendar" :size="25"/><strong>Le mie prenotazioni</strong></button><button v-if="competitionEnabled" class="action-card" @click="openCompetition()"><LionIcon name="progress" :size="25"/><strong>Competizioni e gare</strong></button><button v-if="competitionEnabled" class="action-card" @click="athleteTab='risultati'"><LionIcon name="check" :size="25"/><strong>I miei risultati</strong></button></div>
       <section class="panel lf-agenda-list"><h2>Prossime lezioni</h2><p v-lf-quiet-loading v-if="rowsLoading" role="status" class="muted lf-quiet-status">Caricamento appuntamenti…</p><p v-else-if="!calendarWarning&&!myUpcoming.length" class="muted">Nessun appuntamento nei prossimi 31 giorni.</p><button v-for="b in myUpcoming" :key="b.id" class="lf-agenda-row" @click="athleteTab='mie';myHistory='next'"><div class="lf-agenda-time"><b>{{formatTime(b.startMs)}}</b><small>{{dateTitle(romeParts(b.startMs).date)}}</small></div><div class="lf-agenda-person"><strong>{{b.discipline}}</strong><small>{{coachLabel(b.coachId)}} · {{b.durationMinutes}} min</small></div><LionIcon name="chevron" :size="18"/></button></section>
     </div>
     <AgendaCompetitions v-else-if="(athleteTab==='competizioni'||athleteTab==='risultati')&&competitionEnabled&&session" :session="session" :events="competitionEvents" :entries="competitionEntries" :mode="athleteTab==='risultati'?'results':'events'" :initial-event-id="athleteTab==='competizioni'?selectedCompetitionId:''" :now="nowMs" :loading="competitionLoading" @back="backWithinAthleteAgenda()"/>
-    <section v-else-if="athleteTab==='calendario'" class="panel lf-agenda-list"><button class="ghost" type="button" @click="backWithinAthleteAgenda()">‹ Indietro</button><div class="row between"><h2>Il mio calendario</h2><select v-model="calendarPersonalPeriod" aria-label="Periodo"><option value="next">Prossimi</option><option value="past">Passati</option></select></div><p v-lf-quiet-loading v-if="rowsLoading||competitionLoading" class="muted lf-quiet-status">Caricamento…</p><p v-else-if="!calendarPersonalRows.length&&!calendarWarning&&!competitionWarning" class="muted">Nessun impegno in questo periodo.</p><button v-for="r in calendarPersonalRows" :key="r.id" class="lf-agenda-row" @click="r.kind==='booking'?(athleteTab='mie',myHistory=calendarPersonalPeriod==='next'?'next':'history'):openCompetition(r.id.slice(2))"><div class="lf-agenda-time"><b>{{formatTime(r.startMs)}}</b><small>{{dateTitle(romeParts(r.startMs).date)}}</small></div><div class="lf-agenda-person"><strong>{{r.title}}</strong><small>{{r.description}}</small></div><LionIcon name="chevron" :size="17"/></button></section>
-    <div v-else v-lf-motion-tabs class="booking-tabs booking-main-tabs lf-agenda-main"><button @click="backWithinAthleteAgenda()" type="button">‹ Indietro</button><button :class="{selected:athleteTab==='prenota'}" @click="athleteTab='prenota'">Prenota</button><button :class="{selected:athleteTab==='mie'}" @click="athleteTab='mie';moving=null">Le mie prenotazioni</button></div>
+    <section v-else-if="athleteTab==='calendario'" class="panel lf-agenda-list"><div class="row between"><h2>Il mio calendario</h2><select v-model="calendarPersonalPeriod" aria-label="Periodo"><option value="next">Prossimi</option><option value="past">Passati</option></select></div><p v-lf-quiet-loading v-if="rowsLoading||competitionLoading" class="muted lf-quiet-status">Caricamento…</p><p v-else-if="!calendarPersonalRows.length&&!calendarWarning&&!competitionWarning" class="muted">Nessun impegno in questo periodo.</p><button v-for="r in calendarPersonalRows" :key="r.id" class="lf-agenda-row" @click="r.kind==='booking'?(athleteTab='mie',myHistory=calendarPersonalPeriod==='next'?'next':'history'):openCompetition(r.id.slice(2))"><div class="lf-agenda-time"><b>{{formatTime(r.startMs)}}</b><small>{{dateTitle(romeParts(r.startMs).date)}}</small></div><div class="lf-agenda-person"><strong>{{r.title}}</strong><small>{{r.description}}</small></div><LionIcon name="chevron" :size="17"/></button></section>
+    <div v-else v-lf-motion-tabs class="booking-tabs booking-main-tabs lf-agenda-main"><button :class="{selected:athleteTab==='prenota'}" @click="athleteTab='prenota'">Prenota</button><button :class="{selected:athleteTab==='mie'}" @click="athleteTab='mie';moving=null">Le mie prenotazioni</button></div>
     <template v-if="athleteTab==='prenota'"><div class="lf-booking-v4-flow"><section v-if="moving" class="panel"><h2>Sposta appuntamento</h2><p class="small">Originale: {{localStart(moving.startMs)}} · {{coachLabel(moving.coachId)}}. Scegli un orario libero non sovrapposto. La prenotazione originale resta valida fino al buon esito.</p><button class="secondary" @click="backWithinAthleteAgenda()">Annulla spostamento</button></section><template v-if="!moving">
      <h2 class="booking-section-title">{{uiText("1. Scegli il tuo percorso")}}</h2>
      <div class="booking-choices booking-v1-services">
@@ -457,7 +452,7 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
       <button class="booking-choice booking-service-card" :class="{selected:service==='pesi'}" :aria-pressed="service==='pesi'" @click="service='pesi'"><img class="lf17b-category-photo lf17b-category-pesi" src="/lionfit-redesign/agenda-pesi.webp" width="1000" height="333" decoding="async" alt=""/><strong>PESI</strong><small>{{uiText("Preparazione atletica e allenamento pesi")}}</small></button>
      </div>
      <h2 class="booking-section-title">{{uiText("2. Seleziona il Coach")}}</h2>
-     <div v-if="!configs.length" class="notice">{{uiText("Nessun Coach configurato per le prenotazioni. Accedi come Coach e prepara la disponibilità.")}}</div>
+     <div v-if="!configs.length" class="notice">{{uiText("Nessun coach disponibile per le prenotazioni.")}}</div>
      <div class="grid2 lf-booking-v4-coaches"><button v-for="c in configs.filter(x=>x.active&&x.services[service])" :key="c.coachId" class="action-card lf-booking-coach-choice" :class="{'lf-booking-coach-selected':chosenCoach===c.coachId}" :aria-pressed="chosenCoach===c.coachId" @click="chosenCoach=c.coachId">
       <span class="action-icon">🦁</span><div><strong>{{c.displayName}}</strong><small>{{displayService(service)}} · {{c.durations[service]}} {{uiText("minuti")}}</small></div><span class="lf-booking-coach-check" aria-hidden="true">{{chosenCoach===c.coachId?'✓':'○'}}</span></button></div>
      <h2 class="booking-section-title">{{uiText("3. Tipo di incontro")}}</h2>
@@ -467,9 +462,9 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
       <div class="booking-calendar" style="margin-top:20px"><div v-for="(n,i) in ['L','M','M','G','V','S','D']" :key="i" class="muted">{{n}}</div>
        <template v-for="(d,i) in monthDays" :key="i"><div v-if="!d"/><button v-else class="booking-day" :class="{selected:selectedDate===dateInMonth(d)}" :disabled="!monthDayAvailable(dateInMonth(d))" :title="monthDayAvailable(dateInMonth(d))?'Disponibile':'Nessun orario disponibile'" @click="chooseDate(dateInMonth(d))">{{Number(d)}}</button></template></div></section>
      <section class="panel lf-booking-v4-times"><h2>{{selectedDate}} · {{shownDuration}} {{uiText("minuti")}}</h2>
-      <p v-if="!candidates.length" class="muted">{{uiText("Nessun orario preparato per questo giorno. Seleziona un altro giorno o Coach.")}}</p>
+      <p v-if="!candidates.length" class="muted">{{uiText("Nessun orario disponibile.")}}</p>
       <div v-else class="times"><button v-for="slot in candidates" :key="slot.startMs" :disabled="!slot.free||(!!moving&&!disjointMove(moving,slot.startMs))" :class="{selected:chosenStart===slot.startMs,unavailable:!slot.free||(!!moving&&!disjointMove(moving,slot.startMs))}" :title="slot.busy?'Occupato':slot.late?'Preavviso minimo':'Disponibile'" @click="chosenStart=slot.startMs">{{slot.time}} <small v-if="!slot.free">{{slot.busy?'Occupato':'Preavviso'}}</small></button></div>
-      <p class="small muted">{{uiText("Sono ammessi solo slot consecutivi da 30 minuti, senza sovrapposizioni. L'orario è Europe/Rome.")}}</p>
+      <p class="small muted">{{uiText("Orari in fuso italiano.")}}</p>
      </section>
      <section class="panel lf-booking-v4-review"><span class="eyebrow">{{uiText("RIEPILOGO")}}</span><h2>{{displayService(service)}} · {{chosenConfig?.displayName||'Seleziona Coach'}}</h2>
       <p class="muted">{{selectedDate}} · {{chosenStart!==null?romeParts(chosenStart).time:'Nessun orario selezionato'}} · {{shownDuration}} min · {{discipline}}</p>
@@ -508,7 +503,7 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
      <section v-else class="panel booking-period"><h3>{{monthLabel}} · {{events.length}} {{uiText("appuntamenti")}}</h3>
       <div class="coach-month-grid"><span v-for="(n,i) in ['L','M','M','G','V','S','D']" :key="i" class="coach-month-weekday">{{n}}</span>
        <template v-for="(d,i) in monthDays" :key="i"><span v-if="!d" class="month-empty"/><button v-else class="coach-month-day" :class="{selected:selectedDate===dateInMonth(d)}" @click="chooseMonthDay(dateInMonth(d))"><b>{{Number(d)}}</b><small>{{counts[dateInMonth(d)]||0}} {{uiText("appuntamenti")}}</small><span class="coach-month-dots" :aria-label="coachIdsOn(dateInMonth(d)).map(coachLabel).join(', ')"><span v-for="uid in coachIdsOn(dateInMonth(d))" :key="uid" class="booking-coach-mini"><i class="coach-dot" :class="coachColor(uid)"/>{{coachCountsOn(dateInMonth(d))[uid]||0}}</span></span></button></template>
-      </div><p class="small muted">{{uiText("Tocca un giorno per aprire direttamente gli appuntamenti di quel giorno.")}}</p>
+      </div>
      </section>
      
     </template>
@@ -541,11 +536,11 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
        <div v-for="(holiday,i) in draft.holidays||[]" :key="i" class="row"><small>{{uiText("Ferie")}} {{holiday.from}} — {{holiday.to}}</small><button class="bare" @click="removeHoliday(i)">{{uiText("Rimuovi")}}</button></div>
        <p class="muted small">{{uiText("Salvare sincronizza fino a 30 giorni di slot. Quelli aperti non più validi vengono ritirati; le prenotazioni confermate non vengono cancellate. In caso di errore la disponibilità resta inattiva finché non ripeti il salvataggio.")}}</p>
        
-       <button class="primary wide" :disabled="busy||status!=='ready'" @click="persistAvailability">{{busy?'Sincronizzazione in corso…':uiText("Salva e sincronizza disponibilità (30 giorni)")}}</button><p v-if="availabilityProgress" class="small green lf-availability-progress" role="status" aria-live="polite">{{availabilityProgress}}</p>
+       <button class="primary wide" :disabled="busy||status!=='ready'" @click="persistAvailability">{{busy?'Sincronizzazione in corso…':uiText("Salva disponibilità (30 giorni)")}}</button><p v-if="availabilityProgress" class="small green lf-availability-progress" role="status" aria-live="polite">{{availabilityProgress}}</p>
        <hr/><h3>{{uiText("Prepara slot del giorno selezionato")}}</h3><p class="muted small">{{uiText("Crea soltanto slot mancanti e futuri da 30 minuti; non sovrascrive mai quelli esistenti o prenotati.")}}</p>
        <input v-model="selectedDate" type="date"/>
        <button class="primary wide" :disabled="busy||!myConfig||edited" @click="prepareDay">{{uiText("Prepara slot del")}} {{selectedDate}}</button>
-       <button class="secondary wide" :disabled="busy||!myConfig||edited" @click="prepareNextWeek">{{uiText("Prepara i prossimi 7 giorni · Firebase")}}</button>
+       <button class="secondary wide" :disabled="busy||!myConfig||edited" @click="prepareNextWeek">{{uiText("Prepara i prossimi 7 giorni")}}</button>
        <p v-if="edited" class="small muted">{{uiText("Salva prima la configurazione per preparare nuovi slot.")}}</p>
       </template>
      </section></template>

@@ -58,7 +58,7 @@ const formatDate=(ms:number)=>new Intl.DateTimeFormat('it-IT',{day:'2-digit',mon
 <template>
  <div v-lf-entrance="{id:'coach-dashboard',rows:[{match:'.lf-coach-greeting'},{within:'.lf-kpi-grid',match:'.lf-kpi-card'},{within:'.lf-coach-hero-row',match:'.lf14-brand-container,.lf-coach-actions'},{within:'.lf-coach-detail-grid',match:'.lf-dashboard-panel'},{within:'.lf-coach-bottom-grid',match:'.lf-dashboard-panel'}]}" class="lf-coach-dashboard">
   <WorkAttendanceBadge v-if="badgeSession" :key="`${badgeSession.uid}:${badgeSession.gymId}`" :uid="badgeSession.uid" :gym-id="badgeSession.gymId"/>
-  <header class="lf-coach-greeting"><div><h1>Bentornato, {{name}}! 👊</h1><p>Gestisci atleti, schede, programmi e prenotazioni della tua palestra.</p></div><div class="lf14-header-actions"><DashboardSearch v-if="searchItems" :items="searchItems" :partial="searchPartial" :emulator="source==='Firebase Emulator'"/><span class="lf-source-tag">{{source}}</span></div></header>
+  <header class="lf-coach-greeting"><div><h1>Bentornato, {{name}}! 👊</h1></div><div class="lf14-header-actions"><DashboardSearch v-if="searchItems" :items="searchItems" :partial="searchPartial" :emulator="source==='Firebase Emulator'"/><span v-if="source!=='Firebase Lion Fit'" class="lf-source-tag">{{source}}</span></div></header>
 
   <p v-lf-quiet-loading v-if="loading" role="status" class="muted lf-quiet-status">Caricamento dati della palestra…</p>
   <p v-if="error" role="alert" class="notice">{{error}}</p>
@@ -72,26 +72,26 @@ const formatDate=(ms:number)=>new Intl.DateTimeFormat('it-IT',{day:'2-digit',mon
   <section v-if="visible('activity')||visible('distribution')||visible('appointments')" class="lf-coach-detail-grid lf14-responsive-grid">
    <article v-if="visible('activity')" class="lf-dashboard-panel lf-activity-panel">
     <h2><LionIcon name="dumbbell" :size="18"/> Attività palestra</h2>
-    <p class="lf-widget-desc">Ultimi 30 giorni · prenotazioni in calendario, nuove schede e settimane create</p>
+    <p class="lf-widget-desc">Ultimi 30 giorni</p>
     <div v-if="hasActivity" class="lf-chart-area" role="img" aria-label="Grafico attività palestra negli ultimi 30 giorni, con eventi datati presenti su Firebase">
      <div v-for="day in days" :key="day.date" class="lf-chart-day" :title="`${day.date}: ${day.booking} prenotazioni confermate, ${day.template} schede create, ${day.week} settimane create`">
       <div class="lf-chart-column"><span class="lf-chart-bar lf-chart-booking" :style="{height:barHeight(day.booking)}"></span><span class="lf-chart-bar lf-chart-template" :style="{height:barHeight(day.template)}"></span><span class="lf-chart-bar lf-chart-week" :style="{height:barHeight(day.week)}"></span></div>
       <small>{{day.label}}</small>
      </div>
     </div>
-    <p v-else class="lf-no-trend"><LionIcon name="calendar" :size="24"/><strong>{{historyComplete?'Nessun evento datato negli ultimi 30 giorni':'Dati in caricamento o parziali'}}</strong><span>Non vengono creati valori artificiali.</span></p>
+    <p v-else class="lf-no-trend"><LionIcon name="calendar" :size="24"/><strong>{{historyComplete?'Nessun evento datato negli ultimi 30 giorni':'Dati in caricamento o parziali'}}</strong></p>
     <div class="lf-chart-legend"><span><i class="lf-chart-key lf-chart-booking"></i> Prenotazioni</span><span><i class="lf-chart-key lf-chart-template"></i> Schede</span><span><i class="lf-chart-key lf-chart-week"></i> Settimane</span></div>
     <p v-if="!historyComplete" class="lf-widget-desc">Alcuni dati non sono ancora disponibili: il grafico può essere parziale.</p>
    </article>
    <article v-if="visible('distribution')" class="lf-dashboard-panel">
     <div class="lf-widget-head"><h2><LionIcon name="clipboard" :size="18"/> Distribuzione contenuti</h2><button type="button" class="lf-link-button" :disabled="programLoading||athletes===null" @click="emit('refresh-programs')">{{programLoading?'Aggiorno…':'Aggiorna'}}</button></div>
-    <p class="lf-widget-desc">Conteggi reali delle schede personali nei programmi degli Atleti</p>
+    
     <div class="lf-distribution-list">
      <div><span class="lf-legend-dot"></span> Programmi per Atleta <strong>{{programs??'—'}}</strong></div>
      <div><span class="lf-legend-dot lf-dot-light"></span> Schede personali collegate <strong>{{assigned??'—'}}</strong></div>
      <div><span class="lf-legend-dot lf-dot-neutral"></span> Schede personali non collegate <strong>{{unassigned??'—'}}</strong></div>
     </div>
-    <p class="lf-widget-desc">Un programma è contato per titolo distinto e Atleta, non per singola settimana. Le schede personali sono contate una sola volta per Atleta; il Cestino è escluso.</p>
+    <p class="lf-widget-desc">Programmi distinti per atleta; schede uniche, cestino escluso.</p>
    </article>
    <article v-if="visible('appointments')" class="lf-dashboard-panel">
     <div class="lf-widget-head"><h2><LionIcon name="calendar" :size="18"/> Prossimi appuntamenti</h2><RouterLink :to="calendarUrl">Vedi calendario →</RouterLink></div>

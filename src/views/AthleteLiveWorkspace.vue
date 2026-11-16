@@ -83,15 +83,15 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
     <AthleteHomeContent :name="session?.label||'Atleta'" :today-name="todayDay?.name||''" :week-name="currentWeekLabel" :calendar-day="romeWeekDayNumber(clock)" :activities="todayDay?.activities||[]" :sheets="todaySheets" :days="currentWeek?.days||[]" :plan-link="livePath('/piano')" :archive-link="livePath('/archivio')" :progress-link="livePath('/progressi')" :booking-link="livePath('/prenotazioni')" :avatar-url="avatarUrl" :profile-link="livePath('/profilo')" :day-link="dayLink"/>
    </template>
    <template v-else-if="props.screen==='archive'">
-    <section class="panel athlete-archive-hero"><div class="row between"><h2 class="card-heading">{{uiText("ARCHIVIO")}}</h2><span class="pill pill-neutral">{{archiveReady?archiveDistinctCount:'—'}} {{uiText("SCHEDE")}}</span></div><p class="muted" style="margin:20px 0 0">{{uiText("Ritrova le schede che hai ricevuto dai Coach, comprese quelle dei programmi precedenti.")}}</p></section>
+    <section class="panel athlete-archive-hero"><div class="row between"><h2 class="card-heading">{{uiText("ARCHIVIO")}}</h2><span class="pill pill-neutral">{{archiveReady?archiveDistinctCount:'—'}} {{uiText("SCHEDE")}}</span></div></section>
     <section v-lf-entrance="{id:'athlete-archive',ready:archiveReady,rows:[{match:'.lf-archive-v4-item'}]}" class="panel athlete-archive-list"><div class="row between"><h3>{{uiText("Le mie schede di allenamento")}}</h3><span class="muted">{{archiveReady?archiveGroups.length:'—'}} {{uiText("schede visualizzate")}}</span></div>
      <div class="grid2"><input v-model="search" type="search" aria-label="Cerca archivio personale" placeholder="Cerca nell'Archivio..."/>
       <select v-model="archiveView" aria-label="Filtra archivio personale"><option value="all">Tutte le schede</option><option value="active">Schede assegnate</option><option value="historical">Schede storiche</option><option value="trashed">Schede ritirate</option></select>
      </div>
      <p v-lf-quiet-loading v-if="!archiveReady" class="muted lf-quiet-status" role="status">{{uiText("Caricamento archivio storico…")}}</p>
-     <p v-else-if="!archiveGroups.length" class="notice">{{uiText("Nessuna scheda corrisponde al filtro selezionato. Le copie protette non vengono eliminate.")}}</p>
+     <p v-else-if="!archiveGroups.length" class="notice">{{uiText("Nessuna scheda corrisponde al filtro selezionato.")}}</p>
      <template v-if="archiveReady"><div v-for="g in archiveGroups" :key="g.sheet.id" class="line-card athlete-archive-item lf-archive-v4-item"><button class="wide athlete-archive-open" type="button" @click="opened=g.sheet"><span class="lf-archive-v4-icon" aria-hidden="true">▣</span><b>{{g.sheet.title}}</b><span class="lf-archive-v4-action">Apri scheda ›</span></button></div></template>
-     <p class="muted small lf-archive-v4-note">Le schede storiche rimangono conservate. Le versioni con esercizi o contenuti differenti restano separate.</p>
+     
     </section>
    </template>
   </template>

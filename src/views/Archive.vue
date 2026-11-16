@@ -26,7 +26,7 @@ function hideGroup(copies:readonly ProtectedCopy[]){
  }catch(e){notice.value=(e as Error).message}
 }
 </script>
-<template><component v-if="athleteEmulator && LiveAthlete" :is="LiveAthlete" screen="archive"/><template v-else><div class="stack" style="gap:18px"><section class="panel athlete-archive-hero"><div class="row between"><h2 class="card-heading">{{uiText("ARCHIVIO")}}</h2><button class="ghost" @click="notice='Archivio aggiornato dallo stato locale.'">↻ Aggiorna</button></div><p class="muted" style="margin:20px 0 0">{{uiText("Ritrova le schede ricevute dai Coach, comprese quelle dei programmi precedenti.")}}</p></section>
+<template><component v-if="athleteEmulator && LiveAthlete" :is="LiveAthlete" screen="archive"/><template v-else><div class="stack" style="gap:18px"><section class="panel athlete-archive-hero"><div class="row between"><h2 class="card-heading">{{uiText("ARCHIVIO")}}</h2><button class="ghost" @click="notice='Archivio aggiornato dallo stato locale.'">↻ Aggiorna</button></div></section>
  <section class="panel athlete-archive-list"><div class="row between"><h3>{{uiText("Le mie schede di allenamento")}}</h3><span class="muted">{{items.length}} {{uiText("schede")}}</span></div><input v-model="query" placeholder="Cerca nell'Archivio..."/>
  <div v-for="g in items" :key="g.sheet.id" class="line-card athlete-archive-item"><button class="wide athlete-archive-open" @click="viewed=g.sheet"><b>{{g.sheet.title}}</b><span class="lf-archive-v4-action">Apri scheda ›</span></button></div><p v-if="notice" class="notice">{{notice}}</p></section></div><SheetDetail v-if="viewed" :sheet="viewed" @close="viewed=null" @finish="viewed=null"/></template>
 </template>

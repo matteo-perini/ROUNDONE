@@ -120,32 +120,32 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
 </script>
 <template>
  <div class="lfsettings lfsettings-compact lfsettings-v23" v-lf-entrance="{id:'settings',premiumOnly:true,rows:[{match:'.lfsettings-header'},{match:'.lfsettings-flat-list'}]}">
-  <header class="lfsettings-header"><div><span class="eyebrow">{{uiText("LION FIT · ACCOUNT")}}</span><h1>{{uiText("Impostazioni")}}</h1></div></header>
+  <header class="lfsettings-header"><div><h1>{{uiText("Impostazioni")}}</h1></div></header>
   <div class="lfsettings-flat-list" data-lf-settings-layout="flat-r7">
    <h2 class="lfsettings-section-title">{{uiText("Personalizzazione")}}</h2>
-   <button class="lfsettings-flat-row" type="button" @click="lab.toggleTheme()"><LionIcon name="sun"/><span><b>{{uiText("Tema")}}</b><small>{{uiText("Personalizza l’aspetto dell’app")}}</small></span><strong>{{uiText(lab.theme==='dark'?'Scuro':'Chiaro')}}</strong><LionIcon name="chevron" :size="17"/></button>
+   <button class="lfsettings-flat-row" type="button" @click="lab.toggleTheme()"><LionIcon name="sun"/><span><b>{{uiText("Tema")}}</b></span><strong>{{uiText(lab.theme==='dark'?'Scuro':'Chiaro')}}</strong><LionIcon name="chevron" :size="17"/></button>
 
-    <label class="lfsettings-flat-row lfsettings-flat-language"><LionIcon name="globe"/><span><b>{{uiText('Lingua')}}</b><small>{{uiText("Lingua dell’interfaccia")}}</small></span><select :value="interfaceLanguage" :aria-label="uiText('Lingua dell’interfaccia')" @change="setInterfaceLanguage(($event.target as HTMLSelectElement).value)"><option value="it">🇮🇹 Italiano</option><option value="en">{{uiText("🇬🇧 English")}}</option></select></label>
+    <label class="lfsettings-flat-row lfsettings-flat-language"><LionIcon name="globe"/><span><b>{{uiText('Lingua')}}</b></span><select :value="interfaceLanguage" :aria-label="uiText('Lingua dell’interfaccia')" @change="setInterfaceLanguage(($event.target as HTMLSelectElement).value)"><option value="it">🇮🇹 Italiano</option><option value="en">{{uiText("🇬🇧 English")}}</option></select></label>
    <template v-if="isStagingMode()&&stagingSession&&stagingSession.role!=='atleta'">
-    <button v-if="stagingSession.role==='titolare'" type="button" class="lfsettings-flat-row" :aria-expanded="identityOpen" @click="identityOpen=!identityOpen"><LionIcon name="gym"/><span><b>Personalizza palestra</b><small>Nome, logo e copertina</small></span><LionIcon name="chevron" :size="17"/></button>
+    <button v-if="stagingSession.role==='titolare'" type="button" class="lfsettings-flat-row" :aria-expanded="identityOpen" @click="identityOpen=!identityOpen"><LionIcon name="gym"/><span><b>Personalizza palestra</b></span><LionIcon name="chevron" :size="17"/></button>
     <GymIdentity v-if="identityOpen&&stagingSession.role==='titolare'" edit/>
-    <button type="button" class="lfsettings-flat-row" :aria-expanded="dashboardOpen" @click="dashboardOpen=!dashboardOpen"><LionIcon name="settings"/><span><b>Personalizza dashboard</b><small>Seleziona i tuoi riquadri</small></span><LionIcon name="chevron" :size="17"/></button>
+    <button type="button" class="lfsettings-flat-row" :aria-expanded="dashboardOpen" @click="dashboardOpen=!dashboardOpen"><LionIcon name="settings"/><span><b>Personalizza dashboard</b></span><LionIcon name="chevron" :size="17"/></button>
     <DashboardPreferences v-if="dashboardOpen"/>
    </template>
    <h2 v-if="workPilotAllowed||competitionAvailable||(pushAvailable&&stagingSession)||(calendarPilotEnabled()&&stagingSession)||linkedAllowed||(billingSandboxEnabled()&&stagingSession?.role==='titolare')||platformAllowed" class="lfsettings-section-title">{{uiText("Funzionalità aggiuntive")}}</h2>
    <template v-if="workPilotAllowed">
-    <button type="button" class="lfsettings-flat-row" :aria-expanded="workPilotOpen" @click="workPilotOpen=!workPilotOpen;workReportOpen=false"><LionIcon name="fingerprint"/><span><b>Timbratura GPS</b><small>Gestione sedi e blocco definitivo</small></span><LionIcon name="chevron" :size="17"/></button><WorkConfigSettings v-if="workPilotOpen" :key="`${stagingSession?.uid}:${stagingSession?.gymId}:${stagingSession?.role}`" :gym-id="stagingSession?.gymId||''" :uid="stagingSession?.uid||''" :mobile="workPilotMobile"/><button type="button" class="lfsettings-flat-row" :aria-expanded="workReportOpen" @click="workReportOpen=!workReportOpen;workPilotOpen=false"><LionIcon name="clock"/><span><b>Report mensili</b><small>Ore personali per sede</small></span><LionIcon name="chevron" :size="17"/></button><WorkReport v-if="workReportOpen" embedded :key="`${stagingSession?.uid}:${stagingSession?.gymId}:${stagingSession?.role}`"/>
+    <button type="button" class="lfsettings-flat-row" :aria-expanded="workPilotOpen" @click="workPilotOpen=!workPilotOpen;workReportOpen=false"><LionIcon name="fingerprint"/><span><b>Timbratura GPS</b></span><LionIcon name="chevron" :size="17"/></button><WorkConfigSettings v-if="workPilotOpen" :key="`${stagingSession?.uid}:${stagingSession?.gymId}:${stagingSession?.role}`" :gym-id="stagingSession?.gymId||''" :uid="stagingSession?.uid||''" :mobile="workPilotMobile"/><button type="button" class="lfsettings-flat-row" :aria-expanded="workReportOpen" @click="workReportOpen=!workReportOpen;workPilotOpen=false"><LionIcon name="clock"/><span><b>Report mensili</b></span><LionIcon name="chevron" :size="17"/></button><WorkReport v-if="workReportOpen" embedded :key="`${stagingSession?.uid}:${stagingSession?.gymId}:${stagingSession?.role}`"/>
    </template>
    <template v-if="competitionAvailable">
-    <button type="button" class="lfsettings-flat-row" :disabled="competitionBusy||!mayWriteLive()" @click="toggleCompetition"><LionIcon name="trophy"/><span><b>Competizioni e gare</b><small>Mostra o nascondi il modulo della palestra, senza cancellare gli eventi.</small></span><strong>{{competitionEnabled?'Attivo':'Disattivo'}}</strong></button><p v-if="competitionMessage" class="notice" role="status">{{competitionMessage}}</p>
+    <button type="button" class="lfsettings-flat-row" :disabled="competitionBusy||!mayWriteLive()" @click="toggleCompetition"><LionIcon name="trophy"/><span><b>Competizioni e gare</b><small>Nascondi senza eliminare gli eventi.</small></span><strong>{{competitionEnabled?'Attivo':'Disattivo'}}</strong></button><p v-if="competitionMessage" class="notice" role="status">{{competitionMessage}}</p>
    </template>
    <template v-if="pushAvailable&&stagingSession">
-    <button class="lfsettings-flat-row" type="button" :aria-expanded="pushOpen" @click="pushOpen=!pushOpen"><LionIcon name="bell"/><span><b>{{uiText("Notifiche")}}</b><small>Preferenze account e dispositivi</small></span><LionIcon name="chevron" :size="17"/></button><PushSettings v-if="pushOpen"/>
+    <button class="lfsettings-flat-row" type="button" :aria-expanded="pushOpen" @click="pushOpen=!pushOpen"><LionIcon name="bell"/><span><b>{{uiText("Notifiche")}}</b></span><LionIcon name="chevron" :size="17"/></button><PushSettings v-if="pushOpen"/>
    </template>
    <template v-if="calendarPilotEnabled()&&stagingSession">
-    <button class="lfsettings-flat-row" type="button" :aria-expanded="calendarOpen" @click="calendarOpen=!calendarOpen"><LionIcon name="calendar"/><span><b>Google Calendar</b><small>Collegamento facoltativo</small></span><LionIcon name="chevron" :size="17"/></button><CalendarPilotSettings v-if="calendarOpen" :key="stagingSession.uid"/>
+    <button class="lfsettings-flat-row" type="button" :aria-expanded="calendarOpen" @click="calendarOpen=!calendarOpen"><LionIcon name="calendar"/><span><b>Google Calendar</b></span><LionIcon name="chevron" :size="17"/></button><CalendarPilotSettings v-if="calendarOpen" :key="stagingSession.uid"/>
    </template>
-   <button v-if="linkedAllowed" type="button" class="lfsettings-flat-row" :aria-expanded="linkedOpen" @click="linkedOpen=!linkedOpen"><LionIcon name="switch"/><span><b>Cambio rapido profilo</b><small>Account collegati su questo dispositivo</small></span><LionIcon name="chevron" :size="17"/></button>
+   <button v-if="linkedAllowed" type="button" class="lfsettings-flat-row" :aria-expanded="linkedOpen" @click="linkedOpen=!linkedOpen"><LionIcon name="switch"/><span><b>Cambio rapido profilo</b></span><LionIcon name="chevron" :size="17"/></button>
     <LinkedProfileSettings v-if="linkedAllowed&&linkedOpen" :key="stagingSession?.uid"/>
    <template v-if="billingSandboxEnabled()&&stagingSession?.role==='titolare'">
     <button type="button" class="lfsettings-flat-row" :aria-expanded="billingOpen" @click="billingOpen=!billingOpen"><LionIcon name="clipboard"/><span><b>Abbonamento LionFit (Sandbox)</b><small>Prova gratuita, piani e rinnovi simulati</small></span><LionIcon name="chevron" :size="17"/></button><BillingSandbox v-if="billingOpen"/>
@@ -154,18 +154,18 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
     <RouterLink class="lfsettings-flat-row" to="/lionfit-control"><LionIcon name="shield"/><span><b>Control Center</b><small>Accesso riservato Super Admin</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
    </template>
    <h2 class="lfsettings-section-title">{{uiText("Account e assistenza")}}</h2>
-    <RouterLink v-if="!isStagingMode()||stagingSession" class="lfsettings-flat-row" :to="profilePath+(emulator?'&edit=1':'?edit=1')"><LionIcon name="user"/><span><b>{{uiText("Modifica profilo")}}</b><small>{{uiText("I tuoi dati personali")}}</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
-    <button v-if="canResetPassword" class="lfsettings-flat-row" type="button" @click="securityOpen=true;securityStatus=''"><LionIcon name="shield"/><span><b>{{uiText("Sicurezza")}}</b><small>{{uiText("Password e accessi")}}</small></span><LionIcon name="chevron" :size="17"/></button>
-    <a class="lfsettings-flat-row"  :href="privacyHref" target="_blank" rel="noopener noreferrer"><LionIcon name="shield"/><span><b>{{uiText("Privacy")}}</b><small>{{uiText("Informativa, cookie e tecnologie locali")}}</small></span><LionIcon name="chevron" :size="17"/></a>
-    <a class="lfsettings-flat-row"  :href="termsHref" target="_blank" rel="noopener noreferrer"><LionIcon name="clipboard"/><span><b>{{uiText("Termini e condizioni")}}</b><small>{{uiText("Documenti legali")}}</small></span><LionIcon name="chevron" :size="17"/></a>
-   <button class="lfsettings-flat-row" type="button" @click="infoOpen=true"><LionIcon name="info"/><span><b>{{uiText("Informazioni")}}</b><small>{{uiText("Chi ha creato LionFit, versione e aggiornamenti")}}</small></span><strong>{{appVersion}}</strong><LionIcon name="chevron" :size="17"/></button>
-    <button v-if="isStagingMode()" class="lfsettings-flat-row" type="button" :aria-expanded="ticketsOpen" @click="ticketsOpen=!ticketsOpen"><LionIcon name="mail"/><span><b>{{uiText("Assistenza e feedback")}}</b><small>{{uiText("Segnala problemi e suggerisci miglioramenti")}}</small></span><LionIcon name="chevron" :size="17"/></button>
+    <RouterLink v-if="!isStagingMode()||stagingSession" class="lfsettings-flat-row" :to="profilePath+(emulator?'&edit=1':'?edit=1')"><LionIcon name="user"/><span><b>{{uiText("Modifica profilo")}}</b></span><LionIcon name="chevron" :size="17"/></RouterLink>
+    <button v-if="canResetPassword" class="lfsettings-flat-row" type="button" @click="securityOpen=true;securityStatus=''"><LionIcon name="shield"/><span><b>{{uiText("Sicurezza")}}</b></span><LionIcon name="chevron" :size="17"/></button>
+    <a class="lfsettings-flat-row"  :href="privacyHref" target="_blank" rel="noopener noreferrer"><LionIcon name="shield"/><span><b>{{uiText("Privacy")}}</b></span><LionIcon name="chevron" :size="17"/></a>
+    <a class="lfsettings-flat-row"  :href="termsHref" target="_blank" rel="noopener noreferrer"><LionIcon name="clipboard"/><span><b>{{uiText("Termini e condizioni")}}</b></span><LionIcon name="chevron" :size="17"/></a>
+   <button class="lfsettings-flat-row" type="button" @click="infoOpen=true"><LionIcon name="info"/><span><b>{{uiText("Informazioni")}}</b></span><strong>{{appVersion}}</strong><LionIcon name="chevron" :size="17"/></button>
+    <button v-if="isStagingMode()" class="lfsettings-flat-row" type="button" :aria-expanded="ticketsOpen" @click="ticketsOpen=!ticketsOpen"><LionIcon name="mail"/><span><b>{{uiText("Assistenza e feedback")}}</b></span><LionIcon name="chevron" :size="17"/></button>
     <SupportTickets v-if="ticketsOpen&&isStagingMode()"/>
   </div>
   <button class="lfsettings-exit" @click="exit"><LionIcon name="logout" :size="19"/> {{uiText("Esci dall’account")}}</button>
   <div v-if="infoOpen" class="modal-overlay" @click.self="infoOpen=false"><div class="dialog lf-about-dialog" role="dialog" aria-modal="true" aria-label="Informazioni sull'applicazione">
    <div class="row between"><h2>{{uiText("LionFit · Informazioni")}}</h2><button class="bare" type="button" :aria-label="uiText('Chiudi informazioni')" @click="infoOpen=false">✕</button></div>
-   <p class="eyebrow">{{uiText("LA TUA PALESTRA, SEMPRE CON TE.")}}</p>
+   
    <p>{{uiText("LionFit è una piattaforma digitale pensata per semplificare la gestione degli allenamenti e l'organizzazione delle attività sportive, collegando palestre, allenatori e atleti in un ambiente condiviso.")}}</p>
    <p>{{uiText("Permette di consultare programmi e schede di allenamento, esplorare la libreria degli esercizi, seguire la programmazione e gestire le prenotazioni secondo le autorizzazioni del proprio ruolo.")}}</p>
    <p><strong>{{uiText("Ideazione e sviluppo:")}}</strong> Matteo Perini</p>
@@ -181,12 +181,12 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
     <button class="secondary wide" type="button" @click="openLatestReleases">{{uiText('Apri GitHub Releases')}}</button>
    </section>
    <p v-else class="muted small">{{uiText('Il controllo manuale degli aggiornamenti APK è disponibile nell’app Android.')}}</p>
-   <p>{{uiText("LionFit è un progetto in continua evoluzione: nuove funzioni, ottimizzazioni e miglioramenti vengono introdotti progressivamente. Le funzioni non ancora disponibili non sono mostrate nelle impostazioni.")}}</p>
+   
    <button class="secondary wide" type="button" @click="infoOpen=false">{{uiText("Chiudi")}}</button>
   </div></div>
   <div v-if="securityOpen" class="modal-overlay" @click.self="securityOpen=false"><div class="dialog" role="dialog" aria-modal="true" :aria-label="uiText('Sicurezza account')" style="max-width:510px">
    <div class="row between"><h2>{{uiText("Sicurezza account")}}</h2><button class="bare" type="button" :aria-label="uiText('Chiudi sicurezza')" @click="securityOpen=false">✕</button></div>
-   <p class="muted small">{{uiText("Per cambiare la password riceverai un link di ripristino da Firebase Authentication. La tua password non viene mai salvata da LionFit.")}}</p>
+   <p class="muted small">{{uiText("Riceverai un link via email per cambiare la password. LionFit non conserva la password.")}}</p>
    <button class="primary wide" type="button" :disabled="securityBusy" @click="resetPasswordViaEmail">{{uiText(securityBusy?'Invio…':'Cambia password tramite email')}}</button>
    <p v-if="securityStatus" class="notice" role="status">{{uiText(securityStatus)}}</p>
   </div></div>

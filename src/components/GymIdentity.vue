@@ -30,7 +30,7 @@ async function save(){if(!canSave.value)return;const n=epoch;busy.value=true;mes
 </script>
 <template>
  <section v-if="edit&&stagingSession?.role==='titolare'" class="panel lf14-identity-editor">
-  <h2>Personalizza palestra</h2><p class="muted small">Nome, logo e foto di copertina visibili solo agli utenti della tua palestra.</p>
+  <h2>Personalizza palestra</h2><p class="muted small">Visibile agli utenti della tua palestra.</p>
   <p v-lf-quiet-loading v-if="pending&&!slow" class="muted lf-quiet-status">Caricamento personalizzazione…</p>
   <p v-if="pending&&slow" class="notice" role="status">Connessione lenta. Puoi riprovare senza perdere le modifiche.</p>
   <p v-if="read.gym.state==='error'" class="notice" role="status">Nome palestra non disponibile ({{read.gym.message}}). Verifica connessione e accesso.</p>

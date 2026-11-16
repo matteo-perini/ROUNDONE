@@ -114,7 +114,7 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
   <div v-lf-entrance="{id:'athlete-plan',rows:[{match:'.athlete-plan-summary,.athlete-week-picker'},{within:'.athlete-sheet-grid',match:'.scheme-item'},{within:'.lf-athlete-v4-days',match:'.lf-athlete-v4-day'}]}" class="stack athlete-plan" style="gap:20px">
     <section class="panel athlete-plan-summary">
       <div class="row between">
-        <div><h2 class="card-heading">{{uiText("IL MIO PIANO")}}</h2><p class="muted" style="margin:8px 0 0">{{uiText("SCHEDE E PROGRAMMI ASSEGNATI DAL TUO COACH")}}</p></div>
+        <div><h2 class="card-heading">{{uiText("IL MIO PIANO")}}</h2></div>
         <span class="pill pill-neutral">{{ sheetCount }} {{uiText("SCHEDE")}}<span v-if="allWeeks.length"> · {{ programs.length }} PROGRAMMI</span></span>
       </div>
     </section>
@@ -171,7 +171,7 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
 
   <div v-if="selectedDayDetails" class="modal-overlay athlete-day-overlay" @click.self="closeWeekDay()">
     <div class="dialog athlete-day-dialog" role="dialog" aria-modal="true" :aria-label="'Programma del ' + selectedDayDetails.name">
-      <div class="athlete-day-dialog-head"><div><h2>{{uiText(selectedDayDetails.name.toUpperCase())}}</h2><p class="muted small">{{uiText("PROGRAMMA DEL GIORNO")}}</p></div><button type="button" class="bare" :aria-label="uiText('Chiudi dettagli')" @click="closeWeekDay()">✕</button></div>
+      <div class="athlete-day-dialog-head"><div><h2>{{uiText(selectedDayDetails.name.toUpperCase())}}</h2></div><button type="button" class="bare" :aria-label="uiText('Chiudi dettagli')" @click="closeWeekDay()">✕</button></div>
       <div class="athlete-day-dialog-body lf-athlete-v4-dialog-body">
         <h3>Attività del giorno</h3>
         <div class="lf-athlete-v4-activities"><div v-for="(activity,i) in selectedDay!==null?displayActivities(selectedDay):[]" :key="i" class="lf-athlete-v4-activity"><span>Attività {{i+1}}</span><strong>{{activity}}</strong></div><p v-if="selectedDay!==null&&!displayActivities(selectedDay).length" class="muted small">Giornata senza attività programmate.</p></div>
