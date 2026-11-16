@@ -38,3 +38,14 @@ export function removeExercise(rows:readonly Exercise[],rowId:string):Exercise[]
   result[index]={...result[index],supersetWithPrevious:false,executionMode:'normale',supersetRest:''}
  return result
 }
+
+/** Reorder complete groups, preserving exercise identity, alternatives and all fields.
+ * Invalid legacy flags are left untouched: reordering them could change pair meaning. */
+export function reorderExerciseGroups<T extends {supersetWithPrevious?:boolean}>(rows:readonly T[],from:number,to:number):T[]{
+ const groups=groupExerciseRows(rows)
+ if(!Number.isInteger(from)||!Number.isInteger(to)||from<0||to<0||from>=groups.length||to>=groups.length||from===to)return [...rows]
+ if(groups.some(g=>rows[g.primaryIndex].supersetWithPrevious===true))return [...rows]
+ const blocks=groups.map(g=>rows.slice(g.primaryIndex,(g.secondaryIndex??g.primaryIndex)+1))
+ const [moved]=blocks.splice(from,1);blocks.splice(to,0,moved)
+ return blocks.flat()
+}

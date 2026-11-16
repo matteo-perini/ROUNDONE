@@ -8,10 +8,24 @@ import {muscleLabel,exerciseLabel} from '../features/exercises/librarySelection'
 import {libraryGroupOptions,exercisesInGroup,type LibraryGroupFilter} from '../features/exercises/libraryGroups'
 import {readLegacyExerciseCatalog} from '../integrations/firestore/legacyExerciseCatalog'
 import {uiText,interfaceLanguage} from '../features/i18n/interfaceLanguage'
+import {isOperationalMode} from '../integrations/firebase/stagingConfig'
+import {getStagingClients} from '../integrations/firebase/stagingClient'
+import {stagingSession,readNavigationSession} from '../integrations/firebase/stagingSession'
+import {onAuthStateChanged,type Unsubscribe} from 'firebase/auth'
+import {favoriteKey,readFavorites,toggleFavorite,type FavoriteScope} from '../features/exercises/favoriteExercises'
 const props=withDefaults(defineProps<{selectionMode?:boolean}>(),{selectionMode:false})
 const emit=defineEmits<{select:[CatalogExercise];close:[]}>()
 const route=useRoute()
 const all=ref<CatalogExercise[]>([]),terms=ref(''),muscle=ref<LibraryGroupFilter>(''),state=ref('Caricamento catalogo V1...'),picked=ref<CatalogExercise|null>(null),pending=ref<CatalogExercise|null>(null),lang=ref<'it'|'en'>(interfaceLanguage.value),limit=ref(80),loading=ref(true),failed=ref(false)
+const favoriteScope=ref<FavoriteScope|null>(null),favorites=ref<string[]>([]),onlyFavorites=ref(false),favoriteError=ref('')
+const favoriteSet=computed(()=>new Set(favorites.value))
+let stopFavoriteAuth:Unsubscribe|undefined,favoriteGeneration=0,favoriteAlive=true
+function clearFavoriteScope(){favoriteGeneration++;favoriteScope.value=null;favorites.value=[];onlyFavorites.value=false;favoriteError.value=''}
+function refreshFavorites(){if(!favoriteScope.value)return;try{favorites.value=readFavorites(localStorage,favoriteScope.value);favoriteError.value=''}catch{favoriteError.value=uiText('Preferiti non disponibili su questo dispositivo.')}}
+async function bindFavorites(uid:string|undefined){clearFavoriteScope();const generation=favoriteGeneration;if(!uid)return;try{const session=await readNavigationSession(),{auth,db}=getStagingClients();if(!favoriteAlive||generation!==favoriteGeneration||auth.currentUser?.uid!==uid||session.uid!==uid||session.role==='atleta')return;const project=db.app.options.projectId;if(!project)return;favoriteScope.value={project,gym:session.gymId,uid};refreshFavorites()}catch{/* No verified Coach: do not expose local preferences. */}}
+function favoriteStorage(e:StorageEvent){const scope=favoriteScope.value;if(scope&&(e.key===null||e.key===favoriteKey(scope)))refreshFavorites()}
+function markFavorite(id:string){const scope=favoriteScope.value;if(!scope)return;const current=stagingSession.value;if(!current||current.uid!==scope.uid||current.gymId!==scope.gym||current.role==='atleta'||getStagingClients().auth.currentUser?.uid!==scope.uid){clearFavoriteScope();return}try{favorites.value=toggleFavorite(localStorage,scope,id);favoriteError.value=''}catch{favoriteError.value=uiText('Impossibile salvare il preferito su questo dispositivo.')}}
+watch(stagingSession,current=>{const scope=favoriteScope.value;if(scope&&(!current||current.uid!==scope.uid||current.gymId!==scope.gym||current.role==='atleta'))clearFavoriteScope();if(current&&current.role!=='atleta'&&(!favoriteScope.value||favoriteScope.value.uid!==current.uid||favoriteScope.value.gym!==current.gymId)){try{const uid=getStagingClients().auth.currentUser?.uid;if(uid===current.uid)void bindFavorites(uid)}catch{}}})
 const pickerRoot=ref<HTMLElement|null>(null)
 let nestedOpener:HTMLElement|null=null
 function focusNested(){nestedOpener=document.activeElement instanceof HTMLElement?document.activeElement:null;void nextTick(()=>pickerRoot.value?.querySelector<HTMLElement>('.lf-library-nested button')?.focus())}
@@ -19,7 +33,7 @@ function choose(e:CatalogExercise){pending.value=e;focusNested()}
 function closeNested(){picked.value=null;pending.value=null;const opener=nestedOpener;nestedOpener=null;void nextTick(()=>opener?.focus())}
 async function load(){loading.value=true;failed.value=false;state.value='Caricamento catalogo V1...';try{all.value=await loadCatalog(readLegacyExerciseCatalog);state.value=all.value.length+' ESERCIZI'}catch(e){failed.value=true;state.value=(e as Error).message}finally{loading.value=false}}
 const muscles=computed(()=>libraryGroupOptions(all.value,interfaceLanguage.value))
-const matches=computed(()=>{const scoped=exercisesInGroup(all.value,muscle.value);return rankedExercises(scoped,terms.value,'',scoped.length)})
+const matches=computed(()=>{const scoped=exercisesInGroup(all.value,muscle.value).filter(e=>!onlyFavorites.value||favoriteSet.value.has(e.id));return rankedExercises(scoped,terms.value,'',scoped.length)})
 const results=computed(()=>matches.value.slice(0,limit.value))
 const title=(e:CatalogExercise)=>exerciseLabel(e,interfaceLanguage.value)
 function open(e:CatalogExercise){picked.value=e;lang.value=interfaceLanguage.value;if(props.selectionMode)focusNested()}
@@ -37,19 +51,19 @@ function localBack(event:Event){if(!props.selectionMode||event.defaultPrevented)
 function back(){if(pending.value||picked.value){closeNested();return}emit('close')}
 function confirm(){if(!props.selectionMode||!pending.value)return;const exercise=pending.value;pending.value=null;emit('select',exercise)}
 watch([()=>route.query.exerciseId,all],()=>{if(props.selectionMode)return;const id=route.query.exerciseId;if(typeof id!=='string')return;const exercise=all.value.find(e=>e.id===id);if(exercise){terms.value=title(exercise);open(exercise)}},{immediate:true})
-onMounted(()=>{void load();if(props.selectionMode){document.documentElement.classList.add('lf-library-picker-open');window.addEventListener('lionfit:local-back',localBack);window.addEventListener('keydown',windowEscape);void nextTick(()=>pickerRoot.value?.focus())}})
-onUnmounted(()=>{if(props.selectionMode)document.documentElement.classList.remove('lf-library-picker-open');window.removeEventListener('lionfit:local-back',localBack);window.removeEventListener('keydown',windowEscape)})
+onMounted(()=>{void load();if(isOperationalMode()){try{stopFavoriteAuth=onAuthStateChanged(getStagingClients().auth,user=>void bindFavorites(user?.uid));window.addEventListener('storage',favoriteStorage)}catch{}}if(props.selectionMode){document.documentElement.classList.add('lf-library-picker-open');window.addEventListener('lionfit:local-back',localBack);window.addEventListener('keydown',windowEscape);void nextTick(()=>pickerRoot.value?.focus())}})
+onUnmounted(()=>{favoriteAlive=false;clearFavoriteScope();stopFavoriteAuth?.();window.removeEventListener('storage',favoriteStorage);if(props.selectionMode)document.documentElement.classList.remove('lf-library-picker-open');window.removeEventListener('lionfit:local-back',localBack);window.removeEventListener('keydown',windowEscape)})
 </script>
 <template>
 <div :class="selectionMode?'modal-overlay lf-library-picker-overlay':'stack lf-library-browse'" @click.self="selectionMode&&back()" @keydown="handleKey">
  <div ref="pickerRoot" :class="selectionMode?'dialog lf-library-picker-dialog stack':'lf-library-browse-content'" :role="selectionMode?'dialog':undefined" :aria-modal="selectionMode?true:undefined" :aria-label="selectionMode?uiText('Seleziona esercizio'):undefined" :tabindex="selectionMode?-1:undefined" style="gap:14px">
   <div v-if="selectionMode" class="row between lf-library-picker-top"><strong>{{uiText('Seleziona esercizio')}}</strong><button class="secondary" type="button" @click="back">{{uiText('Chiudi libreria')}} ✕</button></div>
   <div :class="selectionMode?'lf-library-picker-scroll':'lf-library-browse-content'">
-  <section class="panel library-header"><div class="row between"><div><h2 class="card-heading"><LionIcon name="book" :size="20"/> {{uiText("LIBRERIA ESERCIZI")}}</h2><p class="muted small" style="margin:5px 0 0">{{uiText("CATALOGO ESERCIZI CONDIVISO LION FIT")}}</p></div><span class="pill">{{uiText(state)}}</span></div><div class="library-filters"><input v-model="terms" :placeholder="uiText('Cerca in italiano o inglese (es. panca, bench)...')" @input="limit=80"/><select v-model="muscle" @change="limit=80"><option value="">{{uiText("Tutti i Muscoli")}}</option><option v-for="m in muscles" :key="m.id" :value="m.id">{{m.label}} ({{m.count}})</option></select></div></section>
+  <section class="panel library-header"><div class="row between"><div><h2 class="card-heading"><LionIcon name="book" :size="20"/> {{uiText("LIBRERIA ESERCIZI")}}</h2><p class="muted small" style="margin:5px 0 0">{{uiText("CATALOGO ESERCIZI CONDIVISO LION FIT")}}</p></div><span class="pill">{{uiText(state)}}</span></div><div class="library-filters"><input v-model="terms" :placeholder="uiText('Cerca in italiano o inglese (es. panca, bench)...')" @input="limit=80"/><select v-model="muscle" @change="limit=80"><option value="">{{uiText("Tutti i Muscoli")}}</option><option v-for="m in muscles" :key="m.id" :value="m.id">{{m.label}} ({{m.count}})</option></select></div><div v-if="favoriteScope" class="lf-r5-favorite-filters"><button type="button" class="secondary" :class="{'is-selected':onlyFavorites}" :aria-pressed="onlyFavorites" @click="onlyFavorites=!onlyFavorites;limit=80"><span aria-hidden="true">{{onlyFavorites?'♥':'♡'}}</span> {{uiText('Preferiti')}} ({{favorites.length}})</button><small class="muted">{{uiText('Salvati su questo dispositivo')}}</small></div><p v-if="favoriteError" role="status" class="muted small">{{favoriteError}}</p></section>
   <div class="notice notice-success library-explain">{{selectionMode?uiText('Premi Seleziona per inserire un esercizio nella scheda.'):interfaceLanguage==='en'?'Animated exercise previews start automatically. Open an exercise for instructions and playback controls.':'Le anteprime SVG si animano automaticamente: scorri per vedere gli esercizi in movimento senza aprirli.'}}</div>
   <div v-if="failed" class="panel" role="alert">{{state}} <button type="button" class="secondary" @click="load">{{uiText('Riprova')}}</button></div>
   <div class="library-grid">
-   <div v-for="(e,i) in results" :key="e.id" :class="selectionMode?'lf-library-choice':'lf-library-browse-item'">
+   <div v-for="(e,i) in results" :key="e.id" :class="[selectionMode?'lf-library-choice':'lf-library-browse-item',{'lf-r5-has-favorite':!!favoriteScope}]">
     <component :is="selectionMode?'div':'button'" :type="selectionMode?undefined:'button'" class="library-card" style="text-align:left;color:inherit" @click="!selectionMode&&open(e)">
      <button v-if="selectionMode" type="button" class="lf-library-detail" :aria-label="title(e)" @click="open(e)"></button>
      <div :class="selectionMode?'lf-library-preview-wrap':'lf-library-preview-browse'">
@@ -61,9 +75,10 @@ onUnmounted(()=>{if(props.selectionMode)document.documentElement.classList.remov
       <button v-if="selectionMode" type="button" class="lf-library-select" :aria-label="`${uiText('Seleziona')} ${title(e)}`" @click.stop="choose(e)">{{uiText('Seleziona')}}</button>
      </div>
     </component>
+    <button v-if="favoriteScope" type="button" class="lf-r5-favorite-heart" :class="{'is-favorite':favoriteSet.has(e.id)}" :aria-pressed="favoriteSet.has(e.id)" :aria-label="uiText(favoriteSet.has(e.id)?'Rimuovi dai preferiti':'Aggiungi ai preferiti')+' '+title(e)" @click.stop="markFavorite(e.id)"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" :fill="favoriteSet.has(e.id)?'currentColor':'none'" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20.8 5.8a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.4a5.5 5.5 0 0 0 0-7.8Z" transform="translate(0 -1)"/></svg></button>
    </div>
   </div>
-  <div v-if="!loading&&!failed&&!results.length" class="panel">{{uiText("Nessun esercizio trovato.")}}</div><button v-if="matches.length>limit" type="button" class="secondary" @click="limit+=80">{{uiText("Mostra altri esercizi")}} ({{limit}} / {{matches.length}})</button>
+  <div v-if="!loading&&!failed&&!results.length" class="panel">{{uiText(onlyFavorites?"Nessun preferito corrisponde ai filtri.":"Nessun esercizio trovato.")}}</div><button v-if="matches.length>limit" type="button" class="secondary" @click="limit+=80">{{uiText("Mostra altri esercizi")}} ({{limit}} / {{matches.length}})</button>
   </div>
   <div v-if="picked" class="modal-overlay lf-library-nested" @click.self="closeNested"><div class="dialog exercise-dialog"><div class="row between"><h2>{{title(picked)}}</h2><button class="secondary" type="button" @click="closeNested">{{uiText("CHIUDI")}} ✕</button></div><ExerciseMotion v-if="picked.animation?.frames?.length" :exercise="picked" eager/><p v-else class="muted">{{uiText("Questo esercizio ha istruzioni testuali ma non un’animazione SVG nella libreria originale.")}}</p><p class="muted" style="margin:15px 0">EN: {{picked.name}} {{uiText("· Muscolo:")}} {{muscleLabel(picked.target||'',interfaceLanguage)}} {{uiText("· Attrezzatura:")}} {{picked.equipment||uiText('non specificata')}}</p><p v-if="picked.secondaryMuscles?.length" class="small muted">{{uiText("Muscoli secondari:")}} {{picked.secondaryMuscles.map(m=>muscleLabel(m,interfaceLanguage)).join(', ')}}</p><p class="small muted">{{uiText("Licenza dati:")}} {{picked.dataLicense||'non indicata'}} · Media: {{picked.animation?.license||picked.mediaStatus||'non indicati'}}</p><div class="row"><button class="ghost" type="button" @click="lang=lang==='it'?'en':'it'" :disabled="!picked.instructions_it?.length">{{uiText(lang==='it'?'Mostra inglese':'Mostra italiano')}}</button></div><ol class="exercise-steps"><li v-for="(step,i) in (lang==='it'&&picked.instructions_it?.length?picked.instructions_it:picked.instructions||[])" :key="i">{{step}}</li></ol></div></div>
   <div v-if="selectionMode&&pending" class="modal-overlay lf-library-nested" @click.self="closeNested"><div class="dialog lf-library-confirm" role="alertdialog" aria-modal="true" :aria-label="uiText('Inserire questo esercizio?')"><h2>{{uiText('Inserire questo esercizio?')}}</h2><p>{{title(pending)}}</p><p class="muted small">{{uiText('L’esercizio verrà inserito nella riga selezionata della scheda.')}}</p><div class="row" style="justify-content:flex-end;flex-wrap:wrap"><button type="button" class="secondary" @click="closeNested">{{uiText('Annulla')}}</button><button type="button" class="primary" @click="confirm">{{uiText('Conferma selezione')}}</button></div></div></div>
@@ -71,6 +86,8 @@ onUnmounted(()=>{if(props.selectionMode)document.documentElement.classList.remov
 </div>
 </template>
 <style scoped>
+.lf-r5-favorite-filters{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px}.lf-r5-favorite-filters button.is-selected{border-color:var(--mint);color:var(--mint)}.lf-r5-has-favorite{position:relative;display:flex!important;min-width:0}.lf-r5-has-favorite>.library-card{width:100%;flex:1}.lf-r5-favorite-heart{position:absolute;z-index:5;top:6px;right:6px;width:36px!important;height:36px!important;min-height:0!important;padding:0!important;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;color:var(--text);background:var(--card2);box-shadow:none!important}.lf-r5-favorite-heart.is-favorite{color:#e44969}.lf-r5-favorite-heart:active svg{transform:scale(.87)}.lf-r5-favorite-heart svg{transition:transform .17s ease}.lf-r5-favorite-heart:focus-visible{outline:2px solid var(--mint);outline-offset:2px}@media(prefers-reduced-motion:reduce){.lf-r5-favorite-heart svg{transition:none}}
+
 .lf-library-browse{gap:14px}
 .lf-library-browse-content,.lf-library-browse-item{display:contents}
 .lf-library-choice{display:flex;flex-direction:column;min-width:0}

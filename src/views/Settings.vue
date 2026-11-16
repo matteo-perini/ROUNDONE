@@ -119,39 +119,45 @@ const profilePath = computed(() => { const coach=isStagingMode()?stagingSession.
 async function exit() { if(isStagingMode()){if(await signOutStaging())await router.replace('/accesso');return}if(emulator.value){const {leaveDevSession}=await import('../integrations/firebase/devSession');await leaveDevSession();await router.push('/dev/accesso')}else{lab.logout();await router.push('/accesso')} }
 </script>
 <template>
- <div class="lfsettings lfsettings-compact lfsettings-v23" v-lf-entrance="{id:'settings',premiumOnly:true,rows:[{match:'.lfsettings-header'},{match:'.lfsettings-categories'}]}">
+ <div class="lfsettings lfsettings-compact lfsettings-v23" v-lf-entrance="{id:'settings',premiumOnly:true,rows:[{match:'.lfsettings-header'},{match:'.lfsettings-flat-list'}]}">
   <header class="lfsettings-header"><div><span class="eyebrow">{{uiText("LION FIT · ACCOUNT")}}</span><h1>{{uiText("Impostazioni")}}</h1></div></header>
-  <div class="lfsettings-categories">
-   <section class="lfsettings-group"><h2>{{uiText("Generali")}}</h2>
-    <button class="lfsettings-entry" type="button" @click="lab.toggleTheme()"><LionIcon name="sun"/><span><b>{{uiText("Tema")}}</b><small>{{uiText("Personalizza l’aspetto dell’app")}}</small></span><strong>{{uiText(lab.theme==='dark'?'Scuro':'Chiaro')}}</strong><LionIcon name="chevron" :size="17"/></button>
+  <div class="lfsettings-flat-list" data-lf-settings-layout="flat-r6">
+   <button class="lfsettings-flat-row" type="button" @click="lab.toggleTheme()"><LionIcon name="sun"/><span><b>{{uiText("Tema")}}</b><small>{{uiText("Personalizza l’aspetto dell’app")}}</small></span><strong>{{uiText(lab.theme==='dark'?'Scuro':'Chiaro')}}</strong><LionIcon name="chevron" :size="17"/></button>
 
-    <label class="lfsettings-entry lfsettings-language"><LionIcon name="globe"/><span><b>{{uiText('Lingua')}}</b><small>{{uiText("Lingua dell’interfaccia")}}</small></span><select :value="interfaceLanguage" :aria-label="uiText('Lingua dell’interfaccia')" @change="setInterfaceLanguage(($event.target as HTMLSelectElement).value)"><option value="it">🇮🇹 Italiano</option><option value="en">{{uiText("🇬🇧 English")}}</option></select></label>
-   </section>
-   <section v-if="isStagingMode()&&stagingSession&&stagingSession.role!=='atleta'" class="lfsettings-group"><h2>Personalizzazione</h2>
-    <button v-if="stagingSession.role==='titolare'" type="button" class="lfsettings-entry" :aria-expanded="identityOpen" @click="identityOpen=!identityOpen"><LionIcon name="gym"/><span><b>Personalizza palestra</b><small>Nome, logo e copertina</small></span><LionIcon name="chevron" :size="17"/></button>
+    <label class="lfsettings-flat-row lfsettings-flat-language"><LionIcon name="globe"/><span><b>{{uiText('Lingua')}}</b><small>{{uiText("Lingua dell’interfaccia")}}</small></span><select :value="interfaceLanguage" :aria-label="uiText('Lingua dell’interfaccia')" @change="setInterfaceLanguage(($event.target as HTMLSelectElement).value)"><option value="it">🇮🇹 Italiano</option><option value="en">{{uiText("🇬🇧 English")}}</option></select></label>
+   <template v-if="isStagingMode()&&stagingSession&&stagingSession.role!=='atleta'">
+    <button v-if="stagingSession.role==='titolare'" type="button" class="lfsettings-flat-row" :aria-expanded="identityOpen" @click="identityOpen=!identityOpen"><LionIcon name="gym"/><span><b>Personalizza palestra</b><small>Nome, logo e copertina</small></span><LionIcon name="chevron" :size="17"/></button>
     <GymIdentity v-if="identityOpen&&stagingSession.role==='titolare'" edit/>
-    <button type="button" class="lfsettings-entry" :aria-expanded="dashboardOpen" @click="dashboardOpen=!dashboardOpen"><LionIcon name="settings"/><span><b>Personalizza dashboard</b><small>Seleziona i tuoi riquadri</small></span><LionIcon name="chevron" :size="17"/></button>
+    <button type="button" class="lfsettings-flat-row" :aria-expanded="dashboardOpen" @click="dashboardOpen=!dashboardOpen"><LionIcon name="settings"/><span><b>Personalizza dashboard</b><small>Seleziona i tuoi riquadri</small></span><LionIcon name="chevron" :size="17"/></button>
     <DashboardPreferences v-if="dashboardOpen"/>
-   </section>
-   <section v-if="billingSandboxEnabled()&&stagingSession?.role==='titolare'" class="lfsettings-group"><h2>Abbonamento · Ambiente di test</h2><button type="button" class="lfsettings-entry" :aria-expanded="billingOpen" @click="billingOpen=!billingOpen"><LionIcon name="clipboard"/><span><b>Abbonamento LionFit (Sandbox)</b><small>Prova gratuita, piani e rinnovi simulati</small></span><LionIcon name="chevron" :size="17"/></button><BillingSandbox v-if="billingOpen"/></section>
-   <section v-if="platformAllowed" class="lfsettings-group"><h2>LionFit · Gestione piattaforma</h2><RouterLink class="lfsettings-entry" to="/lionfit-control"><LionIcon name="shield"/><span><b>Control Center</b><small>Accesso riservato Super Admin</small></span><LionIcon name="chevron" :size="17"/></RouterLink></section>
-   <section v-if="workPilotAllowed" class="lfsettings-group"><h2>LionFit Work</h2><button type="button" class="lfsettings-entry" :aria-expanded="workPilotOpen" @click="workPilotOpen=!workPilotOpen;workReportOpen=false"><LionIcon name="fingerprint"/><span><b>Timbratura GPS</b><small>Gestione sedi e blocco definitivo</small></span><LionIcon name="chevron" :size="17"/></button><WorkConfigSettings v-if="workPilotOpen" :key="`${stagingSession?.uid}:${stagingSession?.gymId}:${stagingSession?.role}`" :gym-id="stagingSession?.gymId||''" :uid="stagingSession?.uid||''" :mobile="workPilotMobile"/><button type="button" class="lfsettings-entry" :aria-expanded="workReportOpen" @click="workReportOpen=!workReportOpen;workPilotOpen=false"><LionIcon name="clock"/><span><b>Report mensili</b><small>Ore personali per sede</small></span><LionIcon name="chevron" :size="17"/></button><WorkReport v-if="workReportOpen" embedded :key="`${stagingSession?.uid}:${stagingSession?.gymId}:${stagingSession?.role}`"/></section>
-   <section v-if="competitionAvailable" class="lfsettings-group"><h2>Moduli palestra</h2><button type="button" class="lfsettings-entry" :disabled="competitionBusy||!mayWriteLive()" @click="toggleCompetition"><LionIcon name="trophy"/><span><b>Competizioni e gare</b><small>Mostra o nascondi il modulo della palestra, senza cancellare gli eventi.</small></span><strong>{{competitionEnabled?'Attivo':'Disattivo'}}</strong></button><p v-if="competitionMessage" class="notice" role="status">{{competitionMessage}}</p></section>
-   <section v-if="pushAvailable&&stagingSession" class="lfsettings-group"><h2>Notifiche</h2><button class="lfsettings-entry" type="button" :aria-expanded="pushOpen" @click="pushOpen=!pushOpen"><LionIcon name="bell"/><span><b>{{uiText("Notifiche")}}</b><small>Preferenze account e dispositivi</small></span><LionIcon name="chevron" :size="17"/></button><PushSettings v-if="pushOpen"/></section>
-   <section v-if="calendarPilotEnabled()&&stagingSession" class="lfsettings-group"><h2>Integrazioni</h2><button class="lfsettings-entry" type="button" :aria-expanded="calendarOpen" @click="calendarOpen=!calendarOpen"><LionIcon name="calendar"/><span><b>Google Calendar</b><small>Collegamento facoltativo</small></span><LionIcon name="chevron" :size="17"/></button><CalendarPilotSettings v-if="calendarOpen" :key="stagingSession.uid"/></section>
-   <section class="lfsettings-group"><h2>{{uiText("Privacy e account")}}</h2>
-    <button v-if="linkedAllowed" type="button" class="lfsettings-entry" :aria-expanded="linkedOpen" @click="linkedOpen=!linkedOpen"><LionIcon name="switch"/><span><b>Cambio rapido profilo</b><small>Account collegati su questo dispositivo</small></span><LionIcon name="chevron" :size="17"/></button>
+   </template>
+   <template v-if="billingSandboxEnabled()&&stagingSession?.role==='titolare'">
+    <button type="button" class="lfsettings-flat-row" :aria-expanded="billingOpen" @click="billingOpen=!billingOpen"><LionIcon name="clipboard"/><span><b>Abbonamento LionFit (Sandbox)</b><small>Prova gratuita, piani e rinnovi simulati</small></span><LionIcon name="chevron" :size="17"/></button><BillingSandbox v-if="billingOpen"/>
+   </template>
+   <template v-if="platformAllowed">
+    <RouterLink class="lfsettings-flat-row" to="/lionfit-control"><LionIcon name="shield"/><span><b>Control Center</b><small>Accesso riservato Super Admin</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
+   </template>
+   <template v-if="workPilotAllowed">
+    <button type="button" class="lfsettings-flat-row" :aria-expanded="workPilotOpen" @click="workPilotOpen=!workPilotOpen;workReportOpen=false"><LionIcon name="fingerprint"/><span><b>Timbratura GPS</b><small>Gestione sedi e blocco definitivo</small></span><LionIcon name="chevron" :size="17"/></button><WorkConfigSettings v-if="workPilotOpen" :key="`${stagingSession?.uid}:${stagingSession?.gymId}:${stagingSession?.role}`" :gym-id="stagingSession?.gymId||''" :uid="stagingSession?.uid||''" :mobile="workPilotMobile"/><button type="button" class="lfsettings-flat-row" :aria-expanded="workReportOpen" @click="workReportOpen=!workReportOpen;workPilotOpen=false"><LionIcon name="clock"/><span><b>Report mensili</b><small>Ore personali per sede</small></span><LionIcon name="chevron" :size="17"/></button><WorkReport v-if="workReportOpen" embedded :key="`${stagingSession?.uid}:${stagingSession?.gymId}:${stagingSession?.role}`"/>
+   </template>
+   <template v-if="competitionAvailable">
+    <button type="button" class="lfsettings-flat-row" :disabled="competitionBusy||!mayWriteLive()" @click="toggleCompetition"><LionIcon name="trophy"/><span><b>Competizioni e gare</b><small>Mostra o nascondi il modulo della palestra, senza cancellare gli eventi.</small></span><strong>{{competitionEnabled?'Attivo':'Disattivo'}}</strong></button><p v-if="competitionMessage" class="notice" role="status">{{competitionMessage}}</p>
+   </template>
+   <template v-if="pushAvailable&&stagingSession">
+    <button class="lfsettings-flat-row" type="button" :aria-expanded="pushOpen" @click="pushOpen=!pushOpen"><LionIcon name="bell"/><span><b>{{uiText("Notifiche")}}</b><small>Preferenze account e dispositivi</small></span><LionIcon name="chevron" :size="17"/></button><PushSettings v-if="pushOpen"/>
+   </template>
+   <template v-if="calendarPilotEnabled()&&stagingSession">
+    <button class="lfsettings-flat-row" type="button" :aria-expanded="calendarOpen" @click="calendarOpen=!calendarOpen"><LionIcon name="calendar"/><span><b>Google Calendar</b><small>Collegamento facoltativo</small></span><LionIcon name="chevron" :size="17"/></button><CalendarPilotSettings v-if="calendarOpen" :key="stagingSession.uid"/>
+   </template>
+   <button v-if="linkedAllowed" type="button" class="lfsettings-flat-row" :aria-expanded="linkedOpen" @click="linkedOpen=!linkedOpen"><LionIcon name="switch"/><span><b>Cambio rapido profilo</b><small>Account collegati su questo dispositivo</small></span><LionIcon name="chevron" :size="17"/></button>
     <LinkedProfileSettings v-if="linkedAllowed&&linkedOpen" :key="stagingSession?.uid"/>
-    <RouterLink v-if="!isStagingMode()||stagingSession" class="lfsettings-entry" :to="profilePath+(emulator?'&edit=1':'?edit=1')"><LionIcon name="user"/><span><b>{{uiText("Modifica profilo")}}</b><small>{{uiText("I tuoi dati personali")}}</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
-    <button v-if="canResetPassword" class="lfsettings-entry" type="button" @click="securityOpen=true;securityStatus=''"><LionIcon name="shield"/><span><b>{{uiText("Sicurezza")}}</b><small>{{uiText("Password e accessi")}}</small></span><LionIcon name="chevron" :size="17"/></button>
-    <a class="lfsettings-entry"  :href="privacyHref" target="_blank" rel="noopener noreferrer"><LionIcon name="shield"/><span><b>{{uiText("Privacy")}}</b><small>{{uiText("Informativa, cookie e tecnologie locali")}}</small></span><LionIcon name="chevron" :size="17"/></a>
-    <a class="lfsettings-entry"  :href="termsHref" target="_blank" rel="noopener noreferrer"><LionIcon name="clipboard"/><span><b>{{uiText("Termini e condizioni")}}</b><small>{{uiText("Documenti legali")}}</small></span><LionIcon name="chevron" :size="17"/></a>
-   </section>
-   <section class="lfsettings-group"><h2>{{uiText("App e supporto")}}</h2>
-    <button class="lfsettings-entry" type="button" @click="infoOpen=true"><LionIcon name="info"/><span><b>{{uiText("Informazioni")}}</b><small>{{uiText("Chi ha creato LionFit, versione e aggiornamenti")}}</small></span><strong>{{appVersion}}</strong><LionIcon name="chevron" :size="17"/></button>
-    <button v-if="isStagingMode()" class="lfsettings-entry" type="button" :aria-expanded="ticketsOpen" @click="ticketsOpen=!ticketsOpen"><LionIcon name="mail"/><span><b>{{uiText("Assistenza e feedback")}}</b><small>{{uiText("Segnala problemi e suggerisci miglioramenti")}}</small></span><LionIcon name="chevron" :size="17"/></button>
+    <RouterLink v-if="!isStagingMode()||stagingSession" class="lfsettings-flat-row" :to="profilePath+(emulator?'&edit=1':'?edit=1')"><LionIcon name="user"/><span><b>{{uiText("Modifica profilo")}}</b><small>{{uiText("I tuoi dati personali")}}</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
+    <button v-if="canResetPassword" class="lfsettings-flat-row" type="button" @click="securityOpen=true;securityStatus=''"><LionIcon name="shield"/><span><b>{{uiText("Sicurezza")}}</b><small>{{uiText("Password e accessi")}}</small></span><LionIcon name="chevron" :size="17"/></button>
+    <a class="lfsettings-flat-row"  :href="privacyHref" target="_blank" rel="noopener noreferrer"><LionIcon name="shield"/><span><b>{{uiText("Privacy")}}</b><small>{{uiText("Informativa, cookie e tecnologie locali")}}</small></span><LionIcon name="chevron" :size="17"/></a>
+    <a class="lfsettings-flat-row"  :href="termsHref" target="_blank" rel="noopener noreferrer"><LionIcon name="clipboard"/><span><b>{{uiText("Termini e condizioni")}}</b><small>{{uiText("Documenti legali")}}</small></span><LionIcon name="chevron" :size="17"/></a>
+   <button class="lfsettings-flat-row" type="button" @click="infoOpen=true"><LionIcon name="info"/><span><b>{{uiText("Informazioni")}}</b><small>{{uiText("Chi ha creato LionFit, versione e aggiornamenti")}}</small></span><strong>{{appVersion}}</strong><LionIcon name="chevron" :size="17"/></button>
+    <button v-if="isStagingMode()" class="lfsettings-flat-row" type="button" :aria-expanded="ticketsOpen" @click="ticketsOpen=!ticketsOpen"><LionIcon name="mail"/><span><b>{{uiText("Assistenza e feedback")}}</b><small>{{uiText("Segnala problemi e suggerisci miglioramenti")}}</small></span><LionIcon name="chevron" :size="17"/></button>
     <SupportTickets v-if="ticketsOpen&&isStagingMode()"/>
-   </section>
   </div>
   <button class="lfsettings-exit" @click="exit"><LionIcon name="logout" :size="19"/> {{uiText("Esci dall’account")}}</button>
   <div v-if="infoOpen" class="modal-overlay" @click.self="infoOpen=false"><div class="dialog lf-about-dialog" role="dialog" aria-modal="true" aria-label="Informazioni sull'applicazione">
@@ -187,35 +193,33 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
 
 
 <style>
-/* PATCH 28 R4: one compact settings list for both roles and every viewport.
-   Keep semantic sections/role gates, but remove their separate visual cards.
-   These overrides are scoped to Settings; Premium Motion stays enabled elsewhere. */
+/* PATCH 28 R6: one real flat list; legacy card selectors cannot target it. */
 .app .lfsettings.lfsettings-compact{gap:14px;min-width:0}
 .app .lfsettings-compact .lfsettings-header{margin:0 0 3px}
 .app .lfsettings-compact .lfsettings-header .eyebrow{display:none}
-.app .lfsettings-compact .lfsettings-categories{display:block;gap:0;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:0 16px;min-width:0}
-.app .lfsettings.lfsettings-compact .lfsettings-categories>.lfsettings-group{background:transparent;border:0;border-radius:0;padding:0;margin:0;min-width:0;box-shadow:none!important}
-.app .lfsettings-compact .lfsettings-group>h2,
-.app .lfsettings-compact .lfsettings-entry>span>small{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
-.app .lfsettings-compact .lfsettings-group>.lfsettings-entry{display:flex;align-items:center;background:transparent;border:0;border-bottom:1px solid var(--border);border-radius:0;margin:0;padding:9px 4px;min-height:52px;gap:12px;box-shadow:none;text-decoration:none;box-sizing:border-box}
-.app .lfsettings-compact .lfsettings-group:last-child>.lfsettings-entry:last-child{border-bottom:0}
-.app .lfsettings-compact .lfsettings-entry>span>b{font-size:14px;line-height:1.3;font-weight:750;overflow-wrap:anywhere}
-.app .lfsettings-compact .lfsettings-entry>svg{flex-shrink:0}
-.app .lfsettings-compact .lfsettings-entry>svg:last-child:not(:first-child){color:var(--muted);transition:transform .16s ease}
-.app .lfsettings-compact .lfsettings-entry[aria-expanded=true]>svg:last-child{transform:rotate(90deg);color:var(--mint)}
-.app .lfsettings-compact .lfsettings-entry:focus-visible{outline:2px solid var(--mint);outline-offset:-2px;border-radius:6px}
-.app .lfsettings-compact .lfsettings-entry>strong{font-size:12px;white-space:nowrap;flex-shrink:0}
-.app .lfsettings-compact .lfsettings-language{flex-wrap:nowrap!important;gap:10px!important}
-.app .lfsettings-compact .lfsettings-language select{margin:0!important;min-width:0!important;max-width:min(48%,175px)!important;min-height:44px!important;font-size:12px!important}
-.app .lfsettings-compact .lfsettings-group>:not(h2):not(.lfsettings-entry){margin-block:8px 12px;min-width:0}
+.app .lfsettings-compact .lfsettings-flat-list{display:block;gap:0;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:0 16px;min-width:0}
+.app .lfsettings-compact .lfsettings-flat-row>span>small{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.app .lfsettings-compact .lfsettings-flat-list>.lfsettings-flat-row{display:flex;align-items:center;width:100%;min-width:0;text-align:left;color:var(--text);font:inherit;background:transparent;border:0;border-bottom:1px solid var(--border);border-radius:0;margin:0;padding:9px 4px;min-height:52px;gap:12px;box-shadow:none;text-decoration:none;box-sizing:border-box}
+.app .lfsettings-compact .lfsettings-flat-list>.lfsettings-flat-row:last-child{border-bottom:0}
+.app .lfsettings-compact .lfsettings-flat-row>span{flex:1;min-width:0}
+.app .lfsettings-compact .lfsettings-flat-row>span>b{display:block;font-size:14px;line-height:1.3;font-weight:750;overflow-wrap:anywhere}
+.app .lfsettings-compact .lfsettings-flat-row>svg:first-child{color:var(--mint);width:21px;height:21px;flex:none}
+.app .lfsettings-compact .lfsettings-flat-row>svg{flex-shrink:0}
+.app .lfsettings-compact .lfsettings-flat-row>svg:last-child:not(:first-child){color:var(--muted);transition:transform .16s ease}
+.app .lfsettings-compact .lfsettings-flat-row[aria-expanded=true]>svg:last-child{transform:rotate(90deg);color:var(--mint)}
+.app .lfsettings-compact .lfsettings-flat-row:focus-visible{outline:2px solid var(--mint);outline-offset:-2px;border-radius:6px}
+.app .lfsettings-compact .lfsettings-flat-row>strong{font-size:12px;white-space:nowrap;flex-shrink:0}
+.app .lfsettings-compact .lfsettings-flat-language{flex-wrap:nowrap!important;gap:10px!important;cursor:default}
+.app .lfsettings-compact .lfsettings-flat-language select{margin:0!important;min-width:0!important;max-width:min(48%,175px)!important;min-height:40px!important;width:auto!important;font-size:12px!important}
+.app .lfsettings-compact .lfsettings-flat-list>:not(.lfsettings-flat-row){margin-block:8px 12px;min-width:0}
 .app .lfsettings-compact .lfsettings-exit{min-height:48px;border-radius:12px}
-@media (hover:hover){.app .lfsettings-compact .lfsettings-entry:not(.lfsettings-language):not(:disabled):hover{background:var(--card2)}}
+@media (hover:hover){.app .lfsettings-compact .lfsettings-flat-row:not(.lfsettings-flat-language):not(:disabled):hover{background:var(--card2)}}
 @media (max-width: 767px){
  .app .lfsettings.lfsettings-compact{gap:10px}
  .app .lfsettings-compact .lfsettings-header h1{font-size:24px;margin:0}
- .app .lfsettings-compact .lfsettings-categories{padding:0 12px;border-radius:14px}
- .app .lfsettings-compact .lfsettings-group>.lfsettings-entry{min-height:49px;padding:8px 2px;gap:10px}
+ .app .lfsettings-compact .lfsettings-flat-list{padding:0 12px;border-radius:14px}
+ .app .lfsettings-compact .lfsettings-flat-list>.lfsettings-flat-row{min-height:49px;padding:8px 2px;gap:10px}
  .app.as-athlete .lfsettings-v23 .lfsettings-exit{padding:10px;font-size:14px}
 }
-@media(prefers-reduced-motion:reduce){.app .lfsettings-compact .lfsettings-entry>svg:last-child{transition:none}}
+@media(prefers-reduced-motion:reduce){.app .lfsettings-compact .lfsettings-flat-row>svg:last-child{transition:none}}
 </style>

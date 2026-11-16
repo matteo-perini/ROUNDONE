@@ -17,10 +17,11 @@ import {belongsToCoach,hasCoachAssignment,type CoachRosterFilter} from '../featu
 import {blankAlternative} from '../features/sheets/approvedAlternatives'
 import {editorToV1,v1ToEditor} from '../features/sheets/v1ExerciseCodec'
 import {supersetView} from '../features/sheets/supersetView'
-import {groupExerciseRows,primaryExerciseCount,ensurePrimaryExerciseCount,insertSuperset,removeExercise} from '../features/sheets/supersetEditor'
+import {groupExerciseRows,primaryExerciseCount,ensurePrimaryExerciseCount,insertSuperset,removeExercise,reorderExerciseGroups} from '../features/sheets/supersetEditor'
 import {loadCatalog,exactCatalogMatches,type CatalogExercise} from '../features/exercises/catalog'
 import ExerciseMotion from '../components/ExerciseMotion.vue'
 import Library from './Library.vue'
+import ExerciseReorder from '../components/ExerciseReorder.vue'
 import {applyLibraryChoice,clearManualIdentity,type LibraryTarget} from '../features/exercises/librarySelection'
 import {interfaceLanguage} from '../features/i18n/interfaceLanguage'
 import type {ApprovedAlternative} from '../features/sheets/domain'
@@ -70,6 +71,9 @@ const catalog=ref<CatalogExercise[]>([])
 const supersetBadges=computed(()=>supersetView(exercises.value))
 const supersetCount=computed(()=>supersetBadges.value.filter(x=>x?.position==='second').length)
 const exerciseGroups=computed(()=>groupExerciseRows(exercises.value))
+const reorderOpen=ref(false)
+const canReorder=computed(()=>!exerciseGroups.value.some(g=>exercises.value[g.primaryIndex].supersetWithPrevious===true))
+const reorderRows=computed(()=>exerciseGroups.value.map(g=>({id:exercises.value[g.primaryIndex].id,label:exercises.value[g.primaryIndex].name,secondary:g.secondaryIndex===null?undefined:exercises.value[g.secondaryIndex].name||uiText('Esercizio senza nome')})))
 const availableMax=computed(()=>250-exercises.value.length)
 const catalogForRow=(e:Exercise):CatalogExercise|null=>{if(e.exerciseId||e.catalogId)return catalog.value.find(c=>c.id===(e.exerciseId||e.catalogId))||null;const matches=exactCatalogMatches(catalog.value,e.name);return matches.length===1?matches[0]:null}
 // Picker stays in the editor: no navigation and no draft reset.
@@ -112,19 +116,11 @@ function addLinkedSuperset(e:Exercise){
  alignCount();notice.value=''
 }
 function removeExerciseNow(e:Exercise){exercises.value=removeExercise(exercises.value,e.id);alignCount();notice.value=''}
-/** Muove un gruppo intero: le coppie superset restano contigue e l'ID non cambia. */
-function moveExerciseGroup(groupNumber:number,direction:-1|1){
- const groups=exerciseGroups.value
- const target=groupNumber+direction
- if(target<0||target>=groups.length)return
- const group=groups[groupNumber],other=groups[target]
- const first=exercises.value.slice(group.primaryIndex,(group.secondaryIndex??group.primaryIndex)+1)
- const second=exercises.value.slice(other.primaryIndex,(other.secondaryIndex??other.primaryIndex)+1)
- const start=Math.min(group.primaryIndex,other.primaryIndex)
- const end=Math.max(group.secondaryIndex??group.primaryIndex,other.secondaryIndex??other.primaryIndex)+1
- const ordered=direction===1?[second,first]:[first,second]
- exercises.value=[...exercises.value.slice(0,start),...ordered.flat(),...exercises.value.slice(end)]
-}
+/** Solo la bozza viene riordinata; il salvataggio esistente resta autoritativo. */
+function moveGroup(from:number,to:number){if(!editing.value||busy.value||!writable.value||!canReorder.value)return;exercises.value=reorderExerciseGroups(exercises.value,from,to)}
+function moveExerciseGroup(groupNumber:number,direction:-1|1){moveGroup(groupNumber,groupNumber+direction)}
+function insertGroupAfter(index:number){const group=exerciseGroups.value[index];if(!group||!editing.value||busy.value||!writable.value||!canReorder.value||availableMax.value<1)return;const row=blankExercise();exercises.value.splice((group.secondaryIndex??group.primaryIndex)+1,0,row);alignCount();reorderOpen.value=false;void nextTick(()=>document.getElementById('lf-exercise-name-'+row.id)?.focus())}
+watch(editing,()=>{reorderOpen.value=false})
 
 const fixedAthleteContext=computed(()=>dayContext.value||(!pickAssign.value&&((editing.value&&isPersonal.value)||(!editing.value&&typeof route.query.editPersonalId==='string'))&&route.query.athleteId!==undefined))
 const currentAthlete=computed(()=>resolveEditorAthlete(roster.value,visibleRoster.value,session.value?.gymId||'',athleteId.value,route.query.athleteId,fixedAthleteContext.value))
@@ -349,15 +345,17 @@ onUnmounted(()=>{live=false;closeListeners()})
    <span>{{exerciseGroups.length}} {{uiText("esercizi ·")}} {{supersetCount}} {{uiText("superset ·")}} {{exercises.length}} {{uiText("righe")}}</span>
   </div>
   <p class="muted small lf-editor-hint">{{uiText("Aumentando il numero si aggiungono righe vuote; diminuendolo non elimini esercizi già compilati. Le note tecniche delle schede condivise non devono contenere dati sanitari.")}}</p>
-  <div class="lf-editor-groups">
+  <div v-if="exerciseGroups.length>1&&canReorder" class="lf-r5-editor-toolbar"><button type="button" class="secondary" :disabled="busy||!writable" :aria-expanded="reorderOpen" @click="reorderOpen=!reorderOpen">{{uiText(reorderOpen?'Termina riordino':'Riordina esercizi')}}</button></div>
+  <ExerciseReorder v-if="reorderOpen" :rows="reorderRows" :disabled="busy||!writable||!canReorder" :can-insert="availableMax>0" @move="moveGroup" @insert="insertGroupAfter"/>
+  <div v-show="!reorderOpen" class="lf-editor-groups">
    <div v-for="(group,groupNumber) in exerciseGroups" :key="exercises[group.primaryIndex].id" class="lf-exercise-group" :class="{'lf-has-superset':group.secondaryIndex!==null}">
     <div class="lf-exercise-group-head">
      <span class="lf-group-number">{{groupNumber+1}}</span>
      <strong>{{group.secondaryIndex!==null?'COPPIA SUPERSET':'ESERCIZIO'}}</strong>
      <span v-if="group.secondaryIndex!==null" class="lf-pair-pill">A + B</span>
      <div class="lf-group-reorder">
-      <button type="button" class="lf-mini-button" :disabled="groupNumber===0" :aria-label="'Sposta esercizio '+(groupNumber+1)+' su'" @click="moveExerciseGroup(groupNumber,-1)">↑</button>
-      <button type="button" class="lf-mini-button" :disabled="groupNumber===exerciseGroups.length-1" :aria-label="'Sposta esercizio '+(groupNumber+1)+' giù'" @click="moveExerciseGroup(groupNumber,1)">↓</button>
+      <button type="button" class="lf-mini-button" :disabled="busy||!writable||!canReorder||groupNumber===0" :aria-label="'Sposta esercizio '+(groupNumber+1)+' su'" @click="moveExerciseGroup(groupNumber,-1)">↑</button>
+      <button type="button" class="lf-mini-button" :disabled="busy||!writable||!canReorder||groupNumber===exerciseGroups.length-1" :aria-label="'Sposta esercizio '+(groupNumber+1)+' giù'" @click="moveExerciseGroup(groupNumber,1)">↓</button>
      </div>
     </div>
     <div v-for="(index,part) in (group.secondaryIndex===null?[group.primaryIndex]:[group.primaryIndex,group.secondaryIndex])" :key="exercises[index].id" class="lf-exercise-editor" :class="{'lf-superset-secondary':part===1}">
@@ -432,6 +430,7 @@ onUnmounted(()=>{live=false;closeListeners()})
 </template>
 
 <style scoped>
+.lf-r5-editor-toolbar{display:flex;justify-content:flex-end;margin:8px 0}.lf-r5-editor-toolbar button{min-height:42px}
 /* PATCH 4: editor compatto, senza alterare il formato delle schede V1. */
 .lf-editor-panel{--lf-editor-gap:8px;padding:18px!important}
 .lf-editor-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--border)}

@@ -9,7 +9,7 @@ test('updated SFC syntax and unit of measure removed from menu only',()=>{
  for(const [name,source] of [['Settings',settings],['WorkConfigSettings',work],['LionIcon',read('../src/components/LionIcon.vue')]])assert.deepEqual(parse(source,{filename:name+'.vue'}).errors,[])
  assert.doesNotMatch(settings,/Unità di misura|lfsettings-static/)
  assert.match(settings,/@media \(max-width: 767px\)/)
- assert.match(settings,/\.lfsettings-categories\{display:block;gap:0/)
+ assert.match(settings,/\.lfsettings-flat-list\{display:block;gap:0/)
 })
 test('settings preserve operational entries and existing role gates',()=>{
  for(const entry of ['Tema','Lingua','Personalizza palestra','Personalizza dashboard','Timbratura GPS','Competizioni e gare','Notifiche','Google Calendar','Modifica profilo','Sicurezza','Privacy','Termini e condizioni','Informazioni','Assistenza e feedback','Esci dall’account'])assert.ok(settings.includes(entry),entry)
