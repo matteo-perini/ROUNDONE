@@ -14,7 +14,7 @@ html.lf-premium-motion .lf-premium-tabs[data-lf-tab-indicator]::after{content:""
 html.lf-premium-motion .lf27-delayed-loading{min-height:58px;padding:12px;border-radius:12px;box-sizing:border-box}
 html.lf-premium-motion .lf27-delayed-loading::after{content:"";display:block;height:58px;margin-top:9px;border-radius:7px;background:linear-gradient(105deg,transparent 25%,var(--lf-premium-glow,#4b96692a) 47%,transparent 72%),linear-gradient(var(--lf-premium-edge,#768f801c),var(--lf-premium-edge,#768f801c)),linear-gradient(var(--lf-premium-edge,#768f801c),var(--lf-premium-edge,#768f801c));background-size:240% 100%,100% 25px,68% 19px;background-position:100% 0,0 0,0 36px;background-repeat:no-repeat;pointer-events:none}
 @media(prefers-reduced-motion:no-preference){
- html.lf-premium-motion .lf-premium-tabs[data-lf-tab-indicator]::after{transition:transform 460ms cubic-bezier(.22,1,.36,1),width 460ms cubic-bezier(.22,1,.36,1)}
+ html.lf-premium-motion .lf-premium-tabs[data-lf-tab-indicator][data-lf-tab-slide]::after{transition:transform 460ms cubic-bezier(.22,1,.36,1),width 460ms cubic-bezier(.22,1,.36,1)}
  html.lf-premium-motion .lf27-delayed-loading::after{animation:lf-premium-shimmer 1200ms linear infinite}
  html.lf-premium-motion .lf-premium-chart-line{stroke-dasharray:100;animation:lf-premium-draw 1100ms cubic-bezier(.22,1,.36,1) both}
  html.lf-premium-motion .lf-premium-chart-area{animation:lf-premium-fade 600ms ease-out 350ms both}

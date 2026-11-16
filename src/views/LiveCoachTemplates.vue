@@ -305,7 +305,7 @@ onUnmounted(()=>{live=false;closeListeners()})
  <div class="notice coach-archive-guide" role="status"><strong>{{uiText("ARCHIVIO DEL COACH")}}</strong> {{uiText("· Gestisci le schede e assegnale tramite il pulsante della scheda.")}} <RouterLink :to="{path:'/coach/atleti',query:{...(athleteId?{athleteId}:{}),...(typeof route.query.weekId==='string'?{weekId:route.query.weekId}:{})}}">{{uiText("← Torna alla settimana dell’atleta")}}</RouterLink></div>
  <section class="panel"><div class="row between"><div><h2 class="card-heading">{{uiText("ARCHIVIO SCHEDE")}}</h2><p class="muted" style="margin:7px 0 0">{{uiText("CREA SCHEDE RIUTILIZZABILI E ASSEGNALE AI TUOI ATLETI")}}</p></div><button v-if="!editing" class="primary" :disabled="!writable||busy" @click="beginModel">{{uiText("＋ Crea nuova scheda dell'archivio")}}</button></div></section>
  <p v-if="error" class="notice" role="alert">{{error}}</p>
- <p v-if="loading" class="muted lf27-delayed-loading" role="status">{{uiText("Verifica del Coach e lettura degli archivi…")}}</p>
+ <p v-lf-quiet-loading v-if="loading" class="muted lf-quiet-status" role="status">{{uiText("Verifica del Coach e lettura degli archivi…")}}</p>
  <section v-if="!loading && session && (!writable || notice)" class="panel">
   <p v-if="!writable" class="notice">{{uiText("Le modifiche sono temporaneamente disabilitate. Puoi consultare le schede.")}}</p>
   <p v-if="notice" class="notice" role="status" :class="{'lf-premium-confirmed':notice===confirmedNotice}"><svg v-if="notice===confirmedNotice" class="lf-premium-success-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12 L9 17 L20 6" pathLength="100"/></svg>{{notice}}</p>
@@ -402,7 +402,7 @@ onUnmounted(()=>{live=false;closeListeners()})
    </div>
   </div>
   <p v-if="coachLookupNotice" class="muted small" role="status">{{coachLookupNotice}}</p>
-  <p v-if="!modelsReady&&!error" class="muted lf27-delayed-loading" role="status">{{uiText("Caricamento schede…")}}</p>
+  <p v-lf-quiet-loading v-if="!modelsReady&&!error" class="muted lf-quiet-status" role="status">{{uiText("Caricamento schede…")}}</p>
   <div v-if="modelsReady" class="grid2 lf-mobile-archive-grid" v-lf-entrance="{id:'coach-archive',rows:[{match:'.archive-card'}]}"><div v-for="s in choice" :key="s.id" class="archive-card">
    <h3 style="margin:0">{{s.title}}</h3><p class="muted small">{{s.category}} · {{s.exercises.length}} {{uiText("esercizi ·")}} {{s.deletedAt?'Nel cestino':'Attivo'}}</p>
    <p class="lf-creator-meta"><span class="lf-creator-owner">{{s.createdBy?(s.legacyCreatorAssignedBy?uiFormat('Scheda storica attribuita a {coach}',{coach:creatorName(s.createdBy)}):uiFormat('Creata da {coach}',{coach:creatorName(s.createdBy)})):uiText('Scheda storica · autore non registrato')}}</span><span v-if="s.updatedBy" class="muted lf-archive-secondary-meta">{{uiFormat('Ultima modifica: {coach}',{coach:creatorName(s.updatedBy)})}}</span></p>

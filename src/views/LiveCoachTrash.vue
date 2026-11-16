@@ -111,7 +111,7 @@ onMounted(async()=>{
    <p v-if="!mayWriteLive()" class="muted small">{{uiText("Ripristino non disponibile in questa build. Gli elementi restano consultabili.")}}</p>
    <p v-if="error" class="notice" role="alert">{{error}}</p>
    <p v-if="notice" class="notice" role="status">{{notice}}</p>
-   <p v-if="loading" role="status" class="lf-trash-empty">{{uiText("Caricamento di modelli, schede personali e settimane della palestra…")}}</p>
+   <p v-lf-quiet-loading v-if="loading" role="status" class="lf-trash-empty lf-quiet-status">{{uiText("Caricamento di modelli, schede personali e settimane della palestra…")}}</p>
    <p v-else-if="!error&&!deleted.length" class="lf-trash-empty">{{uiText("Il Cestino è vuoto. Nessun elemento da ripristinare.")}}</p>
    <div v-if="!loading && deleted.length" class="lf-trash-items">
     <article v-for="item in deleted" :key="item.kind+'-'+item.athleteId+'-'+item.id" class="lf-trash-item">

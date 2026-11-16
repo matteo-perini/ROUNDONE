@@ -72,7 +72,7 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
 </script>
 <template>
  <div class="stack athlete-live-screen" :aria-label="'Area Atleta'">
-  <div v-if="status==='loading'" class="panel lf27-delayed-loading" role="status">{{uiText("Caricamento schede e settimane…")}}</div>
+  <div v-lf-quiet-loading v-if="status==='loading'" class="panel lf-quiet-status" role="status">{{uiText("Caricamento schede e settimane…")}}</div>
   <div v-else-if="status==='error'" class="notice" role="alert">{{message}} <button type="button" class="secondary" @click="retryWorkspace">{{uiText("Riprova")}}</button> <RouterLink :to="isStagingMode()?'/accesso':'/dev/accesso'">{{uiText("Torna all'accesso")}}</RouterLink></div>
   <template v-else-if="data">
    <template v-if="props.screen==='plan'">
@@ -88,7 +88,7 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
      <div class="grid2"><input v-model="search" type="search" aria-label="Cerca archivio personale" placeholder="Cerca nell'Archivio..."/>
       <select v-model="archiveView" aria-label="Filtra archivio personale"><option value="all">Tutte le schede</option><option value="active">Schede assegnate</option><option value="historical">Schede storiche</option><option value="trashed">Schede ritirate</option></select>
      </div>
-     <p v-if="!archiveReady" class="muted lf27-delayed-loading" role="status">{{uiText("Caricamento archivio storico…")}}</p>
+     <p v-lf-quiet-loading v-if="!archiveReady" class="muted lf-quiet-status" role="status">{{uiText("Caricamento archivio storico…")}}</p>
      <p v-else-if="!archiveGroups.length" class="notice">{{uiText("Nessuna scheda corrisponde al filtro selezionato. Le copie protette non vengono eliminate.")}}</p>
      <template v-if="archiveReady"><div v-for="g in archiveGroups" :key="g.sheet.id" class="line-card athlete-archive-item lf-archive-v4-item"><button class="wide athlete-archive-open" type="button" @click="opened=g.sheet"><span class="lf-archive-v4-icon" aria-hidden="true">▣</span><b>{{g.sheet.title}}</b><span class="lf-archive-v4-action">Apri scheda ›</span></button></div></template>
      <p class="muted small lf-archive-v4-note">Le schede storiche rimangono conservate. Le versioni con esercizi o contenuti differenti restano separate.</p>

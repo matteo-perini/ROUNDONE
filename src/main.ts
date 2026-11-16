@@ -19,6 +19,7 @@ import './styles-patch7-final.css' // PATCH 7: safe-area, temi e testi IT/EN res
 import { installRoundOneMotion } from './features/motion/roundOneMotion'
 import { PREMIUM_MOTION_ENABLED } from './features/motion/premiumMotionMode'
 import { premiumMotionTabs } from './features/motion/premiumMotionTabs'
+import {quietLoading} from './features/motion/quietLoading'
 // Rispetta lingua memorizzata: accessibilita' e formati anche dopo il riavvio dell'APK.
 watch(interfaceLanguage,lang=>{document.documentElement.lang=lang},{immediate:true})
 import {installNavigationRecovery,navigationFailure} from './features/auth/navigationRecovery'
@@ -26,7 +27,12 @@ import {finishProfileSwitchAtBoot,startLinkedProfileObserver} from './integratio
 async function bootstrap(){
  // Do not render a half-initialized shell or the preceding user's interface.
  const root=document.getElementById('app')
- if(root){const status=document.createElement('div');status.setAttribute('role','status');status.textContent='Caricamento LionFit…';status.style.cssText='min-height:100dvh;display:grid;place-items:center;background:#0c1118;color:#eaf4f0;font:600 16px system-ui';root.replaceChildren(status)}
+ const splashTimer=setTimeout(()=>{
+  if(!root)return
+  const status=document.createElement('div');status.className='lf-quiet-boot';status.setAttribute('role','status');status.setAttribute('aria-label','Caricamento LionFit')
+  const logo=document.createElement('img');logo.src='/v1-preview/LOGO-APP.png';logo.alt='LionFit';logo.width=76;logo.height=76;status.append(logo);root.replaceChildren(status)
+ },350)
+ try{
  await finishProfileSwitchAtBoot()
  startLinkedProfileObserver()
  installNavigationRecovery(router)
@@ -35,8 +41,11 @@ async function bootstrap(){
  document.documentElement.classList.toggle('lf-premium-motion',PREMIUM_MOTION_ENABLED)
  if(PREMIUM_MOTION_ENABLED){const pause=()=>document.documentElement.classList.toggle('lf-motion-paused',document.hidden);document.addEventListener('visibilitychange',pause);pause()}
  app.directive('lf-motion-tabs',premiumMotionTabs)
+ app.directive('lf-quiet-loading',quietLoading)
  installRoundOneMotion(router,app)
+ clearTimeout(splashTimer)
  app.mount('#app')
+ }finally{clearTimeout(splashTimer)}
 }
 void bootstrap().catch(()=>{
  const root=document.getElementById('app');if(!root)return
@@ -77,3 +86,4 @@ import "./styles-patch27-performance.css"
 
 // Premium visual overrides must follow the existing theme and mobile rules.
 import './styles-premium-motion.css'
+import './styles-quiet-loading.css'

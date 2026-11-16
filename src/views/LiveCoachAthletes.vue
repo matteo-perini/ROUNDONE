@@ -26,7 +26,7 @@ import SheetDetail from '../components/SheetDetail.vue'
 import LionIcon from '../components/LionIcon.vue'
 const route=useRoute(),router=useRouter(),session=shallowRef<StagingSession|null>(null)
 const roster=ref<RosterAthlete[]>([]),search=ref(''),currentId=ref(''),selectedWeek=ref('')
-const status=ref('Caricamento dati palestra…'),error=ref(''),busy=ref(false)
+const status=ref('Caricamento dati palestra…'),error=ref(''),busy=ref(false),rosterReady=ref(false)
 const data=shallowRef<{personal:Personal[];weeks:ProgramWeek[];groups:Groups}|null>(null)
 let openedSearchId=''
 const opened=shallowRef<Personal|null>(null),pick=ref<{day:number;slot:1|2}|null>(null),pickSearch=ref('')
@@ -310,7 +310,7 @@ onMounted(async()=>{window.addEventListener('beforeunload',beforeUnload);documen
  void fillCardInfo(rosterEpoch)
  if(currentId.value&&!roster.value.some(a=>a.id===currentId.value))close();
  if(!currentId.value && typeof route.query.athleteId==='string' && roster.value.some(a=>a.id===route.query.athleteId))currentId.value=route.query.athleteId;
- status.value='Atleti aggiornati da Firebase'
+ rosterReady.value=true;status.value='Atleti aggiornati da Firebase'
  },e=>{if(alive)error.value='Elenco atleti: '+e.message})
 }catch(e){error.value=e instanceof Error?e.message:String(e)}})
 onUnmounted(()=>{window.removeEventListener('beforeunload',beforeUnload);document.removeEventListener('visibilitychange',touchClock);if(refreshClock)clearInterval(refreshClock);rosterEpoch++;alive=false;stopSharedListening();stopSelected();stopUsers?.();stopCoaches?.();stopAuth?.()})
@@ -575,9 +575,9 @@ function copyToArchive(sheet:Personal){
   <div class="coach-team-title"><h2 class="card-heading">{{uiText("GESTIONE ATLETI")}}</h2><span class="muted">{{uiText("SELEZIONA UN ATLETA")}}</span></div>
   <div class="coach-team-tools"><RouterLink to="/coach/staff" class="primary">{{uiText("+ Invita atleta")}}</RouterLink><input v-model="search" type="search" :aria-label="uiText('Cerca atleta')" :placeholder="uiText('Cerca atleta per nome…')"/></div>
  </section>
- <p v-if="error" class="notice" role="alert">{{error}}</p><p class="small muted" :class="{'lf-roster-mobile-quiet':status==='Atleti aggiornati da Firebase'}" role="status">{{status}}</p>
+ <p v-if="error" class="notice" role="alert">{{error}}</p><p v-if="!rosterReady&&!error" v-lf-quiet-loading class="lf-quiet-status" role="status">{{status}}</p><p v-else-if="status.startsWith('Coach principale associato')" class="small muted" role="status">{{status}}</p>
  <section v-if="!athlete" class="lf-roster-summary" :class="{'lf-roster-mobile-quiet':!(session?.role==='titolare'&&unassignedAthletes.length)}">
-   <span class="small muted lf-roster-mobile-quiet">{{visibleAthletes.length}} {{uiText('atleti ·')}} {{uiText(currentFilterLabel)}}</span>
+   <span class="small muted lf-roster-mobile-quiet">{{rosterReady?visibleAthletes.length:'—'}} {{uiText('atleti ·')}} {{uiText(currentFilterLabel)}}</span>
    <button v-if="session?.role==='titolare'&&unassignedAthletes.length" type="button" class="secondary lf-assign-legacy" @click="legacyPanelOpen=!legacyPanelOpen">{{uiText(legacyPanelOpen?'Chiudi assegnazioni':'Riassegna atleti storici')}}</button>
  </section>
  <p v-if="!athlete" class="small muted lf-roster-help">{{uiText("Tutti i Coach autorizzati possono gestire gli Atleti della stessa palestra. L’associazione al Coach serve soltanto per organizzare i filtri.")}}</p>
@@ -605,8 +605,8 @@ function copyToArchive(sheet:Personal){
    <button type="button" :class="{selected:programFilter==='senza'}" :aria-pressed="programFilter==='senza'" @click="programFilter='senza'">{{uiText("Senza programmazione")}}</button>
   </div></div>
  </section>
- <p v-if="!athlete&&waitingCardCount" class="small muted lf-roster-loading" role="status">{{uiText("Caricamento riepiloghi delle programmazioni:")}} {{waitingCardCount}}…</p>
- <p v-if="!athlete&&!visibleAthletes.length&&!waitingCardCount" class="small muted" role="status">{{uiText("Nessun Atleta corrisponde ai filtri selezionati.")}}</p>
+ <p v-if="!athlete&&waitingCardCount&&!error" v-lf-quiet-loading class="lf-quiet-status" role="status">{{uiText("Caricamento riepiloghi delle programmazioni:")}} {{waitingCardCount}}…</p>
+ <p v-if="!athlete&&rosterReady&&!error&&!visibleAthletes.length&&!waitingCardCount" class="small muted" role="status">{{uiText("Nessun Atleta corrisponde ai filtri selezionati.")}}</p>
  <div v-if="!athlete" v-lf-entrance="{id:'coach-roster',ready:status==='Atleti aggiornati da Firebase',rows:[{match:'.lf-roster-card'}]}" class="grid2 lf-roster-grid">
   <button v-for="a in visibleAthletes" :key="a.id" type="button" class="lf-roster-card" :title="a.email" @click="choose(a.id)">
    <span class="lf-roster-avatar" aria-hidden="true">{{initials(a)}}</span>
@@ -616,7 +616,7 @@ function copyToArchive(sheet:Personal){
      <span class="lf-roster-separator" aria-hidden="true"></span>
      <span class="lf-roster-program-label">
       <template v-if="cardInfo[a.id]?.error"><b>{{uiText("Riepilogo non disponibile")}}</b><small>{{uiText("Riprova riaprendo la pagina")}}</small></template>
-      <template v-else-if="!cardInfo[a.id]?.overview"><b>{{uiText("Caricamento…")}}</b><small>{{uiText("Verifica schede")}}</small></template>
+      <template v-else-if="!cardInfo[a.id]?.overview"><span class="lf-quiet-roster-placeholder" aria-hidden="true"><i></i><i></i></span><span class="lf-quiet-status">{{uiText("Verifica schede")}}</span></template>
       <template v-else-if="displayOverview(a)?.hasProgram">
        <b v-if="displayOverview(a)?.weekNumber">{{uiText('Settimana')}} {{displayOverview(a)?.weekNumber}} {{uiText('di')}} {{displayOverview(a)?.totalWeeks}}</b>
        <b v-else>{{uiText("Programmazione")}}</b>
