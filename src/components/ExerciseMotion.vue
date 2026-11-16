@@ -6,7 +6,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { followVisibleFrames } from '../features/exercises/visibleFrameClock'
 import type { CatalogExercise } from '../features/exercises/catalog'
-const props=withDefaults(defineProps<{exercise:CatalogExercise;eager?:boolean;controls?:boolean}>(),{eager:false,controls:false})
+const props=withDefaults(defineProps<{exercise:CatalogExercise;eager?:boolean;controls?:boolean;compactControls?:boolean}>(),{eager:false,controls:false,compactControls:false})
 const element=ref<HTMLElement|null>(null)
 const visible=ref(true),paused=ref(false),failed=ref(false)
 const excluded=ref<number[]>([]),step=ref(0)
@@ -63,6 +63,6 @@ watch(animating,syncClock)
   <img v-if="svgUrl&&!failed" :src="svgUrl" :alt="exercise.name_it||exercise.name" decoding="async" :loading="eager||visible?'eager':'lazy'" @error="badFrame" />
   <span v-else class="exercise-motion-fallback">Animazione non disponibile</span>
   <button v-if="(eager||controls)&&failed" class="exercise-motion-command" type="button" @click.stop="reset">Riprova</button>
-  <button v-else-if="(eager||controls)&&sequence.length>1" class="exercise-motion-command" type="button" :aria-pressed="paused" @click.stop="toggle">{{paused?'▶ Avvia animazione':'Ⅱ Ferma animazione'}}</button>
+  <button v-else-if="(eager||controls)&&sequence.length>1" class="exercise-motion-command" type="button" :aria-pressed="paused" :aria-label="paused?'Avvia animazione':'Ferma animazione'" :title="paused?'Avvia animazione':'Ferma animazione'" @click.stop="toggle">{{compactControls?(paused?'▶':'Ⅱ'):(paused?'▶ Avvia animazione':'Ⅱ Ferma animazione')}}</button>
  </div>
 </template>

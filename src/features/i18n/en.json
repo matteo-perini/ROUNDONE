@@ -34,6 +34,9 @@
   "Generali": "General",
   "Privacy e account": "Privacy & account",
   "App e supporto": "App & support",
+  "Personalizzazione": "Personalization",
+  "Funzionalità aggiuntive": "Additional features",
+  "Account e assistenza": "Account and support",
   "Tema": "Theme",
   "Notifiche": "Notifications",
   "Lingua": "Language",
@@ -718,5 +721,11 @@
   "esercizi con dati": "exercises with data",
   "Posizione nella scheda": "Position in workout",
   "Avvia Focus Mode": "Start Focus Mode",
-  "Inserisci esercizio dopo": "Insert exercise after"
+  "Inserisci esercizio dopo": "Insert exercise after",
+  "Riepilogo": "Summary",
+  "Superset": "Superset",
+  "Annulla allenamento": "Cancel workout",
+  "Salta": "Skip",
+  "Precedente": "Previous",
+  "Allenamento salvato.": "Workout saved."
 }

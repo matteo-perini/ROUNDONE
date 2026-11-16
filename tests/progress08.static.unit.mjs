@@ -7,7 +7,7 @@ const compress=file('src/features/progress/checkPhotoCompression.ts')
 const storage=file('src/integrations/firestore/progress.ts')
 const css=file('src/styles-progress360.css')
 test('Atleta: selezione scheda precede editor carichi',()=>{
- assert.ok(component.indexOf('class="lf-p360-sheet-list lf-p360-compact-list"')<component.indexOf('REGISTRA ALLENAMENTO'))
+ assert.ok(component.indexOf('class="lf-p360-sheet-list lf-p360-compact-list"')<component.indexOf('lf-r8-setup'))
  assert.match(component,/@click="openSheet\(s\)"/)
  assert.match(component,/v-model="search"/)
  assert.match(component,/lf-p360-picker-filters/)

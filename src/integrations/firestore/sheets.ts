@@ -108,14 +108,15 @@ export async function duplicateWeekGuarded(db:Firestore,gym:string,athlete:strin
  })
 }
 
-export function watchAthleteSheets(db:Firestore,gym:string,athlete:string,emit:(s:{personal:Personal[];weeks:ProgramWeek[];groups:ReturnType<typeof groupSheets>})=>void,onError:(error:Error)=>void):Unsubscribe{
- let left:Personal[]|null=null,right:ProgramWeek[]|null=null,disposed=false
- const update=()=>{if(!disposed&&left&&right)emit({personal:left,weeks:right,groups:groupSheets(left,right,athlete)})}
+export function watchAthleteSheets(db:Firestore,gym:string,athlete:string,emit:(s:{personal:Personal[];weeks:ProgramWeek[];groups:ReturnType<typeof groupSheets>},confirmed?:boolean)=>void,onError:(error:Error)=>void,trackServerConfirmation=false):Unsubscribe{
+ let left:Personal[]|null=null,right:ProgramWeek[]|null=null,disposed=false,leftConfirmed=false,rightConfirmed=false
+ const update=()=>{if(!disposed&&left&&right)emit({personal:left,weeks:right,groups:groupSheets(left,right,athlete)},leftConfirmed&&rightConfirmed)}
  const error=(e:Error)=>{if(!disposed)onError(e)}
  const projectPersonal=createSnapshotProjection((x:QueryDocumentSnapshot)=>rawToPersonal(x.id,athlete,x.data()))
  const projectWeeks=createSnapshotProjection((x:QueryDocumentSnapshot)=>rawToWeek(x.id,athlete,x.data()))
- const stopPersonal=onSnapshot(collection(root(db,gym,athlete),'personal_templates'),snapshot=>{left=projectPersonal(snapshot);update()},error)
- const stopWeeks=onSnapshot(collection(root(db,gym,athlete),'weeks'),snapshot=>{right=projectWeeks(snapshot);update()},error)
+ const options={includeMetadataChanges:trackServerConfirmation}
+ const stopPersonal=onSnapshot(collection(root(db,gym,athlete),'personal_templates'),options,snapshot=>{left=projectPersonal(snapshot);leftConfirmed=!snapshot.metadata.fromCache&&!snapshot.metadata.hasPendingWrites;update()},error)
+ const stopWeeks=onSnapshot(collection(root(db,gym,athlete),'weeks'),options,snapshot=>{right=projectWeeks(snapshot);rightConfirmed=!snapshot.metadata.fromCache&&!snapshot.metadata.hasPendingWrites;update()},error)
  return ()=>{disposed=true;stopPersonal();stopWeeks()}
 }
 

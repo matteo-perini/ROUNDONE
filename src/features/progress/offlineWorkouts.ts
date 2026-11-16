@@ -28,6 +28,13 @@ export function cacheSheet(state:OfflineState,sheet:ProgressSheet):OfflineState{
  if(sheets.length>=30)throw new Error('Limite di 30 schede scaricate: rimuovine una prima di continuare.')
  return {...state,sheets:[...sheets,JSON.parse(JSON.stringify(sheet))]}
 }
+/** Automatic cache, bounded and isolated by the caller's verified scope. Never touch draft or queue. */
+export function cacheAvailableSheets(state:OfflineState,rows:readonly ProgressSheet[]):OfflineState{
+ const seen=new Set<string>();const sheets:ProgressSheet[]=[]
+ for(const row of rows){if(!row.id||seen.has(row.id))continue;seen.add(row.id);sheets.push(row);if(sheets.length===30)break}
+ if(JSON.stringify(state.sheets)===JSON.stringify(sheets))return state
+ return {...state,sheets:JSON.parse(JSON.stringify(sheets))}
+}
 export function sameWorkout(existing:Record<string,unknown>,athlete:string,p:PendingWorkout){
  const canonical=(x:unknown):string=>JSON.stringify(x,(_k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v)
  return existing.athleteId===athlete&&existing.createdBy===athlete&&existing.sheetId===p.sheet.id&&existing.sheetTitle===p.sheet.title.slice(0,160)&&existing.performedOn===p.date&&canonical(existing.exercises)===canonical(p.entries)

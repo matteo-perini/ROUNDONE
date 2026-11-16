@@ -121,7 +121,8 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
 <template>
  <div class="lfsettings lfsettings-compact lfsettings-v23" v-lf-entrance="{id:'settings',premiumOnly:true,rows:[{match:'.lfsettings-header'},{match:'.lfsettings-flat-list'}]}">
   <header class="lfsettings-header"><div><span class="eyebrow">{{uiText("LION FIT · ACCOUNT")}}</span><h1>{{uiText("Impostazioni")}}</h1></div></header>
-  <div class="lfsettings-flat-list" data-lf-settings-layout="flat-r6">
+  <div class="lfsettings-flat-list" data-lf-settings-layout="flat-r7">
+   <h2 class="lfsettings-section-title">{{uiText("Personalizzazione")}}</h2>
    <button class="lfsettings-flat-row" type="button" @click="lab.toggleTheme()"><LionIcon name="sun"/><span><b>{{uiText("Tema")}}</b><small>{{uiText("Personalizza l’aspetto dell’app")}}</small></span><strong>{{uiText(lab.theme==='dark'?'Scuro':'Chiaro')}}</strong><LionIcon name="chevron" :size="17"/></button>
 
     <label class="lfsettings-flat-row lfsettings-flat-language"><LionIcon name="globe"/><span><b>{{uiText('Lingua')}}</b><small>{{uiText("Lingua dell’interfaccia")}}</small></span><select :value="interfaceLanguage" :aria-label="uiText('Lingua dell’interfaccia')" @change="setInterfaceLanguage(($event.target as HTMLSelectElement).value)"><option value="it">🇮🇹 Italiano</option><option value="en">{{uiText("🇬🇧 English")}}</option></select></label>
@@ -131,12 +132,7 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
     <button type="button" class="lfsettings-flat-row" :aria-expanded="dashboardOpen" @click="dashboardOpen=!dashboardOpen"><LionIcon name="settings"/><span><b>Personalizza dashboard</b><small>Seleziona i tuoi riquadri</small></span><LionIcon name="chevron" :size="17"/></button>
     <DashboardPreferences v-if="dashboardOpen"/>
    </template>
-   <template v-if="billingSandboxEnabled()&&stagingSession?.role==='titolare'">
-    <button type="button" class="lfsettings-flat-row" :aria-expanded="billingOpen" @click="billingOpen=!billingOpen"><LionIcon name="clipboard"/><span><b>Abbonamento LionFit (Sandbox)</b><small>Prova gratuita, piani e rinnovi simulati</small></span><LionIcon name="chevron" :size="17"/></button><BillingSandbox v-if="billingOpen"/>
-   </template>
-   <template v-if="platformAllowed">
-    <RouterLink class="lfsettings-flat-row" to="/lionfit-control"><LionIcon name="shield"/><span><b>Control Center</b><small>Accesso riservato Super Admin</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
-   </template>
+   <h2 v-if="workPilotAllowed||competitionAvailable||(pushAvailable&&stagingSession)||(calendarPilotEnabled()&&stagingSession)||linkedAllowed||(billingSandboxEnabled()&&stagingSession?.role==='titolare')||platformAllowed" class="lfsettings-section-title">{{uiText("Funzionalità aggiuntive")}}</h2>
    <template v-if="workPilotAllowed">
     <button type="button" class="lfsettings-flat-row" :aria-expanded="workPilotOpen" @click="workPilotOpen=!workPilotOpen;workReportOpen=false"><LionIcon name="fingerprint"/><span><b>Timbratura GPS</b><small>Gestione sedi e blocco definitivo</small></span><LionIcon name="chevron" :size="17"/></button><WorkConfigSettings v-if="workPilotOpen" :key="`${stagingSession?.uid}:${stagingSession?.gymId}:${stagingSession?.role}`" :gym-id="stagingSession?.gymId||''" :uid="stagingSession?.uid||''" :mobile="workPilotMobile"/><button type="button" class="lfsettings-flat-row" :aria-expanded="workReportOpen" @click="workReportOpen=!workReportOpen;workPilotOpen=false"><LionIcon name="clock"/><span><b>Report mensili</b><small>Ore personali per sede</small></span><LionIcon name="chevron" :size="17"/></button><WorkReport v-if="workReportOpen" embedded :key="`${stagingSession?.uid}:${stagingSession?.gymId}:${stagingSession?.role}`"/>
    </template>
@@ -151,6 +147,13 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
    </template>
    <button v-if="linkedAllowed" type="button" class="lfsettings-flat-row" :aria-expanded="linkedOpen" @click="linkedOpen=!linkedOpen"><LionIcon name="switch"/><span><b>Cambio rapido profilo</b><small>Account collegati su questo dispositivo</small></span><LionIcon name="chevron" :size="17"/></button>
     <LinkedProfileSettings v-if="linkedAllowed&&linkedOpen" :key="stagingSession?.uid"/>
+   <template v-if="billingSandboxEnabled()&&stagingSession?.role==='titolare'">
+    <button type="button" class="lfsettings-flat-row" :aria-expanded="billingOpen" @click="billingOpen=!billingOpen"><LionIcon name="clipboard"/><span><b>Abbonamento LionFit (Sandbox)</b><small>Prova gratuita, piani e rinnovi simulati</small></span><LionIcon name="chevron" :size="17"/></button><BillingSandbox v-if="billingOpen"/>
+   </template>
+   <template v-if="platformAllowed">
+    <RouterLink class="lfsettings-flat-row" to="/lionfit-control"><LionIcon name="shield"/><span><b>Control Center</b><small>Accesso riservato Super Admin</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
+   </template>
+   <h2 class="lfsettings-section-title">{{uiText("Account e assistenza")}}</h2>
     <RouterLink v-if="!isStagingMode()||stagingSession" class="lfsettings-flat-row" :to="profilePath+(emulator?'&edit=1':'?edit=1')"><LionIcon name="user"/><span><b>{{uiText("Modifica profilo")}}</b><small>{{uiText("I tuoi dati personali")}}</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
     <button v-if="canResetPassword" class="lfsettings-flat-row" type="button" @click="securityOpen=true;securityStatus=''"><LionIcon name="shield"/><span><b>{{uiText("Sicurezza")}}</b><small>{{uiText("Password e accessi")}}</small></span><LionIcon name="chevron" :size="17"/></button>
     <a class="lfsettings-flat-row"  :href="privacyHref" target="_blank" rel="noopener noreferrer"><LionIcon name="shield"/><span><b>{{uiText("Privacy")}}</b><small>{{uiText("Informativa, cookie e tecnologie locali")}}</small></span><LionIcon name="chevron" :size="17"/></a>
@@ -193,7 +196,7 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
 
 
 <style>
-/* PATCH 28 R6: one real flat list; legacy card selectors cannot target it. */
+/* PATCH 28 R7: one flat list with small headings, no nested cards. */
 .app .lfsettings.lfsettings-compact{gap:14px;min-width:0}
 .app .lfsettings-compact .lfsettings-header{margin:0 0 3px}
 .app .lfsettings-compact .lfsettings-header .eyebrow{display:none}
@@ -212,12 +215,17 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
 .app .lfsettings-compact .lfsettings-flat-language{flex-wrap:nowrap!important;gap:10px!important;cursor:default}
 .app .lfsettings-compact .lfsettings-flat-language select{margin:0!important;min-width:0!important;max-width:min(48%,175px)!important;min-height:40px!important;width:auto!important;font-size:12px!important}
 .app .lfsettings-compact .lfsettings-flat-list>:not(.lfsettings-flat-row){margin-block:8px 12px;min-width:0}
+/* Headings stay in the same list, outside Premium card styling. */
+.app .lfsettings-compact .lfsettings-flat-list>.lfsettings-section-title{display:block;margin:0;padding:19px 4px 4px;font-size:12px;line-height:1.4;font-weight:700;letter-spacing:.025em;color:var(--muted);background:transparent;border:0;box-shadow:none;border-radius:0;text-transform:none}
+.app .lfsettings-compact .lfsettings-flat-list>.lfsettings-section-title:first-child{padding-top:12px}
 .app .lfsettings-compact .lfsettings-exit{min-height:48px;border-radius:12px}
 @media (hover:hover){.app .lfsettings-compact .lfsettings-flat-row:not(.lfsettings-flat-language):not(:disabled):hover{background:var(--card2)}}
 @media (max-width: 767px){
  .app .lfsettings.lfsettings-compact{gap:10px}
  .app .lfsettings-compact .lfsettings-header h1{font-size:24px;margin:0}
  .app .lfsettings-compact .lfsettings-flat-list{padding:0 12px;border-radius:14px}
+ .app .lfsettings-compact .lfsettings-flat-list>.lfsettings-section-title{padding:16px 2px 4px;font-size:11px}
+ .app .lfsettings-compact .lfsettings-flat-list>.lfsettings-section-title:first-child{padding-top:10px}
  .app .lfsettings-compact .lfsettings-flat-list>.lfsettings-flat-row{min-height:49px;padding:8px 2px;gap:10px}
  .app.as-athlete .lfsettings-v23 .lfsettings-exit{padding:10px;font-size:14px}
 }
