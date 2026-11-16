@@ -35,6 +35,7 @@ const router=createRouter({history:createWebHistory(),routes:[
  {path:'/progressi',component:AthleteProgress,meta:{title:'Allenamenti Atleta'}},
  {path:'/profilo',component:Profile,meta:{title:'Profilo'}},
  {path:'/impostazioni',component:Settings,meta:{title:'Impostazioni'}},
+ {path:'/assistenza',component:()=>import('../views/Support.vue'),meta:{title:'Assistenza'}},
  {path:'/lionfit-control',component:PlatformAdmin,meta:{title:'LionFit Control Center'}},
  {path:'/prenotazioni',component:Bookings,meta:{title:'Prenotazioni'}},
  {path:'/coach',component:isOperationalMode()?LiveCoach:Coach,meta:{title:'Dashboard Coach',coachOnly:true}},
@@ -72,12 +73,13 @@ router.beforeEach(async to=>{
   if(await isCurrentControlAccount()){
    stagingSession.value=null
    const allowed=await verifyPlatformAccess()
-   if(allowed)return to.path==='/lionfit-control'?true:'/lionfit-control'
+   if(allowed)return to.path==='/lionfit-control'?true:to.query.open==='support'?'/lionfit-control?open=support':'/lionfit-control'
    return to.path==='/accesso'?true:'/accesso'
   }
   if(to.path==='/accesso'){
    try{
     const s=await readNavigationSession()
+    if(to.query.open==='support' && isOperationalMode())return '/impostazioni?inboxSupport=1'
     if(to.query.open==='bookings' && isOperationalMode())return s.role==='atleta'?'/prenotazioni':'/coach/prenotazioni'
     return s.role==='atleta'?'/home':'/coach'
    }catch{stagingSession.value=null;return true}
@@ -89,15 +91,16 @@ router.beforeEach(async to=>{
   const athletes=['/home','/piano','/archivio','/progressi','/profilo']
   const coaches=['/coach','/coach/profilo']
   if(isOperationalMode()) {
-   const liveAthletes=[...athletes,'/prenotazioni','/impostazioni']
-   const liveCoaches=[...coaches,'/impostazioni','/coach/atleti','/coach/programmi','/coach/archivio','/coach/libreria','/coach/cestino','/coach/progressi','/coach/staff','/coach/prenotazioni','/coach/work']
+   if(to.path==='/impostazioni'&&to.query.inboxSupport==='1')return {path:'/assistenza',replace:true}
+   const liveAthletes=[...athletes,'/prenotazioni','/impostazioni','/assistenza']
+   const liveCoaches=[...coaches,'/impostazioni','/assistenza','/coach/atleti','/coach/programmi','/coach/archivio','/coach/libreria','/coach/cestino','/coach/progressi','/coach/staff','/coach/prenotazioni','/coach/work']
    return (s.role==='atleta'?liveAthletes:liveCoaches).includes(to.path)?true:(s.role==='atleta'?'/home':'/coach')
   }
   if(s.role==='atleta')return athletes.includes(to.path)?true:'/home'
   return coaches.includes(to.path)?true:'/coach'
  }
 
- if(to.path==='/lionfit-control')return '/accesso'
+ if(to.path==='/lionfit-control'||to.path==='/assistenza')return '/accesso'
  // Il diagnostico DEV non richiede il login demo. Non e' mai registrato in build produzione.
  if (import.meta.env.DEV && to.path === '/dev/emulatore') return true
  if (import.meta.env.DEV && to.path === '/dev/ruoli') return true

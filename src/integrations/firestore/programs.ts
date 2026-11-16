@@ -4,9 +4,10 @@
  * con fence obbligatorio + migrazione coordinata: NON dichiarare release pronta.
  * Mai eliminare fisicamente documenti storici.
  */
-import {collection,doc,getDoc,getDocs,runTransaction,serverTimestamp,type Firestore,type DocumentData} from 'firebase/firestore'
+import {collection,doc,getDoc,getDocs,runTransaction,serverTimestamp,deleteField,type Firestore,type DocumentData} from 'firebase/firestore'
 import {DAY_KEYS,type ProgramDay} from '../../features/sheets/domain'
 import {advanceV1Monday,planV1WeekCopies,initialV1WeekDocument,v1LinkedPersonalIds,type V1WeekDocument} from '../../features/sheets/v1WeekCodec'
+import {weekExpired,romeDate} from '../../features/sheets/assignmentPolicy'
 import {programKeyOf} from '../../features/sheets/programFamilies'
 import {activityDelta,ensureActivityChangesCurrent,activeWeekDateConflict} from '../../features/sheets/weekDraftPolicy'
 import {ensureWeekMutationFence,trashWeek,restoreFromTrash} from './sheets'
@@ -96,6 +97,7 @@ export async function duplicateV1Weeks(db:Firestore,gymId:string,athleteId:strin
   const pp=await Promise.all(ids.map(id=>tx.get(doc(db,'gyms',segment(gymId,'Palestra'),'athlete_programs',segment(athleteId,'Atleta'),'personal_templates',segment(id,'Scheda')))))
   if(pp.some(s=>!s.exists()||s.data().deletedAt))throw new Error('Una scheda collegata non è disponibile. Nessuna duplicazione eseguita.')
   bump(tx,f,baseline,coachUid)
+  if(targetsMondays.some(startDate=>!weekExpired({startDate},romeDate())))for(const p of pp)if(p.data()?.unprogrammedAssignedAt)tx.update(p.ref,{unprogrammedAssignedAt:deleteField()})
   for(const [i,target] of refs.entries())tx.set(target,{...bodies[i],createdAt:serverTimestamp(),updatedAt:serverTimestamp()})
  },{maxAttempts:5})
  return refs.map(x=>x.id)

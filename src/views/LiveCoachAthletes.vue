@@ -11,6 +11,7 @@ import {mayWriteLive} from '../integrations/firebase/stagingConfig'
 import {assignSharedToDay,trashPersonal,watchAthleteSheets,backfillProtectedLegacy} from '../integrations/firestore/sheets'
 import {createV1Program,saveV1WeekActivities,duplicateV1Weeks,trashV1Week,restoreV1Week} from '../integrations/firestore/programs'
 import {advanceV1Monday} from '../features/sheets/v1WeekCodec'
+import {activeAssignmentGroups,romeDate,weekExpired,weekOrdinal} from '../features/sheets/assignmentPolicy'
 import {groupActivePrograms,programForWeek,firstVacantMonday} from '../features/sheets/programFamilies'
 import {hasUnsavedActivities} from '../features/sheets/weekDraftPolicy'
 import {updateV1WeekSlot} from '../integrations/firestore/liveWeekSlots'
@@ -213,9 +214,9 @@ function selectProgram(id:string){
  weekSelectionMode.value='normal';selectedWeekTrash.value=[];duplicateSourceId.value='';closeDay()
 }
 function selectedWeekLabel(){const p=selectedProgram.value,w=week.value
- return p&&w?`${p.title} · Settimana ${p.weeks.findIndex(x=>x.id===w.id)+1}`:'Nessuna settimana'
+ return p&&w?`${p.title} · Settimana ${weekOrdinal(w,p.weeks)}`:'Nessuna settimana'
 }
-const groups=computed(()=>data.value?visualSheetGroups(data.value.groups):null)
+const groups=computed(()=>data.value?visualSheetGroups(activeAssignmentGroups(data.value.personal,data.value.weeks,athlete.value?.id||'',romeDate(now.value))):null)
 const personal=computed(()=>data.value?.personal.filter(x=>!x.deletedAt)??[])
 const byId=(id:string)=>personal.value.find(x=>x.id===id)
 const canWrite=computed(()=>mayWriteLive() && !!session.value && !!athlete.value)
@@ -658,9 +659,9 @@ function copyToArchive(sheet:Personal){
       <button type="button" class="lf-p11-program-header" :aria-pressed="selectedProgram?.id===program.id" @click="selectProgram(program.id)"><strong>Programma {{programIndex+1}} · {{program.title}}</strong><small>{{program.startDate}} → {{program.endDate}} · {{program.weeks.length}} settimane</small></button>
       <div class="lf-week-numbers" :aria-label="`Seleziona settimana di ${program.title}`">
        <button v-for="(w,i) in program.weeks" :key="w.id" type="button" class="lf-week-number" :class="{'is-current':weekSelectionMode==='normal'&&w.id===week?.id&&showWeek,'is-delete-mode':weekSelectionMode==='delete'&&selectedProgram?.id===program.id,'is-duplicate-mode':weekSelectionMode==='duplicate'&&selectedProgram?.id===program.id,'is-marked-delete':weekSelectionMode==='delete'&&selectedWeekTrash.includes(w.id),'is-marked-duplicate':weekSelectionMode==='duplicate'&&duplicateSourceId===w.id}"
-       :aria-label="`${program.title}, settimana ${i+1}, ${w.startDate}`"
+       :aria-label="`${program.title}, settimana ${weekOrdinal(w,program.weeks)}, ${w.startDate}`"
        :aria-pressed="weekSelectionMode==='delete'?selectedWeekTrash.includes(w.id):weekSelectionMode==='duplicate'?duplicateSourceId===w.id:w.id===week?.id&&showWeek"
-       @click="chooseWeek(w.id)" :title="`Dal ${w.startDate}`">{{i+1}}<span v-if="weekSelectionMode==='delete'&&selectedWeekTrash.includes(w.id)" aria-hidden="true">✓</span><span v-else-if="weekSelectionMode==='duplicate'&&duplicateSourceId===w.id" aria-hidden="true">⧉</span></button>
+       @click="chooseWeek(w.id)" :title="`Dal ${w.startDate}`">{{weekOrdinal(w,program.weeks)}}<span v-if="weekExpired(w,romeDate(now))" aria-label="Conclusa"> · ✓</span><span v-if="weekSelectionMode==='delete'&&selectedWeekTrash.includes(w.id)" aria-hidden="true">✓</span><span v-else-if="weekSelectionMode==='duplicate'&&duplicateSourceId===w.id" aria-hidden="true">⧉</span></button>
       </div>
     </div>
     <div v-if="weekSelectionMode!=='normal'" class="lf-mode-notice" :class="weekSelectionMode==='delete'?'lf-mode-notice-delete':'lf-mode-notice-duplicate'" role="status">

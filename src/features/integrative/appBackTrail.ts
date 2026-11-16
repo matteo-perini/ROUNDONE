@@ -6,7 +6,7 @@
 function pathOnly(fullPath:string):string {return fullPath.split(/[?#]/,1)[0].replace(/\/$/,'')||'/'}
 export function routeScope(path:string,context:'athlete'|'coach'|'none'='none'):'athlete'|'coach'|'none' {
  if(path==='/accesso'||path==='/staging'||path.startsWith('/dev/'))return 'none'
- if(path==='/impostazioni')return context==='coach'?'coach':'athlete'
+ if(path==='/impostazioni'||path==='/assistenza')return context==='coach'?'coach':'athlete'
  return path.startsWith('/coach')?'coach':'athlete'
 }
 export function appRoot(path:string,fullPath:string,scopeHint:'athlete'|'coach'|'none'='none'):string {

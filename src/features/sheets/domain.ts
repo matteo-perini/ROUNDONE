@@ -8,7 +8,7 @@ export type ActivitySlot = 1 | 2
 /** Campi nativi V1 + campi UI Modern: non restringere dati storici a kg/numero. */
 export type ApprovedAlternative = {name:string;exerciseId:string;sets:string;reps:string;load:string;rest:string;notes:string}
 export type ExerciseRecord = { id?: string; name: string; sets: number|string; reps: string; rest?: string; kg?: number; exerciseId?: string; load?: string; notes?: string; supersetWithPrevious?: boolean; supersetRest?: string; catalogId?: string; executionMode?: 'normale'|'superset'; alternatives?:ApprovedAlternative[] }
-export type Personal = { id:string; title:string; category:string; exercises: ExerciseRecord[]; athleteId:string; sourceId?:string; revision?:number; deletedAt?:string; deletedBy?:string; planDetached?:boolean }
+export type Personal = { id:string; title:string; category:string; exercises: ExerciseRecord[]; athleteId:string; sourceId?:string; revision?:number; deletedAt?:string; deletedBy?:string; planDetached?:boolean; unprogrammedAssigned?:boolean }
 export type SharedTemplate = Omit<Personal,'athleteId'> & { athleteId?:never }
 export type ProgramDay = { name:string; activities:string[]; activity1:string; activity2:string; templateId:string; templateId2:string }
 export type ProgramWeek = { id:string; name:string; athleteId:string; days:ProgramDay[]; startDate?:string; programTitle?:string; programId?:string; weekIndex?:number; totalWeeks?:number; deletedAt?:string; deletedBy?:string }

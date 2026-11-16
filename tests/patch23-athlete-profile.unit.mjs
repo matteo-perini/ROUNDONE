@@ -23,6 +23,6 @@ test('settings retain real actions, role gates and accessible language selection
  assert.match(settings,/\.app\.as-athlete \.lfsettings-v23/)
  assert.match(settings,/v-if="linkedAllowed&&linkedOpen"/)
  assert.match(settings,/v-if="canResetPassword"/)
- for(const value of ['pushOpen','calendarOpen','privacyHref','termsHref','infoOpen','ticketsOpen','@click="exit"','setInterfaceLanguage'])assert.ok(settings.includes(value),value)
+ for(const value of ['pushOpen','calendarOpen','privacyHref','termsHref','infoOpen','to="/assistenza"','@click="exit"','setInterfaceLanguage'])assert.ok(settings.includes(value),value)
  assert.equal(translations['Lingua dell’interfaccia'],'Interface language')
 })

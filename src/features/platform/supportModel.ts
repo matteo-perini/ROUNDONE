@@ -1,0 +1,8 @@
+export type SupportRow={id:string;subject:string;requesterName:string;gymId:string;type:string;status:string;priority:string;createdAt:number;updatedAt:number;lastRequesterAt:number;lastPlatformAt:number}
+export const priorityLabels={low:'Bassa',normal:'Normale',high:'Alta'} as const
+export const incomingAt=(t:SupportRow,platform:boolean)=>platform?Math.max(t.createdAt,t.lastRequesterAt):t.lastPlatformAt
+export const unread=(t:SupportRow,platform:boolean,seen:Record<string,number>)=>incomingAt(t,platform)>(seen[t.id]||0)
+export const ticketOrder=(a:SupportRow,b:SupportRow)=>Math.max(b.updatedAt,b.createdAt)-Math.max(a.updatedAt,a.createdAt)||b.id.localeCompare(a.id)
+export function filterSupport<T extends SupportRow>(rows:T[],term:string,state:string,platform:boolean,seen:Record<string,number>,gymNames:Record<string,string>={}){const q=term.trim().toLocaleLowerCase('it');return rows.filter(t=>(state==='all'||(state==='unread'?unread(t,platform,seen):state==='active'?['open','working'].includes(t.status):state==='resolved'?['resolved','closed'].includes(t.status):state===t.status))&&(!q||[t.subject,t.type,...(platform?[t.requesterName,t.gymId,gymNames[t.gymId]||'']:[])].some(v=>v.toLocaleLowerCase('it').includes(q)))).sort(ticketOrder)}
+export function mergeSupport<T extends {id:string}>(pages:T[][]){return [...new Map([...pages].reverse().flat().map(t=>[t.id,t])).values()]}
+export function safeSeen(raw:unknown):Record<string,number>{if(!raw||typeof raw!=='object'||Array.isArray(raw))return {};return Object.fromEntries(Object.entries(raw).filter(([k,v])=>/^[\w-]{1,128}$/.test(k)&&typeof v==='number'&&Number.isFinite(v)&&v>0).sort((a,b)=>Number(b[1])-Number(a[1])).slice(0,500))}

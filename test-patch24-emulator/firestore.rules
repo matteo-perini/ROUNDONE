@@ -1103,14 +1103,15 @@ service cloud.firestore {
         && request.resource.data.status == 'open'
         && request.resource.data.createdAt == request.time && request.resource.data.updatedAt == request.time;
       allow update: if lfPlatformAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
-        && request.resource.data.status in ['open','working','resolved']
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt','priority'])
+        && request.resource.data.status in ['open','working','resolved','closed']
+        && (!('priority' in request.resource.data) || request.resource.data.priority in ['low','normal','high'])
         && request.resource.data.updatedAt == request.time;
       allow delete: if false;
       match /replies/{replyId} {
         function parentTicket() { return get(lfTicketPath(ticketId)).data; }
         allow get, list: if lfPlatformAdmin() || lfOwnTicket(parentTicket());
-        allow create: if exists(lfTicketPath(ticketId)) && parentTicket().status != 'resolved'
+        allow create: if exists(lfTicketPath(ticketId)) && !(parentTicket().status in ['resolved','closed'])
           && ((lfPlatformAdmin() && request.resource.data.author == 'platform')
               || (lfOwnTicket(parentTicket()) && request.resource.data.author == 'requester'))
           && request.resource.data.keys().hasAll(['author','message','createdAt'])

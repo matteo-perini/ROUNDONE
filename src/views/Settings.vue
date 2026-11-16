@@ -16,7 +16,6 @@ const WorkReport=defineAsyncComponent(()=>import('./WorkReport.vue'))
 const workReportOpen=ref(false)
 import {pilotAvailable,pilotMobileDevice} from '../features/work/gpsPilot'
 import DashboardPreferences from '../components/DashboardPreferences.vue'
-import SupportTickets from '../components/SupportTickets.vue'
 import {LIONFIT_CONTACT_EMAIL,LIONFIT_CONTACT_MAILTO} from '../features/platform/contact'
 import {verifyPlatformAccess} from '../integrations/firebase/platformAccess'
 import {Capacitor} from '@capacitor/core'
@@ -55,8 +54,7 @@ onMounted(async()=>{if(!isStagingMode())return;try{const s=await readStagingSess
 onUnmounted(()=>{settingsAlive=false;competitionUnsub?.()})
 async function toggleCompetition(){if(competitionBusy.value||!competitionSession||!competitionAvailable.value||!mayWriteLive())return;competitionBusy.value=true;competitionMessage.value='';try{await setCompetitionEnabled(getStagingClients().db,competitionSession,!competitionEnabled.value);competitionMessage.value='Preferenza salvata.'}catch(e){competitionMessage.value='Salvataggio non riuscito: '+(e instanceof Error?e.message:String(e))}finally{competitionBusy.value=false}}
 const billingOpen=ref(false)
-const identityOpen=ref(false),dashboardOpen=ref(false),ticketsOpen=ref(route.query.inboxSupport==='1')
-watch(()=>route.query.inboxSupport,v=>{if(v==='1')ticketsOpen.value=true})
+const identityOpen=ref(false),dashboardOpen=ref(false)
 const verifiedCoach=ref(false),platformAllowed=ref(false)
 watch(()=>stagingSession.value?.uid,async(uid)=>{platformAllowed.value=false;if(uid&&isStagingMode()){const ok=await verifyPlatformAccess();if(stagingSession.value?.uid===uid)platformAllowed.value=ok}},{immediate:true})
 const infoOpen=ref(false),securityOpen=ref(false),securityStatus=ref(''),securityBusy=ref(false)
@@ -159,8 +157,7 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
     <a class="lfsettings-flat-row"  :href="privacyHref" target="_blank" rel="noopener noreferrer"><LionIcon name="shield"/><span><b>{{uiText("Privacy")}}</b></span><LionIcon name="chevron" :size="17"/></a>
     <a class="lfsettings-flat-row"  :href="termsHref" target="_blank" rel="noopener noreferrer"><LionIcon name="clipboard"/><span><b>{{uiText("Termini e condizioni")}}</b></span><LionIcon name="chevron" :size="17"/></a>
    <button class="lfsettings-flat-row" type="button" @click="infoOpen=true"><LionIcon name="info"/><span><b>{{uiText("Informazioni")}}</b></span><strong>{{appVersion}}</strong><LionIcon name="chevron" :size="17"/></button>
-    <button v-if="isStagingMode()" class="lfsettings-flat-row" type="button" :aria-expanded="ticketsOpen" @click="ticketsOpen=!ticketsOpen"><LionIcon name="mail"/><span><b>{{uiText("Assistenza e feedback")}}</b></span><LionIcon name="chevron" :size="17"/></button>
-    <SupportTickets v-if="ticketsOpen&&isStagingMode()"/>
+    <RouterLink v-if="isStagingMode()" class="lfsettings-flat-row" to="/assistenza"><LionIcon name="mail"/><span><b>{{uiText("Assistenza e feedback")}}</b></span><LionIcon name="chevron" :size="17"/></RouterLink>
   </div>
   <button class="lfsettings-exit" @click="exit"><LionIcon name="logout" :size="19"/> {{uiText("Esci dall’account")}}</button>
   <div v-if="infoOpen" class="modal-overlay" @click.self="infoOpen=false"><div class="dialog lf-about-dialog" role="dialog" aria-modal="true" aria-label="Informazioni sull'applicazione">

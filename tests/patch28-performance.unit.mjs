@@ -1,3 +1,4 @@
+import {assertCurrentRulesPreservePatch24} from './patch29-rules-regression-helper.mjs';
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
@@ -38,5 +39,5 @@ test('secondary tabs: first access only, report photos for athlete only, old cal
 })
 test('Vue compilation and unchanged server rules fixture',()=>{
  for(const file of ['src/components/ProgressWorkspace.vue','src/views/LiveBookingWorkspace.vue']){const {descriptor,errors}=parse(read(file));assert.equal(errors.length,0);const s=compileScript(descriptor,{id:file});const t=compileTemplate({source:descriptor.template.content,filename:file,id:file,compilerOptions:{bindingMetadata:s.bindings}});assert.equal(t.errors.length,0)}
- assert.equal(read('security/LIONFIT-FIRESTORE-PATCH24-CANDIDATA.rules'),read('test-patch24-emulator/firestore.rules'))
+ assertCurrentRulesPreservePatch24()
 })

@@ -35,7 +35,9 @@ function syncHeaderViewport(){athleteHeaderVisible.value=athleteHeaderMedia.matc
 athleteHeaderMedia.addEventListener('change',syncHeaderViewport);coachHeaderMedia.addEventListener('change',syncHeaderViewport)
 onUnmounted(()=>{athleteHeaderMedia.removeEventListener('change',syncHeaderViewport);coachHeaderMedia.removeEventListener('change',syncHeaderViewport)})
 function openPushAgenda(){pushNotice.value=null;void router.push(stagingSession.value?.role==='atleta'?'/prenotazioni':'/coach/prenotazioni')}
-watch(()=>stagingSession.value?.uid,uid=>{void connectPushSession(uid||null,openPushAgenda).catch(()=>{})},{immediate:true})
+function openPushSupport(){pushNotice.value=null;void router.push(route.path==='/lionfit-control'?'/lionfit-control?open=support&notice='+Date.now():'/impostazioni?inboxSupport=1')}
+function openPushNotice(){if(pushNotice.value?.open==='support')openPushSupport();else openPushAgenda()}
+watch(()=>stagingSession.value?.uid,uid=>{void connectPushSession(uid||null,openPushAgenda,true,openPushSupport).catch(()=>{})},{immediate:true})
 const workoutRoute=computed(()=>route.path==='/progressi'||route.path==='/coach/progressi')
 // Usa lo stesso gestore di Indietro della WebView, senza importare una seconda volta
 // il modulo nativo e senza cambiare l'ordine dei CSS della shell.
@@ -115,8 +117,8 @@ async function goOut(){
 <template>
   <Teleport to="body"><div v-if="quietLoadingVisible" class="lf-quiet-indicator" role="status"><span class="lf-quiet-status">{{uiText("Caricamento in corso…")}}</span><span class="lf-quiet-track" aria-hidden="true"></span></div></Teleport>
   <Teleport to="body"><aside v-if="navigationFailure" class="lf21-nav-recovery" role="alert"><strong>{{navigationFailure.kind==='assets'?'Pagina non caricata':'Navigazione non riuscita'}}</strong><p>{{navigationFailure.kind==='assets'?'Potrebbe essere disponibile una nuova versione. Ricarica per riprovare.':'Riprova a cambiare pagina o ricarica LionFit.'}}</p><button type="button" @click="reloadNavigation">Ricarica</button><button type="button" @click="navigationFailure=null">Chiudi</button></aside></Teleport>
-  <Teleport to="body"><aside v-if="pushNotice" role="status" style="position:fixed;inset:auto 12px max(85px,env(safe-area-inset-bottom)) 12px;z-index:9999;max-width:440px;margin:auto;padding:14px;border-radius:12px;background:#162720;color:#fff;box-shadow:0 6px 24px #0008"><strong>{{pushNotice.title}}</strong><p>{{pushNotice.body}}</p><button type="button" class="secondary" @click="openPushAgenda">Apri Agenda</button> <button type="button" class="bare" style="color:#fff" @click="pushNotice=null">Chiudi</button></aside></Teleport>
- <div class="app" :class="['theme-'+lab.theme,shownRole==='coach'?'as-coach':'as-athlete',{'bookings-mode':isBooking,'athlete-sidebar-collapsed':!athleteSidebarExpanded}]">
+  <Teleport to="body"><aside v-if="pushNotice" role="status" style="position:fixed;inset:auto 12px max(85px,env(safe-area-inset-bottom)) 12px;z-index:9999;max-width:440px;margin:auto;padding:14px;border-radius:12px;background:#162720;color:#fff;box-shadow:0 6px 24px #0008"><strong>{{pushNotice.title}}</strong><p>{{pushNotice.body}}</p><button type="button" class="secondary" @click="openPushNotice">{{pushNotice.open==='support'?'Apri assistenza':'Apri Agenda'}}</button> <button type="button" class="bare" style="color:#fff" @click="pushNotice=null">Chiudi</button></aside></Teleport>
+ <div class="app" :class="['theme-'+lab.theme,shownRole==='coach'?'as-coach':'as-athlete',{'bookings-mode':isBooking,'lf-support-shell':route.path==='/assistenza'&&!!shownRole&&isStagingMode(),'athlete-sidebar-collapsed':!athleteSidebarExpanded}]">
   <div v-if="isLocalProdDev()" class="lab-banner" role="status">⚠ SVILUPPO LOCALE · FIREBASE PRODUZIONE · LE SCRITTURE POSSONO CAMBIARE DATI REALI</div>
   <component v-if="StagingBanner" :is="StagingBanner"/>
   <div v-else-if="coachEmulatorPreview || athleteEmulatorPreview || bookingEmulatorPreview" class="lab-banner">{{uiText("FIREBASE EMULATOR · DATI FITTIZI · SCRITTURE SOLO CON CONFERMA · NON È L'APP PUBBLICATA")}}</div>
@@ -125,6 +127,7 @@ async function goOut(){
     <main class="login-main"><RouterView/></main>
   </template>
   <template v-else-if="platformPage"><header class="login-header"><img src="/v1-preview/LOGO-APP.png" alt="LionFit"/><span>LION <b>FIT</b> · Control Center</span></header><main class="lf14-platform-shell"><RouterView/></main></template>
+  <template v-else-if="route.path==='/assistenza' && shownRole && isStagingMode()"><RouterView/></template>
   <template v-else-if="shownRole">
     <AthleteDesktopSidebar v-if="shownRole==='atleta'" :items="mobileNav" :expanded="athleteSidebarExpanded" @toggle="toggleAthleteSidebar" @logout="goOut"/>
     <aside v-if="shownRole==='coach'" class="desktop-sidebar">
@@ -139,7 +142,7 @@ async function goOut(){
     <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><QuickProfileSwitch compact/><InboxBell v-if="inboxInHeader&&coachInboxEnabled()&&stagingSession" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><RouterLink v-if="shownRole==='coach'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Apri impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" class="theme-square header-settings-button" :to="athleteDevShell?'/impostazioni?source=emulator':'/impostazioni'" :title="uiText('Impostazioni')" :aria-label="uiText('Apri impostazioni')"><LionIcon name="settings" :size="19"/></RouterLink><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
 
     <!-- Navigazione Atleta esclusiva: sidebar a sinistra su desktop, dock inferiore su mobile. -->
-    <main class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking}]"><button v-if="route.path!=='/home' && route.path!=='/coach'" type="button" class="lf-route-back" :class="{'lf-r8-route-back':workoutRoute}" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> </button><template v-if="coachInboxEnabled()&&stagingSession"><InboxBell v-if="!inboxInHeader" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><PushWelcome :key="stagingSession.uid" :uid="stagingSession.uid" :open-agenda="openPushAgenda"/></template><p v-if="linkedNotice" class="notice" role="alert">{{linkedNotice}} <button type="button" class="bare" @click="linkedNotice=''">Chiudi</button></p><RouterView/></main>
+    <main class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking}]"><button v-if="route.path!=='/home' && route.path!=='/coach'" type="button" class="lf-route-back" :class="{'lf-r8-route-back':workoutRoute}" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> </button><template v-if="coachInboxEnabled()&&stagingSession"><InboxBell v-if="!inboxInHeader" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><PushWelcome :key="stagingSession.uid" :uid="stagingSession.uid" :open-agenda="openPushAgenda" :open-support="openPushSupport"/></template><p v-if="linkedNotice" class="notice" role="alert">{{linkedNotice}} <button type="button" class="bare" @click="linkedNotice=''">Chiudi</button></p><RouterView/></main>
     <!-- La navbar Atleta vive fuori dal contenitore .app: nessun CSS / overflow legacy può coprirla. -->
     <AthleteBottomNavigation v-if="shownRole==='atleta'" :items="mobileNav" :theme="lab.theme"/>
     <nav v-if="shownRole==='coach'" class="bottom-nav coach-bottom" :aria-label="uiText('Navigazione Coach')"><RouterLink v-for="item in mobileNav" :key="item.to" :to="item.to"><LionIcon :name="item.icon" :size="24"/><span>{{uiText(item.label)}}</span></RouterLink></nav>
@@ -154,6 +157,7 @@ async function goOut(){
 </style>
 
 <style>
+.app.lf-support-shell{display:flex!important;flex-direction:column;width:100%;height:100vh;height:100dvh;min-height:0!important;padding:0!important;margin:0!important;overflow:hidden}
 /* R8: a single back control in normal flow when the technical version label is absent. */
 .app .main-layout > .lf-route-back{position:static!important;display:inline-flex!important;align-self:flex-start;justify-content:center;min-width:44px;min-height:44px;margin:0 0 6px;padding:6px;border-radius:10px;box-shadow:none!important}
 /* PATCH 21 R3: four action buttons must remain one row, including the unread badge. */

@@ -4,11 +4,12 @@
  * Verificare Rules, autenticazione, indici, concorrenza con Emulator Suite prima di usarlo.
  */
 import {
- collection, doc, getDoc, getDocs, onSnapshot, runTransaction, serverTimestamp,
+ collection, doc, getDoc, getDocs, getDocFromServer, getDocsFromServer, onSnapshot, runTransaction, serverTimestamp,
  deleteField, type Firestore, type Unsubscribe, type DocumentData, type Transaction, type DocumentSnapshot, type QueryDocumentSnapshot,
 } from 'firebase/firestore'
 import {DAY_KEYS, type DayKey, type ProgramWeek, type Personal, groupSheets, protectedPayload} from '../../features/sheets/domain'
 import {decodeV1Week, type V1WeekDocument} from '../../features/sheets/v1WeekCodec'
+import {assignmentBlock,romeDate,weekExpired} from '../../features/sheets/assignmentPolicy'
 import {createSnapshotProjection} from './snapshotProjection'
 
 const part=(v:string,label:string)=>{if(!v||v.includes('/')||v.trim()!==v)throw new Error(`${label} non valido.`);return v}
@@ -16,7 +17,7 @@ const path=(gym:string,athlete:string):[string,string,string,string]=>['gyms',pa
 const dayKey=(day:DayKey)=>{if(!DAY_KEYS.includes(day))throw new Error('Giorno non valido.');return day}
 const slotKey=(slot:1|2)=>slot===1?'templateId':slot===2?'templateId2':(()=>{throw new Error('Slot non valido.')})()
 const rawToWeek=(id:string,athleteId:string,data:DocumentData):ProgramWeek=>decodeV1Week(id,athleteId,data as V1WeekDocument)
-const rawToPersonal=(id:string,athleteId:string,d:DocumentData):Personal=>({id,athleteId,title:String(d.title||''),category:String(d.category||'Personalizzata'),exercises:Array.isArray(d.exercises)?d.exercises:[],sourceId:typeof d.sourceSharedTemplateId==='string'?d.sourceSharedTemplateId:typeof d.sourceId==='string'?d.sourceId:undefined,revision:Number(d.revision??0),planDetached:!!d.planDetachedAt,...(d.deletedAt?{deletedAt:String(d.deletedAt)}:{})})
+const rawToPersonal=(id:string,athleteId:string,d:DocumentData):Personal=>({id,athleteId,title:String(d.title||''),category:String(d.category||'Personalizzata'),exercises:Array.isArray(d.exercises)?d.exercises:[],sourceId:typeof d.sourceSharedTemplateId==='string'?d.sourceSharedTemplateId:typeof d.sourceId==='string'?d.sourceId:undefined,revision:Number(d.revision??0),planDetached:!!d.planDetachedAt,unprogrammedAssigned:!!d.unprogrammedAssignedAt,...(d.deletedAt?{deletedAt:String(d.deletedAt)}:{})})
 const protectedBody=(s:Personal,uid:string)=>{
  const snapshot=protectedPayload(s,uid,new Date().toISOString())
  return {sourceTemplateId:snapshot.sourceTemplateId,title:snapshot.title,exercises:snapshot.exercises,archiveVersion:1,archivedAt:serverTimestamp(),archivedBy:uid}
@@ -72,7 +73,9 @@ const readLinked=(tx:Transaction,db:Firestore,gym:string,athlete:string,days:unk
  Promise.all(weekLinks(days).map(async id=>{
   const snap=await tx.get(personalDoc(db,gym,athlete,id))
   if(!snap.exists()||snap.data().deletedAt)throw new Error('Una scheda collegata non è attiva: creazione o ripristino bloccati.')
+  return snap
  }))
+const clearFreeMarkers=(tx:Transaction,linked:readonly DocumentSnapshot<DocumentData>[])=>{for(const snap of linked)if(snap.data()?.unprogrammedAssignedAt)tx.update(snap.ref,{unprogrammedAssignedAt:deleteField()})}
 
 /** Creazione atomica di una nuova settimana: controlla gli ID personali e
  * incrementa il fence nello stesso commit. Non usare addDoc diretto dalla UI. */
@@ -84,8 +87,9 @@ export async function createWeekGuarded(db:Firestore,gym:string,athlete:string,w
  await runTransaction(db,async tx=>{
   const [fs,ws]=await Promise.all([tx.get(f),tx.get(w)])
   if(ws.exists())throw new Error('Settimana già presente: non sovrascrivo.')
-  await readLinked(tx,db,gym,athlete,weekData.days)
+  const linked=await readLinked(tx,db,gym,athlete,weekData.days)
   bump(tx,f,fs,coachUid)
+  if(!weekExpired(weekData,romeDate()))clearFreeMarkers(tx,linked)
   tx.set(w,{...weekData,createdAt:serverTimestamp()})
  })
 }
@@ -101,9 +105,10 @@ export async function duplicateWeekGuarded(db:Firestore,gym:string,athlete:strin
   const [fs,old,existing]=await Promise.all([tx.get(f),tx.get(from),tx.get(to)])
   if(!old.exists()||old.data().deletedAt)throw new Error('Settimana sorgente non attiva.')
   if(existing.exists())throw new Error('Settimana di destinazione già presente.')
-  await readLinked(tx,db,gym,athlete,old.data().days)
+  const linked=await readLinked(tx,db,gym,athlete,old.data().days)
   const d=old.data()
   bump(tx,f,fs,coachUid)
+  if(!weekExpired({startDate},romeDate()))clearFreeMarkers(tx,linked)
   tx.set(to,{...d,programTitle:String(d.programTitle||'Programma').replace(/\s*\(Copia\)$/i,''),startDate,createdAt:serverTimestamp(),updatedAt:serverTimestamp()})
  })
 }
@@ -148,11 +153,36 @@ export async function assignShared(db:Firestore,gym:string,athlete:string,templa
  })
 }
 
+/** Explicit unscheduled assignment. Fresh server query + existing week fence.
+ * Legacy writers that bypass weeksVersion remain outside this guarantee. */
+export async function assignSharedWithoutProgram(db:Firestore,gym:string,athlete:string,modelId:string,uid:string):Promise<void>{
+ const f=root(db,gym,athlete),t=templateDoc(db,gym,modelId),p=personalDoc(db,gym,athlete,modelId),a=archiveDoc(db,gym,athlete,modelId)
+ await ensureWeekMutationFence(db,gym,athlete)
+ const baseline=versionOf(await getDocFromServer(f))
+ const [weeks,personals]=await Promise.all([getDocsFromServer(collection(f,'weeks')),getDocsFromServer(collection(f,'personal_templates'))])
+ const weekRefs=weeks.docs.map(x=>x.ref),personalRefs=personals.docs.filter(x=>x.id!==modelId).map(x=>x.ref)
+ await runTransaction(db,async tx=>{
+  const [fs,model,prior,archive,ws,ps]=await Promise.all([tx.get(f),tx.get(t),tx.get(p),tx.get(a),Promise.all(weekRefs.map(x=>tx.get(x))),Promise.all(personalRefs.map(x=>tx.get(x)))])
+  if(versionOf(fs)!==baseline)throw new Error('Programmazione aggiornata da un altro Coach: riprova.')
+  if(!model.exists()||model.data().deletedAt)throw new Error('Modello non disponibile.')
+  const modelData=rawToPersonal(modelId,athlete,model.data())
+  const existing=[prior,...ps].filter(x=>x.exists()).map(x=>rawToPersonal(x.id,athlete,x.data()!))
+  const block=assignmentBlock(modelData,existing,ws.filter(x=>x.exists()).map(x=>rawToWeek(x.id,athlete,x.data()!)),athlete,romeDate())
+  if(block)throw new Error(block)
+  const sheet=prior.exists()?rawToPersonal(modelId,athlete,prior.data()):modelData
+  if(!sheet.title.trim()||!sheet.exercises.length)throw new Error('Scheda senza contenuto.')
+  bump(tx,f,fs,uid)
+  if(!archive.exists())tx.set(a,protectedBody(sheet,uid))
+  if(prior.exists())tx.update(p,{planDetachedAt:deleteField(),planDetachedBy:deleteField(),unprogrammedAssignedAt:serverTimestamp()})
+  else tx.set(p,{title:sheet.title,category:sheet.category,exercises:sheet.exercises,sourceSharedTemplateId:modelId,createdAt:serverTimestamp(),unprogrammedAssignedAt:serverTimestamp()})
+ })
+}
+
 /** All-in-one V1 assignment from a shared model to one day slot.
  * Same templateId across all three docs and week; repeated call with the already
  * assigned ID is idempotent. The protected archive is NEVER overwritten. */
-export async function assignSharedToDay(db:Firestore,gym:string,athlete:string,modelId:string,uid:string,weekId:string,day:DayKey,slot:1|2,expected:string):Promise<'created'|'existing'>{
- return writeSharedToDay(db,gym,athlete,modelId,uid,weekId,day,slot,expected)
+export async function assignSharedToDay(db:Firestore,gym:string,athlete:string,modelId:string,uid:string,weekId:string,day:DayKey,slot:1|2,expected:string,requireOpen=false):Promise<'created'|'existing'>{
+ return writeSharedToDay(db,gym,athlete,modelId,uid,weekId,day,slot,expected,undefined,requireOpen)
 }
 
 /** Create only: model + athlete copy + immutable archive + selected day in one transaction. */
@@ -160,7 +190,7 @@ export async function createSharedToDay(db:Firestore,gym:string,athlete:string,m
  await writeSharedToDay(db,gym,athlete,modelId,uid,weekId,day,slot,expected,body)
 }
 
-async function writeSharedToDay(db:Firestore,gym:string,athlete:string,modelId:string,uid:string,weekId:string,day:DayKey,slot:1|2,expected:string,newModel?:DocumentData):Promise<'created'|'existing'>{
+async function writeSharedToDay(db:Firestore,gym:string,athlete:string,modelId:string,uid:string,weekId:string,day:DayKey,slot:1|2,expected:string,newModel?:DocumentData,requireOpen=false):Promise<'created'|'existing'>{
  const t=templateDoc(db,gym,modelId),p=personalDoc(db,gym,athlete,modelId),a=archiveDoc(db,gym,athlete,modelId)
  const w=weekDoc(db,gym,athlete,weekId),f=root(db,gym,athlete),d=dayKey(day),key=slotKey(slot)
  await ensureWeekMutationFence(db,gym,athlete)
@@ -170,6 +200,8 @@ async function writeSharedToDay(db:Firestore,gym:string,athlete:string,modelId:s
    if(model.exists()||personal.exists()||archived.exists())throw new Error('ID scheda già presente: nessun dato sovrascritto.')
   }else if(!model.exists()||model.data()?.deletedAt)throw new Error('Modello non presente nell Archivio o cestinato.')
   if(!week.exists()||week.data().deletedAt)throw new Error('Settimana non attiva.')
+  const expired=weekExpired(rawToWeek(weekId,athlete,week.data()),romeDate())
+  if(requireOpen&&expired)throw new Error('Settimana conclusa: scegli una settimana attuale o futura.')
   const current=String(week.data().days?.[d]?.[key]||'')
   if(current!==expected && current!==modelId)throw new Error('Un altro Coach ha modificato lo slot: aggiorna prima di riprovare.')
   if(personal.exists()&&personal.data().deletedAt)throw new Error('Scheda personale nel cestino: ripristinala, non duplicarla.')
@@ -186,10 +218,11 @@ async function writeSharedToDay(db:Firestore,gym:string,athlete:string,modelId:s
   if(!sheet.title.trim()||!sheet.exercises.length)throw new Error('Scheda senza contenuto: assegnazione annullata.')
   if(newModel)tx.set(t,newModel)
   if(!personal.exists())tx.set(p,{title:sheet.title,category:sheet.category,exercises:sheet.exercises,sourceSharedTemplateId:modelId,createdAt:serverTimestamp()})
+  if(!expired&&personal.exists()&&personal.data().unprogrammedAssignedAt)tx.update(p,{unprogrammedAssignedAt:deleteField()})
   if(!archived.exists())tx.set(a,protectedBody(sheet,uid))
   if(previousPersonalRef&&previousPersonal?.exists()){
    if(previousArchiveRef&&!previousArchive?.exists())tx.set(previousArchiveRef,protectedBody(rawToPersonal(replacedId,athlete,previousPersonal.data()),uid))
-   tx.update(previousPersonalRef,{planDetachedAt:serverTimestamp(),planDetachedBy:uid})
+   if(!expired||!previousPersonal.data().unprogrammedAssignedAt)tx.update(previousPersonalRef,{planDetachedAt:serverTimestamp(),planDetachedBy:uid,unprogrammedAssignedAt:deleteField()})
   }
   if(current!==modelId){bump(tx,f,fs,uid);tx.update(w,{[`days.${d}.${key}`]:modelId,updatedAt:serverTimestamp()})}
   return personal.exists()?'existing':'created'
@@ -204,6 +237,7 @@ export async function linkPersonalDay(db:Firestore,gym:string,athlete:string,wee
   const [fs,ws,ps,as]=await Promise.all([tx.get(f),tx.get(w),tx.get(p),tx.get(a)])
   if(!ws.exists()||ws.data().deletedAt)throw new Error('Settimana non attiva.')
   if(!ps.exists()||ps.data().deletedAt)throw new Error('Scheda personale non attiva.')
+  const expired=weekExpired(rawToWeek(weekId,athlete,ws.data()),romeDate())
   const found=String(ws.data().days?.[d]?.[key]||'')
   if(found!==expectedId)throw new Error('Collegamento cambiato, aggiorna la settimana.')
   const replacedId=found&&found!==sheetId?found:''
@@ -212,9 +246,10 @@ export async function linkPersonalDay(db:Firestore,gym:string,athlete:string,wee
   const [previousPersonal,previousArchive]=previousPersonalRef&&previousArchiveRef
    ?await Promise.all([tx.get(previousPersonalRef),tx.get(previousArchiveRef)]):[null,null]
   if(!as.exists())tx.set(a,protectedBody(rawToPersonal(sheetId,athlete,ps.data()),coachUid))
+  if(!expired&&ps.data().unprogrammedAssignedAt)tx.update(p,{unprogrammedAssignedAt:deleteField()})
   if(previousPersonalRef&&previousPersonal?.exists()){
    if(previousArchiveRef&&!previousArchive?.exists())tx.set(previousArchiveRef,protectedBody(rawToPersonal(replacedId,athlete,previousPersonal.data()),coachUid))
-   tx.update(previousPersonalRef,{planDetachedAt:serverTimestamp(),planDetachedBy:coachUid})
+   if(!expired||!previousPersonal.data().unprogrammedAssignedAt)tx.update(previousPersonalRef,{planDetachedAt:serverTimestamp(),planDetachedBy:coachUid,unprogrammedAssignedAt:deleteField()})
   }
   bump(tx,f,fs,coachUid)
   tx.update(w,{[`days.${d}.${key}`]:sheetId,updatedAt:serverTimestamp()})
@@ -235,7 +270,7 @@ export async function unlinkPersonalDay(db:Firestore,gym:string,athlete:string,w
   // ma non viene proiettata tra le schede attive senza programma.
   // Se l'ID e' collegato in un altro giorno, groupSheets lo mostra comunque
   // tra quelle programmate. Il marker non cancella mai copie storiche.
-  if(ps.exists())tx.update(p,{planDetachedAt:serverTimestamp(),planDetachedBy:coachUid})
+  if(ps.exists()&&(!weekExpired(rawToWeek(weekId,athlete,ws.data()),romeDate())||!ps.data().unprogrammedAssignedAt))tx.update(p,{planDetachedAt:serverTimestamp(),planDetachedBy:coachUid,unprogrammedAssignedAt:deleteField()})
   tx.update(w,{[`days.${d}.${key}`]:'',updatedAt:serverTimestamp()})
  })
 }
@@ -301,8 +336,9 @@ export async function restoreFromTrash(db:Firestore,gym:string,kind:'shared'|'pe
  await runTransaction(db,async tx=>{
   const [fs,s]=await Promise.all([tx.get(f),tx.get(ref)])
   if(!s.exists()||!s.data().deletedAt)throw new Error('Elemento non nel Cestino.')
-  if(kind==='week')await readLinked(tx,db,gym,athlete!,s.data().days)
+  const linked=kind==='week'?await readLinked(tx,db,gym,athlete!,s.data().days):[]
   bump(tx,f,fs,uid)
+  if(kind==='week'&&!weekExpired({startDate:String(s.data().startDate||'')},romeDate()))clearFreeMarkers(tx,linked)
   tx.update(ref,{deletedAt:deleteField(),deletedBy:deleteField(),updatedAt:serverTimestamp(),updatedBy:uid})
  })
 }

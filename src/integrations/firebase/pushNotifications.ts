@@ -15,7 +15,7 @@ const isAndroid=()=>Capacitor.isNativePlatform()&&Capacitor.getPlatform()==='and
 const vapid=()=>String(import.meta.env.VITE_LIONFIT_PUSH_VAPID_KEY||'').trim()
 export const pushFeatureEnabled=()=>isLiveMode()&&mayWriteLive()&&import.meta.env.VITE_LIONFIT_PUSH_ENABLED==='true'
 const key=()=>`lf-notify-v1:${getStagingClients().auth.app.options.projectId}`
-export const pushNotice=shallowRef<{title:string;body:string}|null>(null)
+export const pushNotice=shallowRef<{title:string;body:string;open?:'support'|'bookings'}|null>(null)
 let detach: (()=>void)|undefined
 let generation=0
 function localBinding():Binding|null{try{const b=JSON.parse(localStorage.getItem(key())||'null');return b&&typeof b.uid==='string'&&/^[a-f0-9]{64}$/.test(b.id)&&['web','android'].includes(b.platform)&&b.prefs?b:null}catch{return null}}
@@ -61,14 +61,14 @@ export async function testPush(){const b=localBinding();if(!b||b.uid!==signedUid
 async function revokeLocal(b:Binding){if(b.platform==='android'){await native.unregister()}else if(await isSupported()){if(!await deleteToken(getMessaging(getStagingClients().auth.app)))throw new Error('Revoca token non confermata.')}else throw new Error('FCM non disponibile.');}
 export function deactivatePush(explicit=true){const uid=signedUid();++generation;detach?.();detach=undefined;return serialized(async()=>{const b=localBinding();if(!b||b.uid!==uid){if(explicit)declinePush(uid);return;}let remote=false,local=false;if(uid===signedUid()){try{await call('lfPushUnregister',{id:b.id});remote=true}catch{/* try revoke device */}}try{await revokeLocal(b);local=true}catch{/* explicit failure */}if(!remote&&!local)throw new Error('Impossibile disattivare le notifiche. Riprova con una connessione attiva.');if(explicit)declinePush(uid);else rememberChoice(uid,'enabled');forget();pushNotice.value=null;})}
 export async function disconnectPushBeforeLogout(){if(!pushFeatureEnabled())return true;try{await deactivatePush(false);return true}catch{window.alert('Non è stato possibile disattivare le notifiche del tuo account. Riprova con una connessione attiva prima di uscire.');return false}}
-export async function connectPushSession(uid:string|null,openAgenda:()=>void,restore=true){const turn=++generation;detach?.();detach=undefined;pushNotice.value=null;if(!uid||!pushFeatureEnabled()){restorePending=Promise.resolve();return;}
+export async function connectPushSession(uid:string|null,openAgenda:()=>void,restore=true,openSupport?:()=>void){const turn=++generation;detach?.();detach=undefined;pushNotice.value=null;if(!uid||!pushFeatureEnabled()){restorePending=Promise.resolve();return;}
  if(restore){restorePending=(async()=>{if(deviceChoice(uid)!=='enabled')return;rememberChoice(uid,'enabled');
   // No operating-system prompt on subsequent logins. Only explicit activation can prompt.
   try{if(await pushSupported()&&turn===generation&&getStagingClients().auth.currentUser?.uid===uid&&await permissionGranted()&&turn===generation){const current=localBinding();const prefs=current?.uid===uid?current.prefs:(await call<{active:boolean;prefs:PushPreferences}>('lfPushSettings',{mode:'account'})).prefs;if(turn===generation&&getStagingClients().auth.currentUser?.uid===uid)await activatePush(prefs,false)}}catch{/* keep saved choice; Settings can retry */}
  })();await restorePending;}
  const b=localBinding();if(!b||b.uid!==uid||turn!==generation)return;
  if(!(await pushSupported())||turn!==generation)return;
- const show=(v:{title?:string;body?:string})=>{if(turn!==generation||getStagingClients().auth.currentUser?.uid!==uid||!v.title||!v.body)return;pushNotice.value={title:v.title,body:v.body}};
- if(isAndroid()){const handles:PluginListenerHandle[]=[];try{handles.push(await native.addListener('pushNotificationReceived',show));handles.push(await native.addListener('pushNotificationActionPerformed',v=>{if(turn===generation&&getStagingClients().auth.currentUser?.uid===uid&&v.notification.data?.open==='bookings')openAgenda()}));if(turn!==generation){handles.forEach(h=>void h.remove());return}detach=()=>handles.forEach(h=>void h.remove())}catch{handles.forEach(h=>void h.remove())}}
- else{const stop=onMessage(getMessaging(getStagingClients().auth.app),v=>show(v.notification||{}));if(turn!==generation)stop();else detach=stop;}
+ const show=(v:{title?:string;body?:string;data?:Record<string,string>})=>{if(turn!==generation||getStagingClients().auth.currentUser?.uid!==uid||!v.title||!v.body)return;pushNotice.value={title:v.title,body:v.body,open:v.data?.open==='support'?'support':'bookings'}};
+ if(isAndroid()){const handles:PluginListenerHandle[]=[];try{handles.push(await native.addListener('pushNotificationReceived',show));handles.push(await native.addListener('pushNotificationActionPerformed',v=>{if(turn===generation&&getStagingClients().auth.currentUser?.uid===uid){if(v.notification.data?.open==='support')openSupport?.();else if(v.notification.data?.open==='bookings')openAgenda()}}));if(turn!==generation){handles.forEach(h=>void h.remove());return}detach=()=>handles.forEach(h=>void h.remove())}catch{handles.forEach(h=>void h.remove())}}
+ else{const stop=onMessage(getMessaging(getStagingClients().auth.app),v=>show({...v.notification,data:v.data}));if(turn!==generation)stop();else detach=stop;}
 }

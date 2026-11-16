@@ -20,12 +20,12 @@ import LionIcon from './LionIcon.vue'
 /** Stessa vista, per schede assegnate, archivio e demo. Solo lettura. */
 type SheetForDisplay={id?:string;title:string;exercises:readonly ExerciseRecord[]}
 type VideoRecord=ExerciseVideo
-const props=defineProps<{sheet:SheetForDisplay}>()
+const props=defineProps<{sheet:SheetForDisplay;readOnly?:boolean}>()
 const route=useRoute(),router=useRouter()
 const athleteView=computed(()=>['/home','/piano','/archivio'].includes(route.path))
 const approvedChoices=ref<Record<number,number>>({})
 const displayExercises=computed(()=>props.sheet.exercises.map((e,i)=>{const a=e.alternatives?.[approvedChoices.value[i]];return a?{...substituteExercise(e,a),id:e.id}:e}))
-function startTraining(){if(!props.sheet.id||!athleteView.value)return;emit('close');void router.push({path:'/progressi',query:{...route.query,sheetId:props.sheet.id}})}
+function startTraining(){if(props.readOnly||!props.sheet.id||!athleteView.value)return;emit('close');void router.push({path:'/progressi',query:{...route.query,sheetId:props.sheet.id}})}
 const supersets=computed(()=>supersetView(props.sheet.exercises))
 const notesOpen=ref<number[]>([])
 function hasData(value:unknown):boolean{return value!==null&&value!==undefined&&String(value).trim().length>0}
@@ -175,7 +175,7 @@ onMounted(async()=>{
      </div>
     </section>
    </div>
-   <footer class="sheet-modal-foot lf6-footer"><button v-if="athleteView&&sheet.id" type="button" class="primary" @click="startTraining">Inizia allenamento</button><button type="button" class="primary" @click="$emit('close')">{{uiText("Chiudi scheda")}}</button></footer>
+   <footer class="sheet-modal-foot lf6-footer"><button v-if="!readOnly&&athleteView&&sheet.id" type="button" class="primary" @click="startTraining">Inizia allenamento</button><button type="button" class="primary" @click="$emit('close')">{{uiText("Chiudi scheda")}}</button></footer>
   </div>
   <div v-if="alternatives.length" class="modal-overlay lf6-dialog-layer" @click.self="alternatives=[]">
    <div class="dialog" role="dialog" aria-modal="true" :aria-label="uiText('Seleziona esercizio')">

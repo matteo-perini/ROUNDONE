@@ -45,12 +45,13 @@ function switchTab(v:'login'|'register'|'reset'){tab.value=v;error.value='';info
 // Vecchio collegamento /www/prenotazioni.html: dopo il login la pagina giusta
 // dipende dal ruolo verificato dal server. Non apre pagine senza autenticazione.
 function signedInDestination(role:'atleta'|'titolare'|'collaboratore'){
+ if(isOperationalMode() && route.query.open==='support')return '/impostazioni?inboxSupport=1'
  if(isOperationalMode() && route.query.open==='bookings')return role==='atleta'?'/prenotazioni':'/coach/prenotazioni'
  return role==='atleta'?'/home':'/coach'
 }
 async function login(){if(busy.value)return
  busy.value=true;error.value='';info.value=''
- try{const s=await signInStaging(email.value.trim(),password.value,remember.value);password.value='';await router.replace(s.role==='platform'?'/lionfit-control':signedInDestination(s.role))}
+ try{const s=await signInStaging(email.value.trim(),password.value,remember.value);password.value='';await router.replace(s.role==='platform'?'/lionfit-control'+(route.query.open==='support'?'?open=support':''):signedInDestination(s.role))}
  catch(e){error.value=e instanceof Error?e.message:'Accesso non riuscito.'}finally{busy.value=false}
 }
 async function reset(){if(!email.value.trim()){error.value='Inserisci la tua email.';return}

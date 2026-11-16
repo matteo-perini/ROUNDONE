@@ -28,6 +28,7 @@ import ExerciseMotion from './ExerciseMotion.vue'
 import {loadCatalog,exactCatalogMatches,type CatalogExercise} from '../features/exercises/catalog'
 import {readLegacyExerciseCatalog} from '../integrations/firestore/legacyExerciseCatalog'
 import {uiText} from '../features/i18n/interfaceLanguage'
+import {activeAssignmentGroups,romeDate} from '../features/sheets/assignmentPolicy'
 import type {Personal,ProgramWeek,Groups,ExerciseRecord} from '../features/sheets/domain'
 const props=defineProps<{role:'athlete'|'coach'}>()
 const route=useRoute()
@@ -103,13 +104,17 @@ onBeforeRouteLeave(()=>!hasDraft.value||(!!offlineState.value?.draft&&!offlineEr
 const canManageGoals=computed(()=>props.role==='coach'&&mayWriteLive()&&!!context.value&&!!athleteId.value&&context.value.uid!==athleteId.value)
 const goalTitle=ref(''),goalNotes=ref(''),goalDate=ref(''),goalBusy=ref(false),goalError=ref(''),showArchivedGoals=ref(false)
 const visibleGoals=computed(()=>shownGoals(goals.value,showArchivedGoals.value))
-const sheets=computed(()=>!online.value||downloadedMode.value?offlineState.value?.sheets||[]:uniqueProgressSheets(sheetData.value?.personal||[],archived.value))
+const assignmentClock=ref(Date.now())
+let assignmentTimer:ReturnType<typeof setInterval>|null=null
+const activeGroups=computed(()=>sheetData.value?activeAssignmentGroups(sheetData.value.personal,sheetData.value.weeks,athleteId.value,romeDate(assignmentClock.value)):null)
+const liveProgressSheets=computed(()=>uniqueProgressSheets(sheetData.value?.personal||[],archived.value).map(s=>({...s,historical:!activeGroups.value?.programmed.some(g=>g.sheet.id===s.id)&&!activeGroups.value?.unprogrammed.some(g=>g.sheet.id===s.id)})))
+const sheets=computed(()=>!online.value||downloadedMode.value?offlineState.value?.sheets||[]:liveProgressSheets.value)
 const visibleSheets=computed(()=>sheets.value.filter(s=>{
  if(!s.title.toLocaleLowerCase('it').includes(search.value.toLocaleLowerCase('it')) && !s.exercises.some(e=>e.name.toLocaleLowerCase('it').includes(search.value.toLocaleLowerCase('it'))))return false
  if(!online.value||downloadedMode.value)return true
  if(sheetFilter.value==='historical')return s.historical
- if(sheetFilter.value==='programmed')return (sheetData.value?.groups.programmed||[]).some(g=>g.sheet.id===s.id)
- if(sheetFilter.value==='unprogrammed')return (sheetData.value?.groups.unprogrammed||[]).some(g=>g.sheet.id===s.id)
+ if(sheetFilter.value==='programmed')return (activeGroups.value?.programmed||[]).some(g=>g.sheet.id===s.id)
+ if(sheetFilter.value==='unprogrammed')return (activeGroups.value?.unprogrammed||[]).some(g=>g.sheet.id===s.id)
  return true
 }))
 const selectedSheet=shallowRef<ProgressSheet|null>(null)
@@ -156,7 +161,7 @@ function bindAthlete(id:string){
  if(props.role==='athlete'&&s.uid===id){offlineScope.value={project:db.app.options.projectId||'',gym:s.gymId,uid:s.uid};try{offlineState.value=readOffline(localStorage,offlineScope.value);if(!offlineState.value&&online.value&&canWrite.value)commitLocal(blankOffline());if(offlineState.value){if(!online.value){downloadedMode.value=true;loading.value=false;loadedSheets=true}restoreLocalDraft();if(online.value)void flushOffline()}}catch(e){offlineError.value='Dati locali non leggibili. Non saranno sovrascritti.';localConflict.value=true;offlineScope.value=null}}
  let confirmedSheets=false,confirmedArchive=false
  const epoch=childEpoch,validCache=()=>alive&&epoch===childEpoch&&context.value?.uid===s.uid&&context.value?.gymId===s.gymId&&athleteId.value===id
- const refreshCachedSheets=()=>{if(!validCache()||!confirmedSheets||!confirmedArchive||!online.value||!canWrite.value||!offlineScope.value||!sheetData.value||localConflict.value)return;if(!offlineState.value&&!commitLocal(blankOffline()))return;cacheAutomatically(uniqueProgressSheets(sheetData.value.personal,archived.value))}
+ const refreshCachedSheets=()=>{if(!validCache()||!confirmedSheets||!confirmedArchive||!online.value||!canWrite.value||!offlineScope.value||!sheetData.value||localConflict.value)return;if(!offlineState.value&&!commitLocal(blankOffline()))return;cacheAutomatically(liveProgressSheets.value)}
  stopChild.push(watchAthleteSheets(db,s.gymId,id,(result,confirmed)=>{
   if(!validCache())return
   sheetData.value=result;loadedSheets=true;loading.value=false;confirmedSheets=confirmed===true;refreshCachedSheets()
@@ -191,7 +196,7 @@ function bindSecondaryTabs(){
  }
 }
 watch(tab,bindSecondaryTabs)
-onMounted(async()=>{window.addEventListener('lionfit:local-back',focusBack);window.addEventListener('online',networkChanged);window.addEventListener('offline',networkChanged);window.addEventListener('storage',externalStorage); 
+onMounted(async()=>{assignmentTimer=setInterval(()=>{assignmentClock.value=Date.now()},30_000);window.addEventListener('lionfit:local-back',focusBack);window.addEventListener('online',networkChanged);window.addEventListener('offline',networkChanged);window.addEventListener('storage',externalStorage); 
  if(!isOperationalMode()){loading.value=false;error.value='Progressi LIVE disponibile solo con accesso Firebase configurato.';return}
  try{
   const s=await (navigator.onLine||props.role==='coach'?readStagingSession():readNavigationSession());if(!alive)return
@@ -219,7 +224,7 @@ watch(()=>route.query.athleteId,value=>{
  if(props.role!=='coach'||!context.value||typeof value!=='string'||!value||value===athleteId.value)return
  if(athletes.value.some(a=>a.id===value))bindAthlete(value)
 })
-onUnmounted(()=>{window.removeEventListener('lionfit:local-back',focusBack);window.removeEventListener('online',networkChanged);window.removeEventListener('offline',networkChanged);window.removeEventListener('storage',externalStorage);alive=false;stopCurrent();for(const f of stops)f();stops=[]})
+onUnmounted(()=>{if(assignmentTimer!==null)clearInterval(assignmentTimer);window.removeEventListener('lionfit:local-back',focusBack);window.removeEventListener('online',networkChanged);window.removeEventListener('offline',networkChanged);window.removeEventListener('storage',externalStorage);alive=false;stopCurrent();for(const f of stops)f();stops=[]})
 watch(historicalSheets,rows=>{if(!rows.some(s=>s.id===historySheetId.value))historySheetId.value=rows[0]?.id||''})
 watch(selectedHistoryExercises,rows=>{if(!rows.some(e=>e.key===historyKey.value))historyKey.value=rows[0]?.key||''})
 watch(historyKey,()=>{repFilter.value='all'})

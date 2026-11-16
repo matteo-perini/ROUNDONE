@@ -17,7 +17,7 @@ test('settings use one compact list on desktop and mobile with no per-section pr
 test('shared settings compile and retain role gates and inline expansion of operational panels',()=>{
  assert.deepEqual(errors,[]);const script=compileScript(descriptor,{id:'r4-settings'});assert.deepEqual(compileTemplate({source:descriptor.template.content,filename:'Settings.vue',id:'r4-settings',compilerOptions:{bindingMetadata:script.bindings}}).errors,[])
  for(const condition of ["isStagingMode()&&stagingSession&&stagingSession.role!=='atleta'","stagingSession.role==='titolare'",'workPilotAllowed','competitionAvailable','pushAvailable&&stagingSession','calendarPilotEnabled()&&stagingSession','linkedAllowed','canResetPassword','platformAllowed'])assert.ok(source.includes(`v-if="${condition}"`),condition)
- assert.match(source,/<button[^>]*:aria-expanded="ticketsOpen"[^>]*>[\s\S]*?<SupportTickets v-if="ticketsOpen&&isStagingMode\(\)"\/>\s*<\/div>/)
+ assert.match(source,/<RouterLink v-if="isStagingMode\(\)" class="lfsettings-flat-row" to="\/assistenza"/)
  assert.match(source,/@click="workReportOpen=!workReportOpen;workPilotOpen=false"/)
 })
 

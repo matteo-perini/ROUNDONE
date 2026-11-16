@@ -1,8 +1,10 @@
 import {initializeApp} from 'firebase-admin/app';
+import {getAuth} from 'firebase-admin/auth';
+import {verifiedControl,CONTROL_UID,CONTROL_SCOPE,incomingRecipient,activityPatch,notificationText} from './supportModel.mjs';
 import {getFirestore,Timestamp,FieldValue} from 'firebase-admin/firestore';
 import {getMessaging} from 'firebase-admin/messaging';
 import {onCall,HttpsError} from 'firebase-functions/v2/https';
-import {onDocumentWritten} from 'firebase-functions/v2/firestore';
+import {onDocumentWritten,onDocumentCreated} from 'firebase-functions/v2/firestore';
 import {onSchedule} from 'firebase-functions/v2/scheduler';
 import {logger} from 'firebase-functions';
 import {pilotScope,pilotMatches,scopeGym,recipientAllowed} from './pilot.mjs';
@@ -19,6 +21,7 @@ const allowedProjects=new Set(['app-palestra-b0b9d','lionfit-staging-test']);
 function projectGuard(){const id=process.env.GCLOUD_PROJECT||process.env.GOOGLE_CLOUD_PROJECT;if(!allowedProjects.has(id))throw new HttpsError('failed-precondition','Progetto non autorizzato.');}
 async function member(req){
  projectGuard(); const uid=req.auth?.uid;if(!validId(uid))throw new HttpsError('unauthenticated','Accedi a LionFit.');
+ if(uid===CONTROL_UID){if(process.env.LIONFIT_SUPPORT_PUSH_ENABLED!=='true'||!verifiedControl(uid,req.auth.token.email,req.auth.token.email_verified,req.auth.token)||!await supportRecipientValid({uid:CONTROL_UID,gym:CONTROL_SCOPE}))throw new HttpsError('permission-denied','Control Center non autorizzato.');return {uid,gym:CONTROL_SCOPE,role:'control'};}
  const p=(await db.doc(`users/${uid}`).get()).data();if(!validId(p?.gymId)||!activeProfile(p,p.gymId))throw new HttpsError('permission-denied','Profilo non attivo.');
  return {uid,gym:p.gymId,role:p.role};
 }
@@ -103,3 +106,28 @@ export const lfBookingReminderSweep=onSchedule({region:REGION,schedule:'every 5 
   const expired=await devices.where('expires','<=',Date.now()).limit(50).get();for(const s of expired.docs)await db.runTransaction(async tx=>{const d=(await tx.get(s.ref)).data();if(d&&d.expires<=Date.now())tx.delete(s.ref);});
  }
 });
+
+// PATCH 29: append activity from immutable reply events; opt-in generic push.
+async function supportRecipientValid(target){
+ try{if(target.uid===CONTROL_UID){const u=await getAuth().getUser(target.uid);return !u.disabled&&verifiedControl(u.uid,u.email,u.emailVerified,u.customClaims);}
+ const [u,p]=await Promise.all([getAuth().getUser(target.uid),db.doc(`users/${target.uid}`).get()]);return !u.disabled&&activeProfile(p.data(),target.gym);
+ }catch(e){logger.warn('Support recipient unavailable',{code:String(e?.code||'unknown')});return false;}
+}
+async function supportEvent(event,author,createdAt){
+ projectGuard();const id=event.params.ticketId;if(!validId(id)||!['requester','platform'].includes(author)||!createdAt?.toMillis)return;
+ const ref=db.doc(`support_tickets/${id}`),claim=jobs.doc(hash(JSON.stringify(['support29',id,event.params.replyId?'reply':'ticket',event.params.replyId||''])));
+ const ticket=await db.runTransaction(async tx=>{const [t,c]=await Promise.all([tx.get(ref),tx.get(claim)]);if(!t.exists||c.exists)return null;const d=t.data();if(!validId(d.gymId)||!validId(d.requesterId))return null;
+ const patch=activityPatch(d,author,createdAt);if(Object.keys(patch).length)tx.update(ref,patch);
+ // Claim once before delivery. An ambiguous send is never retried automatically.
+ tx.create(claim,{kind:'support',claimedAt:stamp(Date.now()),purgeAt:stamp(Date.now()+7*DAY)});return d;
+ });
+ if(!ticket||process.env.LIONFIT_SUPPORT_PUSH_ENABLED!=='true'||Date.now()-createdAt.toMillis()>30*MINUTE||createdAt.toMillis()>Date.now()+MINUTE)return;
+ const target=incomingRecipient(ticket,author);if(!target||!await supportRecipientValid({uid:ticket.requesterId,gym:ticket.gymId})||!await supportRecipientValid(target))return;
+ const ds=await devices.where('uid','==',target.uid).limit(25).get();let accepted=0,rejected=0;
+ for(const item of ds.docs){const fresh=await item.ref.get(),d=fresh.data();if(!d||d.uid!==target.uid||d.gym!==target.gym||!validToken(d.token)||d.expires<=Date.now()||!await supportRecipientValid(target))continue;
+  try{await getMessaging().send({token:d.token,notification:notificationText(author),data:{kind:'support',open:'support'},android:{priority:'high',ttl:10*MINUTE},webpush:{headers:{TTL:'600'},notification:{icon:'/icons/icon-192.png'}}});accepted++;}catch(e){rejected++;const code=String(e?.code||'unknown');if(['messaging/registration-token-not-registered','messaging/invalid-registration-token'].includes(code))await removeInvalid(fresh.ref,d.revision);logger.warn('Support notification rejected',{code});}
+ }
+ await claim.update({accepted,rejected,finishedAt:stamp(Date.now())});
+}
+export const lfSupportTicketCreated=onDocumentCreated({region:REGION,document:'support_tickets/{ticketId}',retry:true,maxInstances:3,timeoutSeconds:120},async event=>{const d=event.data?.data();if(d)await supportEvent(event,'requester',d.createdAt)});
+export const lfSupportReplyCreated=onDocumentCreated({region:REGION,document:'support_tickets/{ticketId}/replies/{replyId}',retry:true,maxInstances:3,timeoutSeconds:120},async event=>{const d=event.data?.data();if(d)await supportEvent(event,d.author,d.createdAt)});

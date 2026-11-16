@@ -12,15 +12,17 @@ import {forWeekRepresentative,weekDayLinkedSheetNames,exactWeekDaySlots} from '.
 import SheetDetail from './SheetDetail.vue'
 import type { Groups, Personal, ProgramWeek } from '../features/sheets/domain'
 import { uniqueSemanticSheets, visualSheetGroups } from '../features/sheets/semanticDedup'
+import {activeAssignmentGroups,partitionPrograms,weekOrdinal,romeDate} from '../features/sheets/assignmentPolicy'
 import {groupActivePrograms,programForWeek,activeWeekOn} from '../features/sheets/programFamilies'
 
 const props = withDefaults(defineProps<{
   athleteKey: string
-  personal: (Pick<Personal, 'title' | 'exercises'> & { deletedAt?: string })[]
+  personal: (Omit<Personal,'athleteId'> & {athleteId?:string})[]
   weeks: ProgramWeek[]
   groups: Groups
   weekId?: string
   initialDay?: number
+  archiveExpired?: boolean
 }>(), { weekId: '' })
 const emit = defineEmits<{ 'update:weekId': [id: string] }>()
 const route=useRoute(),router=useRouter()
@@ -29,12 +31,9 @@ const opened = ref<Personal | null>(null)
 const showSheetChoices=ref(false)
 const selectedDay = ref<number | null>(Number.isInteger(props.initialDay) && props.initialDay! >= 0 && props.initialDay! <= 6 ? props.initialDay! : null)
 const allWeeks = computed(() => props.weeks.filter(w => !w.deletedAt))
-const programs=computed(()=>groupActivePrograms(allWeeks.value))
-const todayIso=()=>{
- const parts=new Intl.DateTimeFormat('en-GB',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:'Europe/Rome'}).formatToParts(new Date())
- const part=(type:string)=>parts.find(p=>p.type===type)?.value||''
- return `${part('year')}-${part('month')}-${part('day')}`
-}
+const todayClock=ref(Date.now())
+const programs=computed(()=>props.archiveExpired?partitionPrograms(allWeeks.value,romeDate(todayClock.value)):groupActivePrograms(allWeeks.value))
+const todayIso=()=>romeDate(todayClock.value)
 const selectedFamily=computed(()=>{
  const explicit=programForWeek(programs.value,props.weekId)
  if(explicit)return explicit
@@ -43,14 +42,14 @@ const selectedFamily=computed(()=>{
 })
 const activeWeeks=computed(()=>selectedFamily.value?.weeks||[])
 const week = computed(() => activeWeeks.value.find(w => w.id === props.weekId) ?? activeWeekOn(activeWeeks.value,todayIso())??activeWeeks.value[0])
-const weekPosition=computed(()=>activeWeeks.value.findIndex(w=>w.id===week.value?.id)+1)
+const weekPosition=computed(()=>week.value?weekOrdinal(week.value,activeWeeks.value):0)
 const selectedWeekLabel=computed(()=>`${selectedFamily.value?.title||'Programma'} · Settimana ${weekPosition.value}`)
-const visual = computed(() => visualSheetGroups(props.groups))
+const liveGroups=computed(()=>props.archiveExpired?activeAssignmentGroups(props.personal.filter((p):p is Personal=>p.athleteId===props.athleteKey),props.weeks,props.athleteKey,todayIso()):props.groups)
+const visual = computed(() => visualSheetGroups(liveGroups.value))
 const programmed = computed(() => visual.value.programmed.filter(group => group.links.some(link => link.weekId === week.value?.id)))
 const unprogrammed = computed(() => visual.value.unprogrammed)
-const sheetCount = computed(() => uniqueSemanticSheets(props.personal.filter(s => !s.deletedAt)).length)
+const sheetCount = computed(() => props.archiveExpired ? visual.value.programmed.length+visual.value.unprogrammed.length : uniqueSemanticSheets(props.personal.filter(s => !s.deletedAt)).length)
 const weekDays = computed(() => week.value?.days ?? [])
-const todayClock=ref(Date.now())
 let clockTimer:ReturnType<typeof setInterval>|null=null
 const refreshClock=()=>{todayClock.value=Date.now()}
 const currentDayIndex = computed(() =>
@@ -66,7 +65,7 @@ function displayActivities(index:number){
 function linksForDay(index: number) {
  // The two assignments in the selected day are authoritative; never use the
  // representative sheet of a group of visually equivalent documents.
- return exactWeekDaySlots(props.groups,week.value,index)
+ return exactWeekDaySlots(liveGroups.value,week.value,index)
 }
 function uniqueDaysForSheet(group: { links: { weekId: string; dayIndex: number; dayName: string }[] }) {
   const seen = new Set<number>()
@@ -76,7 +75,7 @@ function uniqueDaysForSheet(group: { links: { weekId: string; dayIndex: number; 
     return true
   })
 }
-function chooseWeek(id: string) { showSheetChoices.value=false; if(!activeWeeks.value.some(w=>w.id===id))return;emit('update:weekId', id); void router.replace({query:{...route.query,week:id,day:undefined}}); selectedDay.value = null; opened.value = null }
+function chooseWeek(id: string) { showSheetChoices.value=false; if(!programs.value.some(p=>p.weeks.some(w=>w.id===id)))return;emit('update:weekId', id); void router.replace({query:{...route.query,week:id,day:undefined}}); selectedDay.value = null; opened.value = null }
 function chooseProgram(id:string){
  const selected=programs.value.find(p=>p.id===id)
  if(!selected)return
@@ -105,7 +104,7 @@ onUnmounted(()=>{
  document.removeEventListener('visibilitychange',refreshClock)
  if(clockTimer!==null)clearInterval(clockTimer)
 })
-watch(()=>route.query.day,day=>{selectedDay.value=typeof day==='string'&&/^[0-6]$/.test(day)?Number(day):null})
+watch(()=>route.query.day,day=>{selectedDay.value=typeof day==='string'&&/^[0-6]$/.test(day)&&(!props.archiveExpired||!route.query.week||route.query.week===week.value?.id)?Number(day):null})
 watch(() => props.athleteKey, () => { selectedDay.value = null; opened.value = null })
 watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) selectedDay.value = null; opened.value = null })
 </script>
@@ -115,7 +114,7 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
     <section class="panel athlete-plan-summary">
       <div class="row between">
         <div><h2 class="card-heading">{{uiText("IL MIO PIANO")}}</h2></div>
-        <span class="pill pill-neutral">{{ sheetCount }} {{uiText("SCHEDE")}}<span v-if="allWeeks.length"> · {{ programs.length }} PROGRAMMI</span></span>
+        <span class="pill pill-neutral">{{ sheetCount }} {{uiText("SCHEDE")}}<span v-if="programs.length"> · {{ programs.length }} PROGRAMMI</span></span>
       </div>
     </section>
 
@@ -127,7 +126,7 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
       <p class="lf-p11-program-dates">{{selectedFamily?.startDate}} → {{selectedFamily?.endDate}} · {{activeWeeks.length}} settimane</p>
       <div class="row between"><strong>{{uiText("SELEZIONA LA SETTIMANA")}}</strong><span class="muted small">{{ selectedWeekLabel }}</span></div>
       <div class="week-pills" aria-label="Seleziona la settimana del piano">
-        <button v-for="(w,i) in activeWeeks" :key="w.id" type="button" class="week-pill" :aria-label="`Settimana ${i+1}: ${w.name}`" :class="{ selected: week?.id === w.id }" :aria-pressed="week?.id === w.id" @click="chooseWeek(w.id)">{{ i+1 }}</button>
+        <button v-for="(w,i) in activeWeeks" :key="w.id" type="button" class="week-pill" :aria-label="`Settimana ${weekOrdinal(w,activeWeeks)}: ${w.name}`" :class="{ selected: week?.id === w.id }" :aria-pressed="week?.id === w.id" @click="chooseWeek(w.id)">{{ weekOrdinal(w,activeWeeks) }}</button>
       </div>
     </section>
 
@@ -166,7 +165,7 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
         <p v-if="!weekDays.length" class="muted">{{uiText("Non è ancora stata assegnata una settimana.")}}</p>
       </div>
     </section>
-    <p v-if="props.groups.orphanLinks.length" class="notice" role="alert">{{uiText("Attenzione:")}} {{ props.groups.orphanLinks.length }} {{uiText("collegamenti fanno riferimento a schede assenti o cestinate. Nessuna modifica automatica.")}}</p>
+    <p v-if="liveGroups.orphanLinks.length" class="notice" role="alert">{{uiText("Attenzione:")}} {{ liveGroups.orphanLinks.length }} {{uiText("collegamenti fanno riferimento a schede assenti o cestinate. Nessuna modifica automatica.")}}</p>
   </div>
 
   <div v-if="selectedDayDetails" class="modal-overlay athlete-day-overlay" @click.self="closeWeekDay()">
