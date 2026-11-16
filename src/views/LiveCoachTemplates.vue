@@ -58,6 +58,7 @@ function linkIntent(){
  return intent&&currentAthlete.value?.id===intent.athleteId?intent:null
 }
 const personal=ref<Personal[]>([]),error=ref(''),notice=ref(''),loading=ref(true),busy=ref(false)
+const confirmedNotice=ref('')
 const editing=ref(false),editingId=ref(''),revision=ref(0),isPersonal=ref(false)
 const personalEdit=ref(false),draftNameNotice=ref('')
 const title=ref(''),category=ref('Allenamento'),exercises=ref<Exercise[]>([])
@@ -167,7 +168,7 @@ function edit(s:Model){
 async function runWrite(label:string,fn:(ctx:{gym:string;uid:string;athlete:string})=>Promise<void>,requireAthlete=false){
  if(busy.value)return
  if(!mayWriteLive()){notice.value='Modifiche temporaneamente disabilitate: puoi consultare l’archivio.';return}
- busy.value=true;notice.value=''
+ busy.value=true;notice.value='';confirmedNotice.value=''
  const selected=currentAthlete.value,s=session.value
  try{
   // La pressione del pulsante e il consenso esplicito all’operazione: niente doppia spunta.
@@ -176,7 +177,7 @@ async function runWrite(label:string,fn:(ctx:{gym:string;uid:string;athlete:stri
   else verifyCoachArchiveEditor(s,true)
   const ctx={gym:s.gymId,uid:s.uid,athlete:selected?.id||''}
   await fn(ctx)
-  if(live)notice.value=`${label}: operazione completata. Le schede e lo storico sono conservati.`
+  if(live){notice.value=`${label}: operazione completata. Le schede e lo storico sono conservati.`;confirmedNotice.value=notice.value}
  }catch(e){if(live)notice.value=`${label}: ${e instanceof Error?e.message:String(e)}`}
  finally{busy.value=false}
 }
@@ -307,7 +308,7 @@ onUnmounted(()=>{live=false;closeListeners()})
  <p v-if="loading" class="muted lf27-delayed-loading" role="status">{{uiText("Verifica del Coach e lettura degli archivi…")}}</p>
  <section v-if="!loading && session && (!writable || notice)" class="panel">
   <p v-if="!writable" class="notice">{{uiText("Le modifiche sono temporaneamente disabilitate. Puoi consultare le schede.")}}</p>
-  <p v-if="notice" class="notice" role="status">{{notice}}</p>
+  <p v-if="notice" class="notice" role="status" :class="{'lf-premium-confirmed':notice===confirmedNotice}"><svg v-if="notice===confirmedNotice" class="lf-premium-success-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12 L9 17 L20 6" pathLength="100"/></svg>{{notice}}</p>
  </section>
  <section v-if="!loading && session?.role==='titolare' && !editing && legacyUnassigned.length" class="panel lf-legacy-coach-panel">
   <div class="row between lf-legacy-coach-head">

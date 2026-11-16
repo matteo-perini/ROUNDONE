@@ -169,7 +169,7 @@ async function register(){if(busy.value)return;if(!mayWriteLive()){error.value='
  <div class="access-wrap v1-login">
   <div class="login-identity"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><h1>LION <span>FIT</span></h1><h2>GESTIONE &amp; PROGRAMMI</h2><p>{{uiText("Accedi al tuo piano o registrati con la tua palestra")}}</p></div>
   <section class="panel access-card" :aria-label="isTestMode()?'Accesso Lion Fit in ambiente di prova':'Accesso Lion Fit'">
-   <div class="login-tabs"><button type="button" :class="{selected:tab==='login'}" @click="switchTab('login')">{{uiText("ACCEDI")}}</button><button type="button" :class="{selected:tab==='register'}" @click="switchTab('register')">{{uiText("REGISTRATI")}}</button></div>
+   <div v-lf-motion-tabs class="login-tabs"><button type="button" :class="{selected:tab==='login'}" @click="switchTab('login')">{{uiText("ACCEDI")}}</button><button type="button" :class="{selected:tab==='register'}" @click="switchTab('register')">{{uiText("REGISTRATI")}}</button></div>
    <form v-if="tab==='login'" class="stack" @submit.prevent="login">
     <label>EMAIL<input v-model="email" type="email" autocomplete="username" placeholder="la-tua-email@esempio.it" maxlength="160" required/></label>
     <label>PASSWORD<span class="password-control"><input v-model="password" :type="showPassword?'text':'password'" autocomplete="current-password" placeholder="••••••••" required/><button type="button" :aria-label="showPassword?'Nascondi password':'Mostra password'" @click="showPassword=!showPassword">{{showPassword?'Nascondi':'Mostra'}}</button></span></label>

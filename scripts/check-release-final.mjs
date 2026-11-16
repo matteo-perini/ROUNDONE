@@ -1,4 +1,4 @@
-/** LionFit STEP 3T.4: local, offline and credential-free final source checks. */
+/** LionFit: local, offline and credential-free final source checks. Deep Clean 1.0. */
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -22,9 +22,15 @@ check(existsSync(join(root,'security/step3s2-prod-proposed-STORAGE-NON-PUBBLICAR
 check(read('public/CNAME').trim()==='www.lionfit.it','Dominio pubblico invariato')
 for (const p of ['public/404.html','public/www/index.html','public/www/admin.html','public/www/athlete.html','public/www/prenotazioni.html','public/www/ios.html','public/download/index.html','public/v1-preview/exercise-library/LICENSE','android/app/build.gradle','capacitor.config.json'])
  check(existsSync(join(root,p)),`Compatibilita e asset necessari: ${p}`)
-check(/versionCode\s+8\b/.test(read('android/app/build.gradle')),'versionCode 8 conservato: incremento a 9 soltanto alla build finale')
+// Baseline del sorgente verificato nella Deep Clean 1.0 (16/11/2026).
+// Un incremento futuro non deve invalidare l'audit; il confronto con l'APK
+// pubblicato e la verifica della firma restano controlli manuali di rilascio.
+const versionCodeMatch=/^\s*versionCode\s+(\d+)\s*$/m.exec(read('android/app/build.gradle'))
+const versionCode=versionCodeMatch?Number(versionCodeMatch[1]):NaN
+check(Number.isSafeInteger(versionCode)&&versionCode>=23&&versionCode<=2100000000,
+ `Android versionCode valido e non inferiore alla baseline 23 (sorgente: ${Number.isFinite(versionCode)?versionCode:'non rilevato'}); confronto APK pubblicato separato`)
 check(/applicationId\s+"com\.roundone\.app"/.test(read('android/app/build.gradle')),'Package Android originale conservato')
 const errors=tests.filter(t=>!t.ok)
 for(const t of tests) console.log((t.ok?'PASS  ':'FAIL  ')+t.label)
-console.log(`\nSTEP3T4: ${tests.length-errors.length}/${tests.length} PASS, ${errors.length} FAIL. NESSUNA CONNESSIONE A FIREBASE.`)
+console.log(`\nLIONFIT FINALCHECK: ${tests.length-errors.length}/${tests.length} PASS, ${errors.length} FAIL. NESSUNA CONNESSIONE A FIREBASE.`)
 if(errors.length)process.exitCode=1

@@ -13,6 +13,7 @@ import {watchDashboard} from '../integrations/firestore/platform'
 import {accountKey,type WidgetId,type SearchItem} from '../features/platform/platformModel'
 import {RouterLink} from 'vue-router'
 import LionIcon from './LionIcon.vue'
+import PremiumMetric from './PremiumMetric.vue'
 import type {DashboardAppointment,DashboardActivity,DashboardDay} from '../features/coach/dashboardLiveModel'
 const props=defineProps<{
  searchItems?:SearchItem[];searchPartial?:boolean;name:string;athletes:number|null;templates:number|null;bookings?:number|null;programs?:number|null;assigned?:number|null;unassigned?:number|null;
@@ -65,7 +66,7 @@ const formatDate=(ms:number)=>new Intl.DateTimeFormat('it-IT',{day:'2-digit',mon
    <p v-for="(warning,i) in dataWarnings" :key="i">{{warning}}</p>
   </div>
   <section v-if="visible('metrics')" class="lf-kpi-grid" aria-label="Statistiche palestra">
-   <article v-for="metric in metrics" :key="metric.label" class="lf-kpi-card"><span class="lf-kpi-icon"><LionIcon :name="metric.icon" :size="24"/></span><div><h2>{{metric.label}}</h2><strong>{{metric.value===null||metric.value===undefined?'—':metric.value}}</strong><small>{{metric.value===null||metric.value===undefined?'Dato non disponibile':metric.sub}}</small></div></article>
+   <article v-for="metric in metrics" :key="metric.label" class="lf-kpi-card"><span class="lf-kpi-icon"><LionIcon :name="metric.icon" :size="24"/></span><div><h2>{{metric.label}}</h2><strong><PremiumMetric :value="metric.value"/></strong><small>{{metric.value===null||metric.value===undefined?'Dato non disponibile':metric.sub}}</small></div></article>
   </section>
   <section v-if="visible('banner')||visible('actions')" class="lf-coach-hero-row" :class="{'lf14-single':!visible('banner')||!visible('actions')}"><div v-if="visible('banner')" class="lf14-brand-container"><GymIdentity v-if="isStagingMode()" compact/><div v-else class="lf-coach-banner"><div><strong>LION <em>FIT</em></strong><span>PANNELLO COACH</span><p>ALLENATI <b>•</b> PIANIFICA <b>•</b> GESTISCI <b>•</b> CRESCI</p></div></div></div><div v-if="visible('actions')" class="lf-dashboard-panel lf-coach-actions"><h2><LionIcon name="plus" :size="19"/> Azioni rapide</h2><div class="lf-action-grid"><RouterLink v-for="action in actions" :key="action.label" :to="action.to"><LionIcon :name="action.icon" :size="27"/><span>{{action.label}}</span></RouterLink></div></div></section>
   <section v-if="visible('activity')||visible('distribution')||visible('appointments')" class="lf-coach-detail-grid lf14-responsive-grid">

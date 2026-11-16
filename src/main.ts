@@ -17,6 +17,8 @@ import './styles-restyling-finale.css' // 06Nov2026: palette globale, sfondi rip
 import './styles-patch5-athlete.css' // PATCH 5: V3 Atleta, sidebar desktop, navbar a tutta larghezza
 import './styles-patch7-final.css' // PATCH 7: safe-area, temi e testi IT/EN responsive
 import { installRoundOneMotion } from './features/motion/roundOneMotion'
+import { PREMIUM_MOTION_ENABLED } from './features/motion/premiumMotionMode'
+import { premiumMotionTabs } from './features/motion/premiumMotionTabs'
 // Rispetta lingua memorizzata: accessibilita' e formati anche dopo il riavvio dell'APK.
 watch(interfaceLanguage,lang=>{document.documentElement.lang=lang},{immediate:true})
 import {installNavigationRecovery,navigationFailure} from './features/auth/navigationRecovery'
@@ -30,6 +32,9 @@ async function bootstrap(){
  installNavigationRecovery(router)
  const app=createApp(App).use(createPinia()).use(router)
  try{await router.isReady()}catch{if(!navigationFailure.value)navigationFailure.value={kind:'navigation',path:router.currentRoute.value.fullPath}}
+ document.documentElement.classList.toggle('lf-premium-motion',PREMIUM_MOTION_ENABLED)
+ if(PREMIUM_MOTION_ENABLED){const pause=()=>document.documentElement.classList.toggle('lf-motion-paused',document.hidden);document.addEventListener('visibilitychange',pause);pause()}
+ app.directive('lf-motion-tabs',premiumMotionTabs)
  installRoundOneMotion(router,app)
  app.mount('#app')
 }
@@ -69,3 +74,6 @@ import './styles-patch14.css'
 import "./styles-patch20b2-mobile.css"
 
 import "./styles-patch27-performance.css"
+
+// Premium visual overrides must follow the existing theme and mobile rules.
+import './styles-premium-motion.css'

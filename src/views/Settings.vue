@@ -119,7 +119,7 @@ const profilePath = computed(() => { const coach=isStagingMode()?stagingSession.
 async function exit() { if(isStagingMode()){if(await signOutStaging())await router.replace('/accesso');return}if(emulator.value){const {leaveDevSession}=await import('../integrations/firebase/devSession');await leaveDevSession();await router.push('/dev/accesso')}else{lab.logout();await router.push('/accesso')} }
 </script>
 <template>
- <div class="lfsettings lfsettings-compact lfsettings-v23">
+ <div class="lfsettings lfsettings-compact lfsettings-v23" v-lf-entrance="{id:'settings',premiumOnly:true,rows:[{match:'.lfsettings-header'},{within:'.lfsettings-categories',match:'.lfsettings-group'}]}">
   <header class="lfsettings-header"><div><span class="eyebrow">{{uiText("LION FIT · ACCOUNT")}}</span><h1>{{uiText("Impostazioni")}}</h1></div></header>
   <div class="lfsettings-categories">
    <section class="lfsettings-group"><h2>{{uiText("Generali")}}</h2>

@@ -58,7 +58,7 @@ onMounted(async()=>{if(!await verifyPlatformAccess()){void router.replace('/acce
 onUnmounted(()=>{alive=false;stop?.()})
 </script>
 <template>
- <div v-if="allowed" class="stack lf14-platform lf19c-control">
+ <div v-if="allowed" class="stack lf14-platform lf19c-control" v-lf-entrance="{id:'control-center',premiumOnly:true,rows:[{match:'header'},{within:'.lf19c-kpis',match:'.panel'}]}">
   <header class="panel lf19c-header"><div><span class="eyebrow">LIONFIT · ACCESSO RISERVATO</span><h1>Control Center</h1><p class="muted">Amministrazione della piattaforma, separata dal ruolo di Coach.</p></div><button v-if="independent" type="button" class="secondary" @click="leave">Esci dal Control Center</button><RouterLink v-else to="/impostazioni" class="secondary">Torna alle impostazioni</RouterLink></header>
   <div class="lf19c-kpis">
    <section class="panel"><small>Palestre registrate</small><h2>{{counts?.gyms??'—'}}</h2><small>Totale piattaforma</small></section>
@@ -68,7 +68,7 @@ onUnmounted(()=>{alive=false;stop?.()})
    <section class="panel"><small>Da verificare</small><h2>{{totals.unavailable}}</h2><small>Lettura non disponibile</small></section>
    <section class="panel"><small>Ticket da gestire</small><h2>{{counts?.tickets??'—'}}</h2><small>Totale piattaforma</small></section>
   </div>
-  <nav class="lf19c-tabs" aria-label="Sezioni Control Center"><button type="button" :class="tab==='gyms'?'primary':'secondary'" :aria-pressed="tab==='gyms'" :disabled="busy" @click="switchTab('gyms')">Palestre e abbonamenti</button><button type="button" :class="tab==='tickets'?'primary':'secondary'" :aria-pressed="tab==='tickets'" :disabled="busy" @click="switchTab('tickets')">Assistenza</button><button v-if="billingSandboxEnabled()" type="button" :class="tab==='billing'?'primary':'secondary'" :disabled="busy" @click="switchTab('billing')">Abbonamenti test</button></nav>
+  <nav v-lf-motion-tabs class="lf19c-tabs" aria-label="Sezioni Control Center"><button type="button" :class="tab==='gyms'?'primary':'secondary'" :aria-pressed="tab==='gyms'" :disabled="busy" @click="switchTab('gyms')">Palestre e abbonamenti</button><button type="button" :class="tab==='tickets'?'primary':'secondary'" :aria-pressed="tab==='tickets'" :disabled="busy" @click="switchTab('tickets')">Assistenza</button><button v-if="billingSandboxEnabled()" type="button" :class="tab==='billing'?'primary':'secondary'" :disabled="busy" @click="switchTab('billing')">Abbonamenti test</button></nav>
   <p v-if="error" class="notice" role="alert">{{error}}</p><p v-if="success" class="lf19c-success" role="status">{{success}}</p>
   <SupportTickets v-if="tab==='tickets'" platform/>
   <section v-else-if="tab==='billing'&&billingSandboxEnabled()" class="stack"><label>Palestra da verificare (elenco caricato)<select v-model="sandboxGymId"><option value="">Solo catalogo</option><option v-for="g in gyms" :key="g.id" :value="g.id">{{g.name}}</option></select></label><BillingSandbox platform :gym-id="sandboxGymId||undefined"/></section>
