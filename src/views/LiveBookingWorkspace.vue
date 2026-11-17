@@ -425,10 +425,10 @@ const bandTo=(r:Range)=>Array.isArray(r)?r[1]:(r as {from:string;to:string}).to
 const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
 </script>
 <template>
- <div class="stack lf-agenda13" aria-label="Agenda Lion Fit">
+ <div class="stack lf-agenda13" :class="{'lf-agenda-coach':isCoach}" aria-label="Agenda Lion Fit">
   <div class="booking-intro">
    <h1 style="margin:4px 0">{{uiText("Agenda")}}</h1>
-   
+   <p v-if="isCoach" class="lf-agenda-subtitle">Prenotazioni, disponibilità e appuntamenti della tua palestra.</p>
   </div>
   <div v-lf-quiet-loading v-if="status==='loading'" class="panel lf-quiet-status" role="status">{{uiText("Caricamento agenda…")}}</div>
   <div v-else-if="status==='error'" class="panel" role="alert">{{message}} <RouterLink to="/accesso">{{uiText("Torna all'accesso")}}</RouterLink></div>
@@ -480,9 +480,11 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
      </section></template>
    </template>
    <template v-else>
-    <div v-lf-motion-tabs class="booking-tabs booking-main-tabs lf-agenda-main"><button :class="{selected:coachTab==='calendario'}" @click="coachTab='calendario'">Agenda</button><button :class="{selected:coachTab==='disponibilita'}" @click="coachTab='disponibilita'">Disponibilità</button><button v-if="competitionEnabled" :class="{selected:coachTab==='competizioni'}" @click="coachTab='competizioni'">Gare</button></div>
+    <div class="lf-agenda-coach-commandbar">
+     <div v-lf-motion-tabs class="booking-tabs booking-main-tabs lf-agenda-main"><button :class="{selected:coachTab==='calendario'}" @click="coachTab='calendario'">Agenda</button><button :class="{selected:coachTab==='disponibilita'}" @click="coachTab='disponibilita'">Disponibilità</button><button v-if="competitionEnabled" :class="{selected:coachTab==='competizioni'}" @click="coachTab='competizioni'">Gare</button></div>
+     <button v-if="coachTab==='calendario'&&coachInboxEnabled()&&session&&!coachAppointmentOpen" type="button" class="primary lf-agenda-create" @click="coachAppointmentOpen=true"><LionIcon name="calendar-plus" :size="19"/> Nuova prenotazione</button>
+    </div>
     <template v-if="coachTab==='calendario'">
-     <button v-if="coachInboxEnabled()&&session&&!coachAppointmentOpen" type="button" class="primary wide" @click="coachAppointmentOpen=true"><LionIcon name="calendar-plus" :size="19"/> Nuova prenotazione</button>
      <CoachAppointment v-if="coachInboxEnabled()&&session&&coachAppointmentOpen" :key="session.uid" :session="session" :initial-date="selectedDate" @close="coachAppointmentOpen=false" @created="coachAppointmentCreated"/>
      <section class="lf-agenda-toolbar" aria-label="Filtri agenda">
       <div class="lf-agenda-controls"><select v-model="coachFilter" aria-label="Filtra per coach"><option value="all">Tutti i coach</option><option v-for="c in coachChips" :key="c.id" :value="c.id">{{c.name}}</option></select><select :value="upcomingMode?'upcoming':view" aria-label="Vista calendario" @change="($event.target as HTMLSelectElement).value==='upcoming'?openUpcoming():calendarView(($event.target as HTMLSelectElement).value as CalendarView)"><option value="upcoming">Prossimi</option><option value="day">Giorno</option><option value="week">Settimana</option><option value="month">Mese</option></select><button type="button" class="secondary lf-agenda-filter" :aria-expanded="filtersOpen" @click="filtersOpen=!filtersOpen"><LionIcon name="filter" :size="18"/> Filtri</button></div>
@@ -491,7 +493,7 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
      </section>
      <p v-lf-quiet-loading v-if="rowsLoading" class="muted lf-quiet-status" role="status">Caricamento appuntamenti…</p>
      <section v-else-if="upcomingMode" class="lf-agenda-list" v-lf-entrance="{id:'agenda-list',premiumOnly:true,rows:[{match:'.lf-agenda-group'}]}"><div class="row between"><h2>{{upcoming.length}} appuntamenti</h2><small class="muted">Prossimi 31 giorni</small></div>
-      <p v-if="!upcoming.length&&!calendarWarning" class="panel muted">Nessun appuntamento in programma con questi filtri.</p>
+      <div v-if="!upcoming.length&&!calendarWarning" class="panel muted lf-agenda-empty" role="status"><LionIcon name="calendar" :size="26"/><strong>Nessun appuntamento in programma</strong><small>Prova a modificare i filtri oppure crea una nuova prenotazione.</small></div>
       <div v-for="group in agendaGroups" :key="group.date" class="lf-agenda-group"><h3>{{dateTitle(group.date)}}</h3><div v-for="b in group.bookings" :key="b.id" class="lf-agenda-record"><button type="button" class="lf-agenda-row" :aria-expanded="expandedBooking===b.id" @click="toggleDetails(b.id)"><div class="lf-agenda-time"><b>{{formatTime(b.startMs)}}–{{endTime(b)}}</b><small class="lf-agenda-state">{{showStatus(b)}}</small></div><div class="lf-agenda-person"><strong>{{nameLabel(b.athleteId)}}</strong><small>{{b.discipline}} · {{coachLabel(b.coachId)}}</small></div><i class="coach-dot" :class="coachColor(b.coachId)"/><LionIcon name="chevron" :size="17"/></button><div v-if="expandedBooking===b.id" class="lf-agenda-detail"><p v-if="b.createdByCoach" class="small"><strong>Fissato dal coach</strong></p><p v-if="b.note" style="white-space:pre-wrap;overflow-wrap:anywhere">{{b.note}}</p><p>{{displayService(b.service)}} · {{b.durationMinutes}} min · {{dateTitle(group.date)}}</p><button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla appuntamento</button></div></div></div>
      </section>
      <section v-else-if="view==='day'" class="panel booking-period"><h3>{{selectedDate}} · {{todayEvents.length}} {{uiText("appuntamenti")}}</h3>
@@ -608,4 +610,128 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
 .lf-booking-v4-flow .booking-service-card .lf17b-category-fighter{object-position:50% 42%}
 .lf-booking-v4-flow .booking-service-card .lf17b-category-pesi{object-position:48% 55%}
 .lf-booking-v4-flow .booking-service-card[aria-pressed=true] .lf17b-category-photo{outline:1px solid var(--mint);outline-offset:2px}
+</style>
+
+<style scoped>
+/* PATCH 30 R2.1 — solo Agenda Coach su desktop: controlli leggibili,
+   senza toccare il calendario atleta, le azioni o Premium Motion. */
+@media (min-width: 1120px) {
+ .lf-agenda13.lf-agenda-coach {
+  width:100%;
+  max-width:1100px;
+  margin-inline:auto;
+  gap:15px;
+ }
+ .lf-agenda13.lf-agenda-coach .booking-intro{padding:0 2px 3px}
+ .lf-agenda13.lf-agenda-coach .booking-intro h1{font-size:30px;line-height:1.2}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-main{
+  align-self:flex-start;
+  width:auto;
+  max-width:100%;
+  gap:8px!important;
+  padding:5px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:15px;
+ }
+ .lf-agenda13.lf-agenda-coach .lf-agenda-main button{
+  flex:0 0 auto!important;
+  min-width:145px!important;
+  min-height:42px!important;
+  padding:10px 18px!important;
+  border-radius:10px!important;
+ }
+ .lf-agenda13.lf-agenda-coach > .primary.wide{
+  width:auto;
+  min-width:242px;
+  max-width:100%;
+  align-self:flex-start;
+  min-height:48px;
+  padding:12px 22px;
+  border-radius:12px;
+ }
+ .lf-agenda13.lf-agenda-coach .lf-agenda-toolbar{
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:var(--card);
+  padding:14px;
+  gap:12px;
+ }
+ .lf-agenda13.lf-agenda-coach .lf-agenda-controls:not(.lf-agenda-extra){
+  width:100%;
+  max-width:815px;
+  grid-template-columns:minmax(220px,1.25fr) minmax(170px,.85fr) 118px;
+  gap:10px;
+ }
+ .lf-agenda13.lf-agenda-coach .lf-agenda-controls select{
+  padding-inline:12px;
+  min-height:46px;
+ }
+ .lf-agenda13.lf-agenda-coach .lf-agenda-filter{min-height:46px;padding:9px 14px!important}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-date-controls{max-width:460px}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-extra{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:end;
+  max-width:815px;
+  padding:12px 0 0;
+  border:0;
+  border-top:1px solid var(--border);
+  border-radius:0;
+  background:transparent;
+  gap:10px;
+ }
+ .lf-agenda13.lf-agenda-coach .lf-agenda-extra label{flex:1 1 185px;max-width:270px;margin:0}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-extra button{min-height:44px}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-list>.row.between{
+  min-height:38px;
+  gap:12px;
+  padding-inline:2px;
+ }
+ .lf-agenda13.lf-agenda-coach .lf-agenda-list>.panel.muted{
+  min-height:112px;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  padding:24px;
+  border-style:dashed;
+  background:var(--card);
+ }
+}
+</style>
+
+<style scoped>
+/* PATCH 30 R2.2 — Agenda Coach: complete desktop layout without altering
+   athlete screens, mobile controls, booking logic or Premium Motion. */
+.lf-agenda-subtitle{font-size:13px;line-height:1.5;color:var(--muted);margin:5px 0 0}
+.lf-agenda-coach-commandbar{display:flex;flex-direction:column;gap:10px;min-width:0}
+.lf-agenda-coach-commandbar .lf-agenda-create{display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;width:100%;max-width:100%;padding:11px 18px}
+.lf-agenda-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:128px;text-align:center;padding:22px!important;background:var(--card);border:1px dashed var(--border);border-radius:14px}
+.lf-agenda-empty svg{color:var(--mint);opacity:.85}
+.lf-agenda-empty strong{font-size:14px;color:var(--text)}
+.lf-agenda-empty small{font-size:12px;color:var(--muted);max-width:320px;line-height:1.45}
+@media (max-width:900px){.lf-agenda-subtitle{display:none}}
+@media (min-width:901px){
+ .lf-agenda13.lf-agenda-coach{gap:16px;margin-top:0}
+ .lf-agenda13.lf-agenda-coach .booking-intro{padding:0 54px 2px 1px;min-height:0}
+ .lf-agenda13.lf-agenda-coach .booking-intro h1{font-size:clamp(27px,2.3vw,33px);line-height:1.14;margin:0!important;letter-spacing:-.025em}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-coach-commandbar{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-coach-commandbar .lf-agenda-main{margin:0!important;align-self:auto;flex:0 1 auto}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-coach-commandbar .lf-agenda-main button{flex:1 1 auto!important;min-width:126px!important}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-coach-commandbar .lf-agenda-create{width:auto;min-width:205px;flex:0 0 auto;min-height:46px;border-radius:11px}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-toolbar{padding:10px 12px;gap:10px}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-controls:not(.lf-agenda-extra){max-width:none;grid-template-columns:minmax(220px,1.1fr) minmax(170px,.8fr) 118px;gap:10px}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-controls select{min-height:43px}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-filter{min-height:43px}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-list>.panel.muted.lf-agenda-empty{min-height:136px;display:flex;align-items:center;justify-content:center;border-style:dashed}
+}
+@media (min-width:901px) and (max-width:1120px){
+ .lf-agenda13.lf-agenda-coach .lf-agenda-coach-commandbar .lf-agenda-main{flex:1 1 100%}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-coach-commandbar .lf-agenda-create{flex:0 0 auto}
+}
+@media (min-width:1121px){
+ .lf-agenda13.lf-agenda-coach{max-width:1100px}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-main button{min-width:136px!important}
+ .lf-agenda13.lf-agenda-coach .lf-agenda-list>.panel.muted.lf-agenda-empty{min-height:148px}
+}
 </style>

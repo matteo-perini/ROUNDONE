@@ -68,7 +68,7 @@ function rememberSignup(intent:PendingSignup){
 async function afterSignup(){
  sessionStorage.removeItem(PENDING_SIGNUP_KEY);sessionStorage.removeItem(PENDING_KEY)
  canRecover.value=false;verifyCoach.value=false;regPassword.value=''
- const s=await readStagingSession();await router.replace(signedInDestination(s.role))
+ const s=await readStagingSession();await router.replace('/installazione')
 }
 async function completeCoach(){
  if(!mayWriteLive())throw new Error('Registrazione temporaneamente disabilitata: scritture Firebase non autorizzate per questa versione.');

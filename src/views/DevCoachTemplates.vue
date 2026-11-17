@@ -145,7 +145,6 @@ onUnmounted(()=>{live=false;closeListeners()})
 <template>
 <div class="stack" style="gap:20px">
  <div class="notice" role="status"><strong>COACH OPERATIVO · FIREBASE EMULATOR · 2M/J</strong> — Grafica originale; nessuna scrittura nella produzione. Ogni operazione richiede il consenso. <RouterLink to="/coach/atleti?source=emulator">← Gestione atleti</RouterLink></div>
- <section class="panel"><div class="row between"><div><h2 class="card-heading">ARCHIVIO SCHEDE</h2><p class="muted" style="margin:7px 0 0">CREA SCHEDE RIUTILIZZABILI E ASSEGNALE AI TUOI ATLETI</p></div><button v-if="!editing" class="primary" :disabled="!writable||busy" @click="beginModel">＋ Crea nuova scheda dell'archivio</button></div></section>
  <p v-if="error" class="notice" role="alert">{{error}}</p>
  <p v-if="loading" class="muted">Verifica del Coach e lettura degli archivi…</p>
  <section v-if="!loading && session" class="panel">
@@ -180,7 +179,7 @@ onUnmounted(()=>{live=false;closeListeners()})
   <button class="primary wide" :disabled="!consent||busy||!writable||!title.trim()||!exercises.length" @click="save">{{isPersonal?'SALVA SCHEDA PERSONALE':editingId?'SALVA MODIFICHE':'SALVA NELL’ARCHIVIO SCHEDE'}}</button>
  </section>
  <section v-else-if="!loading && session" class="panel">
-  <div class="row between"><div><h2 class="card-heading">ARCHIVIO · SCHEDE</h2><span class="muted small">{{choice.length}} di {{activeCount}} schede attive nell'archivio</span></div><button class="secondary" :disabled="!writable||busy" @click="beginPersonal">+ Crea scheda personale</button></div>
+  <div class="lf30-archive-head"><div class="lf30-archive-title"><h2 class="card-heading">ARCHIVIO SCHEDE</h2><span class="muted small">{{choice.length}} di {{activeCount}} schede attive nell'archivio</span></div><div class="lf30-archive-actions"><button class="secondary" :disabled="!writable||busy" @click="beginPersonal">+ Crea scheda personale</button><button class="primary" :disabled="!writable||busy" @click="beginModel">+ Crea nuova scheda dall'archivio</button></div></div>
   <div class="grid2" style="margin-top:16px"><input v-model="search" type="search" placeholder="Cerca una scheda..."/><select v-model="sort"><option value="recent">Più recenti</option><option value="az">A–Z</option><option value="za">Z–A</option><option value="more">Più esercizi</option></select></div>
   <div class="row" style="justify-content:flex-end;margin:13px 0"><select v-model="filter" style="width:auto"><option value="active">Modelli attivi</option><option value="trash">Nel cestino</option><option value="all">Tutti</option></select></div>
   <div class="grid2"><div v-for="s in choice" :key="s.id" class="archive-card">

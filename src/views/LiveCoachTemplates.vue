@@ -339,8 +339,6 @@ onUnmounted(()=>{live=false;closeListeners()})
 </script>
 <template>
 <div class="stack" style="gap:20px">
- <div class="notice coach-archive-guide" role="status"><strong>{{uiText("ARCHIVIO DEL COACH")}}</strong> {{uiText("· Gestisci le schede e assegnale tramite il pulsante della scheda.")}} <RouterLink :to="{path:'/coach/atleti',query:{...(athleteId?{athleteId}:{}),...(typeof route.query.weekId==='string'?{weekId:route.query.weekId}:{})}}">{{uiText("← Torna alla settimana dell’atleta")}}</RouterLink></div>
- <section class="panel"><div class="row between"><div><h2 class="card-heading">{{uiText("ARCHIVIO SCHEDE")}}</h2></div><button v-if="!editing" class="primary" :disabled="!writable||busy" @click="beginModel">{{uiText("＋ Crea nuova scheda dell'archivio")}}</button></div></section>
  <p v-if="error" class="notice" role="alert">{{error}}</p>
  <p v-lf-quiet-loading v-if="loading" class="muted lf-quiet-status" role="status">{{uiText("Caricamento archivio…")}}</p>
  <section v-if="!loading && session && (!writable || notice)" class="panel">
@@ -430,7 +428,8 @@ onUnmounted(()=>{live=false;closeListeners()})
   <div class="lf-editor-actions"><button type="button" class="secondary" :disabled="busy" @click="editing=false">{{uiText("← Indietro")}}</button><button class="primary" :disabled="busy||!writable||!title.trim()||!exercises.length||(isPersonal&&(!currentAthlete||(dayContext&&!requestedDay)))" @click="save">{{busy?'SALVATAGGIO…':isPersonal?(personalEdit?'SALVA MODIFICHE PERSONALI':'SALVA SCHEDA PERSONALE'):editingId?'SALVA MODIFICHE':'SALVA SCHEDA'}}</button></div>
  </section>
  <section v-else-if="!loading && session" class="panel lf-mobile-archive">
-  <div class="row between"><div><h2 class="card-heading">{{uiText("ARCHIVIO · SCHEDE")}}</h2><span class="muted small">{{modelsReady?choice.length:'—'}} {{uiText("di")}} {{modelsReady?activeCount:'—'}} {{uiText("schede attive nell'archivio")}}</span></div><button v-if="typeof route.query.athleteId==='string'" class="secondary" :disabled="!writable||busy" @click="beginPersonal">{{uiText("+ Crea scheda personale")}}</button></div>
+  <div class="lf30-archive-head"><div class="lf30-archive-title"><h2 class="card-heading">{{uiText("ARCHIVIO SCHEDE")}}</h2><span class="muted small">{{modelsReady?choice.length:'—'}} {{uiText("di")}} {{modelsReady?activeCount:'—'}} {{uiText("schede attive nell'archivio")}}</span></div><div class="lf30-archive-actions"><button v-if="typeof route.query.athleteId==='string'" class="secondary" :disabled="!writable||busy" @click="beginPersonal">{{uiText("+ Crea scheda personale")}}</button><button class="primary" :disabled="!writable||busy" @click="beginModel">{{uiText("+ Crea nuova scheda dall'archivio")}}</button></div></div>
+  <RouterLink v-if="typeof route.query.athleteId==='string'||typeof route.query.weekId==='string'" class="lf30-archive-context" :to="{path:'/coach/atleti',query:{...(athleteId?{athleteId}:{}),...(typeof route.query.weekId==='string'?{weekId:route.query.weekId}:{})}}">{{uiText("← Torna alla settimana dell’atleta")}}</RouterLink>
   <div class="coach-archive-toolbar"><input v-model="search" type="search" placeholder="Cerca una scheda…" aria-label="Cerca una scheda"/><button class="secondary" @click="filter=filter==='trash'?'active':'trash'">{{filter==='trash'?'← Archivio schede':'Apri cestino'}}</button><select v-model="sort" aria-label="Ordina schede"><option value="recent">{{uiText("Più recenti")}}</option><option value="az">{{uiText("Nome A–Z")}}</option><option value="more">{{uiText("Più esercizi")}}</option></select></div>
   <div class="lf-creator-filter" role="group" aria-label="Filtra le schede per Coach creatore">
    <span class="lf-creator-filter-label">{{uiText("Filtra per Coach")}}</span>

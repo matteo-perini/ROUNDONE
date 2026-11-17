@@ -152,6 +152,7 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
     <RouterLink class="lfsettings-flat-row" to="/lionfit-control"><LionIcon name="shield"/><span><b>Control Center</b><small>Accesso riservato Super Admin</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
    </template>
    <h2 class="lfsettings-section-title">{{uiText("Account e assistenza")}}</h2>
+    <RouterLink v-if="isStagingMode()&&stagingSession" class="lfsettings-flat-row" to="/installazione"><LionIcon name="home"/><span><b>Installa LionFit</b><small>Android, iPhone o computer</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
     <RouterLink v-if="!isStagingMode()||stagingSession" class="lfsettings-flat-row" :to="profilePath+(emulator?'&edit=1':'?edit=1')"><LionIcon name="user"/><span><b>{{uiText("Modifica profilo")}}</b></span><LionIcon name="chevron" :size="17"/></RouterLink>
     <button v-if="canResetPassword" class="lfsettings-flat-row" type="button" @click="securityOpen=true;securityStatus=''"><LionIcon name="shield"/><span><b>{{uiText("Sicurezza")}}</b></span><LionIcon name="chevron" :size="17"/></button>
     <a class="lfsettings-flat-row"  :href="privacyHref" target="_blank" rel="noopener noreferrer"><LionIcon name="shield"/><span><b>{{uiText("Privacy")}}</b></span><LionIcon name="chevron" :size="17"/></a>

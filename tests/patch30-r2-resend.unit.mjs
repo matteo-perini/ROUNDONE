@@ -1,0 +1,46 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {readFileSync} from 'node:fs'
+const read=file=>readFileSync(new URL('../'+file,import.meta.url),'utf8')
+const view=read('src/views/LiveCoachStaff.vue')
+const ui=read('src/components/InviteTeamHub.vue')
+const client=read('src/integrations/firebase/inviteMail.ts')
+const cloud=read('invites-backend/functions/index.mjs')
+test('EmailJS stays default; the Resend provider is opt-in',()=>{
+ assert.match(client,/VITE_LIONFIT_INVITES_PROVIDER==='resend'/)
+ assert.match(view,/if\(centralizedInvitesEnabled\(\)\)/)
+ assert.match(view,/https:\/\/api\.emailjs\.com\/api\/v1\.0\/email\/send/g)
+ assert.match(view,/!centralizedInvitesEnabled\(\)/)
+})
+test('no Resend credentials or direct Resend API request in frontend',()=>{
+ assert.doesNotMatch(view+client,/LIONFIT_INVITES_RESEND_API_KEY|api\.resend\.com/)
+ assert.match(client,/httpsCallable/)
+ assert.match(client,/lfSendInviteEmail/)
+})
+test('both invitation flows preserve old pending-token reuse and collaborator restrictions',()=>{
+ assert.match(view,/reusableCoachInvite\(email,s\.gymId\)/)
+ assert.match(view,/reusableUnsent\(email,s\.gymId\)/)
+ assert.match(view,/if\(!owner\.value\)/)
+ assert.match(view,/makeInvite\('atleta','email'\)/)
+ assert.match(view,/if\(x\.type==='coach'&&!owner\.value\)/)
+})
+test('backend denies unapproved environment and enforces auth, gym role, quotas',()=>{
+ assert.match(cloud,/LIONFIT_INVITES_RESEND_ENABLED!=='ENABLED_AFTER_REVIEW'/)
+ assert.match(cloud,/process\.env\.FUNCTIONS_EMULATOR==='true'/)
+ assert.match(cloud,/req\.auth\?\.uid/)
+ assert.match(cloud,/canSendInvite/)
+ assert.match(cloud,/quotaPermits/)
+ assert.match(cloud,/db\.runTransaction/)
+ assert.match(cloud,/Idempotency-Key/)
+ assert.match(cloud,/resendApiKey\.value\(\)/)
+ assert.match(cloud,/base!=='https:\/\/www\.lionfit\.it'/)
+})
+test('R1 UI and navbar preserved, no new menu',()=>{
+ assert.match(ui,/Inviti e Team/)
+ assert.match(ui,/<slot name="pending"/)
+ assert.match(ui,/<slot name="team"/)
+ assert.match(ui,/centralized\?/) 
+ assert.match(view,/<InviteTeamHub/)
+ assert.match(view,/@click="sendAthleteMail"/)
+ assert.match(view,/@click="sendCoachMail"/)
+})

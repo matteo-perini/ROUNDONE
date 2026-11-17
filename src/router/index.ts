@@ -20,6 +20,7 @@ const Bookings = () => import('../views/Bookings.vue')
 const Library = () => import('../views/Library.vue')
 const AthleteProgress = () => import('../views/AthleteProgress.vue')
 const Profile = () => import('../views/Profile.vue')
+const WelcomeInstall = () => import('../views/WelcomeInstall.vue')
 const Settings = () => import('../views/Settings.vue')
 const CoachTrash = () => import('../views/CoachTrash.vue')
 const CoachProgress = () => import('../views/CoachProgress.vue')
@@ -35,6 +36,7 @@ const router=createRouter({history:createWebHistory(),routes:[
  {path:'/progressi',component:AthleteProgress,meta:{title:'Allenamenti Atleta'}},
  {path:'/profilo',component:Profile,meta:{title:'Profilo'}},
  {path:'/impostazioni',component:Settings,meta:{title:'Impostazioni'}},
+ {path:'/installazione',component:WelcomeInstall,meta:{title:'Benvenuto e installazione'}},
  {path:'/assistenza',component:()=>import('../views/Support.vue'),meta:{title:'Assistenza'}},
  {path:'/lionfit-control',component:PlatformAdmin,meta:{title:'LionFit Control Center'}},
  {path:'/prenotazioni',component:Bookings,meta:{title:'Prenotazioni'}},
@@ -92,12 +94,12 @@ router.beforeEach(async to=>{
   const coaches=['/coach','/coach/profilo']
   if(isOperationalMode()) {
    if(to.path==='/impostazioni'&&to.query.inboxSupport==='1')return {path:'/assistenza',replace:true}
-   const liveAthletes=[...athletes,'/prenotazioni','/impostazioni','/assistenza']
-   const liveCoaches=[...coaches,'/impostazioni','/assistenza','/coach/atleti','/coach/programmi','/coach/archivio','/coach/libreria','/coach/cestino','/coach/progressi','/coach/staff','/coach/prenotazioni','/coach/work']
+   const liveAthletes=[...athletes,'/prenotazioni','/impostazioni','/installazione','/assistenza']
+   const liveCoaches=[...coaches,'/impostazioni','/installazione','/assistenza','/coach/atleti','/coach/programmi','/coach/archivio','/coach/libreria','/coach/cestino','/coach/progressi','/coach/staff','/coach/prenotazioni','/coach/work']
    return (s.role==='atleta'?liveAthletes:liveCoaches).includes(to.path)?true:(s.role==='atleta'?'/home':'/coach')
   }
-  if(s.role==='atleta')return athletes.includes(to.path)?true:'/home'
-  return coaches.includes(to.path)?true:'/coach'
+  if(s.role==='atleta')return (to.path==='/installazione'||athletes.includes(to.path))?true:'/home'
+  return (to.path==='/installazione'||coaches.includes(to.path))?true:'/coach'
  }
 
  if(to.path==='/lionfit-control'||to.path==='/assistenza')return '/accesso'
