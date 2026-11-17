@@ -753,5 +753,21 @@
   "Sessione temporanea se disattivato.": "Turn off for a temporary session.",
   "Caricamento agenda…": "Loading calendar…",
   "Caricamento esercizi…": "Loading exercises…",
-  "Licenze e fonti": "Licenses and sources"
+  "Licenze e fonti": "Licenses and sources",
+  "Inviti e Team": "Invites & Team",
+  "INVITI E TEAM": "INVITES & TEAM",
+  "Invita nuovi atleti e gestisci il team della tua palestra.": "Invite new athletes and manage your gym team.",
+  "Tipo di invito": "Invitation type",
+  "Invita atleta": "Invite athlete",
+  "Nuovo atleta": "New athlete",
+  "Invita collaboratore": "Invite collaborator",
+  "Nuovo Coach": "New coach",
+  "Nuovo invito": "New invite",
+  "Inviti in attesa": "Pending invitations",
+  "Gestisci gli inviti ancora validi": "Manage invitations that are still valid",
+  "Il tuo team": "Your team",
+  "Coach e collaboratori": "Coaches and collaborators",
+  "Email collaboratore": "Collaborator email",
+  "Invio disabilitato in questo ambiente.": "Sending is disabled in this environment.",
+  "Modalità demo: nessun invito reale.": "Demo mode: no real invitations."
 }

@@ -2,7 +2,7 @@
 import {uiText} from '../features/i18n/interfaceLanguage'
 /** Inviti email: token monouso creati internamente e revocabili, senza distribuzione manuale. */
 import {onMounted,onUnmounted,ref,computed} from 'vue'
-import {RouterLink} from 'vue-router'
+import InviteTeamHub from '../components/InviteTeamHub.vue'
 import {collection,doc,getDocs,getDocFromServer,onSnapshot,query,where,runTransaction,serverTimestamp,Timestamp,updateDoc,type Unsubscribe} from 'firebase/firestore'
 import {readStagingSession,stagingSession} from '../integrations/firebase/stagingSession'
 import {getStagingClients} from '../integrations/firebase/stagingClient'
@@ -228,21 +228,18 @@ async function revoke(x:Invite){
 }
 </script>
 <template>
- <div class="stack coach-staff-screen staff-v1" style="gap:12px">
-  <section class="panel"><h2>{{uiText("COACH DELLA PALESTRA")}}</h2><p v-if="status==='Caricamento coach e inviti…'" v-lf-quiet-loading class="lf-quiet-status" role="status">{{status}}</p><p v-else-if="status" class="muted small" role="status">{{status}}</p></section>
-  <div class="staff-v1-columns">
-   <div class="stack">
-    <section class="panel"><h3>{{uiText("COACH PRESENTI NELLA PALESTRA")}}</h3><div v-for="c in coaches" :key="c.id" class="line-card staff-person"><span>{{c.name}}</span><span class="pill staff-role">{{c.membershipStatus==='revoked'?'REVOCATO':c.role}}</span><button v-if="owner && c.role!=='TITOLARE' && coachRevocationEnabled() && mayWriteLive()" class="secondary" :disabled="busy" @click="setMemberStatus(c.id,c.membershipStatus==='revoked'?'active':'revoked')">{{c.membershipStatus==='revoked'?'Riattiva':'Revoca accesso'}}</button></div><p v-if="owner && !coachRevocationEnabled()" class="muted small">{{uiText("Revoca accessi non disponibile. Revocare un invito non revoca un account.")}}</p><p v-if="!coaches.length" class="muted small">{{uiText("Nessun coach caricato.")}}</p></section>
-    <section v-if="owner" class="panel"><h3>{{uiText("INVITA UN COACH COLLABORATORE")}}</h3><p class="muted small">{{uiText("Invito valido 7 giorni. Il coach deve registrarsi con la stessa email.")}}</p>
-     <div class="staff-email-row"><input v-model="coachEmail" type="email" placeholder="Email del nuovo coach" aria-label="Email collaboratore"/><button class="primary" :disabled="busy||!emailValid(coachEmail)" @click="sendCoachMail">{{uiText("✉ INVIA INVITO COACH")}}</button></div>
-    </section>
-   </div>
-   <section class="panel staff-athlete-invites"><h3>{{uiText("INVITA UN ATLETA")}}</h3><p class="muted small">{{uiText("Inviti personali · validi 7 giorni.")}}</p>
-    <section class="staff-invite-subcard"><label>{{uiText("EMAIL DELL'ATLETA")}}<input v-model="athleteEmail" type="email" placeholder="atleta@esempio.it"/></label><button class="primary wide" :disabled="busy||!emailValid(athleteEmail)" @click="sendAthleteMail">{{uiText("✉ INVIA INVITO ATLETA")}}</button></section>
-    <details class="staff-details"><summary>{{uiText("Impostazioni email (avanzate)")}}</summary><div class="staff-email-settings"><label>SERVICE ID<input v-model="serviceId" autocomplete="off" placeholder="service_..."/></label><label>PUBLIC KEY<input v-model="publicKey" autocomplete="off" placeholder="Public Key EmailJS"/></label><label>{{uiText("TEMPLATE INVITI (COACH E ATLETI)")}}<input v-model="templateId" autocomplete="off" placeholder="template_..."/></label></div><button class="secondary" @click="saveEmailSettings">{{uiText("Salva configurazione EmailJS")}}</button><p class="muted small">{{uiText("Questi ID pubblici sono salvati solo su questo dispositivo. Usiamo un solo template neutro per entrambi i ruoli. Il ruolo e il tipo di account sono determinati esclusivamente dall’invito Firebase verificato. Non inserire password o chiavi private.")}}</p></details>
-    <details class="staff-details"><summary>{{uiText("Gestisci inviti pendenti e precedenti (")}}{{activeInvites.length}})</summary><div v-if="!activeInvites.length" class="muted small">{{uiText("Nessun invito pendente.")}}</div><div v-for="x in activeInvites" :key="x.type+x.id" class="line-card row between"><span class="small">{{x.type==='coach'?'Coach':'Atleta'}} · {{x.email||x.id.slice(0,8)+'…'}}</span><button class="ghost" :disabled="busy" @click="revoke(x)">{{uiText("Revoca")}}</button></div></details>
-   </section>
-  </div>
-  <RouterLink to="/coach" class="secondary">{{uiText("← TORNA ALLA DASHBOARD")}}</RouterLink>
- </div>
+ <InviteTeamHub :owner="owner" :busy="busy">
+  <template #athlete>
+   <h3>{{uiText("INVITA UN ATLETA")}}</h3><p class="muted small">{{uiText("Inviti personali · validi 7 giorni.")}}</p>
+   <div class="lf-invite-send"><label>{{uiText("EMAIL DELL'ATLETA")}}<input v-model="athleteEmail" type="email" autocomplete="email" placeholder="atleta@esempio.it" :disabled="busy"/></label><button type="button" class="primary" :disabled="busy||!mayWriteLive()||!emailValid(athleteEmail)" @click="sendAthleteMail">{{uiText("✉ INVIA INVITO ATLETA")}}</button></div>
+  </template>
+  <template v-if="owner" #coach>
+   <h3>{{uiText("INVITA UN COACH COLLABORATORE")}}</h3><p class="muted small">{{uiText("Invito valido 7 giorni. Il coach deve registrarsi con la stessa email.")}}</p>
+   <div class="lf-invite-send"><label>{{uiText('Email collaboratore')}}<input v-model="coachEmail" type="email" autocomplete="email" placeholder="Email del nuovo coach" :disabled="busy"/></label><button type="button" class="primary" :disabled="busy||!mayWriteLive()||!emailValid(coachEmail)" @click="sendCoachMail">{{uiText("✉ INVIA INVITO COACH")}}</button></div>
+  </template>
+  <template #status><p v-if="status==='Caricamento coach e inviti…'" v-lf-quiet-loading class="lf-quiet-status" role="status">{{status}}</p><p v-else-if="status" class="muted small lf-invite-feedback" role="status">{{status}}</p><p v-if="!mayWriteLive()" class="muted small lf-invite-feedback">{{uiText('Invio disabilitato in questo ambiente.')}}</p></template>
+  <template #team><div v-for="c in coaches" :key="c.id" class="line-card staff-person"><span>{{c.name}}</span><span class="pill staff-role">{{c.membershipStatus==='revoked'?'REVOCATO':c.role}}</span><button v-if="owner && c.role!=='TITOLARE' && coachRevocationEnabled() && mayWriteLive()" class="secondary" :disabled="busy" @click="setMemberStatus(c.id,c.membershipStatus==='revoked'?'active':'revoked')">{{c.membershipStatus==='revoked'?'Riattiva':'Revoca accesso'}}</button></div><p v-if="owner && !coachRevocationEnabled()" class="muted small">{{uiText("Revoca accessi non disponibile. Revocare un invito non revoca un account.")}}</p><p v-if="!coaches.length" class="muted small">{{uiText("Nessun coach caricato.")}}</p></template>
+  <template #pending><div v-if="!activeInvites.length" class="muted small">{{uiText("Nessun invito pendente.")}}</div><div v-for="x in activeInvites" :key="x.type+x.id" class="line-card row between"><span class="small">{{x.type==='coach'?'Coach':'Atleta'}} · {{x.email||x.id.slice(0,8)+'…'}}</span><button class="ghost" :disabled="busy||!mayWriteLive()" @click="revoke(x)">{{uiText("Revoca")}}</button></div></template>
+  <template #settings><div class="staff-email-settings"><label>SERVICE ID<input v-model="serviceId" :disabled="busy" autocomplete="off" placeholder="service_..."/></label><label>PUBLIC KEY<input v-model="publicKey" :disabled="busy" autocomplete="off" placeholder="Public Key EmailJS"/></label><label>{{uiText("TEMPLATE INVITI (COACH E ATLETI)")}}<input v-model="templateId" :disabled="busy" autocomplete="off" placeholder="template_..."/></label></div><button class="secondary" :disabled="busy" @click="saveEmailSettings">{{uiText("Salva configurazione EmailJS")}}</button><p class="muted small">{{uiText("Questi ID pubblici sono salvati solo su questo dispositivo. Usiamo un solo template neutro per entrambi i ruoli. Il ruolo e il tipo di account sono determinati esclusivamente dall’invito Firebase verificato. Non inserire password o chiavi private.")}}</p></template>
+ </InviteTeamHub>
 </template>

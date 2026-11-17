@@ -47,7 +47,7 @@ const router=createRouter({history:createWebHistory(),routes:[
  {path:'/coach/cestino',component:CoachTrash,meta:{title:'Cestino',coachOnly:true}},
  {path:'/coach/progressi',component:CoachProgress,meta:{title:'Allenamenti Coach',coachOnly:true}},
  {path:'/coach/work',component:()=>import('../views/WorkReport.vue'),meta:{title:'Report lavorativi',coachOnly:true}},
- {path:'/coach/staff',component:CoachStaff,meta:{title:'Coach e Inviti',coachOnly:true}},
+ {path:'/coach/staff',component:CoachStaff,meta:{title:'Inviti e Team',coachOnly:true}},
  {path:'/coach/profilo',component:Profile,meta:{title:'Profilo Coach',coachOnly:true}},
  {path:'/coach/prenotazioni',component:Bookings,meta:{title:'Calendario Appuntamenti',coachOnly:true}},
  ...(import.meta.env.DEV ? [{path:'/classica',component:()=>import('../views/Classic.vue'),meta:{title:'Sorgente Originale'}}] : []),

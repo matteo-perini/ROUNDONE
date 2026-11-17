@@ -45,10 +45,10 @@ function show(id:string){active.value=active.value===id?'':id}
     </div>
    </section>
    <RouterLink v-if="athlete && workoutsEnabled" class="lfp-section-button" to="/progressi"><span class="lfp-section-icon"><LionIcon name="dumbbell" :size="21"/></span><span class="lfp-section-copy"><strong>{{uiText("Allenamenti")}}</strong><small>{{uiText("Storico, andamento e obiettivi")}}</small></span><LionIcon name="chevron" :size="18"/></RouterLink>
-   <RouterLink v-if="!athlete && staffEnabled && (role==='titolare'||role==='coach-demo')" class="lfp-section-button lfp-mobile-staff" :to="coachStaffTo"><span class="lfp-section-icon"><LionIcon name="users" :size="21"/></span><span class="lfp-section-copy"><strong>{{uiText("Coach della palestra")}}</strong></span><LionIcon name="chevron" :size="18"/></RouterLink>
+   <RouterLink v-if="!athlete && staffEnabled && (role==='titolare'||role==='coach-demo')" class="lfp-section-button lfp-mobile-staff" :to="coachStaffTo"><span class="lfp-section-icon"><LionIcon name="users" :size="21"/></span><span class="lfp-section-copy"><strong>{{uiText("Inviti e Team")}}</strong></span><LionIcon name="chevron" :size="18"/></RouterLink>
    <RouterLink class="lfp-section-button lfp-settings-link" :to="settingsTo"><span class="lfp-section-icon"><LionIcon name="settings" :size="21"/></span><span class="lfp-section-copy"><strong>{{uiText("Impostazioni")}}</strong></span><LionIcon name="chevron" :size="18"/></RouterLink>
   </div>
-  <div v-if="!athlete" class="lfp-actions"><h3>{{uiText("Azioni rapide")}}</h3><div class="lfp-action-grid"><RouterLink :to="athleteTo"><LionIcon name="users"/> {{uiText("Gestisci atleti")}}</RouterLink><RouterLink :to="bookingsTo"><LionIcon name="calendar"/> {{uiText("Prenotazioni")}}</RouterLink><RouterLink v-if="staffEnabled&&(role==='titolare'||role==='coach-demo')" :to="coachStaffTo"><LionIcon name="gym"/> {{uiText("Coach della palestra")}}</RouterLink></div></div>
+  <div v-if="!athlete" class="lfp-actions"><h3>{{uiText("Azioni rapide")}}</h3><div class="lfp-action-grid"><RouterLink :to="athleteTo"><LionIcon name="users"/> {{uiText("Gestisci atleti")}}</RouterLink><RouterLink :to="bookingsTo"><LionIcon name="calendar"/> {{uiText("Prenotazioni")}}</RouterLink><RouterLink v-if="staffEnabled&&(role==='titolare'||role==='coach-demo')" :to="coachStaffTo"><LionIcon name="gym"/> {{uiText("Inviti e Team")}}</RouterLink></div></div>
  </section>
 </template>
 
