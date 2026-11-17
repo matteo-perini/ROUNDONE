@@ -32,8 +32,9 @@ import type {Exercise,Sheet} from '../model'
 import {newId} from '../model'
 import {mayWriteLive} from '../integrations/firebase/stagingConfig'
 import type {Personal,ProgramWeek} from '../features/sheets/domain'
-import {assignmentBlock,athleteMatches,partitionPrograms,romeDate,weekEnd} from '../features/sheets/assignmentPolicy'
+import {assignmentBlock,personalTemplateInTrash,availableAssignmentModels,partitionPrograms,romeDate,weekEnd} from '../features/sheets/assignmentPolicy'
 import SheetDetail from '../components/SheetDetail.vue'
+import AthleteSearchSelect from '../components/AthleteSearchSelect.vue'
 import {creatorFilterChoices,creatorFilterMatches,creatorDisplayName,type ArchiveCreatorCoach} from '../features/coach/archiveCreatorFilters'
 import {availableLegacyCoaches,unassignedLegacyModels,checkLegacyAttribution} from '../features/coach/legacyTemplateAttribution'
 import {attributeLegacyTemplate} from '../integrations/firestore/legacyTemplateAttribution'
@@ -41,17 +42,15 @@ import {attributeLegacyTemplate} from '../integrations/firestore/legacyTemplateA
 type Model = Sheet & {createdBy:string;updatedBy:string;revision:number;createdMs:number;legacyCreatorAssignedBy?:string}
 const route=useRoute(),router=useRouter()
 const session=shallowRef<StagingSession|null>(null)
-const models=ref<Model[]>([]),modelsReady=ref(false),roster=ref<RosterAthlete[]>([]),athleteId=ref('')
+const models=ref<Model[]>([]),modelsReady=ref(false),modelsConfirmed=ref(false),roster=ref<RosterAthlete[]>([]),athleteId=ref('')
 // La paternita' e' un'etichetta per i filtri, mai un permesso.
 const archiveCoaches=ref<(ArchiveCreatorCoach & {active:boolean})[]>([]),creatorFilter=ref('all'),coachLookupNotice=ref('')
 // One-time migration UI: only the gym Owner can attribute templates lacking createdBy.
 const legacyPanelOpen=ref(false),legacyCreatorSelections=ref<Record<string,string>>({}),legacyBusyId=ref('')
 const pickAssign=shallowRef<Model|null>(null)
 const coachFilter=ref<CoachRosterFilter>('tutti')
-const assignSearch=ref('')
 let coachFilterInitialized=false
 const visibleRoster=computed(()=>roster.value.filter(a=>belongsToCoach(a,session.value?.uid||'',coachFilter.value)))
-const searchedRoster=computed(()=>visibleRoster.value.filter(a=>athleteMatches(a.name,assignSearch.value)))
 const hasAnyMembership=computed(()=>roster.value.some(a=>hasCoachAssignment(a)))
 const dayContext=computed(()=>hasDayEditorIntent(route.query))
 const requestedDay=computed(()=>parseDayEditorIntent(route.query))
@@ -69,7 +68,9 @@ const chosenWeek=computed(()=>chosenProgram.value?.weeks.find(w=>w.id===assignWe
 const targetDay=computed(()=>chosenWeek.value?.days[assignDay.value])
 const targetId=computed(()=>String((assignSlot.value===1?targetDay.value?.templateId:targetDay.value?.templateId2)||''))
 const freeBlock=computed(()=>pickAssign.value&&currentAthlete.value&&assignReady.value?assignmentBlock(pickAssign.value,assignPersonal.value,assignWeeks.value,currentAthlete.value.id,assignDate.value):'')
-const personalTrashed=computed(()=>assignPersonal.value.some(p=>p.id===pickAssign.value?.id&&p.deletedAt))
+const personalConfirmed=ref(false)
+const personalTrashed=computed(()=>!!pickAssign.value&&!!currentAthlete.value&&personalTemplateInTrash(pickAssign.value.id,dayContext.value?personal.value:assignPersonal.value,currentAthlete.value.id))
+const modelAvailable=computed(()=>!!pickAssign.value&&modelsReady.value&&modelsConfirmed.value&&models.value.some(m=>m.id===pickAssign.value?.id&&!m.deletedAt))
 const slotTitleForAssign=(slot:1|2)=>{const id=slot===1?targetDay.value?.templateId:targetDay.value?.templateId2;return id?(assignPersonal.value.find(p=>p.id===id)?.title||'Scheda presente'):'Disponibile'}
 function pickProgram(id:string){assignProgramId.value=id;assignWeekId.value='';assignDay.value=0;assignSlot.value=1}
 function pickWeek(id:string){assignWeekId.value=id;assignDay.value=0;assignSlot.value=1}
@@ -149,19 +150,19 @@ const creatorName=(uid:string)=>creatorDisplayName(uid,archiveCoaches.value,sess
 const legacyUnassigned=computed(()=>unassignedLegacyModels(models.value))
 const legacyAvailableCoaches=computed(()=>availableLegacyCoaches(archiveCoaches.value))
 const canAssignLegacy=computed(()=>writable.value && session.value?.role==='titolare' && !editing.value)
-const choice=computed(()=>models.value.filter(s=>(filter.value==='all'||(filter.value==='trash'?!!s.deletedAt:!s.deletedAt)) &&
+const choice=computed(()=>(dayContext.value&&filter.value==='active'?(modelsConfirmed.value&&personalConfirmed.value&&currentAthlete.value?availableAssignmentModels(models.value,personal.value,currentAthlete.value.id):[]):models.value).filter(s=>(filter.value==='all'||(filter.value==='trash'?!!s.deletedAt:!s.deletedAt)) &&
  creatorFilterMatches(s.createdBy,creatorFilter.value,session.value?.uid||'') &&
  (modelSearch.value.get(s.id)||'').includes(search.value.toLowerCase()))
  .slice().sort((a,b)=>sort.value==='az'?a.title.localeCompare(b.title,'it'):sort.value==='za'?b.title.localeCompare(a.title,'it'):sort.value==='more'?b.exercises.length-a.exercises.length:b.createdMs-a.createdMs))
 const lastOwnEditable=computed(()=>editingId.value && models.value.find(x=>x.id===editingId.value))
 let live=true,stopModels:Unsubscribe|null=null,stopUsers:Unsubscribe|null=null,stopCoaches:Unsubscribe|null=null,stopPersonal:Unsubscribe|null=null,stopAuth:Unsubscribe|null=null
 const closeListeners=()=>{clearAssignment();stopModels?.();stopModels=null;stopUsers?.();stopUsers=null;stopCoaches?.();stopCoaches=null;stopPersonal?.();stopPersonal=null;stopAuth?.();stopAuth=null}
-watch([()=>currentAthlete.value?.id||'',()=>!!pickAssign.value],([id,assigning])=>{stopPersonal?.();stopPersonal=null;personal.value=[]
- if(assigning&&!dayContext.value)return
+watch([()=>currentAthlete.value?.id||'',()=>!!pickAssign.value&&!dayContext.value],([id,assigning])=>{stopPersonal?.();stopPersonal=null;personal.value=[];personalConfirmed.value=false
+ if(assigning)return
  if(!session.value||!maySelectLabAthlete(roster.value,session.value.gymId,id))return
  const {db}=getStagingClients(),s=session.value
- stopPersonal=watchPersonalSheets(db,s.gymId,id,sheets=>{if(live && currentAthlete.value?.id===id)personal.value=sheets},e=>{if(live)error.value=`Schede personali non leggibili: ${e.message}`})
-})
+ stopPersonal=watchPersonalSheets(db,s.gymId,id,(sheets,confirmed)=>{if(live&&currentAthlete.value?.id===id){personal.value=sheets;personalConfirmed.value=confirmed===true}},e=>{if(live&&currentAthlete.value?.id===id){personalConfirmed.value=false;error.value=`Schede personali non leggibili: ${e.message}`}},dayContext.value)
+},{flush:'sync'})
 watch([()=>pickAssign.value?.id||'',()=>currentAthlete.value?.id||''],([model,id])=>{
  clearAssignment();assignProgramId.value='';assignWeekId.value='';assignDay.value=0;assignSlot.value=1;assignDate.value=romeDate()
  if(!model||!id||dayContext.value||!session.value||!maySelectLabAthlete(roster.value,session.value.gymId,id))return
@@ -227,17 +228,18 @@ async function save(){
  },wasPersonal)
 }
 function openAssign(s:Model){
- if(s.deletedAt)return
+ if(s.deletedAt||!modelsReady.value||!modelsConfirmed.value||!models.value.some(m=>m.id===s.id&&!m.deletedAt))return
+ if(dayContext.value&&(!personalConfirmed.value||!currentAthlete.value||personalTemplateInTrash(s.id,personal.value,currentAthlete.value.id)))return
  assignMode.value='program';notice.value='';pickAssign.value=s
- assignSearch.value=''
  const fromRoute=typeof route.query.athleteId==='string'?route.query.athleteId:''
  if(dayContext.value||!currentAthlete.value)athleteId.value=roster.value.some(a=>a.id===fromRoute)?fromRoute:''
 }
 async function assign(s:Model){
  if(dayContext.value&&!linkIntent()){notice.value='Giorno, slot o atleta non validi: collegamento non effettuato.';return}
- if(s.deletedAt||!currentAthlete.value){notice.value='Seleziona un atleta prima di assegnare.';return}
- if(personal.value.some(p=>p.id===s.id&&p.deletedAt)||personalTrashed.value){notice.value='Scheda personale nel cestino: ripristinala prima di assegnarla.';return}
+ if(s.deletedAt||!modelAvailable.value||!currentAthlete.value){notice.value='Seleziona un atleta prima di assegnare.';return}
+ if(personalTrashed.value){notice.value='Scheda personale nel cestino: ripristinala prima di assegnarla.';return}
  const fixed=linkIntent(),mode=assignMode.value
+ if(fixed&&!personalConfirmed.value){notice.value='Attendi la conferma delle schede personali dal server.';return}
  const w=chosenWeek.value,day=assignDay.value,slot=assignSlot.value,expected=targetId.value
  if(!fixed){
   if(!assignReady.value){notice.value='Attendi il caricamento della programmazione.';return}
@@ -301,12 +303,12 @@ onMounted(async()=>{
   if(!['titolare','collaboratore'].includes(verified.role)||!verified.gymId||verified.gymId.includes('/')||verified.gymId.startsWith('demo-'))throw new Error('Accesso Coach non autorizzato.')
   session.value=verified
   const {db,auth}=getStagingClients()
-  stopModels=onSnapshot(collection(db,'gyms',verified.gymId,'templates'),snap=>{
+  stopModels=onSnapshot(collection(db,'gyms',verified.gymId,'templates'),{includeMetadataChanges:true},snap=>{
    if(!live)return
    models.value=snap.docs.map(d=>{const x=d.data();return {id:d.id,title:String(x.title||''),category:String(x.category||'Allenamento'),exercises:Array.isArray(x.exercises)?x.exercises:[],createdBy:String(x.createdBy||''),updatedBy:String(x.updatedBy||''),...(x.legacyCreatorAssignedBy?{legacyCreatorAssignedBy:String(x.legacyCreatorAssignedBy)}:{}),revision:Number(x.revision||0),createdMs:typeof x.createdAt?.toMillis==='function'?x.createdAt.toMillis():typeof x.updatedAt?.toMillis==='function'?x.updatedAt.toMillis():0,...(x.deletedAt?{deletedAt:String(x.deletedAt)}:{})} as Model})
-   modelsReady.value=true
+   modelsReady.value=true;modelsConfirmed.value=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites
    if(!legacyUnassigned.value.length)legacyPanelOpen.value=false
-  },e=>{if(live){modelsReady.value=false;models.value=[];error.value=`Archivio Coach non leggibile: ${e.message}`}})
+  },e=>{if(live){modelsReady.value=false;modelsConfirmed.value=false;models.value=[];error.value=`Archivio Coach non leggibile: ${e.message}`}})
   // La query e' limitata alla stessa palestra e al ruolo Coach (come in Gestione Atleti).
   // Non modifica i permessi di lettura/scrittura delle schede condivise.
   stopCoaches=onSnapshot(query(collection(db,'users'),where('gymId','==',verified.gymId),where('role','==','admin')),snap=>{
@@ -320,11 +322,12 @@ onMounted(async()=>{
   },()=>{if(live)coachLookupNotice.value='Nomi Coach temporaneamente non disponibili; le schede restano accessibili.'})
   stopUsers=onSnapshot(query(collection(db,'users'),where('gymId','==',verified.gymId),where('role','==','athlete')),snap=>{
    if(!live)return
-   roster.value=labCoachRoster(snap.docs.map(d=>({id:d.id,data:d.data()})),verified.gymId)
+   roster.value=labCoachRoster(snap.docs.filter(d=>(d.data().membershipStatus??'active')==='active').map(d=>({id:d.id,data:d.data()})),verified.gymId)
    if(!coachFilterInitialized){coachFilterInitialized=true;if(roster.value.some(a=>a.primaryCoachUid===verified.uid))coachFilter.value='miei'}
    if(!maySelectLabAthlete(roster.value,verified.gymId,athleteId.value)){
     const requested=typeof route.query.athleteId==='string'?route.query.athleteId:''
-    athleteId.value=requested?(roster.value.find(a=>a.id===requested)?.id||''):(roster.value[0]?.id||'')
+    // Never replace a cleared or removed assignment target implicitly.
+    athleteId.value=pickAssign.value&&!dayContext.value?'':requested?(roster.value.find(a=>a.id===requested)?.id||''):(roster.value[0]?.id||'')
    }
    loading.value=false
   },e=>{if(live){loading.value=false;error.value=`Elenco atleti non leggibile: ${e.message}`}})
@@ -447,21 +450,20 @@ onUnmounted(()=>{live=false;closeListeners()})
    <div class="archive-actions lf-archive-desktop-actions"><button class="secondary" @click="preview=s">{{uiText("Visualizza")}}</button>
     <button v-if="!s.deletedAt" class="secondary" :disabled="!session||!canManageCoachModel(s.id,session.role)" @click="edit(s)">{{uiText("Modifica")}}</button>
     <button v-if="!s.deletedAt" class="secondary" :disabled="busy||!writable" @click="duplicate(s)">{{uiText("Duplica")}}</button>
-    <button v-if="!s.deletedAt" class="primary" :disabled="busy||!writable" @click="openAssign(s)">{{uiText("Assegna")}}</button>
+    <button v-if="!s.deletedAt&&(!dayContext||(personalConfirmed&&currentAthlete&&!personalTemplateInTrash(s.id,personal,currentAthlete.id)))" class="primary" :disabled="busy||!writable||!modelsConfirmed" @click="openAssign(s)">{{uiText("Assegna")}}</button>
     <button v-if="!s.deletedAt" class="danger" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="trash(s)">{{uiText("Nel Cestino")}}</button>
     <button v-if="s.deletedAt" class="secondary" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="restore(s)">{{uiText("Ripristina")}}</button>
    </div>
-   <div class="lf-archive-mobile-actions"><button v-if="!s.deletedAt" class="primary" :disabled="busy||!writable" @click="openAssign(s)">{{uiText("Assegna")}}</button><button class="secondary" @click="preview=s">{{uiText("Visualizza")}}</button><button v-if="!s.deletedAt" class="secondary" :disabled="!session||!canManageCoachModel(s.id,session.role)" @click="edit(s)">{{uiText("Modifica")}}</button><button v-if="s.deletedAt" class="secondary" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="restore(s)">{{uiText("Ripristina")}}</button><details v-if="!s.deletedAt" class="lf-archive-more"><summary :aria-label="'Altre azioni: '+s.title">⋮</summary><div><button class="secondary" :disabled="busy||!writable" @click="duplicate(s)">{{uiText("Duplica")}}</button><button class="danger" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="trash(s)">{{uiText("Nel Cestino")}}</button></div></details></div>
+   <div class="lf-archive-mobile-actions"><button v-if="!s.deletedAt&&(!dayContext||(personalConfirmed&&currentAthlete&&!personalTemplateInTrash(s.id,personal,currentAthlete.id)))" class="primary" :disabled="busy||!writable||!modelsConfirmed" @click="openAssign(s)">{{uiText("Assegna")}}</button><button class="secondary" @click="preview=s">{{uiText("Visualizza")}}</button><button v-if="!s.deletedAt" class="secondary" :disabled="!session||!canManageCoachModel(s.id,session.role)" @click="edit(s)">{{uiText("Modifica")}}</button><button v-if="s.deletedAt" class="secondary" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="restore(s)">{{uiText("Ripristina")}}</button><details v-if="!s.deletedAt" class="lf-archive-more"><summary :aria-label="'Altre azioni: '+s.title">⋮</summary><div><button class="secondary" :disabled="busy||!writable" @click="duplicate(s)">{{uiText("Duplica")}}</button><button class="danger" :disabled="busy||!writable||!session||!canManageCoachModel(s.id,session.role)" @click="trash(s)">{{uiText("Nel Cestino")}}</button></div></details></div>
   </div></div>
-  <p v-if="modelsReady&&!choice.length" class="muted">{{uiText("Nessuna scheda corrisponde ai filtri.")}}</p>
+  <p v-if="dayContext&&(!personalConfirmed||!modelsConfirmed)" class="muted small" role="status">In attesa della conferma delle schede personali dal server…</p><p v-else-if="modelsReady&&!choice.length" class="muted">{{uiText("Nessuna scheda corrisponde ai filtri.")}}</p>
   
   
  </section>
  <div v-if="pickAssign" class="modal-overlay" @click.self="closeAssign"><div class="dialog coach-assign-dialog lf-r3-assign" role="dialog" aria-modal="true" aria-label="Assegna scheda"><div class="row between"><h2>{{pickAssign.title}}</h2><button class="bare" :disabled="busy" aria-label="Chiudi" @click="closeAssign">✕</button></div>
  <p v-if="dayContext" class="notice">{{currentAthlete&&requestedDay ? `${currentAthlete.name} · ${DAY_NAMES[requestedDay.day]} · Scheda ${requestedDay.slot}` : 'Contesto del giorno non valido.'}}</p>
  <template v-else>
- <label>{{uiText('Cerca atleta')}}<input v-model="assignSearch" :disabled="busy" type="search" autocomplete="off" placeholder="Nome o cognome…"/></label>
- <label>{{uiText('Atleta')}}<select v-model="athleteId" :disabled="busy"><option value="">Seleziona atleta…</option><option v-for="a in searchedRoster" :key="a.id" :value="a.id">{{a.name}}</option></select></label>
+ <AthleteSearchSelect v-model="athleteId" :athletes="visibleRoster" :disabled="busy" allow-empty/>
  <label>{{uiText('Visualizza atleti')}}<select v-model="coachFilter" :disabled="busy"><option value="miei">I miei</option><option value="condivisi">Condivisi</option><option value="tutti">Tutti</option></select></label>
  <template v-if="currentAthlete">
  <div class="lf-r3-choice"><button type="button" :class="assignMode==='program'?'primary':'secondary'" :disabled="busy" :aria-pressed="assignMode==='program'" @click="assignMode='program'">Nella programmazione</button><button type="button" :class="assignMode==='free'?'primary':'secondary'" :disabled="busy" :aria-pressed="assignMode==='free'" @click="assignMode='free'">Senza programmazione</button></div>
@@ -472,7 +474,7 @@ onUnmounted(()=>{live=false;closeListeners()})
  <template v-if="chosenWeek"><label>Giorno<select v-model.number="assignDay" :disabled="busy"><option v-for="(d,i) in DAY_NAMES" :key="i" :value="i">{{d}}</option></select></label><div class="lf-r3-choice"><button v-for="slot in ([1,2] as const)" :key="slot" type="button" :disabled="busy" :class="assignSlot===slot?'primary':'secondary'" :aria-pressed="assignSlot===slot" @click="assignSlot=slot"><b>Scheda {{slot}}</b><small>{{slotTitleForAssign(slot)}}</small></button></div></template>
  </template><p v-else-if="freeBlock" class="notice" role="status">{{freeBlock}}</p>
  </template></template>
- <p v-if="notice" class="notice" role="alert">{{notice}}</p><button class="primary wide" :disabled="busy||!writable||!currentAthlete||(dayContext?!requestedDay:(!assignReady||personalTrashed||(assignMode==='free'?!!freeBlock:!chosenWeek||targetId===pickAssign.id)))||personal.some(p=>p.id===pickAssign?.id&&p.deletedAt)" @click="assign(pickAssign)">{{uiText('Assegna scheda')}}</button></div></div>
+ <p v-if="personalTrashed" class="notice" role="status">Scheda personale nel cestino: ripristinala prima di assegnarla.</p><p v-if="notice" class="notice" role="alert">{{notice}}</p><button class="primary wide" :disabled="busy||!writable||!currentAthlete||!modelAvailable||personalTrashed||(dayContext?(!requestedDay||!personalConfirmed):(!assignReady||(assignMode==='free'?!!freeBlock:!chosenWeek||targetId===pickAssign.id)))" @click="assign(pickAssign)">{{uiText('Assegna scheda')}}</button></div></div>
  <Library v-if="editing&&libraryTarget" selection-mode @select="selectLibraryExercise" @close="closeLibrary"/>
  <SheetDetail v-if="preview" :sheet="preview" @close="preview=null"/>
 </div>

@@ -28,8 +28,7 @@ export function activeAssignmentGroups(personal:readonly Personal[],weeks:readon
 }
 type Model=TemplateLike & {id:string}
 export function assignmentBlock(model:Model,personal:readonly Personal[],weeks:readonly ProgramWeek[],athlete:string,today:string):string{
- const exact=personal.find(p=>p.id===model.id&&p.athleteId===athlete)
- if(exact?.deletedAt)return 'Scheda personale nel Cestino: ripristinala prima di assegnarla.'
+ if(personalTemplateInTrash(model.id,personal,athlete))return 'Scheda personale nel Cestino: ripristinala prima di assegnarla.'
  const sig=semanticSheetSignature(model)
  const same=(p:Personal)=>p.id===model.id||p.sourceId===model.id||semanticSheetSignature(p)===sig
  const groups=activeAssignmentGroups(personal,weeks,athlete,today)
@@ -39,7 +38,16 @@ export function assignmentBlock(model:Model,personal:readonly Personal[],weeks:r
  if(groups.unprogrammed.some(g=>same(g.sheet)))return 'Scheda già assegnata senza programmazione.'
  return ''
 }
+// Assignment writes use the canonical model ID as the personal document ID.
+// Never use semantic equality as a trash marker: independent models can have the same content.
+export function personalTemplateInTrash(modelId:string,personal:readonly Pick<Personal,'id'|'athleteId'|'deletedAt'>[],athlete:string):boolean{
+ return personal.some(p=>p.id===modelId&&p.athleteId===athlete&&!!p.deletedAt)
+}
+export function availableAssignmentModels<T extends {id:string;deletedAt?:unknown}>(models:readonly T[],personal:readonly Pick<Personal,'id'|'athleteId'|'deletedAt'>[],athlete:string):T[]{
+ const trashed=new Set(personal.filter(p=>p.athleteId===athlete&&p.deletedAt).map(p=>p.id))
+ return models.filter(m=>!m.deletedAt&&!trashed.has(m.id))
+}
 export function athleteMatches(name:string,query:string):boolean{
- const norm=(s:string)=>s.normalize('NFD').replace(/\p{Diacritic}/gu,'').toLocaleLowerCase('it').trim()
+ const norm=(s:string)=>s.normalize('NFD').replace(/\p{Diacritic}/gu,'').toLocaleLowerCase('it').replace(/[’‘'`]/gu,'').replace(/[-‐‑–—]/gu,' ').trim()
  const n=norm(name);return norm(query).split(/\s+/).every(word=>n.includes(word))
 }

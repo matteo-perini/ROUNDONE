@@ -126,10 +126,10 @@ export function watchAthleteSheets(db:Firestore,gym:string,athlete:string,emit:(
 }
 
 /** Archive editor needs personal documents only, not the athlete's program weeks. */
-export function watchPersonalSheets(db:Firestore,gym:string,athlete:string,emit:(s:Personal[])=>void,onError:(error:Error)=>void):Unsubscribe{
+export function watchPersonalSheets(db:Firestore,gym:string,athlete:string,emit:(s:Personal[],confirmed?:boolean)=>void,onError:(error:Error)=>void,trackServerConfirmation=false):Unsubscribe{
  let disposed=false
  const project=createSnapshotProjection((x:QueryDocumentSnapshot)=>rawToPersonal(x.id,athlete,x.data()))
- const stop=onSnapshot(collection(root(db,gym,athlete),'personal_templates'),snapshot=>{if(!disposed)emit(project(snapshot))},e=>{if(!disposed)onError(e)})
+ const stop=onSnapshot(collection(root(db,gym,athlete),'personal_templates'),{includeMetadataChanges:trackServerConfirmation},snapshot=>{if(!disposed)emit(project(snapshot),!snapshot.metadata.fromCache&&!snapshot.metadata.hasPendingWrites)},e=>{if(!disposed)onError(e)})
  return ()=>{disposed=true;stop()}
 }
 

@@ -11,7 +11,7 @@ import {mayWriteLive} from '../integrations/firebase/stagingConfig'
 import {assignSharedToDay,trashPersonal,watchAthleteSheets,backfillProtectedLegacy} from '../integrations/firestore/sheets'
 import {createV1Program,saveV1WeekActivities,duplicateV1Weeks,trashV1Week,restoreV1Week} from '../integrations/firestore/programs'
 import {advanceV1Monday} from '../features/sheets/v1WeekCodec'
-import {activeAssignmentGroups,romeDate,weekExpired,weekOrdinal} from '../features/sheets/assignmentPolicy'
+import {activeAssignmentGroups,romeDate,weekExpired,weekOrdinal,availableAssignmentModels} from '../features/sheets/assignmentPolicy'
 import {groupActivePrograms,programForWeek,firstVacantMonday} from '../features/sheets/programFamilies'
 import {hasUnsavedActivities} from '../features/sheets/weekDraftPolicy'
 import {updateV1WeekSlot} from '../integrations/firestore/liveWeekSlots'
@@ -33,7 +33,8 @@ let openedSearchId=''
 const opened=shallowRef<Personal|null>(null),pick=ref<{day:number;slot:1|2}|null>(null),pickSearch=ref('')
 type SharedChoice={id:string;title:string;category:string;exercises:Personal['exercises']}
 const sharedChoices=ref<SharedChoice[]>([]),sharedLoading=ref(false),sharedError=ref('')
-const visibleShared=computed(()=>sharedChoices.value.filter(x=>(x.title+' '+x.category+' '+x.exercises.map(y=>y.name).join(' ')).toLocaleLowerCase('it').includes(pickSearch.value.toLocaleLowerCase('it'))))
+const personalConfirmed=ref(false),sharedConfirmed=ref(false)
+const visibleShared=computed(()=>!personalConfirmed.value||!sharedConfirmed.value||!currentId.value||!data.value?[]:availableAssignmentModels(sharedChoices.value,data.value.personal,currentId.value).filter(x=>(x.title+' '+x.category+' '+x.exercises.map(y=>y.name).join(' ')).toLocaleLowerCase('it').includes(pickSearch.value.toLocaleLowerCase('it'))))
 const createProgramOpen=ref(false),programName=ref('Preparazione Fighter'),monday=ref(''),weekCount=ref(4),programError=ref('')
 watch([monday,programName,weekCount],()=>{programError.value=''})
 const showWeek=ref(true),showMaintenance=ref(false),activeDay=ref(-1)
@@ -225,9 +226,9 @@ let alive=true,stopUsers:Unsubscribe|null=null,stopCoaches:Unsubscribe|null=null
 // Riusato per i successivi giorni senza ri-leggere la collezione ad ogni clic.
 let stopShared:Unsubscribe|null=null,sharedGeneration=0
 function stopSharedListening(){
- sharedGeneration++;stopShared?.();stopShared=null;sharedLoading.value=false
+ sharedGeneration++;stopShared?.();stopShared=null;sharedLoading.value=false;sharedConfirmed.value=false
 }
-function stopSelected(){stopSheets?.();stopSheets=null;selectedProgramId.value='';data.value=null;opened.value=null;pick.value=null;selectedWeek.value='';selectedWeekTrash.value=[];weekSelectionMode.value='normal';deleteConfirmOpen.value=false;closeDay();syncActivityDraft(null)}
+function stopSelected(){stopSheets?.();stopSheets=null;personalConfirmed.value=false;selectedProgramId.value='';data.value=null;opened.value=null;pick.value=null;selectedWeek.value='';selectedWeekTrash.value=[];weekSelectionMode.value='normal';deleteConfirmOpen.value=false;closeDay();syncActivityDraft(null)}
 function choose(id:string){if(!roster.value.some(a=>a.id===id)||id===currentId.value||!discardIfDirty('Cambiare atleta'))return;currentId.value=id;showWeek.value=true
 }
 async function assignLegacyAthlete(athleteId:string){
@@ -279,7 +280,7 @@ watch(currentId,id=>{
  stopSelected();const s=session.value
  if(!s||!id||!roster.value.some(a=>a.id===id&&a.gymId===s.gymId))return
  const {db}=getStagingClients()
- stopSheets=watchAthleteSheets(db,s.gymId,id,change=>{if(!alive||currentId.value!==id)return;data.value=change;
+ stopSheets=watchAthleteSheets(db,s.gymId,id,(change,confirmed)=>{if(!alive||currentId.value!==id)return;personalConfirmed.value=confirmed===true;data.value=change;
   weekCache.set(id,change.weeks);cardInfo.value[id]={loading:false,overview:programOverview(change.weeks,new Date(now.value)),hasPersonal:change.personal.some(p=>!p.deletedAt)};
   const personalRequested=route.query.personalSheetId
   if(typeof personalRequested==='string'&&personalRequested!==openedSearchId&&route.query.athleteId===id){const found=change.personal.find(p=>p.id===personalRequested&&!p.deletedAt);if(found){opened.value=found;openedSearchId=personalRequested}}
@@ -287,7 +288,7 @@ watch(currentId,id=>{
   if(typeof requested==='string' && change.weeks.some(w=>w.id===requested&&!w.deletedAt)){
    if(!dirty.value||selectedWeek.value===requested)selectedWeek.value=requested
   }else if(typeof requested==='string' && requested && !selectedWeek.value){message.value='La settimana richiesta non è più attiva: seleziona una settimana disponibile.'}
-  status.value='Sincronizzato con Firebase';},e=>{if(alive)error.value='Schede atleta: '+e.message})
+  status.value='Sincronizzato con Firebase';},e=>{if(alive&&currentId.value===id){personalConfirmed.value=false;error.value='Schede atleta: '+e.message}},true)
 })
 onMounted(async()=>{window.addEventListener('beforeunload',beforeUnload);document.addEventListener('visibilitychange',touchClock);refreshClock=setInterval(touchClock,15*60*1000);try{
  const {session:s,profile:p}=await readStagingDetails();if(!alive)return
@@ -400,9 +401,10 @@ function refreshSharedChoices(force=false){
  const generation=sharedGeneration
  sharedLoading.value=true;sharedError.value=''
  const {db}=getStagingClients()
- stopShared=onSnapshot(collection(db,'gyms',s.gymId,'templates'),snap=>{
+ stopShared=onSnapshot(collection(db,'gyms',s.gymId,'templates'),{includeMetadataChanges:true},snap=>{
   if(!alive||generation!==sharedGeneration)return
   sharedChoices.value=snap.docs.filter(d=>!d.data().deletedAt).map(d=>({id:d.id,title:String(d.data().title||''),category:String(d.data().category||'Allenamento'),exercises:Array.isArray(d.data().exercises)?d.data().exercises:[]}))
+  sharedConfirmed.value=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites
   sharedLoading.value=false;sharedError.value=''
  },err=>{
   if(!alive||generation!==sharedGeneration)return
@@ -417,6 +419,7 @@ function openSharedPreview(s:SharedChoice){
 function assignFromShared(s:SharedChoice){
  const me=session.value,a=athlete.value,w=week.value,slot=pick.value
  if(!me||!a||!w||!slot)return
+ if(!visibleShared.value.some(x=>x.id===s.id)){message.value='Scheda non più disponibile per questo atleta. Aggiorna o ripristinala dal cestino.';return}
  const expected=String(slot.slot===1?w.days[slot.day]?.templateId||'':w.days[slot.day]?.templateId2||'')
  void withWrite('Assegna Archivio Coach al giorno',async()=>{
   const {db}=getStagingClients()
@@ -717,8 +720,8 @@ function copyToArchive(sheet:Personal){
   <input v-model="pickSearch" type="search" placeholder="Cerca scheda…" aria-label="Cerca nell’Archivio Coach"/><button class="secondary wide" @click="linkToEditor('shared',pick.day,pick.slot)">{{uiText("Apri Archivio Coach · Visualizza / Assegna")}}</button>
   <div class="row between"><strong>{{uiText("ARCHIVIO COACH ·")}} {{visibleShared.length}} {{uiText("schede")}}</strong><button class="secondary" :disabled="sharedLoading" @click="refreshSharedChoices(true)">{{sharedLoading?'Caricamento…':'Aggiorna'}}</button></div>
   <p v-if="message" class="notice" role="alert">{{message}}</p>
-  <p v-if="sharedError" class="notice" role="alert">{{uiText("Archivio non leggibile:")}} {{sharedError}}</p>
-  <div class="coach-v1-pick-list"><article v-for="s in visibleShared" :key="s.id" class="line-card coach-pick-row"><div class="coach-pick-row-info"><b>{{s.title}}</b><p class="muted small">{{s.category}} · {{s.exercises.length}} {{uiText("esercizi")}}</p></div><div class="row coach-pick-row-actions"><button class="secondary" @click="openSharedPreview(s)">{{uiText("Visualizza")}}</button><button class="primary" :disabled="busy||!canWrite" @click="assignFromShared(s)">{{uiText("Assegna")}}</button></div></article><p v-if="!sharedLoading&&!visibleShared.length" class="muted">{{uiText("Nessuna scheda nell’Archivio Coach corrisponde alla ricerca.")}}</p></div>
+  <p v-if="!sharedError&&(!personalConfirmed||!sharedConfirmed)" class="muted small" role="status">In attesa della conferma delle schede dal server…</p><p v-if="sharedError" class="notice" role="alert">{{uiText("Archivio non leggibile:")}} {{sharedError}}</p>
+  <div class="coach-v1-pick-list"><article v-for="s in visibleShared" :key="s.id" class="line-card coach-pick-row"><div class="coach-pick-row-info"><b>{{s.title}}</b><p class="muted small">{{s.category}} · {{s.exercises.length}} {{uiText("esercizi")}}</p></div><div class="row coach-pick-row-actions"><button class="secondary" @click="openSharedPreview(s)">{{uiText("Visualizza")}}</button><button class="primary" :disabled="busy||!canWrite" @click="assignFromShared(s)">{{uiText("Assegna")}}</button></div></article><p v-if="personalConfirmed&&sharedConfirmed&&!sharedLoading&&!visibleShared.length" class="muted">{{uiText("Nessuna scheda nell’Archivio Coach corrisponde alla ricerca.")}}</p></div>
   <p class="small muted">{{uiText("Per creare una scheda, usa «Crea nuova» nel giorno.")}}</p>
  </div></div>
  <div v-if="deleteConfirmOpen" class="modal-overlay" @click.self="deleteConfirmOpen=false"><div class="dialog lf-weeks-confirm" role="dialog" aria-modal="true" aria-label="Conferma spostamento settimane nel Cestino"><div class="row between"><h2>Conferma eliminazione</h2><button class="bare" :disabled="busy" aria-label="Chiudi conferma" @click="deleteConfirmOpen=false">✕</button></div><p>Vuoi spostare <strong>{{selectedWeekTrash.length}} {{selectedWeekTrash.length===1?'settimana':'settimane'}}</strong> nel Cestino?</p><p class="small muted">I programmi e le schede collegate non vengono eliminati definitivamente. Potrai ripristinare le settimane.</p><div class="row lf-confirm-actions"><button class="secondary" :disabled="busy" @click="deleteConfirmOpen=false">Annulla</button><button class="danger" :disabled="busy||!canWrite" @click="trashMultipleWeeks">{{busy?'Eliminazione…':'Sposta nel Cestino'}}</button></div></div></div>
