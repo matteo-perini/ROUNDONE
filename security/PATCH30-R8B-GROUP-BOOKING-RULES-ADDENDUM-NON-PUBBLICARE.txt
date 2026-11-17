@@ -1,0 +1,32 @@
+PATCH 30 R8B — ADDENDUM FIRESTORE RULES — NON PUBBLICARE SENZA EMULATOR E DIFF DALLE RULES LIVE
+
+OBIETTIVO
+Una lezione privata rimane una sola prenotazione collegata a un solo athleteId.
+participantCount opzionale (2–6) indica un numero di persone, senza altri ID.
+
+NELLA REGOLA ATTUALE `match /gyms/{gymId}/spark_booking_reservations/{bookingId}`:
+
+1. Dentro `allow create`, estendere SOLTANTO `request.resource.data.keys().hasOnly([...])`
+   aggiungendo la stringa `'participantCount'` all'elenco esistente.
+   NON aggiungerla al `hasAll`: lo storico e le prenotazioni singole non la richiedono.
+
+2. Sempre in `allow create`, aggiungere le 3 condizioni:
+   && request.resource.data.get('participantCount', 1) is int
+   && request.resource.data.get('participantCount', 1) >= 1
+   && request.resource.data.get('participantCount', 1) <= 6
+
+3. Non variare controlli di proprietario/Coach/gym/slot/durate/timestamp/cancellazione.
+   La transazione di spostamento copia `participantCount` sul nuovo appuntamento.
+
+TEST EMULATOR INDISPENSABILI PRIMA DI QUALSIASI DEPLOY
+- Singolo senza campo: consentito (retrocessione compatibile).
+- Count 2..6: consentito solo con i 2/4 slot prenotati atomici.
+- Count 0,7,1.5,'4',null: negato.
+- `athleteId` diverso dal richiedente, altra palestra, slot non prenotati: negato.
+- Annullamento e spostamento mantengono la coerenza degli slot e del numero.
+- Nessuna modifica alle Rule di altri moduli.
+
+ATTIVAZIONE SUCCESSIVA, SOLO DOPO RULES TESTATE E PUBBLICATE MANUALMENTE
+VITE_LIONFIT_GROUP_BOOKING_ENABLED=true
+
+N.B. NON sovrascrivere le regole LIVE con un vecchio ruleset degli emulatori.

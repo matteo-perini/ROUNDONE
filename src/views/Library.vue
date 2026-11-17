@@ -72,10 +72,11 @@ onUnmounted(()=>{favoriteAlive=false;clearFavoriteScope();stopFavoriteAuth?.();w
      <h3>{{title(e)}}</h3>
      <div :class="selectionMode?'lf-library-meta':'lf-library-browse-content'">
       <div :class="selectionMode?'lf-library-meta-copy':'lf-library-browse-content'"><p>EN · {{e.name}}</p><span class="green small">{{muscleLabel(e.target||'',interfaceLanguage)||uiText('ESERCIZIO')}}</span><p class="small muted">{{muscleLabel(e.bodyPart||'',interfaceLanguage)}} · {{e.equipment||uiText('Attrezzatura non specificata')}}</p></div>
+      <button v-if="selectionMode&&favoriteScope" type="button" class="lf-r8b-picker-heart" :class="{'is-favorite':favoriteSet.has(e.id)}" :aria-pressed="favoriteSet.has(e.id)" :aria-label="uiText(favoriteSet.has(e.id)?'Rimuovi dai preferiti':'Aggiungi ai preferiti')+' '+title(e)" @click.stop="markFavorite(e.id)"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" :fill="favoriteSet.has(e.id)?'currentColor':'none'" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20.8 5.8a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.4a5.5 5.5 0 0 0 0-7.8Z" transform="translate(0 -1)"/></svg></button>
       <button v-if="selectionMode" type="button" class="lf-library-select" :aria-label="`${uiText('Seleziona')} ${title(e)}`" @click.stop="choose(e)">{{uiText('Seleziona')}}</button>
      </div>
     </component>
-    <button v-if="favoriteScope" type="button" class="lf-r5-favorite-heart" :class="{'is-favorite':favoriteSet.has(e.id)}" :aria-pressed="favoriteSet.has(e.id)" :aria-label="uiText(favoriteSet.has(e.id)?'Rimuovi dai preferiti':'Aggiungi ai preferiti')+' '+title(e)" @click.stop="markFavorite(e.id)"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" :fill="favoriteSet.has(e.id)?'currentColor':'none'" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20.8 5.8a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.4a5.5 5.5 0 0 0 0-7.8Z" transform="translate(0 -1)"/></svg></button>
+    <button v-if="favoriteScope&&!selectionMode" type="button" class="lf-r5-favorite-heart" :class="{'is-favorite':favoriteSet.has(e.id)}" :aria-pressed="favoriteSet.has(e.id)" :aria-label="uiText(favoriteSet.has(e.id)?'Rimuovi dai preferiti':'Aggiungi ai preferiti')+' '+title(e)" @click.stop="markFavorite(e.id)"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" :fill="favoriteSet.has(e.id)?'currentColor':'none'" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20.8 5.8a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.4a5.5 5.5 0 0 0 0-7.8Z" transform="translate(0 -1)"/></svg></button>
    </div>
   </div>
   <div v-if="!loading&&!failed&&!results.length" class="panel">{{uiText(onlyFavorites?"Nessun preferito corrisponde ai filtri.":"Nessun esercizio trovato.")}}</div><button v-if="matches.length>limit" type="button" class="secondary" @click="limit+=80">{{uiText("Mostra altri esercizi")}} ({{limit}} / {{matches.length}})</button>
@@ -117,4 +118,10 @@ onUnmounted(()=>{favoriteAlive=false;clearFavoriteScope();stopFavoriteAuth?.();w
 /* Fit five previews per row on wide desktop screens, only in the selector. */
 @media(min-width:1200px){.lf-library-picker-dialog .library-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-width:600px){.lf-library-picker-top{padding:calc(8px + env(safe-area-inset-top,0px)) max(10px,env(safe-area-inset-right,0px)) 8px max(10px,env(safe-area-inset-left,0px))}.lf-library-picker-scroll{padding:10px max(10px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}.lf-library-picker-dialog .library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.lf-library-choice .lf-library-meta{flex-wrap:wrap}.lf-library-choice .lf-library-meta-copy{flex:1 1 100%}.lf-library-choice .lf-library-select{margin-left:auto;min-height:40px}}
+
+/* PATCH 30 R8B: only the SVG picker gets the compact favorite control LEFT of Select. */
+.lf-library-choice .lf-r8b-picker-heart{position:relative;z-index:4;display:grid;place-items:center;align-self:flex-end;flex:0 0 36px;width:36px!important;height:36px!important;min-height:36px!important;margin:0 2px 0 0!important;padding:0!important;border:1px solid var(--border);border-radius:10px;background:var(--card2);color:var(--muted)}
+.lf-library-choice .lf-r8b-picker-heart.is-favorite{color:#df4d73;border-color:rgba(223,77,115,.5)}
+.lf-library-choice .lf-r8b-picker-heart:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+@media(max-width:600px){.lf-library-choice .lf-r8b-picker-heart{min-height:40px!important;height:40px!important;flex-basis:40px}}
 </style>

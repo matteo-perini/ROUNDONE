@@ -46,6 +46,7 @@ function switchTab(v:'login'|'register'|'reset'){tab.value=v;error.value='';info
 // dipende dal ruolo verificato dal server. Non apre pagine senza autenticazione.
 function signedInDestination(role:'atleta'|'titolare'|'collaboratore'){
  if(isOperationalMode() && route.query.open==='support')return '/impostazioni?inboxSupport=1'
+ if(isOperationalMode() && route.query.open==='competition'&&typeof route.query.eventId==='string'&&/^[A-Za-z0-9]{20}$/.test(route.query.eventId))return (role==='atleta'?'/prenotazioni':'/coach/prenotazioni')+'?competitionId='+encodeURIComponent(route.query.eventId)
  if(isOperationalMode() && route.query.open==='bookings')return role==='atleta'?'/prenotazioni':'/coach/prenotazioni'
  return role==='atleta'?'/home':'/coach'
 }

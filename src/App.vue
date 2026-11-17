@@ -35,9 +35,10 @@ function syncHeaderViewport(){athleteHeaderVisible.value=athleteHeaderMedia.matc
 athleteHeaderMedia.addEventListener('change',syncHeaderViewport);coachHeaderMedia.addEventListener('change',syncHeaderViewport)
 onUnmounted(()=>{athleteHeaderMedia.removeEventListener('change',syncHeaderViewport);coachHeaderMedia.removeEventListener('change',syncHeaderViewport)})
 function openPushAgenda(){pushNotice.value=null;void router.push(stagingSession.value?.role==='atleta'?'/prenotazioni':'/coach/prenotazioni')}
+function openPushCompetition(eventId:string){pushNotice.value=null;const path=stagingSession.value?.role==='atleta'?'/prenotazioni':'/coach/prenotazioni';if(/^[A-Za-z0-9]{20}$/.test(eventId))void router.push({path,query:{competitionId:eventId}});else openPushAgenda()}
 function openPushSupport(){pushNotice.value=null;void router.push(route.path==='/lionfit-control'?'/lionfit-control?open=support&notice='+Date.now():'/impostazioni?inboxSupport=1')}
-function openPushNotice(){if(pushNotice.value?.open==='support')openPushSupport();else openPushAgenda()}
-watch(()=>stagingSession.value?.uid,uid=>{void connectPushSession(uid||null,openPushAgenda,true,openPushSupport).catch(()=>{})},{immediate:true})
+function openPushNotice(){const n=pushNotice.value;if(n?.open==='support')openPushSupport();else if(n?.open==='competition'&&n.eventId)openPushCompetition(n.eventId);else openPushAgenda()}
+watch(()=>stagingSession.value?.uid,uid=>{void connectPushSession(uid||null,openPushAgenda,true,openPushSupport,openPushCompetition).catch(()=>{})},{immediate:true})
 const workoutRoute=computed(()=>route.path==='/progressi'||route.path==='/coach/progressi')
 // Usa lo stesso gestore di Indietro della WebView, senza importare una seconda volta
 // il modulo nativo e senza cambiare l'ordine dei CSS della shell.
@@ -119,7 +120,7 @@ async function goOut(){
 <template>
   <Teleport to="body"><div v-if="quietLoadingVisible" class="lf-quiet-indicator" role="status"><span class="lf-quiet-status">{{uiText("Caricamento in corso…")}}</span><span class="lf-quiet-track" aria-hidden="true"></span></div></Teleport>
   <Teleport to="body"><aside v-if="navigationFailure" class="lf21-nav-recovery" role="alert"><strong>{{navigationFailure.kind==='assets'?'Pagina non caricata':'Navigazione non riuscita'}}</strong><p>{{navigationFailure.kind==='assets'?'Potrebbe essere disponibile una nuova versione. Ricarica per riprovare.':'Riprova a cambiare pagina o ricarica LionFit.'}}</p><button type="button" @click="reloadNavigation">Ricarica</button><button type="button" @click="navigationFailure=null">Chiudi</button></aside></Teleport>
-  <Teleport to="body"><aside v-if="pushNotice" role="status" style="position:fixed;inset:auto 12px max(85px,env(safe-area-inset-bottom)) 12px;z-index:9999;max-width:440px;margin:auto;padding:14px;border-radius:12px;background:#162720;color:#fff;box-shadow:0 6px 24px #0008"><strong>{{pushNotice.title}}</strong><p>{{pushNotice.body}}</p><button type="button" class="secondary" @click="openPushNotice">{{pushNotice.open==='support'?'Apri assistenza':'Apri Agenda'}}</button> <button type="button" class="bare" style="color:#fff" @click="pushNotice=null">Chiudi</button></aside></Teleport>
+  <Teleport to="body"><aside v-if="pushNotice" role="status" style="position:fixed;inset:auto 12px max(85px,env(safe-area-inset-bottom)) 12px;z-index:9999;max-width:440px;margin:auto;padding:14px;border-radius:12px;background:#162720;color:#fff;box-shadow:0 6px 24px #0008"><strong>{{pushNotice.title}}</strong><p>{{pushNotice.body}}</p><button type="button" class="secondary" @click="openPushNotice">{{pushNotice.open==='support'?'Apri assistenza':pushNotice.open==='competition'?'Apri gara':'Apri Agenda'}}</button> <button type="button" class="bare" style="color:#fff" @click="pushNotice=null">Chiudi</button></aside></Teleport>
  <div class="app" :class="['theme-'+lab.theme,shownRole==='coach'?'as-coach':'as-athlete',{'bookings-mode':isBooking,'lf-support-shell':route.path==='/assistenza'&&!!shownRole&&isStagingMode(),'athlete-sidebar-collapsed':!athleteSidebarExpanded}]">
   <div v-if="isLocalProdDev()" class="lab-banner" role="status">⚠ SVILUPPO LOCALE · FIREBASE PRODUZIONE · LE SCRITTURE POSSONO CAMBIARE DATI REALI</div>
   <component v-if="StagingBanner" :is="StagingBanner"/>

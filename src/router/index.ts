@@ -82,6 +82,7 @@ router.beforeEach(async to=>{
    try{
     const s=await readNavigationSession()
     if(to.query.open==='support' && isOperationalMode())return '/impostazioni?inboxSupport=1'
+    if(to.query.open==='competition'&&isOperationalMode()&&typeof to.query.eventId==='string'&&/^[A-Za-z0-9]{20}$/.test(to.query.eventId))return (s.role==='atleta'?'/prenotazioni':'/coach/prenotazioni')+'?competitionId='+encodeURIComponent(to.query.eventId)
     if(to.query.open==='bookings' && isOperationalMode())return s.role==='atleta'?'/prenotazioni':'/coach/prenotazioni'
     return s.role==='atleta'?'/home':'/coach'
    }catch{stagingSession.value=null;return true}

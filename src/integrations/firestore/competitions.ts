@@ -15,7 +15,7 @@ export function watchCompetitionEvents(db:Firestore,gym:string,cb:(rows:Competit
 }
 export function watchCompetitionEntries(db:Firestore,gym:string,scope:{athlete:string}|{event:string},cb:(rows:CompetitionEntry[])=>void,err:(e:Error)=>void):Unsubscribe{
  const q='athlete' in scope?query(entries(db,gym),where('athleteId','==',seg(scope.athlete))):query(entries(db,gym),where('eventId','==',seg(scope.event)))
- return onSnapshot(q,snap=>cb(snap.docs.flatMap(d=>{const x=d.data();return ['pending','approved','rejected','withdrawn'].includes(x.status)?[{id:d.id,eventId:String(x.eventId),athleteId:String(x.athleteId),status:x.status,result:String(x.result||'')}]:[]})),err)
+ return onSnapshot(q,snap=>cb(snap.docs.flatMap(d=>{const x=d.data();return ['pending','approved','rejected','withdrawn'].includes(x.status)?[{id:d.id,eventId:String(x.eventId),athleteId:String(x.athleteId),status:x.status,result:String(x.result||''),updatedBy:String(x.updatedBy||'')}]:[]})),err)
 }
 export async function saveCompetition(db:Firestore,s:StagingSession,d:CompetitionDraft,event?:CompetitionEvent){
  if(s.role==='atleta')throw new Error('Operazione riservata ai Coach.')

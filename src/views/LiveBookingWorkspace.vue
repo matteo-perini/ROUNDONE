@@ -4,6 +4,7 @@ import CompetitionCover from '../components/CompetitionCover.vue'
 import AgendaCompetitions from '../components/AgendaCompetitions.vue'
 import {watchCompetitionEnabled,watchCompetitionEvents,watchCompetitionEntries} from '../integrations/firestore/competitions'
 import {nextCompetition,confirmedCompetitions,type CompetitionEvent,type CompetitionEntry} from '../features/bookings/competitionModel'
+import {groupBookingEnabled,groupLabel,MAX_PRIVATE_PARTICIPANTS} from '../features/bookings/groupBooking'
 import LionIcon from '../components/LionIcon.vue'
 import CoachAppointment from '../components/CoachAppointment.vue'
 import {coachInboxEnabled} from '../integrations/firebase/coachInbox'
@@ -50,7 +51,7 @@ const nameLookup=createBoundedLookup<string>(4,async id=>{
   names.value={...names.value,[id]:[r.data().name,r.data().surname].filter(Boolean).join(' ')||'Atleta'}
 })
 const selectedDate=ref(romeParts(Date.now()).date),month=ref(selectedDate.value.slice(0,7))
-const service=ref<Service>('fighter'),chosenCoach=ref(''),discipline=ref('MMA'),chosenStart=ref<number|null>(null)
+const service=ref<Service>('fighter'),chosenCoach=ref(''),discipline=ref('MMA'),chosenStart=ref<number|null>(null),privateParticipants=ref(1)
 const athleteTab=ref<AthleteAgendaScreen>('agenda'),coachTab=ref<'calendario'|'disponibilita'|'competizioni'>('calendario')
 const coachFilter=ref('all'),serviceFilter=ref<'all'|Service>('all'),history=ref<'next'|'history'|'all'>('all')
 const view=ref<CalendarView>('day'),busy=ref(false)
@@ -68,7 +69,7 @@ function backWithinAthleteAgenda():boolean{
  if(busy.value)return true // Do not leave a booking transaction in flight.
  const previous=athleteTrail.back()
  if(!previous)return false
- if(moving.value){moving.value=null;chosenStart.value=null}
+ if(moving.value){moving.value=null;chosenStart.value=null;privateParticipants.value=1}
  restoringAthleteTab=true
  try{athleteTab.value=previous.screen}finally{restoringAthleteTab=false}
  restoreAgendaPosition(previous.position)
@@ -85,9 +86,14 @@ const competitionEnabled=ref(false),competitionLoading=ref(false),competitionEve
 let competitionStops:Unsubscribe[]=[]
 const heroEvent=computed(()=>nextCompetition(competitionEvents.value,nowMs.value))
 const myEventDates=computed(()=>confirmedCompetitions(competitionEvents.value,competitionEntries.value))
-const myCalendarRows=computed(()=>[...myRows.value.filter(b=>b.status==='confirmed').map(b=>({id:'b_'+b.id,startMs:b.startMs,title:b.discipline,description:coachLabel(b.coachId)+' · Lezione privata',kind:'booking'})),...myEventDates.value.map(e=>({id:'e_'+e.id,startMs:e.startMs,title:e.title,description:e.location+' · Competizione',kind:'competition'}))].sort((a,b)=>a.startMs-b.startMs))
+const myCalendarRows=computed(()=>[...myRows.value.filter(b=>b.status==='confirmed').map(b=>({id:'b_'+b.id,startMs:b.startMs,title:b.discipline,description:coachLabel(b.coachId)+' · Lezione privata · '+groupLabel(b.participantCount),kind:'booking'})),...myEventDates.value.map(e=>({id:'e_'+e.id,startMs:e.startMs,title:e.title,description:e.location+' · Competizione',kind:'competition'}))].sort((a,b)=>a.startMs-b.startMs))
 const calendarPersonalPeriod=ref<'next'|'past'>('next'),selectedCompetitionId=ref('')
-function openCompetition(id=''){selectedCompetitionId.value=id;athleteTab.value='competizioni'}
+function openCompetition(id=''){selectedCompetitionId.value=id;if(isCoach.value)coachTab.value='competizioni';else athleteTab.value='competizioni'}
+function showAthleteCompetitionMode(mode:'events'|'results'){selectedCompetitionId.value='';athleteTab.value=mode==='results'?'risultati':'competizioni'}
+watch([()=>route.query.competitionId,competitionEnabled],([id,enabled])=>{
+ if(!enabled||typeof id!=='string'||!/^[A-Za-z0-9]{20}$/.test(id))return
+ if(route.path==='/prenotazioni'||route.path==='/coach/prenotazioni')openCompetition(id)
+},{immediate:true})
 const calendarPersonalRows=computed(()=>myCalendarRows.value.filter(r=>calendarPersonalPeriod.value==='next'?r.startMs>=nowMs.value:r.startMs<nowMs.value))
 function clearCompetitionData(){competitionStops.forEach(stop=>stop());competitionStops=[];competitionEnabled.value=false;competitionLoading.value=false;competitionEvents.value=[];competitionEntries.value=[];if(athleteTab.value==='competizioni'||athleteTab.value==='risultati')athleteTab.value='agenda';if(coachTab.value==='competizioni')coachTab.value='calendario'}
 function subscribeCompetitionModule(db:ReturnType<typeof getStagingClients>['db'],s:StagingSession){
@@ -316,13 +322,14 @@ async function makeBooking(){
  if(old&&!window.confirm('Confermi lo spostamento? Il vecchio appuntamento verrà liberato soltanto se il nuovo orario è confermato.'))return
  await runWrite(async()=>{
   const {db}=getStagingClients()
-  if(old){await rescheduleReservation(db,mustSession(),old.id,ms);moving.value=null}else await reserve(db,mustSession(),c,service.value,discipline.value,ms)
+  if(old){await rescheduleReservation(db,mustSession(),old.id,ms);moving.value=null}else await reserve(db,mustSession(),c,service.value,discipline.value,ms,privateParticipants.value)
+  privateParticipants.value=1
   replaceAthleteTab('mie');chosenStart.value=null
   return old?'Appuntamento spostato. Il nuovo orario è confermato.':'Prenotazione confermata.'
  })
 }
 function canMove(b:LiveReservation){const c=configs.value.find(c=>c.coachId===b.coachId);return !b.createdByCoach&&!isCoach.value&&canRemove(b)&&!!c&&c.active&&c.services[b.service]&&c.durations[b.service]===b.durationMinutes&&disciplineAllowed(b.service,b.discipline)}
-async function beginMove(b:LiveReservation){if(!canMove(b)||busy.value)return;moving.value=b;service.value=b.service;chosenCoach.value=b.coachId;chooseDate(romeParts(b.startMs).date);athleteTab.value='prenota';await nextTick();discipline.value=b.discipline;chosenStart.value=null}
+async function beginMove(b:LiveReservation){if(!canMove(b)||busy.value)return;moving.value=b;privateParticipants.value=b.participantCount;service.value=b.service;chosenCoach.value=b.coachId;chooseDate(romeParts(b.startMs).date);athleteTab.value='prenota';await nextTick();discipline.value=b.discipline;chosenStart.value=null}
 async function cancelBookingRow(b:LiveReservation){
  if(!canRemove(b))return
  if(!window.confirm('Annullare questa prenotazione e liberare gli slot?'))return
@@ -425,10 +432,11 @@ const bandTo=(r:Range)=>Array.isArray(r)?r[1]:(r as {from:string;to:string}).to
 const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
 </script>
 <template>
- <div class="stack lf-agenda13" :class="{'lf-agenda-coach':isCoach}" aria-label="Agenda Lion Fit">
-  <div class="booking-intro">
+ <div class="stack lf-agenda13" :class="{'lf-agenda-coach':isCoach}" :data-r9-athlete="!isCoach" aria-label="Agenda Lion Fit">
+  <div v-if="isCoach||athleteTab==='agenda'" class="booking-intro">
    <h1 style="margin:4px 0">{{uiText("Agenda")}}</h1>
    <p v-if="isCoach" class="lf-agenda-subtitle">Prenotazioni, disponibilità e appuntamenti della tua palestra.</p>
+   <p v-else class="lf-r9-home-intro">Lezioni private, appuntamenti e competizioni</p>
   </div>
   <div v-lf-quiet-loading v-if="status==='loading'" class="panel lf-quiet-status" role="status">{{uiText("Caricamento agenda…")}}</div>
   <div v-else-if="status==='error'" class="panel" role="alert">{{message}} <RouterLink to="/accesso">{{uiText("Torna all'accesso")}}</RouterLink></div>
@@ -438,14 +446,36 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
    <p v-if="message&&message!=='Calendario sincronizzato.'" class="small muted" role="status">{{message}}</p>
    <template v-if="!isCoach">
     <div v-if="athleteTab==='agenda'" class="lf-agenda-athlete-home">
-      <div class="lf-agenda-hero"><div class="lf-agenda-hero-cover"><CompetitionCover :gym="session?.gymId||''" :event-id="heroEvent?.id" :cover-id="heroEvent?.coverId"/></div><span class="eyebrow">{{heroEvent?'PROSSIMO EVENTO':'LIONFIT'}}</span><h2>{{heroEvent?.title||'La tua agenda sportiva'}}</h2><p v-if="heroEvent">{{dateTitle(romeParts(heroEvent.startMs).date)+' · '+formatTime(heroEvent.startMs)+' · '+heroEvent.location}}</p><button v-if="heroEvent" class="secondary" @click="openCompetition(heroEvent.id)">Scopri l’evento</button></div>
-      <div class="lf-agenda-tiles"><button class="action-card" @click="athleteTab='calendario'"><LionIcon name="calendar" :size="25"/><strong>Calendario</strong></button><button class="action-card" @click="athleteTab='prenota'"><LionIcon name="calendar-plus" :size="25"/><strong>Prenota lezione</strong></button><button class="action-card" @click="athleteTab='mie';myHistory='next'"><LionIcon name="calendar" :size="25"/><strong>Le mie prenotazioni</strong></button><button v-if="competitionEnabled" class="action-card" @click="openCompetition()"><LionIcon name="progress" :size="25"/><strong>Competizioni e gare</strong></button><button v-if="competitionEnabled" class="action-card" @click="athleteTab='risultati'"><LionIcon name="check" :size="25"/><strong>I miei risultati</strong></button></div>
-      <section class="panel lf-agenda-list"><h2>Prossime lezioni</h2><p v-lf-quiet-loading v-if="rowsLoading" role="status" class="muted lf-quiet-status">Caricamento appuntamenti…</p><p v-else-if="!calendarWarning&&!myUpcoming.length" class="muted">Nessun appuntamento nei prossimi 31 giorni.</p><button v-for="b in myUpcoming" :key="b.id" class="lf-agenda-row" @click="athleteTab='mie';myHistory='next'"><div class="lf-agenda-time"><b>{{formatTime(b.startMs)}}</b><small>{{dateTitle(romeParts(b.startMs).date)}}</small></div><div class="lf-agenda-person"><strong>{{b.discipline}}</strong><small>{{coachLabel(b.coachId)}} · {{b.durationMinutes}} min</small></div><LionIcon name="chevron" :size="18"/></button></section>
+      <div class="lf-agenda-hero lf-r9-hero">
+       <div class="lf-agenda-hero-cover"><CompetitionCover :gym="session?.gymId||''" :event-id="heroEvent?.id" :cover-id="heroEvent?.coverId"/></div>
+       <span class="eyebrow">{{heroEvent?'PROSSIMO EVENTO':'LA TUA AGENDA'}}</span>
+       <h2>{{heroEvent?.title||'Organizza il tuo allenamento'}}</h2>
+       <p v-if="heroEvent">{{dateTitle(romeParts(heroEvent.startMs).date)+' · '+formatTime(heroEvent.startMs)+' · '+heroEvent.location}}</p>
+       <p v-else>Lezioni, appuntamenti e gare in un unico posto.</p>
+       <button v-if="heroEvent" class="secondary lf-r9-hero-cta" type="button" @click="openCompetition(heroEvent.id)">Scopri l’evento <LionIcon name="chevron" :size="17"/></button>
+       <button v-else class="secondary lf-r9-hero-cta" type="button" @click="athleteTab='prenota'">Prenota una lezione <LionIcon name="chevron" :size="17"/></button>
+      </div>
+      <div class="lf-agenda-tiles lf-r9-agenda-tiles" aria-label="Azioni agenda">
+       <button class="action-card lf-r9-tile" type="button" @click="athleteTab='prenota'"><LionIcon name="calendar-plus" :size="26"/><strong>Prenota lezione</strong><small>Singola o di gruppo</small></button>
+       <button class="action-card lf-r9-tile" type="button" @click="athleteTab='calendario'"><LionIcon name="calendar" :size="26"/><strong>Calendario</strong><small>I tuoi appuntamenti</small></button>
+       <button v-if="competitionEnabled" class="action-card lf-r9-tile lf-r9-tile-full" type="button" @click="openCompetition()"><LionIcon name="trophy" :size="27"/><span><strong>Gare e risultati</strong><small>Competizioni, partecipazioni e risultati</small></span><LionIcon name="chevron" :size="20"/></button>
+      </div>
+      <section class="panel lf-agenda-list lf-r9-upcoming">
+       <div class="lf-r9-section-heading"><h2>Le mie prossime lezioni</h2><button type="button" class="lf-r9-inline-link" @click="athleteTab='mie';myHistory='next'">Vedi tutte <LionIcon name="chevron" :size="15"/></button></div>
+       <p v-lf-quiet-loading v-if="rowsLoading" role="status" class="muted lf-quiet-status">Caricamento appuntamenti…</p>
+       <div v-else-if="!calendarWarning&&!myUpcoming.length" class="lf-r9-empty"><LionIcon name="calendar" :size="24"/><div><strong>Nessuna lezione prenotata</strong><small>Puoi prenotare una lezione quando preferisci.</small></div></div>
+       <button v-for="b in myUpcoming" :key="b.id" type="button" class="lf-agenda-row" @click="athleteTab='mie';myHistory='next'"><div class="lf-agenda-time"><b>{{formatTime(b.startMs)}}</b><small>{{dateTitle(romeParts(b.startMs).date)}}</small></div><div class="lf-agenda-person"><strong>{{b.discipline}}</strong><small>{{coachLabel(b.coachId)}} · {{b.durationMinutes}} min · {{groupLabel(b.participantCount)}}</small></div><LionIcon name="chevron" :size="18"/></button>
+      </section>
     </div>
-    <AgendaCompetitions v-else-if="(athleteTab==='competizioni'||athleteTab==='risultati')&&competitionEnabled&&session" :session="session" :events="competitionEvents" :entries="competitionEntries" :mode="athleteTab==='risultati'?'results':'events'" :initial-event-id="athleteTab==='competizioni'?selectedCompetitionId:''" :now="nowMs" :loading="competitionLoading" @back="backWithinAthleteAgenda()"/>
-    <section v-else-if="athleteTab==='calendario'" class="panel lf-agenda-list"><div class="row between"><h2>Il mio calendario</h2><select v-model="calendarPersonalPeriod" aria-label="Periodo"><option value="next">Prossimi</option><option value="past">Passati</option></select></div><p v-lf-quiet-loading v-if="rowsLoading||competitionLoading" class="muted lf-quiet-status">Caricamento…</p><p v-else-if="!calendarPersonalRows.length&&!calendarWarning&&!competitionWarning" class="muted">Nessun impegno in questo periodo.</p><button v-for="r in calendarPersonalRows" :key="r.id" class="lf-agenda-row" @click="r.kind==='booking'?(athleteTab='mie',myHistory=calendarPersonalPeriod==='next'?'next':'history'):openCompetition(r.id.slice(2))"><div class="lf-agenda-time"><b>{{formatTime(r.startMs)}}</b><small>{{dateTitle(romeParts(r.startMs).date)}}</small></div><div class="lf-agenda-person"><strong>{{r.title}}</strong><small>{{r.description}}</small></div><LionIcon name="chevron" :size="17"/></button></section>
+    <AgendaCompetitions v-else-if="(athleteTab==='competizioni'||athleteTab==='risultati')&&competitionEnabled&&session" :session="session" :events="competitionEvents" :entries="competitionEntries" :mode="athleteTab==='risultati'?'results':'events'" :initial-event-id="athleteTab==='competizioni'?selectedCompetitionId:''" :now="nowMs" :loading="competitionLoading" @back="backWithinAthleteAgenda()" @mode-change="showAthleteCompetitionMode"/>
+     <section v-else-if="athleteTab==='calendario'" class="panel lf-agenda-list lf-r9-calendar">
+      <div class="lf-r9-section-heading"><div><h2>Il mio calendario</h2><p class="muted small">Le tue lezioni e le gare confermate</p></div><select v-model="calendarPersonalPeriod" aria-label="Periodo"><option value="next">Prossimi</option><option value="past">Passati</option></select></div>
+      <p v-lf-quiet-loading v-if="rowsLoading||competitionLoading" class="muted lf-quiet-status">Caricamento…</p>
+      <div v-else-if="!calendarPersonalRows.length&&!calendarWarning&&!competitionWarning" class="lf-r9-empty"><LionIcon name="calendar" :size="23"/><div><strong>Nessun impegno in questo periodo</strong><small>Le lezioni prenotate e le gare confermate appariranno qui.</small></div></div>
+      <button v-for="r in calendarPersonalRows" :key="r.id" type="button" class="lf-agenda-row lf-r9-calendar-row" @click="r.kind==='booking'?(athleteTab='mie',myHistory=calendarPersonalPeriod==='next'?'next':'history'):openCompetition(r.id.slice(2))"><div class="lf-agenda-time"><b>{{formatTime(r.startMs)}}</b><small>{{dateTitle(romeParts(r.startMs).date)}}</small></div><div class="lf-agenda-person"><strong><LionIcon :name="r.kind==='competition'?'trophy':'calendar'" :size="16"/> {{r.title}}</strong><small>{{r.description}}</small></div><LionIcon name="chevron" :size="17"/></button>
+     </section>
     <div v-else v-lf-motion-tabs class="booking-tabs booking-main-tabs lf-agenda-main"><button :class="{selected:athleteTab==='prenota'}" @click="athleteTab='prenota'">Prenota</button><button :class="{selected:athleteTab==='mie'}" @click="athleteTab='mie';moving=null">Le mie prenotazioni</button></div>
-    <template v-if="athleteTab==='prenota'"><div class="lf-booking-v4-flow"><section v-if="moving" class="panel"><h2>Sposta appuntamento</h2><p class="small">Originale: {{localStart(moving.startMs)}} · {{coachLabel(moving.coachId)}}. Scegli un orario libero non sovrapposto. La prenotazione originale resta valida fino al buon esito.</p><button class="secondary" @click="backWithinAthleteAgenda()">Annulla spostamento</button></section><template v-if="!moving">
+    <template v-if="athleteTab==='prenota'"><div class="lf-booking-v4-flow"><section v-if="moving" class="panel"><h2>Sposta appuntamento</h2><p class="small">Originale: {{localStart(moving.startMs)}} · {{coachLabel(moving.coachId)}} · {{groupLabel(moving.participantCount)}}. Scegli un orario libero non sovrapposto. La prenotazione originale resta valida fino al buon esito.</p><button class="secondary" @click="backWithinAthleteAgenda()">Annulla spostamento</button></section><template v-if="!moving">
      <h2 class="booking-section-title">{{uiText("1. Scegli il tuo percorso")}}</h2>
      <div class="booking-choices booking-v1-services">
       <button class="booking-choice booking-service-card" :class="{selected:service==='fighter'}" :aria-pressed="service==='fighter'" @click="service='fighter'"><img class="lf17b-category-photo lf17b-category-fighter" src="/lionfit-redesign/agenda-fighter.webp" width="1000" height="333" decoding="async" alt=""/><strong>FIGHTER</strong><small>{{uiText("MMA, Boxe, K-1 e discipline da combattimento")}}</small></button>
@@ -457,6 +487,7 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
       <span class="action-icon">🦁</span><div><strong>{{c.displayName}}</strong><small>{{displayService(service)}} · {{c.durations[service]}} {{uiText("minuti")}}</small></div><span class="lf-booking-coach-check" aria-hidden="true">{{chosenCoach===c.coachId?'✓':'○'}}</span></button></div>
      <h2 class="booking-section-title">{{uiText("3. Tipo di incontro")}}</h2>
      <section class="panel"><h3 class="booking-reasons-title">{{service==='fighter'?'Disciplina Fighter':'Motivo della prenotazione Pesi'}}</h3><label class="lf-booking-v4-select-label"><select v-model="discipline" class="lf-booking-v4-select" aria-label="Seleziona disciplina o motivo"><option v-for="reason in serviceReasons" :key="reason" :value="reason">{{reason}}</option></select></label></section>
+     <section class="panel lf-r8b-group-booking" aria-label="Numero partecipanti lezione privata"><h3>Per quante persone prenoti?</h3><p class="muted small">Sei tu il referente: le altre persone non devono avere un account LionFit.</p><div class="lf-r8b-people-choices" role="group" aria-label="Numero totale persone"><button v-for="n in MAX_PRIVATE_PARTICIPANTS" :key="n" type="button" :class="{'is-chosen':privateParticipants===n}" :aria-pressed="privateParticipants===n" @click="privateParticipants=n">{{n}} <small>{{n===1?'persona':'persone'}}</small></button></div><p v-if="privateParticipants>1&&!groupBookingEnabled()" class="muted small" role="status">L'opzione gruppo richiede l'attivazione delle regole Firebase R8B prima di confermare.</p></section>
      </template><h2 class="booking-section-title">{{moving?'Scegli un nuovo giorno e orario':uiText("4. Scegli giorno e orario")}}</h2>
      <section class="panel lf-booking-v4-calendar"><div class="row between"><button class="secondary" @click="moveAthleteMonth(-1)">‹</button><strong>{{monthLabel}}</strong><button class="secondary" @click="moveAthleteMonth(1)">›</button></div>
       <div class="booking-calendar" style="margin-top:20px"><div v-for="(n,i) in ['L','M','M','G','V','S','D']" :key="i" class="muted">{{n}}</div>
@@ -467,14 +498,14 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
       <p class="small muted">{{uiText("Orari in fuso italiano.")}}</p>
      </section>
      <section class="panel lf-booking-v4-review"><span class="eyebrow">{{uiText("RIEPILOGO")}}</span><h2>{{displayService(service)}} · {{chosenConfig?.displayName||'Seleziona Coach'}}</h2>
-      <p class="muted">{{selectedDate}} · {{chosenStart!==null?romeParts(chosenStart).time:'Nessun orario selezionato'}} · {{shownDuration}} min · {{discipline}}</p>
+      <p class="muted">{{selectedDate}} · {{chosenStart!==null?romeParts(chosenStart).time:'Nessun orario selezionato'}} · {{shownDuration}} min · {{discipline}}</p><p class="lf-r8b-people-recap">{{groupLabel(moving?moving.participantCount:privateParticipants)}} · un solo atleta collegato · un solo appuntamento</p>
       
-      <button class="primary wide" :disabled="busy||chosenStart===null||!availableTimes.some(t=>t.startMs===chosenStart)" @click="makeBooking">{{moving?'Conferma spostamento':uiText("Conferma prenotazione")}}</button>
+      <button class="primary wide" :disabled="busy||chosenStart===null||!availableTimes.some(t=>t.startMs===chosenStart)||(!moving&&privateParticipants>1&&!groupBookingEnabled())" @click="makeBooking">{{moving?'Conferma spostamento':uiText("Conferma prenotazione")}}</button>
      </section>
     </div></template>
     <template v-else-if="athleteTab==='mie'"><section class="panel"><h2>{{uiText("Le mie prenotazioni")}}</h2><div v-lf-motion-tabs class="booking-tabs"><button :class="{selected:myHistory==='next'}" @click="myHistory='next'">{{uiText("Prossime")}}</button><button :class="{selected:myHistory==='history'}" @click="myHistory='history'">{{uiText("Storico")}}</button></div><p v-if="!visibleMyRows.length" class="muted">{{uiText("Nessuna prenotazione in questa sezione.")}}</p>
       <article v-for="b in visibleMyRows" :key="b.id" class="event-item" style="display:block;margin:9px 0"><strong>{{localStart(b.startMs)}} · {{displayService(b.service)}} · {{b.durationMinutes}} min</strong>
-       <p class="small muted">{{coachLabel(b.coachId)}} · {{b.discipline}} · {{showStatus(b)}}</p><p v-if="b.createdByCoach" class="small"><strong>Fissato dal coach</strong></p><p v-if="b.note" style="white-space:pre-wrap;overflow-wrap:anywhere">{{b.note}}</p>
+       <p class="small muted">{{coachLabel(b.coachId)}} · {{b.discipline}} · {{groupLabel(b.participantCount)}} · {{showStatus(b)}}</p><p v-if="b.createdByCoach" class="small"><strong>Fissato dal coach</strong></p><p v-if="b.note" style="white-space:pre-wrap;overflow-wrap:anywhere">{{b.note}}</p>
        <div class="row"><button v-if="canMove(b)" class="secondary" :disabled="busy" @click="beginMove(b)">Sposta</button><button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">{{uiText("Annulla e libera slot")}}</button></div></article>
       
      </section></template>
@@ -494,13 +525,13 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
      <p v-lf-quiet-loading v-if="rowsLoading" class="muted lf-quiet-status" role="status">Caricamento appuntamenti…</p>
      <section v-else-if="upcomingMode" class="lf-agenda-list" v-lf-entrance="{id:'agenda-list',premiumOnly:true,rows:[{match:'.lf-agenda-group'}]}"><div class="row between"><h2>{{upcoming.length}} appuntamenti</h2><small class="muted">Prossimi 31 giorni</small></div>
       <div v-if="!upcoming.length&&!calendarWarning" class="panel muted lf-agenda-empty" role="status"><LionIcon name="calendar" :size="26"/><strong>Nessun appuntamento in programma</strong><small>Prova a modificare i filtri oppure crea una nuova prenotazione.</small></div>
-      <div v-for="group in agendaGroups" :key="group.date" class="lf-agenda-group"><h3>{{dateTitle(group.date)}}</h3><div v-for="b in group.bookings" :key="b.id" class="lf-agenda-record"><button type="button" class="lf-agenda-row" :aria-expanded="expandedBooking===b.id" @click="toggleDetails(b.id)"><div class="lf-agenda-time"><b>{{formatTime(b.startMs)}}–{{endTime(b)}}</b><small class="lf-agenda-state">{{showStatus(b)}}</small></div><div class="lf-agenda-person"><strong>{{nameLabel(b.athleteId)}}</strong><small>{{b.discipline}} · {{coachLabel(b.coachId)}}</small></div><i class="coach-dot" :class="coachColor(b.coachId)"/><LionIcon name="chevron" :size="17"/></button><div v-if="expandedBooking===b.id" class="lf-agenda-detail"><p v-if="b.createdByCoach" class="small"><strong>Fissato dal coach</strong></p><p v-if="b.note" style="white-space:pre-wrap;overflow-wrap:anywhere">{{b.note}}</p><p>{{displayService(b.service)}} · {{b.durationMinutes}} min · {{dateTitle(group.date)}}</p><button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla appuntamento</button></div></div></div>
+      <div v-for="group in agendaGroups" :key="group.date" class="lf-agenda-group"><h3>{{dateTitle(group.date)}}</h3><div v-for="b in group.bookings" :key="b.id" class="lf-agenda-record"><button type="button" class="lf-agenda-row" :aria-expanded="expandedBooking===b.id" @click="toggleDetails(b.id)"><div class="lf-agenda-time"><b>{{formatTime(b.startMs)}}–{{endTime(b)}}</b><small class="lf-agenda-state">{{showStatus(b)}}</small></div><div class="lf-agenda-person"><strong>{{nameLabel(b.athleteId)}}</strong><small>{{b.discipline}} · {{coachLabel(b.coachId)}} · {{groupLabel(b.participantCount)}}</small></div><i class="coach-dot" :class="coachColor(b.coachId)"/><LionIcon name="chevron" :size="17"/></button><div v-if="expandedBooking===b.id" class="lf-agenda-detail"><p v-if="b.createdByCoach" class="small"><strong>Fissato dal coach</strong></p><p v-if="b.note" style="white-space:pre-wrap;overflow-wrap:anywhere">{{b.note}}</p><p>{{displayService(b.service)}} · {{groupLabel(b.participantCount)}} · {{b.durationMinutes}} min · {{dateTitle(group.date)}}</p><button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla appuntamento</button></div></div></div>
      </section>
      <section v-else-if="view==='day'" class="panel booking-period"><h3>{{selectedDate}} · {{todayEvents.length}} {{uiText("appuntamenti")}}</h3>
-      <p v-if="!todayEvents.length&&!calendarWarning" class="muted">Nessun appuntamento.</p><div v-for="b in todayEvents" :key="b.id" class="lf-agenda-record"><button type="button" class="lf-agenda-row" :aria-expanded="expandedBooking===b.id" @click="toggleDetails(b.id)"><div class="lf-agenda-time"><b>{{formatTime(b.startMs)}}–{{endTime(b)}}</b><small :class="{'lf-agenda-state':showStatus(b)==='Confermato'}">{{showStatus(b)}}</small></div><div class="lf-agenda-person"><strong>{{nameLabel(b.athleteId)}}</strong><small>{{b.discipline}} · {{coachLabel(b.coachId)}}</small></div><i class="coach-dot" :class="coachColor(b.coachId)"/><LionIcon name="chevron" :size="17"/></button><div v-if="expandedBooking===b.id" class="lf-agenda-detail"><p v-if="b.createdByCoach" class="small"><strong>Fissato dal coach</strong></p><p v-if="b.note" style="white-space:pre-wrap;overflow-wrap:anywhere">{{b.note}}</p><p>{{displayService(b.service)}} · {{b.durationMinutes}} min</p><button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla appuntamento</button></div></div>
+      <p v-if="!todayEvents.length&&!calendarWarning" class="muted">Nessun appuntamento.</p><div v-for="b in todayEvents" :key="b.id" class="lf-agenda-record"><button type="button" class="lf-agenda-row" :aria-expanded="expandedBooking===b.id" @click="toggleDetails(b.id)"><div class="lf-agenda-time"><b>{{formatTime(b.startMs)}}–{{endTime(b)}}</b><small :class="{'lf-agenda-state':showStatus(b)==='Confermato'}">{{showStatus(b)}}</small></div><div class="lf-agenda-person"><strong>{{nameLabel(b.athleteId)}}</strong><small>{{b.discipline}} · {{coachLabel(b.coachId)}} · {{groupLabel(b.participantCount)}}</small></div><i class="coach-dot" :class="coachColor(b.coachId)"/><LionIcon name="chevron" :size="17"/></button><div v-if="expandedBooking===b.id" class="lf-agenda-detail"><p v-if="b.createdByCoach" class="small"><strong>Fissato dal coach</strong></p><p v-if="b.note" style="white-space:pre-wrap;overflow-wrap:anywhere">{{b.note}}</p><p>{{displayService(b.service)}} · {{groupLabel(b.participantCount)}} · {{b.durationMinutes}} min</p><button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla appuntamento</button></div></div>
      </section>
      <section v-else-if="view==='week'" class="panel booking-period"><h3>{{uiText("Settimana del")}} {{weekDates[0]}} · {{events.length}} {{uiText("appuntamenti")}}</h3>
-      <div v-for="day in weekDates" :key="day" class="week-event-day"><strong>{{dateTitle(day)}}</strong><span class="event-count">{{eventsOn(day).length}}</span><p v-if="!eventsOn(day).length" class="small muted">Nessun appuntamento</p><div v-for="b in eventsOn(day)" :key="b.id" class="lf-agenda-record"><button type="button" class="lf-agenda-row" :aria-expanded="expandedBooking===b.id" @click="toggleDetails(b.id)"><div class="lf-agenda-time"><b>{{formatTime(b.startMs)}}–{{endTime(b)}}</b><small :class="{'lf-agenda-state':showStatus(b)==='Confermato'}">{{showStatus(b)}}</small></div><div class="lf-agenda-person"><strong>{{nameLabel(b.athleteId)}}</strong><small>{{b.discipline}} · {{coachLabel(b.coachId)}}</small></div><i class="coach-dot" :class="coachColor(b.coachId)"/><LionIcon name="chevron" :size="17"/></button><div v-if="expandedBooking===b.id" class="lf-agenda-detail"><p v-if="b.createdByCoach" class="small"><strong>Fissato dal coach</strong></p><p v-if="b.note" style="white-space:pre-wrap;overflow-wrap:anywhere">{{b.note}}</p><p>{{displayService(b.service)}} · {{b.durationMinutes}} min</p><button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla appuntamento</button></div></div></div>
+      <div v-for="day in weekDates" :key="day" class="week-event-day"><strong>{{dateTitle(day)}}</strong><span class="event-count">{{eventsOn(day).length}}</span><p v-if="!eventsOn(day).length" class="small muted">Nessun appuntamento</p><div v-for="b in eventsOn(day)" :key="b.id" class="lf-agenda-record"><button type="button" class="lf-agenda-row" :aria-expanded="expandedBooking===b.id" @click="toggleDetails(b.id)"><div class="lf-agenda-time"><b>{{formatTime(b.startMs)}}–{{endTime(b)}}</b><small :class="{'lf-agenda-state':showStatus(b)==='Confermato'}">{{showStatus(b)}}</small></div><div class="lf-agenda-person"><strong>{{nameLabel(b.athleteId)}}</strong><small>{{b.discipline}} · {{coachLabel(b.coachId)}} · {{groupLabel(b.participantCount)}}</small></div><i class="coach-dot" :class="coachColor(b.coachId)"/><LionIcon name="chevron" :size="17"/></button><div v-if="expandedBooking===b.id" class="lf-agenda-detail"><p v-if="b.createdByCoach" class="small"><strong>Fissato dal coach</strong></p><p v-if="b.note" style="white-space:pre-wrap;overflow-wrap:anywhere">{{b.note}}</p><p>{{displayService(b.service)}} · {{groupLabel(b.participantCount)}} · {{b.durationMinutes}} min</p><button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla appuntamento</button></div></div></div>
      </section>
      <section v-else class="panel booking-period"><h3>{{monthLabel}} · {{events.length}} {{uiText("appuntamenti")}}</h3>
       <div class="coach-month-grid"><span v-for="(n,i) in ['L','M','M','G','V','S','D']" :key="i" class="coach-month-weekday">{{n}}</span>
@@ -509,7 +540,7 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
      </section>
      
     </template>
-    <AgendaCompetitions v-else-if="coachTab==='competizioni'&&competitionEnabled&&session" :session="session" :events="competitionEvents" :entries="competitionEntries" mode="events" :now="nowMs" :loading="competitionLoading" @back="coachTab='calendario'"/>
+    <AgendaCompetitions v-else-if="coachTab==='competizioni'&&competitionEnabled&&session" :session="session" :events="competitionEvents" :entries="competitionEntries" mode="events" :initial-event-id="selectedCompetitionId" :now="nowMs" :loading="competitionLoading" @back="coachTab='calendario'"/>
     <template v-else><section class="panel coach-availability-compact"><h2>{{uiText("Disponibilità del Coach autenticato")}}</h2><p class="muted coach-availability-intro">{{uiText("Solo il Coach proprietario può salvare la propria configurazione. Il titolare può preparare slot degli altri Coach solo con funzioni amministrative dedicate, qui disabilitate.")}}</p>
       <template v-if="draft">
        <label>{{uiText("Nome pubblico del Coach")}}<input :value="draft.displayName" maxlength="100" @input="draft.displayName=($event.target as HTMLInputElement).value;editConfig()"/></label>
@@ -734,4 +765,53 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
  .lf-agenda13.lf-agenda-coach .lf-agenda-main button{min-width:136px!important}
  .lf-agenda13.lf-agenda-coach .lf-agenda-list>.panel.muted.lf-agenda-empty{min-height:148px}
 }
+
+/* R8B: participant count is just one booking's metadata. */
+.lf-r8b-group-booking h3{font-size:16px;margin:0 0 5px}.lf-r8b-group-booking>p{margin:4px 0 10px}.lf-r8b-people-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.lf-r8b-people-choices button{border:1px solid var(--border);border-radius:11px;min-height:56px;padding:7px 4px;display:grid;justify-items:center;align-content:center;gap:3px;color:var(--text);background:var(--card2);font-size:18px;font-weight:850}.lf-r8b-people-choices button small{font-size:10px;font-weight:650;color:var(--muted)}.lf-r8b-people-choices button.is-chosen{border-color:var(--mint);color:var(--mint);background:var(--green-bg)}.lf-r8b-people-recap{font-size:12px;font-weight:750;color:var(--mint);margin:9px 0}.lf-r8b-people-choices button:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+
+/* PATCH 30 R9: scoped Athlete Agenda UX only; no data / booking changes. */
+.lf-agenda13[data-r9-athlete="true"]{gap:12px!important;max-width:960px;min-width:0}
+.lf-agenda13[data-r9-athlete="true"] .booking-intro{padding:0!important;min-height:0!important;margin:0!important}
+.lf-agenda13[data-r9-athlete="true"] .booking-intro h1{max-width:none!important;font-size:clamp(25px,4vw,32px);letter-spacing:-.035em;margin:0!important}
+.lf-r9-home-intro{font-size:13px;color:var(--muted);line-height:1.45;margin:4px 0 0!important}
+.lf-agenda13[data-r9-athlete="true"] .lf-agenda-athlete-home{display:grid;gap:12px;align-content:start;min-width:0}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-hero{min-height:180px;border:1px solid #376b54;border-radius:18px;padding:19px 18px;background:#112820;justify-content:flex-end;gap:4px}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-hero .lf-agenda-hero-cover::after{background:linear-gradient(90deg,rgba(4,17,16,.95) 0%,rgba(4,17,16,.65) 61%,rgba(4,17,16,.22) 100%),linear-gradient(0deg,rgba(4,17,16,.7),transparent 85%)}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-hero .eyebrow{color:#72f0b6;font-size:11px;letter-spacing:.14em}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-hero h2{font-size:clamp(20px,4.7vw,28px);line-height:1.15;margin:5px 0 3px;max-width:92%;overflow-wrap:anywhere;text-wrap:balance}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-hero p{font-size:12px;line-height:1.55;color:#e0e9e5;max-width:94%;overflow-wrap:anywhere}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-hero .lf-r9-hero-cta{display:inline-flex;align-items:center;gap:6px;min-height:42px;margin-top:8px;padding:9px 13px!important;align-self:flex-start;background:#162d30;border:1px solid #537c78;color:#fff;font-size:12px;box-shadow:none}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-agenda-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;min-width:0;min-height:100px;padding:14px!important;border:1px solid var(--border);border-radius:15px;background:var(--card);text-align:left;color:var(--text)}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile>svg{flex:0 0 auto;color:var(--mint)}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile strong{font-size:14px;line-height:1.2;font-weight:850;overflow-wrap:anywhere}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile small{font-size:11px;line-height:1.35;color:var(--muted)}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile:hover,.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile:focus-visible{border-color:var(--mint)}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile-full{grid-column:1/-1;flex-direction:row;justify-content:flex-start;align-items:center;min-height:77px;gap:13px}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile-full span{display:grid;gap:3px;min-width:0;flex:1}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile-full>svg:last-child{margin-left:auto;color:var(--muted)}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-upcoming{display:grid;gap:10px;padding:14px!important;margin:0!important;border-radius:16px;background:var(--card)}
+.lf-r9-section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.lf-r9-section-heading h2{font-size:clamp(16px,3.2vw,19px);line-height:1.2;margin:0}
+.lf-r9-section-heading p{margin:5px 0 0}
+.lf-r9-inline-link{border:0;background:transparent;display:inline-flex;align-items:center;gap:2px;color:var(--mint);font-size:12px;font-weight:850;padding:7px 1px!important;min-height:36px}
+.lf-r9-empty{display:flex;align-items:center;gap:10px;padding:14px 10px;background:var(--card2);border:1px dashed var(--border);border-radius:12px;min-width:0}
+.lf-r9-empty svg{color:var(--mint);flex:0 0 auto}
+.lf-r9-empty div{display:grid;gap:4px;min-width:0}
+.lf-r9-empty strong{font-size:13px;font-weight:800}
+.lf-r9-empty small{font-size:11px;line-height:1.4;color:var(--muted)}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-calendar{display:grid;gap:12px;padding:15px!important;margin:0!important}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-calendar select{width:auto;min-width:112px;min-height:38px;padding:7px 8px;font-size:12px}
+.lf-agenda13[data-r9-athlete="true"] .lf-r9-calendar-row{grid-template-columns:minmax(82px,.75fr) minmax(0,1.5fr) auto;min-height:68px}
+.lf-r9-calendar-row .lf-agenda-person strong{display:flex;align-items:center;gap:5px}
+.lf-r9-calendar-row .lf-agenda-person strong svg{flex-shrink:0;color:var(--mint)}
+@media(max-width:650px){.lf-agenda13[data-r9-athlete="true"]{gap:11px!important}.lf-agenda13[data-r9-athlete="true"] .lf-r9-hero{min-height:180px;padding:16px 14px}.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile{min-height:95px;padding:12px!important}.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile-full{min-height:70px}.lf-agenda13[data-r9-athlete="true"] .lf-r9-upcoming{padding:13px!important}}
+@media(max-width:365px){.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile strong{font-size:12px}.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile small{font-size:10px}.lf-agenda13[data-r9-athlete="true"] .lf-r9-calendar-row{grid-template-columns:80px minmax(0,1fr) 17px}}
+@media(prefers-reduced-motion:reduce){.lf-agenda13[data-r9-athlete="true"] .lf-r9-tile{transition:none!important}}
+
+</style>
+
+<style>
+/* R9 targeted override: supersedes the legacy mobile 120px intro spacer. */
+.app.as-athlete .main-layout.booking-in-shell .lf-agenda13[data-r9-athlete="true"] .booking-intro{min-height:0!important;padding:0!important;margin:0!important}
 </style>

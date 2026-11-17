@@ -3,6 +3,7 @@
  */
 import { collection, doc, documentId, getDocFromServer, getDocs, query, where, runTransaction, serverTimestamp, Timestamp, type Firestore } from 'firebase/firestore'
 import { disjointMove } from '../../features/bookings/agendaOverview.ts'
+import {participantCount,validParticipantCount} from '../../features/bookings/groupBooking.ts'
 import { candidateSlots, romeParts, slotId, validateConfig, workingRanges, disciplineAllowed, SLOT_MS,
   type CoachConfig, type Service, type Slot, type Booking } from '../../features/bookings/bookingPolicy.ts'
 
@@ -10,7 +11,7 @@ import { candidateSlots, romeParts, slotId, validateConfig, workingRanges, disci
 export const bookingPaths = {
  config: 'spark_booking_coaches', slots:'spark_booking_slots', reservations:'spark_booking_reservations'
 } as const
-export type LiveReservation=Booking & { discipline:string;createdByCoach?:boolean;note?:string }
+export type LiveReservation=Booking & { discipline:string;participantCount:number;createdByCoach?:boolean;note?:string }
 export type LiveCoachConfig=CoachConfig & { displayName:string;lastPreparedDate:string }
 export function toReservation(id:string,raw:Record<string,unknown>):LiveReservation|null {
  const start=(raw.startAt as {toMillis?:()=>number}|undefined)?.toMillis?.()
@@ -20,7 +21,7 @@ export function toReservation(id:string,raw:Record<string,unknown>):LiveReservat
   !['confirmed','cancelled'].includes(String(raw.status)))return null
  return {id,startMs:start,athleteId:String(raw.athleteId||''),coachId:String(raw.coachId||''),
   service:raw.service as Service,durationMinutes:raw.durationMinutes as 60|120,
-  status:raw.status as 'confirmed'|'cancelled',discipline:String(raw.discipline||''),createdByCoach:typeof raw.createdBy==='string'&&raw.createdBy===raw.coachId,note:typeof raw.note==='string'?raw.note.slice(0,300):''}
+  status:raw.status as 'confirmed'|'cancelled',discipline:String(raw.discipline||''),participantCount:participantCount(raw.participantCount),createdByCoach:typeof raw.createdBy==='string'&&raw.createdBy===raw.coachId,note:typeof raw.note==='string'?raw.note.slice(0,300):''}
 }
 export function toSlot(raw:Record<string,unknown>):Slot|null {
  const start=(raw.startAt as {toMillis?:()=>number}|undefined)?.toMillis?.()
@@ -104,8 +105,10 @@ export async function prepareDaySlots(db:Firestore,caller:{uid:string;gymId:stri
  return {created,already}
 }
 export async function reserve(db:Firestore,caller:{uid:string;gymId:string;role:string},
- cfg:LiveCoachConfig,service:Service,discipline:string,startMs:number){
+ cfg:LiveCoachConfig,service:Service,discipline:string,startMs:number,participants=1){
  const BOOKING_GYM=validatedGym(caller.gymId)
+ if(!validParticipantCount(participants))throw new Error('NUMERO_PARTECIPANTI_NON_VALIDO')
+ if(participants>1&&import.meta.env.VITE_LIONFIT_GROUP_BOOKING_ENABLED!=='true')throw new Error('PRENOTAZIONI_DI_GRUPPO_NON_ABILITATE')
  if(caller.role!=='atleta'||caller.gymId!==BOOKING_GYM)throw new Error('SOLO_ATLETA')
  if(!discipline.trim()||discipline.trim().length>64||!disciplineAllowed(service,discipline.trim()))throw new Error('DISCIPLINA_NON_VALIDA')
  if(!Number.isSafeInteger(startMs)||startMs%SLOT_MS)throw new Error('ORARIO_NON_VALIDO')
@@ -131,7 +134,7 @@ export async function reserve(db:Firestore,caller:{uid:string;gymId:string;role:
   refs.forEach(ref=>tx.update(ref,{status:'booked',bookingId:id}))
   tx.set(doc(db,'gyms',BOOKING_GYM,bookingPaths.reservations,id),{
    athleteId:caller.uid,coachId:cfg.coachId,service,discipline:discipline.trim(),
-   startAt:Timestamp.fromMillis(startMs),durationMinutes:duration,status:'confirmed',createdAt:serverTimestamp()
+   startAt:Timestamp.fromMillis(startMs),durationMinutes:duration,status:'confirmed',createdAt:serverTimestamp(),...(participants>1?{participantCount:participants}:{})
   })
  },{maxAttempts:5})
  return id
@@ -189,7 +192,7 @@ export async function rescheduleReservation(db:Firestore,caller:{uid:string;gymI
   if(!candidateSlots(cfg,newSlots as Slot[],old.service,romeParts(newStart).date,now).some(x=>x.startMs===newStart&&x.free))throw new Error('NUOVO_ORARIO_NON_DISPONIBILE')
   // Only after all reads and validations: atomic change, not two commits.
   newSlots.forEach((_,i)=>tx.update(newRefs[i],{status:'booked',bookingId:newRef.id}))
-  tx.set(newRef,{athleteId:caller.uid,coachId:old.coachId,service:old.service,discipline:old.discipline,startAt:Timestamp.fromMillis(newStart),durationMinutes:old.durationMinutes,status:'confirmed',createdAt:serverTimestamp()})
+  tx.set(newRef,{athleteId:caller.uid,coachId:old.coachId,service:old.service,discipline:old.discipline,startAt:Timestamp.fromMillis(newStart),durationMinutes:old.durationMinutes,status:'confirmed',createdAt:serverTimestamp(),...(old.participantCount>1?{participantCount:old.participantCount}:{})})
   tx.update(oldRef,{status:'cancelled',cancelledAt:serverTimestamp()})
   oldRefs.forEach(r=>tx.update(r,{status:'open',bookingId:''}))
  },{maxAttempts:5})
