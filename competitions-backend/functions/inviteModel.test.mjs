@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {validId,validEventId,validRecipients,activeMember,canInviteEvent,isInvitationPending,entryInviteLabel} from './inviteModel.mjs'
+import {validId,validEventId,validRecipients,activeMember,canInviteEvent,isInvitationPending,entryInviteLabel,pilotAllowed} from './inviteModel.mjs'
 const event='01234567890123456789'
 test('rejects invalid identifiers and duplicate/oversized recipient lists',()=>{
  assert.equal(validEventId(event),true);assert.equal(validEventId('../escape'),false)
@@ -13,6 +13,12 @@ test('pending invited distinct from spontaneous request with same existing schem
  assert.equal(entryInviteLabel({status:'pending',athleteId:'atleta1',updatedBy:'atleta1'}),null)
  assert.equal(entryInviteLabel({status:'approved',athleteId:'atleta1',updatedBy:'atleta1'}),'Partecipa')
  assert.equal(entryInviteLabel({status:'rejected',athleteId:'atleta1',updatedBy:'atleta1'}),'Non partecipa')
+})
+test('pilot is required and isolated by gym',()=>{
+ assert.equal(pilotAllowed('gym_alpha','gym_alpha'),true)
+ assert.equal(pilotAllowed('gym_alpha','gym_beta'),false)
+ assert.equal(pilotAllowed('gym_alpha',undefined),false)
+ assert.equal(pilotAllowed('../evil','../evil'),false)
 })
 test('roles and date scope fail closed',()=>{
  assert.equal(activeMember({role:'athlete',gymId:'g',membershipStatus:'active'},'g','athlete'),true)

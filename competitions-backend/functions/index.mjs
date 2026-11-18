@@ -8,7 +8,7 @@ import {getFirestore,FieldValue} from 'firebase-admin/firestore'
 import {getMessaging} from 'firebase-admin/messaging'
 import {onCall,HttpsError} from 'firebase-functions/v2/https'
 import {logger} from 'firebase-functions'
-import {validId,validEventId,validRecipients,activeMember,canInviteEvent,isInvitationPending} from './inviteModel.mjs'
+import {validId,validEventId,validRecipients,activeMember,canInviteEvent,isInvitationPending,pilotAllowed} from './inviteModel.mjs'
 initializeApp()
 const db=getFirestore(),REGION='europe-west1'
 const opts={region:REGION,maxInstances:3,timeoutSeconds:60,concurrency:20}
@@ -16,12 +16,13 @@ function enabled(){
  if(process.env.LF_COMPETITION_INVITES_ENABLED!=='true')throw new HttpsError('failed-precondition','Inviti alle gare non ancora attivati.')
  const id=process.env.GCLOUD_PROJECT||process.env.GOOGLE_CLOUD_PROJECT
  if(!id||id!==process.env.LF_COMPETITION_PROJECT_ID)throw new HttpsError('failed-precondition','Progetto Firebase non autorizzato.')
+ if(!process.env.LF_COMPETITION_PILOT_GYM_ID)throw new HttpsError('failed-precondition','Palestra pilota non configurata.')
 }
 async function caller(req,role){
  enabled();const uid=req.auth?.uid
- if(!validId(uid)||req.auth?.token?.email_verified!==true)throw new HttpsError('unauthenticated','Account verificato richiesto.')
+ if(!validId(uid))throw new HttpsError('unauthenticated','Accesso richiesto.')
  const p=(await db.doc(`users/${uid}`).get()).data(),gym=p?.gymId
- if(!validId(gym)||!activeMember(p,gym,role))throw new HttpsError('permission-denied','Profilo non autorizzato.')
+ if(!validId(gym)||!activeMember(p,gym,role)||!pilotAllowed(gym,process.env.LF_COMPETITION_PILOT_GYM_ID))throw new HttpsError('permission-denied','Profilo non autorizzato o fuori dalla palestra pilota.')
  return {uid,gym,role}
 }
 const eventRef=(g,e)=>db.doc(`gyms/${g}/competitions/${e}`)
@@ -30,10 +31,13 @@ const configRef=g=>db.doc(`gyms/${g}/agenda_config/competitions`)
 const now=()=>Date.now()
 async function pushTo(uid,gym,role,title,body,eventId){
  try{
+  // Recheck current membership before considering any device for a push.
+  const profile=(await db.doc(`users/${uid}`).get()).data()
+  if(!activeMember(profile,gym,role)||!pilotAllowed(gym,process.env.LF_COMPETITION_PILOT_GYM_ID))return
   const rows=await db.collection('lf_push_devices').where('uid','==',uid).limit(15).get()
   const tokens=rows.docs.map(x=>x.data()).filter(x=>x?.gym===gym&&x.role===role&&x.expires>now()&&typeof x.token==='string'&&x.token.length>=20).map(x=>x.token)
   if(!tokens.length)return
-  const results=await Promise.allSettled(tokens.map(token=>getMessaging().send({token,notification:{title,body},data:{kind:'competition-invite',open:'competition',eventId},android:{priority:'high',ttl:600000},webpush:{headers:{TTL:'600'},notification:{icon:'/icons/icon-192.png'}}})))
+  const results=await Promise.allSettled(tokens.map(token=>getMessaging().send({token,notification:{title,body},data:{kind:'competition-invite',open:'bookings',eventId},android:{priority:'high',ttl:600000},webpush:{headers:{TTL:'600'},notification:{icon:'/icons/icon-192.png'}}})))
   const rejected=results.filter(r=>r.status==='rejected').length
   if(rejected)logger.warn('Competition push partial rejection',{rejected,count:tokens.length})
  }catch(e){logger.warn('Competition push unavailable',{code:String(e?.code||'unknown')})}

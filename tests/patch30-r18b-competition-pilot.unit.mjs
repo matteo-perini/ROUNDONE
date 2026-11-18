@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const manifest=JSON.parse(readFileSync(resolve(root,'R18B_MANIFEST.json'),'utf8'));
+const read=rel=>readFileSync(resolve(root,rel),'utf8');
+const hash=b=>createHash('sha256').update(b).digest('hex');
+test('payload matches exact SHA256 manifest',()=>{for(const p of manifest.targets){assert.equal(hash(readFileSync(resolve(root,'R18B_PAYLOAD',p))),manifest.patched[p]);assert.notEqual(manifest.base[p],manifest.patched[p])}});
+test('server denies missing pilot and other gyms',()=>{const index=read('R18B_PAYLOAD/competitions-backend/functions/index.mjs');assert.match(index,/LF_COMPETITION_PILOT_GYM_ID/);assert.match(index,/pilotAllowed\(gym,process\.env\.LF_COMPETITION_PILOT_GYM_ID\)/);assert.match(index,/activeMember\(p,gym,role\)/);assert.match(index,/LF_COMPETITION_PROJECT_ID/)});
+test('only explicit invite sends targeted notification',()=>{const index=read('R18B_PAYLOAD/competitions-backend/functions/index.mjs');assert.match(index,/Promise\.all\(created\.map\(id=>pushTo\(id,u\.gym,'athlete'/);assert.match(index,/if\(entrySnap\.exists\)return false/);assert.match(index,/status:'pending'/);assert.match(index,/data:\{kind:'competition-invite',open:'bookings',eventId\}/)});
+test('web and native controls gated to pilot gym',()=>{const api=read('R18B_PAYLOAD/src/integrations/firebase/competitionInvites.ts');const vue=read('R18B_PAYLOAD/src/components/AgendaCompetitions.vue');assert.match(api,/VITE_LIONFIT_COMPETITION_PILOT_GYM_ID/);assert.doesNotMatch(vue,/competitionInvitesEnabled\(\)/);assert.equal((vue.match(/competitionInvitesEnabled\(props\.session\.gymId\)/g)||[]).length,4)});
+test('spontaneous requests stay in existing component',()=>{const vue=read('R18B_PAYLOAD/src/components/AgendaCompetitions.vue');assert.match(vue,/Voglio partecipare/);assert.match(vue,/Non partecipo/);assert.match(vue,/Partecipo/);assert.match(vue,/saveCompetitionResult/)});
+test('installer must verify base SHA256 before applying',()=>{const c=read('R18B_INSTALLA.cjs');assert.match(c,/manifest\.base\[c\.rel\]/);assert.match(c,/manifest\.patched\[c\.rel\]/);assert.match(c,/R18B_BACKUP\.json/);assert.doesNotMatch(c,/firebase deploy/)});

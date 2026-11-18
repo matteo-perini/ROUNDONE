@@ -1,0 +1,21 @@
+LIONFIT R18C — TEST FIRESTORE GARE (ISOLATO)
+================================================
+Questo ZIP NON modifica l'app, NON fa deploy e NON attiva le notifiche.
+Usa le Rules R17B fornite dall'utente e un progetto demo separato.
+
+Estrai ZIP nella root LionFit-Modern-Git, verra creata R18C_EMULATOR_GARE.
+In PowerShell VS Code:
+  cd "C:\Users\LENOVO X380\Desktop\ULTIMA\LionFit-Modern-Git\R18C_EMULATOR_GARE"
+  java -version
+  npm.cmd install --no-audit --no-fund
+  firebase.cmd emulators:exec --only firestore --project demo-lionfit-r18c --config firebase.json "npm.cmd test"
+
+ATTESO: 12 pass, 0 fail (solo se l'Emulator e le regole effettivamente passano).
+Se una prova fallisce, non fare il deploy delle Functions.
+
+Questi test verificano le FIRESTORE RULES ma NON esercitano le Cloud Functions,
+FCM, AppCheck, chiamate auth, push device reali, costo, o l'apertura delle notifiche.
+Anche con test tutti verdi resta obbligatorio un collaudo delle callable e dei push
+su una palestra pilota prima del rilascio generale.
+
+NON pubblicare questa cartella su GitHub (contiene test e copie delle Rules).
