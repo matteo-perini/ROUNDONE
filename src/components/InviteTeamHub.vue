@@ -37,7 +37,7 @@ function select(kind:'atleta'|'coach'){
     <div class="lf-invite-detail-body"><slot name="settings"/></div>
    </details>
   </div>
-   <details v-if="owner" class="staff-details lf-invite-detail lf-email-studio-detail">
+   <details class="staff-details lf-invite-detail lf-email-studio-detail">
     <summary><LionIcon name="palette" :size="21"/><span class="lf-invite-summary"><strong>Personalizza inviti</strong><small>Testi, colori, logo e anteprima</small></span><LionIcon name="chevron" :size="16" class="lf-invite-chevron"/></summary>
     <div class="lf-invite-detail-body"><slot name="studio"/></div>
    </details>

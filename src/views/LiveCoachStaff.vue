@@ -352,7 +352,7 @@ async function revoke(x:Invite){
     <div class="lf-pending-actions"><button v-if="mayWriteLive() && (owner||x.createdBy===stagingSession?.uid)" class="secondary" :disabled="busy" @click="shareInOneClick(x.type,'copy',x)">Copia</button><button v-if="mayWriteLive() && (owner||x.createdBy===stagingSession?.uid)" class="lf-wa-button" :disabled="busy" @click="shareInOneClick(x.type,'whatsapp',x)">WhatsApp</button><button class="ghost" :disabled="busy||!mayWriteLive()" @click="revoke(x)">{{uiText("Revoca")}}</button></div>
    </div>
   </template>
-  <template v-if="owner" #studio><InviteEmailStudio v-if="stagingSession?.uid&&stagingSession?.gymId" :gym-id="stagingSession.gymId" :uid="stagingSession.uid" :gym-name="studioGymName" :logo="studioLogo" :cover="studioCover" :busy="busy"/></template>
+  <template #studio><InviteEmailStudio v-if="stagingSession?.uid&&stagingSession?.gymId" :gym-id="stagingSession.gymId" :uid="stagingSession.uid" :gym-name="studioGymName" :logo="studioLogo" :cover="studioCover" :owner="owner" :coaches="coaches" :busy="busy"/></template>
   <template #settings><p class="muted small">LionFit Mail · Resend: inviti inviati attraverso Firebase. Mittente e credenziali sono gestiti esclusivamente sul server. Il logo e la copertina seguono il branding della palestra, con immagini standard LionFit quando mancano.</p></template>
  </InviteTeamHub>
 </template>

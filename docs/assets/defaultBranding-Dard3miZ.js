@@ -1,0 +1,1 @@
+const i="/lionfit-defaults/lionfit-logo-official.png",t="/lionfit-defaults/lionfit-gym-premium.jpg",r="LionFit Team",e=(n,o=180)=>String(n||"").trim().replace(/\s+/g," ").slice(0,o);function l(n){return e(n,24e4)||i}function s(n){return e(n,42e4)||t}function a(n,o){return e(n,70)||e(o,70)||r}export{s as a,a as b,l as r};

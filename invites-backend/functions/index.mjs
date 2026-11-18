@@ -5,6 +5,7 @@ import {initializeApp,getApps} from 'firebase-admin/app'
 import {getFirestore,FieldValue} from 'firebase-admin/firestore'
 import {validateRequest,makeInviteUrl,idempotencyKey,canSendInvite,quotaPermits,GYM_ID} from './inviteCore.mjs'
 import {validateStudio,trustedStudio,defaultInviteStudio,studioMedia,renderStudioInviteEmail} from './studioCore.mjs'
+import {studioRole,validatedEditors,readEditors,studioConfigPath,studioEditorsPath,studioModelPath} from './studioPermissions.mjs'
 
 if(!getApps().length)initializeApp()
 const resendApiKey=defineSecret('LIONFIT_INVITES_RESEND_API_KEY')
@@ -15,7 +16,7 @@ function safeProject(){
  const allowed=String(process.env.LIONFIT_INVITES_PROJECT_ID||'').trim()
  if(!allowed||project!==allowed||project.startsWith('demo-'))throw new HttpsError('failed-precondition','Servizio inviti non abilitato su questo progetto.')
  if(process.env.FUNCTIONS_EMULATOR==='true')throw new HttpsError('failed-precondition','Invio esterno disabilitato su Emulator.')
- if(process.env.LIONFIT_INVITES_RESEND_ENABLED!=='ENABLED_AFTER_REVIEW')throw new HttpsError('failed-precondition','Resend non è ancora attivo: utilizzare EmailJS.')
+ if(process.env.LIONFIT_INVITES_RESEND_ENABLED!=='ENABLED_AFTER_REVIEW')throw new HttpsError('failed-precondition','Invio Resend non attivo sul server.')
  return project
 }
 function providerName(){
@@ -29,29 +30,51 @@ function studioEnabled(){
  if(!process.env.LIONFIT_INVITES_PROJECT_ID||p!==process.env.LIONFIT_INVITES_PROJECT_ID||p.startsWith('demo-')||process.env.LIONFIT_INVITES_STUDIO_ENABLED!=='ENABLED_AFTER_REVIEW')
   throw new HttpsError('failed-precondition','Email Studio cloud non ancora abilitato su questo progetto.')
 }
-async function studioAccess(req,write=false){
+/** PATCH 30 R12: every tenant has its own model and coach grants, fully enforced server-side. */
+async function studioAccess(req,action='read'){
  studioEnabled()
- const uid=req.auth?.uid, gymId=req.data?.gymId
+ const uid=req.auth?.uid,gymId=req.data?.gymId
  if(!uid)throw new HttpsError('unauthenticated','Accedi a LionFit.')
- if(typeof gymId!=='string'||!GYM_ID.test(gymId)||Object.keys(req.data||{}).some(k=>!['gymId',...(write?['settings']:[])].includes(k)))throw new HttpsError('invalid-argument','Richiesta non valida.')
- if(req.auth.token.email_verified!==true)denied('Verifica la tua email prima di modificare il modello.')
- const [p,g]=await Promise.all([db.doc(`users/${uid}`).get(),db.doc(`gyms/${gymId}`).get()])
- const profile=p.data(),gym=g.data()
- if(!profile||!gym||profile.gymId!==gymId||profile.role!=='admin'||!['owner','collaborator'].includes(profile.coachRole)||profile.membershipStatus&&profile.membershipStatus!=='active')denied()
- if(write && (profile.coachRole!=='owner'||gym.ownerUid!==uid))denied('Solo il titolare può modificare il modello degli inviti.')
- return {uid,gymId}
+ const names=action==='read'?['gymId','kind']:action==='save'?['gymId','settings','kind']:['gymId','editorUids']
+ const kind=req.data?.kind
+ if(action!=='grant'&&kind!==undefined&&!['athlete','coach'].includes(kind))throw new HttpsError('invalid-argument','Tipo di invito non valido.')
+ if(typeof gymId!=='string'||!GYM_ID.test(gymId)||!req.data||Object.keys(req.data).some(k=>!names.includes(k)))throw new HttpsError('invalid-argument','Richiesta non valida.')
+ if(req.auth.token.email_verified!==true)denied('Verifica la tua email prima di usare Email Studio.')
+ const [p,g,access]=await Promise.all([
+  db.doc(`users/${uid}`).get(),db.doc(`gyms/${gymId}`).get(),db.doc(studioEditorsPath(gymId)).get()
+ ])
+ const role=studioRole({uid,gymId,profile:p.data(),gym:g.data()})
+ if(!role)denied('Non appartieni alla palestra o non hai un ruolo valido.')
+ const editorUids=readEditors(access.data()?.editorUids)
+ if(action==='grant'&&role!=='owner')denied('Solo il titolare può assegnare i permessi di modifica.')
+ if(action==='save'&&role!=='owner'&&!editorUids.includes(uid))denied('Il titolare non ti ha autorizzato a modificare il modello.')
+ return {uid,gymId,role,editorUids,kind}
 }
 export const lfReadInviteStudio=onCall({region:REGION,maxInstances:3},async req=>{
- const {gymId}=await studioAccess(req)
- const snap=await db.doc(`gyms/${gymId}/invite_email_studio/config`).get()
- return {settings:trustedStudio(snap.data()?.settings)}
+ const {gymId,uid,role,editorUids,kind}=await studioAccess(req)
+ const [snap,legacy]=await Promise.all([db.doc(kind?studioModelPath(gymId,kind):studioConfigPath(gymId)).get(),db.doc(studioConfigPath(gymId)).get()])
+ return {settings:trustedStudio(snap.data()?.settings)||trustedStudio(legacy.data()?.settings),canEdit:role==='owner'||editorUids.includes(uid),isOwner:role==='owner',editorUids:role==='owner'?editorUids:[]}
 })
 export const lfSaveInviteStudio=onCall({region:REGION,maxInstances:3},async req=>{
- const {gymId,uid}=await studioAccess(req,true)
+ const {gymId,uid,kind}=await studioAccess(req,'save')
  let settings
  try{settings=validateStudio(req.data?.settings)}catch{throw new HttpsError('invalid-argument','Controlla i campi del modello email.')}
- await db.doc(`gyms/${gymId}/invite_email_studio/config`).set({settings,updatedBy:uid,updatedAt:FieldValue.serverTimestamp(),schemaVersion:1})
+ await db.doc(kind?studioModelPath(gymId,kind):studioConfigPath(gymId)).set({settings,updatedBy:uid,updatedAt:FieldValue.serverTimestamp(),schemaVersion:1})
  return {saved:true}
+})
+/** Owner-only, explicitly approved active coaches of THIS gym; never delegate tenant access. */
+export const lfSetInviteStudioEditors=onCall({region:REGION,maxInstances:3},async req=>{
+ const {gymId,uid}=await studioAccess(req,'grant')
+ let editorUids
+ try{editorUids=validatedEditors(req.data?.editorUids)}catch{throw new HttpsError('invalid-argument','Elenco dei Coach non valido.')}
+ const profiles=await Promise.all(editorUids.map(id=>db.doc(`users/${id}`).get()))
+ for(let i=0;i<editorUids.length;i++){
+  const p=profiles[i].data()
+  if(!p||p.gymId!==gymId||p.role!=='admin'||p.coachRole!=='collaborator'||p.membershipStatus&&p.membershipStatus!=='active')
+   denied('Puoi autorizzare soltanto Coach attivi della tua palestra.')
+ }
+ await db.doc(studioEditorsPath(gymId)).set({editorUids,updatedBy:uid,updatedAt:FieldValue.serverTimestamp(),schemaVersion:1})
+ return {saved:true,editorUids}
 })
 /** Only an authenticated, active invitation creator may request a single dispatch.
  * The client cannot choose a sender, invite URL, branding or provider key.
@@ -96,11 +119,12 @@ export const lfSendInviteEmail=onCall({region:REGION,secrets:[resendApiKey],maxI
  })
  if(claimed.alreadySent)return {accepted:true,alreadySent:true}
  // Server-only tenant settings and existing gym images. Never accept branding from the sender's request.
- const [modelDoc,appearanceDoc]=await Promise.all([
-  db.doc(`gyms/${gymId}/invite_email_studio/config`).get(),
+ const [modelDoc,kindModelDoc,appearanceDoc]=await Promise.all([
+  db.doc(studioConfigPath(gymId)).get(),
+  db.doc(studioModelPath(gymId,kind)).get(),
   db.doc(`gyms/${gymId}/identity/appearance`).get()
  ])
- const studio=trustedStudio(modelDoc.data()?.settings)||defaultInviteStudio(claimed.gymName)
+ const studio=trustedStudio(kindModelDoc.data()?.settings)||trustedStudio(modelDoc.data()?.settings)||defaultInviteStudio(claimed.gymName)
  const attachments=studioMedia(appearanceDoc.data(),studio)
  const mail=renderStudioInviteEmail({gymName:claimed.gymName,kind,inviteUrl,studio,attachments})
  // Never log recipient addresses, tokens, emails, or provider credentials.

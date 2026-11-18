@@ -13,10 +13,16 @@ async function studioCall<T>(name:string,payload:Record<string,unknown>,uid:stri
  if(auth.currentUser?.uid!==uid)throw new Error('Account cambiato durante l’operazione.')
  return out
 }
-export async function loadGymInviteStudio(gymId:string,uid:string){
- return studioCall<{settings:InviteEmailStudioSettings|null}>('lfReadInviteStudio',{gymId},uid)
+export type InviteStudioAccess={settings:InviteEmailStudioSettings|null;canEdit:boolean;isOwner:boolean;editorUids:string[]}
+export async function loadGymInviteStudio(gymId:string,uid:string,kind:'athlete'|'coach'='athlete'){
+ return studioCall<InviteStudioAccess>('lfReadInviteStudio',{gymId,kind},uid)
 }
-export async function saveGymInviteStudio(gymId:string,uid:string,settings:InviteEmailStudioSettings){
+export async function saveGymInviteStudio(gymId:string,uid:string,settings:InviteEmailStudioSettings,kind:'athlete'|'coach'='athlete'){
  if(!mayWriteLive())throw new Error('Salvataggio disabilitato in questo ambiente.')
- return studioCall<{saved:boolean}>('lfSaveInviteStudio',{gymId,settings},uid)
+ return studioCall<{saved:boolean}>('lfSaveInviteStudio',{gymId,settings,kind},uid)
+}
+
+export async function saveGymInviteStudioEditors(gymId:string,uid:string,editorUids:string[]){
+ if(!mayWriteLive())throw new Error('Salvataggio disabilitato in questo ambiente.')
+ return studioCall<{saved:boolean;editorUids:string[]}>('lfSetInviteStudioEditors',{gymId,editorUids},uid)
 }
