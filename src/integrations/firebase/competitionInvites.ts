@@ -2,11 +2,16 @@
 import {getFunctions,httpsCallable} from 'firebase/functions'
 import {getStagingClients} from './stagingClient'
 import {mayWriteLive} from './stagingConfig'
-// Only the opted-in pilot gym sees invitation controls. The server independently checks membership and scope.
+// Client visibility only; the server always rechecks gym, role and active membership.
+// Missing scope preserves the single-gym pilot. All gyms requires EXPLICIT opt-in.
 export const competitionInvitesEnabled=(gymId?:string)=>{
+ if(import.meta.env.VITE_LIONFIT_COMPETITION_INVITES_ENABLED!=='true')return false
+ if(gymId!==undefined&&!/^[A-Za-z0-9_-]{1,128}$/.test(gymId))return false
+ const scope=String(import.meta.env.VITE_LIONFIT_COMPETITION_SCOPE||'pilot')
+ if(scope==='all')return true
+ if(scope!=='pilot')return false
  const pilot=String(import.meta.env.VITE_LIONFIT_COMPETITION_PILOT_GYM_ID||'')
- if(import.meta.env.VITE_LIONFIT_COMPETITION_INVITES_ENABLED!=='true'||!pilot||!/^[A-Za-z0-9_-]{1,128}$/.test(pilot))return false
- return !gymId||gymId===pilot
+ return /^[A-Za-z0-9_-]{1,128}$/.test(pilot)&&(!gymId||gymId===pilot)
 }
 function api<T>(name:string,payload:Record<string,unknown>):Promise<T>{
  if(!mayWriteLive()||!competitionInvitesEnabled())throw new Error('Inviti alle gare non ancora attivati: prima collauda e distribuisci le Cloud Functions dedicate.')

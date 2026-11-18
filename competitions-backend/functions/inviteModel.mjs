@@ -13,3 +13,6 @@ export function entryInviteLabel(entry){
 }
 export const activeMember=(p,gym,role)=>p?.gymId===gym&&p?.role===role&&(!('membershipStatus' in p)||p.membershipStatus==='active')
 export function canInviteEvent(e,now){return e?.status==='published'&&typeof e.startAt?.toMillis==='function'&&e.startAt.toMillis()>now}
+
+/** Explicit scope all never bypasses the per-gym role/membership check. */
+export const scopeAllowed=(gym,scope,pilot)=>validId(gym)&&(scope==='all'||(scope==='pilot'&&pilotAllowed(gym,pilot)))

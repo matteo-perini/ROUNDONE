@@ -1,0 +1,55 @@
+LIONFIT — PATCH 30 R18E | Inviti gare per tutte le palestre (SAFE)
+======================================================================
+REQUISITI
+- Aver installato R18B + R18D e collaudato il pilota.
+- NON modificare i file .env manualmente se puoi usare lo script.
+- Progetto Firebase approvato: app-palestra-b0b9d.
+- Nessun cambio alle Firestore Rules, notifiche generali, pagamenti o altri backend.
+
+INSTALLAZIONE (VS Code, terminale APERTO NELLA RADICE LionFit-Modern-Git)
+1) Estrai TUTTI i file dello ZIP nella radice LionFit-Modern-Git (sovrascrivi i file R18E se presenti).
+2) node R18E_INSTALLA.cjs install
+3) node --test tests/patch30-r18e-global-invites.unit.mjs
+4) npm.cmd --prefix .\competitions-backend\functions test
+5) node --check .\competitions-backend\functions\index.mjs
+6) node R18E_CONFIGURA_TUTTE.cjs all
+   Lo script aggiorna SOLO LF_COMPETITION_SCOPE e VITE_LIONFIT_COMPETITION_SCOPE
+   dentro i due .env locali. Non li stampa, non modifica altri parametri e fa backup
+   ESTERNO alla cartella progetto. Refuses tracked .env, mismatched projects, unexpected hashes.
+
+PUBBLICAZIONE SERVER (SOLO dopo test e config riusciti)
+7) cd .\competitions-backend
+8) firebase.cmd deploy --only "functions:competitions:lfCompetitionInvite,functions:competitions:lfCompetitionRespond" --project app-palestra-b0b9d
+   Se Firebase chiede di eliminare Functions, rispondi N e fermati.
+9) cd ..
+
+PUBBLICAZIONE FRONTEND WEB
+10) npm.cmd run build
+11) Esegui il tuo LIONFIT_PREPARA_WEB_E_DOCS.cmd per aggiornare la build GitHub Pages;
+    controlla GitHub Desktop: non committare file .env / backup / credenziali.
+12) Commit e Push origin, quindi collauda sul sito pubblicato con un'altra palestra.
+
+ANDROID
+Gli APK gia distribuiti contengono il vecchio frontend: per attivare le gare
+in tutte le palestre Android bisogna produrre e distribuire un nuovo APK.
+Non usare un vecchio APK per verificare il rollout multi-palestra.
+
+COLLAUDO MINIMO
+- Un Coach di una palestra diversa dalla pilota puo invitare solo i propri atleti;
+  l'Atleta vede invito nella campanellina, risponde e il Coach vede la risposta.
+- Un Atleta di un'altra palestra NON deve comparire nella lista del Coach.
+- La pubblicazione della gara da sola NON manda push.
+- Le push richiedono registrazione del dispositivo e permessi: sono best-effort.
+- Resta attivo il limite di 35 destinatari per ciascuna richiesta e fino a 100
+  atleti nella lista caricata; nessuna nuova paginazione in questa patch.
+- La palestra deve avere l'Agenda gare attiva in agenda_config/competitions.
+
+ROLLBACK SICURO
+A) node R18E_CONFIGURA_TUTTE.cjs pilot (ripristina i gate pilota, fa backup)
+B) node R18E_INSTALLA.cjs rollback (ripristina i sorgenti R18D/R18B, hash-guard)
+C) Ridistribuisci nuovamente le sole 2 Cloud Functions gare.
+D) Ricompila il web / Prepara Web e Docs / GitHub push; ricompila APK se usato.
+Non tocca i dati degli inviti gia creati.
+
+R18E NON MODIFICA AUTOMATICAMENTE Firebase, git, APK, Firestore Rules o altri servizi.
+Tutte le autorizzazioni rimangono legate a gymId, ruolo e membershipStatus.

@@ -9,21 +9,31 @@ import {getFirestore,FieldValue,Timestamp} from 'firebase-admin/firestore'
 import {getMessaging} from 'firebase-admin/messaging'
 import {onCall,HttpsError} from 'firebase-functions/v2/https'
 import {logger} from 'firebase-functions'
-import {validId,validEventId,validRecipients,activeMember,canInviteEvent,isInvitationPending,pilotAllowed} from './inviteModel.mjs'
+import {validId,validEventId,validRecipients,activeMember,canInviteEvent,isInvitationPending,scopeAllowed} from './inviteModel.mjs'
 initializeApp()
 const db=getFirestore(),REGION='europe-west1'
 const opts={region:REGION,maxInstances:3,timeoutSeconds:60,concurrency:20}
+// Backwards compatible and fail-closed: missing scope retains the existing single-gym pilot.
+// Global rollout requires an EXPLICIT server-side LF_COMPETITION_SCOPE=all.
+function competitionScope(){
+ const scope=process.env.LF_COMPETITION_SCOPE||'pilot'
+ if(scope!=='pilot'&&scope!=='all')throw new HttpsError('failed-precondition','Ambito gare non valido.')
+ return scope
+}
+function gymInScope(gym){
+ return scopeAllowed(gym,competitionScope(),process.env.LF_COMPETITION_PILOT_GYM_ID)
+}
 function enabled(){
  if(process.env.LF_COMPETITION_INVITES_ENABLED!=='true')throw new HttpsError('failed-precondition','Inviti alle gare non ancora attivati.')
  const id=process.env.GCLOUD_PROJECT||process.env.GOOGLE_CLOUD_PROJECT
  if(!id||id!==process.env.LF_COMPETITION_PROJECT_ID)throw new HttpsError('failed-precondition','Progetto Firebase non autorizzato.')
- if(!process.env.LF_COMPETITION_PILOT_GYM_ID)throw new HttpsError('failed-precondition','Palestra pilota non configurata.')
+ if(competitionScope()==='pilot'&&!validId(process.env.LF_COMPETITION_PILOT_GYM_ID))throw new HttpsError('failed-precondition','Palestra pilota non configurata.')
 }
 async function caller(req,role){
  enabled();const uid=req.auth?.uid
  if(!validId(uid))throw new HttpsError('unauthenticated','Accesso richiesto.')
  const p=(await db.doc(`users/${uid}`).get()).data(),gym=p?.gymId
- if(!validId(gym)||!activeMember(p,gym,role)||!pilotAllowed(gym,process.env.LF_COMPETITION_PILOT_GYM_ID))throw new HttpsError('permission-denied','Profilo non autorizzato o fuori dalla palestra pilota.')
+ if(!validId(gym)||!activeMember(p,gym,role)||!gymInScope(gym))throw new HttpsError('permission-denied','Profilo o palestra non autorizzati.')
  return {uid,gym,role}
 }
 const eventRef=(g,e)=>db.doc(`gyms/${g}/competitions/${e}`)
@@ -47,7 +57,7 @@ async function pushTo(uid,gym,role,title,body,eventId){
  try{
   // Recheck current membership before considering any device for a push.
   const profile=(await db.doc(`users/${uid}`).get()).data()
-  if(!activeMember(profile,gym,role)||!pilotAllowed(gym,process.env.LF_COMPETITION_PILOT_GYM_ID))return
+  if(!activeMember(profile,gym,role)||!gymInScope(gym))return
   const rows=await db.collection('lf_push_devices').where('uid','==',uid).limit(15).get()
   const tokens=rows.docs.map(x=>x.data()).filter(x=>x?.gym===gym&&x.role===role&&x.expires>now()&&typeof x.token==='string'&&x.token.length>=20).map(x=>x.token)
   if(!tokens.length){logger.info('Competition push skipped: no active registered device',{role});return}
