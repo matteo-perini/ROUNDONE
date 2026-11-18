@@ -88,7 +88,7 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
   <template v-else-if="data">
    <template v-if="props.screen==='plan'">
     <AthletePlanContent archive-expired :athlete-key="session?.uid||''" :personal="data.personal" :weeks="data.weeks" :groups="data.groups" :week-id="selectedWeek||currentWeek?.id||''" :initial-day="requestedDay" @update:week-id="id => { selectedWeek=id }" />
-    <div class="row" style="flex-wrap:wrap;gap:8px"><RouterLink :to="livePath('/archivio')" class="secondary">Archivio schede</RouterLink><RouterLink :to="{path:'/archivio',query:{...(isStagingMode()?{}:{source:'emulator'}),view:'programmi'}}" class="secondary">Archivio programmazioni</RouterLink></div>
+    <nav class="lf-r13-plan-archives" aria-label="Archivi del piano"><span>CONSULTA LO STORICO</span><div class="lf-r13-plan-archive-links"><RouterLink :to="livePath('/archivio')" class="secondary">Archivio schede <span aria-hidden="true">›</span></RouterLink><RouterLink :to="{path:'/archivio',query:{...(isStagingMode()?{}:{source:'emulator'}),view:'programmi'}}" class="secondary">Archivio programmazioni <span aria-hidden="true">›</span></RouterLink></div></nav>
    </template>
    <template v-else-if="props.screen==='home'">
     <AthleteHomeContent :name="session?.label||'Atleta'" :today-name="todayDay?.name||''" :week-name="currentWeekLabel" :calendar-day="romeWeekDayNumber(clock)" :activities="todayDay?.activities||[]" :sheets="todaySheets" :days="currentWeek?.days||[]" :plan-link="livePath('/piano')" :archive-link="livePath('/archivio')" :progress-link="livePath('/progressi')" :booking-link="livePath('/prenotazioni')" :avatar-url="avatarUrl" :profile-link="livePath('/profilo')" :day-link="dayLink"/>
@@ -111,3 +111,14 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
   <SheetDetail v-if="opened" :sheet="opened" @close="opened=null" @finish="opened=null"/>
  </div>
 </template>
+
+<style scoped>
+/* R13: Secondary history navigation only on the athlete plan. */
+.lf-r13-plan-archives{width:100%;max-width:100%;padding:4px 2px 10px;display:grid;gap:10px}
+.lf-r13-plan-archives>span{font-size:10px;letter-spacing:.1em;font-weight:850;color:var(--muted)}
+.lf-r13-plan-archive-links{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.lf-r13-plan-archive-links a{min-height:38px;padding:9px 12px;font-size:11px;font-weight:800;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:15px;text-decoration:none;background:var(--card2);border:1px solid var(--outline);color:var(--text)}
+.lf-r13-plan-archive-links a span{color:var(--mint);font-size:18px;line-height:1}
+.lf-r13-plan-archive-links a:hover,.lf-r13-plan-archive-links a:focus-visible{border-color:var(--mint)}
+@media(max-width:600px){.lf-r13-plan-archive-links a{font-size:10px;gap:7px;flex:1;min-width:135px}}
+</style>

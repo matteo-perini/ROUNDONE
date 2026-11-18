@@ -118,7 +118,7 @@ onMounted(async()=>{
 </script>
 <template>
  <div class="sheet-modal-bg lf6-backdrop" @click.self="$emit('close')">
-  <div class="sheet-modal lf6-sheet" role="dialog" aria-modal="true" :aria-label="sheet.title">
+  <div class="sheet-modal lf6-sheet" :class="{'lf-r13-athlete-sheet':athleteView}" role="dialog" aria-modal="true" :aria-label="sheet.title">
    <header class="sheet-modal-head lf6-header">
     <h2>{{sheet.title}}</h2>
     <div class="lf6-head-actions">
@@ -141,7 +141,8 @@ onMounted(async()=>{
       <div class="lf6-preview-wrap">
        <ExerciseMotion v-if="resolved[i]" :exercise="resolved[i]!" controls class="lf6-preview"/>
        <div v-else class="lf6-preview-empty" :aria-label="'Nessuna illustrazione disponibile per '+displayExercises[i].name">
-        <LionIcon name="dumbbell" :size="31"/>
+        <LionIcon name="dumbbell" :size="28"/>
+        <small>Illustrazione<br>non disponibile</small>
        </div>
        <button v-if="resolved[i]" type="button" class="lf6-enlarge" :aria-label="'Ingrandisci '+displayExercises[i].name" @click="viewExercise(displayExercises[i],i)">
         <LionIcon name="search" :size="15"/> {{uiText("Ingrandisci")}}
@@ -271,4 +272,25 @@ onMounted(async()=>{
  .lf6-coach-note{display:block!important;color:#000!important}
 }
 @media(prefers-reduced-motion:reduce){.lf6-group,.lf6-exercise{transition:none}}
+</style>
+
+<style scoped>
+/* R13: Only athlete-facing sheet view. Original SVG animation, superset,
+   PDF/print, notes and alternative selection are untouched. */
+.lf-r13-athlete-sheet{border-radius:18px!important;max-width:840px}
+.lf-r13-athlete-sheet .lf6-header{background:var(--card2);padding:13px 16px;border-bottom:1px solid var(--outline)}
+.lf-r13-athlete-sheet .lf6-header h2{letter-spacing:.025em;font-weight:950}
+.lf-r13-athlete-sheet .lf6-group{border-radius:13px;padding:6px;gap:7px;background:var(--card2)}
+.lf-r13-athlete-sheet .lf6-exercise{border-radius:11px;background:var(--card);border:1px solid var(--outline);gap:10px;padding:9px}
+.lf-r13-athlete-sheet .lf6-preview-empty{border:1px dashed var(--outline);background:linear-gradient(145deg,var(--card2),var(--card));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.lf-r13-athlete-sheet .lf6-preview-empty small{font-size:9px;line-height:1.35;text-align:center;color:var(--muted);font-weight:700}
+.lf-r13-athlete-sheet .lf6-preview-wrap :deep(.exercise-motion-command){font-size:9px!important;letter-spacing:0!important;padding:3px 5px!important}
+.lf-r13-athlete-sheet .lf6-sequence{border-radius:9px;background:var(--green-bg)}
+.lf-r13-athlete-sheet .lf6-name-line h3{font-size:clamp(12px,1.55vw,14px);line-height:1.4;letter-spacing:.01em}
+.lf-r13-athlete-sheet .lf6-chip{background:var(--card2);border-color:var(--outline);padding:5px 8px;border-radius:8px}
+.lf-r13-athlete-sheet .lf6-text-link{font-size:10px;padding:5px 8px;border:1px solid var(--outline);background:transparent;border-radius:8px}
+.lf-r13-athlete-sheet .lf6-footer{background:var(--card2)}
+@media(max-width:600px){.lf-r13-athlete-sheet{border-radius:12px!important}.lf-r13-athlete-sheet .lf6-body{gap:6px;padding:7px!important}.lf-r13-athlete-sheet .lf6-group{padding:4px}.lf-r13-athlete-sheet .lf6-exercise{gap:8px;padding:7px}.lf-r13-athlete-sheet .lf6-preview-wrap{flex-basis:105px}.lf-r13-athlete-sheet .lf6-preview-wrap :deep(.lf6-preview),.lf-r13-athlete-sheet .lf6-preview-empty{width:105px;height:100px}.lf-r13-athlete-sheet .lf6-preview-empty small{font-size:8px}.lf-r13-athlete-sheet .lf6-content{gap:7px}.lf-r13-athlete-sheet .lf6-name-line h3{font-size:12px}.lf-r13-athlete-sheet .lf6-chip{padding:5px 6px}}
+@media(max-width:370px){.lf-r13-athlete-sheet .lf6-preview-wrap{flex-basis:85px}.lf-r13-athlete-sheet .lf6-preview-wrap :deep(.lf6-preview),.lf-r13-athlete-sheet .lf6-preview-empty{width:85px;height:86px}.lf-r13-athlete-sheet .lf6-preview-empty small{font-size:7px}}
+@media print{.lf-r13-athlete-sheet .lf6-preview-empty small{display:none!important}}
 </style>

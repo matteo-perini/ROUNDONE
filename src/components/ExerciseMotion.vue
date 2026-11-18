@@ -63,6 +63,6 @@ watch(animating,syncClock)
   <img v-if="svgUrl&&!failed" :src="svgUrl" :alt="exercise.name_it||exercise.name" decoding="async" :loading="eager||visible?'eager':'lazy'" @error="badFrame" />
   <span v-else class="exercise-motion-fallback">Animazione non disponibile</span>
   <button v-if="(eager||controls)&&failed" class="exercise-motion-command" type="button" @click.stop="reset">Riprova</button>
-  <button v-else-if="(eager||controls)&&sequence.length>1" class="exercise-motion-command" type="button" :aria-pressed="paused" :aria-label="paused?'Avvia animazione':'Ferma animazione'" :title="paused?'Avvia animazione':'Ferma animazione'" @click.stop="toggle">{{compactControls?(paused?'▶':'Ⅱ'):(paused?'▶ Avvia animazione':'Ⅱ Ferma animazione')}}</button>
+  <button v-else-if="(eager||controls)&&sequence.length>1" class="exercise-motion-command" type="button" :aria-pressed="paused" :aria-label="paused?'Avvia animazione':'Ferma animazione'" :title="paused?'Avvia animazione':'Ferma animazione'" @click.stop="toggle">{{compactControls?(paused?'▶':'Ⅱ'):(paused?'Avvia animazione':'Ferma animazione')}}</button>
  </div>
 </template>
