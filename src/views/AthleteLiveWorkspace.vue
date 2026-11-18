@@ -65,6 +65,11 @@ const currentWeekLabel=computed(()=>{
 const todayIndex=computed(()=>romeDayIndex(clock.value))
 const todayDay=computed(()=>currentWeek.value?.days[todayIndex.value])
 const todaySheets=computed(()=>data.value&&currentWeek.value?linkedSheetsForDay(data.value.groups,currentWeek.value.id,todayIndex.value):[])
+// Schede libere con assegnazione reale e non storica, come nella pagina Piano.
+const homeFreeSheets=computed(()=>{
+ const d=data.value,uid=session.value?.uid
+ return d&&uid?activeAssignmentGroups(d.personal,d.weeks,uid,romeDate(clock.value)).unprogrammed.map(g=>g.sheet):[]
+})
 const pastPrograms=computed(()=>partitionPrograms(data.value?.weeks||[],romeDate(clock.value),true))
 const mergedArchive=computed(()=>joinArchivesWithLegacy(archive.value,data.value?.personal||[]))
 const shownArchive=computed(()=>mergedArchive.value.filter(a=>!hiddenArchiveIds.value.has(a.id)))
@@ -91,7 +96,7 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
     <nav class="lf-r13-plan-archives" aria-label="Archivi del piano"><span>CONSULTA LO STORICO</span><div class="lf-r13-plan-archive-links"><RouterLink :to="livePath('/archivio')" class="secondary">Archivio schede <span aria-hidden="true">›</span></RouterLink><RouterLink :to="{path:'/archivio',query:{...(isStagingMode()?{}:{source:'emulator'}),view:'programmi'}}" class="secondary">Archivio programmazioni <span aria-hidden="true">›</span></RouterLink></div></nav>
    </template>
    <template v-else-if="props.screen==='home'">
-    <AthleteHomeContent :name="session?.label||'Atleta'" :today-name="todayDay?.name||''" :week-name="currentWeekLabel" :calendar-day="romeWeekDayNumber(clock)" :activities="todayDay?.activities||[]" :sheets="todaySheets" :days="currentWeek?.days||[]" :plan-link="livePath('/piano')" :archive-link="livePath('/archivio')" :progress-link="livePath('/progressi')" :booking-link="livePath('/prenotazioni')" :avatar-url="avatarUrl" :profile-link="livePath('/profilo')" :day-link="dayLink"/>
+    <AthleteHomeContent :name="session?.label||'Atleta'" :today-name="todayDay?.name||''" :week-name="currentWeekLabel" :calendar-day="romeWeekDayNumber(clock)" :now-ms="clock" :activities="todayDay?.activities||[]" :sheets="todaySheets" :free-sheets="homeFreeSheets" :has-current-week="!!currentWeek" :gym-id="session?.gymId||''" :uid="session?.uid||''" :days="currentWeek?.days||[]" :plan-link="livePath('/piano')" :archive-link="livePath('/archivio')" :progress-link="livePath('/progressi')" :booking-link="livePath('/prenotazioni')" :avatar-url="avatarUrl" :profile-link="livePath('/profilo')" :day-link="dayLink"/>
    </template>
    <template v-else-if="props.screen==='archive'">
     <section class="panel athlete-archive-hero"><div class="row between"><h2 class="card-heading">{{uiText("ARCHIVIO")}}</h2><span class="pill pill-neutral">{{archiveReady?archiveDistinctCount:'—'}} {{uiText("SCHEDE")}}</span></div></section>

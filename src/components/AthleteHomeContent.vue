@@ -1,103 +1,77 @@
 <script setup lang="ts">
+/** PATCH 30 R14 — Home Atleta di sola lettura: dati dal piano effettivo e dall'Agenda. */
+import {computed,ref} from 'vue'
+import {RouterLink} from 'vue-router'
 import {uiText} from '../features/i18n/interfaceLanguage'
-/** PATCH 5/7 — Dashboard atleta V3: solo dati assegnati, senza scritture.
- * Il cerchio ora indica il giorno del calendario (lun=1, dom=7),
- * NON gli allenamenti programmati né quelli completati.
- */
-import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import type {ExerciseRecord,ProgramDay} from '../features/sheets/domain'
 import LionIcon from './LionIcon.vue'
 import GymIdentity from './GymIdentity.vue'
 import SheetDetail from './SheetDetail.vue'
-import type { ExerciseRecord, ProgramDay } from '../features/sheets/domain'
-
-type HomeSheet = {id:string; title:string; exercises:readonly ExerciseRecord[]}
+import AthleteHomeHighlights from './AthleteHomeHighlights.vue'
+type HomeSheet={id:string;title:string;exercises:readonly ExerciseRecord[]}
 const props=defineProps<{
- name:string;todayName:string;weekName:string;calendarDay:number
- activities:readonly string[];sheets:readonly HomeSheet[]
- days?:readonly ProgramDay[]
+ name:string;todayName:string;weekName:string;calendarDay:number;nowMs?:number
+ activities:readonly string[];sheets:readonly HomeSheet[];freeSheets?:readonly HomeSheet[];hasCurrentWeek?:boolean
+ days?:readonly ProgramDay[];gymId?:string;uid?:string
  planLink:string;archiveLink:string;progressLink:string;bookingLink:string;profileLink:string;dayLink:string
  avatarUrl?:string
 }>()
 const activeSheet=ref<HomeSheet|null>(null)
-// Il cerchio entra in animazione solo quando la Home viene aperta.
-// Il valore reale viene sempre dalle attività programmate, non dai risultati eseguiti.
-const ringReady=ref(false)
-let ringFrame=0
-onMounted(()=>{ringFrame=requestAnimationFrame(()=>{ringReady.value=true})})
-onUnmounted(()=>{if(ringFrame)cancelAnimationFrame(ringFrame)})
 const firstName=computed(()=>props.name.trim().split(/\s+/)[0]||'Atleta')
-// Il cerchio segue il calendario di Roma, anche nei giorni senza attivita'.
-const elapsedDays=computed(()=>Math.min(7,Math.max(1,Math.round(props.calendarDay))))
-const hasCurrentWeek=computed(()=>!!props.weekName)
-const shortWeekLabel=computed(()=>{
- const name=props.weekName.trim()
- if(!name)return 'Nessuna settimana attiva'
- const found=name.match(/settimana\s*\d+/i)
- return found?.[0]||name
+const todayDisplay=computed(()=>new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',weekday:'long',day:'numeric',month:'long'}).format(new Date(props.nowMs??Date.now())))
+const dayNumber=computed(()=>Math.max(1,Math.min(7,Math.round(props.calendarDay))))
+const currentWeekLabel=computed(()=>{
+ if(!props.weekName.trim())return ''
+ const found=props.weekName.match(/settimana\s*\d+/i)
+ return found?.[0]||props.weekName.trim()
 })
-const circlePercent=computed(()=>Math.round(elapsedDays.value/7*100))
-const todayDisplay=computed(()=>props.todayName.trim() || new Intl.DateTimeFormat('it-IT',{weekday:'long',timeZone:'Europe/Rome'}).format(new Date()))
-const visibleActivities=computed(()=>props.activities.map(v=>v.trim()).filter(v=>v&&!/^(OFF|RIPOSO)$/i.test(v)))
-const todayTitle=computed(()=>visibleActivities.value.join(' · ') || (props.sheets.length?'Schede assegnate per oggi':'Nessun allenamento oggi'))
-const todayNote=computed(()=>props.sheets.length?'Schede collegate':'Consulta il piano per vedere le attività assegnate')
-const quick=[
- {label:'Il mio piano',icon:'calendar',key:'plan',subtitle:'Allenamenti'},
- {label:'Il mio profilo',icon:'user',key:'profile',subtitle:'I miei dati'},
- {label:'Prenotazioni',icon:'calendar-plus',key:'booking',subtitle:'Prenota una sessione'},
- {label:'Archivio',icon:'archive',key:'archive',subtitle:'Schede e storico'},
-] as const
-function target(key:(typeof quick)[number]['key']){
- return key==='plan'?props.planLink:key==='profile'?props.profileLink:key==='booking'?props.bookingLink:props.archiveLink
-}
+const liveActivities=computed(()=>props.activities.map(s=>s.trim()).filter(s=>s&&!/^(off|riposo)$/i.test(s)))
+const isRestDay=computed(()=>props.activities.some(s=>/^(off|riposo)$/i.test(s.trim()))&&!liveActivities.value.length&&!props.sheets.length)
+const free=computed(()=>props.freeSheets||[])
+const hasTodayPlan=computed(()=>!!props.hasCurrentWeek)
+const todayHeadline=computed(()=>{
+ if(hasTodayPlan.value)return liveActivities.value.join(' · ')||(props.sheets.length?'Scheda disponibile':isRestDay.value?'Giornata di riposo':'Nessuna attività prevista oggi')
+ if(free.value.length)return free.value.length===1?free.value[0].title:'Le tue schede disponibili'
+ return 'Nessun allenamento programmato oggi'
+})
+const todayNote=computed(()=>{
+ if(hasTodayPlan.value){
+  if(props.sheets.length)return `${props.sheets.length} ${props.sheets.length===1?'scheda collegata':'schede collegate'} al programma`
+  return isRestDay.value?'Il recupero fa parte del percorso.':'Consulta le attività e i prossimi giorni dal Piano.'
+ }
+ if(free.value.length)return `${free.value.length} ${free.value.length===1?'scheda assegnata':'schede assegnate'} senza programmazione settimanale`
+ return 'Il Coach non ha ancora assegnato attività per oggi.'
+})
+const directSheet=computed(()=>{
+ if(hasTodayPlan.value&&props.sheets.length===1)return props.sheets[0]
+ if(!hasTodayPlan.value&&free.value.length===1)return free.value[0]
+ return null
+})
+const actionLabel=computed(()=>directSheet.value?'Apri scheda':hasTodayPlan.value&&props.sheets.length>1?'Scegli scheda di oggi':hasTodayPlan.value&&liveActivities.value.length?'Visualizza attività di oggi':free.value.length?'Vedi le mie schede':'Consulta il mio piano')
+const hasTrainingAction=computed(()=>!!directSheet.value||props.sheets.length>1)
+function openSheet(){if(directSheet.value)activeSheet.value=directSheet.value}
 </script>
 <template>
- <div v-lf-entrance="{id:'athlete-home',rows:[{match:'.lf-v3-intro,.lf-v3-progress,.lf-v3-today,.lf-v3-shortcuts,.lf14-gym-identity'}]}" class="lf-home-v3 lf-home-approved" aria-label="Dashboard Atleta">
-  <section class="lf-v3-intro">
-   <div class="lf-v3-greeting">
-    <h1>{{uiText('Ciao,')}} {{firstName}}! <span class="lf-v3-wave" aria-hidden="true">👋</span></h1>
-    
-   </div>
+ <div v-lf-entrance="{id:'athlete-home-r14',rows:[{match:'.lf-r14-identity,.lf-r14-today,.lf-r14-progress,.lf-r14-upcoming'}]}" class="lf-r14-home" aria-label="Dashboard Atleta">
+  <section class="lf-r14-identity" aria-label="Benvenuto e palestra">
+   <div class="lf-r14-greeting"><span class="lf-r14-eyebrow">LA TUA AREA ATLETA</span><h1>{{uiText('Ciao,')}} {{firstName}}! <span aria-hidden="true">👋</span></h1><p>Il tuo percorso, le attività e gli appuntamenti in un unico posto.</p></div>
+   <GymIdentity compact/>
   </section>
-
-  <GymIdentity/>
-  <!-- La settimana resta in UNA card orizzontale con il cerchio, non con sette tessere. -->
-  <RouterLink :to="planLink" class="lf-v3-progress" :aria-label="`${shortWeekLabel}, giorno ${elapsedDays} di 7 della settimana. Apri il piano`">
-   <span class="lf-v3-ring" aria-hidden="true">
-    <svg viewBox="0 0 100 100" class="lf-v3-ring-svg">
-     <circle class="lf-v3-ring-track" cx="50" cy="50" r="43" pathLength="100"/>
-     <circle class="lf-v3-ring-value" cx="50" cy="50" r="43" pathLength="100" stroke-dasharray="100 100" :style="{'stroke-dashoffset':ringReady?100-circlePercent:100}"/>
-    </svg>
-    <span class="lf-v3-ring-center"><strong>{{`${elapsedDays}/7`}}</strong></span>
-   </span>
-   <span class="lf-v3-week-summary">
-    <strong>{{shortWeekLabel}}</strong>
-    <span>{{uiText('Giorno')}} {{elapsedDays}} {{uiText('di')}} 7 · {{uiText('avanzamento settimanale')}}</span>
-   </span>
-   <LionIcon name="chevron" :size="24" class="lf-v3-week-arrow" />
+  <section class="lf-r14-today" aria-label="Allenamento di oggi">
+   <div class="lf-r14-today-label"><LionIcon name="calendar" :size="19"/><span>OGGI · {{todayDisplay}}</span></div>
+   <h2>{{uiText(todayHeadline)}}</h2>
+   <p>{{uiText(todayNote)}}</p>
+   <div v-if="hasTodayPlan&&sheets.length>1" class="lf-r14-sheet-chips"><button v-for="sheet in sheets" :key="sheet.id" type="button" @click="activeSheet=sheet">{{sheet.title}} <span aria-hidden="true">›</span></button></div>
+   <button v-if="directSheet" type="button" class="lf-r14-primary-action" @click="openSheet()"><span>{{uiText(actionLabel)}}</span><LionIcon name="chevron" :size="19"/></button>
+   <RouterLink v-else :to="hasTodayPlan?dayLink:planLink" class="lf-r14-primary-action" :class="{'lf-r14-secondary-action':!hasTrainingAction&&!liveActivities.length}"><span>{{uiText(actionLabel)}}</span><LionIcon name="chevron" :size="19"/></RouterLink>
+  </section>
+  <RouterLink :to="planLink" class="lf-r14-progress" :aria-label="`Giorno ${dayNumber} di 7 della settimana, ${currentWeekLabel||'nessun programma attivo'}. Apri il piano`">
+   <span class="lf-r14-progress-circle" aria-hidden="true"><strong>{{dayNumber}}<small>/7</small></strong></span>
+   <span class="lf-r14-progress-copy"><small>IL TUO PERCORSO</small><strong>{{currentWeekLabel|| (free.length?'Schede senza programmazione':'Nessun programma attivo')}}</strong><span>Giorno {{dayNumber}} di 7 · calendario settimanale</span></span>
+   <LionIcon name="chevron" :size="19"/>
   </RouterLink>
-
-  <!-- Card del giorno con foto locale esistente: i dati sono SEMPRE quelli live. -->
-  <section class="lf-v3-today" aria-label="Allenamento di oggi">
-   <div class="lf-v3-today-head"><LionIcon name="calendar" :size="23"/><span>{{uiText('OGGI ·')}} {{uiText(todayDisplay)}}</span></div>
-   <div class="lf-v3-today-main">
-    <h2>{{uiText(todayTitle)}}</h2>
-    <p>{{uiText(todayNote)}}</p>
-    <div v-if="sheets.length" class="lf-v3-sheets"><button v-for="sheet in sheets" :key="sheet.id" type="button" @click="activeSheet=sheet" :title="`Apri ${sheet.title}`">{{sheet.title}}</button></div>
-   </div>
-   <RouterLink :to="dayLink" class="lf-v3-today-cta"><span>{{uiText('Apri scheda di oggi')}}</span><LionIcon name="chevron" :size="23"/></RouterLink>
-  </section>
-
-  <!-- Solo quattro azioni rapide: niente riquadro settimanale separato. -->
-  <section class="lf-v3-shortcuts" :aria-label="uiText('Accesso rapido')">
-   <div class="lf-v3-section-head"><strong>{{uiText('Accesso rapido')}}</strong></div>
-   <div class="lf-v3-shortcuts-grid">
-    <RouterLink v-for="item in quick" :key="item.key" :to="target(item.key)" class="lf-v3-shortcut">
-     <span class="lf-v3-shortcut-icon"><LionIcon :name="item.icon" :size="25"/></span>
-     <span class="lf-v3-shortcut-copy"><strong>{{uiText(item.label)}}</strong></span>
-    </RouterLink>
-   </div>
-  </section>
+  <AthleteHomeHighlights v-if="uid&&gymId" :key="gymId+':'+uid" :uid="uid" :gym-id="gymId" :booking-link="bookingLink"/>
+  <section v-else class="lf-r14-home-agenda-link"><RouterLink :to="bookingLink">Visualizza Agenda e prenotazioni <LionIcon name="chevron" :size="16"/></RouterLink></section>
  </div>
  <SheetDetail v-if="activeSheet" :sheet="activeSheet" @close="activeSheet=null" @finish="activeSheet=null"/>
 </template>

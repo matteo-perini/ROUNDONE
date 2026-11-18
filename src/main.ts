@@ -87,3 +87,6 @@ import "./styles-patch27-performance.css"
 // Premium visual overrides must follow the existing theme and mobile rules.
 import './styles-premium-motion.css'
 import './styles-quiet-loading.css'
+
+// PATCH 30 R14: Dashboard Atleta premium e navbar senza scorciatoia Impostazioni.
+import './styles-r14-athlete-home.css'
