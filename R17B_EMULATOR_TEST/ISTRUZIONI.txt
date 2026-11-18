@@ -1,0 +1,33 @@
+LIONFIT — R17B FIREBASE EMULATOR TEST ISOLATO
+============================================
+Il pacchetto contiene le regole complete R17B (una sola riga aggiornata),
+configurazione locale e 13 controlli automatici di permessi.
+Non pubblica regole. Non tocca il database Firebase reale.
+
+1) Estrai la cartella R17B_EMULATOR_TEST accanto ad APPLICA_R17B.cmd
+   nella radice LionFit-Modern-Git.
+2) Apri PowerShell in VS Code nella root e lancia:
+
+cd .\R17B_EMULATOR_TEST
+java -version
+npm.cmd install --no-audit --no-fund
+firebase.cmd emulators:exec --only firestore --project demo-lionfit-r17b --config firebase.json "npm.cmd test"
+
+3) Attendi l'output: 13 test, 0 fallimenti.
+   In caso di ERRORI non pubblicare: invia qui l'output.
+
+ATTENZIONE
+- Il project ID inizia con demo-: non esiste come ambiente remoto.
+- NON modificare demo-lionfit-r17b in app-palestra-b0b9d per i test.
+- Java richiesto (Java 21 con CLI moderne).
+- Se la porta 8089 e' gia' occupata, interrompi il programma che la occupa;
+  non cambiare la porta alla cieca, visto che anche i test la verificano.
+- L'npm install viene eseguito solo nella cartella isolata R17B_EMULATOR_TEST.
+- Questo testa SOLO la sicurezza delle Firestore Rules. La sincronizzazione
+  in tempo reale va poi controllata con due account test nell'app.
+- Anche se i test passano, prima del deploy ricontrollare che in Console
+  le regole di produzione siano ancora quelle fornite il 18 novembre 2026.
+- Pubblicazione: in Firebase Console > Firestore Database > Regole
+  sostituire solo verified() con signed() dentro multisport_results > allowedPerson,
+  oppure incollare il file completo solo se non ci sono state modifiche live.
+- Non usare firebase deploy generico e non caricare file emulator negli ambienti live.

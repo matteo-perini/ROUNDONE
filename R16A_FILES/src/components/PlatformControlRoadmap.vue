@@ -1,0 +1,22 @@
+<script setup lang="ts">
+/** R16A: gli indicatori non misurati restano esplicitamente 'non collegati'. */
+const props=defineProps<{module:'subscriptions'|'usage'|'security'|'config';accessVerifiedAt:number|null;loadedGyms:number;subscriptionPlanned:number}>()
+const emit=defineEmits<{(e:'open-gyms'):void;(e:'open-services'):void}>()
+const copy={
+ subscriptions:{kicker:'BUSINESS · MONETIZZAZIONE',title:'Abbonamenti e ricavi',intro:'Separiamo preferenze commerciali da abbonamenti e incassi confermati. I pagamenti di produzione non sono abilitati da questo pannello.',cards:[['Palestre destinate ad abbonamento','Preferenza commerciale sulle palestre caricate'],['Prove gratuite e scadenze','Dati server per palestra da integrare'],['Incassi, fatture e MRR','Stripe LIVE verificato da integrare'],['Mancati pagamenti e tolleranze','Webhook e riconciliazione da integrare']]},
+ usage:{kicker:'ANALYTICS · ADOZIONE',title:'Utilizzo dell’app',intro:'L’adozione sarà misurata mediante soli aggregati per palestra, senza leggere schede private degli atleti.',cards:[['Palestre attive 7/30 giorni','Aggregati giornalieri da integrare'],['Allenamenti e schede','Solo conteggi anonimizzati da integrare'],['Prenotazioni e inviti','Eventi aggregati da integrare'],['Gare e utilizzo moduli','Metriche di adozione da integrare']]},
+ security:{kicker:'SECURITY · GOVERNANCE',title:'Sicurezza e audit',intro:'Accesso riservato al Super Admin verificato: il registro audit centrale delle modifiche resta un modulo futuro.',cards:[['Controllo autorizzazione','Verifica per la sessione corrente'],['Audit delle modifiche','Registro server protetto da integrare'],['Ruoli e privilegi','Nessuna modifica ai permessi in R16A'],['Protezione dati degli atleti','Accesso ai soli aggregati necessari']]},
+ config:{kicker:'SAAS · GOVERNANCE',title:'Configurazione piattaforma',intro:'Qui arriveranno i parametri globali: per ora nessun prezzo, modulo o permesso viene modificato.',cards:[['Prezzi e piani','Configurazione versionata da integrare'],['Prove e tolleranze','Regole server da integrare'],['Feature flag per palestra','Attivazioni controllate da integrare'],['Rollout e versioni','Distribuzione per ambiente da integrare']]}
+} as const
+</script>
+<template>
+ <section class="lfcc-roadmap" aria-label="Modulo in pianificazione">
+  <header><span>{{copy[module].kicker}}</span><h2>{{copy[module].title}}</h2><p>{{copy[module].intro}}</p></header>
+  <div class="lfcc-future-grid"><article v-for="item in copy[module].cards" :key="item[0]"><span class="lfcc-future-badge">{{module==='security'&&item[0]==='Controllo autorizzazione'&&accessVerifiedAt?'Sessione verificata':'Non collegato'}}</span><h3>{{item[0]}}</h3><p>{{item[1]}}</p></article></div>
+  <div class="lfcc-inline-actions"><button type="button" class="secondary" @click="emit('open-gyms')">Apri gestione palestre</button><button type="button" class="secondary" @click="emit('open-services')">Apri Stato servizi</button></div>
+  <p v-if="module==='subscriptions'" class="lfcc-explain">{{subscriptionPlanned}} palestre contrassegnate per futuro abbonamento tra {{loadedGyms}} caricate. <strong>Non sono clienti paganti verificati.</strong></p>
+ </section>
+</template>
+<style scoped>
+.lfcc-roadmap{display:grid;gap:16px;min-width:0}.lfcc-roadmap>header{border:1px solid rgba(55,206,139,.35);border-radius:17px;background:linear-gradient(120deg,rgba(13,75,55,.3),transparent),var(--card);padding:22px}.lfcc-roadmap>header span{font-size:10px;letter-spacing:.13em;color:var(--mint);font-weight:900}.lfcc-roadmap h2{font-size:clamp(22px,3vw,30px);margin:9px 0 7px}.lfcc-roadmap p{font-size:12px;color:var(--muted);line-height:1.55;margin:0}.lfcc-future-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.lfcc-future-grid article{min-width:0;padding:18px;border:1px solid var(--border);background:var(--card);border-radius:14px;display:grid;gap:10px}.lfcc-future-grid h3{font-size:15px;margin:0}.lfcc-future-badge{width:fit-content;font-size:10px;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:5px 8px}.lfcc-inline-actions{display:flex;flex-wrap:wrap;gap:9px}.lfcc-explain{border-left:3px solid var(--mint);padding:8px 11px;background:var(--card2);border-radius:5px}.lfcc-explain strong{color:var(--text)}@media(max-width:680px){.lfcc-future-grid{grid-template-columns:1fr}.lfcc-roadmap>header{padding:16px}}
+</style>

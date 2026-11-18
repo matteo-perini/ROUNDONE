@@ -84,7 +84,7 @@ onUnmounted(()=>{if(typeof window!=='undefined')window.removeEventListener('keyd
   <nav class="lf15-quick-grid" aria-label="Azioni rapide Atleta">
    <RouterLink class="lf15-quick-tile" :to="bookingLink"><LionIcon name="calendar-plus" :size="28"/><span>Prenota lezione</span></RouterLink>
    <RouterLink class="lf15-quick-tile" :to="trainingLink||progressLink"><LionIcon name="dumbbell" :size="28"/><span>I miei allenamenti</span></RouterLink>
-   <RouterLink class="lf15-quick-tile" :to="planLink"><LionIcon name="book" :size="28"/><span>Le mie schede</span></RouterLink>
+   <RouterLink class="lf15-quick-tile" :to="archiveLink"><LionIcon name="book" :size="28"/><span>Le mie schede</span></RouterLink>
    <button class="lf15-quick-tile lf15-quick-video" type="button" @click="openTutorial"><LionIcon name="info" :size="28"/><span>Video &amp; Tutorial</span><small>In arrivo</small></button>
   </nav>
  </div>

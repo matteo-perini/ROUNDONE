@@ -1,0 +1,48 @@
+LIONFIT — PATCH 30 R15 — ARCHIVIO ATLETA EXPERIENCE 3.0 SAFE
+Data: 18 novembre 2026
+Base: PATCH 30 R14C + correzione R14B (R14D opzionale: inclusa se serve)
+
+CHE COSA CAMBIA
+- Header Archivio compatto, contatore coerente alla tab aperta.
+- Schede/Programmazioni in selettore orizzontale moderno, stesso contenuto storico.
+- Ricerca e quattro filtri esistenti, con pulsante Azzera filtri solo quando necessario.
+- Schede più compatte, nome, conteggio esercizi e Apri; le schede con titolo identico non vengono fuse per nome.
+- Programmazioni concluse con date in italiano, selezione settimane e dettaglio giorni più leggibile.
+- Test e controllo dell'azione Dashboard "Le mie schede" verso Archivio > Schede (R14D).
+- Nessuna modifica a Firebase, permessi, moduli Coach/Admin, registrazioni, schede e salvataggi.
+
+IMPORTANTE: QUESTO E' UN KIT SICURO CHE AGGIORNA I FILE PRESENTI SUL TUO PC.
+NON contiene vecchie copie di AthleteLiveWorkspace o main.ts da sovrascrivere.
+In caso di struttura imprevista si blocca PRIMA di modificare il progetto.
+
+COME INSTALLARE
+1. Fare prima una copia di sicurezza dell'attuale LionFit-Modern-Git funzionante.
+2. Estrarre TUTTI i file dello ZIP R15 nella RADICE (cartella principale) LionFit-Modern-Git.
+   Devono apparire allo stesso livello di package.json e src:
+   - APPLICA_R15.cmd, LionFit_R15_APPLICA.cjs, R15_ARCHIVIO.css, R15_ARCHIVIO_TEST.mjs
+   - RIPRISTINA_R15.cmd, LionFit_R15_RIPRISTINA.cjs, LEGGIMI_R15.txt
+3. Doppio clic su APPLICA_R15.cmd (una sola volta). Leggere il risultato.
+4. Nella radice del progetto, PowerShell:
+   node --test tests/patch30-r15-archive-experience.unit.mjs
+   npm.cmd run typecheck
+5. Se tutti i test superati, eseguire LIONFIT_PREPARA_WEB_E_DOCS.cmd e controllare che la build sia riuscita.
+6. Solo dopo build riuscita usare GitHub Desktop, ispezionare modifiche, Commit e Push origin.
+   Nel commit includi SOLO i file src/ modificati e il test tests/; non committare APPLICA_R15.cmd,
+   i file R15_ARCHIVIO.*, gli script di installazione, file .env o backup del Desktop.
+7. Controllare smartphone: Schede 7/7, ricerca, filtri, programmi conclusi, settimane, giorni e PDF/scheda.
+
+COME RIPRISTINARE
+- Eseguire RIPRISTINA_R15.cmd, che controlla hash dei file attuali per non perdere successive modifiche.
+- Backup originali: Desktop\LionFit_R15_BACKUP, salvati automaticamente dall'installer.
+- Se i file sono cambiati dopo R15, rollback si blocca e NON sovrascrive il lavoro nuovo.
+- Dopo rollback online, rigenerare web/docs e fare Commit/Push della versione ripristinata.
+
+NON ESSEGUIRE DEPLOY FIREBASE.
+NON CARICARE file .env, secret, kit Emulator o backup su GitHub.
+
+VERIFICHE DEL KIT
+- Il codice viene modificato solo quando il file sorgente corrisponde ad ancore verificate.
+- Test automatici dedicati nel progetto: 12 controlli mirati.
+- TypeScript e CSS parser verificano la sintassi, ma NON sostituiscono npm run typecheck e build sul PC.
+- Non abbiamo accesso diretto alla cartella Windows o ai sorgenti R14C aggiornati in tempo reale:
+  proprio per questo il kit applica la modifica sul tuo codice senza sovrascriverlo da versioni vecchie.

@@ -1,0 +1,50 @@
+LIONFIT PATCH 30 R17A — SYNC AUTOMATICO ALTRI PROGRESSI: SOLO RULES
+18 novembre 2026
+
+OSSERVAZIONI
+- Il file incollato dall'utente si presenta come "cumulativa PATCH 12-17B" e "Candidata per PROD".
+  NON e' una prova che sia la versione attualmente pubblicata nelle Firestore Rules.
+- NEL SOLO BLOCCO /gyms/{gymId}/progress/{athleteId}/multisport_results/{resultId}, function allowedPerson():
+  PRIMA: return verified() && !lfControlUid()
+  DOPO:  return signed() && !lfControlUid()
+- Tutte le altre condizioni restano IDENTICHE: coach della palestra oppure atleta proprietario,
+  target atleta attivo, super admin escluso, create/update solo con controlli forma e autore.
+- Le sessioni di allenamento "normali" non sono cambiate.
+- Listener onSnapshot gia' esistente nel repository: aggiornamento in tempo reale tra coach e atleta
+  SE il front-end e le regole correntemente distribuite puntano alla stessa collezione.
+- L'avviso "verifica email" mostrato dal tuo APK non scompare automaticamente con una modifica Rules.
+  Occorre una PATCH R17B sul componente MultiSportProgress.vue aggiornato, non presente nelle
+  copie del sorgente di questa sessione. Non sostituire quel componente con versioni obsolete.
+- Il test con due account reali o Firebase Emulator deve essere eseguito prima del deploy di produzione.
+
+FILE NELLO ZIP
+1) LionFit_R17A_RULES_RICEVUTE_ORIGINALI_BACKUP.rules: copia ESATTA del file ricevuto.
+2) LionFit_R17A_MULTISPORT_SOLO_FIX_CANDIDATO.rules: intero file modificato in UNA sola riga.
+3) LionFit_R17A_DIFF_UNICA_MODIFICA.txt: diff per verificare la modifica.
+4) LionFit_R17A_VERIFY_RULES.py: test statico che confronta prima/dopo (python presente se installato).
+5) Questo documento.
+
+ISTRUZIONI DI SICUREZZA
+1. Apri Firebase Console, progetto app-palestra-b0b9d, Firestore Database > Regole.
+2. Confronta il testo PUBBLICATO con la copia originale ricevuta: se non e' identico,
+   NON sovrascrivere con il file completo di questo ZIP. Applica solo la sostituzione
+   verificando manualmente la stessa funzione allowedPerson() nel blocco MultiSport.
+3. Salva una copia delle Rules pubblicate da Firebase prima di modificare.
+4. Test in Firebase Rules Playground o Emulator (reale e con account di prova):
+   - Coach A legge/crea MultiSport su atleta A della sua palestra; atleta A legge subito;
+   - Atleta A crea; Coach A legge subito;
+   - Coach B di altra palestra NEGATO;
+   - Atleta B NEGATO sull'atleta A;
+   - Coach A non modifica record creato da atleta A; atleta A non modifica record creato dal Coach A;
+   - Account revocato NEGATO; Super Admin NEGATO;
+   - Sessioni normali: atleta crea; coach puo leggere ma non creare.
+5. Soltanto dopo test e backup, PUBBLICA da console Firebase le Rules necessarie.
+6. Non distribuire Cloud Functions per questa R17A. Non cambiare secret o env.
+7. Per eliminare la scritta di verifica in app: fornire il componente Vue ATTUALE;
+   rimuovere il banner non elimina i controlli di accesso in Firebase.
+
+GARE (INTERVENTO SEPARATO)
+Da functions:list risultano presenti notifiche generali, inbox e prenotazioni, ma NON
+le due callable delle gare lfCompetitionInvite e lfCompetitionRespond della R8B.
+La presenza di competitions-backend/functions/index.mjs nel PC significa che il sorgente
+c'e', NON che sia pubblicato o abilitato. Evitare di attivare i flag senza test backend.

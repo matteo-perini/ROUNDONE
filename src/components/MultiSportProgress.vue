@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {computed,onMounted,onUnmounted,ref,watch} from 'vue'
-import {getIdToken,onAuthStateChanged,reload,sendEmailVerification} from 'firebase/auth'
+import {onAuthStateChanged} from 'firebase/auth'
 import {matchesMultiActor,isConfirmedMulti,confirmedMultiRows,multiAuthor} from '../features/multisport/syncPolicy'
 import {getStagingClients} from '../integrations/firebase/stagingClient'
 import {mayWriteLive} from '../integrations/firebase/stagingConfig'
@@ -10,20 +10,16 @@ const props=defineProps<{gym:string;athlete:string;actor:string;role:'athlete'|'
 const selected=ref<Sport|null>(null), tab=ref<'history'|'graph'>('history'), rows=ref<Result[]>([]), pageSize=ref(100),more=ref(false),loading=ref(true),connection=ref(false),error=ref(''),notice=ref(''),busy=ref(false),form=ref<ResultData|null>(null),editing=ref<Result|null>(null),confirmArchive=ref<Result|null>(null),showArchived=ref(false),search=ref(''),openId=ref('')
 const distanceUnit=ref('m'), distanceInput=ref(''),hour=ref(''),minute=ref(''),sec=ref(''),cent=ref(''),metric=ref<Metric>('durationSec'),group=ref(''),pointId=ref('')
 let active=true,unsubscribe:(()=>void)|undefined,stopAuth:(()=>void)|undefined,generation=0
-const verificationNeeded=ref(false),checkingAuth=ref(false),confirmedOnce=ref(false),pending=ref(false)
-const canWrite=computed(()=>confirmedOnce.value&&connection.value&&!pending.value&&!verificationNeeded.value&&mayWriteLive()&&!busy.value&&matchesMultiActor(props,getStagingClients().auth.currentUser?.uid))
+const connecting=ref(false),confirmedOnce=ref(false),pending=ref(false)
+const canWrite=computed(()=>confirmedOnce.value&&connection.value&&!pending.value&&mayWriteLive()&&!busy.value&&matchesMultiActor(props,getStagingClients().auth.currentUser?.uid))
 function clearPrivate(){rows.value=[];more.value=false;confirmedOnce.value=false;form.value=null;editing.value=null;confirmArchive.value=null;openId.value='';pointId.value=''}
 function cancelBinding(){generation++;unsubscribe?.();unsubscribe=undefined;connection.value=false;pending.value=false}
-async function bind(force=false){
- cancelBinding();const token=generation;loading.value=true;checkingAuth.value=true;verificationNeeded.value=false;error.value=''
+async function bind(){
+ cancelBinding();const token=generation;loading.value=true;connecting.value=true;error.value=''
  try{
   const {db,auth}=getStagingClients(),user=auth.currentUser
   const valid=()=>active&&token===generation&&matchesMultiActor(props,auth.currentUser?.uid)
   if(!user||!valid()){clearPrivate();throw Error('Sessione non disponibile. Accedi nuovamente.')}
-  // The existing Firestore Rules require email_verified. Refresh only when needed
-  // (legacy/owner signup can be unverified) or after an explicit user retry.
-  if(force||!user.emailVerified){await reload(user);if(!valid())return;await getIdToken(user,true);if(!valid())return}
-  if(!user.emailVerified){clearPrivate();verificationNeeded.value=true;loading.value=false;return}
   unsubscribe=watchMulti(db,props.gym,props.athlete,pageSize.value,snapshot=>{
    if(!valid())return
    pending.value=snapshot.pending;connection.value=!snapshot.fromCache
@@ -32,19 +28,12 @@ async function bind(force=false){
   },e=>{
    if(!valid())return
    clearPrivate();connection.value=false;pending.value=false;loading.value=false
-   error.value=(e as {code?:string}).code==='permission-denied'?'Accesso MultiSport non autorizzato. Verifica email, palestra e Rules Firestore, poi riprova.':'Risultati non disponibili. Controlla la connessione e riprova.'
+   error.value=(e as {code?:string}).code==='permission-denied'?'Accesso MultiSport non autorizzato. Controlla l’accesso alla palestra e le regole Firestore, poi riprova.':'Risultati non disponibili. Controlla la connessione e riprova.'
   })
  }catch(e){if(active&&token===generation){loading.value=false;connection.value=false;error.value=e instanceof Error?e.message:'Connessione non disponibile.'}}
- finally{if(active&&token===generation)checkingAuth.value=false}
+ finally{if(active&&token===generation)connecting.value=false}
 }
-async function requestVerification(){
- if(checkingAuth.value||!verificationNeeded.value)return
- const token=generation;checkingAuth.value=true;notice.value='';error.value=''
- try{const {auth}=getStagingClients(),user=auth.currentUser;if(!user||!matchesMultiActor(props,user.uid))throw Error('Sessione non disponibile.');await sendEmailVerification(user);if(active&&token===generation)notice.value='Email inviata. Apri il link e premi «Ho verificato l’email».'}
- catch(e){if(active&&token===generation)error.value=e instanceof Error?e.message:'Invio non riuscito.'}
- finally{if(active&&token===generation)checkingAuth.value=false}
-}
-onMounted(()=>{try{const {auth}=getStagingClients();stopAuth=onAuthStateChanged(auth,u=>{if(!matchesMultiActor(props,u?.uid)){cancelBinding();clearPrivate();checkingAuth.value=false;verificationNeeded.value=false;loading.value=false;error.value='Sessione terminata: accedi nuovamente.'}});void bind()}catch{loading.value=false;error.value='Connessione non disponibile.'}})
+onMounted(()=>{try{const {auth}=getStagingClients();stopAuth=onAuthStateChanged(auth,u=>{if(!matchesMultiActor(props,u?.uid)){cancelBinding();clearPrivate();connecting.value=false;loading.value=false;error.value='Sessione terminata: accedi nuovamente.'}});void bind()}catch{loading.value=false;error.value='Connessione non disponibile.'}})
 onUnmounted(()=>{active=false;cancelBinding();stopAuth?.();clearPrivate()})
 const sportInfo=computed(()=>SPORTS.find(s=>s.id===selected.value))
 const current=computed(()=>rows.value.filter(r=>r.sport===selected.value))
@@ -78,8 +67,7 @@ const art:Record<Sport,string>={swim:'M7 53c12-13 21 13 33 0s21 13 33 0 21 13 33
  <section class="lf-ms stack" aria-label="Advanced Progress MultiSport">
   <div class="lf-ms-head"><div><h2>Altri progressi</h2></div><span class="lf-ms-symbol">↗</span></div>
   <p v-if="error" class="notice" role="alert">{{error}}</p><p v-if="notice" class="notice" role="status">{{notice}}</p>
-  <div v-if="verificationNeeded" class="notice" role="status"><p>Per sincronizzare i risultati, verifica l’indirizzo email del tuo account. Le protezioni della palestra restano attive.</p><div class="row"><button type="button" class="secondary" :disabled="checkingAuth" @click="requestVerification">Invia email di verifica</button><button type="button" class="primary" :disabled="checkingAuth" @click="bind(true)">Ho verificato l’email</button></div></div>
-  <p v-else-if="checkingAuth||loading" class="muted small" role="status">In attesa dei dati dal server… <button type="button" class="secondary" :disabled="checkingAuth||busy" @click="bind(true)">Riprova</button></p><p v-else-if="!connection" class="muted small" role="status">{{confirmedOnce?'Ultimi risultati confermati; modifiche sospese.':'Risultati non ancora disponibili.'}} <button type="button" class="secondary" :disabled="busy" @click="bind(true)">Riprova</button></p><p v-else-if="pending" class="muted small" role="status">Sincronizzazione con il server…</p>
+  <p v-if="connecting||loading" class="muted small" role="status">In attesa dei dati dal server… <button type="button" class="secondary" :disabled="connecting||busy" @click="bind()">Riprova</button></p><p v-else-if="!connection" class="muted small" role="status">{{confirmedOnce?'Ultimi risultati confermati; modifiche sospese.':'Risultati non ancora disponibili.'}} <button type="button" class="secondary" :disabled="busy" @click="bind()">Riprova</button></p><p v-else-if="pending" class="muted small" role="status">Sincronizzazione con il server…</p>
   <div v-if="!selected" class="lf-ms-sports"><button v-for="s in SPORTS" :key="s.id" :style="{'--sport-color':s.color}" class="lf-ms-sport" type="button" @click="selectSport(s.id)"><svg viewBox="0 0 120 95" aria-hidden="true"><path :d="art[s.id]" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="lf-ms-sport-copy"><b>{{s.name}}</b><small>{{s.desc}}</small><small>{{rows.filter(r=>r.sport===s.id&&!r.archived).length}} risultati ›</small></span></button></div>
   <template v-else>
    <div class="row between"><button type="button" class="secondary" :disabled="busy" @click="selected=null;form=null;confirmArchive=null">← Discipline</button><b>{{sportInfo?.name}}</b></div>
@@ -102,7 +90,7 @@ const art:Record<Sport,string>={swim:'M7 53c12-13 21 13 33 0s21 13 33 0 21 13 33
    <template v-if="tab==='history'"><input v-model="search" type="search" placeholder="Cerca test…" aria-label="Cerca test"/><label class="checkline"><input v-model="showArchived" type="checkbox"/> Mostra risultati archiviati</label><p v-if="!visible.length&&confirmedOnce&&!loading" class="muted small">Nessun risultato in questa vista.</p><article v-for="r in visible" :key="r.id" class="panel lf-ms-panel lf-ms-row"><button class="lf-ms-row-head" type="button" :aria-expanded="openId===r.id" @click="openId=openId===r.id?'':r.id"><span><b>{{r.testName}}</b><small>{{r.performedOn}} · {{multiAuthor(r,actor)}} · {{r.kind}}<span v-if="r.style"> · {{r.style}}</span></small></span><strong>{{primary(r)}}</strong><span>{{openId===r.id?'⌃':'⌄'}}</span></button><template v-if="openId===r.id"><dl><template v-if="r.disciplineName"><dt>Disciplina</dt><dd>{{r.disciplineName}}</dd></template><template v-for="k in ALLOWED[r.sport]" :key="k"><template v-if="r[k]!==null"><dt>{{FIELDS[k].label}}</dt><dd>{{valueLabel(r,k)}}</dd></template></template><template v-if="r.sport==='swim'&&r.distanceM&&r.poolM"><dt>Vasche equivalenti</dt><dd>{{numberLabel(r.distanceM/r.poolM)}}</dd></template><template v-if="metricValue(r,'pace')!==null&&['run','swim'].includes(r.sport)"><dt>Passo medio</dt><dd>{{fmt(r,'pace',metricValue(r,'pace')!)}}</dd></template><template v-if="metricValue(r,'speed')!==null&&['run','cycle','swim'].includes(r.sport)"><dt>Velocità media</dt><dd>{{fmt(r,'speed',metricValue(r,'speed')!)}}</dd></template></dl><p v-if="r.notes" class="lf-ms-notes">{{r.notes}}</p><small class="muted">Inserito da {{multiAuthor(r,actor)}}</small><div v-if="r.createdBy===actor" class="row"><button v-if="!r.archived" class="secondary" type="button" :disabled="!canWrite" @click="newForm(r);openId=''">Modifica</button><button class="secondary" type="button" :disabled="!canWrite" @click="confirmArchive=r">{{r.archived?'Ripristina':'Archivia'}}</button></div><div v-if="confirmArchive?.id===r.id" class="notice"><p>{{r.archived?'Ripristinare il risultato?':'Archiviare il risultato? Non comparirà nei grafici.'}}</p><div class="row"><button type="button" class="primary" :disabled="!canWrite" @click="archive">Conferma</button><button class="secondary" type="button" :disabled="busy" @click="confirmArchive=null">Annulla</button></div></div></template></article></template>
    <section v-else class="panel lf-ms-panel"><label>Indicatore<select v-model="metric"><option v-for="m in choices" :key="m" :value="m">{{metricLabel(m)}}</option></select></label><label>Test comparabile<select v-model="group"><option v-for="[key,r] in groups" :key="key" :value="key">{{groupName(r)}}</option></select></label><p v-if="!example||best===null" class="muted">{{confirmedOnce?'Nessun dato per questo indicatore.':'In attesa dei risultati confermati.'}}</p><template v-else><div class="lf-ms-record"><small>{{lower(example,metric)?'Valore più basso':'Valore più alto'}}</small><strong>{{fmt(example,metric,best)}}</strong><small>{{points.length}} risultati comparabili</small></div><svg viewBox="0 0 330 175" class="lf-ms-chart" role="img" :aria-label="'Andamento '+metricLabel(metric)"><path d="M30 35H300 M30 90H300 M30 145H300" stroke="var(--border)" stroke-width="1"/><polygon v-if="plot.length>1" class="lf-premium-chart-area" :points="plotting+' 300,145 30,145'" fill="var(--mint)" fill-opacity=".10"/><polyline v-if="plot.length>1" class="lf-premium-chart-line" pathLength="100" :points="plotting" fill="none" stroke="var(--mint)" stroke-width="3"/><circle v-for="(p,i) in plot" :key="p.p.r.id" :class="{'lf-premium-chart-last':plot.length>1&&i===plot.length-1}" :cx="p.x" :cy="p.y" :r="p.p.r.id===pointId?7:5" fill="var(--mint)" class="lf-ms-dot" @click="pointId=p.p.r.id"><title>{{p.p.r.performedOn}}: {{fmt(p.p.r,metric,p.p.v)}}</title></circle><text x="30" y="167" fill="var(--muted)" font-size="10">{{points[0]?.r.performedOn}}</text><text x="300" y="167" text-anchor="end" fill="var(--muted)" font-size="10">{{points[points.length-1]?.r.performedOn}}</text></svg><p v-if="chosenPoint" class="lf-ms-preview">{{chosenPoint.r.performedOn}} · {{multiAuthor(chosenPoint.r,actor)}} · {{fmt(chosenPoint.r,metric,chosenPoint.v)}}</p><p class="muted small">Confronta soltanto prove con le stesse condizioni. Verifica anche percorso, tecnica e condizioni nelle note.</p><button type="button" class="lf-ms-point" :class="{selected:pointId===p.r.id}" v-for="p in points" :key="p.r.id" @click="pointId=p.r.id"><span>{{p.r.performedOn}}</span><b>{{fmt(p.r,metric,p.v)}}</b></button></template></section>
   </template>
-  <button v-if="more" type="button" class="secondary wide" :disabled="loading||busy||!connection||pending||checkingAuth" @click="pageSize+=100;bind()">Carica altri risultati</button>
+  <button v-if="more" type="button" class="secondary wide" :disabled="loading||busy||!connection||pending||connecting" @click="pageSize+=100;bind()">Carica altri risultati</button>
  </section>
 </template>
 <style scoped>

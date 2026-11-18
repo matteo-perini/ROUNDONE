@@ -93,3 +93,5 @@ import './styles-r14-athlete-home.css'
 
 // PATCH 30 R14C — Nuova Home Atleta dal concept approvato; prevale sulla R14.
 import './styles-r14c-dashboard-rebuild.css'
+// PATCH 30 R15: archivio atleta Experience 3.0.
+import './styles-r15-athlete-archive.css'
