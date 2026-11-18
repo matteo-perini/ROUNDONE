@@ -1,0 +1,12 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';
+const dir=path.resolve(import.meta.dirname,'..');
+const manifest=JSON.parse(fs.readFileSync(path.join(dir,'R18D_MANIFEST.json')));
+const s=fs.readFileSync(path.join(dir,'R18D_PAYLOAD',manifest.base_file),'utf8');
+test('01 payload matches SHA-256 manifest',()=>assert.equal(crypto.createHash('sha256').update(s).digest('hex'),manifest.payload_sha256));
+test('02 backend keeps both callable exports',()=>{assert.match(s,/export const lfCompetitionInvite=onCall/);assert.match(s,/export const lfCompetitionRespond=onCall/)});
+test('03 athlete inbox notice is atomic with invitation creation',()=>{assert.match(s,/tx\.create\(entryRef\(u\.gym,eventId,athleteId\)/);assert.match(s,/tx\.create\(inboxRef\(u\.gym,athleteId,'competition-invite',eventId\)/)});
+test('04 coach inbox notice on actual response, unique by athlete',()=>{assert.match(s,/tx\.create\(inboxRef\(u\.gym,inviter,'competition-reply',`\$\{eventId\}_\$\{u\.uid\}`\)/);assert.match(s,/if\(activeMember\(inviterProfile,u\.gym,'admin'\)\)/)});
+test('05 inbox ids 64-hex compatible with lfInboxRead',()=>{assert.match(s,/createHash\('sha256'\)/);assert.match(s,/\.digest\('hex'\)/)});
+test('06 notices survive no registered push device',()=>{assert.match(s,/if\(!tokens\.length\)\{logger\.info/);assert.match(s,/const created=\[\]/);assert.match(s,/Promise\.all\(created\.map/)});
+test('07 public notifications never broadcast to noninvitees',()=>assert.doesNotMatch(s,/sendToTopic|subscribeToTopic/));
+test('08 no change to competition publication trigger',()=>assert.doesNotMatch(s,/onDocumentCreated|onDocumentWritten/));

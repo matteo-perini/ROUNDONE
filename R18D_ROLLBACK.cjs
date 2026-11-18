@@ -1,0 +1,11 @@
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+const manifest=require('./R18D_MANIFEST.json');
+const file=path.join(__dirname,...manifest.base_file.split('/'));
+const original=path.resolve(__dirname,'..',process.argv[2]||'','index.mjs.R18B_ORIGINALE');
+if(!process.argv[2]||!/^LionFit_R18D_BACKUP_[A-Za-z0-9T_.-]+$/.test(process.argv[2]))throw Error('Passare SOLO il nome esatto della cartella backup R18D.');
+if(!fs.existsSync(original))throw Error('Backup originale non trovato.');
+if(sha(fs.readFileSync(original))!==manifest.source_sha256)throw Error('Backup non corrispondente alla R18B.');
+if(sha(fs.readFileSync(file))!==manifest.payload_sha256)throw Error('Il backend e stato modificato dopo la R18D: rollback automatico bloccato.');
+fs.copyFileSync(original,file);
+console.log('Rollback R18B completato (SOLO file locale). Nessun deploy Firebase.');

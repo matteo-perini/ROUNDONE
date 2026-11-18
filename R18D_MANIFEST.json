@@ -1,0 +1,8 @@
+{
+  "base_file": "competitions-backend/functions/index.mjs",
+  "source_sha256": "9d123a5810282201f7e35f8b9a18738c940821bafc6e8385da33a15e72197946",
+  "payload_sha256": "11d81ebf15fd93057a2dd71300d3c063110a068d4884079ec0ed9da91c3f33f2",
+  "role": "backend-only",
+  "version": "R18D",
+  "requires": "R18B installed, R18C tests passed"
+}

@@ -1,0 +1,34 @@
+LIONFIT R18D - NOTIFICHE GARE NELLA CAMPANELLINA (BACKEND ONLY)
+
+VERIFICHE E LIMITI
+- Basata esclusivamente sul backend gare R18B con SHA256 9d123a5810282201f7e35f8b9a18738c940821bafc6e8385da33a15e72197946
+- Modifica SOLO competitions-backend/functions/index.mjs. Nessuna modifica a frontend, Firestore Rules, altri backend, dati, .env.
+- Il componente InboxBell esistente legge lf_inbox_users/<uid>/gyms/<gym>/items tramite lfInboxList.
+- I nuovi inviti verranno scritti nella stessa transazione Firestore che crea la partecipazione: campanellina persistente anche senza push.
+- Le risposte scrivono una notifica al coach attivo della stessa palestra nella transazione che aggiorna la risposta.
+- Un invito già esistente NON viene inviato una seconda volta: per il collaudo crea una nuova gara o usa un atleta non ancora invitato.
+- La notifica, cliccata, apre l'Agenda con la navigazione attuale: non è ancora un collegamento diretto alla singola gara.
+- Le push dipendono dai token registrati. I nuovi log indicano conteggi FCM, non garantiscono che il telefono visualizzi l'avviso.
+- La campanellina deve essere già funzionante e disponibile per gli account pilota; il backend R18D non la abilita su eventuali account dove non lo è.
+- NON è stato eseguito un test end-to-end su Firebase reale o Emulator Functions. I test statici/unitari NON lo sostituiscono.
+
+INSTALLAZIONE SAFE:
+1. Backup progetto; estrai ZIP nella root LionFit-Modern-Git senza cartelle doppie.
+2. Doppio clic APPLICA_R18D.cmd. Si ferma se il backend attuale NON corrisponde esattamente alla R18B verificata.
+3. Verifica in PowerShell dalla root:
+   node --test tests/patch30-r18d-competition-inbox.unit.mjs
+   node --test competitions-backend/functions/inviteModel.test.mjs
+   node --check competitions-backend/functions/index.mjs
+4. Solo dopo collaudo, prendere nota del nome del backup creato; inviare output se test non superati.
+5. Per rendere attiva la correzione serve un deploy MIRATO della codebase competitions, dopo controllo config pilota e test.
+   cd competitions-backend
+   firebase.cmd deploy --only functions:competitions --project app-palestra-b0b9d
+   Nessuna conferma di eliminazioni inattese.
+6. Prova con una GARA NUOVA, account di prova Coach/Atleta.
+7. Verifica campanellina su entrambi e console logs FCM per eventuale assenza di token.
+
+ROLLBACK:
+La cartella esterna LionFit_R18D_BACKUP_<timestamp> contiene il file originale.
+Solo per rollback locale, dalla root e con il nome esatto del backup:
+   node .\R18D_ROLLBACK.cjs "LionFit_R18D_BACKUP_<timestamp>"
+Non esegue deploy rollback. Prima di eventuale deploy rollback valutare con cautela la codebase.
