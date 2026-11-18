@@ -90,3 +90,6 @@ import './styles-quiet-loading.css'
 
 // PATCH 30 R14: Dashboard Atleta premium e navbar senza scorciatoia Impostazioni.
 import './styles-r14-athlete-home.css'
+
+// PATCH 30 R14C — Nuova Home Atleta dal concept approvato; prevale sulla R14.
+import './styles-r14c-dashboard-rebuild.css'

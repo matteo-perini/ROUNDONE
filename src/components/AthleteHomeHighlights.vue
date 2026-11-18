@@ -10,7 +10,6 @@ import {bookingPaths,toReservation,type LiveReservation} from '../integrations/f
 import {upcomingRows} from '../features/bookings/agendaOverview'
 import {watchCompetitionEnabled,watchCompetitionEvents} from '../integrations/firestore/competitions'
 import {nextCompetition,type CompetitionEvent} from '../features/bookings/competitionModel'
-import {romeParts} from '../features/bookings/bookingPolicy'
 import LionIcon from './LionIcon.vue'
 const props=defineProps<{uid:string;gymId:string;bookingLink:string}>()
 const reservations=ref<LiveReservation[]>([])
@@ -50,24 +49,26 @@ const fmt=(ms:number)=>new Intl.DateTimeFormat('it-IT',{timeZone:'Europe/Rome',w
 const service=(b:LiveReservation)=>b.service==='fighter'?'Fighter':'Pesi'
 </script>
 <template>
- <section class="lf-r14-upcoming" aria-label="Prossimi appuntamenti ed eventi">
-  <div class="lf-r14-section-title"><div><span>IL TUO CALENDARIO</span><h2>In arrivo</h2></div><RouterLink :to="bookingLink">Apri Agenda <LionIcon name="chevron" :size="16"/></RouterLink></div>
-  <div class="lf-r14-upcoming-grid" :class="{'lf-r14-only-bookings':!competitionsEnabled}">
-   <article class="lf-r14-upcoming-card">
-    <div class="lf-r14-mini-heading"><LionIcon name="calendar-plus" :size="19"/><strong>Le prossime lezioni</strong></div>
-    <p v-if="!bookingsReady" class="lf-r14-muted" role="status">Caricamento appuntamenti…</p>
-    <p v-else-if="bookingsError" class="lf-r14-muted">Consulta l'Agenda per verificare gli appuntamenti.</p>
-    <div v-else-if="nextBookings.length" class="lf-r14-next-list">
-     <RouterLink v-for="b in nextBookings" :key="b.id" :to="bookingLink" class="lf-r14-next-row"><div><strong>{{b.discipline||service(b)}}</strong><small>{{fmt(b.startMs)}} · {{b.durationMinutes}} min<span v-if="b.participantCount>1"> · {{b.participantCount}} persone</span></small></div><LionIcon name="chevron" :size="17"/></RouterLink>
-    </div>
-    <p v-else class="lf-r14-muted">Nessuna lezione prenotata nei prossimi 31 giorni.</p>
-   </article>
-   <article v-if="competitionsEnabled" class="lf-r14-upcoming-card">
-    <div class="lf-r14-mini-heading"><LionIcon name="progress" :size="19"/><strong>Eventi e gare</strong></div>
-    <p v-if="!eventsReady" class="lf-r14-muted" role="status">Caricamento eventi…</p>
-    <RouterLink v-else-if="nextEvent" :to="bookingLink" class="lf-r14-next-row"><div><strong>{{nextEvent.title}}</strong><small>{{fmt(nextEvent.startMs)}} · {{nextEvent.location}}</small><small>Evento pubblicato dalla palestra</small></div><LionIcon name="chevron" :size="17"/></RouterLink>
-    <p v-else class="lf-r14-muted">Nessun evento futuro pubblicato.</p>
-   </article>
-  </div>
+ <section class="lf15-events" aria-label="Prossima lezione e prossimo evento">
+  <article class="lf15-event-card">
+   <RouterLink :to="bookingLink" class="lf15-event-content" aria-label="Apri la prossima lezione nell'Agenda">
+    <div class="lf15-event-head"><LionIcon name="calendar-plus" :size="21"/><strong>PROSSIMA LEZIONE</strong></div>
+    <p v-if="!bookingsReady" class="lf15-event-empty" role="status">Caricamento appuntamenti…</p>
+    <p v-else-if="bookingsError" class="lf15-event-empty">Consulta l'Agenda per verificare le lezioni.</p>
+    <template v-else-if="nextBookings.length"><strong class="lf15-event-value">{{nextBookings[0].discipline||service(nextBookings[0])}}</strong><small>{{fmt(nextBookings[0].startMs)}}<span v-if="nextBookings[0].participantCount>1"> · {{nextBookings[0].participantCount}} partecipanti</span></small></template>
+    <p v-else class="lf15-event-empty">Nessuna lezione prenotata nei prossimi 31 giorni.</p>
+    <span class="lf15-event-open">Apri Agenda <LionIcon name="chevron" :size="15"/></span>
+   </RouterLink>
+  </article>
+  <article class="lf15-event-card">
+   <RouterLink :to="bookingLink" class="lf15-event-content" aria-label="Apri gli eventi e le gare nell'Agenda">
+    <div class="lf15-event-head"><LionIcon name="trophy" :size="21"/><strong>PROSSIMO EVENTO</strong></div>
+    <p v-if="!eventsReady" class="lf15-event-empty" role="status">Caricamento eventi…</p>
+    <p v-else-if="!competitionsEnabled" class="lf15-event-empty">Gare e competizioni non attive.</p>
+    <template v-else-if="nextEvent"><strong class="lf15-event-value">{{nextEvent.title}}</strong><small>{{fmt(nextEvent.startMs)}} · {{nextEvent.location}}</small><small>Evento pubblicato dalla palestra</small></template>
+    <p v-else class="lf15-event-empty">Nessun evento futuro pubblicato.</p>
+    <span class="lf15-event-open">Apri Agenda <LionIcon name="chevron" :size="15"/></span>
+   </RouterLink>
+  </article>
  </section>
 </template>

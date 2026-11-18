@@ -5,7 +5,7 @@ import {isStagingMode,mayWriteLive} from '../integrations/firebase/stagingConfig
 import {watchGymIdentity,saveGymIdentity,emptyIdentity,emptyIdentityRead,type IdentityField} from '../integrations/firestore/platform'
 import {accountKey} from '../features/platform/platformModel'
 import {compressIdentity} from '../features/platform/identityImage'
-const p=defineProps<{edit?:boolean;compact?:boolean}>()
+const p=defineProps<{edit?:boolean;compact?:boolean;hero?:boolean}>()
 const read=ref(emptyIdentityRead()),draft=ref(emptyIdentity()),changed=ref<IdentityField[]>([]),busy=ref(false),message=ref(''),slow=ref(false)
 const identity=computed(()=>read.value.identity)
 const nameReady=computed(()=>read.value.gym.state==='ready')
@@ -44,6 +44,12 @@ async function save(){if(!canSave.value)return;const n=epoch;busy.value=true;mes
   <section v-if="nameReady" class="lf14-gym-identity" :class="{'lf14-with-cover':brandReady&&!!draft.cover}"><img v-if="brandReady&&draft.cover" :src="draft.cover" alt="" class="lf14-bg-cover"/><div class="lf14-gym-label"><img :src="(brandReady&&draft.logo)||'/v1-preview/LOGO-APP.png'" class="lf14-logo" alt="Logo palestra"/><div><small>ANTEPRIMA</small><strong>{{draft.name||'Palestra'}}</strong></div></div></section>
   <button v-if="nameReady" class="primary wide" :disabled="!canSave" @click="save">{{busy?'Attendi…':'Salva personalizzazione'}}</button>
   <p v-if="message" class="notice" role="status">{{message}}</p>
+ </section>
+ <section v-else-if="!edit&&p.hero" class="lf14-gym-identity lf14-gym-hero" :class="{'lf14-with-cover':!!identity.cover}" aria-label="La tua palestra">
+  <img class="lf14-hero-image" :src="identity.cover||'/lionfit-r8a/athlete-workout-hero.webp'" alt=""/>
+  <div class="lf14-hero-shade" aria-hidden="true"></div>
+  <div class="lf14-hero-content"><slot /></div>
+  <div class="lf14-gym-label"><img :src="identity.logo||'/v1-preview/LOGO-APP.png'" class="lf14-logo" alt="Logo palestra"/><div><small>LA TUA PALESTRA</small><strong>{{identity.name||'LionFit'}}</strong></div></div>
  </section>
  <section v-else-if="!edit&&(identity.name||compact)" class="lf14-gym-identity" :class="{'lf14-with-cover':!!identity.cover,'lf14-compact':compact}"><img v-if="identity.cover" :src="identity.cover" alt="" class="lf14-bg-cover"/><div class="lf14-gym-label"><img :src="identity.logo||'/v1-preview/LOGO-APP.png'" class="lf14-logo" alt="Logo palestra"/><div><small>{{identity.name?'PALESTRA':'PANNELLO COACH'}}</small><strong>{{identity.name||'LionFit'}}</strong></div></div></section>
 </template>

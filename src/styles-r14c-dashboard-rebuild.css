@@ -1,0 +1,93 @@
+/* PATCH 30 R14C - NEW LionFit Athlete Command Dashboard. Scoped and additive. */
+.app.as-athlete .lf15-home{display:grid;gap:13px;max-width:950px;margin:0 auto 16px;width:100%;min-width:0}
+.lf15-home :is(h1,h2,p){margin:0}
+/* One photographic hero. Existing gym identity stream supplies only ONE image (custom or default). */
+.app.as-athlete .lf15-home .lf14-gym-hero{display:flex!important;flex-direction:column;justify-content:space-between;align-items:stretch;position:relative;isolation:isolate;min-height:225px!important;max-height:none!important;height:auto!important;border:1px solid rgba(50,221,148,.47)!important;border-radius:19px!important;background:#091715!important;overflow:hidden;color:white;box-shadow:0 14px 33px rgba(0,0,0,.22)}
+.lf15-home .lf14-gym-hero:before{display:none!important}
+.lf15-home .lf14-gym-hero .lf14-hero-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 43%;z-index:0;pointer-events:none}
+.lf15-home .lf14-gym-hero .lf14-hero-shade{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(3,15,18,.94) 0%,rgba(3,15,18,.77) 43%,rgba(3,15,18,.13) 100%),linear-gradient(0deg,rgba(2,10,12,.74),transparent 62%);pointer-events:none}
+.lf15-home .lf14-gym-hero .lf14-hero-content,.lf15-home .lf14-gym-hero .lf14-gym-label{z-index:2;position:relative;isolation:isolate}
+.lf15-home .lf14-hero-content{padding:23px 22px 5px;max-width:80%}
+.lf15-home .lf15-hero-greeting{display:grid;gap:6px}
+.lf15-kicker{color:#5ceeb0;font-size:10px;letter-spacing:.13em;font-weight:900}
+.lf15-hero-greeting h1{color:#fff;font-size:clamp(27px,4vw,40px);line-height:1.13;font-weight:950;letter-spacing:-.035em;overflow-wrap:anywhere}
+.lf15-hero-greeting h1 span{font-size:.66em}.lf15-hero-greeting p{color:#d0ddd7;font-size:13px;line-height:1.42}
+.lf15-home .lf14-gym-hero .lf14-gym-label{padding:19px 22px 22px;min-height:auto!important;gap:10px;width:100%;display:flex;align-items:center}
+.lf15-home .lf14-gym-hero .lf14-logo{width:47px;height:47px;object-fit:contain;background:#fff;padding:3px;border-radius:11px;flex:none}
+.lf15-home .lf14-gym-hero .lf14-gym-label small{font-size:10px;font-weight:800;letter-spacing:.11em;color:#92ceb2}
+.lf15-home .lf14-gym-hero .lf14-gym-label strong{font-size:clamp(16px,2.5vw,20px);font-weight:900;line-height:1.25;color:#fff}
+/* Training action uses one shared dark official glove image, never gym custom image. */
+.lf15-home .lf15-today{display:grid;gap:12px;border:1px solid #31c78d;border-radius:18px;overflow:hidden;padding:20px 21px 21px;min-height:186px;background:linear-gradient(103deg,rgba(3,23,24,.99),rgba(6,35,34,.93) 57%,rgba(9,32,31,.28)),url('/lionfit-redesign/gloves-clean.jpg') right center/auto 100% no-repeat,#071d1e;color:#f4fff8;box-shadow:0 11px 26px #0002}
+.lf15-today-top{display:flex;align-items:center;gap:9px;font-size:10px;letter-spacing:.10em;font-weight:900;color:#5bf4aa;text-transform:uppercase}
+.lf15-today-top svg{flex:none}
+.lf15-today h2{font-size:clamp(23px,3.2vw,32px);font-weight:950;font-style:italic;line-height:1.18;color:#fff;max-width:85%;overflow-wrap:anywhere}
+.lf15-today p{font-size:12px;line-height:1.45;color:#d2e9e1;max-width:90%}
+.lf15-sheet-list{display:flex;flex-wrap:wrap;gap:7px}
+.lf15-sheet-list button{min-height:36px;padding:7px 10px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:7px;background:#1b4b36;color:#e6fff1;border:1px solid #43ce8a;border-radius:9px;max-width:100%}
+.lf15-main-cta{margin-top:3px;display:flex!important;justify-content:space-between;align-items:center;gap:11px;max-width:485px;width:100%;min-height:47px;padding:10px 15px;border-radius:12px;border:1px solid #62f7b1;background:linear-gradient(105deg,#53f7a9,#13db7d);color:#05251a!important;font-weight:950;font-size:14px;text-decoration:none!important;box-shadow:0 6px 18px #0c9b5738;cursor:pointer}
+.lf15-main-cta>span{flex:1;text-align:center}.lf15-main-cta svg{flex:none}
+.lf15-main-cta-muted{background:#265246;border-color:#4f9875;color:#eafff2!important}
+.lf15-main-cta:hover{filter:brightness(1.05)}
+/* Week indicator is calendar position, not fabricated completion KPI. */
+.lf15-route{display:flex;align-items:center;gap:13px;border:1px solid var(--outline);border-radius:17px;padding:14px 16px;min-width:0;background:linear-gradient(115deg,#13312e3b,transparent),var(--card);text-decoration:none!important;color:var(--text)!important}
+.lf15-route:hover{border-color:var(--mint)}
+.lf15-route-ring{display:grid;place-items:center;flex:none;width:65px;height:65px;border-radius:50%;background:radial-gradient(closest-side,var(--card) 75%,transparent 78%),conic-gradient(#31e493 0 var(--lf15-day-progress,42%),#344551 var(--lf15-day-progress,42%) 100%);border:2px solid #345b52}
+.lf15-route-ring>strong{font-size:23px;line-height:1.1;color:var(--text)}.lf15-route-ring small{font-size:11px;color:var(--muted)}
+.lf15-route-content{display:grid;gap:4px;min-width:0;flex:1}
+.lf15-route-content>small{color:var(--mint);font-size:10px;font-weight:900;letter-spacing:.12em}
+.lf15-route-content>strong{font-size:clamp(16px,2.5vw,22px);font-weight:950;line-height:1.23;overflow-wrap:anywhere}
+.lf15-route-content>span{font-size:11px;color:var(--muted)}
+.lf15-route-content>em{font-size:10px;line-height:1.3;color:var(--muted);font-style:normal;border:1px solid var(--outline);border-radius:9px;padding:5px 8px;margin-top:2px;width:fit-content;max-width:100%;overflow-wrap:anywhere}
+.lf15-route>svg{flex:none;color:var(--muted)}
+/* The two equally sized next-up tiles are retained EVEN IF EMPTY (no fake bookings or dates). */
+.lf15-events{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;min-width:0}
+.lf15-event-card{min-width:0;border:1px solid var(--outline);background:linear-gradient(130deg,#10352819,transparent),var(--card);border-radius:16px;overflow:hidden;display:flex;min-height:127px}
+.lf15-event-content{min-width:0;width:100%;display:grid;align-content:start;gap:7px;padding:15px 14px;color:var(--text)!important;text-decoration:none!important}
+.lf15-event-head{display:flex;align-items:center;gap:6px;min-width:0;color:var(--mint)}.lf15-event-head>strong{font-size:10px;font-weight:900;letter-spacing:.04em;line-height:1.2}.lf15-event-head svg{flex:none}
+.lf15-event-value{font-size:13px;font-weight:900;color:var(--text);line-height:1.3;overflow-wrap:anywhere}
+.lf15-event-content>small{font-size:10px;color:var(--muted);line-height:1.35;overflow-wrap:anywhere}
+.lf15-event-empty{font-size:11px;line-height:1.45;color:var(--muted)}
+.lf15-event-open{display:flex;align-items:center;gap:3px;margin-top:auto;padding-top:6px;font-size:10px;color:var(--mint);font-weight:800}
+.lf15-progress-link{display:flex;align-items:center;gap:12px;min-width:0;border-radius:15px;padding:14px 16px;border:1px solid var(--outline);background:linear-gradient(115deg,#0c493b18,transparent),var(--card);text-decoration:none!important;color:var(--text)!important}
+.lf15-progress-link>svg:first-child{color:var(--mint);flex:none}.lf15-progress-link>svg:last-child{color:var(--mint);flex:none}
+.lf15-progress-link>span{display:grid;gap:4px;flex:1;min-width:0}.lf15-progress-link strong{font-size:14px;font-weight:900}.lf15-progress-link small{font-size:11px;color:var(--muted)}
+/* Four real action tiles exactly as approved mockup. */
+.lf15-quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;min-width:0}
+.lf15-quick-tile{border:1px solid var(--outline);background:linear-gradient(140deg,#185b4222,transparent),var(--card);border-radius:14px;padding:16px 7px 13px;min-height:104px;min-width:0;color:var(--text)!important;text-decoration:none!important;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;text-align:center;font:inherit;cursor:pointer;position:relative}
+.lf15-quick-tile>svg{color:var(--mint);flex:none}.lf15-quick-tile>span{font-size:12px;line-height:1.23;font-weight:850;overflow-wrap:break-word}.lf15-quick-tile>small{font-size:9px;color:var(--mint);font-weight:800;line-height:1}
+.lf15-quick-tile:hover,.lf15-event-card:hover,.lf15-progress-link:hover{border-color:#42c48c}
+.lf15-home :is(a,button):focus-visible,.lf15-video-dialog button:focus-visible{outline:2px solid #5df4ae;outline-offset:3px}
+.lf15-video-backdrop{position:fixed;inset:0;z-index:1010;background:rgba(2,8,12,.81);display:grid;place-items:center;padding:20px}
+.lf15-video-dialog{width:min(440px,100%);padding:26px 24px;border-radius:19px;background:#14232e;border:1px solid #4dc292;box-shadow:0 25px 80px #0008;color:#effff4;display:grid;gap:11px;text-align:center;justify-items:center}
+.lf15-video-symbol{display:grid;place-items:center;width:57px;height:57px;background:#10402f;color:#48ec98;border-radius:15px}
+.lf15-video-dialog h2{font-size:23px;font-weight:900}.lf15-video-dialog p{font-size:13px;line-height:1.55;color:#c0d2cc}.lf15-video-dialog strong{font-size:12px;color:#4ce6a0}
+.lf15-video-dialog button{width:100%;margin-top:10px;padding:12px 18px;min-height:44px;border-radius:11px;border:1px solid #4fe8a0;background:#19ce7c;color:#072a1b;font-weight:900;cursor:pointer}
+/* Light mode retains dark-photo cards, with legible light panels for utilities. */
+.app.theme-light.as-athlete .lf15-home .lf14-gym-hero,.app.theme-light.as-athlete .lf15-today{color:#fff}
+@media(max-width:799px){
+ .app.as-athlete .lf15-home{gap:12px;padding-bottom:10px}
+ .app.as-athlete .lf15-home .lf14-gym-hero{min-height:204px!important}
+ .lf15-home .lf14-hero-content{padding:20px 17px 5px;max-width:91%}
+ .lf15-home .lf15-hero-greeting h1{font-size:29px}
+ .lf15-home .lf14-gym-hero .lf14-gym-label{padding:19px 17px 18px}
+ .lf15-today{padding:18px 17px;min-height:168px}
+ .lf15-today h2{max-width:98%;font-size:24px}
+ .lf15-route{padding:13px 12px}
+ .lf15-event-content{padding:12px 11px}
+ .lf15-quick-grid{gap:7px}
+ .lf15-quick-tile{min-height:100px;padding:13px 4px 11px;gap:8px}
+ .lf15-quick-tile>span{font-size:10px}
+}
+@media(max-width:360px){
+ .lf15-home .lf14-hero-content{max-width:100%}
+ .lf15-home .lf15-hero-greeting h1{font-size:26px}
+ .lf15-route-ring{width:54px;height:54px}.lf15-route-ring>strong{font-size:20px}
+ .lf15-event-head>strong{font-size:9px}.lf15-event-head svg{width:17px;height:17px}
+ .lf15-event-content{padding:10px 9px}
+ .lf15-quick-tile>span{font-size:9px}
+}
+@media(prefers-reduced-motion:no-preference){
+ .lf15-home :is(.lf15-main-cta,.lf15-route,.lf15-event-card,.lf15-progress-link,.lf15-quick-tile){transition:transform .4s cubic-bezier(.2,.7,.2,1),border-color .35s ease,filter .35s ease}
+ .lf15-home :is(.lf15-main-cta,.lf15-route,.lf15-quick-tile):hover{transform:translateY(-2px)}
+}
+@media(prefers-reduced-motion:reduce){.lf15-home *, .lf15-video-backdrop *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

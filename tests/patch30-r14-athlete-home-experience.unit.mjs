@@ -19,13 +19,13 @@ test('only Profile contains an entry into Settings; header and desktop sidebar h
  assert.match(shell,/{to:'\/coach\/profilo',label:'PROFILO'/)
 })
 test('Home renders gym live identity with default gym image and custom cover support',()=>{
- assert.match(home,/<GymIdentity compact\/>/)
- assert.match(css,/lionfit-defaults\/lionfit-gym-premium\.jpg/)
- assert.match(css,/lf14-gym-identity\.lf14-with-cover/)
+ assert.match(home,/<GymIdentity hero>/)
+ assert.match(read('src/components/GymIdentity.vue'),/identity.cover\|\|'\/lionfit-r8a\/athlete-workout-hero\.webp'/)
+ assert.match(read('src/styles-r14c-dashboard-rebuild.css'),/lf14-hero-image/)
  assert.match(home,/firstName/)
 })
 test('R14 Today action does not promise a workout when there is no assigned sheet',()=>{
- for(const t of ['hasTodayPlan','isRestDay','freeSheets','directSheet','actionLabel','Nessun allenamento programmato oggi','Consulta il mio piano','Visualizza attività di oggi'])assert.ok(home.includes(t),t)
+ for(const t of ['hasTodayPlan','isRestDay','freeSheets','directSheet','actionLabel','Nessun allenamento programmato oggi','Apri il mio piano','Visualizza attività'])assert.ok(home.includes(t),t)
  assert.match(home,/v-if="directSheet"/)
  assert.match(home,/activeSheet=sheet/)
  assert.match(live,/:free-sheets="homeFreeSheets"/)
@@ -35,8 +35,8 @@ test('Week circle has unambiguous calendar label not a completion percentage',()
  assert.match(home,/Giorno \{\{dayNumber\}\} di 7 · calendario settimanale/)
  assert.doesNotMatch(home,/allenamenti completati|avanzamento settimanale/)
 })
-test('No duplicated four-menu shortcuts in homepage, existing navbar remains intact',()=>{
- assert.doesNotMatch(home,/lf-v3-shortcuts|Accesso rapido|quick=|lf-r14-shortcuts/)
+test('Four requested action tiles are present, main navigation remains intact',()=>{
+ for (const label of ['Prenota lezione','I miei allenamenti','Le mie schede','Video &amp; Tutorial']) assert.ok(home.includes(label),label)
  assert.match(shell,/<AthleteBottomNavigation/)
  assert.match(shell,/<RouterView\/>/)
 })
@@ -53,7 +53,7 @@ test('Competition highlights use existing per-gym module switch and public event
  assert.match(highlight,/watchCompetitionEvents\(db,gym/)
  assert.match(highlight,/nextCompetition\(events\.value/)
  assert.match(highlight,/Evento pubblicato dalla palestra/)
- assert.match(highlight,/v-if="competitionsEnabled"/)
+ assert.match(highlight,/v-else-if="!competitionsEnabled"/)
 })
 test('Loading, read errors and no data do not render fabricated reservations',()=>{
  for(const t of ['bookingsReady','bookingsError','Caricamento appuntamenti','Consulta l\'Agenda','Nessuna lezione prenotata'])assert.ok(highlight.includes(t),t)
