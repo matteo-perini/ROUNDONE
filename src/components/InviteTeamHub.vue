@@ -3,7 +3,7 @@ import {computed,ref} from 'vue'
 import {RouterLink} from 'vue-router'
 import LionIcon from './LionIcon.vue'
 import {uiText} from '../features/i18n/interfaceLanguage'
-const props=defineProps<{owner:boolean;busy:boolean;pendingCount?:number;expiringCount?:number;teamCount?:number;centralized?:boolean}>()
+const props=defineProps<{owner:boolean;busy:boolean;pendingCount?:number;expiringCount?:number;teamCount?:number}>()
 const choice=ref<'atleta'|'coach'>('atleta')
 const selected=computed(()=>props.owner&&choice.value==='coach'?'coach':'atleta')
 function select(kind:'atleta'|'coach'){
@@ -33,7 +33,7 @@ function select(kind:'atleta'|'coach'){
     <div class="lf-invite-detail-body"><slot name="team"/></div>
    </details>
    <details class="staff-details lf-invite-detail">
-    <summary><LionIcon name="settings" :size="21"/><span class="lf-invite-summary"><strong>{{uiText('Impostazioni email (avanzate)')}}</strong><small>{{centralized?'LionFit Mail · Resend':'EmailJS'}}</small></span><LionIcon name="chevron" :size="16" class="lf-invite-chevron"/></summary>
+    <summary><LionIcon name="settings" :size="21"/><span class="lf-invite-summary"><strong>{{uiText('Impostazioni email (avanzate)')}}</strong><small>LionFit Mail · Resend</small></span><LionIcon name="chevron" :size="16" class="lf-invite-chevron"/></summary>
     <div class="lf-invite-detail-body"><slot name="settings"/></div>
    </details>
   </div>

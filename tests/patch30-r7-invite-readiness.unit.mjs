@@ -29,10 +29,10 @@ test('read-only readiness checker passes without credentials or network',()=>{
  assert.match(output,/Nessuna email inviata/)
  assert.match(output,/webhook/)
 })
-test('no Resend public key in frontend and EmailJS stays default',()=>{
+test('frontend uses only Resend callable with no API keys or EmailJS transport',()=>{
  const client=read('src/integrations/firebase/inviteMail.ts')
  const view=read('src/views/LiveCoachStaff.vue')
- assert.match(client,/VITE_LIONFIT_INVITES_PROVIDER==='resend'/)
- assert.match(view,/api\.emailjs\.com/)
- assert.doesNotMatch(client+view,/LIONFIT_INVITES_RESEND_API_KEY|api\.resend\.com/)
+ assert.doesNotMatch(client,/VITE_LIONFIT_INVITES_PROVIDER/)
+ assert.match(view,/sendCentralInviteEmail\(/)
+ assert.doesNotMatch(client+view,/LIONFIT_INVITES_RESEND_API_KEY|api\.resend\.com|api\.emailjs\.com/)
 })

@@ -14,8 +14,7 @@ import {emailValid} from '../features/invites/visibility'
 import {pendingMonitor,visiblePendingMonitor,expiryLabel,type MonitorFilter} from '../features/invites/monitor'
 import {coachRevocationEnabled} from '../features/athletes/coachRevocation'
 import {mayWriteLive} from '../integrations/firebase/stagingConfig'
-import {LEGACY_EMAILJS_PUBLIC} from '../integrations/email/legacyEmailJs'
-import {centralizedInvitesEnabled,sendCentralInviteEmail} from '../integrations/firebase/inviteMail'
+import {sendCentralInviteEmail} from '../integrations/firebase/inviteMail'
 type InviteKind='atleta'|'coach'
 type Invite={id:string;email?:string;status:string;type:InviteKind;createdBy?:string;expiresAt?:{toMillis():number}}
 type PreparedShare={kind:ShareInviteKind;link:string;gymId:string;uid:string;email:string;origin:string}
@@ -30,9 +29,7 @@ let inviteClock:ReturnType<typeof setInterval>|null=null
 const scopedInvites=computed(()=>owner.value?invited.value:invited.value.filter(x=>x.createdBy===stagingSession.value?.uid))
 const inviteStats=computed(()=>pendingMonitor(scopedInvites.value,inviteNow.value))
 const activeInvites=computed(()=>visiblePendingMonitor(scopedInvites.value,inviteFilter.value,inviteSearch.value,inviteNow.value))
-const MAIL_CONF_KEY='lionfit-emailjs-public-config-v1',UNSENT_KEY='lionfit-unsent-invite-session-v1',UNSENT_COACH_KEY='lionfit-unsent-coach-invite-v1'
-// Stesso template generico EmailJS per Coach e Atleti; il ruolo dipende dall'invito Firebase.
-const serviceId=ref(LEGACY_EMAILJS_PUBLIC.serviceId),publicKey=ref(LEGACY_EMAILJS_PUBLIC.publicKey),templateId=ref(LEGACY_EMAILJS_PUBLIC.templateId)
+const UNSENT_KEY='lionfit-unsent-invite-session-v1',UNSENT_COACH_KEY='lionfit-unsent-coach-invite-v1'
 type Unsent={email:string;link:string;gymId:string;createdAt:number}
 let unsent:Unsent|null=null,coachUnsent:Unsent|null=null;let mounted=true;const stops:Unsubscribe[]=[]
 function inviteUrlBase():string {
@@ -69,17 +66,7 @@ function token(kind:'email'|'coach'|'manual'){
  const bytes=crypto.getRandomValues(new Uint8Array(23))
  return (kind==='manual'?'a1':'e1')+[...bytes].map(x=>x.toString(16).padStart(2,'0')).join('')
 }
-function saveEmailSettings(){
- if(!serviceId.value.trim()||!publicKey.value.trim()||!templateId.value.trim()){status.value='Compila Service ID, Public Key e Template ID.';return}
- try{localStorage.setItem(MAIL_CONF_KEY,JSON.stringify({service_id:serviceId.value.trim(),user_id:publicKey.value.trim(),template_id:templateId.value.trim()}));status.value='Impostazioni EmailJS salvate solo su questo dispositivo.'}
- catch{status.value='Impossibile salvare le impostazioni email sul dispositivo.'}
-}
 function restoreLocal(){
- try{const c=JSON.parse(localStorage.getItem(MAIL_CONF_KEY)||'{}')
-  if(typeof c.service_id==='string')serviceId.value=c.service_id
-  if(typeof c.user_id==='string')publicKey.value=c.user_id
-  if(typeof c.template_id==='string')templateId.value=c.template_id
- }catch{}
  try{const d=JSON.parse(sessionStorage.getItem(UNSENT_KEY)||'null') as Unsent|null
   if(d && typeof d.email==='string' && typeof d.link==='string' && typeof d.gymId==='string' && Date.now()-d.createdAt<7*86400000 && validStoredInviteLink(d.link,d.gymId,'atleta')){
    unsent=d;athleteEmail.value=d.email
@@ -185,7 +172,7 @@ async function existingValidCoachInvite(email:string,gymId:string,ownerUid:strin
 
 /** Manual invitations reuse the SAME Firestore schema, expiry and rules as email invites.
  * A collaborator link remains bound to the exact email and requires email verification.
- * Tokens remain memory-only here (unless the existing EmailJS retry logic stores them).
+ * Manual sharing tokens remain memory-only; email retry state uses sessionStorage only.
  */
 async function assertSharePending(kind:ShareInviteKind,link:string,gymId:string,uid:string,email:string):Promise<void>{
  const id=shareToken(link,kind,gymId,inviteUrlBase())
@@ -281,7 +268,7 @@ async function copyInviteToClipboard(link:string){
  }
 }
 
-/** EmailJS accepts delivery for processing; it does not certify inbox reception.
+/** Resend accepts delivery for processing; it does not certify inbox reception.
  * Failed attempts reuse the same pending token instead of producing new records.
  */
 async function sendCoachMail(){if(busy.value)return
@@ -289,35 +276,22 @@ async function sendCoachMail(){if(busy.value)return
  if(!owner.value){status.value='Solo il titolare può invitare un Coach.';return}
  if(!allowedMailRecipient(email)){status.value='Email di test disabilitata: usa un destinatario esplicitamente autorizzato per STAGING.';return}
  if(!emailValid(email)){status.value='Inserisci l’email del collaboratore.';return}
- if(!centralizedInvitesEnabled()&&(!serviceId.value.trim()||!publicKey.value.trim()||!templateId.value.trim())){
-  status.value='Configura EmailJS e il template inviti nelle impostazioni avanzate.';return
- }
  const s=stagingSession.value;if(!s){status.value='Sessione titolare assente.';return}
  busy.value=true;status.value=''
  try{
   const link=await reusableCoachInvite(email,s.gymId)??await existingValidCoachInvite(email,s.gymId,s.uid)??await makeInvite('coach','coach')
   coachUnsent={email,link,gymId:s.gymId,createdAt:Date.now()}
   sessionStorage.setItem(UNSENT_COACH_KEY,JSON.stringify(coachUnsent))
-  if(centralizedInvitesEnabled()){
-   await sendCentralInviteEmail({gymId:s.gymId,kind:'coach',link,recipient:email,uid:s.uid})
-  }else{
-   const response=await fetch('https://api.emailjs.com/api/v1.0/email/send',{
-    method:'POST',referrerPolicy:'no-referrer',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({service_id:serviceId.value.trim(),template_id:templateId.value.trim(),user_id:publicKey.value.trim(),
-     template_params:{to_email:email,invite_link:link,recipient_role:'coach',apk_link:'https://github.com/matteo-perini/ROUNDONE/releases/latest/download/LionFit.apk',ios_guide_link:'https://www.lionfit.it/www/ios.html'}})
-   })
-   if(!response.ok)throw new Error('EmailJS HTTP '+response.status)
-  }
+  await sendCentralInviteEmail({gymId:s.gymId,kind:'coach',link,recipient:email,uid:s.uid})
   coachUnsent=null;sessionStorage.removeItem(UNSENT_COACH_KEY);coachEmail.value=''
-  status.value=centralizedInvitesEnabled()?'Resend ha accettato l’invito Coach. Il destinatario deve verificare la ricezione e la propria email.':'Email Coach accettata da EmailJS. Il destinatario deve verificare la ricezione e la propria email.'
- }catch(e){status.value=centralizedInvitesEnabled()?'Invio Coach non confermato: '+(e instanceof Error?e.message:String(e))+'. Per sicurezza non ripetere automaticamente lo stesso invito.':'Invio Coach non completato: '+(e instanceof Error?e.message:String(e))+'. Il token resta pending per il nuovo tentativo.'}
+  status.value='Resend ha accettato l’invito Coach. Il destinatario deve verificare la ricezione e la propria email.'
+ }catch(e){status.value='Invio Coach non confermato: '+(e instanceof Error?e.message:String(e))+'. Per sicurezza non ripetere automaticamente lo stesso invito.'}
  finally{busy.value=false}
 }
 async function sendAthleteMail(){if(busy.value)return
  const email=athleteEmail.value.trim().toLowerCase()
  if(!emailValid(email)){status.value='Inserisci un indirizzo email valido.';return}
  if(!allowedMailRecipient(email)){status.value='Email di test disabilitata: usa un destinatario esplicitamente autorizzato per STAGING.';return}
- if(!centralizedInvitesEnabled()&&(!serviceId.value.trim()||!publicKey.value.trim()||!templateId.value.trim())){status.value='Configura prima Service ID, Public Key e Template ID nelle impostazioni avanzate.';return}
  const s=stagingSession.value;if(!s){status.value='Sessione coach assente.';return}
  busy.value=true;status.value=''
  try{
@@ -325,17 +299,10 @@ async function sendAthleteMail(){if(busy.value)return
   if(!link){link=await makeInvite('atleta','email')}
   unsent={email,link,gymId:s.gymId,createdAt:Date.now()}
   sessionStorage.setItem(UNSENT_KEY,JSON.stringify(unsent))
-  if(centralizedInvitesEnabled()){
-   await sendCentralInviteEmail({gymId:s.gymId,kind:'athlete',link,recipient:email,uid:s.uid})
-  }else{
-   const response=await fetch('https://api.emailjs.com/api/v1.0/email/send',{
-    method:'POST',referrerPolicy:'no-referrer',headers:{'Content-Type':'application/json'},body:JSON.stringify({service_id:serviceId.value.trim(),template_id:templateId.value.trim(),user_id:publicKey.value.trim(),template_params:{to_email:email,invite_link:link,recipient_role:'atleta',apk_link:'https://github.com/matteo-perini/ROUNDONE/releases/latest/download/LionFit.apk',ios_guide_link:'https://www.lionfit.it/www/ios.html'}})
-   })
-   if(!response.ok)throw new Error('EmailJS HTTP '+response.status)
-  }
+  await sendCentralInviteEmail({gymId:s.gymId,kind:'athlete',link,recipient:email,uid:s.uid})
   unsent=null;sessionStorage.removeItem(UNSENT_KEY);athleteEmail.value=''
-  status.value=centralizedInvitesEnabled()?'Resend ha accettato l’invito Atleta. Controlla la ricezione nella casella del destinatario.':'Email accettata dal servizio di invio. Verifica che sia arrivata nella casella dell’atleta.'
- }catch(e){status.value=centralizedInvitesEnabled()?`Invio centralizzato non confermato: ${e instanceof Error?e.message:String(e)}. Per sicurezza non ripetere automaticamente lo stesso invito.`:`Invio email non completato: ${e instanceof Error?e.message:String(e)}. Il token non è stato eliminato; riprova per riutilizzarlo.`}
+  status.value='Resend ha accettato l’invito Atleta. Controlla la ricezione nella casella del destinatario.'
+ }catch(e){status.value=`Invio centralizzato non confermato: ${e instanceof Error?e.message:String(e)}. Per sicurezza non ripetere automaticamente lo stesso invito.`}
  finally{busy.value=false}
 }
 async function revoke(x:Invite){
@@ -355,7 +322,7 @@ async function revoke(x:Invite){
 }
 </script>
 <template>
- <InviteTeamHub :owner="owner" :busy="busy" :centralized="centralizedInvitesEnabled()" :pending-count="inviteStats.active" :expiring-count="inviteStats.expiring" :team-count="coaches.length">
+ <InviteTeamHub :owner="owner" :busy="busy" :pending-count="inviteStats.active" :expiring-count="inviteStats.expiring" :team-count="coaches.length">
   <template #athlete>
    <h3>{{uiText("INVITA UN ATLETA")}}</h3><p class="muted small">{{uiText("Inviti personali · validi 7 giorni.")}}</p>
    <div class="lf-invite-send"><label>{{uiText("EMAIL DELL'ATLETA")}}<input v-model="athleteEmail" type="email" autocomplete="email" placeholder="atleta@esempio.it" :disabled="busy"/></label><button type="button" class="primary" :disabled="busy||!mayWriteLive()||!emailValid(athleteEmail)" @click="sendAthleteMail">{{uiText("✉ INVIA INVITO ATLETA")}}</button></div>
@@ -386,7 +353,7 @@ async function revoke(x:Invite){
    </div>
   </template>
   <template v-if="owner" #studio><InviteEmailStudio v-if="stagingSession?.uid&&stagingSession?.gymId" :gym-id="stagingSession.gymId" :uid="stagingSession.uid" :gym-name="studioGymName" :logo="studioLogo" :cover="studioCover" :busy="busy"/></template>
-  <template #settings><p v-if="centralizedInvitesEnabled()" class="muted small">LionFit Mail centralizzato: il mittente e la chiave Resend sono gestiti sul server. Nessuna configurazione EmailJS necessaria sul dispositivo.</p><div v-else class="staff-email-settings"><label>SERVICE ID<input v-model="serviceId" :disabled="busy" autocomplete="off" placeholder="service_..."/></label><label>PUBLIC KEY<input v-model="publicKey" :disabled="busy" autocomplete="off" placeholder="Public Key EmailJS"/></label><label>{{uiText("TEMPLATE INVITI (COACH E ATLETI)")}}<input v-model="templateId" :disabled="busy" autocomplete="off" placeholder="template_..."/></label></div><button v-if="!centralizedInvitesEnabled()" class="secondary" :disabled="busy" @click="saveEmailSettings">{{uiText("Salva configurazione EmailJS")}}</button><p v-if="!centralizedInvitesEnabled()" class="muted small">{{uiText("Questi ID pubblici sono salvati solo su questo dispositivo. Usiamo un solo template neutro per entrambi i ruoli. Il ruolo e il tipo di account sono determinati esclusivamente dall’invito Firebase verificato. Non inserire password o chiavi private.")}}</p></template>
+  <template #settings><p class="muted small">LionFit Mail · Resend: inviti inviati attraverso Firebase. Mittente e credenziali sono gestiti esclusivamente sul server. Il logo e la copertina seguono il branding della palestra, con immagini standard LionFit quando mancano.</p></template>
  </InviteTeamHub>
 </template>
 

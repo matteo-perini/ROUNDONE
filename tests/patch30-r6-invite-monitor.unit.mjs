@@ -48,7 +48,7 @@ test('no new navbar, backend or auth changes; retains pending actions',()=>{
  assert.match(live,/@click="revoke\(x\)"/)
  assert.match(live,/<template v-if="owner" #coach>/)
  assert.match(live,/sendCentralInviteEmail/)
- assert.match(live,/api\.emailjs\.com/)
+ assert.doesNotMatch(live,/api\.emailjs\.com/)
  assert.match(live,/:pending-count="inviteStats\.active"/)
  assert.match(live,/:expiring-count="inviteStats\.expiring"/)
  assert.match(hub,/lf-invite-summary-counts/)
@@ -56,7 +56,7 @@ test('no new navbar, backend or auth changes; retains pending actions',()=>{
 test('timer is removed on unmount and no extra Firestore query is introduced for summary',()=>{
  assert.match(live,/inviteClock=setInterval\(/)
  assert.match(live,/clearInterval\(inviteClock\)/)
- const summary=live.slice(live.indexOf('const scopedInvites='),live.indexOf("const MAIL_CONF_KEY="))
+ const summary=live.slice(live.indexOf('const scopedInvites='),live.indexOf("const UNSENT_KEY="))
  assert.doesNotMatch(summary,/getDocs|onSnapshot|fetch\(|runTransaction/)
 })
 test('TypeScript and CSS parse in available tooling',()=>{

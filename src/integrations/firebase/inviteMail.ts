@@ -1,10 +1,9 @@
-/** PATCH 30 R2: an explicit opt-in to centralized email; EmailJS stays the default. */
+/** PATCH 30 R11: invitations use exclusively the authorized Firebase -> Resend backend. */
 import {getStagingClients} from './stagingClient'
 import {mayWriteLive} from './stagingConfig'
 export type CentralInviteKind='athlete'|'coach'
-export const centralizedInvitesEnabled=()=>import.meta.env.VITE_LIONFIT_INVITES_PROVIDER==='resend'
 export async function sendCentralInviteEmail(input:{gymId:string;kind:CentralInviteKind;link:string;recipient:string;uid:string}) {
- if(!centralizedInvitesEnabled()||!mayWriteLive())throw new Error('Resend non è attivo in questo ambiente.')
+ if(!mayWriteLive())throw new Error('Invio disabilitato in questo ambiente.')
  const {auth}=getStagingClients()
  if(!auth.currentUser||auth.currentUser.uid!==input.uid)throw new Error('Sessione cambiata: accedi nuovamente.')
  const u=new URL(input.link),name=input.kind==='coach'?'coachInvite':'athleteInvite'

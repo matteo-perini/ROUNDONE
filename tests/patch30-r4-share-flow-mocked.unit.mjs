@@ -24,7 +24,7 @@ function setup(){
   readStagingSession:async()=>stagingSession.value,getStagingClients:()=>({db:{}}),getDocs,getDocFromServer,runTransaction,
   serverTimestamp:()=>({toMillis:()=>Date.now()}),Timestamp:{fromMillis:n=>({toMillis:()=>n})},isLiveMode:()=>true,isTestMode:()=>false,mayWriteLive:()=>writes,
   safeImage:x=>x||'',visibleInvite:x=>x.status==='pending',emailValid:x=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x),
-  coachRevocationEnabled:()=>false,LEGACY_EMAILJS_PUBLIC:{serviceId:'a',publicKey:'b',templateId:'c'},centralizedInvitesEnabled:()=>false,
+  coachRevocationEnabled:()=>false,
   shareToken,shareWhatsappUrl,env,crypto:webcrypto,navigator:{clipboard:{writeText:async x=>copies.push(x)}},window,
   localStorage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}},sessionStorage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}}}
  const script=new Function(...Object.keys(ctx),compiled+returns)(...Object.values(ctx))

@@ -9,8 +9,8 @@ export type InviteEmailStudioSettings={
 export const studioDefaults=(gymName:string):InviteEmailStudioSettings=>({
  senderName:resolveSenderName('',gymName),
  subject:'Sei invitato su LionFit!',
- message:'La nostra palestra ti invita a entrare nel team. Registrati per iniziare ad allenarti con noi.',
- accent:'#D6B56B',theme:'dark',showLogo:true,showCover:true
+ message:'La tua palestra ti invita a entrare nel team. Crea il tuo account LionFit per iniziare.',
+ accent:'#24E58C',theme:'dark',showLogo:true,showCover:true
 })
 const plain=(v:unknown,max:number)=>typeof v==='string' ? v.trim().replace(/[\u0000-\u001f\u007f<>"']/g,' ').replace(/\s+/g,' ').slice(0,max) : ''
 const message=(v:unknown)=>typeof v==='string' ? v.trim().replace(/[\u0000-\u0009\u000B-\u001f\u007f]/g,'').slice(0,600) : ''

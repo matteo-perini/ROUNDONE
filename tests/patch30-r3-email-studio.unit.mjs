@@ -19,9 +19,10 @@ test('never exposes recipient, token or sender email in editor payload',()=>{
  assert.match(client,/VITE_LIONFIT_INVITES_STUDIO_PROVIDER==='cloud'/)
  assert.match(ui,/L'email effettiva|Nell'email effettiva/)
 })
-test('no Firebase Rules, navbar, Resend production activation, or legacy email send rewritten',()=>{
+test('no Firebase Rules, navbar, or server access checks changed; Resend remains server gated',()=>{
  assert.match(backend,/LIONFIT_INVITES_RESEND_ENABLED!=='ENABLED_AFTER_REVIEW'/)
- assert.match(live,/https:\/\/api\.emailjs\.com\/api\/v1\.0\/email\/send/g)
+ assert.doesNotMatch(live,/emailjs/i)
+ assert.match(live,/sendCentralInviteEmail\(/)
  assert.match(live,/reusableCoachInvite\(email,s\.gymId\)/)
  assert.match(live,/reusableUnsent\(email,s\.gymId\)/)
  assert.match(backend,/LIONFIT_INVITES_STUDIO_ENABLED!=='ENABLED_AFTER_REVIEW'/)

@@ -24,7 +24,7 @@ const policy={
  senderPresent:Boolean(process.env.LIONFIT_INVITES_FROM_EMAIL),
  secretPresent:Boolean(process.env.LIONFIT_INVITES_RESEND_API_KEY)
 }
-check('Resend opt-in, EmailJS resta il predefinito',()=>ui.includes("VITE_LIONFIT_INVITES_PROVIDER==='resend'")&&ui.includes('mayWriteLive()'))
+check('Solo Resend tramite Callable Firebase, senza invio diretto dal browser',()=>ui.includes('sendCentralInviteEmail')&&ui.includes('mayWriteLive()')&&!ui.includes('VITE_LIONFIT_INVITES_PROVIDER')&&!ui.includes('api.emailjs.com'))
 check('Cloud Function bloccata senza approvazione esplicita',()=>backend.includes("LIONFIT_INVITES_RESEND_ENABLED!=='ENABLED_AFTER_REVIEW'")&&backend.includes("FUNCTIONS_EMULATOR==='true'"))
 check('Ruoli, inviti pendenti, quote e idempotenza conservati',()=>/canSendInvite\(/.test(backend)&&/quotaPermits\(/.test(backend)&&/db\.runTransaction\(/.test(backend)&&backend.includes('Idempotency-Key'))
 check('Studio separato e non abilitato automaticamente',()=>backend.includes("LIONFIT_INVITES_STUDIO_ENABLED!=='ENABLED_AFTER_REVIEW'"))

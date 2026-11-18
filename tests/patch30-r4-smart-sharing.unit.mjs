@@ -27,14 +27,14 @@ test('WhatsApp share requires valid source and properly encodes the target, neve
  const coachMsg=new URL(shareWhatsappUrl(link('coach'),'coach','LionFit',gym,origin)).searchParams.get('text')
  assert.match(coachMsg,/stessa email|email al quale|indirizzo email/)
 })
-test('manual athlete tokens are separate from old email tokens; no change to existing email flows',()=>{
+test('manual athlete tokens remain separate and Resend email flows preserve reuse',()=>{
  assert.match(live,/kind==='manual'\?'a1':'e1'/)
  assert.match(live,/makeInvite\('atleta','email'\)/)
  assert.match(live,/makeInvite\('coach','coach'\)/)
  assert.match(live,/reusableUnsent\(email,s\.gymId\)/)
  assert.match(live,/reusableCoachInvite\(email,s\.gymId\)/)
- assert.match(live,/https:\/\/api\.emailjs\.com\/api\/v1\.0\/email\/send/)
- assert.match(live,/centralizedInvitesEnabled\(\)/)
+ assert.doesNotMatch(live,/api\.emailjs\.com|centralizedInvitesEnabled/)
+ assert.match(live,/sendCentralInviteEmail\(/)
 })
 test('collaborator link remains tied to email, owner-only; athlete permitted for coaches',()=>{
  assert.match(live,/kind==='coach'&&!owner\.value/)

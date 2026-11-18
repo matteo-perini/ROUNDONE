@@ -454,8 +454,6 @@
   "✉ INVIA INVITO ATLETA": "✉ SEND ATHLETE INVITE",
   "Impostazioni email (avanzate)": "Email settings (advanced)",
   "TEMPLATE INVITI (COACH E ATLETI)": "INVITATION TEMPLATE (COACHES AND ATHLETES)",
-  "Salva configurazione EmailJS": "Save EmailJS settings",
-  "Questi ID pubblici sono salvati solo su questo dispositivo. Usiamo un solo template neutro per entrambi i ruoli. Il ruolo e il tipo di account sono determinati esclusivamente dall’invito Firebase verificato. Non inserire password o chiavi private.": "These public IDs are stored only on this device. One neutral template is used for both roles. Account type is determined only by the verified Firebase invitation. Never enter passwords or private keys.",
   "Gestisci inviti pendenti e precedenti (": "Manage pending and previous invitations (",
   "Nessun invito pendente.": "No pending invitations.",
   "Revoca": "Revoke",
