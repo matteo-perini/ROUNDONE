@@ -1,0 +1,49 @@
+/* R19A: Focus mobile: viewport-safe shell, content-only scrolling.
+   Keep existing SVG animations, timer, set editor and save workflow intact. */
+.lf-r5-workout-flow:not(.lf-r5-focus)>.lf-r19a-main,
+.lf-r5-workout-flow:not(.lf-r5-focus)>.lf-r19a-footer{display:contents}
+.lf-r5-focus{box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important;height:100vh!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;overflow:hidden!important;overscroll-behavior:none!important;padding:calc(6px + env(safe-area-inset-top,0px)) max(9px,calc((100vw - 700px)/2)) calc(7px + env(safe-area-inset-bottom,0px))!important}
+.lf-r5-focus>.lf-r5-focus-head{flex:0 0 auto!important;min-height:0!important;margin:0!important;padding-bottom:6px!important}
+.lf-r5-focus>.lf-r19a-main{display:flex;flex-direction:column;align-items:stretch;gap:8px;flex:1 1 auto;min-height:0;width:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scroll-padding-block:10px 18px}
+.lf-r5-focus>.lf-r19a-main>.lf-p360-exercise{flex:none!important;margin:0!important}
+.lf-r5-focus>.lf-r19a-footer{display:flex;flex-direction:column;gap:6px;flex:0 0 auto;min-height:0;width:100%;border-top:1px solid var(--border);padding-top:6px;margin-top:auto}
+.lf-r5-focus>.lf-r19a-footer:not(:has(> *)){display:none}
+.lf-r5-focus>.lf-r19a-main:not(:has(> .lf-p360-exercise)){display:none}
+.lf-r5-focus>.lf-r19a-footer>*,.lf-r5-focus>.lf-r19a-main>*{min-width:0}
+.lf-r5-focus>.lf-p360-card:last-child:not(.lf-r19a-footer){flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.lf-r5-focus .lf-r5-focus-head h2{font-size:clamp(16px,4.2vw,21px)!important;line-height:1.15!important;margin:0!important}
+.lf-r5-focus .lf-r5-focus-head .lf-r8-position{font-size:12px}
+.lf-r5-focus .lf-r5-focus-progress{margin:0!important;gap:1px!important}
+.lf-r5-focus .lf-r5-focus-progress div{height:4px!important}
+.lf-r5-focus .lf-r5-focus-head .lf-r8-focus-close{width:40px!important;height:40px!important;min-height:40px!important}
+.lf-r5-focus .lf-p360-exercise{padding:9px 10px!important}
+.lf-r5-focus .lf-p360-exercise h3{font-size:clamp(16px,4.3vw,20px)!important;line-height:1.16!important;margin:0!important}
+.lf-r5-focus .lf-p360-exercise .row.between{gap:8px!important}
+.lf-r5-focus .lf-p360-set-header{margin:4px 0 2px!important}
+.lf-r5-focus .lf-p360-set{margin:3px 0!important;gap:6px!important;grid-template-columns:30px minmax(0,1fr) minmax(0,1fr)!important}
+.lf-r5-focus .lf-p360-set-header{grid-template-columns:30px minmax(0,1fr) minmax(0,1fr)!important;gap:6px!important}
+.lf-r5-focus .lf-p360-set input{min-height:40px!important;font-size:16px!important;padding:6px!important}
+.lf-r5-focus .lf-p360-row-actions{margin-top:5px!important}
+.lf-r5-focus .lf-p360-row-actions button{min-height:40px}
+.lf-r5-focus .lf-r5-focus-motion{max-width:260px!important;margin:4px auto!important}
+.lf-r5-focus .lf-r5-focus-motion :deep(.exercise-preview){height:clamp(90px,16dvh,136px)!important;max-height:136px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-timer){display:grid!important;grid-template-columns:minmax(0,1fr) auto;gap:4px 8px!important;padding:6px 9px!important;border-radius:12px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-timer-top){grid-column:1;grid-row:1;gap:5px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-timer-top strong){font-size:12px}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-sound){width:34px!important;min-height:34px!important;padding:2px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-time){grid-column:2;grid-row:1;font-size:clamp(24px,6vw,31px)!important;align-self:center}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-timer-controls){grid-column:1/-1;grid-row:2;gap:4px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-timer-controls button){min-height:36px!important;padding:4px 2px!important;font-size:12px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-duration){grid-column:1/-1;grid-row:3;font-size:11px!important;gap:6px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-duration input){height:30px!important;min-height:30px!important;font-size:16px!important;padding:2px 6px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-finish){grid-column:1/-1;margin:0!important;font-size:12px}
+.lf-r5-focus .lf-r5-workout-nav{margin:0!important;padding:5px!important}
+.lf-r5-focus .lf-r5-workout-nav .row{gap:6px!important}
+.lf-r5-focus .lf-r5-workout-nav button{min-height:40px!important;padding:6px 10px!important}
+@media(max-height:650px){
+ .lf-r5-focus{gap:4px!important;padding-top:calc(4px + env(safe-area-inset-top,0px))!important;padding-bottom:calc(4px + env(safe-area-inset-bottom,0px))!important}
+ .lf-r5-focus>.lf-r19a-main{gap:5px}
+ .lf-r5-focus .lf-p360-exercise{padding:6px 8px!important}
+ .lf-r5-focus .lf-r5-focus-motion :deep(.exercise-preview){height:85px!important}
+ .lf-r5-focus .lf-r19a-footer{gap:3px!important;padding-top:4px!important}
+}

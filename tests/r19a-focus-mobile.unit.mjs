@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {test} from 'node:test';
+const installer=readFileSync(new URL('../R19A_INSTALLA.cjs',import.meta.url),'utf8');
+const css=readFileSync(new URL('../R19A_FOCUS_MOBILE.css',import.meta.url),'utf8');
+test('attiva i wrapper per scroll centrale e footer',()=>{assert.match(installer,/lf-r19a-main/);assert.match(installer,/lf-r19a-footer/)});
+test('nessun scroll della shell esterna',()=>assert.match(css,/overflow:hidden!important/));
+test('area centrale scorre solo se necessario',()=>assert.match(css,/overflow-y:auto/));
+test('supporto viewport mobile dinamico',()=>assert.match(css,/100dvh/));
+test('rispetta safe area top e bottom',()=>{assert.match(css,/safe-area-inset-top/);assert.match(css,/safe-area-inset-bottom/)});
+test('niente fullscreen nativo sui touch',()=>assert.match(installer,/hover: hover.*pointer: fine/));
+test('timer, nav e SVG restano visibili',()=>{assert.match(css,/lf-r5-time/);assert.match(css,/lf-r5-workout-nav/);assert.match(css,/exercise-preview/)});
+test('backup fuori progetto e rollback protetto SHA',()=>{assert.match(installer,/path.dirname\(ROOT\)/);assert.match(installer,/patchedSha256/);assert.match(installer,/rollback/)});
+test('notifica se struttura sorgente incompatibile',()=>assert.match(installer,/Nessun file modificato/));

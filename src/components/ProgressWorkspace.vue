@@ -67,10 +67,11 @@ const prescribedTimer=computed(()=>{const g=exerciseGroups.value[stepIndex.value
 const visibleExerciseIndices=computed(()=>{const g=exerciseGroups.value[stepIndex.value];return g?(g.secondaryIndex===null?[g.primaryIndex]:[g.primaryIndex,g.secondaryIndex]):[]})
 const displayEditorRows=computed(()=>editor.value.map((exercise,i)=>({exercise,i})).filter(({i})=>!guided.value||(!showSummary.value&&visibleExerciseIndices.value.includes(i))))
 const timerAnchor=ref<HTMLElement|null>(null)
-const focusMode=ref(false),focusRoot=ref<HTMLElement|null>(null),focusTarget=shallowRef<HTMLElement|null>(null),focusCatalog=shallowRef<CatalogExercise[]>([])
+const focusScroll=ref<HTMLElement|null>(null),focusMode=ref(false),focusRoot=ref<HTMLElement|null>(null),focusTarget=shallowRef<HTMLElement|null>(null),focusCatalog=shallowRef<CatalogExercise[]>([])
 let focusOpener:HTMLElement|null=null,focusLoad=0,focusLock:{overflow:string;inert:HTMLElement[]}|null=null
-const nativeFullscreenAvailable=typeof document!=='undefined'&&document.fullscreenEnabled===true
+const nativeFullscreenAvailable=typeof document!=='undefined'&&document.fullscreenEnabled===true&&typeof window!=='undefined'&&window.matchMedia('(hover: hover) and (pointer: fine)').matches
 const focusProgress=computed(()=>selectedSummary.value.total?Math.round(100*editor.value.filter(e=>e.skipped||e.sets.some(s=>s.kg!==null||s.reps!==null)).length/selectedSummary.value.total):0)
+watch(stepIndex,()=>{if(focusMode.value)void nextTick(()=>focusScroll.value?.scrollTo({top:0}))})
 const focusCatalogIndex=computed(()=>new Map(focusCatalog.value.map(e=>[e.id,e])))
 function focusExercise(i:number){const ex=activePrescription.value[i];if(!ex)return null;const id=ex.exerciseId||ex.catalogId;if(id)return focusCatalogIndex.value.get(id)||null;const matches=exactCatalogMatches(focusCatalog.value,ex.name);return matches.length===1?matches[0]:null}
 async function enterFocus(){if(!selectedSheet.value||tab.value!=='record'||props.role!=='athlete'||focusMode.value)return;focusOpener=document.activeElement instanceof HTMLElement?document.activeElement:null;focusTarget.value=focusRoot.value?.closest<HTMLElement>('.app')||null;if(!focusTarget.value){focusOpener=null;return}guided.value=true;showSummary.value=false;focusMode.value=true;const request=++focusLoad;await nextTick();if(!focusMode.value)return;const root=focusRoot.value;if(root){const inert:HTMLElement[]=[];for(const el of Array.from(root.parentElement?.children||[])){if(el instanceof HTMLElement&&el!==root&&!el.inert){el.inert=true;inert.push(el)}}focusLock={overflow:document.body.style.overflow,inert};document.body.style.overflow='hidden';root.focus();if(nativeFullscreenAvailable&&!document.fullscreenElement)void nativeFullscreen()}
@@ -442,14 +443,18 @@ function openRevisionForSheet(sheet:ProgressSheet|null){
      <header v-if="focusMode" class="lf-r5-focus-head"><div><h2>{{selectedSheet.title}}</h2><span class="lf-r8-position">{{showSummary?uiText('Riepilogo'):`${uiText(visibleExerciseIndices.length===2?'Superset':'Esercizio')} ${stepIndex+1} / ${exerciseGroups.length}`}}</span></div><button type="button" class="secondary lf-r8a-focus-timer" @click="timerAnchor?.scrollIntoView({block:'center',behavior:'smooth'})"><LionIcon name="clock" :size="17"/> Timer ↓</button><button type="button" class="secondary lf-r8-focus-close" @click="releaseFocus" :aria-label="uiText('Esci da Focus')" :title="uiText('Esci da Focus')">×</button><div class="lf-r5-focus-progress"><div role="progressbar" :aria-valuenow="focusProgress" aria-valuemin="0" aria-valuemax="100" aria-label="Esercizi registrati o saltati"><i :style="{width:focusProgress+'%'}"/></div></div></header>
      <p v-if="focusMode&&(writeError||offlineError||error)" class="notice lf-p360-error" role="alert">{{writeError||offlineError||error}}</p>
      <section class="panel lf-p360-card lf-r8-setup" v-show="!focusMode"><h2>{{selectedSheet.title}}</h2><div class="lf-p360-date"><label for="lf-p360-date">Data</label><input id="lf-p360-date" v-model="performedOn" type="date" :max="localDate()"/></div><div class="lf-p360-filters"><button :class="{on:guided}" @click="guided=true;showSummary=false">Guidato</button><button :class="{on:!guided}" @click="guided=false;showSummary=false">Registro completo</button></div><button type="button" class="primary wide lf-r5-focus-enter" @click="enterFocus">⛶ {{uiText('Avvia Focus Mode')}}</button><button v-if="role==='athlete'" type="button" class="secondary lf-r8a-picker-revision" @click="openRevisionForSheet(selectedSheet)"><LionIcon name="edit" :size="16"/> Richiedi revisione di questa scheda</button><button v-if="hasDraft" type="button" class="secondary lf-r8-timer-link" @click="closeWorkout">{{uiText('Annulla allenamento')}}</button><button v-if="!guided" type="button" class="secondary lf-r8-timer-link" @click="timerAnchor?.scrollIntoView({block:'center'})">{{uiText('Timer recupero')}} ↓</button></section>
+     <div class="lf-r19a-main" aria-label="Esercizi e serie" ref="focusScroll">
      <section v-for="{exercise,i} in displayEditorRows" :key="exercise.key+'-'+i" class="panel lf-p360-card lf-p360-exercise"><div class="row between"><div><h3>{{exercise.name}}</h3><small class="muted">{{exercise.plannedSets}} serie × {{exercise.plannedReps}} rip.</small></div><button class="secondary lf-p360-skip" @click="skipExercise(i)">{{uiText(exercise.skipped?'Ripristina':'Salta')}}</button></div>
       <div v-if="focusMode&&focusExercise(i)?.animation?.frames?.length" class="lf-r5-focus-motion"><ExerciseMotion :exercise="focusExercise(i)!" eager compact-controls/></div>
       <p v-if="activePrescription[i]?.load" class="muted small">Carico previsto: {{activePrescription[i].load}}</p><p v-if="activePrescription[i]?.rest" class="muted small">Recupero: {{activePrescription[i].rest}}</p><p v-if="activePrescription[i]?.supersetRest" class="muted small">Recupero dopo il superset: {{activePrescription[i].supersetRest}}</p><p v-if="activePrescription[i]?.notes" class="muted small">Note: {{activePrescription[i].notes}}</p>
       <details v-if="selectedSheet.exercises[i]?.alternatives?.length"><summary>Visualizza alternativa</summary><div class="lf-p360-row-actions"><button class="secondary" type="button" @click="changeAlternative(i,-1)">Originale</button><button v-for="(a,ai) in selectedSheet.exercises[i].alternatives" :key="ai" type="button" class="secondary" @click="changeAlternative(i,ai)">{{a.name}}</button></div></details>
       <template v-if="!exercise.skipped"><div class="lf-p360-set-header" aria-label="Compila solo le serie eseguite; lascia vuoti i valori non registrati"><span>Serie</span><span>Kg</span><span>Rip.</span></div><div v-for="(set,j) in exercise.sets" :key="j" class="lf-p360-set"><b>{{j+1}}</b><input aria-label="Carico kg" type="number" min="0" max="2000" step="0.5" :value="set.kg??''" placeholder="—" @input="editCell(i,j,'kg',($event.target as HTMLInputElement).value)"/><input aria-label="Ripetizioni" type="number" min="1" max="300" step="1" :value="set.reps??''" placeholder="—" @input="editCell(i,j,'reps',($event.target as HTMLInputElement).value)"/><div v-if="previousSet(i,j)" class="lf-p12-last"><small>{{previousSet(i,j)?.position===undefined?'Ultimo valore (serie non identificata)':'Ultima volta'}}: {{previousSet(i,j)?.kg??'—'}} kg × {{previousSet(i,j)?.reps??'—'}}</small><button type="button" class="secondary" @click="usePrevious(i,j)">Usa valori</button></div></div><div class="lf-p360-row-actions"><button type="button" class="secondary" :disabled="exercise.sets.length>=30" @click="addSet(i)">＋ Serie</button><button type="button" class="secondary" :disabled="!exercise.sets.length" @click="removeSet(i)">− Serie</button></div></template><p v-else class="muted small">Esercizio saltato.</p>
      </section>
+     </div>
+     <div class="lf-r19a-footer">
      <div v-if="!guided||!showSummary" ref="timerAnchor"><RestTimer :seconds="guided?prescribedTimer:90" :reset-token="timerReset"/></div>
      <section v-if="guided&&!showSummary" class="panel lf-p360-card lf-r5-workout-nav"><div class="row between"><button v-if="stepIndex>0" class="secondary" @click="step(-1)">← {{uiText('Precedente')}}</button><button class="primary" @click="step(1)">{{stepIndex+1===exerciseGroups.length?'Riepilogo':'Avanti →'}}</button></div></section>
+     </div>
      <section v-if="!guided||showSummary" class="panel lf-p360-card"><div class="row between"><strong>Riepilogo</strong><span class="muted small">{{selectedSummary.completed}}/{{selectedSummary.total}} esercizi con dati</span></div><div v-for="(e,i) in editor" :key="i" class="lf-p12-detail-exercise"><b>{{e.name}}</b><p class="muted small">{{e.skipped?'Saltato':e.sets.filter(s=>s.kg!==null||s.reps!==null).length+' serie registrate'}}</p></div><p class="muted small">Volume documentato: {{formatKg(selectedSummary.volume)}} kg · Carico massimo: {{formatKg(selectedSummary.max)}} kg</p><button v-if="guided" class="secondary wide" @click="showSummary=false">← Torna agli esercizi</button><button class="primary lf-p360-main-button" :disabled="!canWrite||busy" @click="saveWorkout">{{busy?'Salvataggio…':'✓ Salva allenamento'}}</button><p v-if="!canWrite" class="muted small">Salvataggio non disponibile.</p></section>
      </div>
      </Teleport>
@@ -607,5 +612,59 @@ function openRevisionForSheet(sheet:ProgressSheet|null){
 @media(min-width:820px){.lf-progress360 .lf-r8a-hub{grid-template-columns:repeat(4,minmax(0,1fr))}.lf-progress360 .lf-r8a-hero .lf-r8a-hero-cta{width:min(100%,380px)}}
 @media(max-width:430px){.lf-progress360 .lf-r8a-hero{min-height:220px}.lf-progress360 .lf-r8a-hero .lf-r8a-hero-content{padding:15px}.lf-progress360 .lf-r8a-hero h2,.lf-progress360 .lf-r8a-hero p{max-width:76%}.lf-progress360 .lf-r8a-hub .lf-r8a-hub-card{min-height:114px;padding:11px}.lf-r8a-hub-icon{width:38px;height:38px}.lf-r8a-progress-top{align-items:flex-start}.lf-progress360 .lf-r8a-report-link{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.lf-progress360 .lf-r8a-hub .lf-r8a-hub-card{transition:none}.lf-progress360 .lf-r8a-hub-card:hover{transform:none}}
+
+</style>
+
+<!-- LIONFIT_R19A_FOCUS_MOBILE_2026 -->
+<style scoped>
+/* R19A: Focus mobile: viewport-safe shell, content-only scrolling.
+   Keep existing SVG animations, timer, set editor and save workflow intact. */
+.lf-r5-workout-flow:not(.lf-r5-focus)>.lf-r19a-main,
+.lf-r5-workout-flow:not(.lf-r5-focus)>.lf-r19a-footer{display:contents}
+.lf-r5-focus{box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important;height:100vh!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;overflow:hidden!important;overscroll-behavior:none!important;padding:calc(6px + env(safe-area-inset-top,0px)) max(9px,calc((100vw - 700px)/2)) calc(7px + env(safe-area-inset-bottom,0px))!important}
+.lf-r5-focus>.lf-r5-focus-head{flex:0 0 auto!important;min-height:0!important;margin:0!important;padding-bottom:6px!important}
+.lf-r5-focus>.lf-r19a-main{display:flex;flex-direction:column;align-items:stretch;gap:8px;flex:1 1 auto;min-height:0;width:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scroll-padding-block:10px 18px}
+.lf-r5-focus>.lf-r19a-main>.lf-p360-exercise{flex:none!important;margin:0!important}
+.lf-r5-focus>.lf-r19a-footer{display:flex;flex-direction:column;gap:6px;flex:0 0 auto;min-height:0;width:100%;border-top:1px solid var(--border);padding-top:6px;margin-top:auto}
+.lf-r5-focus>.lf-r19a-footer:not(:has(> *)){display:none}
+.lf-r5-focus>.lf-r19a-main:not(:has(> .lf-p360-exercise)){display:none}
+.lf-r5-focus>.lf-r19a-footer>*,.lf-r5-focus>.lf-r19a-main>*{min-width:0}
+.lf-r5-focus>.lf-p360-card:last-child:not(.lf-r19a-footer){flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.lf-r5-focus .lf-r5-focus-head h2{font-size:clamp(16px,4.2vw,21px)!important;line-height:1.15!important;margin:0!important}
+.lf-r5-focus .lf-r5-focus-head .lf-r8-position{font-size:12px}
+.lf-r5-focus .lf-r5-focus-progress{margin:0!important;gap:1px!important}
+.lf-r5-focus .lf-r5-focus-progress div{height:4px!important}
+.lf-r5-focus .lf-r5-focus-head .lf-r8-focus-close{width:40px!important;height:40px!important;min-height:40px!important}
+.lf-r5-focus .lf-p360-exercise{padding:9px 10px!important}
+.lf-r5-focus .lf-p360-exercise h3{font-size:clamp(16px,4.3vw,20px)!important;line-height:1.16!important;margin:0!important}
+.lf-r5-focus .lf-p360-exercise .row.between{gap:8px!important}
+.lf-r5-focus .lf-p360-set-header{margin:4px 0 2px!important}
+.lf-r5-focus .lf-p360-set{margin:3px 0!important;gap:6px!important;grid-template-columns:30px minmax(0,1fr) minmax(0,1fr)!important}
+.lf-r5-focus .lf-p360-set-header{grid-template-columns:30px minmax(0,1fr) minmax(0,1fr)!important;gap:6px!important}
+.lf-r5-focus .lf-p360-set input{min-height:40px!important;font-size:16px!important;padding:6px!important}
+.lf-r5-focus .lf-p360-row-actions{margin-top:5px!important}
+.lf-r5-focus .lf-p360-row-actions button{min-height:40px}
+.lf-r5-focus .lf-r5-focus-motion{max-width:260px!important;margin:4px auto!important}
+.lf-r5-focus .lf-r5-focus-motion :deep(.exercise-preview){height:clamp(90px,16dvh,136px)!important;max-height:136px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-timer){display:grid!important;grid-template-columns:minmax(0,1fr) auto;gap:4px 8px!important;padding:6px 9px!important;border-radius:12px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-timer-top){grid-column:1;grid-row:1;gap:5px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-timer-top strong){font-size:12px}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-sound){width:34px!important;min-height:34px!important;padding:2px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-time){grid-column:2;grid-row:1;font-size:clamp(24px,6vw,31px)!important;align-self:center}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-timer-controls){grid-column:1/-1;grid-row:2;gap:4px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-timer-controls button){min-height:36px!important;padding:4px 2px!important;font-size:12px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-duration){grid-column:1/-1;grid-row:3;font-size:11px!important;gap:6px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-duration input){height:30px!important;min-height:30px!important;font-size:16px!important;padding:2px 6px!important}
+.lf-r5-focus .lf-r19a-footer :deep(.lf-r5-finish){grid-column:1/-1;margin:0!important;font-size:12px}
+.lf-r5-focus .lf-r5-workout-nav{margin:0!important;padding:5px!important}
+.lf-r5-focus .lf-r5-workout-nav .row{gap:6px!important}
+.lf-r5-focus .lf-r5-workout-nav button{min-height:40px!important;padding:6px 10px!important}
+@media(max-height:650px){
+ .lf-r5-focus{gap:4px!important;padding-top:calc(4px + env(safe-area-inset-top,0px))!important;padding-bottom:calc(4px + env(safe-area-inset-bottom,0px))!important}
+ .lf-r5-focus>.lf-r19a-main{gap:5px}
+ .lf-r5-focus .lf-p360-exercise{padding:6px 8px!important}
+ .lf-r5-focus .lf-r5-focus-motion :deep(.exercise-preview){height:85px!important}
+ .lf-r5-focus .lf-r19a-footer{gap:3px!important;padding-top:4px!important}
+}
 
 </style>

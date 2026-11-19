@@ -1,0 +1,31 @@
+LionFit PATCH 30 R19A -- Focus Mode Mobile SAFE (19 novembre 2026)
+
+OBIETTIVO
+- Focus Mode compatta: niente scroll alla prima apertura se i contenuti entrano.
+- Se crescono le serie/esercizi, scorre la sola zona centrale.
+- Header + timer + pulsanti Precedente/Avanti restano in vista.
+- Rispetto safe-area iPhone/Android, niente fullscreen nativo su dispositivi touch.
+- Rimangono SVG animati, serie, carichi, timer, riepilogo, salvataggio.
+
+INSTALLAZIONE
+1. Estrai i file di questo ZIP direttamente nella cartella LionFit-Modern-Git.
+2. Nella radice del progetto: node .\R19A_INSTALLA.cjs install
+3. Esegui: npm.cmd run build
+4. Se build OK, LIONFIT_PREPARA_WEB_E_DOCS.cmd e Commit + Push origin.
+5. Per APK Android e' necessaria una nuova build/sync/distribuzione APK.
+
+SICUREZZA
+- Modifica esclusivamente src/components/ProgressWorkspace.vue.
+- Inserisce un blocco CSS separato e wrapper strutturali.
+- Backup automatico nella cartella sorella, fuori dal repository.
+- Controlla gli ancoraggi prima di scrivere. Se una versione non e' riconosciuta, NON forza la patch.
+- Idempotente. Rollback con node .\R19A_INSTALLA.cjs rollback
+  soltanto se il file installato non e' stato modificato successivamente.
+- Nessun deploy Firebase e nessuna modifica a dati o regole.
+
+LIMITI TEST
+- La patch e' stata verificata su uno snapshot disponibile di ProgressWorkspace.vue;
+  il file locale piu' recente potrebbe differire. Installer deve confermare la compatibilita'.
+- Verificare il risultato su iOS Safari/PWA e Android APK: WebView, safe area e tastiera
+  possono variare a seconda del dispositivo. Soprattutto Android edge-to-edge
+  potrebbe richiedere ulteriori impostazioni native specifiche.
