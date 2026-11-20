@@ -1,0 +1,691 @@
+/* LIONFIT R20B - Hybrid Design (visual-only, standalone and reversible).
+ * Generated from the actual R20A frontend CSS and scoped Vue styles.
+ * The original styles and app logic are not rewritten.
+ * Circle/ring/avatar/pill geometry and all colors, motion, sizes and safe areas stay unchanged.
+ * Cards/heroes/modals: max 12px. Actions/inputs/tabs: max 8px.
+ * Imported LAST in src/main.ts for visual override only.
+ */
+
+html:root .sidebar-nav a{border-radius:8px !important;}
+html:root .invite-shortcut{border-radius:8px !important;}
+html:root .theme-square{border-radius:8px !important;}
+html:root .header-avatar{border-radius:50% !important;}
+html:root .bottom-nav a{border-radius:8px !important;}
+html:root .card{border-radius:12px !important;}
+html:root .panel{border-radius:12px !important;}
+html:root .pill{border-radius:14px !important;}
+html:root .action-card{border-radius:8px !important;}
+html:root .action-icon{border-radius:8px !important;}
+html:root .green-hero{border-radius:12px !important;}
+html:root .primary{border-radius:8px !important;}
+html:root .secondary{border-radius:8px !important;}
+html:root .ghost{border-radius:8px !important;}
+html:root .danger{border-radius:8px !important;}
+html:root .bare{border-radius:8px !important;}
+html:root .notice{border-radius:12px !important;}
+html:root .field{border-radius:8px !important;}
+html:root input:not([type=checkbox]){border-radius:8px !important;}
+html:root select{border-radius:8px !important;}
+html:root textarea{border-radius:8px !important;}
+html:root .preview-banner{border-radius:12px !important;}
+html:root .profile-overlap{border-radius:50% !important;}
+html:root .week-pill{border-radius:50% !important;}
+html:root .day-card{border-radius:12px !important;}
+html:root .card-outline{border-radius:12px !important;}
+html:root .scheme-item{border-radius:8px !important;}
+html:root .scheme-item .chip{border-radius:8px !important;}
+html:root .sheet-modal{border-radius:12px !important;}
+html:root .exercise-item{border-radius:8px !important;}
+html:root .exercise-tag{border-radius:8px !important;}
+html:root .line-card{border-radius:12px !important;}
+html:root .program-day{border-radius:8px !important;}
+html:root .program-slot{border-radius:8px !important;}
+html:root .program-sheet{border-radius:11px !important;}
+html:root .chip{border-radius:8px !important;}
+html:root .archive-card{border-radius:12px !important;}
+html:root .library-card{border-radius:12px !important;}
+html:root .exercise-preview{border-radius:8px !important;}
+html:root .dialog{border-radius:12px !important;}
+html:root .booking-tabs button{border-radius:8px !important;}
+html:root .booking-choice{border-radius:8px !important;}
+html:root .booking-day{border-radius:8px !important;}
+html:root .times button{border-radius:8px !important;}
+html:root .booking-filter{border-radius:8px !important;}
+html:root .login-panel{border-radius:12px !important;}
+@media (max-width:600px){html:root .card{border-radius:12px !important;}}
+@media (max-width:600px){html:root .panel{border-radius:12px !important;}}
+html:root .as-coach .card{border-radius:12px !important;}
+html:root .as-coach .panel{border-radius:12px !important;}
+html:root .as-coach .green-hero{border-radius:12px !important;}
+html:root .as-coach .action-card{border-radius:8px !important;}
+html:root .as-coach .archive-card{border-radius:12px !important;}
+html:root .as-coach .program-day{border-radius:8px !important;}
+html:root .as-coach .week-pill{border-radius:10px !important;}
+html:root .staff-details{border-radius:8px !important;}
+html:root .settings-inner .settings-logout{border-radius:8px !important;}
+html:root .library-card .exercise-preview{border-radius:8px !important;}
+html:root .booking-main .panel{border-radius:12px !important;}
+html:root .empty-event{border-radius:8px !important;}
+html:root .week-event-day{border-radius:8px !important;}
+html:root .event-count{border-radius:50% !important;}
+html:root .event-item{border-radius:8px !important;}
+html:root .coach-month-day{border-radius:8px !important;}
+html:root .as-coach .coach-team-toolbar{border-radius:8px !important;}
+html:root .as-coach .coach-team-tools .primary{border-radius:8px !important;}
+html:root .as-coach .coach-team-tools .secondary{border-radius:8px !important;}
+html:root .as-coach .coach-team-tools input{border-radius:8px !important;}
+html:root .as-coach .coach-athlete-count button{border-radius:7px !important;}
+html:root .as-coach .coach-athlete-list .action-card{border-radius:8px !important;}
+html:root .as-coach .coach-athlete-list .action-icon{border-radius:8px !important;}
+html:root .as-coach .coach-selected-athlete{border-radius:8px !important;}
+html:root .as-coach .coach-selected-head button{border-radius:7px !important;}
+html:root .as-coach .coach-athlete-quick-actions .action-card{border-radius:8px !important;}
+html:root .as-coach .assignment-panel{border-radius:12px !important;}
+html:root .as-coach .assignment-item{border-radius:8px !important;}
+html:root .as-coach .assignment-actions button{border-radius:7px !important;}
+html:root .as-coach .coach-program-toggle{border-radius:8px !important;}
+html:root .as-coach .coach-program-compact{border-radius:8px !important;}
+html:root .as-coach .coach-week-bar .week-pill{border-radius:7px !important;}
+html:root .as-coach .coach-week-delete-select{border-radius:6px !important;}
+html:root .as-coach .coach-week-close{border-radius:7px !important;}
+html:root .as-coach .coach-week-body{border-radius:8px !important;}
+html:root .as-coach .coach-week-actions button{border-radius:6px !important;}
+html:root .as-coach .coach-program-compact .program-day{border-radius:8px !important;}
+html:root .as-coach .coach-program-compact .program-slot{border-radius:7px !important;}
+html:root .as-coach .coach-program-compact .program-sheet{border-radius:8px !important;}
+html:root .as-coach .coach-program-compact .program-sheet .ghost{border-radius:6px !important;}
+html:root .as-coach .coach-program-compact .program-sheet .grid2 button{border-radius:6px !important;}
+html:root .as-coach .pill{border-radius:8px !important;}
+html:root .as-coach .staff-details{border-radius:8px !important;}
+html:root .as-coach .line-card{border-radius:8px !important;}
+html:root .as-coach .primary{border-radius:8px !important;}
+html:root .as-coach .secondary{border-radius:8px !important;}
+html:root .as-coach .danger{border-radius:8px !important;}
+html:root .as-coach .ghost{border-radius:8px !important;}
+html:root .as-coach .notice{border-radius:8px !important;}
+html:root .as-coach .theme-square{border-radius:8px !important;}
+html:root .as-coach input:not([type="checkbox"]){border-radius:8px !important;}
+html:root .as-coach select{border-radius:8px !important;}
+html:root .as-coach textarea{border-radius:8px !important;}
+html:root .as-coach .staff-details summary{border-radius:5px !important;}
+html:root .as-coach .staff-person{border-radius:8px !important;}
+html:root .as-coach .staff-role{border-radius:6px !important;}
+html:root .profile-photo-button img{border-radius:50% !important;}
+html:root .profile-camera{border-radius:8px !important;}
+html:root .profile-settings-gear{border-radius:8px !important;}
+html:root .profile-screen .profile-gym-pill{border-radius:7px !important;}
+html:root .coach-profile .profile-coach-staff{border-radius:8px !important;}
+html:root .header-avatar img{border-radius:50% !important;}
+html:root .settings-top .settings-back{border-radius:8px !important;}
+html:root .settings-inner h3{border-radius:0 !important;}
+html:root .as-athlete .athlete-week-program .day-card{border-radius:12px !important;}
+html:root .athlete-day-dialog{border-radius:12px !important;}
+html:root .athlete-day-activity{border-radius:8px !important;}
+@media (max-width:600px){html:root .as-athlete .athlete-sheet-grid .scheme-item{border-radius:12px !important;}}
+@media (max-width:600px){html:root .as-athlete .athlete-week-program-panel{border-radius:12px !important;}}
+@media (max-width:600px){html:root .as-athlete .athlete-week-program .day-card{border-radius:12px !important;}}
+html:root .bookings-mode .booking-control{border-radius:8px !important;}
+html:root .bookings-mode .booking-live-pill{border-radius:18px !important;}
+html:root .bookings-mode .booking-main-tabs button{border-radius:8px !important;}
+html:root .bookings-mode .booking-service-card{border-radius:12px !important;}
+html:root .bookings-mode .booking-service-icon-box{border-radius:12px !important;}
+html:root .bookings-mode .booking-service-cta{border-radius:999px !important;}
+html:root .as-athlete .top-actions .theme-square{border-radius:8px !important;}
+html:root .profile-screen .preview-banner{border-radius:12px !important;}
+@media (max-width:600px){html:root .bookings-mode .booking-service-card{border-radius:12px !important;}}
+@media (max-width:600px){html:root .bookings-mode .booking-service-icon-box{border-radius:12px !important;}}
+html:root .as-coach .coach-dashboard-summary .coach-metric-card{border-radius:12px !important;}
+html:root .profile-screen .profile-settings-gear{border-radius:8px !important;}
+@media (max-width:620px){html:root .as-coach .coach-dashboard-summary .coach-metric-card{border-radius:12px !important;}}
+@media (max-width:620px){html:root .as-athlete .top-actions .theme-square{border-radius:8px !important;}}
+@media (max-width:380px){html:root .as-athlete .top-actions .theme-square{border-radius:8px !important;}}
+html:root .booking-in-shell .booking-service-card{border-radius:12px !important;}
+html:root .coach-v1-day .coach-v1-activity{border-radius:8px !important;}
+html:root .coach-v1-day .coach-v1-sheet{border-radius:11px !important;}
+html:root .sidebar-foot .invite-shortcut{border-radius:8px !important;}
+html:root .coach-dot{border-radius:50% !important;}
+html:root .profile-photo-editor img{border-radius:50% !important;}
+html:root .profile-photo-editor>span{border-radius:50% !important;}
+html:root .password-control input{border-radius:8px 0 0 8px !important;}
+html:root .password-control button{border-radius:0 8px 8px 0 !important;}
+html:root .v1-register-link{border-radius:8px !important;}
+html:root .as-coach .coach-athletes-screen .panel{border-radius:12px !important;}
+html:root .as-coach .assignment-panel .line-card{border-radius:8px !important;}
+html:root .as-coach .coach-program-compact .week-pill{border-radius:8px !important;}
+html:root .as-coach .coach-v1-day{border-radius:8px !important;}
+html:root .as-coach .coach-v1-day .coach-v1-activity{border-radius:8px !important;}
+html:root .as-coach .coach-v1-day .coach-v1-sheet{border-radius:8px !important;}
+html:root .as-coach .coach-v1-day .coach-v1-activity input{border-radius:6px !important;}
+html:root .as-coach .coach-v1-day .coach-v1-slot-head button{border-radius:7px !important;}
+html:root .as-coach .coach-v1-day .coach-v1-slot-actions button{border-radius:6px !important;}
+html:root .as-coach .archive-actions button{border-radius:7px !important;}
+html:root .as-coach .coach-archive-toolbar input{border-radius:8px !important;}
+html:root .as-coach .coach-archive-toolbar select{border-radius:8px !important;}
+html:root .as-coach .coach-archive-toolbar button{border-radius:8px !important;}
+html:root .as-coach .coach-staff-screen .panel{border-radius:12px !important;}
+html:root .exercise-motion-command{border-radius:8px !important;}
+html:root .as-athlete .brand img{border-radius:8px !important;}
+html:root .as-athlete .top-actions .header-avatar{border-radius:50% !important;}
+html:root .as-athlete .header-avatar img{border-radius:50% !important;}
+html:root .as-athlete .bottom-nav a{border-radius:8px !important;}
+html:root .as-athlete:not(.bookings-mode) .panel{border-radius:12px !important;}
+html:root .as-athlete:not(.bookings-mode) .pill{border-radius:9px !important;}
+html:root .as-athlete .athlete-home-quick-link{border-radius:8px !important;}
+html:root .as-athlete .athlete-quick-icon{border-radius:8px !important;}
+html:root .as-athlete .athlete-welcome-icon{border-radius:12px !important;}
+html:root .as-athlete .athlete-today-hero{border-radius:12px !important;}
+html:root .as-athlete .athlete-today-badge{border-radius:6px !important;}
+html:root .as-athlete .athlete-today-sheet-button{border-radius:8px !important;}
+html:root .as-athlete .athlete-today-open{border-radius:8px !important;}
+html:root .as-athlete .athlete-main-plan-shortcut{border-radius:8px !important;}
+html:root .as-athlete .athlete-main-plan-icon{border-radius:8px !important;}
+html:root .as-athlete .athlete-plan-summary{border-radius:12px !important;}
+html:root .as-athlete .athlete-week-picker{border-radius:8px !important;}
+html:root .as-athlete .athlete-week-picker .week-pill{border-radius:9px !important;}
+html:root .as-athlete .athlete-sheet-grid .scheme-item{border-radius:12px !important;}
+html:root .as-athlete .athlete-sheet-grid .scheme-item .chip{border-radius:5px !important;}
+html:root .as-athlete .athlete-week-program-panel{border-radius:12px !important;}
+html:root .as-athlete .athlete-day-dialog{border-radius:12px !important;}
+html:root .as-athlete .athlete-day-activity{border-radius:8px !important;}
+html:root .as-athlete .athlete-day-linked .primary{border-radius:8px !important;}
+html:root .as-athlete .athlete-archive-list input{border-radius:8px !important;}
+html:root .as-athlete .athlete-archive-list select{border-radius:8px !important;}
+html:root .as-athlete .athlete-archive-open{border-radius:8px !important;}
+html:root .as-athlete .athlete-archive-item>.secondary{border-radius:8px !important;}
+html:root .as-athlete .athlete-team-screen input{border-radius:8px !important;}
+html:root .as-athlete .athlete-team-list .action-card{border-radius:8px !important;}
+html:root .as-athlete .athlete-team-list .action-icon{border-radius:50% !important;}
+html:root .as-athlete .profile-screen .preview-banner{border-radius:12px !important;}
+html:root .as-athlete .profile-screen .profile-settings-gear{border-radius:8px !important;}
+html:root .as-athlete .profile-screen .profile-info-card{border-radius:12px !important;}
+html:root .as-athlete .profile-screen .profile-overlap img{border-radius:50% !important;}
+html:root .as-athlete .profile-screen .profile-edit-action{border-radius:8px !important;}
+html:root .settings-inner button.settings-entry{border-radius:0 !important;}
+html:root .as-coach .coach-team-tools select{border-radius:8px !important;}
+html:root .sheet-modal .exercise-item>.row button{border-radius:8px !important;}
+html:root .staff-invite-subcard{border-radius:12px !important;}
+html:root .staff-link-result{border-radius:8px !important;}
+html:root .staff-v1 .staff-details{border-radius:8px !important;}
+html:root .v1-login .register-invite-group{border-radius:11px !important;}
+html:root .v1-login .register-consents label{border-radius:10px !important;}
+html:root .v1-login .register-verification{border-radius:12px !important;}
+html:root .booking-in-shell .booking-compact-toolbar{border-radius:8px !important;}
+html:root .booking-in-shell .booking-period{border-radius:8px !important;}
+html:root .booking-in-shell .coach-month-day{border-radius:8px !important;}
+html:root .booking-service-badge{border-radius:7px !important;}
+@media (max-width:900px){html:root .as-coach .bottom-nav.coach-bottom a{border-radius:8px !important;}}
+html:root .as-coach .coach-v1-day :is(.coach-v1-activity,.coach-v1-sheet){border-radius:8px !important;}
+html:root .as-coach .coach-v1-day .coach-v1-slot-link{border-radius:8px !important;}
+html:root .coach-picker-dialog .coach-pick-row-actions button{border-radius:8px !important;}
+html:root .app .exercise-preview{border-radius:8px !important;}
+html:root .booking-in-shell .booking-top-controls .booking-control{border-radius:8px !important;}
+html:root .booking-in-shell .booking-top-controls .pill{border-radius:8px !important;}
+html:root .app.as-coach .coach-program-compact .program-sheet .coach-v1-slot-link{border-radius:8px !important;}
+html:root .app .lfp-gear{border-radius:8px !important;}
+html:root .app .lfp-hero{border-radius:12px !important;}
+html:root .app .lfp-avatar{border-radius:50% !important;}
+html:root .app .lfp-avatar img{border-radius:50% !important;}
+html:root .app .lfp-camera{border-radius:50% !important;}
+html:root .app .lfp-gym{border-radius:8px !important;}
+html:root .app .lfp-edit-button{border-radius:8px !important;}
+html:root .app .lfp-outline{border-radius:8px !important;}
+html:root .app .lfp-facts>div{border-radius:8px !important;}
+html:root .app .lfp-section{border-radius:12px !important;}
+html:root .app .lfp-settings-link{border-radius:8px !important;}
+html:root .app .lfp-section-button{border-radius:8px !important;}
+html:root .app .lfp-section-icon{border-radius:10px !important;}
+html:root .app .lfp-inline-edit{border-radius:8px !important;}
+html:root .app .lfp-actions{border-radius:8px !important;}
+html:root .app .lfp-action-grid a{border-radius:8px !important;}
+html:root .app .lfp-form-wrap{border-radius:8px !important;}
+html:root .app .lfsettings-group{border-radius:8px !important;}
+html:root .app .lfsettings-entry{border-radius:8px !important;}
+html:root .app .lfsettings-exit{border-radius:8px !important;}
+html:root .app .lfp-search-box{border-radius:11px !important;}
+@media (min-width:800px){html:root .app.as-athlete > .athlete-top-nav{border-radius:8px !important;}}
+@media (min-width:800px){html:root .app.as-athlete > .athlete-top-nav a{border-radius:8px !important;}}
+html:root .app.as-athlete .athlete-home-quick-link{border-radius:8px !important;}
+html:root .app.as-athlete .athlete-quick-icon{border-radius:8px !important;}
+html:root .app.as-coach :is(.coach-v1-sheet,.program-sheet) .coach-v1-slot-link{border-radius:10px !important;}
+html:root .app.as-athlete .booking-in-shell .booking-main-tabs button{border-radius:8px !important;}
+html:root .app.as-athlete .booking-in-shell .booking-service-card{border-radius:12px !important;}
+@media (min-width:800px){html:root .app.as-athlete > #athlete-top-menu.lf-top-menu-75{border-radius:0 0 12px 12px !important;}}
+html:root .lf-booking-mark{border-radius:8px !important;}
+@media (max-width:500px){html:root .lf-booking-mark{border-radius:8px !important;}}
+html:root .app .lfp-inline-lookup{border-radius:8px !important;}
+html:root .app .lfp-facts .lfp-metric-link{border-radius:12px !important;}
+@media (min-width:800px){html:root .app.as-athlete>#athlete-top-menu.lf-top-menu-76{border-radius:0 0 12px 12px !important;}}
+@media (min-width:800px){html:root .app.as-athlete>#athlete-top-menu.lf-top-menu-76 a{border-radius:9px !important;}}
+html:root .app .library-grid .library-card .exercise-preview[data-lionfit-animating="true"]:after{border-radius:5px !important;}
+html:root .app.as-athlete .booking-in-shell .booking-service-card .lf-booking-mark{border-radius:12px !important;}
+html:root .app .mobile-topbar .top-actions .header-avatar{border-radius:50% !important;}
+html:root .app.as-athlete .lf-athlete-intro{border-radius:8px !important;}
+html:root .lf-today-card{border-radius:12px !important;}
+html:root .lf-today-pill{border-radius:12px !important;}
+html:root .lf-today-sheet-btn{border-radius:8px !important;}
+html:root .lf-today-go{border-radius:8px !important;}
+html:root .lf-day-tile{border-radius:12px !important;}
+html:root .lf-home-shortcut{border-radius:8px !important;}
+html:root .lf-home-shortcut-icon{border-radius:8px !important;}
+html:root .lf-source-tag{border-radius:8px !important;}
+html:root .lf-kpi-card{border-radius:12px !important;}
+html:root .lf-dashboard-panel{border-radius:12px !important;}
+html:root .lf-kpi-icon{border-radius:8px !important;}
+html:root .lf-coach-banner{border-radius:12px !important;}
+html:root .lf-action-grid a{border-radius:8px !important;}
+html:root .lf-legend-dot{border-radius:50% !important;}
+html:root .lf-access-grid a{border-radius:8px !important;}
+@media (max-width:650px){html:root .app.as-athlete .lf-athlete-intro{border-radius:8px !important;}}
+@media (max-width:650px){html:root .lf-today-card{border-radius:12px !important;}}
+@media (max-width:650px){html:root .lf-day-tile{border-radius:11px !important;}}
+@media (max-width:650px){html:root .lf-home-shortcut{border-radius:8px !important;}}
+@media (max-width:650px){html:root .lf-home-shortcut-icon{border-radius:8px !important;}}
+html:root .lf-coach-dashboard .lf-dashboard-warnings p{border-radius:8px !important;}
+html:root .lf-coach-dashboard .lf-chart-bar{border-radius:2px 2px 0 0 !important;}
+html:root .lf-coach-dashboard .lf-chart-key{border-radius:2px !important;}
+html:root .lf-coach-dashboard .lf-appointment-row{border-radius:8px !important;}
+html:root .lf-coach-dashboard .lf-recent-event{border-radius:8px !important;}
+@media (max-width:650px){html:root .as-coach .lf-coach-dashboard .lf-coach-banner{border-radius:12px !important;}}
+html:root .app.as-athlete .booking-in-shell .booking-service-card .lf-booking-mark .lf-fighter-illustration{border-radius:10px !important;}
+@media (min-width:800px){html:root .lf-athlete-side-brand button{border-radius:8px !important;}}
+@media (min-width:800px){html:root .lf-athlete-side-links a{border-radius:8px !important;}}
+@media (min-width:800px){html:root .lf-athlete-side-footer a{border-radius:8px !important;}}
+@media (min-width:800px){html:root .lf-athlete-side-footer button{border-radius:8px !important;}}
+html:root .lionfit-athlete-dock{border-radius:0 !important;}
+html:root .lf-v3-avatar{border-radius:50% !important;}
+html:root .lf-v3-week-name{border-radius:8px !important;}
+html:root .lf-v3-progress{border-radius:8px !important;}
+html:root .lf-v3-today{border-radius:8px !important;}
+html:root .lf-v3-weekdays{border-radius:8px !important;}
+html:root .lf-v3-shortcuts{border-radius:8px !important;}
+html:root .lf-v3-ring{border-radius:50% !important;}
+html:root .lf-v3-ring-center{border-radius:50% !important;}
+html:root .lf-v3-today-badge{border-radius:30px !important;}
+html:root .lf-v3-sheets button{border-radius:8px !important;}
+html:root .lf-v3-today-cta{border-radius:8px !important;}
+html:root .lf-v3-day{border-radius:8px !important;}
+html:root .lf-v3-day i{border-radius:50% !important;}
+html:root .lf-v3-shortcut{border-radius:8px !important;}
+html:root .lf-v3-shortcut-icon{border-radius:8px !important;}
+html:root .lf-athlete-coming{border-radius:8px !important;}
+html:root .lf-athlete-coming-symbol{border-radius:8px !important;}
+html:root .lf-athlete-coming-back{border-radius:8px !important;}
+@media (max-width:799px){html:root .lf-v3-progress{border-radius:8px !important;}}
+@media (max-width:799px){html:root .lf-v3-today{border-radius:8px !important;}}
+@media (max-width:799px){html:root .lf-v3-weekdays{border-radius:8px !important;}}
+@media (max-width:799px){html:root .lf-v3-shortcuts{border-radius:8px !important;}}
+@media (max-width:799px){html:root .lf-v3-today-cta{border-radius:8px !important;}}
+@media (max-width:799px){html:root .lf-v3-shortcut{border-radius:8px !important;}}
+@media (max-width:799px){html:root .lf-v3-shortcut-icon{border-radius:8px !important;}}
+@media (max-width:799px){html:root .lionfit-athlete-dock{border-radius:0 !important;}}
+html:root .app.as-athlete .lf-home-approved .lf-v3-progress{border-radius:8px !important;}
+html:root .app.as-athlete .lf-home-approved .lf-v3-today{border-radius:8px !important;}
+html:root .app.as-athlete .lf-home-approved .lf-v3-today-cta{border-radius:8px !important;}
+html:root .app.as-athlete .lf-home-approved .lf-v3-shortcuts{border-radius:0 !important;}
+html:root .app.as-athlete .lf-home-approved .lf-v3-shortcut{border-radius:8px !important;}
+html:root .app .lfp-profile .lfp-hero .lfp-avatar{border-radius:50% !important;}
+html:root .app .lfp-form-wrap .lfp-avatar.lfp-edit-avatar{border-radius:50% !important;}
+html:root .app .lfp-avatar .lfp-avatar-crop{border-radius:50% !important;}
+html:root .app .lfp-avatar .lfp-avatar-crop img{border-radius:50% !important;}
+html:root .app .main-layout > .lf-route-back{border-radius:8px !important;}
+html:root .lf-about-dialog .lf-android-update-box{border-radius:12px !important;}
+html:root .app .lf-booking-coach-check{border-radius:50% !important;}
+html:root .app.as-athlete .lf-archive-v4-item{border-radius:8px !important;}
+html:root .app.as-athlete .lf-archive-v4-item .athlete-archive-open{border-radius:8px !important;}
+html:root .app.as-athlete .lf-booking-v4-flow .panel{border-radius:12px !important;}
+html:root .app.as-athlete .lf-booking-v4-flow .booking-service-card{border-radius:12px !important;}
+html:root .app.as-athlete .lf-booking-v4-flow .lf-booking-v4-coaches .action-card{border-radius:8px !important;}
+html:root .app.as-athlete .lf-booking-v4-select{border-radius:8px !important;}
+html:root .app.as-athlete .lf-booking-v4-calendar .booking-day{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-head-icon{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-tabs button{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-card{border-radius:12px !important;}
+html:root .lf-progress360 .lf-p360-card input{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-card select{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-coach-selector select{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-card textarea{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-filters button{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-sheet{border-radius:12px !important;}
+html:root .lf-progress360 .lf-p360-square{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-set>b{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-row-actions button{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-skip{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-main-button{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-stat{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-graph{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-empty{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-photo-select{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-check-row{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-check-row img{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-goal-editor{border-radius:12px !important;}
+html:root .lf-progress360 .lf-p360-goal{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-goal-status{border-radius:99px !important;}
+html:root .lf-progress360 .lf-p360-goal-actions button{border-radius:8px !important;}
+html:root .lf-progress360 .lf-p360-compact-sheet{border-radius:10px !important;}
+html:root .lf-progress360 .lf-p360-compact-sheet .lf-p360-square{border-radius:9px !important;}
+html:root .lf-progress360 .lf-p360-photo-status{border-radius:10px !important;}
+html:root .lf-progress360 .lf-p12-hero{border-radius:12px !important;}
+html:root .lf-progress360 .lf-p12-hub button{border-radius:8px !important;}
+html:root .lf-p15-photo-frame{border-radius:10px !important;}
+html:root .lf14-gym-identity{border-radius:8px !important;}
+html:root .lf14-logo{border-radius:8px !important;}
+html:root .lf14-cover-preview{border-radius:9px !important;}
+html:root .lf14-ticket-detail{border-radius:8px !important;}
+@media (max-width:767px){html:root .app .lfp-coach .lfp-sections{border-radius:12px !important;}}
+@media (max-width:767px){html:root .app .lfp-coach .lfp-section{border-radius:0 !important;}}
+@media (max-width:767px){html:root .app .lfp-coach .lfp-section-button{border-radius:0 !important;}}
+@media (max-width:767px){html:root .app .lf-search-input{border-radius:8px !important;}}
+@media (max-width:767px){html:root .app .lf-search-inline-results{border-radius:8px !important;}}
+@media (max-width:767px){html:root .app .lf-coach-dashboard .lf-kpi-card{border-radius:12px !important;}}
+@media (max-width:767px){html:root .app .lf-coach-dashboard .lf-dashboard-panel{border-radius:12px !important;}}
+@media (max-width:767px){html:root .app .coach-athletes-screen .lf-roster-toolbar .coach-team-tools input{border-radius:8px !important;}}
+@media (max-width:767px){html:root .app .lf-mobile-archive-grid .archive-card{border-radius:12px !important;}}
+@media (max-width:767px){html:root .app .lf-archive-more summary{border-radius:8px !important;}}
+@media (max-width:767px){html:root .app .lf-archive-more>div{border-radius:8px !important;}}
+html:root html.lf-premium-motion .lf-premium-tabs[data-lf-tab-indicator]::after{border-radius:999px !important;}
+html:root html.lf-premium-motion .lf27-delayed-loading{border-radius:8px !important;}
+html:root html.lf-premium-motion .lf27-delayed-loading::after{border-radius:7px !important;}
+html:root .lf-quiet-track{border-radius:999px !important;}
+html:root .lf-quiet-roster-placeholder i{border-radius:3px !important;}
+html:root .lf-r14-identity{border-radius:8px !important;}
+html:root .lf-r14-identity .lf14-gym-identity{border-radius:0 !important;}
+html:root .lf-r14-identity .lf14-logo{border-radius:8px !important;}
+html:root .lf-r14-today{border-radius:8px !important;}
+html:root .lf-r14-sheet-chips button{border-radius:8px !important;}
+html:root .lf-r14-primary-action{border-radius:8px !important;}
+html:root .lf-r14-progress{border-radius:8px !important;}
+html:root .lf-r14-progress-circle{border-radius:50% !important;}
+html:root .lf-r14-upcoming-card{border-radius:12px !important;}
+html:root .lf-r14-next-row{border-radius:8px !important;}
+html:root .app.as-athlete .lf15-home .lf14-gym-hero{border-radius:12px !important;}
+html:root .lf15-home .lf14-gym-hero .lf14-logo{border-radius:11px !important;}
+html:root .lf15-home .lf15-today{border-radius:8px !important;}
+html:root .lf15-sheet-list button{border-radius:8px !important;}
+html:root .lf15-main-cta{border-radius:8px !important;}
+html:root .lf15-route{border-radius:8px !important;}
+html:root .lf15-route-ring{border-radius:50% !important;}
+html:root .lf15-route-content>em{border-radius:8px !important;}
+html:root .lf15-event-card{border-radius:12px !important;}
+html:root .lf15-progress-link{border-radius:8px !important;}
+html:root .lf15-quick-tile{border-radius:12px !important;}
+html:root .lf15-video-dialog{border-radius:12px !important;}
+html:root .lf15-video-symbol{border-radius:8px !important;}
+html:root .lf15-video-dialog button{border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-count{border-radius:99px !important;}
+html:root .app.as-athlete .lf-r15-archive-tabs{border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-archive-tabs button{border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-archive-list{border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-archive-tools :is(input,select){border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-clear{border-radius:7px !important;}
+html:root .app.as-athlete .lf-r15-archive-list .lf-r15-archive-item{border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-archive-list .lf-r15-archive-item .athlete-archive-open{border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-archive-item .lf-archive-v4-icon{border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-empty{border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-history{border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-history-head .lf-r15-history-back{border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-history .lf-r15-history-program{border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-history-program .lf-r15-history-symbol{border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-history .lf-r15-history-weeks>button{border-radius:8px !important;}
+html:root .app.as-athlete .lf-r15-history .lf-r15-history-days article{border-radius:8px !important;}
+html:root .lf21-nav-recovery{border-radius:8px !important;}
+html:root .lf21-nav-recovery button{border-radius:8px !important;}
+html:root .lf-comp-event{border-radius:8px !important;}
+html:root .lf-comp-cover{border-radius:12px !important;}
+html:root .lf-r8b-invite-stats span{border-radius:8px !important;}
+html:root .lf-r8b-roster{border-radius:8px !important;}
+html:root .lf-r8b-roster .lf-r8b-roster-row{border-radius:8px !important;}
+html:root .lf-r8b-invite-respond{border-radius:8px !important;}
+html:root .lf-r9-comp-tabs{border-radius:8px !important;}
+html:root .lf-r9-comp-tabs button{border-radius:8px !important;}
+html:root .lf-r9-comp-empty{border-radius:8px !important;}
+html:root .lionfit-dock-item{border-radius:8px !important;}
+html:root .athlete-plan .lf-athlete-v4-day{border-radius:8px !important;}
+html:root .lf-athlete-v4-today-tag{border-radius:5px !important;}
+html:root .lf-athlete-v4-sheet-chip{border-radius:6px !important;}
+html:root .lf-athlete-v4-activity{border-radius:8px !important;}
+html:root .lf-athlete-v4-linked-card{border-radius:9px !important;}
+html:root .lf-athlete-v4-chooser{border-radius:8px !important;}
+html:root .as-athlete .lf-p11-athlete-program-select{border-radius:8px !important;}
+html:root .lf-p11-athlete-program-select{border-radius:8px !important;}
+html:root .lf-r13-total{border-radius:99px !important;}
+html:root .lf-r13-meta{border-radius:99px !important;}
+html:root .lf-r13-today{border-radius:8px !important;}
+html:root .lf-r13-today:before{border-radius:50% !important;}
+html:root .lf-r13-today-action{border-radius:8px !important;}
+html:root .lf-r13-program{border-radius:8px !important;}
+html:root .lf-r13-schedule-panel{border-radius:12px !important;}
+html:root .lf-r13-program .lf-p11-athlete-program-select{border-radius:8px !important;}
+html:root .lf-r13-program .lf-r13-week-pill{border-radius:12px !important;}
+html:root .lf-r13-plan .lf-athlete-v4-day{border-radius:8px !important;}
+html:root .lf-r13-day-count{border-radius:8px !important;}
+html:root .lf-r13-free-card{border-radius:12px !important;}
+html:root .lf-r13-day-dialog{border-radius:12px !important;}
+html:root .lf-r13-day-body .lf-athlete-v4-activity{border-radius:8px !important;}
+html:root .lf-r13-day-body .lf-athlete-v4-linked-card{border-radius:11px !important;}
+html:root .lf-r4-athlete-search input{border-radius:8px !important;}
+html:root .lf-r4-athlete-search select{border-radius:8px !important;}
+html:root .lf25-check{border-radius:8px !important;}
+html:root .lf25-consent{border-radius:8px !important;}
+html:root .lf25-photo{border-radius:10px !important;}
+html:root .lf25-placeholder{border-radius:8px !important;}
+html:root .lf25-viewer{border-radius:8px !important;}
+html:root .lf25-viewer button{border-radius:8px !important;}
+html:root .lf18-athlete-results{border-radius:8px !important;}
+html:root .lf-competition-cover{border-radius:inherit !important;}
+html:root .lf-r5-order-row{border-radius:8px !important;}
+html:root .lf-r5-grip{border-radius:8px !important;}
+html:root .lf17-badge{border-radius:999px !important;}
+html:root .lf17-inbox-panel{border-radius:12px !important;}
+html:root .lf17-inbox-panel button{border-radius:8px !important;}
+html:root .lf17-dot{border-radius:50% !important;}
+html:root .lf-studio-mode{border-radius:8px !important;}
+html:root .lf-studio-fields input:not([type=checkbox]){border-radius:8px !important;}
+html:root .lf-studio-fields textarea{border-radius:8px !important;}
+html:root .lf-studio-fields select{border-radius:8px !important;}
+html:root .lf-studio-swatch{border-radius:50% !important;}
+html:root .lf-studio-preview{border-radius:8px !important;}
+html:root .lf-studio-cover{border-radius:10px !important;}
+html:root .lf-studio-cta{border-radius:8px !important;}
+html:root .lf-studio-kinds button{border-radius:8px !important;}
+html:root .lf-studio-editor-perms{border-radius:12px !important;}
+html:root .lf-share-panel{border-radius:12px !important;}
+html:root .lf-invite-summary-counts span{border-radius:12px !important;}
+html:root .lf-invite-choice{border-radius:8px !important;}
+html:root .lf-invite-hub .lf-invite-detail{border-radius:8px !important;}
+@media (min-width: 1240px){html:root .lf-invite-choice{border-radius:8px !important;}}
+html:root .lf-linked-settings{border-radius:8px !important;}
+html:root .lf-ms-symbol{border-radius:8px !important;}
+html:root .lf-ms-sport{border-radius:8px !important;}
+html:root .lf-ms-panel{border-radius:12px !important;}
+html:root .lf-ms-time{border-radius:8px !important;}
+html:root .lf-ms-preview{border-radius:8px !important;}
+html:root .lf-ms-record{border-radius:8px !important;}
+html:root .lf-ms-tabs button{border-radius:8px !important;}
+html:root .lfcc-roadmap>header{border-radius:8px !important;}
+html:root .lfcc-future-grid article{border-radius:8px !important;}
+html:root .lfcc-future-badge{border-radius:8px !important;}
+html:root .lfcc-explain{border-radius:5px !important;}
+html:root .lfcc-intro{border-radius:8px !important;}
+html:root .lfcc-source{border-radius:8px !important;}
+html:root .lfcc-metric{border-radius:12px !important;}
+html:root .lfcc-callout{border-radius:8px !important;}
+html:root .lfcc-unknown{border-radius:8px !important;}
+html:root .lfcc-service-hero{border-radius:12px !important;}
+html:root .lfcc-stats>div{border-radius:8px !important;}
+html:root .lfcc-service-row{border-radius:8px !important;}
+html:root .lfcc-dot{border-radius:50% !important;}
+html:root .lfcc-state{border-radius:8px !important;}
+html:root .lfcc-service-note{border-radius:8px !important;}
+@media (max-width:767px){html:root .app.as-athlete .lfp-athlete .lfp-hero{border-radius:12px !important;}}
+@media (max-width:767px){html:root .app.as-athlete .lfp-athlete .lfp-sections{border-radius:12px !important;}}
+@media (max-width:767px){html:root .app.as-athlete .lfp-athlete .lfp-sections>.lfp-section{border-radius:0 !important;}}
+@media (max-width:767px){html:root .app.as-athlete .lfp-athlete .lfp-sections>.lfp-section-button{border-radius:0 !important;}}
+html:root .lf-r5-focus-progress div{border-radius:99px !important;}
+html:root .lf-r5-focus-progress i{border-radius:99px !important;}
+html:root .lf-p24-editor{border-radius:12px !important;}
+html:root .lf-p24-confirm{border-radius:8px !important;}
+html:root .lf-progress360 .lf-r8a-hero .lf-r8a-hero-cta{border-radius:8px !important;}
+html:root .lf-progress360 .lf-r8a-hub .lf-r8a-hub-card{border-radius:12px !important;}
+html:root .lf-r8a-hub-icon{border-radius:8px !important;}
+html:root .lf-progress360 .lf-r8a-review-shortcut{border-radius:8px !important;}
+html:root .lf-progress360 .lf-r8a-picker-revision{border-radius:8px !important;}
+html:root .lf-progress360 .lf-r8a-report-link{border-radius:8px !important;}
+html:root .lf-r8a-progress-switch{border-radius:14px !important;}
+html:root .lf-r8a-progress-switch button{border-radius:10px !important;}
+html:root .lf-r8a-check-mark{border-radius:8px !important;}
+html:root .lf-r8a-goal-empty{border-radius:8px !important;}
+html:root .lf17-push-welcome{border-radius:12px !important;}
+html:root .lf-switch-dialog{border-radius:20px !important;}
+html:root .lf-switch-close{border-radius:10px !important;}
+html:root .lf-switch-choice{border-radius:12px !important;}
+html:root .lf-switch-confirm{border-radius:11px !important;}
+html:root .lf-switch-cancel{border-radius:11px !important;}
+html:root .lf-r5-timer{border-radius:8px !important;}
+html:root .lf6-sheet{border-radius:12px !important;}
+html:root .lf6-print{border-radius:8px !important;}
+html:root .lf6-close{border-radius:8px !important;}
+html:root .lf6-group{border-radius:8px !important;}
+html:root .lf6-pair-mark{border-radius:7px !important;}
+html:root .lf6-exercise{border-radius:8px !important;}
+html:root .lf6-preview-empty{border-radius:8px !important;}
+html:root .lf6-enlarge{border-radius:7px !important;}
+html:root .lf6-sequence{border-radius:7px !important;}
+html:root .lf6-more{border-radius:8px !important;}
+html:root .lf6-chip{border-radius:7px !important;}
+html:root .lf6-coach-note{border-radius:7px !important;}
+html:root .lf6-text-link{border-radius:7px !important;}
+@media (max-width:600px){html:root .lf6-sheet{border-radius:12px !important;}}
+@media (max-width:600px){html:root .lf6-exercise{border-radius:8px !important;}}
+html:root .lf-r13-athlete-sheet{border-radius:12px !important;}
+html:root .lf-r13-athlete-sheet .lf6-group{border-radius:12px !important;}
+html:root .lf-r13-athlete-sheet .lf6-exercise{border-radius:11px !important;}
+html:root .lf-r13-athlete-sheet .lf6-sequence{border-radius:9px !important;}
+html:root .lf-r13-athlete-sheet .lf6-chip{border-radius:8px !important;}
+html:root .lf-r13-athlete-sheet .lf6-text-link{border-radius:8px !important;}
+@media (max-width:600px){html:root .lf-r13-athlete-sheet{border-radius:12px !important;}}
+html:root .lf29-dedicated{border-radius:0 !important;}
+html:root .lf29-back{border-radius:50% !important;}
+html:root .lf29-send{border-radius:50% !important;}
+html:root .lf29-row{border-radius:0 !important;}
+html:root .lf29-avatar{border-radius:50% !important;}
+html:root .lf29-dot{border-radius:50% !important;}
+html:root .lf29-chat{border-radius:8px !important;}
+html:root .lf29-dedicated .lf29-chat{border-radius:0 !important;}
+html:root .lf29-bubble{border-radius:14px 14px 14px 4px !important;}
+html:root .lf29-bubble.is-own{border-radius:14px 14px 4px 14px !important;}
+html:root .lf29-composer textarea{border-radius:8px !important;}
+html:root .lf-work-badge{border-radius:16px !important;}
+html:root .lf-work-buttons button{border-radius:8px !important;}
+html:root .lf-work-choice button{border-radius:8px !important;}
+html:root .lf-work-reload{border-radius:8px !important;}
+html:root .lf-work-result{border-radius:8px !important;}
+html:root .lf-work-site{border-radius:8px !important;}
+html:root .lf-work-switch{border-radius:20px !important;}
+html:root .lf-work-switch::after{border-radius:50% !important;}
+html:root .lf-r13-plan-archive-links a{border-radius:8px !important;}
+html:root .lf-r5-favorite-heart{border-radius:50% !important;}
+html:root .lf-library-choice .lf-library-detail{border-radius:inherit !important;}
+html:root .lf-library-choice .lf-library-select{border-radius:7px !important;}
+html:root .lf-library-picker-dialog{border-radius:0 !important;}
+html:root .lf-library-choice .lf-r8b-picker-heart{border-radius:8px !important;}
+html:root .coach-availability-compact input:not([type="checkbox"]){border-radius:8px !important;}
+html:root .coach-availability-compact select{border-radius:8px !important;}
+html:root .coach-availability-week .line-card{border-radius:10px !important;}
+html:root .booking-reason{border-radius:8px !important;}
+html:root .lf-agenda13 .lf-agenda-main button{border-radius:8px !important;}
+html:root .lf-agenda-controls select{border-radius:8px !important;}
+html:root .lf-agenda-date-controls input{border-radius:8px !important;}
+html:root .lf-agenda-extra{border-radius:8px !important;}
+html:root .lf-agenda-row{border-radius:8px !important;}
+html:root .lf-agenda-row .lf-agenda-state{border-radius:8px !important;}
+html:root .lf-agenda-detail{border-radius:0 0 8px 8px !important;}
+html:root .lf-agenda-hero{border-radius:12px !important;}
+html:root .lf-agenda-tiles button{border-radius:8px !important;}
+html:root .lf-booking-v4-flow .booking-service-card .lf17b-category-photo{border-radius:10px !important;}
+@media (min-width: 1120px){html:root .lf-agenda13.lf-agenda-coach .lf-agenda-main{border-radius:8px !important;}}
+@media (min-width: 1120px){html:root .lf-agenda13.lf-agenda-coach .lf-agenda-main button{border-radius:8px !important;}}
+@media (min-width: 1120px){html:root .lf-agenda13.lf-agenda-coach > .primary.wide{border-radius:8px !important;}}
+@media (min-width: 1120px){html:root .lf-agenda13.lf-agenda-coach .lf-agenda-toolbar{border-radius:8px !important;}}
+@media (min-width: 1120px){html:root .lf-agenda13.lf-agenda-coach .lf-agenda-extra{border-radius:0 !important;}}
+html:root .lf-agenda-empty{border-radius:8px !important;}
+@media (min-width:901px){html:root .lf-agenda13.lf-agenda-coach .lf-agenda-coach-commandbar .lf-agenda-create{border-radius:8px !important;}}
+html:root .lf-r8b-people-choices button{border-radius:8px !important;}
+html:root .lf-agenda13[data-r9-athlete="true"] .lf-r9-hero{border-radius:12px !important;}
+html:root .lf-agenda13[data-r9-athlete="true"] .lf-r9-tile{border-radius:12px !important;}
+html:root .lf-agenda13[data-r9-athlete="true"] .lf-r9-upcoming{border-radius:8px !important;}
+html:root .lf-r9-empty{border-radius:8px !important;}
+html:root .lf-roster-toolbar{border-radius:8px !important;}
+html:root .lf-roster-summary .lf-assign-legacy{border-radius:8px !important;}
+html:root .lf-roster-filters{border-radius:8px !important;}
+html:root .lf-filter-buttons button{border-radius:8px !important;}
+html:root .lf-roster-card{border-radius:12px !important;}
+html:root .lf-roster-avatar{border-radius:50% !important;}
+html:root .lf-roster-track{border-radius:99px !important;}
+html:root .lf-roster-fill{border-radius:inherit !important;}
+html:root .lf-roster-manage{border-radius:8px !important;}
+html:root .lf-week-number{border-radius:8px !important;}
+html:root .lf-compact-day{border-radius:8px !important;}
+html:root .lf-compact-day-data{border-radius:6px !important;}
+html:root .lf-week-action{border-radius:8px !important;}
+html:root .lf-mode-notice{border-radius:10px !important;}
+html:root .lf-day-sheet-slot{border-radius:11px !important;}
+html:root .lf-day-sheet-buttons button{border-radius:7px !important;}
+html:root .lf-day-unlink-confirm{border-radius:8px !important;}
+html:root .lf-p11-program-row{border-radius:8px !important;}
+html:root .lf-p11-date-label input[type=date]{border-radius:8px !important;}
+html:root .lf-wa-button{border-radius:8px !important;}
+html:root .lf-monitor-filters button{border-radius:8px !important;}
+html:root .lf-editor-panel input{border-radius:8px !important;}
+html:root .lf-editor-panel select{border-radius:8px !important;}
+html:root .lf-exercise-group{border-radius:8px !important;}
+html:root .lf-group-number{border-radius:50% !important;}
+html:root .lf-pair-pill{border-radius:7px !important;}
+html:root .lf-mini-button{border-radius:6px !important;}
+html:root .lf-exercise-editor{border-radius:8px !important;}
+html:root .lf-editor-motion{border-radius:8px !important;}
+html:root .lf-exercise-remove{border-radius:50% !important;}
+html:root .lf-superset-add{border-radius:8px !important;}
+html:root .lf-inline-library{border-radius:8px !important;}
+html:root .lf-open-library{border-radius:6px !important;}
+html:root .lf-creator-filter{border-radius:8px !important;}
+html:root .lf-creator-filter-button{border-radius:8px !important;}
+html:root .lf-legacy-coach-row{border-radius:8px !important;}
+html:root .lf-legacy-coach-pick select{border-radius:7px !important;}
+html:root .lf-trash-hero{border-radius:12px !important;}
+html:root .lf-trash-hero-icon{border-radius:12px !important;}
+html:root .lf-trash-panel{border-radius:12px !important;}
+html:root .lf-trash-count{border-radius:8px !important;}
+html:root .lf-trash-item{border-radius:8px !important;}
+html:root .lf-trash-type-icon{border-radius:8px !important;}
+html:root .lf-trash-footer{border-radius:8px !important;}
+html:root .lf19c-tag{border-radius:8px !important;}
+html:root .lf19c-success{border-radius:8px !important;}
+html:root .lf19c-choices label{border-radius:8px !important;}
+html:root .lfcc-navigation button{border-radius:8px !important;}
+html:root .app .lfsettings-compact .lfsettings-flat-list{border-radius:8px !important;}
+html:root .app .lfsettings-compact .lfsettings-flat-list>.lfsettings-flat-row{border-radius:0 !important;}
+html:root .app .lfsettings-compact .lfsettings-flat-row:focus-visible{border-radius:6px !important;}
+html:root .app .lfsettings-compact .lfsettings-flat-list>.lfsettings-section-title{border-radius:0 !important;}
+html:root .app .lfsettings-compact .lfsettings-exit{border-radius:8px !important;}
+@media (max-width: 767px){html:root .app .lfsettings-compact .lfsettings-flat-list{border-radius:8px !important;}}
+html:root .lf-r8b-switch{border-radius:999px !important;}
+html:root .lf-r8b-switch i{border-radius:50% !important;}
+html:root .lf-welcome-panel{border-radius:12px !important;}
+html:root .lf-welcome-check{border-radius:50% !important;}
+html:root .lf-welcome-logo{border-radius:12px !important;}
+html:root .lf-welcome-cover{border-radius:12px !important;}
+html:root .lf-welcome-device{border-radius:12px !important;}
+html:root .lf-welcome-guide{border-radius:12px !important;}
+html:root .lf-welcome-primary-link{border-radius:12px !important;}
+html:root .lf-welcome-install{border-radius:12px !important;}
+html:root .lf-welcome-continue{border-radius:12px !important;}
+@media (max-width:430px){html:root .lf-welcome-panel{border-radius:12px !important;}}
+html:root .wr-month{border-radius:8px !important;}
+html:root .wr-panel{border-radius:12px !important;}
+html:root .wr-month input{border-radius:7px !important;}
+html:root .work-report button{border-radius:8px !important;}
+html:root .wr-person img{border-radius:8px !important;}
+html:root .wr-sites>div{border-radius:8px !important;}
+html:root .wr-alert{border-radius:8px !important;}
+html:root .wr-interval{border-radius:8px !important;}
+html:root #lf-modern-update{border-radius:12px !important;}

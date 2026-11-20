@@ -16,7 +16,7 @@
    font-weight:900!important;font-size:12px!important;letter-spacing:.03em;
  }
  .app.as-athlete > #athlete-top-menu.lf-top-menu-75 a.router-link-active {background:var(--green-bg)!important;color:var(--mint)!important;}
- .app.as-athlete>.main-layout{max-width:1250px!important;width:100%!important;}
+ .app.as-athlete>.main-layout{}
 }
 @media(max-width:799px){
  .app.as-athlete > #athlete-top-menu.lf-top-menu-75 {display:none!important;visibility:hidden!important;}
@@ -26,19 +26,19 @@
 .app.as-athlete > .mobile-topbar{top:0!important;position:sticky!important;z-index:110!important;}
 .app.as-athlete {overflow-x:clip;}
 .app.as-athlete .booking-in-shell .booking-v1-services {
-  display:grid!important;grid-template-columns:repeat(2,minmax(0,220px))!important;
-  gap:12px!important;justify-content:start!important;align-items:stretch!important;
+  grid-template-columns:repeat(2,minmax(0,220px))!important;
+  align-items:stretch!important;
 }
 .app.as-athlete .booking-in-shell .booking-service-card {
   box-sizing:border-box!important;min-height:260px!important;max-height:none!important;
-  aspect-ratio:0.80!important;min-width:0!important;width:100%!important;
+  aspect-ratio:0.80!important;
   padding:16px 13px!important;border-radius:19px!important;
-  display:flex!important;flex-direction:column!important;align-items:flex-start!important;
-  justify-content:space-between!important;text-align:left!important;gap:10px!important;
+  align-items:flex-start!important;
+  gap:10px!important;
 }
 .app.as-athlete .booking-in-shell .booking-service-card strong {font-size:clamp(17px,2.4vw,23px)!important;}
-.app.as-athlete .booking-in-shell .booking-service-card small {font-size:11px!important;line-height:1.35!important;}
-.app.as-athlete .booking-in-shell .booking-main-tabs{justify-content:flex-start!important;}
+.app.as-athlete .booking-in-shell .booking-service-card small {}
+.app.as-athlete .booking-in-shell .booking-main-tabs{}
 .app.as-athlete .booking-in-shell .booking-main-tabs button{flex:0 0 auto!important;min-height:36px!important;padding:7px 13px!important;}
 .lf-booking-mark{display:grid;place-items:center;width:72px;height:72px;flex:0 0 72px;background:radial-gradient(circle at 36% 24%,rgba(92,245,168,.20),rgba(10,46,34,.06));border:1px solid rgba(88,215,160,.32);border-radius:20px;color:#92ffc2;}
 .lf-booking-mark svg{width:60px;height:60px;display:block;stroke:currentColor;}

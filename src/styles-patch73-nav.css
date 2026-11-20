@@ -22,7 +22,7 @@
  .app.as-athlete > .athlete-top-nav a:focus-visible{outline:2px solid var(--mint);outline-offset:-2px;}
 
  .app.as-athlete .main-layout{padding-bottom:36px!important;}
- .app.as-athlete{padding-bottom:0!important;}
+ .app.as-athlete{}
 }
 /* Puntini in filtri, giorni, settimane e mese: riconoscibili e allineati. */
 .app .booking-coach-chips .coach-dot,

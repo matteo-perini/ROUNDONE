@@ -95,3 +95,5 @@ import './styles-r14-athlete-home.css'
 import './styles-r14c-dashboard-rebuild.css'
 // PATCH 30 R15: archivio atleta Experience 3.0.
 import './styles-r15-athlete-archive.css'
+// PATCH R20B: angoli ibridi globali (solo presentazione, dopo tutti gli altri override).
+import './styles-r20b-hybrid-design.css'

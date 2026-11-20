@@ -101,10 +101,10 @@
  }
  .app.as-athlete main.main-layout.athlete-container:has(.lf-home-approved)>.version{display:none!important}
  .app.as-athlete main.main-layout.athlete-container:has(.lf-home-approved)>.athlete-live-screen{
-  display:flex!important;flex:1 1 auto!important;min-height:0!important;height:100%!important;gap:0!important;overflow:hidden!important;
+  display:flex!important;flex:1 1 auto!important;height:100%!important;gap:0!important;overflow:hidden!important;
  }
  .app.as-athlete .athlete-container .lf-home-approved{
-  display:grid!important;flex:1 1 auto!important;min-height:0!important;height:100%!important;width:100%!important;
+  display:grid!important;flex:1 1 auto!important;height:100%!important;width:100%!important;
   max-width:none!important;
   grid-template-rows:auto clamp(96px,17dvh,134px) minmax(150px,1fr) auto!important;
   gap:clamp(7px,1.2dvh,12px)!important;
@@ -126,7 +126,7 @@
  .app.as-athlete .lf-home-approved .lf-v3-shortcuts{padding:0!important}
  .app.as-athlete .lf-home-approved .lf-v3-section-head{margin-bottom:8px!important}
  .app.as-athlete .lf-home-approved .lf-v3-section-head strong{font-size:clamp(16px,4.6vw,21px)!important}
- .app.as-athlete .lf-home-approved .lf-v3-shortcuts-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ .app.as-athlete .lf-home-approved .lf-v3-shortcuts-grid{gap:8px!important}
  .app.as-athlete .lf-home-approved .lf-v3-shortcut{min-height:58px!important;gap:9px!important;padding:8px 10px!important;overflow:hidden}
  .app.as-athlete .lf-home-approved .lf-v3-shortcut-icon{width:27px!important;height:27px!important;flex:none}
  .app.as-athlete .lf-home-approved .lf-v3-shortcut-icon svg{width:25px;height:25px}

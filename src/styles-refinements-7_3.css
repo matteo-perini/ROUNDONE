@@ -33,12 +33,12 @@
 .app .sheet-exercise-heading .sheet-exercise-mini>img {width:auto!important;height:auto!important;max-width:72px!important;max-height:72px!important;object-fit:contain!important;}
 .app .exercise-dialog .exercise-preview>img {width:auto!important;height:auto!important;max-width:min(180px,calc(100% - 20px))!important;max-height:165px!important;object-fit:contain!important;}
 /* Prenotazioni Atleta: tabs allineati a sinistra, cards più quadrate/alte come ROUNDONE. */
-.app.as-athlete .booking-in-shell .booking-main-tabs {display:flex!important;justify-content:flex-start;align-items:center;gap:8px;margin:10px 0;}
-.app.as-athlete .booking-in-shell .booking-main-tabs button {width:auto!important;flex:0 0 auto!important;min-height:35px;padding:7px 12px!important;border-radius:15px;font-size:12px;}
-.app.as-athlete .booking-in-shell .booking-v1-services {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+.app.as-athlete .booking-in-shell .booking-main-tabs {justify-content:flex-start;align-items:center;gap:8px;margin:10px 0;}
+.app.as-athlete .booking-in-shell .booking-main-tabs button {min-height:35px;padding:7px 12px!important;border-radius:15px;font-size:12px;}
+.app.as-athlete .booking-in-shell .booking-v1-services {grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
 .app.as-athlete .booking-in-shell .booking-service-card {min-height:clamp(195px,24vw,258px)!important;max-height:none;min-width:0;border-radius:19px;padding:14px!important;}
 .app.as-athlete .booking-in-shell .booking-service-card strong {font-size:clamp(17px,2.3vw,23px)!important;}
-.app.as-athlete .booking-in-shell .booking-service-card small {line-height:1.35;font-size:11px!important;}
+.app.as-athlete .booking-in-shell .booking-service-card small {line-height:1.35;}
 .app.as-athlete .booking-in-shell .booking-intro {min-height:88px!important;position:relative;}
 .app.as-athlete .booking-in-shell .booking-top-controls {position:absolute!important;right:0!important;top:0!important;max-width:61%!important;display:flex;flex-wrap:wrap;justify-content:flex-end!important;gap:6px!important;margin:0!important;}
 .app.as-athlete .booking-in-shell .booking-top-controls>* {font-size:10px!important;min-height:31px;}

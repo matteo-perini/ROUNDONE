@@ -8,8 +8,8 @@
 /* Sidebar desktop: solo atleta, indipendente dalla sidebar Coach. */
 .lf-athlete-desktop-sidebar{display:none}
 @media(min-width:800px){
- .app.as-athlete{--lf-v3-sidebar:242px;padding-bottom:0!important}
- .app.as-athlete.athlete-sidebar-collapsed{--lf-v3-sidebar:70px}
+ .app.as-athlete{}
+ .app.as-athlete.athlete-sidebar-collapsed{}
  .app.as-athlete>.mobile-topbar{display:none!important}
  .app.as-athlete>#athlete-top-menu{display:none!important;visibility:hidden!important}
  .app.as-athlete>.main-layout{

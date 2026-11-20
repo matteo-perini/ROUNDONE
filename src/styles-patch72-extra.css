@@ -35,7 +35,7 @@
    sheet previews h-16 / h-20 (64–80px). Modern must not enlarge the SVG
    to the entire width of a 300px card. Keep the img fully visible. */
 .app .library-grid .library-card .exercise-preview {height:100px!important;flex:0 0 100px!important;display:grid;place-items:center;overflow:hidden;}
-.app .library-grid .library-card .exercise-preview img {width:auto!important;height:auto!important;max-width:min(92px,calc(100% - 14px))!important;max-height:88px!important;object-fit:contain!important;object-position:50% 50%!important;transform:none!important;}
+.app .library-grid .library-card .exercise-preview img {max-width:min(92px,calc(100% - 14px))!important;object-position:50% 50%!important;transform:none!important;}
 .app .sheet-exercise-heading .sheet-exercise-mini {width:78px!important;height:78px!important;min-width:78px!important;max-width:78px!important;flex:0 0 78px!important;}
 .app .sheet-exercise-heading .sheet-exercise-mini img {width:auto!important;height:auto!important;max-width:72px!important;max-height:72px!important;object-fit:contain!important;}
 .app .exercise-dialog .exercise-preview {height:195px!important;max-height:29dvh!important;display:grid;place-items:center;}

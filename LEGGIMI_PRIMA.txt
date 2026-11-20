@@ -1,3 +1,0 @@
-Questo ZIP aggiunge SOLO la cartella R17B_EMULATOR_TEST per testare offline
-le regole Firestore R17B. Non modifica il codice Vue e non pubblica Firebase.
-Vedi R17B_EMULATOR_TEST/ISTRUZIONI.txt.

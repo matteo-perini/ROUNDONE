@@ -4,7 +4,7 @@
  * SVG sempre dentro al proprio riquadro, tema chiaro leggibile.
  */
 html,body,#app {min-width:0;width:100%;max-width:100%;}
-.app {min-width:0;max-width:100%;overflow-x:clip;}
+.app {max-width:100%;}
 .main-layout,.panel,.card,.stack,.grid2,.grid3,.grid4 {min-width:0;}
 .grid2,.grid3,.grid4 {max-width:100%;}
 .app button,.app a,.app select,.app input {touch-action:manipulation;}
@@ -63,7 +63,7 @@ html,body,#app {min-width:0;width:100%;max-width:100%;}
 .app .dialog h2 {overflow-wrap:anywhere;}
 /* Libreria: frame SVG mai fuori dal box, senza transform erratici. */
 .app .exercise-preview {position:relative;display:grid;place-items:center;min-width:0;overflow:hidden;isolation:isolate;border-radius:10px;background:#253749;border:1px solid var(--border);}
-.app .exercise-preview img {display:block!important;position:static!important;inset:auto!important;width:calc(100% - 14px)!important;height:calc(100% - 14px)!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:50% 50%!important;transform:none!important;filter:none!important;}
+.app .exercise-preview img {display:block!important;position:static!important;inset:auto!important;width:calc(100% - 14px)!important;height:calc(100% - 14px)!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:50% 50%!important;transform:none!important;}
 .app .library-grid {grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch;gap:10px;}
 .app .library-card {min-width:0;overflow:hidden;}
 .app .library-card .exercise-preview {height:116px;flex:0 0 116px;}
@@ -100,7 +100,7 @@ html,body,#app {min-width:0;width:100%;max-width:100%;}
 .booking-in-shell .booking-compact-toolbar .booking-toolbar-line {min-width:0;}
 .booking-in-shell .booking-compact-toolbar .booking-date-controls input {max-width:100%;}
 /* Luce moderna: superfici neutre, contrasto e accent colore coerente. */
-.app.theme-light {--bg:#F3F6F4;--nav:#FFFFFF;--card:#FFFFFF;--card2:#F3F8F5;--field:#F9FBFA;--text:#192E25;--muted:#566F62;--border:#D7E2DC;--outline:#A7BEB0;--mint:#126F49;--green:#187D52;--green-bg:#DDEFE4;color:var(--text);}
+.app.theme-light {--bg:#F3F6F4;--nav:#FFFFFF;--card:#FFFFFF;--card2:#F3F8F5;--field:#F9FBFA;--text:#192E25;--muted:#566F62;--border:#D7E2DC;--outline:#A7BEB0;--mint:#126F49;--green:#187D52;--green-bg:#DDEFE4;}
 .theme-light .desktop-sidebar,.theme-light .mobile-topbar,.theme-light .bottom-nav {box-shadow:0 2px 14px rgba(30,66,43,.055);}
 .theme-light .panel,.theme-light .card,.theme-light .archive-card,.theme-light .action-card {background:#FFFFFF;color:var(--text);border-color:var(--border);box-shadow:0 2px 12px rgba(30,66,43,.055);}
 .theme-light .green-hero {background:linear-gradient(125deg,#EAF4EE,#D9EDE0);border-color:#B6D5C1;color:#153F2B;}
