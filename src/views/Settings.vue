@@ -54,7 +54,7 @@ onMounted(async()=>{if(!isStagingMode())return;try{const s=await readStagingSess
 onUnmounted(()=>{settingsAlive=false;competitionUnsub?.()})
 async function toggleCompetition(){if(competitionBusy.value||!competitionSession||!competitionAvailable.value||!mayWriteLive())return;competitionBusy.value=true;competitionMessage.value='';try{await setCompetitionEnabled(getStagingClients().db,competitionSession,!competitionEnabled.value);competitionMessage.value='Preferenza salvata.'}catch(e){competitionMessage.value='Salvataggio non riuscito: '+(e instanceof Error?e.message:String(e))}finally{competitionBusy.value=false}}
 const billingOpen=ref(false)
-const identityOpen=ref(false),dashboardOpen=ref(false)
+const identityOpen=ref(false),dashboardOpen=ref(route.query.dashboard==='1')
 const verifiedCoach=ref(false),platformAllowed=ref(false)
 watch(()=>stagingSession.value?.uid,async(uid)=>{platformAllowed.value=false;if(uid&&isStagingMode()){const ok=await verifyPlatformAccess();if(stagingSession.value?.uid===uid)platformAllowed.value=ok}},{immediate:true})
 const infoOpen=ref(false),securityOpen=ref(false),securityStatus=ref(''),securityBusy=ref(false)

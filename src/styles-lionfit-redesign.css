@@ -48,8 +48,8 @@
 .lf-coach-dashboard .lf-link-button:disabled{opacity:.5;cursor:wait}
 .lf-coach-dashboard .lf-chart-area{margin:15px 0 5px;display:grid;grid-template-columns:repeat(30,minmax(5px,1fr));align-items:end;gap:3px;height:155px;min-width:0}
 .lf-coach-dashboard .lf-chart-day{display:flex;flex-direction:column;min-width:0;height:100%;align-items:center;justify-content:end;gap:3px}
-.lf-coach-dashboard .lf-chart-column{display:flex;flex-direction:column-reverse;justify-content:flex-start;align-items:stretch;width:100%;height:132px;min-width:0;border-bottom:1px solid var(--border);overflow:hidden}
-.lf-coach-dashboard .lf-chart-bar{display:block;min-height:0;width:100%;flex:none;border-radius:2px 2px 0 0}
+.lf-coach-dashboard .lf-chart-column{display:flex;flex-direction:row;justify-content:center;align-items:flex-end;gap:1px;width:100%;height:132px;min-width:0;border-bottom:1px solid var(--border);overflow:hidden}
+.lf-coach-dashboard .lf-chart-bar{display:block;min-width:0;min-height:0;width:auto;flex:1 1 0;border-radius:2px 2px 0 0}
 .lf-coach-dashboard .lf-chart-booking{background:#28da85}.lf-coach-dashboard .lf-chart-template{background:#73a5f4}.lf-coach-dashboard .lf-chart-week{background:#e7a857}
 .lf-coach-dashboard .lf-chart-day small{font-size:9px;color:var(--muted);height:11px}
 .lf-coach-dashboard .lf-chart-day:not(:nth-child(5n)) small{visibility:hidden}
