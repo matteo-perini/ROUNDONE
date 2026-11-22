@@ -19,8 +19,15 @@ export async function heicConverter():Promise<Converter>{
   const script=document.createElement('script')
   script.src='https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js'
   script.async=true
-  script.onload=()=>window.heic2any?resolve(window.heic2any):reject(new Error('Convertitore HEIC non disponibile'))
-  script.onerror=()=>reject(new Error('Impossibile caricare il convertitore HEIC. Riprova con internet attivo o usa JPG.'))
+  let finished=false
+  const timeout=setTimeout(()=>done(new Error('Convertitore HEIC non raggiungibile. Riprova con una connessione attiva oppure usa JPG.')),14000)
+  function done(error?:Error){
+   if(finished)return;finished=true;clearTimeout(timeout);script.onload=null;script.onerror=null
+   if(error){script.remove();reject(error)}else if(window.heic2any)resolve(window.heic2any)
+   else reject(new Error('Convertitore HEIC non disponibile.'))
+  }
+  script.onload=()=>done()
+  script.onerror=()=>done(new Error('Impossibile caricare il convertitore HEIC. Riprova con Internet attivo oppure usa JPG.'))
   document.head.appendChild(script)
  }).catch(e=>{converterTask=null;throw e})
  return converterTask!

@@ -8,8 +8,8 @@ import {heicConverter} from '../profile/imageProcessing'
 export const MAX_CHECK_PHOTO_BYTES = 1_000_000 // strict decimal MB, Storage rule must match
 export const MAX_CHECK_INPUT_BYTES = 40 * 1024 * 1024
 const TARGET_BYTES = 940_000 // breathing space under the server-side limit
-const EXTENSIONS = /\.(jpe?g|png|webp|heic|heif|avif|gif|bmp|tiff?)$/i
-const MIMES = /^image\/(jpeg|png|webp|heic|heif|heic-sequence|heif-sequence|avif|gif|bmp|tiff)$/i
+const EXTENSIONS = /\.(jpe?g|jfif|png|webp|heic|heif|avif|gif|bmp|tiff?)$/i
+const MIMES = /^image\/(jpeg|pjpeg|jfif|png|webp|heic|heif|heic-sequence|heif-sequence|avif|gif|bmp|tiff)$/i
 
 export function supportedCheckPhoto(file:Pick<File,'name'|'type'|'size'>):boolean {
  return Number.isFinite(file.size) && file.size > 0 && file.size <= MAX_CHECK_INPUT_BYTES &&
@@ -61,7 +61,7 @@ export async function compressCheckPhoto(file:File):Promise<Blob> {
   throw new Error('Dimensioni foto non valide o eccessive.')
  // Retain aspect ratio and avoid upscaling. Try large/high quality first; reduce only if needed.
  const longest=Math.max(img.naturalWidth,img.naturalHeight)
- for(const requestedSize of [2560,2200,1920,1600,1360,1120,900,720]){
+ for(const requestedSize of [2200,1920,1600,1360,1120,900,720]){
   const scale=Math.min(1,requestedSize/longest)
   const canvas=document.createElement('canvas')
   canvas.width=Math.max(1,Math.round(img.naturalWidth*scale))
@@ -71,7 +71,7 @@ export async function compressCheckPhoto(file:File):Promise<Blob> {
   // Transparent source image becomes white for consistent full-body photo previews.
   ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height)
   ctx.drawImage(img,0,0,canvas.width,canvas.height)
-  for(const quality of [.92,.86,.79,.70,.60,.48,.36]){
+  for(const quality of [.86,.73,.59,.44]){
    const blob=await toJpeg(canvas,quality)
    if(blob.size<TARGET_BYTES)return blob
   }

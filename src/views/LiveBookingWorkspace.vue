@@ -524,13 +524,13 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
      </section>
      <p v-lf-quiet-loading v-if="rowsLoading" class="muted lf-quiet-status" role="status">Caricamento appuntamenti…</p>
      <section v-else-if="upcomingMode" class="lf-agenda-list" v-lf-entrance="{id:'agenda-list',premiumOnly:true,rows:[{match:'.lf-agenda-group'}]}"><div class="row between"><h2>{{upcoming.length}} appuntamenti</h2><small class="muted">Prossimi 31 giorni</small></div>
-      <div v-if="!upcoming.length&&!calendarWarning" class="panel muted lf-agenda-empty" role="status"><LionIcon name="calendar" :size="26"/><strong>Nessun appuntamento in programma</strong><small>Prova a modificare i filtri oppure crea una nuova prenotazione.</small></div>
+      <div v-if="!upcoming.length&&!calendarWarning" class="panel muted lf-agenda-empty" role="status"><span class="lf-r21c-empty-icon"><LionIcon name="calendar" :size="27"/></span><strong>Nessun appuntamento in programma</strong><small>Prova a modificare i filtri oppure crea una nuova prenotazione.</small><div class="lf-r21c-empty-actions"><button v-if="coachInboxEnabled()&&session" type="button" class="primary" @click="coachAppointmentOpen=true"><LionIcon name="calendar-plus" :size="16"/> Nuova prenotazione</button><button type="button" class="secondary" @click="coachTab='disponibilita'">Gestisci disponibilità</button></div></div>
       <div v-for="group in agendaGroups" :key="group.date" class="lf-agenda-group"><h3>{{dateTitle(group.date)}}</h3><div v-for="b in group.bookings" :key="b.id" class="lf-agenda-record"><button type="button" class="lf-agenda-row" :aria-expanded="expandedBooking===b.id" @click="toggleDetails(b.id)"><div class="lf-agenda-time"><b>{{formatTime(b.startMs)}}–{{endTime(b)}}</b><small class="lf-agenda-state">{{showStatus(b)}}</small></div><div class="lf-agenda-person"><strong>{{nameLabel(b.athleteId)}}</strong><small>{{b.discipline}} · {{coachLabel(b.coachId)}} · {{groupLabel(b.participantCount)}}</small></div><i class="coach-dot" :class="coachColor(b.coachId)"/><LionIcon name="chevron" :size="17"/></button><div v-if="expandedBooking===b.id" class="lf-agenda-detail"><p v-if="b.createdByCoach" class="small"><strong>Fissato dal coach</strong></p><p v-if="b.note" style="white-space:pre-wrap;overflow-wrap:anywhere">{{b.note}}</p><p>{{displayService(b.service)}} · {{groupLabel(b.participantCount)}} · {{b.durationMinutes}} min · {{dateTitle(group.date)}}</p><button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla appuntamento</button></div></div></div>
      </section>
-     <section v-else-if="view==='day'" class="panel booking-period"><h3>{{selectedDate}} · {{todayEvents.length}} {{uiText("appuntamenti")}}</h3>
+     <section v-else-if="view==='day'" class="panel booking-period"><h3>{{dateTitle(selectedDate)}} · {{todayEvents.length}} {{uiText("appuntamenti")}}</h3>
       <p v-if="!todayEvents.length&&!calendarWarning" class="muted">Nessun appuntamento.</p><div v-for="b in todayEvents" :key="b.id" class="lf-agenda-record"><button type="button" class="lf-agenda-row" :aria-expanded="expandedBooking===b.id" @click="toggleDetails(b.id)"><div class="lf-agenda-time"><b>{{formatTime(b.startMs)}}–{{endTime(b)}}</b><small :class="{'lf-agenda-state':showStatus(b)==='Confermato'}">{{showStatus(b)}}</small></div><div class="lf-agenda-person"><strong>{{nameLabel(b.athleteId)}}</strong><small>{{b.discipline}} · {{coachLabel(b.coachId)}} · {{groupLabel(b.participantCount)}}</small></div><i class="coach-dot" :class="coachColor(b.coachId)"/><LionIcon name="chevron" :size="17"/></button><div v-if="expandedBooking===b.id" class="lf-agenda-detail"><p v-if="b.createdByCoach" class="small"><strong>Fissato dal coach</strong></p><p v-if="b.note" style="white-space:pre-wrap;overflow-wrap:anywhere">{{b.note}}</p><p>{{displayService(b.service)}} · {{groupLabel(b.participantCount)}} · {{b.durationMinutes}} min</p><button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla appuntamento</button></div></div>
      </section>
-     <section v-else-if="view==='week'" class="panel booking-period"><h3>{{uiText("Settimana del")}} {{weekDates[0]}} · {{events.length}} {{uiText("appuntamenti")}}</h3>
+     <section v-else-if="view==='week'" class="panel booking-period"><h3>{{uiText("Settimana del")}} {{dateTitle(weekDates[0])}} · {{events.length}} {{uiText("appuntamenti")}}</h3>
       <div v-for="day in weekDates" :key="day" class="week-event-day"><strong>{{dateTitle(day)}}</strong><span class="event-count">{{eventsOn(day).length}}</span><p v-if="!eventsOn(day).length" class="small muted">Nessun appuntamento</p><div v-for="b in eventsOn(day)" :key="b.id" class="lf-agenda-record"><button type="button" class="lf-agenda-row" :aria-expanded="expandedBooking===b.id" @click="toggleDetails(b.id)"><div class="lf-agenda-time"><b>{{formatTime(b.startMs)}}–{{endTime(b)}}</b><small :class="{'lf-agenda-state':showStatus(b)==='Confermato'}">{{showStatus(b)}}</small></div><div class="lf-agenda-person"><strong>{{nameLabel(b.athleteId)}}</strong><small>{{b.discipline}} · {{coachLabel(b.coachId)}} · {{groupLabel(b.participantCount)}}</small></div><i class="coach-dot" :class="coachColor(b.coachId)"/><LionIcon name="chevron" :size="17"/></button><div v-if="expandedBooking===b.id" class="lf-agenda-detail"><p v-if="b.createdByCoach" class="small"><strong>Fissato dal coach</strong></p><p v-if="b.note" style="white-space:pre-wrap;overflow-wrap:anywhere">{{b.note}}</p><p>{{displayService(b.service)}} · {{groupLabel(b.participantCount)}} · {{b.durationMinutes}} min</p><button v-if="canRemove(b)" class="danger" :disabled="busy" @click="cancelBookingRow(b)">Annulla appuntamento</button></div></div></div>
      </section>
      <section v-else class="panel booking-period"><h3>{{monthLabel}} · {{events.length}} {{uiText("appuntamenti")}}</h3>
@@ -541,8 +541,9 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
      
     </template>
     <AgendaCompetitions v-else-if="coachTab==='competizioni'&&competitionEnabled&&session" :session="session" :events="competitionEvents" :entries="competitionEntries" mode="events" :initial-event-id="selectedCompetitionId" :now="nowMs" :loading="competitionLoading" @back="coachTab='calendario'"/>
-    <template v-else><section class="panel coach-availability-compact"><h2>{{uiText("Disponibilità del Coach autenticato")}}</h2><p class="muted coach-availability-intro">{{uiText("Solo il Coach proprietario può salvare la propria configurazione. Il titolare può preparare slot degli altri Coach solo con funzioni amministrative dedicate, qui disabilitate.")}}</p>
+    <template v-else><section class="panel coach-availability-compact lf-r21c-availability"><div class="lf-r21c-section-head"><div><h2>{{uiText("Disponibilità del Coach autenticato")}}</h2><p class="muted coach-availability-intro">{{uiText("Solo il Coach proprietario può salvare la propria configurazione. Il titolare può preparare slot degli altri Coach solo con funzioni amministrative dedicate, qui disabilitate.")}}</p></div><span v-if="draft" class="lf-r21c-availability-state" :class="{'is-active':draft.active}">{{draft.active?'Disponibilità attiva':'Disponibilità non attiva'}}</span></div>
       <template v-if="draft">
+       <section class="lf-r21c-settings-group" aria-label="Configurazione del Coach"><h3>Impostazioni prenotazione</h3>
        <label>{{uiText("Nome pubblico del Coach")}}<input :value="draft.displayName" maxlength="100" @input="draft.displayName=($event.target as HTMLInputElement).value;editConfig()"/></label>
        <label class="checkline"><input :checked="draft.active" type="checkbox" @change="draft.active=($event.target as HTMLInputElement).checked;editConfig()"/> {{uiText("Disponibilità attiva")}}</label>
        <div class="grid2 coach-availability-fields"><label class="checkline"><input :checked="draft.services.fighter" type="checkbox" @change="draft.services.fighter=($event.target as HTMLInputElement).checked;editConfig()"/> {{uiText("FIGHTER abilitato")}}</label>
@@ -554,6 +555,7 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
         <label>{{uiText("Prenotabile entro (giorni)")}}<input type="number" min="1" max="30" :value="draft.maxDays" @input="draft.maxDays=Number(($event.target as HTMLInputElement).value);editConfig()"/></label>
        </div><div class="grid2 coach-availability-period"><label>{{uiText("Validità disponibilità")}}<select :value="draft.mode||'always'" @change="draft.mode=($event.target as HTMLSelectElement).value as 'always'|'period';editConfig()"><option value="always">{{uiText("Sempre")}}</option><option value="period">{{uiText("Solo per un periodo")}}</option></select></label></div>
        <div v-if="draft.mode==='period'" class="grid2"><label>{{uiText("Dal")}}<input type="date" :value="draft.from" @change="draft.from=($event.target as HTMLInputElement).value;editConfig()"/></label><label>Al<input type="date" :value="draft.to" @change="draft.to=($event.target as HTMLInputElement).value;editConfig()"/></label></div>
+       </section><section class="lf-r21c-settings-group lf-r21c-weekly" aria-label="Orario settimanale">
        <h3 class="coach-availability-heading">{{uiText("Settimana tipo · massimo 4 fasce per giorno")}}</h3>
        <button class="secondary" type="button" @click="fillDefaultWeek">{{uiText("Precompila Lun–Sab 09:00–13:00 (solo modulo)")}}</button>
        <div class="availability-grid coach-availability-week"><div v-for="day in weekdays" :key="day.id" class="line-card"><div class="row between"><strong>{{day.label}}</strong><input type="checkbox" :checked="draft.weekly[day.id as keyof typeof draft.weekly]?.enabled??false" @change="setWeeklyDay(day.id,'enabled',($event.target as HTMLInputElement).checked)"/></div>
@@ -561,20 +563,21 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
          <input class="coach-time-input" type="time" step="1800" :value="bandTo(band)" @change="draft!.weekly[day.id as keyof typeof draft.weekly]!.ranges[i]={from:bandFrom(band),to:($event.target as HTMLInputElement).value};editConfig()"/>
          <button type="button" class="bare" :disabled="(draft.weekly[day.id as keyof typeof draft.weekly]?.ranges.length||0)<=1" @click="removeBand(day.id,i)">×</button></div>
         <button class="ghost" :disabled="(draft.weekly[day.id as keyof typeof draft.weekly]?.ranges.length||0)>=4" @click="addBand(day.id)">{{uiText("+ Fascia")}}</button></div></div>
-       <h3>{{uiText("Eccezioni e ferie")}}</h3><div class="grid2"><label>{{uiText("Giorno")}}<input v-model="exceptDate" type="date"/></label><label>{{uiText("Tipo")}}<select v-model="exceptKind"><option value="closed">{{uiText("Chiudi questo giorno")}}</option><option value="special">{{uiText("Orario speciale")}}</option></select></label>
+       </section><details class="lf-r21c-settings-group lf-r21c-fold"><summary><span>Eccezioni e ferie</span><small>{{Object.keys(draft.exceptions||{}).length}} eccezioni · {{(draft.holidays||[]).length}} periodi ferie</small></summary><div class="lf-r21c-fold-content"><div class="grid2"><label>{{uiText("Giorno")}}<input v-model="exceptDate" type="date"/></label><label>{{uiText("Tipo")}}<select v-model="exceptKind"><option value="closed">{{uiText("Chiudi questo giorno")}}</option><option value="special">{{uiText("Orario speciale")}}</option></select></label>
         <label v-if="exceptKind==='special'">{{uiText("Dalle")}}<input v-model="exceptFrom" type="time" step="1800"/></label><label v-if="exceptKind==='special'">{{uiText("Alle")}}<input v-model="exceptTo" type="time" step="1800"/></label></div>
        <button class="secondary" @click="addException">{{uiText("+ Aggiungi eccezione")}}</button>
        <div v-for="(val,date) in draft.exceptions||{}" :key="date" class="row"><small>{{date}} · {{val.enabled?'Orario speciale':'Chiuso'}}</small><button class="bare" @click="removeException(String(date))">{{uiText("Rimuovi")}}</button></div>
        <div class="grid2"><label>{{uiText("Ferie dal")}}<input v-model="holidayFrom" type="date"/></label><label>{{uiText("Ferie al")}}<input v-model="holidayTo" type="date"/></label></div><button class="secondary" @click="addHoliday">{{uiText("+ Aggiungi ferie")}}</button>
-       <div v-for="(holiday,i) in draft.holidays||[]" :key="i" class="row"><small>{{uiText("Ferie")}} {{holiday.from}} — {{holiday.to}}</small><button class="bare" @click="removeHoliday(i)">{{uiText("Rimuovi")}}</button></div>
+       <div v-for="(holiday,i) in draft.holidays||[]" :key="i" class="row"><small>{{uiText("Ferie")}} {{holiday.from}} — {{holiday.to}}</small><button class="bare" @click="removeHoliday(i)">{{uiText("Rimuovi")}}</button></div></div></details>
+       <div class="lf-r21c-save-group"><p v-if="edited" class="lf-r21c-unsaved" role="status">Hai modifiche non salvate. Conferma per aggiornare la disponibilità.</p>
        <p class="muted small">{{uiText("Salvare sincronizza fino a 30 giorni di slot. Quelli aperti non più validi vengono ritirati; le prenotazioni confermate non vengono cancellate. In caso di errore la disponibilità resta inattiva finché non ripeti il salvataggio.")}}</p>
        
-       <button class="primary wide" :disabled="busy||status!=='ready'" @click="persistAvailability">{{busy?'Sincronizzazione in corso…':uiText("Salva disponibilità (30 giorni)")}}</button><p v-if="availabilityProgress" class="small green lf-availability-progress" role="status" aria-live="polite">{{availabilityProgress}}</p>
-       <hr/><h3>{{uiText("Prepara slot del giorno selezionato")}}</h3><p class="muted small">{{uiText("Crea soltanto slot mancanti e futuri da 30 minuti; non sovrascrive mai quelli esistenti o prenotati.")}}</p>
+       <button class="primary wide" :disabled="busy||status!=='ready'" @click="persistAvailability">{{busy?'Sincronizzazione in corso…':uiText("Salva disponibilità (30 giorni)")}}</button><p v-if="availabilityProgress" class="small green lf-availability-progress" role="status" aria-live="polite">{{availabilityProgress}}</p></div>
+       <details class="lf-r21c-settings-group lf-r21c-fold"><summary><span>Preparazione manuale degli slot</span><small>Strumenti avanzati · nessuna sovrascrittura delle prenotazioni</small></summary><div class="lf-r21c-fold-content"><h3>{{uiText("Prepara slot del giorno selezionato")}}</h3><p class="muted small">{{uiText("Crea soltanto slot mancanti e futuri da 30 minuti; non sovrascrive mai quelli esistenti o prenotati.")}}</p>
        <input v-model="selectedDate" type="date"/>
        <button class="primary wide" :disabled="busy||!myConfig||edited" @click="prepareDay">{{uiText("Prepara slot del")}} {{selectedDate}}</button>
        <button class="secondary wide" :disabled="busy||!myConfig||edited" @click="prepareNextWeek">{{uiText("Prepara i prossimi 7 giorni")}}</button>
-       <p v-if="edited" class="small muted">{{uiText("Salva prima la configurazione per preparare nuovi slot.")}}</p>
+       <p v-if="edited" class="small muted">{{uiText("Salva prima la configurazione per preparare nuovi slot.")}}</p></div></details>
       </template>
      </section></template>
    </template>
@@ -814,4 +817,49 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
 <style>
 /* R9 targeted override: supersedes the legacy mobile 120px intro spacer. */
 .app.as-athlete .main-layout.booking-in-shell .lf-agenda13[data-r9-athlete="true"] .booking-intro{min-height:0!important;padding:0!important;margin:0!important}
+</style>
+
+<style scoped>
+/* R21C — Desktop Agenda polish. Only styles; all Firestore operations stay in existing methods. */
+.lf-agenda13.lf-agenda-coach .booking-intro{padding-bottom:2px}
+.lf-agenda13.lf-agenda-coach .lf-agenda-coach-commandbar .lf-agenda-main{border-radius:10px}
+.lf-agenda13.lf-agenda-coach .lf-agenda-coach-commandbar .lf-agenda-main button{border-radius:7px!important}
+.lf-agenda13.lf-agenda-coach .lf-agenda-toolbar{border-radius:10px}
+.lf-agenda13.lf-agenda-coach .lf-agenda-controls select,
+.lf-agenda13.lf-agenda-coach .lf-agenda-controls button{border-radius:7px}
+.lf-agenda-coach .lf-agenda-empty{gap:11px!important;padding:27px 18px!important;border-radius:10px!important}
+.lf-agenda-coach .lf-agenda-empty .lf-r21c-empty-icon{display:grid;place-items:center;width:48px;height:48px;background:var(--green-bg);border:1px solid var(--border);border-radius:10px}
+.lf-r21c-empty-actions{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:4px}
+.lf-r21c-empty-actions button{min-height:40px;padding:9px 15px;border-radius:7px;display:inline-flex;align-items:center;gap:7px;font-size:12px}
+.lf-r21c-empty-actions button:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.lf-r21c-availability{display:grid;gap:14px;padding:16px!important;border-radius:10px}
+.lf-r21c-availability .lf-r21c-section-head{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.lf-r21c-availability .lf-r21c-section-head>div{min-width:0;flex:1 1 340px}
+.lf-r21c-availability .lf-r21c-section-head h2{font-size:21px}
+.lf-r21c-availability .lf-r21c-section-head p{margin-top:5px}
+.lf-r21c-availability-state{display:inline-flex;align-items:center;border:1px solid var(--border);background:var(--card2);color:var(--muted);padding:7px 10px;border-radius:7px;font-size:11px;font-weight:750;white-space:nowrap}
+.lf-r21c-availability-state.is-active{border-color:var(--mint);background:var(--green-bg);color:var(--mint)}
+.lf-r21c-settings-group{padding:14px;border:1px solid var(--border);border-radius:9px;background:var(--card2);min-width:0}
+.lf-r21c-settings-group>h3{font-size:14px;margin:0 0 12px}
+.lf-r21c-settings-group .coach-availability-heading{margin:0 0 10px}
+.lf-r21c-settings-group>.coach-availability-week{margin-top:10px}
+.lf-r21c-settings-group .line-card{background:var(--card);border-radius:8px}
+.lf-r21c-settings-group label{max-width:100%}
+.lf-r21c-fold{padding:0;overflow:visible}
+.lf-r21c-fold summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;padding:14px;list-style:none;color:var(--text);font-weight:800;font-size:14px}
+.lf-r21c-fold summary::-webkit-details-marker{display:none}
+.lf-r21c-fold summary::before{content:'+';color:var(--mint);font-size:18px;font-weight:700;line-height:1}
+.lf-r21c-fold[open] summary::before{content:'−'}
+.lf-r21c-fold summary span{flex:1}
+.lf-r21c-fold summary small{font-weight:500;color:var(--muted);font-size:11px}
+.lf-r21c-fold summary:focus-visible{outline:2px solid var(--mint);outline-offset:2px;border-radius:8px}
+.lf-r21c-fold-content{display:grid;gap:10px;border-top:1px solid var(--border);padding:13px 14px 14px}
+.lf-r21c-fold-content>h3{margin:0}
+.lf-r21c-fold-content>.grid2{margin:0}
+.lf-r21c-save-group{display:grid;gap:9px;border:1px solid var(--border);border-radius:9px;padding:13px;background:var(--card)}
+.lf-r21c-save-group>.primary{min-height:44px;border-radius:7px}
+.lf-r21c-save-group>p{margin:0}
+.lf-r21c-unsaved{border-left:3px solid var(--mint);background:var(--green-bg);padding:9px 11px;font-size:12px;color:var(--text)}
+@media(min-width:901px){.lf-agenda13.lf-agenda-coach{max-width:1180px}.lf-r21c-settings-group .coach-availability-fields{grid-template-columns:repeat(3,minmax(0,1fr))}.lf-r21c-settings-group .coach-availability-week{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:680px){.lf-r21c-availability{padding:12px!important;gap:10px}.lf-r21c-settings-group{padding:11px}.lf-r21c-fold{padding:0}.lf-r21c-fold summary{padding:12px;flex-wrap:wrap}.lf-r21c-fold summary small{width:100%;padding-left:26px}.lf-r21c-empty-actions{width:100%}.lf-r21c-empty-actions button{flex:1 1 100%;justify-content:center}}
 </style>

@@ -4,7 +4,7 @@ import {createSnapshotProjection} from './snapshotProjection'
 import {getApp} from 'firebase/app'
 import {getAuth} from 'firebase/auth'
 import {getFunctions,httpsCallable} from 'firebase/functions'
-import {getStorage,ref as storageRef,uploadBytes,getBlob,deleteObject} from 'firebase/storage'
+import {getStorage,ref as storageRef,uploadBytesResumable,getBlob,deleteObject} from 'firebase/storage'
 import type {ProgressSession,ProgressCheck,RecordedExercise,CheckPhoto} from '../../features/progress/progressModel'
 import {normalizeEntries,validDate,correctionValues,sameValues,workoutSlot,validWorkoutValues,type CorrectionHead} from '../../features/progress/progressModel'
 import {normalizeGoal,type ProgressGoal,type ProgressGoalStatus,type GoalInput} from '../../features/progress/goalsModel'
@@ -58,11 +58,21 @@ export async function recordCheck(db:Firestore,gym:string,athlete:string,date:st
  await setDoc(target,{schemaVersion:1,athleteId:athlete,performedOn:date,notes:notes.slice(0,500),createdBy:actor,createdAt:serverTimestamp(),photos})
  return target.id
 }
-export async function uploadCheckPhoto(gym:string,athlete:string,checkId:string,side:CheckPhoto['side'],blob:Blob):Promise<CheckPhoto>{
+export async function uploadCheckPhoto(gym:string,athlete:string,checkId:string,side:CheckPhoto['side'],blob:Blob,onProgress?:(percent:number)=>void,signal?:AbortSignal):Promise<CheckPhoto>{
  if(blob.type!=='image/jpeg'||blob.size>=MAX_CHECK_PHOTO_BYTES || blob.size===0)throw new Error('Foto troppo grande o formato non valido.')
+ if(signal?.aborted)throw new Error('Caricamento annullato per cambio account.')
  const path=`progress_photos/${segment(gym)}/${segment(athlete)}/${segment(checkId)}/${side}.jpg`
  const storage=privateStorage()
- await uploadBytes(storageRef(storage,path),blob,{contentType:'image/jpeg',customMetadata:{athleteId:athlete}})
+ const task=uploadBytesResumable(storageRef(storage,path),blob,{contentType:'image/jpeg',customMetadata:{athleteId:athlete}})
+ await new Promise<void>((resolve,reject)=>{
+  const cancel=()=>task.cancel()
+  signal?.addEventListener('abort',cancel,{once:true})
+  task.on('state_changed',snap=>onProgress?.(Math.round(100*snap.bytesTransferred/Math.max(1,snap.totalBytes))),error=>{
+   signal?.removeEventListener('abort',cancel);reject(error)
+  },()=>{signal?.removeEventListener('abort',cancel);resolve()})
+  if(signal?.aborted)cancel()
+ })
+ if(signal?.aborted)throw new Error('Caricamento interrotto per cambio account.')
  return {side,storagePath:path}
 }
 export async function loadPhoto(storagePath:string):Promise<string>{
@@ -80,6 +90,11 @@ export async function loadScopedCheckPhoto(scope:PhotoScope,p:PhotoRequest):Prom
  const url=await loadPhoto(p.storagePath)
  if(auth.currentUser?.uid!==scope.actorId){URL.revokeObjectURL(url);throw new Error('Sessione cambiata.')}
  return url
+}
+export async function removeStagedPhotoStrict(storagePath:string):Promise<void>{
+ if(!/^progress_photos\/[\w-]+\/[\w-]+\/[\w-]+\/(front|back|left|right)\.jpg$/.test(storagePath))throw new Error('Riferimento foto non valido.')
+ try{await deleteObject(storageRef(privateStorage(),storagePath))}
+ catch(error){if((error as {code?:string}).code!=='storage/object-not-found')throw new Error('Non riesco a eliminare la foto già inviata. Riprova con Internet attivo.')}
 }
 export async function removeStagedPhoto(storagePath:string):Promise<void>{
  if(!/^progress_photos\/[\w-]+\/[\w-]+\/[\w-]+\/(front|back|left|right)\.jpg$/.test(storagePath))return

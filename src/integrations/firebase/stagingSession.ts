@@ -5,6 +5,7 @@ import {doc,getDocFromServer,type DocumentSnapshot} from 'firebase/firestore'
 import {getStagingClients} from './stagingClient'
 import {isLiveMode,isTestMode,stagingTestGym} from './stagingConfig'
 import {clearOfflineForUser} from '../../features/progress/offlineWorkouts'
+import {pendingChecksFor} from '../../features/progress/checkPhotoQueue'
 import {isCurrentControlAccount,verifyPlatformAccess} from './platformAccess'
 import {resolveLegacyGymRole} from '../../features/auth/legacyRole'
 export type StagingSession={uid:string;email:string;gymId:string;role:'atleta'|'titolare'|'collaboratore';label:string}
@@ -80,6 +81,11 @@ export async function signOutStaging(){
  const {auth,db}=getStagingClients()
  const user=auth.currentUser
  if(user){const {disconnectPushBeforeLogout}=await import('./pushNotifications');if(!await disconnectPushBeforeLogout())return false}
+ if(user&&stagingSession.value?.uid===user.uid){
+  try{const count=await pendingChecksFor({projectId:db.app.options.projectId||'',gymId:stagingSession.value.gymId,uid:user.uid})
+   if(count&&!window.confirm(`${count} Check Zone ha foto ancora in attesa. Restano su questo dispositivo e saranno inviate quando rientrerai con lo stesso account. Su un dispositivo condiviso è preferibile completare prima l'invio. Uscire comunque?`))return false
+  }catch{if(!window.confirm('Non posso verificare le foto locali in attesa. Uscire comunque?'))return false}
+ }
  if(user&&!clearOfflineForUser(localStorage,db.app.options.projectId||'',user.uid,()=>window.confirm('Uscendo perderai le bozze e gli allenamenti non sincronizzati salvati sul dispositivo. Continuare?')))return false
  if(isLiveMode()){try{const {clearLinkedProfiles}=await import('./linkedProfiles');await clearLinkedProfiles()}catch(e){window.alert(e instanceof Error?e.message:'Impossibile scollegare i profili. Riprova.');return false}}
  stagingSession.value=null

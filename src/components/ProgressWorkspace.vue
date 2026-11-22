@@ -8,11 +8,12 @@ import {getStagingClients} from '../integrations/firebase/stagingClient'
 import {readStagingSession,readNavigationSession,type StagingSession} from '../integrations/firebase/stagingSession'
 import {isOperationalMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
 import {watchAthleteSheets} from '../integrations/firestore/sheets'
-import {watchProgress,watchChecks,watchGoals,addGoal,setGoalStatus,recordSession,recordCheck,uploadCheckPhoto,removeStagedPhoto,loadPhoto,checkCollection,correctWorkout,watchCorrectionHeads,deleteWorkout,watchRevisions,requestRevision,changeRevisionStatus,syncPendingWorkout,checkSharingEnabled,watchCheckShares,changeCheckShare,type ProgramRevision,type RevisionStatus} from '../integrations/firestore/progress'
+import {watchProgress,watchChecks,watchGoals,addGoal,setGoalStatus,recordSession,loadPhoto,checkCollection,correctWorkout,watchCorrectionHeads,deleteWorkout,watchRevisions,requestRevision,changeRevisionStatus,syncPendingWorkout,checkSharingEnabled,watchCheckShares,changeCheckShare,type ProgramRevision,type RevisionStatus} from '../integrations/firestore/progress'
 import {uniqueProgressSheets,emptyEntries,normalizeEntries,exerciseSeries,sheetSummary,progressMetrics,sheetPerformanceTimeline,setLabel,historySheets,historyExercises,matchesHistoryExercise,lastSet,applyCorrectionHeads,availableWorkoutSlots,type CorrectionHead,type WorkoutSet,type ProgressSheet,type RecordedExercise,type ProgressSession,type ProgressCheck,type CheckPhoto} from '../features/progress/progressModel'
 import {archiveItemFromRaw,type HistoricalArchive} from '../features/athletes/labArchive'
 import {shownGoals,statusLabel,type ProgressGoal,type ProgressGoalStatus} from '../features/progress/goalsModel'
-import {compressCheckPhoto,supportedCheckPhoto,MAX_CHECK_PHOTO_BYTES} from '../features/progress/checkPhotoCompression'
+import {supportedCheckPhoto} from '../features/progress/checkPhotoCompression'
+import {enqueueCheckPhotos} from '../features/progress/checkPhotoQueue'
 import {groupExerciseRows} from '../features/sheets/supersetEditor'
 import {substituteExercise} from '../features/sheets/approvedAlternatives'
 import {Capacitor} from '@capacitor/core'
@@ -321,22 +322,17 @@ function chooseFile(side:CheckPhoto['side'],event:Event){
  writeError.value='';selectedPhotos.value={...selectedPhotos.value,[side]:file}
 }
 async function saveCheck(){
- if(!context.value||!canWrite.value||busy.value||!online.value)return
+ if(!context.value||!canWrite.value||busy.value)return
  const files=Object.entries(selectedPhotos.value) as Array<[CheckPhoto['side'],File]>
  if(!files.length){writeError.value='Seleziona almeno una foto per creare il check.';return}
- busy.value=true;writeError.value='';notice.value='';const uploaded:CheckPhoto[]=[]
- const id=doc(checkCollection(getStagingClients().db,context.value.gymId,context.value.uid)).id
+ busy.value=true;writeError.value='';notice.value=''
+ const s=context.value
+ const id=doc(checkCollection(getStagingClients().db,s.gymId,s.uid)).id
  try{
-  for(const [index,[side,file]] of files.entries()){
-   photoStatus.value=`Ottimizzo foto ${index+1}/${files.length} · ${file.name.slice(0,28)}`
-   const resized=await compressCheckPhoto(file)
-   if(resized.size>=MAX_CHECK_PHOTO_BYTES)throw new Error('La foto supera il limite di 1 MB.')
-   photoStatus.value=`Carico foto ${index+1}/${files.length} · ${(resized.size/1024).toFixed(0)} KB`
-   uploaded.push(await uploadCheckPhoto(context.value.gymId,context.value.uid,id,side,resized))
-  }
-  await recordCheck(getStagingClients().db,context.value.gymId,context.value.uid,checkDate.value,checkNotes.value,uploaded,context.value.uid,id)
-  selectedPhotos.value={};checkNotes.value='';notice.value='Check Zone salvato. Foto archiviate privatamente. Apri lo storico per condividerle con i Coach, se desideri.'
- }catch(e){writeError.value=e instanceof Error?e.message:String(e);for(const p of uploaded)await removeStagedPhoto(p.storagePath)}finally{busy.value=false;photoStatus.value=''}
+  // Only a confirmed IndexedDB transaction allows leaving this screen without the originals.
+  await enqueueCheckPhotos({projectId:getStagingClients().db.app.options.projectId||'',gymId:s.gymId,uid:s.uid},{id,date:checkDate.value,notes:checkNotes.value,files:files.map(([side,file])=>({side,file}))})
+  if(context.value?.uid===s.uid){selectedPhotos.value={};checkNotes.value='';photoStatus.value='';notice.value='Foto acquisite sul dispositivo. L’invio prosegue in LionFit: vedrai la conferma solo dopo il salvataggio completo su Firebase. Se chiudi l’app, riprenderà alla riapertura.'}
+ }catch(e){writeError.value=e instanceof Error?e.message:String(e)}finally{busy.value=false}
 }
 async function saveGoal(){
  const s=context.value,id=athleteId.value
@@ -366,6 +362,18 @@ const workoutHub=[
  {id:'goals',icon:'trophy',title:'Obiettivi',detail:'I traguardi del Coach'},
  {id:'check',icon:'camera',title:'Foto progressi',detail:'Foto e confronti nel tempo'}
 ] as const
+// LIONFIT_R21D_COACH_TRAINING_2026 — Coach presentation only; no new data reads or mutations.
+const coachWorkoutSections=[
+ {id:'history',icon:'clock',title:'Storico allenamenti',detail:'Sessioni registrate'},
+ {id:'trend',icon:'progress',title:'Progressi',detail:'Carichi e andamento'},
+ {id:'multisport',icon:'progress',title:'Altri progressi',detail:'Risultati multisport'},
+ {id:'goals',icon:'trophy',title:'Obiettivi',detail:'Traguardi assegnati'},
+ {id:'check',icon:'camera',title:'Foto progressi',detail:'Check condivisi'},
+ {id:'report',icon:'save',title:'Report PDF',detail:'Esporta i risultati'},
+ {id:'review',icon:'edit',title:'Revisione programma',detail:'Richieste e stato'}
+] as const
+const coachCurrentSection=computed(()=>coachWorkoutSections.find(x=>x.id===tab.value)?.title||'Allenamenti')
+const coachPendingRevisions=computed(()=>revisions.value.filter(r=>r.status==='pending').length)
 function openRevisionForSheet(sheet:ProgressSheet|null){
  if(hasDraft.value&&!window.confirm('La registrazione in corso non è ancora salvata. Aprire la richiesta di revisione?'))return
  revisionSheet.value=sheet?.id||''
@@ -375,16 +383,23 @@ function openRevisionForSheet(sheet:ProgressSheet|null){
 </script>
 <template>
  <section class="lf-progress360 stack lf-r8-workout" v-lf-entrance="{id:'progress-hub',premiumOnly:true,ready:!loading,rows:[{match:'.lf-p360-head,.lf-p12-hero'},{within:'.lf-p12-hub',match:'button'}]}">
-  <header v-if="tab==='home'" class="lf-p360-head lf-r8a-title"><h1>{{role==='athlete'?'Allenamenti':'Allenamenti Atleta'}}</h1><p v-if="role==='athlete'" class="muted small">Le tue schede, i progressi e i risultati</p></header>
+  <header v-if="tab==='home'" class="lf-p360-head lf-r8a-title"><h1>{{role==='athlete'?'Allenamenti':'Allenamenti Atleta'}}</h1><p v-if="role==='athlete'" class="muted small">Le tue schede, i progressi e i risultati</p><p v-else class="muted small">Sessioni, risultati e obiettivi dell’atleta selezionato</p></header>
   <p v-if="error" class="notice lf-p360-error" role="alert">{{error}}</p>
   <p v-if="writeError" class="notice lf-p360-error" role="alert">{{writeError}}</p>
   <p v-if="notice" class="notice" role="status" :class="{'lf-premium-confirmed':lastSaved&&notice==='Allenamento salvato.'}"><svg v-if="lastSaved&&notice==='Allenamento salvato.'" class="lf-premium-success-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12 L9 17 L20 6" pathLength="100"/></svg>{{notice}}</p>
   <p v-lf-quiet-loading v-if="loading" class="muted lf-quiet-status" role="status">Caricamento allenamenti…</p>
-  <div v-if="role==='coach'" class="panel lf-p360-coach-selector"><label for="lf-p360-athlete">Seleziona Atleta</label><select id="lf-p360-athlete" :value="athleteId" @change="bindAthlete(($event.target as HTMLSelectElement).value)"><option v-for="a in athletes" :key="a.id" :value="a.id">{{a.name}}</option></select></div>
+  <div v-if="role==='coach'" class="panel lf-p360-coach-selector lf-r21d-selector">
+   <div class="lf-r21d-selector-heading"><label for="lf-p360-athlete">Atleta selezionato</label><small v-if="athletes.length" class="muted">{{athletes.length}} {{athletes.length===1?'atleta disponibile':'atleti disponibili'}}</small></div>
+   <select id="lf-p360-athlete" :value="athleteId" @change="bindAthlete(($event.target as HTMLSelectElement).value)"><option v-for="a in athletes" :key="a.id" :value="a.id">{{a.name}}</option></select>
+  </div>
   <div v-if="offlineError" class="notice lf-r8-sync" role="alert">{{offlineError}} <button v-if="online&&offlineState?.queue.length" type="button" class="secondary" :disabled="syncing" @click="flushOffline">Riprova</button></div>
   <p v-else-if="role==='athlete'&&online&&syncing&&offlineState?.queue.length" v-lf-quiet-loading class="lf-quiet-status" role="status">Sincronizzazione allenamento…</p>
   <div v-else-if="role==='athlete'&&online&&!syncing&&offlineState?.queue.length" class="notice lf-r8-sync" role="status">Allenamenti da sincronizzare <button class="secondary" type="button" @click="flushOffline">Riprova</button></div>
   <p v-else-if="role==='athlete'&&!online&&(!offlineState||offlineState.queue.length)" class="lf-r8-offline-note" role="status">{{offlineState?'Allenamenti in attesa di sincronizzazione.':'Nessuna connessione e nessuna copia locale.'}}</p>
+  <nav v-if="role==='coach'&&tab!=='home'&&athleteId" class="lf-r21d-breadcrumb" aria-label="Navigazione Allenamenti">
+   <button type="button" class="secondary" @click="navigateTab('home')"><LionIcon name="back" :size="15"/> Panoramica</button>
+   <span aria-current="page">{{coachCurrentSection}}</span>
+  </nav>
   <template v-if="!loading&&athleteId">
    <template v-if="tab==='home'">
     <section v-if="role==='athlete'" class="lf-p12-hero lf-r8a-hero" aria-label="Inizia il tuo allenamento">
@@ -405,15 +420,21 @@ function openRevisionForSheet(sheet:ProgressSheet|null){
       <LionIcon name="chevron" :size="17" class="lf-r8a-hub-arrow"/>
      </button>
     </nav>
-    <nav v-else class="lf-p12-hub" aria-label="Sezioni Allenamenti">
-     <button type="button" @click="navigateTab('history')"><b>◷ Storico allenamenti</b></button>
-     <button type="button" @click="navigateTab('trend')"><b>↗ Progressi</b></button>
-     <button type="button" @click="navigateTab('multisport')"><b>↗ Altri progressi</b></button>
-     <button type="button" @click="navigateTab('goals')"><b>◎ Obiettivi</b></button>
-     <button type="button" @click="navigateTab('check')"><b>▣ Foto progressi</b></button>
-     <button type="button" @click="navigateTab('report')"><b>▤ Report PDF</b></button>
-     <button type="button" @click="navigateTab('review')"><b>✎ Revisione programma</b><small v-if="revisions.some(r=>r.status==='pending')">{{revisions.filter(r=>r.status==='pending').length}} da valutare</small></button>
-    </nav>
+    <template v-else>
+     <div class="lf-r21d-kpis" aria-label="Riepilogo dell’atleta">
+      <div class="lf-r21d-kpi"><span>Sessioni caricate</span><strong>{{totalSessions}}</strong></div>
+      <div class="lf-r21d-kpi"><span>Esercizi registrati</span><strong>{{uniqueRecords}}</strong></div>
+      <div class="lf-r21d-kpi"><span>Schede disponibili</span><strong>{{sheets.length}}</strong></div>
+     </div>
+     <div class="lf-r21d-hub-head"><h2>Esplora gli allenamenti</h2><p class="muted small">Scegli una sezione per consultare i dati dell’atleta</p></div>
+     <nav class="lf-p12-hub lf-r21d-coach-hub" aria-label="Sezioni Allenamenti Coach">
+      <button v-for="item in coachWorkoutSections" :key="item.id" type="button" class="lf-r21d-hub-card" @click="navigateTab(item.id)">
+       <span class="lf-r21d-hub-icon"><LionIcon :name="item.icon" :size="20"/></span>
+       <span class="lf-r21d-hub-copy"><b>{{item.title}}</b><small>{{item.detail}}</small><small v-if="item.id==='review'&&coachPendingRevisions" class="lf-r21d-alert">{{coachPendingRevisions}} da valutare</small></span>
+       <LionIcon name="chevron" :size="15" class="lf-r21d-hub-chevron"/>
+      </button>
+     </nav>
+    </template>
     <button v-if="role==='athlete'" type="button" class="secondary lf-r8a-review-shortcut" @click="openRevisionForSheet(null)"><LionIcon name="edit" :size="18"/> Richiedi revisione programma <LionIcon name="chevron" :size="16"/></button>
    </template>
    <template v-if="tab==='record'&&role==='athlete'">
@@ -542,7 +563,7 @@ function openRevisionForSheet(sheet:ProgressSheet|null){
    </template>
    <template v-if="tab==='check'">
     <section class="panel lf-p360-card lf-r8a-check-section"><div class="lf-r8a-check-title"><span class="lf-r8a-check-mark"><LionIcon name="camera" :size="24"/></span><div><h2>Foto progressi</h2><p class="muted small">Confronta i cambiamenti fisici nel tempo. Le foto restano private finché non scegli di condividerle.</p></div></div>
-      <template v-if="role==='athlete'"><div class="lf-p360-date"><label for="lf-p360-checkdate">Data check</label><input id="lf-p360-checkdate" v-model="checkDate" type="date" :max="localDate()"/></div><div class="lf-p360-photo-grid"><label v-for="side in checkSides.map(s=>[s.id,s.label] as const)" :key="side[0]" class="lf-p360-photo-select"><img class="lf-r8a-photo-pose" src="/lionfit-r8a/photo-pose-placeholder.svg" alt="" loading="lazy"/><strong>{{side[1]}}</strong><small>{{cleanFile(selectedPhotos[side[0]])||'＋ Aggiungi'}}</small><input type="file" accept="image/*,.heic,.heif,.avif,.bmp,.tif,.tiff" :disabled="busy" @change="chooseFile(side[0],$event)"/></label></div><label class="lf-p360-field-label">Note facoltative <textarea v-model="checkNotes" maxlength="500" rows="2" placeholder="Come ti senti, dettagli utili…"/></label><p v-if="photoStatus" class="muted small lf-p360-photo-status" role="status">{{photoStatus}}</p><p class="muted small">HEIC/HEIF può richiedere Internet. La compressione può ridurre i dettagli.</p><button class="primary lf-p360-main-button" :disabled="!canWrite||busy||!online" @click="saveCheck">{{busy?'Ottimizzazione e caricamento…':'＋ Salva nuovo check'}}</button><p v-if="!canWrite" class="muted small">Caricamento foto non disponibile.</p></template>
+      <template v-if="role==='athlete'"><div class="lf-p360-date"><label for="lf-p360-checkdate">Data check</label><input id="lf-p360-checkdate" v-model="checkDate" type="date" :max="localDate()"/></div><div class="lf-p360-photo-grid"><label v-for="side in checkSides.map(s=>[s.id,s.label] as const)" :key="side[0]" class="lf-p360-photo-select"><img class="lf-r8a-photo-pose" src="/lionfit-r8a/photo-pose-placeholder.svg" alt="" loading="lazy"/><strong>{{side[1]}}</strong><small>{{cleanFile(selectedPhotos[side[0]])||'＋ Aggiungi'}}</small><input type="file" accept="image/*,.jfif,.heic,.heif,.avif,.bmp,.tif,.tiff" :disabled="busy" @change="chooseFile(side[0],$event)"/></label></div><label class="lf-p360-field-label">Note facoltative <textarea v-model="checkNotes" maxlength="500" rows="2" placeholder="Come ti senti, dettagli utili…"/></label><p class="muted small lf-p360-photo-status">Le foto vengono conservate sul dispositivo prima dell'invio. Puoi usare LionFit mentre vengono elaborate; la conferma definitiva arriva solo dopo il salvataggio su Firebase. Se chiudi l'app, l'invio riprende alla riapertura. HEIC/HEIF può richiedere Internet.</p><button class="primary lf-p360-main-button" :disabled="!canWrite||busy" @click="saveCheck">{{busy?'Acquisizione foto…':'＋ Acquisisci e invia foto'}}</button><p v-if="!canWrite" class="muted small">Caricamento foto non disponibile.</p></template>
      <p v-else class="muted small">Consultazione Coach: puoi vedere soltanto i check fotografici condivisi esplicitamente dall'Atleta.</p>
     </section>
     <p v-lf-quiet-loading v-if="checksState==='loading'" class="muted small lf-quiet-status" role="status">Sincronizzazione foto progressi…</p>
@@ -667,4 +688,38 @@ function openRevisionForSheet(sheet:ProgressSheet|null){
  .lf-r5-focus .lf-r19a-footer{gap:3px!important;padding-top:4px!important}
 }
 
+</style>
+
+<!-- LIONFIT_R21D_COACH_TRAINING_STYLE_2026 -->
+<style scoped>
+/* R21D: presentation-only coach hub. Athlete UI and Focus Mode remain untouched. */
+.lf-progress360 .lf-r21d-selector{padding:12px 15px;display:grid;gap:7px}
+.lf-r21d-selector-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.lf-r21d-selector-heading label{margin:0;font-weight:750;font-size:12px}
+.lf-r21d-selector-heading small{font-size:11px}
+.lf-progress360 .lf-r21d-selector select{margin:0;min-height:42px}
+.lf-r21d-breadcrumb{display:flex;align-items:center;gap:12px;min-height:37px;flex-wrap:wrap;font-size:12px;font-weight:700}
+.lf-r21d-breadcrumb button{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 11px;min-height:36px;font-size:12px}
+.lf-r21d-breadcrumb span{color:var(--muted);overflow-wrap:anywhere}
+.lf-r21d-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.lf-r21d-kpi{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:6px;padding:11px 13px;min-height:74px;border:1px solid var(--border);border-radius:8px;background:var(--card);min-width:0}
+.lf-r21d-kpi span{font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.045em;color:var(--muted)}
+.lf-r21d-kpi strong{font-size:clamp(20px,2.1vw,27px);font-weight:850;line-height:1;color:var(--mint)}
+.lf-r21d-hub-head{display:grid;gap:3px;margin:5px 0 0}
+.lf-r21d-hub-head h2{font-size:16px;margin:0}
+.lf-r21d-hub-head p{margin:0;font-size:11px}
+.lf-progress360 .lf-r21d-coach-hub{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.lf-progress360 .lf-r21d-coach-hub .lf-r21d-hub-card{min-height:79px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;position:relative;padding:11px 24px 11px 12px;border-radius:8px;transition:border-color .2s ease,background-color .2s ease;min-width:0}
+.lf-r21d-hub-icon{flex:none;display:grid;place-items:center;width:37px;height:37px;color:var(--mint);background:var(--green-bg);border-radius:8px}
+.lf-r21d-hub-copy{display:grid;gap:3px;min-width:0}
+.lf-progress360 .lf-r21d-hub-copy b{font-size:12px;line-height:1.25;overflow-wrap:anywhere}
+.lf-progress360 .lf-r21d-hub-copy small{font-size:10px;line-height:1.3;color:var(--muted)}
+.lf-progress360 .lf-r21d-hub-copy .lf-r21d-alert{color:var(--mint);font-weight:800}
+.lf-r21d-hub-chevron{position:absolute;right:7px;top:50%;transform:translateY(-50%);opacity:.55;pointer-events:none}
+.lf-progress360 .lf-r21d-coach-hub .lf-r21d-hub-card:hover{border-color:var(--mint);background:var(--green-bg)}
+.lf-progress360 .lf-r21d-coach-hub .lf-r21d-hub-card:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+@media(max-width:1050px){.lf-progress360 .lf-r21d-coach-hub{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:740px){.lf-progress360 .lf-r21d-coach-hub{grid-template-columns:repeat(2,minmax(0,1fr))}.lf-progress360 .lf-r21d-coach-hub .lf-r21d-hub-card{min-height:80px;padding:10px 20px 10px 9px;gap:7px}.lf-r21d-hub-icon{width:31px;height:31px}.lf-r21d-kpi{padding:9px;min-height:66px}.lf-r21d-kpi span{font-size:9px}}
+@media(max-width:350px){.lf-r21d-kpis{gap:5px}.lf-progress360 .lf-r21d-coach-hub{gap:7px}.lf-r21d-hub-icon{display:none}.lf-progress360 .lf-r21d-coach-hub .lf-r21d-hub-card{padding:9px 18px 9px 8px}}
+@media(prefers-reduced-motion:reduce){.lf-progress360 .lf-r21d-coach-hub .lf-r21d-hub-card{transition:none}}
 </style>

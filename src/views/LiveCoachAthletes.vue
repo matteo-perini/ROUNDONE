@@ -551,6 +551,26 @@ function alignMaintenance(){
   return `Archivio: ${report.created} copie create, ${report.alreadyPresent} già protette, ${report.pending} ancora da verificare.`
  })
 }
+// R21B — Menu azioni delle schede: solo presentazione, nessuna modifica a Firestore.
+function closeAssignmentMoreMenu(event: Event){
+ const target=event.currentTarget
+ const details=target instanceof Element?target.closest('details.lf-assignment-more'):null
+ if(details instanceof HTMLDetailsElement)details.open=false
+}
+function closeAssignmentMoreOnBlur(event: FocusEvent){
+ const details=event.currentTarget
+ if(!(details instanceof HTMLDetailsElement))return
+ const next=event.relatedTarget
+ if(!(next instanceof Node)||!details.contains(next))details.open=false
+}
+function onAssignmentMoreToggle(event: Event){
+ const current=event.currentTarget
+ if(!(current instanceof HTMLDetailsElement)||!current.open)return
+ const host=current.closest('.coach-athletes-screen')
+ host?.querySelectorAll('details.lf-assignment-more[open]').forEach(item=>{
+  if(item!==current && item instanceof HTMLDetailsElement)item.open=false
+ })
+}
 function editPersonal(sheet:Personal){
  if(!athlete.value)return
  void router.push({path:'/coach/archivio',query:{athleteId:athlete.value.id,mode:'personal',editPersonalId:sheet.id,...(week.value?{weekId:week.value.id}:{})}})
@@ -647,12 +667,49 @@ function copyToArchive(sheet:Personal){
   </div>
  </section>
  <p v-if="message" class="notice" role="status">{{message}}</p>
- <div v-if="data" class="grid2 assignment-columns"><section class="panel assignment-panel"><h3>{{uiText("📄 SCHEDE SINGOLE SENZA PROGRAMMA")}}</h3>
-  <div class="assignment-scroll"><div v-if="!groups?.unprogrammed.length" class="line-card">{{uiText("Nessuna scheda singola senza programma.")}}</div><div v-for="g in groups?.unprogrammed||[]" :key="g.sheet.id" class="line-card coach-v1-assignment-card"><b>🏋️ {{g.sheet.title}}</b><div class="assignment-actions"><button class="secondary" @click="opened=g.sheet">{{uiText("Visualizza")}}</button><button class="secondary" @click="editPersonal(g.sheet)">{{uiText("Modifica")}}</button><button class="secondary" @click="copyToArchive(g.sheet)">{{uiText("Copia nell'Archivio schede")}}</button><button class="danger" @click="trashUnusedPersonal(g.sheet)">{{uiText("Nel Cestino")}}</button></div></div></div>
- </section><section class="panel assignment-panel"><h3>{{uiText("🗓️ SCHEDE IN PROGRAMMA")}}</h3>
-  <div class="assignment-scroll"><div v-if="!groups?.programmed.length" class="line-card">{{uiText("Nessuna scheda in programma.")}}</div><div v-for="g in groups?.programmed||[]" :key="g.sheet.id" class="line-card coach-v1-assignment-card"><b>🏋️ {{g.sheet.title}}</b><p class="small green">{{linksLabel(g.links)}}</p><div class="assignment-actions"><button class="secondary" @click="opened=g.sheet">{{uiText("Visualizza")}}</button><button class="secondary" @click="editPersonal(g.sheet)">{{uiText("Modifica")}}</button><button class="secondary" @click="copyToArchive(g.sheet)">{{uiText("Copia nell'Archivio schede")}}</button><button class="secondary" @click="manageDays(g.links)">{{uiText("Gestisci giorni")}}</button><button class="danger" @click="showDelete={title:g.sheet.title,links:g.links}">{{uiText("Cancella")}}</button></div></div></div>
- </section></div>
- 
+ <div v-if="data" class="grid2 assignment-columns">
+  <section class="panel assignment-panel">
+   <h3>{{uiText("📄 SCHEDE SINGOLE SENZA PROGRAMMA")}}</h3>
+   <div class="assignment-scroll">
+    <div v-if="!groups?.unprogrammed.length" class="line-card">{{uiText("Nessuna scheda singola senza programma.")}}</div>
+    <div v-for="g in groups?.unprogrammed||[]" :key="g.sheet.id" class="line-card coach-v1-assignment-card">
+     <b>🏋️ {{g.sheet.title}}</b>
+     <div class="assignment-actions">
+      <button class="secondary" type="button" @click="opened=g.sheet">{{uiText("Visualizza")}}</button>
+      <button class="secondary" type="button" @click="editPersonal(g.sheet)">{{uiText("Modifica")}}</button>
+      <details class="lf-assignment-more" @toggle="onAssignmentMoreToggle" @focusout="closeAssignmentMoreOnBlur" @keydown.esc.stop.prevent="closeAssignmentMoreMenu">
+       <summary :aria-label="`Altre azioni per ${g.sheet.title}`" :title="`Altre azioni · ${g.sheet.title}`">⋯</summary>
+       <div class="lf-assignment-more-menu">
+        <button type="button" @click="closeAssignmentMoreMenu($event);copyToArchive(g.sheet)">{{uiText("Copia nell'Archivio schede")}}</button>
+        <button class="lf-more-danger" type="button" @click="closeAssignmentMoreMenu($event);trashUnusedPersonal(g.sheet)">{{uiText("Nel Cestino")}}</button>
+       </div>
+      </details>
+     </div>
+    </div>
+   </div>
+  </section>
+  <section class="panel assignment-panel">
+   <h3>{{uiText("🗓️ SCHEDE IN PROGRAMMA")}}</h3>
+   <div class="assignment-scroll">
+    <div v-if="!groups?.programmed.length" class="line-card">{{uiText("Nessuna scheda in programma.")}}</div>
+    <div v-for="g in groups?.programmed||[]" :key="g.sheet.id" class="line-card coach-v1-assignment-card">
+     <b>🏋️ {{g.sheet.title}}</b>
+     <p class="small green">{{linksLabel(g.links)}}</p>
+     <div class="assignment-actions">
+      <button class="secondary" type="button" @click="opened=g.sheet">{{uiText("Visualizza")}}</button>
+      <button class="secondary" type="button" @click="editPersonal(g.sheet)">{{uiText("Modifica")}}</button>
+      <details class="lf-assignment-more" @toggle="onAssignmentMoreToggle" @focusout="closeAssignmentMoreOnBlur" @keydown.esc.stop.prevent="closeAssignmentMoreMenu">
+       <summary :aria-label="`Altre azioni per ${g.sheet.title}`" :title="`Altre azioni · ${g.sheet.title}`">⋯</summary>
+       <div class="lf-assignment-more-menu">
+        <button type="button" @click="closeAssignmentMoreMenu($event);copyToArchive(g.sheet)">{{uiText("Copia nell'Archivio schede")}}</button>
+        <button class="lf-more-danger" type="button" @click="closeAssignmentMoreMenu($event);showDelete={title:g.sheet.title,links:g.links}">{{uiText("Cancella")}}</button>
+       </div>
+      </details>
+     </div>
+    </div>
+   </div>
+  </section>
+ </div> 
  <details class="panel" :open="showMaintenance" @toggle="showMaintenance=($event.target as HTMLDetailsElement).open"><summary>{{uiText("⚙ Manutenzione delle schede esistenti")}}</summary><p class="small muted">{{uiText("Le vecchie schede possono essere protette nell'Archivio. La manutenzione non cancella automaticamente schede o settimane.")}}</p><button class="primary" @click="alignMaintenance">{{uiText("Allinea schede delle settimane (manutenzione)")}}</button></details>
  <section class="panel coach-program-compact lf-program-v2" aria-label="Programmazione settimanale Atleta">
   <div class="row between lf-program-v2-heading"><div><h2>PROGRAMMI DELL’ATLETA</h2><p class="small muted">{{programs.length}} programmi · {{allActiveWeeks.length}} settimane · Seleziona un programma e la sua settimana</p></div><span class="pill pill-neutral">{{currentWeeks.length}} SETTIMANE SELEZIONATE</span></div>
@@ -858,4 +915,59 @@ function copyToArchive(sheet:Personal){
 :global(.theme-light) .lf-p11-date-label input[type=date]::-webkit-calendar-picker-indicator{filter:brightness(0);opacity:1}
 .lf-p11-date-label input[type=date]:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
 @media(max-width:550px){.lf-p11-program-row{padding:7px}.lf-p11-program-header strong{font-size:11px}}
+
+/* R21B — Schede atleta: altezza naturale e azioni essenziali in vista. */
+.coach-athletes-screen .assignment-columns{align-items:start!important}
+.coach-athletes-screen .assignment-columns>.assignment-panel{
+ align-self:start!important;height:auto!important;min-height:0;overflow:visible!important;
+}
+.coach-athletes-screen .assignment-columns .assignment-scroll{
+ max-height:none!important;overflow:visible!important;overscroll-behavior:auto!important;
+}
+.coach-athletes-screen .coach-v1-assignment-card .assignment-actions{
+ display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 38px!important;
+ gap:6px!important;align-items:start;
+}
+.coach-athletes-screen .coach-v1-assignment-card .assignment-actions>button{
+ width:100%;min-width:0;min-height:34px!important;padding:6px 5px!important;
+}
+.coach-athletes-screen .lf-assignment-more{position:relative;min-width:0}
+.coach-athletes-screen .lf-assignment-more[open]{z-index:30}
+.coach-athletes-screen .lf-assignment-more>summary{
+ box-sizing:border-box;display:grid;place-items:center;list-style:none;
+ height:34px;width:38px;min-height:34px;padding:0;
+ border:1px solid var(--outline);border-radius:7px;background:var(--card2);
+ color:var(--text);font-size:22px;font-weight:800;line-height:1;
+ cursor:pointer;user-select:none;
+}
+.coach-athletes-screen .lf-assignment-more>summary::marker{content:''}
+.coach-athletes-screen .lf-assignment-more>summary::-webkit-details-marker{display:none}
+.coach-athletes-screen .lf-assignment-more>summary:hover,
+.coach-athletes-screen .lf-assignment-more[open]>summary{border-color:var(--mint);color:var(--mint)}
+.coach-athletes-screen .lf-assignment-more>summary:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.coach-athletes-screen .lf-assignment-more-menu{
+ position:absolute;right:0;top:calc(100% + 5px);z-index:31;
+ width:220px;max-width:calc(100vw - 48px);box-sizing:border-box;
+ display:grid;gap:4px;padding:6px;border:1px solid var(--outline);border-radius:8px;
+ background:var(--card2);box-shadow:0 9px 24px rgba(0,0,0,.26);
+}
+.coach-athletes-screen .lf-assignment-more-menu button{
+ width:100%;min-height:37px;box-sizing:border-box;padding:9px 10px!important;
+ border:1px solid transparent!important;border-radius:6px!important;
+ text-align:left;white-space:normal;overflow-wrap:anywhere;
+ background:transparent!important;color:var(--text)!important;
+ font-size:11px!important;font-weight:750;cursor:pointer;
+}
+.coach-athletes-screen .lf-assignment-more-menu button:hover,
+.coach-athletes-screen .lf-assignment-more-menu button:focus-visible{
+ border-color:var(--outline)!important;background:var(--field)!important;
+}
+.coach-athletes-screen .lf-assignment-more-menu .lf-more-danger{color:#e9777f!important}
+:global(.theme-light) .coach-athletes-screen .lf-assignment-more-menu .lf-more-danger{color:#ac263d!important}
+@media(max-width:520px){
+ .coach-athletes-screen .coach-v1-assignment-card .assignment-actions{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) 36px!important;
+ }
+ .coach-athletes-screen .lf-assignment-more>summary{width:36px}
+}
 </style>
