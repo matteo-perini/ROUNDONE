@@ -3,6 +3,7 @@ import {getStagingClients} from '../firebase/stagingClient'
 import {mayWriteLive,isStagingMode} from '../firebase/stagingConfig'
 import {readStagingSession,type StagingSession} from '../firebase/stagingSession'
 import {verifyPlatformAccess} from '../firebase/platformAccess'
+import {platformAuditEnabled,auditedCommercialPreference} from '../firebase/platformAudit'
 import {readCommercialMode,type CommercialMode,type CommercialGym} from '../../features/platform/commercialModel'
 import {accountKey,cleanHidden,gymName,safeImage,ticketTypes,ticketStates,type WidgetId,type TicketState} from '../../features/platform/platformModel'
 const ensureWrite=()=>{if(!mayWriteLive())throw new Error('Scritture non abilitate in questo ambiente.')}
@@ -66,7 +67,7 @@ export async function createTicket(type:string,subject:string,message:string,exp
 export async function readReplies(ticketId:string,platform:boolean,cursor?:QueryDocumentSnapshot){const store=platform?await platformGuard():db();if(!platform)await readStagingSession();const snap=await getDocsFromServer(query(collection(store,'support_tickets',ticketId,'replies'),orderBy('createdAt','asc'),...(cursor?[startAfter(cursor)]:[]),limit(50)));return {rows:snap.docs.map(d=>({id:d.id,author:d.data().author as Reply['author'],message:String(d.data().message||''),createdAt:ms(d.data().createdAt)})),cursor:snap.docs.at(-1),more:snap.size===50}}
 export async function replyTicket(ticketId:string,platform:boolean,text:string){ensureWrite();const store=platform?await platformGuard(true):db();if(!platform)await readStagingSession();text=text.trim();if(text.length<2||text.length>1800)throw new Error('Messaggio da 2 a 1800 caratteri.');await addDoc(collection(store,'support_tickets',ticketId,'replies'),{author:platform?'platform':'requester',message:text,createdAt:serverTimestamp()})}
 export async function changeTicketStatus(ticketId:string,status:TicketState){const store=await platformGuard(true);if(!ticketStates.includes(status))throw new Error('Stato non valido.');await updateDoc(doc(store,'support_tickets',ticketId),{status,updatedAt:serverTimestamp()})}
-export async function setBillingExemption(gym:string,exempt:boolean){if(typeof exempt!=='boolean')throw new Error('Preferenza non valida.');const store=await platformGuard(true);await setDoc(doc(store,'platform_billing',gym),{exempt,updatedAt:serverTimestamp()})}
+export async function setBillingExemption(gym:string,exempt:boolean){if(typeof exempt!=='boolean')throw new Error('Preferenza non valida.');const store=await platformGuard(true);if(platformAuditEnabled()){await auditedCommercialPreference(gym,exempt);return}/* LEGACY: remove only after the backend+Rules audit rollout is verified. */await setDoc(doc(store,'platform_billing',gym),{exempt,updatedAt:serverTimestamp()})}
 async function readGymCommercialMode(store:ReturnType<typeof db>,gym:string):Promise<CommercialMode>{
  const p=await getDocFromServer(doc(store,'platform_billing',gym))
  if(p.metadata.fromCache||p.metadata.hasPendingWrites)return 'unavailable'

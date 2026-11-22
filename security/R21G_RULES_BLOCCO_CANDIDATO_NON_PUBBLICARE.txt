@@ -1,0 +1,39 @@
+R21G — SOLO FRAMMENTO DA CONFRONTARE CON LE FIRESTORE RULES EFFETTIVAMENTE PUBBLICATE.
+NON sostituire le Rules live con questo file. NON pubblicare senza test emulatore e backup.
+
+Dentro match /databases/{database}/documents { ... }:
+
+match /platform_billing/{gymId} {
+  allow get: if lfPlatformAdmin();
+  allow list: if false;
+  // Tutte le modifiche commerciali passano dalla Cloud Function che scrive
+  // la preferenza e il registro audit nella stessa transazione.
+  allow create, update, delete: if false;
+}
+
+match /platform_audit/{entryId} {
+  // L'audit e' immutabile, leggibile solo via callable autorizzata;
+  // le Rules non limitano il server Admin SDK, che usa IAM.
+  allow read, write: if false;
+}
+
+SEQUENZA PROTETTA (solo dopo test con account di prova/emulatore):
+1) Eseguire un backup delle Rules esattamente pubblicate e controllare eventuali
+   definizioni /platform_billing e /platform_audit aggiuntive o sovrapposte.
+2) Distribuire la nuova codebase Functions in modo isolato, verificare che
+   le callable siano attive, autenticazione UID+email verificata+claim e test.
+3) Fondere il blocco nel file delle Rules realmente pubblicate, senza toccare
+   altri match. Testare gli accessi normali e il mancato accesso diretto.
+4) Solo DOPO, attivare VITE_LIONFIT_PLATFORM_AUDIT=ENABLED_AFTER_RULES_DEPLOY
+   nella build del solo Control Center. Senza flag il percorso legacy resta
+   temporaneamente invariato, ma non crea log.
+5) Verificare un cambio preferenza e la corrispondente voce nel registro.
+
+ATTENZIONE: Non e' garantito un rollout a zero downtime: dopo il blocco delle
+scritture dirette, build vecchie non potranno piu' cambiare preferenze fino
+all'aggiornamento al nuovo Control Center. Non abilitare su app clienti prima
+che il rollout sia stato testato.
+
+Per ora il registro comprende SOLO le modifiche di esenzione/abbonamento
+previsto. Le risposte ai ticket e altri controlli non sono ancora auditati.
+Non attiva alcun addebito o sospensione.

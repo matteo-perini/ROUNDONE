@@ -9,7 +9,7 @@ const props=defineProps<{
  loading:boolean
  lastVerifiedAt:number|null
 }>()
-const emit=defineEmits<{(e:'navigate',value:'gyms'|'tickets'|'subscriptions'|'services'):void}>()
+const emit=defineEmits<{(e:'navigate',value:'gyms'|'tickets'|'subscriptions'|'services'):void;(e:'refresh'):void}>()
 const sourceDate=computed(()=>props.lastVerifiedAt?new Date(props.lastVerifiedAt).toLocaleString('it-IT'):'Lettura non ancora verificata')
 const commercialValue=(n:number)=>(props.loaded===0&&props.counts===null?'—':n)
 const cards=computed(()=>[
@@ -25,7 +25,7 @@ const cards=computed(()=>[
  <section class="lfcc-overview" aria-label="Panoramica esecutiva LionFit">
   <div class="lfcc-intro">
    <div><p class="lfcc-eyebrow">DASHBOARD EXECUTIVE</p><h2>La piattaforma sotto controllo.</h2><p>Numeri verificati, priorità operative e strumenti commerciali in un'unica schermata.</p></div>
-   <div class="lfcc-source"><strong>Fonte: Firestore</strong><small>{{loading?'Aggiornamento in corso…':sourceDate}}</small></div>
+   <div class="lfcc-source"><strong>Fonte: Firestore</strong><small>{{loading?'Aggiornamento in corso…':sourceDate}}</small><button type="button" class="lfcc-refresh" :disabled="loading" @click="emit('refresh')">{{loading?'Verifica in corso…':'Aggiorna dati'}}</button></div>
   </div>
   <div class="lfcc-metrics">
    <button v-for="card in cards" :key="card.label" class="lfcc-metric" type="button" @click="emit('navigate',card.key)"><span>{{card.label}}</span><strong>{{card.value}}</strong><small>{{card.detail}}</small></button>
@@ -34,7 +34,7 @@ const cards=computed(()=>[
    <article class="lfcc-callout"><div class="lfcc-callout-head"><span>RICAVI E ABBONAMENTI</span><span class="lfcc-unknown">Fonte non collegata</span></div><h3>Incassi reali: —</h3><p>Le palestre segnate «a pagamento» sono una preferenza commerciale, non un pagamento Stripe verificato. MRR, rinnovi e prove scadute compariranno solo dopo l'integrazione billing validata.</p><button type="button" @click="emit('navigate','subscriptions')">Gestione abbonamenti →</button></article>
    <article class="lfcc-callout lfcc-tech"><div class="lfcc-callout-head"><span>AFFIDABILITÀ</span><span class="lfcc-unknown">Copertura parziale</span></div><h3>Stato dei servizi</h3><p>Accesso e letture Firestore si possono verificare ora. Uptime di Functions, Resend, push, webhooks e costi cloud richiedono metriche backend affidabili.</p><button type="button" @click="emit('navigate','services')">Apri Stato servizi →</button></article>
   </div>
-  <p class="lfcc-footnote">Palestre caricate: <strong>{{loaded}}</strong><span v-if="counts"> su {{counts.gyms}} registrate</span><span v-if="more"> · altre pagine disponibili nel registro</span>. I conteggi commerciali non rappresentano il totale della piattaforma quando la lista è parziale.</p>
+  <p class="lfcc-footnote" role="status">Palestre caricate: <strong>{{loaded}}</strong><span v-if="counts"> su {{counts.gyms}} registrate</span><span v-if="more"> · <strong>elenco incompleto:</strong> altre pagine disponibili nel registro</span>. I conteggi commerciali non rappresentano il totale della piattaforma quando la lista è parziale.</p>
  </section>
 </template>
 <style scoped>
@@ -42,4 +42,7 @@ const cards=computed(()=>[
 @media(max-width:720px){.lfcc-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.lfcc-insights{grid-template-columns:1fr}.lfcc-intro{padding:17px}.lfcc-metric{padding:14px 12px}.lfcc-metric strong{font-size:27px}}
 @media(max-width:370px){.lfcc-metrics{grid-template-columns:1fr 1fr}.lfcc-metric>span{font-size:10px}.lfcc-source{width:100%}}
 @media(prefers-reduced-motion:reduce){.lfcc-metric{transition:none}}
+.lfcc-refresh{padding:8px 10px;margin-top:3px;background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:11px;font-weight:700;cursor:pointer}
+.lfcc-refresh:hover,.lfcc-refresh:focus-visible{border-color:var(--mint)}
+.lfcc-refresh:disabled{cursor:wait;opacity:.65}
 </style>
