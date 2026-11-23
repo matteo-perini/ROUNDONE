@@ -21,6 +21,7 @@ import {verifyPlatformAccess} from '../integrations/firebase/platformAccess'
 import {Capacitor} from '@capacitor/core'
 import type {NativeUpdateStatus} from '../features/release/nativeUpdates'
 import {sendPasswordResetEmail} from 'firebase/auth'
+import {googleLinkEnabled,linkedGoogleEmail,linkGoogleToExistingAccount,googleLinkErrorMessage,requestGoogleLinkVerification,reloadGoogleLinkStatus} from '../integrations/firebase/googleAccountLink'
 import appMeta from '../../package.json'
 import { RouterLink, useRouter, useRoute } from 'vue-router'
 import {isStagingMode,isLiveMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
@@ -58,6 +59,31 @@ const identityOpen=ref(false),dashboardOpen=ref(route.query.dashboard==='1')
 const verifiedCoach=ref(false),platformAllowed=ref(false)
 watch(()=>stagingSession.value?.uid,async(uid)=>{platformAllowed.value=false;if(uid&&isStagingMode()){const ok=await verifyPlatformAccess();if(stagingSession.value?.uid===uid)platformAllowed.value=ok}},{immediate:true})
 const infoOpen=ref(false),securityOpen=ref(false),securityStatus=ref(''),securityBusy=ref(false)
+const googleLinkBusy=ref(false),googleLinkedAddress=ref<string|null>(null),googleEmailVerified=ref(false)
+const googleLinkAvailable=computed(()=>googleLinkEnabled()&&!!stagingSession.value&&!Capacitor.isNativePlatform())
+function googleRefreshLocal(){
+ try{const u=getStagingClients().auth.currentUser;googleLinkedAddress.value=linkedGoogleEmail(u);googleEmailVerified.value=!!u?.emailVerified}catch{googleLinkedAddress.value=null;googleEmailVerified.value=false}
+}
+watch(()=>stagingSession.value?.uid,googleRefreshLocal,{immediate:true})
+async function refreshGoogleStatus(){
+ if(googleLinkBusy.value)return;googleLinkBusy.value=true;securityStatus.value=''
+ try{const status=await reloadGoogleLinkStatus();googleLinkedAddress.value=status.linkedEmail;googleEmailVerified.value=status.verified;securityStatus.value='Stato accesso Google aggiornato.'}
+ catch(e){securityStatus.value=googleLinkErrorMessage(e)}finally{googleLinkBusy.value=false}
+}
+async function askGoogleLink(){
+ if(googleLinkBusy.value)return
+ const u=getStagingClients().auth.currentUser
+ if(!u?.email)return
+ if(!window.confirm('Vuoi collegare un account Google con email '+u.email+' al tuo profilo LionFit esistente? L’UID e i dati rimarranno invariati.'))return
+ googleLinkBusy.value=true;securityStatus.value=''
+ try{googleLinkedAddress.value=await linkGoogleToExistingAccount();securityStatus.value='Account Google collegato. UID e dati LionFit invariati.'}
+ catch(e){securityStatus.value=googleLinkErrorMessage(e)}finally{googleLinkBusy.value=false}
+}
+async function sendGoogleVerification(){
+ if(googleLinkBusy.value)return;googleLinkBusy.value=true;securityStatus.value=''
+ try{await requestGoogleLinkVerification();securityStatus.value='Email di verifica inviata. Apri il link ricevuto, torna qui e premi Aggiorna verifica.'}
+ catch(e){securityStatus.value=googleLinkErrorMessage(e)}finally{googleLinkBusy.value=false}
+}
 const appVersion=appMeta.version
 const nativeAndroid=Capacitor.isNativePlatform()&&Capacitor.getPlatform()==='android'
 const updateBusy=ref(false),downloadBusy=ref(false),updateMessage=ref(''),installedAndroidVersion=ref('')
@@ -154,7 +180,7 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
    <h2 class="lfsettings-section-title">{{uiText("Account e assistenza")}}</h2>
     <RouterLink v-if="isStagingMode()&&stagingSession" class="lfsettings-flat-row" to="/installazione"><LionIcon name="home"/><span><b>Installa LionFit</b><small>Android, iPhone o computer</small></span><LionIcon name="chevron" :size="17"/></RouterLink>
     <RouterLink v-if="!isStagingMode()||stagingSession" class="lfsettings-flat-row" :to="profilePath+(emulator?'&edit=1':'?edit=1')"><LionIcon name="user"/><span><b>{{uiText("Modifica profilo")}}</b></span><LionIcon name="chevron" :size="17"/></RouterLink>
-    <button v-if="canResetPassword" class="lfsettings-flat-row" type="button" @click="securityOpen=true;securityStatus=''"><LionIcon name="shield"/><span><b>{{uiText("Sicurezza")}}</b></span><LionIcon name="chevron" :size="17"/></button>
+    <button v-if="canResetPassword||googleLinkAvailable" class="lfsettings-flat-row" type="button" @click="securityOpen=true;securityStatus='';googleRefreshLocal()"><LionIcon name="shield"/><span><b>{{uiText("Sicurezza")}}</b></span><LionIcon name="chevron" :size="17"/></button>
     <a class="lfsettings-flat-row"  :href="privacyHref" target="_blank" rel="noopener noreferrer"><LionIcon name="shield"/><span><b>{{uiText("Privacy")}}</b></span><LionIcon name="chevron" :size="17"/></a>
     <a class="lfsettings-flat-row"  :href="termsHref" target="_blank" rel="noopener noreferrer"><LionIcon name="clipboard"/><span><b>{{uiText("Termini e condizioni")}}</b></span><LionIcon name="chevron" :size="17"/></a>
    <button class="lfsettings-flat-row" type="button" @click="infoOpen=true"><LionIcon name="info"/><span><b>{{uiText("Informazioni")}}</b></span><strong>{{appVersion}}</strong><LionIcon name="chevron" :size="17"/></button>
@@ -184,8 +210,21 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
   </div></div>
   <div v-if="securityOpen" class="modal-overlay" @click.self="securityOpen=false"><div class="dialog" role="dialog" aria-modal="true" :aria-label="uiText('Sicurezza account')" style="max-width:510px">
    <div class="row between"><h2>{{uiText("Sicurezza account")}}</h2><button class="bare" type="button" :aria-label="uiText('Chiudi sicurezza')" @click="securityOpen=false">✕</button></div>
-   <p class="muted small">{{uiText("Riceverai un link via email per cambiare la password. LionFit non conserva la password.")}}</p>
-   <button class="primary wide" type="button" :disabled="securityBusy" @click="resetPasswordViaEmail">{{uiText(securityBusy?'Invio…':'Cambia password tramite email')}}</button>
+   <template v-if="canResetPassword">
+    <p class="muted small">{{uiText("Riceverai un link via email per cambiare la password. LionFit non conserva la password.")}}</p>
+    <button class="primary wide" type="button" :disabled="securityBusy||googleLinkBusy" @click="resetPasswordViaEmail">{{uiText(securityBusy?'Invio…':'Cambia password tramite email')}}</button>
+   </template>
+   <section v-if="googleLinkAvailable" class="lf-google-link-panel" aria-label="Collegamento account Google">
+    <h3>Account Google</h3>
+    <p class="muted small">Collega Google solo dopo aver effettuato l'accesso con l'account LionFit esistente. Non crea nuovi profili e non cambia i tuoi allenamenti. Prima fase: collegamento, non ancora nuovo pulsante di login.</p>
+    <p class="small"><strong>Stato:</strong> {{googleLinkedAddress?'Collegato ('+googleLinkedAddress+')':'Non collegato'}}</p>
+    <template v-if="!googleLinkedAddress">
+     <p v-if="!googleEmailVerified" class="muted small">Prima verifica l'indirizzo email del tuo profilo LionFit.</p>
+     <button v-if="!googleEmailVerified" class="secondary wide" type="button" :disabled="googleLinkBusy" @click="sendGoogleVerification">Invia email di verifica</button>
+     <button v-if="!googleEmailVerified" class="secondary wide" type="button" :disabled="googleLinkBusy" @click="refreshGoogleStatus">Aggiorna verifica</button>
+     <button v-else class="secondary wide" type="button" :disabled="googleLinkBusy" @click="askGoogleLink">{{googleLinkBusy?'Collegamento in corso…':'Collega il mio account Google'}}</button>
+    </template>
+   </section>
    <p v-if="securityStatus" class="notice" role="status">{{uiText(securityStatus)}}</p>
   </div></div>
 
@@ -194,6 +233,10 @@ async function exit() { if(isStagingMode()){if(await signOutStaging())await rout
 
 
 <style>
+/* R21N: integrazione Google confinata al dialog di Sicurezza. */
+.lfsettings .lf-google-link-panel{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:grid;gap:9px}
+.lfsettings .lf-google-link-panel h3{font-size:15px;line-height:1.25;margin:0}
+.lfsettings .lf-google-link-panel p{margin:0}
 /* PATCH 28 R7: one flat list with small headings, no nested cards. */
 .app .lfsettings.lfsettings-compact{gap:14px;min-width:0}
 .app .lfsettings-compact .lfsettings-header{margin:0 0 3px}

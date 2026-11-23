@@ -1,0 +1,3 @@
+{
+ "functions":[{"source":"functions","codebase":"lionfit-google-auth","runtime":"nodejs22","ignore":["node_modules",".git","tests","*.log"]}]
+}

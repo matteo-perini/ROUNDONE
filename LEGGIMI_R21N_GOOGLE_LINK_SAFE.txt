@@ -1,0 +1,58 @@
+LIONFIT — PATCH 30 R21N · GOOGLE ACCOUNT LINK SAFE
+===================================================
+
+SCOPO
+Collega Google a un account Coach/Atleta già autenticato, senza modificare
+l'UID Firebase, l'email/password, Firestore, gli inviti o l'Audit commerciale.
+NON è ancora la fase "Accedi con Google": quella richiede una salvaguardia
+contro la creazione di account Firebase nuovi per Google non ancora collegati.
+
+FILE INCREMENTALI
+- src/integrations/firebase/googleAccountLink.ts  (NUOVO)
+- src/views/Settings.vue                           (MODIFICATO)
+- tests/patch30-r21n-google-link.unit.mjs          (NUOVO)
+
+INSTALLAZIONE
+1. Backup di src/views/Settings.vue della versione attualmente online.
+2. Estrai lo ZIP dentro la cartella vera:
+   Desktop\ULTIMA\LionFit-Modern-Git
+3. Conserva la struttura dei percorsi nello ZIP.
+4. npm.cmd run build
+5. node --test tests/patch30-r21n-google-link.unit.mjs
+
+DISATTIVATA DI DEFAULT
+La funzione rimane invisibile finché non imposti in .env.production.local:
+   VITE_LIONFIT_GOOGLE_LINK=ENABLED_AFTER_PROVIDER_REVIEW
+Non impostare subito il flag in produzione. Il primo test deve avvenire
+con account palestra fittizia e nel browser desktop, dopo aver:
+- abilitato Google in Firebase Console -> Authentication -> Sign-in method;
+- controllato i domini autorizzati, inclusi lionfit.it e quello usato per i test;
+- controllato che l'email Firebase dell'account di test sia verificata.
+
+PROCEDURA QUANDO ABILITATO
+Accedi con email e password del profilo esistente -> Impostazioni -> Sicurezza ->
+Account Google -> Collega il mio account Google.
+La schermata richiede la stessa email Google e un login recente.
+Non permette l'autocreazione di un utente tramite Google: usa linkWithPopup.
+Se Google è già associato ad un altro UID si ferma, senza unioni automatiche.
+La versione Android APK e la PWA iPhone non sono ancora collaudate per popup OAuth.
+
+NON FARE IN QUESTA PATCH
+- Nessuna modifica a firestore.rules o storage.rules.
+- Nessun deploy di Cloud Functions.
+- Nessuna scrittura a users/gyms o modifica a provider password.
+- Non pubblicare una release Google Login generalizzata prima del test browser.
+- Non inserire .env.production.local negli archivi Git o nei commit.
+
+TEST E LIMITI
+- Typecheck Vue/TypeScript: superato nell'ambiente di lavoro.
+- Test selezionati: 19/19 superati (8 specifici Google + 11 regressione).
+- Build Vite in questo ambiente Linux: non eseguibile per libreria nativa Rollup;
+  verificare con npm.cmd run build su Windows.
+- Non è stata eseguita un'autenticazione reale con account Google.
+
+ROLLBACK
+Elimina src/integrations/firebase/googleAccountLink.ts e ripristina il backup
+precedente di src/views/Settings.vue. Il flag, se aggiunto, va tolto.
+Siccome il flag è OFF di default, una patch presente nei file non espone il
+collegamento ad utenti esistenti finché non è attivato esplicitamente.

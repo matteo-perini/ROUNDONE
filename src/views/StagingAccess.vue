@@ -10,6 +10,7 @@ import {createUserWithEmailAndPassword,sendEmailVerification,sendPasswordResetEm
  signInWithEmailAndPassword} from 'firebase/auth'
 import {doc,getDocFromServer} from 'firebase/firestore'
 import {getStagingClients} from '../integrations/firebase/stagingClient'
+import GoogleExistingSigninButton from '../components/GoogleExistingSigninButton.vue'
 import {readStagingSession,signInStaging} from '../integrations/firebase/stagingSession'
 import {isOperationalMode,isTestMode,stagingTestGym,mayWriteLive} from '../integrations/firebase/stagingConfig'
 import {finishPendingSignup} from '../integrations/firebase/registrationResume'
@@ -49,6 +50,10 @@ function signedInDestination(role:'atleta'|'titolare'|'collaboratore'){
  if(isOperationalMode() && route.query.open==='competition'&&typeof route.query.eventId==='string'&&/^[A-Za-z0-9]{20}$/.test(route.query.eventId))return (role==='atleta'?'/prenotazioni':'/coach/prenotazioni')+'?competitionId='+encodeURIComponent(route.query.eventId)
  if(isOperationalMode() && route.query.open==='bookings')return role==='atleta'?'/prenotazioni':'/coach/prenotazioni'
  return role==='atleta'?'/home':'/coach'
+}
+async function googleLoginComplete(role:'atleta'|'titolare'|'collaboratore'){
+ try{await router.replace(signedInDestination(role))}
+ catch{error.value='Accesso Google riuscito. Ricarica la pagina per entrare in LionFit.'}
 }
 async function login(){if(busy.value)return
  busy.value=true;error.value='';info.value=''
@@ -178,6 +183,7 @@ async function register(){if(busy.value)return;if(!mayWriteLive()){error.value='
     <div class="row between login-recover-row"><button class="bare small" type="button" @click="switchTab('reset')">{{uiText("Password dimenticata?")}}</button></div>
     <label class="checkline login-remember-row"><input v-model="remember" type="checkbox"/><span><strong>{{uiText("Mantieni l'accesso")}}</strong><small>{{uiText("Sessione temporanea se disattivato.")}}</small></span></label>
     <button type="submit" class="primary wide" :disabled="busy">{{busy?'ACCESSO IN CORSO…':'ACCEDI'}}</button>
+    <GoogleExistingSigninButton :remember="remember" @authenticated="googleLoginComplete" @error="error=$event"/>
    </form>
    <form v-else-if="tab==='reset'" class="stack" @submit.prevent="reset"><h2>{{uiText("RECUPERA LA PASSWORD")}}</h2><p class="muted small">{{uiText("Inserisci la tua email per ricevere un collegamento di recupero.")}}</p><label>EMAIL<input v-model="email" type="email" autocomplete="email" required/></label><button class="primary wide" type="submit" :disabled="busy">{{uiText("INVIA EMAIL DI RECUPERO")}}</button><button class="secondary wide" type="button" @click="switchTab('login')">{{uiText("← Torna all'accesso")}}</button></form>
    <form v-else class="stack register-v1" @submit.prevent="register">
