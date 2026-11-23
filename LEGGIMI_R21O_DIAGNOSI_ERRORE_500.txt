@@ -1,0 +1,49 @@
+LIONFIT R21O — DIAGNOSI MIRATA ERRORE HTTP 500 GOOGLE LOGIN
+23 novembre 2026
+
+Questa mini-patch modifica ESCLUSIVAMENTE il file:
+  google-auth-backend/functions/index.mjs
+
+NON modifica: frontend, file .env, package.json, package-lock.json,
+Firestore Rules, UID utenti, database, altre Cloud Functions, Audit.
+
+Motivo: la R21O intercetta due tipi di errore interno ma non ne stampa la
+causa nei log. Questa mini-patch aggiunge solo una registrazione tecnica
+SANITIZZATA prima di restituire lo stesso errore generico al browser.
+Registra solo: fase dell'errore, codice sintetico, indicatori permessi.
+NON registra: Google ID token, Firebase token, UID, email, dati utenti.
+
+INSTALLAZIONE (PowerShell, nella cartella radice LionFit):
+1) Estrai lo ZIP in una cartella separata.
+2) Dal contenuto estratto copia la cartella google-auth-backend nella
+   cartella principale LionFit, confermando la sostituzione del SOLO
+   file google-auth-backend/functions/index.mjs.
+3) Verifica e pubblica SOLO la funzione Google:
+
+cd "$env:USERPROFILE\Desktop\ULTIMA\LionFit-Modern-Git\google-auth-backend\functions"
+node --check .\index.mjs
+node --test .\tests\model.test.mjs
+cd ..
+firebase.cmd deploy --only functions:lionfit-google-auth --project app-palestra-b0b9d
+
+Non eseguire se node --check o i test falliscono.
+Se Firebase richiede di eliminare funzioni esistenti, annulla.
+
+DOPO IL DEPLOY
+1) In lionfit.it esci, riprova UNA volta il Login Google (account già collegato).
+2) Torna in PowerShell, in una cartella qualsiasi:
+
+firebase.cmd functions:log --only lfGoogleSignInExisting --project app-palestra-b0b9d --lines 30
+
+3) Cerca la riga 'R21O GOOGLE SERVER FAILURE' e condividi soltanto la parte
+   {"stage":...,"code":...,"iamSignBlob":..., ...}.
+   Oscura eventuali email, IP, credenziali, token, dati personali presenti in
+   altre righe dell'output.
+
+INTERPRETAZIONE
+stage=lookup-auth-user -> problema lettura Firebase Auth
+stage=read-user-profile/read-gym -> problema Firestore
+stage=create-custom-token -> problema emissione token (potenziali permessi IAM)
+
+Questa è una patch diagnostica, NON una correzione automatica dei permessi.
+Non assegnare ruoli IAM fino all'esito dei log.

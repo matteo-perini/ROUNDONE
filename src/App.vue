@@ -132,7 +132,7 @@ async function goOut(){
   </template>
   <template v-else-if="platformPage"><header class="login-header"><img src="/v1-preview/LOGO-APP.png" alt="LionFit"/><span>LION <b>FIT</b> · Control Center</span></header><main class="lf14-platform-shell"><RouterView/></main></template>
   <template v-else-if="route.path==='/assistenza' && shownRole && isStagingMode()"><RouterView/></template>
-  <template v-else-if="shownRole">
+  <template v-else-if="shownRole && route.path!=='/accesso'">
     <AthleteDesktopSidebar v-if="shownRole==='atleta'" :items="mobileNav" :expanded="athleteSidebarExpanded" @toggle="toggleAthleteSidebar" @logout="goOut"/>
     <aside v-if="shownRole==='coach'" class="desktop-sidebar">
       <div class="sidebar-head"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><strong>LION <em>FIT</em></strong><small>{{uiText("AREA COACH / ADMIN")}}</small></div></div>

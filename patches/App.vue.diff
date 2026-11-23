@@ -1,0 +1,5 @@
+--- src/App.vue
++++ src/App.vue
+@@ R21P
+- <template v-else-if="shownRole">
++ <template v-else-if="shownRole && route.path!='/accesso'">
