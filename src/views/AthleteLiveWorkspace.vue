@@ -14,6 +14,7 @@ import AthleteHomeContent from '../components/AthleteHomeContent.vue'
 import { useAthleteLive } from '../features/athletes/useAthleteLive'
 import {useRomeDayClock} from '../features/performance/useRomeDayClock'
 import { sectionTransition } from '../features/navigation/sectionSwipe'
+import {prepareSectionLeave,finishSectionLeave} from '../features/navigation/continuousMotion'
 import {isStagingMode,isLiveMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
 import { linkedSheetsForDay,liveWeekForDate } from '../features/athletes/athleteOperationalPolicy'
 import { romeDayIndex,romeWeekDayNumber } from '../features/athletes/romeWeekProgress'
@@ -31,7 +32,8 @@ const screenOrder=['home','plan','archive'] as const
 watch(()=>props.screen,(next,previous)=>{
  workspaceMotion.value=window.innerWidth<800?sectionTransition(previous,next,screenOrder):''
 },{flush:'sync'})
-function finishWorkspaceMotion(){workspaceMotion.value=''}
+function finishWorkspaceMotion(el:Element){if(el.getAttribute('data-lf-screen')===props.screen)workspaceMotion.value=''}
+function beforeWorkspaceLeave(el:Element){prepareSectionLeave(el,workspaceMotion.value,window.innerWidth<800)}
 const programArchiveOpen=ref(route.query.view==='programmi')
 watch(()=>route.query.view,v=>{programArchiveOpen.value=v==='programmi'})
 const {status,message,session,data,avatarUrl,archive,archiveReady,hiddenArchiveIds,snapshots,updatedAt,hideArchiveCopy}=useAthleteLive(()=>props.screen==='archive')
@@ -89,8 +91,8 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
   <div v-lf-quiet-loading v-if="status==='loading'" class="panel lf-quiet-status" role="status">{{uiText("Caricamento schede e settimane…")}}</div>
   <div v-else-if="status==='error'" class="notice" role="alert">{{message}} <button type="button" class="secondary" @click="retryWorkspace">{{uiText("Riprova")}}</button> <RouterLink :to="isStagingMode()?'/accesso':'/dev/accesso'">{{uiText("Torna all'accesso")}}</RouterLink></div>
   <template v-else-if="data">
-   <Transition :name="workspaceMotion" @after-enter="finishWorkspaceMotion">
-    <div :key="props.screen" class="lf-r22b5-page">
+   <Transition :name="workspaceMotion" @after-enter="finishWorkspaceMotion" @before-leave="beforeWorkspaceLeave" @after-leave="finishSectionLeave" @leave-cancelled="finishSectionLeave">
+    <div :key="props.screen" class="lf-r22b5-page" :data-lf-screen="props.screen">
    <template v-if="props.screen==='plan'">
     <AthletePlanContent archive-expired :athlete-key="session?.uid||''" :personal="data.personal" :weeks="data.weeks" :groups="data.groups" :week-id="selectedWeek||currentWeek?.id||''" :initial-day="requestedDay" @update:week-id="id => { selectedWeek=id }" />
     <nav class="lf-r13-plan-archives" aria-label="Archivi del piano"><span>CONSULTA LO STORICO</span><div class="lf-r13-plan-archive-links"><RouterLink :to="livePath('/archivio')" class="secondary">Archivio schede <span aria-hidden="true">›</span></RouterLink><RouterLink :to="{path:'/archivio',query:{...(isStagingMode()?{}:{source:'emulator'}),view:'programmi'}}" class="secondary">Archivio programmazioni <span aria-hidden="true">›</span></RouterLink></div></nav>
@@ -125,13 +127,13 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
 .athlete-live-screen{position:relative}
 .lf-r22b5-page{display:flex;flex:1 0 auto;flex-direction:column;gap:13px;min-width:0;width:100%;min-height:0}
 @media(max-width:799px) and (prefers-reduced-motion:no-preference){
- .lf-section-next-enter-active,.lf-section-next-leave-active,.lf-section-prev-enter-active,.lf-section-prev-leave-active{transition:transform 340ms cubic-bezier(.22,1,.36,1),opacity 300ms ease;will-change:transform;transition-duration:var(--lf-swipe-commit-duration,340ms),var(--lf-swipe-commit-duration,300ms)}
- .lf-section-next-enter-from,.lf-section-prev-leave-to{transform:translate3d(100%,0,0);opacity:.9}
- .lf-section-next-leave-to,.lf-section-prev-enter-from{transform:translate3d(-100%,0,0);opacity:.9}
+ .lf-section-next-enter-active,.lf-section-next-leave-active,.lf-section-prev-enter-active,.lf-section-prev-leave-active{transition:transform 340ms cubic-bezier(.22,1,.36,1);will-change:transform;transition-duration:var(--lf-swipe-commit-duration,340ms)}
+ .lf-section-next-enter-from,.lf-section-prev-leave-to{transform:translate3d(var(--lf-motion-span,100%),0,0)}
+ .lf-section-next-leave-to,.lf-section-prev-enter-from{transform:translate3d(calc(-1 * var(--lf-motion-span,100%)),0,0)}
  .lf-section-next-leave-from,.lf-section-prev-leave-from{transform:translate3d(var(--lf-swipe-commit-offset,0px),0,0)}
- .lf-section-next-enter-from{transform:translate3d(calc(100% + var(--lf-swipe-commit-offset,0px)),0,0)}
- .lf-section-prev-enter-from{transform:translate3d(calc(-100% + var(--lf-swipe-commit-offset,0px)),0,0)}
- .lf-section-next-leave-active,.lf-section-prev-leave-active{position:absolute;top:0;left:0;width:100%;pointer-events:none}
+ .lf-section-next-enter-from{transform:translate3d(calc(var(--lf-motion-span,100%) + var(--lf-swipe-commit-offset,0px)),0,0)}
+ .lf-section-prev-enter-from{transform:translate3d(calc(-1 * var(--lf-motion-span,100%) + var(--lf-swipe-commit-offset,0px)),0,0)}
+ .lf-section-next-leave-active,.lf-section-prev-leave-active{position:absolute;top:var(--lf-leave-top,0px);left:var(--lf-leave-left,0px);width:var(--lf-leave-width,100%);pointer-events:none}
 }
 @media(prefers-reduced-motion:reduce){
  .lf-section-next-enter-active,.lf-section-next-leave-active,.lf-section-prev-enter-active,.lf-section-prev-leave-active{transition:none!important;animation:none!important}

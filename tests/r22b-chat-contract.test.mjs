@@ -24,7 +24,7 @@ test('private messages are accessed only through callables, not unrestricted dir
 })
 test('app preserves chat swipe and screen, does not expand athlete dock',()=>{
  const app=read('src/App.vue'),view=read('src/views/AthleteChatPreview.vue')
- assert.match(app,/chatSwipeDestination/)
+ assert.match(app,/swipeNeighbor\(start.path,dx,swipePages.value\)/)
  assert.match(app,/chatUnreadCount/)
  assert.match(view,/lf-chat-mobile-back/)
  assert.match(view,/chatHistory/)

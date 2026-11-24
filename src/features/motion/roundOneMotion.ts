@@ -2,6 +2,7 @@
  * No subtree observer, synchronous layout reads, or animation-dependent data flow. */
 import {nextTick,type App,type Directive} from 'vue'
 import type {Router} from 'vue-router'
+import {isMobileSectionSlide} from '../navigation/continuousMotion.ts'
 import {PREMIUM_MOTION_ENABLED} from './premiumMotionMode.ts'
 export const ROUNDONE_MOTION=Object.freeze(PREMIUM_MOTION_ENABLED?{titleMs:510,panelMs:510,rowMs:450,staggerMs:70,rowStaggerMs:80,maxDelayMs:140,maxPanels:8,entryWindowMs:1600}:{titleMs:170,panelMs:210,rowMs:210,staggerMs:12,rowStaggerMs:12,maxDelayMs:36,maxPanels:8,entryWindowMs:1600})
 export type MotionRole='title'|'panel'|'row'|'page'
@@ -92,8 +93,8 @@ export function installRoundOneMotion(router:Router,app:App):void{
   beforeUnmount(el){groups.delete(el)}
  }
  app.directive('lf-entrance',directive)
- function enter(nextPath:string){stop();path=nextPath;seen.clear();used=0;deadline=performance.now()+ROUNDONE_MOTION.entryWindowMs;firstFrame=true;schedule()}
- router.afterEach((to,from,failure)=>{if(failure)return;if(to.path!==from.path)enter(to.path);else if(to.fullPath!==from.fullPath)deadline=0})
+ function enter(nextPath:string,sectionSlide=false){stop();path=nextPath;seen.clear();used=0;if(sectionSlide)return;deadline=performance.now()+ROUNDONE_MOTION.entryWindowMs;firstFrame=true;schedule()}
+ router.afterEach((to,from,failure)=>{if(failure)return;if(to.path!==from.path)enter(to.path,isMobileSectionSlide(from.path,to.path,window.innerWidth));else if(to.fullPath!==from.fullPath)deadline=0})
  // Legacy embedded WebViews use addListener rather than addEventListener.
  const changed=()=>{if(reduce.matches)stop()}
  if(typeof reduce.addEventListener==='function')reduce.addEventListener('change',changed);else reduce.addListener?.(changed)

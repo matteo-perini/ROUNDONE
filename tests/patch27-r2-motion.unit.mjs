@@ -3,10 +3,11 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import vm from 'node:vm'
 import ts from 'typescript'
+import {isMobileSectionSlide} from '../src/features/navigation/continuousMotion.ts'
 import {parse,compileScript,compileTemplate} from '@vue/compiler-sfc'
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8')
 const compiled=ts.transpileModule(read('src/features/motion/roundOneMotion.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText
-function harness({reduced=false,translate=true,path='/home',legacyMedia=false,premium=true}={}){
+function harness({reduced=false,translate=true,path='/home',legacyMedia=false,premium=true,width=1200}={}){
  let clock=10,id=0,nav,dir,mediaFn
  const calls=[],ticks=[],frames=new Map(),events=new Map()
  class Element{
@@ -20,7 +21,7 @@ function harness({reduced=false,translate=true,path='/home',legacyMedia=false,pr
  const app={directive:(name,value)=>{assert.equal(name,'lf-entrance');dir=value}}
  const router={currentRoute:{value:{path,fullPath:path}},afterEach:f=>nav=f}
  const mod={exports:{}}
- vm.runInNewContext(compiled,{exports:mod.exports,module:mod,require:id=>{if(id==='./premiumMotionMode.ts')return {PREMIUM_MOTION_ENABLED:premium};assert.equal(id,'vue');return {nextTick:f=>{ticks.push(f);return Promise.resolve()}}},HTMLElement:Element,window:{matchMedia:()=>media},document:doc,CSS:{supports:()=>translate},performance:{now:()=>clock},requestAnimationFrame:f=>{frames.set(++id,f);return id},cancelAnimationFrame:i=>frames.delete(i)})
+ vm.runInNewContext(compiled,{exports:mod.exports,module:mod,require:id=>{if(id==='../navigation/continuousMotion.ts')return {isMobileSectionSlide};if(id==='./premiumMotionMode.ts')return {PREMIUM_MOTION_ENABLED:premium};assert.equal(id,'vue');return {nextTick:f=>{ticks.push(f);return Promise.resolve()}}},HTMLElement:Element,window:{matchMedia:()=>media,innerWidth:width},document:doc,CSS:{supports:()=>translate},performance:{now:()=>clock},requestAnimationFrame:f=>{frames.set(++id,f);return id},cancelAnimationFrame:i=>frames.delete(i)})
  mod.exports.installRoundOneMotion(router,app)
  const mount=(el,value)=>dir.mounted(el,{value}),update=(el,oldValue,value)=>dir.updated(el,{oldValue,value}),unmount=el=>{el.isConnected=false;dir.beforeUnmount(el)}
  const flush=()=>{while(ticks.length)ticks.shift()();for(const [id,f] of [...frames]){frames.delete(id);f(clock)}}
@@ -38,3 +39,5 @@ test('direct groups compile and do not attach directives to dialogs, or change b
 
 test('classic rollback restores short timings and ignores premium-only groups',()=>{const x=harness({premium:false});x.mount(x.list(3),{...x.group('premium'),premiumOnly:true});x.mount(x.list(3),x.group('classic'));x.flush();assert.equal(x.calls.length,3);assert.deepEqual(x.calls.map(a=>a.options.delay),[0,12,24]);assert.ok(x.calls.every(a=>a.options.duration===210&&a.frames[0].translate==='0 9px'));x.events.get('pointerdown')();x.navigate('/piano');assert.ok(x.calls.every(a=>a.cancelled))})
 test('premium rows enter from the side, identity stays stable and interaction stops future reveal without snapping an active animation',()=>{const x=harness(),brand=new x.Element('article',['card','lf14-gym-identity']),row=new x.Element('article',['card','archive-card']);x.mount(new x.Element('div',[],[brand,row]),x.group('identity'));x.flush();assert.equal(x.calls.length,1);assert.equal(x.calls[0].el,row);assert.equal(x.calls[0].options.duration,450);assert.equal(x.calls[0].frames[0].translate,'18px 0');x.events.get('pointerdown')();assert.equal(x.calls[0].cancelled,false)})
+
+test('mobile section slide takes priority over secondary entrances, ordinary subpages retain motion',()=>{const x=harness({width:390});x.mount(x.list(1),x.group('home'));x.flush();assert.equal(x.calls.length,1);x.navigate('/piano');x.mount(x.list(3),x.group('plan'));x.flush();assert.equal(x.calls.length,1);x.navigate('/impostazioni');x.mount(x.list(2),x.group('settings'));x.flush();assert.ok(x.calls.length>1)})

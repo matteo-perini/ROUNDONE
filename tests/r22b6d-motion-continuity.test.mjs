@@ -27,8 +27,8 @@ test('freeze until real route change, use painted offset rather than queued fram
 test('both Vue transition layers inherit the start offset and duration; normal taps retain 340ms',()=>{
  for(const source of [app,workspace]){
   assert.match(source,/leave-from\{transform:translate3d\(var\(--lf-swipe-commit-offset,0px\)/)
-  assert.match(source,/calc\(100% \+ var\(--lf-swipe-commit-offset,0px\)\)/)
-  assert.match(source,/calc\(-100% \+ var\(--lf-swipe-commit-offset,0px\)\)/)
+  assert.match(source,/calc\(var\(--lf-motion-span,100%\) \+ var\(--lf-swipe-commit-offset,0px\)\)/)
+  assert.match(source,/calc\(-1 \* var\(--lf-motion-span,100%\) \+ var\(--lf-swipe-commit-offset,0px\)\)/)
   assert.match(source,/var\(--lf-swipe-commit-duration,340ms\)/)
   assert.match(source,/prefers-reduced-motion:reduce/)
  }

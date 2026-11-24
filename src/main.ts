@@ -97,3 +97,6 @@ import './styles-r14c-dashboard-rebuild.css'
 import './styles-r15-athlete-archive.css'
 // PATCH R20B: angoli ibridi globali (solo presentazione, dopo tutti gli altri override).
 import './styles-r20b-hybrid-design.css'
+
+// R22B.6E.2: clipping only during a mobile page gesture or paired transition.
+import './styles-continuous-motion.css'

@@ -7,11 +7,11 @@ export function resolveSwipeIntent(previous:SwipeIntent,dx:number,dy:number):Swi
  if(previous!=='pending')return previous
  if(!Number.isFinite(dx)||!Number.isFinite(dy))return 'pending'
  const x=Math.abs(dx),y=Math.abs(dy)
- if(Math.max(x,y)<10)return 'pending'
- if(x>=y*1.45)return 'horizontal'
- if(y>=x*1.15)return 'vertical'
+ if(Math.max(x,y)<7)return 'pending'
+ if(x>=y*1.25)return 'horizontal'
+ if(y>=x*1.12)return 'vertical'
  // Resolve ambiguous diagonals conservatively, in favour of native scrolling.
- return Math.max(x,y)>=24?'vertical':'pending'
+ return Math.max(x,y)>=20?'vertical':'pending'
 }
 export const protectedSwipeSelector='input,textarea,select,option,label,video,audio,iframe,canvas,dialog,[contenteditable]:not([contenteditable="false"]),[role="dialog"],[role="slider"],[role="listbox"],[draggable="true"],[data-lf-no-chat-swipe],[data-lf-no-section-swipe],.modal-overlay,.lf15-video-backdrop,.lf-r5-grip,.swiper,.carousel,.recharts-wrapper,.apexcharts-canvas,.lf-p360-graph,.lf-ms-chart'
 export function hasNativeHorizontalScroll(scrollWidth:number,clientWidth:number,overflowX:string):boolean{

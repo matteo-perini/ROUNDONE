@@ -1,0 +1,61 @@
+{
+  "patch": "R22B.6E.2",
+  "base": "R22B.6E.1",
+  "files": [
+    {
+      "path": "src/App.vue",
+      "sha256": "3adf1e5f024d6bae6548aca0da251e93584fa4675dc435b0cd0b709bbe68fbee",
+      "base_sha256": "9db885fd5cf2757476a071cdfe708bff5fda1211f71b155075d736d51584cc12"
+    },
+    {
+      "path": "src/views/AthleteLiveWorkspace.vue",
+      "sha256": "fc74f93b3bfa6665a8d9fa768905e75f276ae52014fec2f2fa3cdb9f876d9a89",
+      "base_sha256": "3e843dd46c7a10e952eb12dc5d6a64a33e85497002b42522d2840d1d0321515d"
+    },
+    {
+      "path": "src/features/navigation/continuousMotion.ts",
+      "sha256": "2b18c66f90b277d9281e08c3f4a5fb04b67b63317c07d505520f45d2689af674",
+      "base_sha256": null
+    },
+    {
+      "path": "src/features/motion/roundOneMotion.ts",
+      "sha256": "778b7aabf1d7a265ae5687b192ea5c5b6bb8ab59261ed581028a4f9fa2dd9a7a",
+      "base_sha256": "3062e27f2376db408c9db35c6871f7fb2a7b6f500479fe0421b604e5fb5a3f8a"
+    },
+    {
+      "path": "src/styles-continuous-motion.css",
+      "sha256": "61aa911ced9ba62240fb9e1dccc8ea9f5a41d8498a50427fe4a4ec8473bcc00f",
+      "base_sha256": null
+    },
+    {
+      "path": "src/styles-r14-athlete-home.css",
+      "sha256": "62898ee319b02bd45af3fabb6e47ac77866b5ba519143de5a961189bc9d44d0e",
+      "base_sha256": "99d4198e4f19077e59933ecb36c88693b0b7822353cb8625d7a06b09b7aa7552"
+    },
+    {
+      "path": "src/main.ts",
+      "sha256": "43c518c64913aa6bf04589c075343ba355569d3a76744d1c3927286e891340a7",
+      "base_sha256": "743ca887ad7811a18761cbf691cb5fdca65452add81ec0adf99e2c0119b7d118"
+    },
+    {
+      "path": "tests/r22b5-athlete-shared-screen-motion.test.mjs",
+      "sha256": "93f15d9dfdc6d582cf8b5928b35f36f4db8fe8da606fc91cbbc34a05a702b642",
+      "base_sha256": "f35f65e9eea5d98e7142534f72dd1da9f09d15e07556f5ff972b8b52653fa5ab"
+    },
+    {
+      "path": "tests/r22b6d-motion-continuity.test.mjs",
+      "sha256": "aceef9d759ab60fb37becc19f1343190e0147170f65dcaa6eb965190c9cdf3bc",
+      "base_sha256": "4bcd5d67dc6b4adbf2351cf2ec8ff6bc93149d99861dc16e322b47a244fb5a3f"
+    },
+    {
+      "path": "tests/patch27-r2-motion.unit.mjs",
+      "sha256": "cb2a5e190a45468c19bcdc0685957e657da18c63c6db9fe508a70037ca226409",
+      "base_sha256": "8d5fc4ed4755d08a3d0de260eb6206ad383ad1f5d9d934948c6657008b94a02d"
+    },
+    {
+      "path": "tests/r22b6e2-continuous-motion.test.mjs",
+      "sha256": "2a42d3a2a0f2b541c177f8bd6dd2fe656b2720472d81369578ad4842f84f47f0",
+      "base_sha256": null
+    }
+  ]
+}

@@ -14,6 +14,8 @@ import { watchAthleteSheets } from '../../integrations/firestore/sheets'
 import type { Groups, Personal, ProgramWeek } from '../sheets/domain'
 import { archiveItemFromRaw, type HistoricalArchive } from './labArchive'
 import { assertAthleteLabIdentity } from './athleteOperationalPolicy'
+import {beginSessionDataAudit} from '../performance/sessionDataAudit'
+import {subscribeAthleteSheets} from './athleteSheetStream'
 import { hideOneArchiveCopy } from './archiveExclusions'
 export type AthleteLiveData={personal:Personal[];weeks:ProgramWeek[];groups:Groups}
 export function useAthleteLive(archiveRequested:()=>boolean=()=>true){
@@ -35,6 +37,7 @@ export function useAthleteLive(archiveRequested:()=>boolean=()=>true){
  function close(){scopeClosed=true;startArchive=null;archiveReady.value=false;stopSheets?.();stopSheets=null;stopArchive?.();stopArchive=null;stopExclusions?.();stopExclusions=null;stopAuth?.();stopAuth=null}
  watch(archiveRequested,on=>{if(on)startArchive?.()})
  onMounted(async()=>{
+  const audit=beginSessionDataAudit('athlete-workspace')
   try{
    const staged=isStagingMode()
    const details=staged?await readStagingDetails():null
@@ -55,19 +58,25 @@ export function useAthleteLive(archiveRequested:()=>boolean=()=>true){
     if(!alive)return
     if(!user||user.uid!==verified.uid){close();data.value=null;archive.value=[];hiddenArchiveIds.value=new Set();avatarUrl.value='';session.value=null;status.value='loading';void router.replace(staged?'/accesso':'/dev/accesso')}
    })
-   stopSheets=watchAthleteSheets(db,target.gymId,target.athleteId,value=>{
+   const acceptSheets=(value:AthleteLiveData)=>{
     if(!alive||scopeClosed)return
+    if(data.value===value&&status.value==='ready')return
     data.value=value
-    status.value='ready'
+    status.value='ready';audit('ready')
     snapshots.value++
     updatedAt.value=new Date().toLocaleTimeString('it-IT')
     message.value=staged?'Piano sincronizzato con lo staging Firebase.':'Piano sincronizzato con Firebase Emulator.'
-   },error=>{
+   }
+   const failSheets=(error:Error)=>{
     if(!alive||scopeClosed)return
-    status.value='error';data.value=null
+    status.value='error';data.value=null;audit('error')
     message.value=`Impossibile leggere il piano dell'atleta: ${error.message}`
     close()
-   })
+   }
+   // Full profile and gym verification above remains mandatory on every remount.
+   // A warm listener can then replay its server-confirmed projection immediately.
+   stopSheets=details?subscribeAthleteSheets(db,details.session,{next:update=>{if(update.kind==='data')acceptSheets(update.value);else failSheets(update.error)},reset:()=>{if(alive&&!scopeClosed){data.value=null;archive.value=[];hiddenArchiveIds.value=new Set();avatarUrl.value='';session.value=null;status.value='error';message.value='Sessione cambiata. Riapri la schermata.';close()}}}):watchAthleteSheets(db,target.gymId,target.athleteId,acceptSheets,failSheets)
+   if(scopeClosed){stopSheets?.();stopSheets=null;return}
    startArchive=()=>{
     if(!alive||scopeClosed||archiveStarted||auth.currentUser?.uid!==verified.uid)return
     archiveStarted=true
@@ -90,7 +99,7 @@ export function useAthleteLive(archiveRequested:()=>boolean=()=>true){
    if(archiveRequested())startArchive()
   }catch(error){
    if(!alive)return
-   status.value='error';data.value=null;archive.value=[]
+   status.value='error';data.value=null;archive.value=[];audit('error')
    message.value=error instanceof Error?error.message:'Sessione Atleta non verificata.'
    close()
   }

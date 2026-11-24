@@ -4,6 +4,8 @@
 import {getFunctions,httpsCallable} from 'firebase/functions'
 import {ref} from 'vue'
 import {getStagingClients} from '../../integrations/firebase/stagingClient'
+import {stagingSession} from '../../integrations/firebase/stagingSession'
+import {currentVerifiedScope} from '../performance/verifiedSessionStreams'
 import {isStagingMode} from '../../integrations/firebase/stagingConfig'
 export const CHAT_PILOT_ENABLED=(import.meta.env.MODE==='staging'&&import.meta.env.VITE_LIONFIT_CHAT_BETA==='STAGING_REVIEWED') ||
  (import.meta.env.MODE==='production'&&import.meta.env.VITE_LIONFIT_CHAT_BETA==='LIVE_PILOT_REVIEWED')
@@ -26,10 +28,11 @@ async function invoke<K extends keyof ChatActions>(name:K,data:ChatActions[K]['i
  if(!CHAT_PILOT_ENABLED||!isStagingMode())throw new Error('La chat privata non è ancora attivata per questo ambiente.')
  const {auth}=getStagingClients()
  await auth.authStateReady()
- if(!uid||auth.currentUser?.uid!==uid)throw new Error('Sessione cambiata: effettua nuovamente l’accesso.')
+ const session=stagingSession.value,scope=session?currentVerifiedScope(session):''
+ if(!uid||auth.currentUser?.uid!==uid||session?.uid!==uid||!scope)throw new Error('Sessione cambiata: effettua nuovamente l’accesso.')
  const call=httpsCallable<ChatActions[K]['input'],ChatActions[K]['output']>(getFunctions(auth.app,'europe-west1'),name)
  const result=await call(data)
- if(auth.currentUser?.uid!==uid)throw new Error('Sessione cambiata: aggiorna la pagina.')
+ if(auth.currentUser?.uid!==uid||!stagingSession.value||currentVerifiedScope(stagingSession.value)!==scope)throw new Error('Sessione cambiata: aggiorna la pagina.')
  return result.data
 }
 const empty={} as Record<string,never>

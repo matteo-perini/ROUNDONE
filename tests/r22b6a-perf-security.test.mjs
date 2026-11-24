@@ -13,7 +13,9 @@ test('motion instrumentation is dev only and no network calls',()=>{
 test('unread polling skips accounts outside pilot and stops on hidden tabs',()=>{
  const app=read('src/App.vue')
  assert.match(app,/!chatPilotAllowed\.value\|\|!isStagingMode/)
- assert.match(app,/stagingSession\.value\?\.uid,chatPilotAllowed\.value/)
+ assert.match(app,/watch\(\[\(\)=>accountKey\(stagingSession\.value\),chatPilotAllowed\]/)
+ assert.match(app,/if\(document\.hidden\)return/)
+ assert.match(app,/accountKey\(stagingSession\.value\)===key/)
 })
 test('chat poll throttled and refreshed on tab visibility',()=>{
  const chat=read('src/views/AthleteChatPreview.vue')

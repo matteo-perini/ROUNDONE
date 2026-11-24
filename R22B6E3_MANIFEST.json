@@ -1,0 +1,107 @@
+{
+  "patch": "R22B.6E.3",
+  "base": "R22B.6E.2",
+  "files": [
+    {
+      "path": "src/App.vue",
+      "action": "replace",
+      "sha256_before": "3adf1e5f024d6bae6548aca0da251e93584fa4675dc435b0cd0b709bbe68fbee",
+      "sha256_after": "5b589ee059e6fea89a114e13e234247865186d3b9d89f876d39e380f37fffccb"
+    },
+    {
+      "path": "src/components/AthleteHomeHighlights.vue",
+      "action": "replace",
+      "sha256_before": "e70214045fc3899c909494c1d2a887752bc7c77974d90c3625a5d42f303b73a1",
+      "sha256_after": "17733d3489bf74da9461421a34fa186aac8883f4b51ca3b16e033297d6ed7c9b"
+    },
+    {
+      "path": "src/components/GymIdentity.vue",
+      "action": "replace",
+      "sha256_before": "edd5585f81ca58e00dfba5698ac54bf329d702d4fb0ce6a8c16f1e87993c8f0e",
+      "sha256_after": "fd02cb9c376a128dba84e14370e84613c671242817f17c660c9e3063e6602e0f"
+    },
+    {
+      "path": "src/features/athletes/athleteSheetStream.ts",
+      "action": "add",
+      "sha256_before": null,
+      "sha256_after": "90f8668c288c45be5999d8f5f233c21a914975272c48ec87233a7936f9a7111a"
+    },
+    {
+      "path": "src/features/athletes/useAthleteLive.ts",
+      "action": "replace",
+      "sha256_before": "0b37c2f5ef9f882a05bdaf71788d0d26d447762f6ece278920a051b89bb3be2f",
+      "sha256_after": "5f5f390a236f30e0142094c333538fb67b8de9dfbbd575fb222db98abf93978b"
+    },
+    {
+      "path": "src/features/branding/liveIdentityStream.ts",
+      "action": "add",
+      "sha256_before": null,
+      "sha256_after": "3ff8fb97e77beda21f06534975348d5e406e4dacf6e0dee00bfe73ffc0d25c38"
+    },
+    {
+      "path": "src/features/chat/chatClient.ts",
+      "action": "replace",
+      "sha256_before": "7cdc785c1be281b0da038c45c1b214a59efc960a109884a10b6fbf4b43828983",
+      "sha256_after": "e08b34021f0cd2988f92ce6d50d3f086d7c380160d723809af6bd5e9fa8510d7"
+    },
+    {
+      "path": "src/features/chat/chatSessionSnapshot.ts",
+      "action": "add",
+      "sha256_before": null,
+      "sha256_after": "29baeb8c114c4cbff5e85aeea287a10394ae44d1bb3e8afc1df135b7c193eaab"
+    },
+    {
+      "path": "src/features/performance/sessionDataAudit.ts",
+      "action": "add",
+      "sha256_before": null,
+      "sha256_after": "965bde16ccfa9bff5fef41e16aa595a07ed9194783b3089aa3a914b31640c7cb"
+    },
+    {
+      "path": "src/features/performance/verifiedSessionStreams.ts",
+      "action": "add",
+      "sha256_before": null,
+      "sha256_after": "3849fc400c543522cff73c8730dee41b5eeac95c6ea403fe6056ea7a545d5b0c"
+    },
+    {
+      "path": "src/features/performance/warmSessionStream.ts",
+      "action": "add",
+      "sha256_before": null,
+      "sha256_after": "1617d054a6ed98cfd2eb2bca5adb3936f2fc8e16a1da4f4c298c6a81608b46a4"
+    },
+    {
+      "path": "src/integrations/firestore/competitions.ts",
+      "action": "replace",
+      "sha256_before": "386adc87451f13982697a5af45f6bb9e8343f8ebd6d7aa6a6a4417b0396e1258",
+      "sha256_after": "0785a7c1a1f90b6c5243d007eae33e533cd331b9f9e511b8a56b45eaee7634a3"
+    },
+    {
+      "path": "src/views/AthleteChatPreview.vue",
+      "action": "replace",
+      "sha256_before": "e9f86b7acfd45874e2448a8bac2cfd24fe8ac5c982e34b047356bfbe88488c1d",
+      "sha256_after": "3994a9c5422a7032755c6d6236d3d335ef1ff24cc3c8b3d55ae6a8ab8aa61738"
+    },
+    {
+      "path": "tests/patch27-performance.unit.mjs",
+      "action": "replace",
+      "sha256_before": "30e8ba9a1b4b509a38a4b0310a1b01ed32af0de1b86be1b04f94a8fe7f64af44",
+      "sha256_after": "0f277ac0e359d79cbfebbf1c3bea67ff89cf1fee52047fdc756d7f6f365c7378"
+    },
+    {
+      "path": "tests/r22b6a-perf-security.test.mjs",
+      "action": "replace",
+      "sha256_before": "593bb1dceb33619cf2e2c768770a4f0b1cd01717623749326ef72f9f11e56287",
+      "sha256_after": "3b6b93d9a096fb2178c8daef54578c2872819344f6e67275904b35820c85f33b"
+    },
+    {
+      "path": "tests/r22b6e3-session-data.test.mjs",
+      "action": "add",
+      "sha256_before": null,
+      "sha256_after": "a321dae77a99d4200f5233086aaaade09e9e3b920da6972099ffadb527c4ecc0"
+    }
+  ],
+  "notes": [
+    "No deploy",
+    "No configuration changes",
+    "No files to delete during installation"
+  ]
+}

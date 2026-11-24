@@ -1,28 +1,38 @@
 <script setup lang="ts">
-import {computed,ref,watch,onUnmounted} from 'vue'
+import {computed,ref,shallowRef,watch,onUnmounted} from 'vue'
 import {stagingSession} from '../integrations/firebase/stagingSession'
 import {isStagingMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
 import {watchGymIdentity,saveGymIdentity,emptyIdentity,emptyIdentityRead,type IdentityField} from '../integrations/firestore/platform'
 import {accountKey} from '../features/platform/platformModel'
+import {liveIdentityStream,startIdentityStream} from '../features/branding/liveIdentityStream'
+import {beginSessionDataAudit} from '../features/performance/sessionDataAudit'
 import {compressIdentity} from '../features/platform/identityImage'
 const p=defineProps<{edit?:boolean;compact?:boolean;hero?:boolean}>()
-const read=ref(emptyIdentityRead()),draft=ref(emptyIdentity()),changed=ref<IdentityField[]>([]),busy=ref(false),message=ref(''),slow=ref(false)
+const read=shallowRef(emptyIdentityRead()),draft=ref(emptyIdentity()),changed=ref<IdentityField[]>([]),busy=ref(false),message=ref(''),slow=ref(false)
 const identity=computed(()=>read.value.identity)
 const nameReady=computed(()=>read.value.gym.state==='ready')
 const brandReady=computed(()=>nameReady.value&&read.value.appearance.state==='ready')
 const pending=computed(()=>read.value.gym.state==='loading'||read.value.appearance.state==='loading')
+// Only live readers show a neutral placeholder; demo/preview retains the original fallback.
+const displayNamePending=computed(()=>!p.edit&&isStagingMode()&&!!stagingSession.value&&read.value.gym.state==='loading'&&!identity.value.name)
+const displayAppearancePending=computed(()=>!p.edit&&isStagingMode()&&!!stagingSession.value&&read.value.appearance.state==='loading')
 const canSave=computed(()=>!busy.value&&mayWriteLive()&&changed.value.length>0&&(!changed.value.includes('name')||nameReady.value)&&(!changed.value.some(f=>f!=='name')||brandReady.value))
 let stop:(()=>void)|undefined,epoch=0,timer:ReturnType<typeof setTimeout>|undefined
 function mark(f:IdentityField){if(!changed.value.includes(f))changed.value=[...changed.value,f]}
 function start(reset=false){
+ const audit=beginSessionDataAudit('gym-identity')
  const s=stagingSession.value;stop?.();clearTimeout(timer);const n=++epoch;read.value=emptyIdentityRead();slow.value=false
  if(reset){draft.value=emptyIdentity();changed.value=[];busy.value=false;message.value=''}
  if(!isStagingMode()||!s||(p.edit&&s.role!=='titolare'))return
  timer=setTimeout(()=>{if(n===epoch)slow.value=true},12000)
- try{stop=watchGymIdentity(s,v=>{if(n!==epoch)return;read.value=v;for(const f of ['name','logo','cover'] as const){if(!changed.value.includes(f))draft.value[f]=v.identity[f]}if(!pending.value)clearTimeout(timer)})}
+ try{
+ const accept=(v:typeof read.value)=>{if(n!==epoch)return;read.value=v;if(p.edit)for(const f of ['name','logo','cover'] as const){if(!changed.value.includes(f))draft.value[f]=v.identity[f]}if(!pending.value){clearTimeout(timer);audit(brandReady.value?'ready':'error')}}
+ // Editor stays on its own fresh server-confirmed source; reuse is read-only.
+ stop=p.edit?watchGymIdentity(s,accept):liveIdentityStream.acquire(s,publish=>startIdentityStream(s,publish),{next:accept,reset:()=>{if(n===epoch){read.value=emptyIdentityRead();draft.value=emptyIdentity();clearTimeout(timer)}}})
+ }
  catch{read.value={...emptyIdentityRead(),gym:{state:'error',message:'configurazione'},appearance:{state:'error',message:'configurazione'}};clearTimeout(timer)}
 }
-watch(()=>accountKey(stagingSession.value),()=>start(true),{immediate:true})
+watch(()=>accountKey(stagingSession.value),()=>start(true),{immediate:true,flush:'sync'})
 onUnmounted(()=>{epoch++;stop?.();clearTimeout(timer)})
 async function pick(e:Event,kind:'logo'|'cover'){const el=e.target as HTMLInputElement,file=el.files?.[0];el.value='';if(!file||busy.value||!brandReady.value)return;const n=epoch;busy.value=true;message.value='';try{const data=await compressIdentity(file,kind);if(n===epoch){draft.value={...draft.value,[kind]:data};mark(kind)}}catch(e){if(n===epoch)message.value=(e as Error).message}finally{if(n===epoch)busy.value=false}}
 function remove(f:'logo'|'cover'){if(!brandReady.value||busy.value)return;draft.value[f]='';mark(f)}
@@ -46,10 +56,10 @@ async function save(){if(!canSave.value)return;const n=epoch;busy.value=true;mes
   <p v-if="message" class="notice" role="status">{{message}}</p>
  </section>
  <section v-else-if="!edit&&p.hero" class="lf14-gym-identity lf14-gym-hero" :class="{'lf14-with-cover':!!identity.cover}" aria-label="La tua palestra">
-  <img class="lf14-hero-image" :src="identity.cover||'/lionfit-r8a/athlete-workout-hero.webp'" alt=""/>
+  <img v-if="!displayAppearancePending||identity.cover" class="lf14-hero-image" :src="identity.cover||'/lionfit-r8a/athlete-workout-hero.webp'" alt=""/>
   <div class="lf14-hero-shade" aria-hidden="true"></div>
   <div class="lf14-hero-content"><slot /></div>
-  <div class="lf14-gym-label"><img :src="identity.logo||'/v1-preview/LOGO-APP.png'" class="lf14-logo" alt="Logo palestra"/><div><small>LA TUA PALESTRA</small><strong>{{identity.name||'LionFit'}}</strong></div></div>
+  <div class="lf14-gym-label"><span v-if="displayAppearancePending&&!identity.logo" class="lf14-logo lf-e4-logo-placeholder" aria-hidden="true"/><img v-else :src="identity.logo||'/v1-preview/LOGO-APP.png'" class="lf14-logo" alt="Logo palestra"/><div><small>LA TUA PALESTRA</small><strong v-if="displayNamePending" class="lf-e4-name-placeholder" role="status"><span class="lf15-event-sr">Caricamento nome palestra…</span></strong><strong v-else>{{identity.name||'LionFit'}}</strong></div></div>
  </section>
- <section v-else-if="!edit&&(identity.name||compact)" class="lf14-gym-identity" :class="{'lf14-with-cover':!!identity.cover,'lf14-compact':compact}"><img v-if="identity.cover" :src="identity.cover" alt="" class="lf14-bg-cover"/><div class="lf14-gym-label"><img :src="identity.logo||'/v1-preview/LOGO-APP.png'" class="lf14-logo" alt="Logo palestra"/><div><small>{{identity.name?'PALESTRA':'PANNELLO COACH'}}</small><strong>{{identity.name||'LionFit'}}</strong></div></div></section>
+ <section v-else-if="!edit&&(identity.name||compact)" class="lf14-gym-identity" :class="{'lf14-with-cover':!!identity.cover,'lf14-compact':compact}"><img v-if="identity.cover" :src="identity.cover" alt="" class="lf14-bg-cover"/><div class="lf14-gym-label"><span v-if="displayAppearancePending&&!identity.logo" class="lf14-logo lf-e4-logo-placeholder" aria-hidden="true"/><img v-else :src="identity.logo||'/v1-preview/LOGO-APP.png'" class="lf14-logo" alt="Logo palestra"/><div><small>{{identity.name||displayNamePending?'PALESTRA':'PANNELLO COACH'}}</small><strong v-if="displayNamePending" class="lf-e4-name-placeholder" role="status"><span class="lf15-event-sr">Caricamento nome palestra…</span></strong><strong v-else>{{identity.name||'LionFit'}}</strong></div></div></section>
 </template>

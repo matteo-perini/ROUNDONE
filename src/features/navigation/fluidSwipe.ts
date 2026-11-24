@@ -9,7 +9,7 @@ export function swipeNeighbor(path:string,dx:number,order:readonly string[]):str
 }
 export function swipePreviewOffset(dx:number,dy:number,width:number,hasNeighbor:boolean):number{
  if(![dx,dy,width].every(Number.isFinite)||width<=0)return 0
- if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.4)return 0
+ if(Math.abs(dx)<7||Math.abs(dx)<Math.abs(dy)*1.25)return 0
  const magnitude=Math.abs(dx)
  // Ease the content toward the finger; provide a restrained rubber band at either edge.
  const limit=hasNeighbor?Math.min(width*.68,580):24
@@ -18,12 +18,14 @@ export function swipePreviewOffset(dx:number,dy:number,width:number,hasNeighbor:
 }
 export function shouldNavigateOnRelease(dx:number,dy:number,elapsedMs:number,width:number,hasNeighbor:boolean):boolean{
  if(!hasNeighbor||![dx,dy,elapsedMs,width].every(Number.isFinite))return false
- if(elapsedMs<50||elapsedMs>1100||width<=0)return false
- if(Math.abs(dx)<Math.abs(dy)*1.65)return false
+ // Caller has already locked the horizontal axis. Allow deliberate slow
+ // drags and short flicks; still reject a release dominated by vertical travel.
+ if(elapsedMs<20||width<=0)return false
+ if(Math.abs(dx)<Math.abs(dy)*1.15)return false
  const distance=Math.abs(dx)
  const velocity=distance/Math.max(elapsedMs,1)
- const threshold=Math.min(125,Math.max(74,width*.22))
- return distance>=threshold||(distance>=42&&velocity>=.55)
+ const threshold=Math.min(100,Math.max(56,width*.18))
+ return distance>=threshold||(distance>=32&&velocity>=.48)
 }
 export function snapBackDuration(offset:number,width:number):number{
  if(!Number.isFinite(offset)||!Number.isFinite(width)||width<=0)return 180

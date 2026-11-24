@@ -91,3 +91,17 @@
  .lf15-home :is(.lf15-main-cta,.lf15-route,.lf15-quick-tile):hover{transform:translateY(-2px)}
 }
 @media(prefers-reduced-motion:reduce){.lf15-home *, .lf15-video-backdrop *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* E.4: keep the Agenda cards' footer anchored and reserve the body before data arrives. */
+.lf15-event-card{min-height:150px}
+/* Ready data may occupy multiple rows: a flex column keeps the same bottom anchor. */
+.lf15-event-content{display:flex;flex-direction:column;gap:6px}
+.lf15-event-empty,.lf15-event-loading{min-height:44px}
+.lf15-event-value{font-size:14px;line-height:1.35}.lf15-event-content>small,.lf15-event-empty{font-size:12px;line-height:1.4}
+.lf15-event-open{font-size:11px;margin-top:auto;padding-top:6px}
+.lf15-event-loading{display:grid;align-content:start;gap:8px;padding-top:5px}.lf15-event-loading i{display:block;width:85%;height:9px;border-radius:5px;background:var(--muted);opacity:.2}.lf15-event-loading i:last-child{width:56%}
+.lf15-event-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.lf14-gym-label .lf14-logo.lf-e4-logo-placeholder{background:var(--muted);opacity:.25;padding:0}
+.lf-e4-name-placeholder{display:block;width:min(128px,32vw);height:1.25em;position:relative;border-radius:5px;background:var(--muted);opacity:.35}
+@media(max-width:799px){.lf15-event-card{min-height:166px}}
+@media(max-width:360px){.lf15-event-head>strong{font-size:10px;overflow-wrap:anywhere}.lf15-event-content>small,.lf15-event-empty{font-size:11px}}
