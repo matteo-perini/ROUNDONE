@@ -125,9 +125,12 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
 .athlete-live-screen{position:relative}
 .lf-r22b5-page{display:flex;flex:1 0 auto;flex-direction:column;gap:13px;min-width:0;width:100%;min-height:0}
 @media(max-width:799px) and (prefers-reduced-motion:no-preference){
- .lf-section-next-enter-active,.lf-section-next-leave-active,.lf-section-prev-enter-active,.lf-section-prev-leave-active{transition:transform 340ms cubic-bezier(.22,1,.36,1),opacity 300ms ease;will-change:transform}
+ .lf-section-next-enter-active,.lf-section-next-leave-active,.lf-section-prev-enter-active,.lf-section-prev-leave-active{transition:transform 340ms cubic-bezier(.22,1,.36,1),opacity 300ms ease;will-change:transform;transition-duration:var(--lf-swipe-commit-duration,340ms),var(--lf-swipe-commit-duration,300ms)}
  .lf-section-next-enter-from,.lf-section-prev-leave-to{transform:translate3d(100%,0,0);opacity:.9}
  .lf-section-next-leave-to,.lf-section-prev-enter-from{transform:translate3d(-100%,0,0);opacity:.9}
+ .lf-section-next-leave-from,.lf-section-prev-leave-from{transform:translate3d(var(--lf-swipe-commit-offset,0px),0,0)}
+ .lf-section-next-enter-from{transform:translate3d(calc(100% + var(--lf-swipe-commit-offset,0px)),0,0)}
+ .lf-section-prev-enter-from{transform:translate3d(calc(-100% + var(--lf-swipe-commit-offset,0px)),0,0)}
  .lf-section-next-leave-active,.lf-section-prev-leave-active{position:absolute;top:0;left:0;width:100%;pointer-events:none}
 }
 @media(prefers-reduced-motion:reduce){

@@ -27,7 +27,7 @@ import {demoProfiles} from './features/profile/localProfile'
 import {uiText} from './features/i18n/interfaceLanguage'
 import {CHAT_PREVIEW_ENABLED} from './features/chat/chatPreview'
 import {sectionSwipeDestination,sectionTransition} from './features/navigation/sectionSwipe'
-import {swipeNeighbor,swipePreviewOffset,shouldNavigateOnRelease,snapBackDuration} from './features/navigation/fluidSwipe'
+import {swipeNeighbor,swipePreviewOffset,shouldNavigateOnRelease,snapBackDuration,swipeCommitMotion} from './features/navigation/fluidSwipe'
 import {resolveSwipeIntent,protectedSwipeSelector,hasNativeHorizontalScroll,insideSystemEdge,suppressSwipeClick,type SwipeIntent} from './features/navigation/swipeIntent'
 import {installMotionAudit} from './features/performance/motionAudit'
 import {chatSwipeDestination} from './features/chat/chatNavigation'
@@ -154,7 +154,7 @@ window.addEventListener('lionfit:chat-updated',chatEvent)
 if(CHAT_PILOT_ENABLED)chatUnreadTimer=setInterval(()=>{void refreshChatUnread()},30000)
 onUnmounted(()=>{++chatRequest;if(chatUnreadTimer)clearInterval(chatUnreadTimer);document.removeEventListener('visibilitychange',chatVisibility);window.removeEventListener('lionfit:chat-updated',chatEvent)})
 watch(()=>route.path,(now,before)=>{
- touchStart=null;restoreDrag(false)
+ touchStart=null;transferSwipeMotion(before,now);restoreDrag(false)
  // Preserve the R22A premium Chat gesture on athlete Home; extend the same direction logic
  // to the other top-level sections, including taps on the existing navbar.
  if (chatPreviewEnabled.value && before==='/home' && now==='/messaggi') chatMotion.value='lf-chat-open'
@@ -172,22 +172,46 @@ type GestureStart={x:number;y:number;at:number;path:string;root:HTMLElement|null
 let touchStart:GestureStart|null=null
 let swipeClickGuard:{at:number;target:Element}|null=null
 let swipeRouteRoot:HTMLElement|null=null
-let dragFrame=0,dragOffset=0,dragRoot:HTMLElement|null=null
+let dragFrame=0,dragOffset=0,dragPaintedOffset=0,dragRoot:HTMLElement|null=null
+let snapAnimation:Animation|null=null
+let pendingSwipe:{from:string;to:string;direction:number}|null=null
+let motionStage:HTMLElement|null=null,motionTimer:ReturnType<typeof setTimeout>|null=null
 let dragOriginal:{transform:string;transition:string;willChange:string}|null=null
 function setSwipeRouteRoot(instance:unknown){
  const element=(instance as {$el?:unknown}|null)?.$el
  swipeRouteRoot=element instanceof HTMLElement?element:null
 }
+function clearSwipeMotion(){
+ if(motionTimer!==null){clearTimeout(motionTimer);motionTimer=null}
+ motionStage?.style.removeProperty('--lf-swipe-commit-offset')
+ motionStage?.style.removeProperty('--lf-swipe-commit-duration')
+ motionStage=null
+}
+function transferSwipeMotion(from:string,to:string){
+ clearSwipeMotion()
+ const pending=pendingSwipe;pendingSwipe=null
+ if(!pending||pending.from!==from||pending.to!==to||!dragRoot?.isConnected||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return
+ const motion=swipeCommitMotion(dragPaintedOffset,window.innerWidth,pending.direction)
+ const stage=dragRoot.closest<HTMLElement>('.main-layout')
+ if(!motion||!stage)return
+ // Both the outer RouterView and the reused athlete workspace inherit these
+ // variables. Vue's leave-from starts at the last visible drag offset.
+ motionStage=stage
+ stage.style.setProperty('--lf-swipe-commit-offset',`${motion.offset}px`)
+ stage.style.setProperty('--lf-swipe-commit-duration',`${motion.duration}ms`)
+ motionTimer=setTimeout(clearSwipeMotion,1200)
+}
 function restoreDrag(animateBack:boolean){
  if(dragFrame){cancelAnimationFrame(dragFrame);dragFrame=0}
- const el=dragRoot,original=dragOriginal,offset=dragOffset
- dragRoot=null;dragOriginal=null;dragOffset=0
+ snapAnimation?.cancel();snapAnimation=null
+ const el=dragRoot,original=dragOriginal,offset=dragPaintedOffset
+ dragRoot=null;dragOriginal=null;dragOffset=0;dragPaintedOffset=0
  if(!el||!original)return
  el.style.transform=original.transform
  el.style.transition=original.transition
  el.style.willChange=original.willChange
  if(animateBack&&Math.abs(offset)>3&&el.isConnected&&typeof el.animate==='function'){
-  el.animate([{transform:`translate3d(${offset}px,0,0)`},{transform:original.transform||'translate3d(0,0,0)'}],
+  snapAnimation=el.animate([{transform:`translate3d(${offset}px,0,0)`},{transform:original.transform||'translate3d(0,0,0)'}],
    {duration:snapBackDuration(offset,window.innerWidth),easing:'cubic-bezier(.18,1,.35,1)'})
  }
 }
@@ -218,6 +242,7 @@ function chatClickCapture(event:MouseEvent){
  }else if(Date.now()-guard.at>450)swipeClickGuard=null
 }
 function chatTouchStart(event:TouchEvent){
+ if(pendingSwipe)return // Keep the last painted position until the router settles.
  touchStart=null;swipeClickGuard=null;restoreDrag(false)
  if(!shownRole.value||!swipeViewport()||!swipePages.value.includes(route.path)||event.touches.length!==1)return
  const touch=event.touches[0]
@@ -240,7 +265,7 @@ function chatTouchMove(event:TouchEvent){
  event.preventDefault()
  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return
  const next=swipeNeighbor(start.path,dx,swipePages.value)
- const offset=swipePreviewOffset(dx,dy,window.innerWidth,!!next)
+ const offset=swipePreviewOffset(dx,0,window.innerWidth,!!next) // axis already locked
  if(!offset){if(dragRoot)restoreDrag(true);return}
  const el=start.root
  if(!el||!el.isConnected)return // Route fragments fall back to the original safe end-of-swipe navigation.
@@ -256,9 +281,11 @@ function chatTouchMove(event:TouchEvent){
   dragRoot.style.transition='none'
   dragRoot.style.willChange='transform'
   dragRoot.style.transform=`translate3d(${dragOffset}px,0,0)`
+  dragPaintedOffset=dragOffset
  })
 }
 function chatTouchEnd(event:TouchEvent){
+ if(pendingSwipe)return
  const start=touchStart;touchStart=null
  if(!start||start.path!==route.path||!swipeViewport()||event.changedTouches.length!==1||event.touches.length>0||event.changedTouches[0].identifier!==start.identifier){restoreDrag(true);return}
  if(start.intent!=='horizontal'){restoreDrag(true);return}
@@ -274,17 +301,23 @@ function chatTouchEnd(event:TouchEvent){
  const chatDestination=chatPreviewEnabled.value&&shownRole.value==='atleta' ? chatSwipeDestination(route.path,dx,dy,elapsed) : null
  const classicDestination=sectionSwipeDestination(route.path,dx,dy,elapsed,swipePages.value)
  const destination=shouldMove?candidate:(chatDestination??classicDestination)
- restoreDrag(!destination)
+ if(!destination){restoreDrag(true);return}
  if(destination){
   if(destination==='/messaggi'||route.path==='/messaggi')chatHintClose()
-  void router.push(route.query.source==='emulator'?{path:destination,query:{source:'emulator'}}:destination)
+  const commit={from:route.path,to:destination,direction:dx}
+  pendingSwipe=commit
+  // Freeze the preview until the route actually changes. Failed/aborted
+  // navigation returns the existing page to rest; no stale inline styles.
+  const settle=()=>{if(pendingSwipe===commit&&route.path!==commit.to){pendingSwipe=null;restoreDrag(true)}}
+  void router.push(route.query.source==='emulator'?{path:destination,query:{source:'emulator'}}:destination).then(settle,settle)
  }
 }
 function chatTouchCancel(){
+ if(pendingSwipe)return
  if(touchStart?.intent==='horizontal')armSwipeClickGuard(touchStart)
  touchStart=null;restoreDrag(true)
 }
-onUnmounted(()=>{touchStart=null;swipeClickGuard=null;restoreDrag(false)})
+onUnmounted(()=>{touchStart=null;pendingSwipe=null;swipeClickGuard=null;restoreDrag(false);clearSwipeMotion()})
 
 const showChatHint=ref(false)
 const chatHintKey='lionfit-r22a-chat-hint-seen'
@@ -420,16 +453,22 @@ async function goOut(){
 /* Chat lies to the LEFT of Home: opening moves the Home right; returning reverses. */
 .main-layout.lf-chat-stage{position:relative;overflow-x:clip}
 @media(prefers-reduced-motion:no-preference){
- .lf-chat-open-enter-active,.lf-chat-open-leave-active,.lf-chat-close-enter-active,.lf-chat-close-leave-active{transition:transform 340ms cubic-bezier(.22,1,.36,1),opacity 340ms ease;will-change:transform}
+ .lf-chat-open-enter-active,.lf-chat-open-leave-active,.lf-chat-close-enter-active,.lf-chat-close-leave-active{transition:transform 340ms cubic-bezier(.22,1,.36,1),opacity 340ms ease;will-change:transform;transition-duration:var(--lf-swipe-commit-duration,340ms)}
+ .lf-chat-open-leave-from,.lf-chat-close-leave-from{transform:translate3d(var(--lf-swipe-commit-offset,0px),0,0)}
  .lf-chat-open-enter-from,.lf-chat-close-leave-to{transform:translate3d(-101%,0,0);opacity:.88}
  .lf-chat-open-leave-to,.lf-chat-close-enter-from{transform:translate3d(101%,0,0);opacity:.88}
+ .lf-chat-open-enter-from{transform:translate3d(calc(-101% + var(--lf-swipe-commit-offset,0px)),0,0)}
+ .lf-chat-close-enter-from{transform:translate3d(calc(101% + var(--lf-swipe-commit-offset,0px)),0,0)}
  .lf-chat-open-leave-active,.lf-chat-close-leave-active{position:absolute;top:0;left:0;width:100%;pointer-events:none}
 }
 /* Navigate horizontally between existing mobile section tabs (no extra navbar items). */
 @media(max-width:900px) and (prefers-reduced-motion:no-preference){
- .lf-section-next-enter-active,.lf-section-next-leave-active,.lf-section-prev-enter-active,.lf-section-prev-leave-active{transition:transform 340ms cubic-bezier(.22,1,.36,1),opacity 300ms ease;will-change:transform}
+ .lf-section-next-enter-active,.lf-section-next-leave-active,.lf-section-prev-enter-active,.lf-section-prev-leave-active{transition:transform 340ms cubic-bezier(.22,1,.36,1),opacity 300ms ease;will-change:transform;transition-duration:var(--lf-swipe-commit-duration,340ms),var(--lf-swipe-commit-duration,300ms)}
  .lf-section-next-enter-from,.lf-section-prev-leave-to{transform:translate3d(100%,0,0);opacity:.9}
  .lf-section-next-leave-to,.lf-section-prev-enter-from{transform:translate3d(-100%,0,0);opacity:.9}
+ .lf-section-next-leave-from,.lf-section-prev-leave-from{transform:translate3d(var(--lf-swipe-commit-offset,0px),0,0)}
+ .lf-section-next-enter-from{transform:translate3d(calc(100% + var(--lf-swipe-commit-offset,0px)),0,0)}
+ .lf-section-prev-enter-from{transform:translate3d(calc(-100% + var(--lf-swipe-commit-offset,0px)),0,0)}
  .lf-section-next-leave-active,.lf-section-prev-leave-active{position:absolute;top:0;left:0;width:100%;pointer-events:none}
 }
 @media(prefers-reduced-motion:reduce){

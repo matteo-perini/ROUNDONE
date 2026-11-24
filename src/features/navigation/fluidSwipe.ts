@@ -29,3 +29,10 @@ export function snapBackDuration(offset:number,width:number):number{
  if(!Number.isFinite(offset)||!Number.isFinite(width)||width<=0)return 180
  return Math.round(Math.min(240,Math.max(135,140+Math.abs(offset)/width*180)))
 }
+
+/** R22B.6D: continue from the last painted offset, not from a fresh full-width slide. */
+export function swipeCommitMotion(offset:number,width:number,direction:number):{offset:number;duration:number}|null{
+ if(![offset,width,direction].every(Number.isFinite)||width<=0||direction===0||Math.sign(offset)!==Math.sign(direction)||Math.abs(offset)<3)return null
+ const bounded=Math.sign(offset)*Math.min(Math.abs(offset),width*.68,580)
+ return {offset:bounded,duration:Math.round(Math.max(180,340-160*Math.abs(bounded)/width))}
+}
