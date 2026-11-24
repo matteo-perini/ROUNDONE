@@ -1,0 +1,13 @@
+LIONFIT — PATCH R22B.6E.7 Final Performance Review
+Base richiesta: R22B.6E.6.
+
+1) Backup dei sei file src elencati nel MANIFEST_R22B6E7.json, fuori dal progetto.
+2) Estrarre nella radice di LionFit e confermare la sovrascrittura.
+3) npm.cmd run typecheck
+4) npm.cmd run build
+5) Se entrambi OK, LIONFIT_PREPARA_WEB_E_DOCS.cmd e commit/push GitHub Desktop.
+Nessun deploy Firebase, nessuna modifica alle Rules o .env.
+
+Rollback: ripristinare i sei file dal backup E.6, rimuovere il nuovo test E.7, ricostruire e ripubblicare.
+Test: 154/154 R22, 736/750 suite estesa (14 fallimenti identici alla E.6), 48 asserzioni browser isolate; build Linux bloccata dal modulo Rollup nativo assente.
+Leggere il report per limiti e collaudo smartphone.

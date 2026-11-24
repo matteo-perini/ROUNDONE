@@ -5,12 +5,13 @@ import ts from 'typescript'
 import * as Vue from 'vue'
 import {parse,compileScript,compileTemplate} from '@vue/compiler-sfc'
 import {createWarmSessionStream} from '../src/features/performance/warmSessionStream.ts'
+import * as ChatViewport from '../src/features/chat/chatViewport.ts'
 import {createChatListHint} from '../src/features/chat/chatSessionSnapshot.ts'
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8')
 const deferred=()=>{let resolve,reject;const promise=new Promise((r,j)=>{resolve=r;reject=j});return {promise,resolve,reject}}
 const settle=async()=>{await new Promise(r=>setImmediate(r));await Vue.nextTick()}
 function load(code,modules){const js=ts.transpileModule(code,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,mod={exports:{}};new Function('require','module','exports',js)(id=>{if(!(id in modules))throw Error('Unexpected module '+id);return modules[id]},mod,mod.exports);return mod.exports}
-function component(file,modules){const {descriptor,errors}=parse(read(file),{filename:file});assert.deepEqual(errors,[]);const script=compileScript(descriptor,{id:file});const template=compileTemplate({id:file,filename:file,source:descriptor.template.content,compilerOptions:{bindingMetadata:script.bindings}});assert.deepEqual(template.errors,[]);const mod=load(script.content,{vue:Vue,'../features/performance/sessionDataAudit':{beginSessionDataAudit:()=>()=>{}},...modules});return {...mod.default,render(){return Vue.h('div')}}}
+function component(file,modules){const {descriptor,errors}=parse(read(file),{filename:file});assert.deepEqual(errors,[]);const script=compileScript(descriptor,{id:file});const template=compileTemplate({id:file,filename:file,source:descriptor.template.content,compilerOptions:{bindingMetadata:script.bindings}});assert.deepEqual(template.errors,[]);const mod=load(script.content,{vue:Vue,'../features/chat/chatViewport':ChatViewport,'../features/performance/sessionDataAudit':{beginSessionDataAudit:()=>()=>{}},...modules});return {...mod.default,render(){return Vue.h('div')}}}
 const node=type=>({type,children:[],parent:null,text:''})
 const renderer=Vue.createRenderer({createElement:node,createText:t=>({...node('text'),text:t}),createComment:t=>({...node('comment'),text:t}),setText:(n,t)=>n.text=t,setElementText:(n,t)=>n.text=t,parentNode:n=>n.parent,nextSibling:n=>n.parent?.children[n.parent.children.indexOf(n)+1]??null,patchProp(){},insert(n,p,a=null){if(n.parent){const i=n.parent.children.indexOf(n);if(i>=0)n.parent.children.splice(i,1)}n.parent=p;const i=a?p.children.indexOf(a):-1;if(i<0)p.children.push(n);else p.children.splice(i,0,n)},remove(n){if(n.parent){const i=n.parent.children.indexOf(n);if(i>=0)n.parent.children.splice(i,1)}n.parent=null}})
 function mount(c,props={}){const app=renderer.createApp(c,props);const vm=app.mount(node('root'));return {state:vm.$.setupState,unmount:()=>app.unmount()}}

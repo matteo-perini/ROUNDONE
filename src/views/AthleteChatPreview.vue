@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /** E.3: short same-session list hint, fresh authorization on each entry.
  * All private message reads/writes still use the callable backend. */
-import {computed,ref,watch,onUnmounted,nextTick} from 'vue'
+import {computed,ref,watch,onMounted,onUnmounted,nextTick} from 'vue'
 import {RouterLink,useRoute} from 'vue-router'
 import LionIcon from '../components/LionIcon.vue'
 import {isStagingMode} from '../integrations/firebase/stagingConfig'
@@ -9,6 +9,7 @@ import {readNavigationSession,stagingSession} from '../integrations/firebase/sta
 import {accountKey} from '../features/platform/platformModel'
 import {currentVerifiedScope} from '../features/performance/verifiedSessionStreams'
 import {beginSessionDataAudit} from '../features/performance/sessionDataAudit'
+import {attachChatViewport,chatNearBottom} from '../features/chat/chatViewport'
 import {chatListHint} from '../features/chat/chatSessionSnapshot'
 import {CHAT_PILOT_ENABLED,chatPilotAllowed,chatContacts,chatList,chatOpen,chatHistory,chatSend,chatMarkRead,signalChatUpdated,
  type ChatContact,type ChatThread,type ChatMessage} from '../features/chat/chatClient'
@@ -20,18 +21,34 @@ const enabled=computed(()=>CHAT_PILOT_ENABLED&&chatPilotAllowed.value&&isStaging
 const uid=ref(''),contacts=ref<ChatContact[]>([]),threads=ref<ChatThread[]>([])
 const currentId=ref(''),currentName=ref(''),messages=ref<ChatMessage[]>([]),olderCursor=ref<string|null>(null)
 const query=ref(''),draft=ref(''),error=ref(''),busy=ref(false),sending=ref(false),loading=ref(true),verified=ref(false),hintVisible=ref(false)
-const logEl=ref<HTMLElement|null>(null)
+const logEl=ref<HTMLElement|null>(null),pageEl=ref<HTMLElement|null>(null)
+let viewport:ReturnType<typeof attachChatViewport>|undefined,logObserver:ResizeObserver|undefined,anchorFrame=0,stickToBottom=true
+const mobileChat=()=>typeof window!=='undefined'&&window.innerWidth<(coach.value?901:800)
+function onLogScroll(){if(logEl.value)stickToBottom=chatNearBottom(logEl.value)}
+function keepBottom(){
+ if(!stickToBottom||!logEl.value||!inChatRoute.value||!verified.value)return
+ if(anchorFrame)cancelAnimationFrame(anchorFrame)
+ const el=logEl.value,id=currentId.value,n=generation
+ anchorFrame=requestAnimationFrame(()=>{anchorFrame=0;if(active(n)&&stickToBottom&&currentId.value===id&&logEl.value===el)el.scrollTop=el.scrollHeight})
+}
+function resetChatLayout(preserve=false){viewport?.deactivate(preserve);if(anchorFrame){cancelAnimationFrame(anchorFrame);anchorFrame=0}}
+onMounted(()=>{if(pageEl.value&&typeof window!=='undefined')viewport=attachChatViewport(pageEl.value,{active:()=>enabled.value&&inChatRoute.value,mobile:mobileChat,onLayout:keepBottom})})
+watch(logEl,(el)=>{logObserver?.disconnect();logObserver=undefined;stickToBottom=true;if(el&&typeof ResizeObserver!=='undefined'){logObserver=new ResizeObserver(keepBottom);logObserver.observe(el)}},{flush:'post'})
+watch([currentId,error],()=>viewport?.schedule(),{flush:'post'})
 let poll:ReturnType<typeof setInterval>|null=null,hintTimer:ReturnType<typeof setTimeout>|undefined,alive=true,refreshing=false,generation=0,scopeKey='',lastContacts=0,lastList=0,actionVersion=0
 let pendingSend:{threadId:string;text:string;key:string}|null=null
 const keyNow=()=>stagingSession.value?currentVerifiedScope(stagingSession.value):''
 const active=(n:number)=>alive&&n===generation&&enabled.value&&inChatRoute.value&&!!scopeKey&&keyNow()===scopeKey
 const current=(n:number,version:number)=>active(n)&&version===actionVersion
 function stopPoll(){if(poll)clearInterval(poll);poll=null;clearTimeout(hintTimer);document.removeEventListener('visibilitychange',onVisibilityChange)}
-function clearThread(){currentId.value='';currentName.value='';messages.value=[];olderCursor.value=null;draft.value='';pendingSend=null}
+function clearThread(){stickToBottom=true;currentId.value='';currentName.value='';messages.value=[];olderCursor.value=null;draft.value='';pendingSend=null}
 function clearView(){generation++;stopPoll();scopeKey='';uid.value='';contacts.value=[];threads.value=[];clearThread();query.value='';error.value='';busy.value=false;sending.value=false;loading.value=true;verified.value=false;hintVisible.value=false;refreshing=false;lastContacts=0;lastList=0;actionVersion++}
 function onVisibilityChange(){if(!document.hidden){if(!verified.value)void initializeChat();else void refresh()}}
-const filterContacts=computed(()=>contacts.value.filter(c=>c.name.toLocaleLowerCase('it').includes(query.value.trim().toLocaleLowerCase('it'))))
-const availableContacts=computed(()=>filterContacts.value.filter(c=>!threads.value.some(t=>t.peerUid===c.uid)).slice(0,50))
+const normalizedQuery=computed(()=>query.value.trim().toLocaleLowerCase('it'))
+const filterContacts=computed(()=>contacts.value.filter(c=>c.name.toLocaleLowerCase('it').includes(normalizedQuery.value)))
+const threadPeers=computed(()=>new Set(threads.value.map(t=>t.peerUid)))
+const availableContacts=computed(()=>filterContacts.value.filter(c=>!threadPeers.value.has(c.uid)).slice(0,50))
+const filteredThreads=computed(()=>threads.value.filter(t=>t.peerName.toLocaleLowerCase('it').includes(normalizedQuery.value)))
 const titleFor=(id:string)=>threads.value.find(t=>t.id===id)?.peerName||contacts.value.find(c=>c.threadId===id)?.name||currentName.value||'Conversazione'
 function readableError(e:unknown){
  const raw=e instanceof Error?e.message:String(e??'')
@@ -47,13 +64,14 @@ function fail(e:unknown,n:number){
  chatListHint.clear();clearTimeout(hintTimer)
  const code=String((e as {code?:string})?.code||'')+' '+String(e)
  if(!verified.value||/permission-denied|unauthenticated|failed-precondition|not-found/i.test(code)){
+  resetChatLayout()
   verified.value=false;hintVisible.value=false;contacts.value=[];threads.value=[];clearThread();stopPoll()
  }
  loading.value=false;error.value=readableError(e)
 }
 const timeFormat=new Intl.DateTimeFormat('it-IT',{hour:'2-digit',minute:'2-digit'})
 function time(ms:number){return ms>0?timeFormat.format(new Date(ms)):''}
-async function scrollLast(n:number,selected:string){await nextTick();if(active(n)&&currentId.value===selected&&logEl.value)logEl.value.scrollTop=logEl.value.scrollHeight}
+async function scrollLast(n:number,selected:string){await nextTick();if(active(n)&&currentId.value===selected&&logEl.value){stickToBottom=true;logEl.value.scrollTop=logEl.value.scrollHeight}}
 function rememberList(){if(verified.value&&scopeKey&&keyNow()===scopeKey)chatListHint.remember(scopeKey,contacts.value,threads.value,Math.min(lastContacts,lastList))}
 async function refreshList(n:number,withContacts=false,version=actionVersion){
  if(!current(n,version)||document.hidden)return
@@ -73,7 +91,7 @@ async function refreshHistory(scroll=false,n=generation,version=actionVersion){
  const result=await chatHistory(uid.value,selected)
  if(!current(n,version)||selected!==currentId.value)return
  const oldLast=messages.value.at(-1)?.id
- const el=logEl.value,nearBottom=!el||el.scrollHeight-el.scrollTop-el.clientHeight<90
+ const el=logEl.value,nearBottom=!el||chatNearBottom(el)
  // Keep an older page only when the new server tail overlaps it; do not create invisible gaps.
  const first=result.rows[0]?.id,overlap=first?messages.value.findIndex(m=>m.id===first):-1
  if(overlap>0){messages.value=[...messages.value.slice(0,overlap),...result.rows]}
@@ -112,13 +130,14 @@ async function older(){
  if(!verified.value||!active(generation)||!olderCursor.value||!currentId.value||busy.value||sending.value)return
  actionVersion++;const n=generation,cursor=olderCursor.value,id=currentId.value
  const el=logEl.value,oldHeight=el?.scrollHeight||0,oldTop=el?.scrollTop||0
+ stickToBottom=false
  busy.value=true;error.value=''
  try{
   const data=await chatHistory(uid.value,id,cursor)
   if(!active(n)||currentId.value!==id)return
   const seen=new Set(data.rows.map(m=>m.id));messages.value=[...data.rows,...messages.value.filter(m=>!seen.has(m.id))]
   olderCursor.value=data.beforeId
-  await nextTick();if(active(n)&&currentId.value===id&&el&&el===logEl.value)el.scrollTop=oldTop+el.scrollHeight-oldHeight
+  await nextTick();if(active(n)&&currentId.value===id&&el&&el===logEl.value){el.scrollTop=oldTop+el.scrollHeight-oldHeight;onLogScroll()}
  }catch(e){fail(e,n)}finally{if(active(n))busy.value=false}
 }
 async function send(){
@@ -135,8 +154,8 @@ async function send(){
   await refreshList(n);await refreshHistory(true,n);signalChatUpdated()
  }catch(e){fail(e,n)}finally{if(active(n))sending.value=false}
 }
-function onEnter(e:KeyboardEvent){if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();void send()}}
-function backToList(){if(busy.value||sending.value)return;actionVersion++;clearThread();error.value=''}
+function onEnter(e:KeyboardEvent){if(e.key==='Enter'&&!mobileChat()&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();void send()}}
+function backToList(){if(busy.value||sending.value)return;resetChatLayout();actionVersion++;clearThread();error.value=''}
 async function initializeChat(){
  if(!enabled.value||!inChatRoute.value||verified.value||busy.value||document.hidden)return
  const n=++generation;scopeKey=keyNow();if(!scopeKey)return
@@ -164,18 +183,18 @@ watch([enabled,()=>accountKey(stagingSession.value),()=>route.path],()=>{
  // finished its leave animation. Invalidate callbacks and stop all polling now.
  // Scope changes and access revocation instead clear sensitive state immediately.
  if(!enabled.value||(previousScope&&previousScope!==keyNow())){
-  chatListHint.clear();clearView()
+  resetChatLayout();chatListHint.clear();clearView()
   if(!enabled.value||!inChatRoute.value)return
  }
- if(!inChatRoute.value){generation++;actionVersion++;stopPoll();refreshing=false;return}
- clearView();coach.value=route.path==='/coach/messaggi'
+ if(!inChatRoute.value){resetChatLayout(true);generation++;actionVersion++;stopPoll();refreshing=false;return}
+ clearView();coach.value=route.path==='/coach/messaggi';viewport?.schedule()
  document.addEventListener('visibilitychange',onVisibilityChange);void initializeChat()
 },{immediate:true,flush:'sync'})
-onUnmounted(()=>{alive=false;clearView()})
+onUnmounted(()=>{alive=false;viewport?.dispose();logObserver?.disconnect();if(anchorFrame)cancelAnimationFrame(anchorFrame);clearView()})
 </script>
 
 <template>
- <section class="lf-chat-page" aria-label="Messaggi Coach e Atleta">
+ <section ref="pageEl" class="lf-chat-page" :class="{'lf-chat-native-active':enabled,'lf-chat-native-thread':!!currentId,'lf-chat-native-coach':coach}" aria-label="Messaggi Coach e Atleta">
   <div class="lf-chat-head">
    <div class="lf-chat-emblem"><LionIcon name="messages" :size="24"/></div>
    <div><p class="lf-chat-kicker">LIONFIT · CONVERSAZIONI PRIVATE</p><h1>Messaggi</h1><p>In contatto con il tuo {{coach?'atleta':'Coach'}}.</p></div>
@@ -200,7 +219,7 @@ onUnmounted(()=>{alive=false;clearView()})
      <p v-if="hintVisible" class="lf-chat-small" role="status">Aggiornamento conversazioni…</p>
      <p class="lf-chat-group-title">Conversazioni</p>
      <p v-if="verified&&!threads.length" class="lf-chat-small">Non hai ancora conversazioni.</p>
-     <button v-for="t in threads.filter(x=>x.peerName.toLocaleLowerCase('it').includes(query.trim().toLocaleLowerCase('it')))" :key="t.id" type="button" class="lf-chat-person" :class="{'is-selected':t.id===currentId}" :disabled="!verified||busy||sending" @click="selectThread(t)">
+     <button v-for="t in filteredThreads" :key="t.id" type="button" class="lf-chat-person" :class="{'is-selected':t.id===currentId}" :disabled="!verified||busy||sending" @click="selectThread(t)">
       <span class="lf-chat-avatar"><LionIcon name="user" :size="19"/></span>
       <span class="lf-chat-person-copy"><strong>{{t.peerName}}</strong><small>{{hintVisible?'Conversazione':(t.lastText||'Inizia la conversazione')}}</small></span>
       <span v-if="t.unread>0" class="lf-chat-count">{{t.unread>99?'99+':t.unread}}</span>
@@ -216,9 +235,8 @@ onUnmounted(()=>{alive=false;clearView()})
    </aside>
    <div class="lf-chat-main" aria-label="Conversazione privata">
     <template v-if="currentId">
-     <button type="button" class="lf-chat-mobile-back" :disabled="busy||sending" @click="backToList"><LionIcon name="back" :size="20"/> Conversazioni</button>
-     <header class="lf-chat-conversation-title"><span class="lf-chat-avatar" aria-hidden="true"><LionIcon name="user" :size="20"/></span><div><strong>{{titleFor(currentId)}}</strong><small>Conversazione privata</small></div></header>
-     <div ref="logEl" class="lf-chat-messages" role="log" aria-label="Cronologia dei messaggi" aria-live="polite">
+     <header class="lf-chat-conversation-title"><button type="button" class="lf-chat-mobile-back" :disabled="busy||sending" @click="backToList" aria-label="Torna alle conversazioni"><LionIcon name="back" :size="20"/></button><span class="lf-chat-avatar" aria-hidden="true"><LionIcon name="user" :size="20"/></span><div><strong>{{titleFor(currentId)}}</strong><small>Conversazione privata</small></div></header>
+     <div ref="logEl" class="lf-chat-messages" role="log" aria-label="Cronologia dei messaggi" aria-live="polite" @scroll.passive="onLogScroll">
       <button v-if="olderCursor" type="button" class="lf-chat-older" :disabled="busy||sending" @click="older">Carica i messaggi precedenti</button>
       <div v-if="!messages.length&&busy" class="lf-chat-history-loading" role="status"><p>Caricamento messaggi…</p><span aria-hidden="true"/><span aria-hidden="true"/></div>
       <p v-else-if="!messages.length&&!error" class="lf-chat-none">Inizia la conversazione con un messaggio.</p>
@@ -228,8 +246,8 @@ onUnmounted(()=>{alive=false;clearView()})
      </div>
      <form class="lf-chat-composer" @submit.prevent="send">
       <label for="lf-chat-compose" class="lf-chat-sr">Scrivi il tuo messaggio</label>
-      <textarea id="lf-chat-compose" v-model="draft" placeholder="Scrivi un messaggio…" rows="2" maxlength="1200" :disabled="!verified||busy||sending" @keydown="onEnter"/>
-      <button type="submit" :disabled="!verified||!draft.trim()||busy||sending"  :aria-label="sending?'Invio in corso':'Invia messaggio'"><LionIcon name="send" :size="21"/> <span>{{sending?'Invio…':'Invia'}}</span></button>
+      <textarea id="lf-chat-compose" v-model="draft" placeholder="Scrivi un messaggio…" rows="2" maxlength="1200" enterkeyhint="enter" :disabled="!verified" @keydown="onEnter"/>
+      <button type="submit" @mousedown.prevent :disabled="!verified||!draft.trim()||busy||sending"  :aria-label="sending?'Invio in corso':'Invia messaggio'"><LionIcon name="send" :size="21"/> <span>{{sending?'Invio…':'Invia'}}</span></button>
      </form>
      <p class="lf-chat-hint">Invio: Invio · Nuova riga: Maiusc + Invio</p>
     </template>
@@ -301,4 +319,45 @@ onUnmounted(()=>{alive=false;clearView()})
  .lf-chat-composer{padding:8px}.lf-chat-composer button{min-width:46px;padding:10px;gap:0}.lf-chat-composer button span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.lf-chat-hint{display:none}
 }
 @media(prefers-reduced-motion:reduce){.lf-chat-page *{scroll-behavior:auto!important}}
+/* E.6: one viewport-sized mobile workspace; only messages/list scroll. */
+@media(max-width:799px){
+ .lf-chat-page.lf-chat-native-active{height:var(--lf-chat-visible-height,calc(100dvh - 180px));min-height:0;max-height:none;display:flex;flex-direction:column;gap:8px;padding:4px 3px 0;overflow:hidden}
+ .lf-chat-native-active .lf-chat-head{flex:none;margin:0;gap:9px}
+ .lf-chat-native-thread .lf-chat-head,.lf-chat-keyboard-open .lf-chat-head{display:none}
+ .lf-chat-native-active .lf-chat-workspace{flex:1 1 0;height:auto;min-height:0;max-height:none;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+ .lf-chat-native-active .lf-chat-sidebar{display:flex;flex-direction:column;overflow:auto;min-height:0}
+ .lf-chat-native-active .lf-chat-list>*{flex-shrink:0}
+ .lf-chat-native-active .lf-chat-search-field{flex:none;position:sticky;top:0;z-index:1;background:var(--card2);padding-bottom:4px}
+ .lf-chat-native-active .lf-chat-main{min-height:0;overflow:hidden}
+ .lf-chat-native-active .lf-chat-conversation-title{flex:none;padding:5px 8px;min-height:52px;gap:8px}
+ .lf-chat-native-active .lf-chat-mobile-back{min-width:44px;width:44px;padding:8px;justify-content:center}
+ .lf-chat-native-active .lf-chat-conversation-title strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .lf-chat-native-active .lf-chat-conversation-title>div{flex:1}
+ .lf-chat-native-active .lf-chat-messages{flex:1 1 0;min-height:0;overflow-y:auto;overflow-anchor:none}
+ .lf-chat-native-active .lf-chat-messages>*{flex-shrink:0}
+ .lf-chat-native-active .lf-chat-composer{flex:none;padding:7px;gap:6px}
+ .lf-chat-native-active .lf-chat-composer textarea{box-sizing:border-box;min-height:46px;max-height:80px;padding:10px;field-sizing:content}
+ .lf-chat-native-active .lf-chat-gesture{display:none}
+ .lf-chat-native-active .lf-chat-error{flex:none;max-height:80px;overflow:auto;margin:0;padding:6px;font-size:12px}
+}
+/* Coach dock remains mobile up to 900px (athlete up to 799px). */
+@media(min-width:800px) and (max-width:900px){
+ .lf-chat-page.lf-chat-native-coach.lf-chat-native-active{height:var(--lf-chat-visible-height,calc(100dvh - 180px));min-height:0;max-height:none;display:flex;flex-direction:column;gap:8px;padding:4px 3px 0;overflow:hidden}
+ .lf-chat-native-coach .lf-chat-head{flex:none;margin:0}
+ .lf-chat-native-coach.lf-chat-keyboard-open .lf-chat-head{display:none}
+ .lf-chat-native-coach .lf-chat-workspace{flex:1 1 0;height:auto;min-height:0;max-height:none}
+ .lf-chat-native-coach .lf-chat-messages{min-height:0;overflow-anchor:none}
+ .lf-chat-native-coach .lf-chat-messages>*{flex-shrink:0}
+ .lf-chat-native-coach .lf-chat-hint{display:none}
+ .lf-chat-native-coach .lf-chat-error{flex:none;max-height:80px;overflow:auto;margin:0}
+}
+</style>
+<style>
+/* The shell already reserves the dock; the chat calculates this space itself.
+   Never change the padding of a different active route during the leave animation. */
+@media(max-width:799px){.app.as-athlete>main.main-layout:has(>.lf-chat-native-active:not(.lf-motion-leaving)){padding-bottom:0!important;min-height:0!important}}
+@media(max-width:900px){.app.as-coach>main.main-layout:has(>.lf-chat-native-active:not(.lf-motion-leaving)){padding-bottom:0!important;min-height:0!important}.app.as-coach:has(>main>.lf-chat-native-active:not(.lf-motion-leaving)){padding-bottom:0!important}}
+/* The athlete navigation is teleported. Hide only with confirmed keyboard shrink. */
+@media(max-width:799px){body[data-lf-chat-keyboard] [data-lionfit-dock="athlete"]{display:none!important}}
+@media(max-width:900px){body[data-lf-chat-keyboard] .app.as-coach .coach-bottom{display:none!important}}
 </style>

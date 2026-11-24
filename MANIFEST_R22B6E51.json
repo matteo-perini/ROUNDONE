@@ -1,0 +1,73 @@
+{
+  "patch": "R22B.6E.5.1",
+  "base": "R22B.6E.5",
+  "firebase_deploy": false,
+  "files": [
+    {
+      "path": "src/App.vue",
+      "action": "modified",
+      "sha256": "6c3cc007fd7eafcd1c8c4db9aea5b1c7b590834d4305103d262483a696242c23",
+      "base_sha256": "ca3496f167fc9e8d0b3bc1aee8786366fea1979af55d86aaffb5d7586e213d3d"
+    },
+    {
+      "path": "src/features/navigation/continuousMotion.ts",
+      "action": "modified",
+      "sha256": "4513f701bb2d84ff05ca83a9da556eabe5a8285d03bdcf25140ff7678e50c7fe",
+      "base_sha256": "5e1528fd8f8c663ac28b3f2a83446e454df5453dd513f5bbd46816e6467f328d"
+    },
+    {
+      "path": "src/features/navigation/swipeIntent.ts",
+      "action": "modified",
+      "sha256": "5fc7440f7516a87a573134389f1e7c953267788704e0c3486650afd74fe20784",
+      "base_sha256": "2750c86265840dda3a6cbd1c15dba82b1603c24ecdc1b41b7fa8d472b5043830"
+    },
+    {
+      "path": "src/features/navigation/swipeRails.ts",
+      "action": "new",
+      "sha256": "8ad31eb5f5185bdba48fce5a4002d5ead3217d4de17fcd1ac58937de821fc094",
+      "base_sha256": null
+    },
+    {
+      "path": "src/features/navigation/universalMotion.ts",
+      "action": "new",
+      "sha256": "f51dc4be7be951acf2e4cbfe58fc1cdcd0b37960876ed4375e8d551e80cf1a15",
+      "base_sha256": null
+    },
+    {
+      "path": "src/styles-continuous-motion.css",
+      "action": "modified",
+      "sha256": "554f6a6d724be35c8c91501d0805f62bbf86ebe27f7f5057e42cb8a9015f0f02",
+      "base_sha256": "dc83e2ed3ae92f25f795335f8f3f5bc489f7cce04a25a2a14296e5d2447174b0"
+    },
+    {
+      "path": "src/views/AthleteLiveWorkspace.vue",
+      "action": "modified",
+      "sha256": "08b3216c0e270f4c3d88a52ef1917f97831be46302aab4c7d36f6efda1b7b1f6",
+      "base_sha256": "8672d5624c7ae7066a7d018cefd9f45a1b5998baa91d2ff7147eb3c2e78cac82"
+    },
+    {
+      "path": "tests/r22b6d-motion-continuity.test.mjs",
+      "action": "modified",
+      "sha256": "ea80d3f03ea4c68e767f7bd3e49d134cc2de8c729ec7e65b5db889aa2f0a60a9",
+      "base_sha256": "104f77deab9a34a227f0ec067b50381b1e5a55ce564620ce3be39ca47856e448"
+    },
+    {
+      "path": "tests/r22b6e2-continuous-motion.test.mjs",
+      "action": "modified",
+      "sha256": "5e60b715aa4c68e6617a449a4dfa6018c1a12cdd273ccb032d236f6ad9bdcfa9",
+      "base_sha256": "83918961b35266a9e4a3a87f164dfa0b4c03f52a331c875ba593e52a0663eec7"
+    },
+    {
+      "path": "tests/r22b6e5-native-swipe.test.mjs",
+      "action": "modified",
+      "sha256": "698917f29c29fa7b63e577aa999e0bf39883ed76af3a1c96af90bdff280de51c",
+      "base_sha256": "26e9e9428859fd4580323ac9e350ca6c191683f29de95e377d935a4a80f8c4fc"
+    },
+    {
+      "path": "tests/r22b6e51-universal-motion.test.mjs",
+      "action": "new",
+      "sha256": "9464b29b6f52e24505a1223e788ace920afa5be99c6a6af5dcee444a4ea2e879",
+      "base_sha256": null
+    }
+  ]
+}

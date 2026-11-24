@@ -4,3 +4,15 @@
    gesture before it reaches the shell. Do not apply this to horizontal rails. */
 @media(max-width:799px){.main-layout.athlete-container.lf-swipe-surface :is(.athlete-live-screen,.lf-r22b5-page,.lf-chat-sidebar,.lf-chat-messages){touch-action:pan-y pinch-zoom}}
 @media(max-width:900px){.main-layout.coach-container.lf-swipe-surface :is(.lf-chat-sidebar,.lf-chat-messages,.lf-appointments-list,.lf-recent-events,.lf-legacy-coach-list){touch-action:pan-y pinch-zoom}}
+/* E.5.1 — fit-only rails must not become horizontal native scroll containers. */
+@media(max-width:799px){.main-layout.athlete-container.lf-swipe-surface [data-lf-rail-fits]{overflow-x:visible!important;overflow-x:clip!important;overflow-y:visible!important;scroll-snap-type:none!important;touch-action:pan-y pinch-zoom}}
+@media(max-width:900px){.main-layout.coach-container.lf-swipe-surface [data-lf-rail-fits]{overflow-x:visible!important;overflow-x:clip!important;overflow-y:visible!important;scroll-snap-type:none!important;touch-action:pan-y pinch-zoom}}
+/* Gesture-only, inert cue. Never holds a Vue page or receives a click. */
+.main-layout:is([data-lf-motion-dragging],[data-lf-motion-paired]){position:relative}
+.lf-motion-cue{position:absolute;z-index:0;pointer-events:none;user-select:none;box-sizing:border-box;background:var(--bg);color:var(--text);min-height:240px;padding:12px 0 20px;will-change:transform}
+.lf-motion-cue[hidden]{display:none!important}
+.lf-motion-cue-title{display:block;font-size:clamp(20px,5.4vw,27px);font-weight:850;margin:0 0 12px}
+.lf-motion-cue-card{padding:16px;min-height:95px;border:1px solid var(--border);border-radius:14px;background:var(--card);color:var(--text)}
+.lf-motion-cue-card p{margin:8px 0 0;color:var(--muted);font-size:13px}
+.lf-motion-cue-neutral{height:90px;border:1px solid var(--border);border-radius:14px;background:var(--card);opacity:.7}
+@media(prefers-reduced-motion:reduce){.lf-motion-cue{display:none!important}}

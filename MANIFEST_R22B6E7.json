@@ -1,0 +1,48 @@
+{
+  "patch": "R22B.6E.7",
+  "base": "R22B.6E.6",
+  "files": [
+    {
+      "path": "src/features/navigation/universalMotion.ts",
+      "operation": "replace",
+      "sha256": "8a083f79f3c015e54adfc949c983597f701b644a4a56f7c3ac183dd87163647d",
+      "base_sha256": "f51dc4be7be951acf2e4cbfe58fc1cdcd0b37960876ed4375e8d551e80cf1a15"
+    },
+    {
+      "path": "src/features/navigation/swipeRails.ts",
+      "operation": "replace",
+      "sha256": "e5913cbdb689ca7b0e1defe00d7691c85c68ee9ce33d3daae8721007366f267a",
+      "base_sha256": "8ad31eb5f5185bdba48fce5a4002d5ead3217d4de17fcd1ac58937de821fc094"
+    },
+    {
+      "path": "src/features/performance/warmSessionStream.ts",
+      "operation": "replace",
+      "sha256": "562411b05db5d8af428b48d984efbb58fbd9d7d797f3a0edc1bbdbb60cbd29fa",
+      "base_sha256": "1617d054a6ed98cfd2eb2bca5adb3936f2fc8e16a1da4f4c298c6a81608b46a4"
+    },
+    {
+      "path": "src/features/performance/motionAudit.ts",
+      "operation": "replace",
+      "sha256": "575eab4c6016a933afc977b8aae441c065a079dcd70d22abecb3355b2dfcfcf0",
+      "base_sha256": "5f5fb303d2771bc081761af089108c48faa0e80c3114904b94242b85e23d483b"
+    },
+    {
+      "path": "src/features/chat/chatViewport.ts",
+      "operation": "replace",
+      "sha256": "a9c02662eefa0d61a654192ef5e87b0e6a020c791eb154483a2564aaf7fd9a8c",
+      "base_sha256": "19f9736f109decac7a64e763028e50fae532a426062e025669f2d1ba125d95ce"
+    },
+    {
+      "path": "src/views/AthleteChatPreview.vue",
+      "operation": "replace",
+      "sha256": "b98bf4af07978eb23a6a8ea5ec96accfa603b87ff1079446d9e38e94ef6bc57b",
+      "base_sha256": "e14223590e973b41bed536cea143234c43ae36ddc16607e94311ec60fb8430a5"
+    },
+    {
+      "path": "tests/r22b6e7-final-review.test.mjs",
+      "operation": "add",
+      "sha256": "316d0aa3cbf0c2a8a3b95ba3f41dd2c99603fe91f07686a55f2720698a68ed5d",
+      "base_sha256": null
+    }
+  ]
+}

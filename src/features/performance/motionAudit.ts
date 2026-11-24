@@ -1,7 +1,7 @@
 /** R22B.6A - opt-in, local-only motion diagnostics. No telemetry/network calls.
  * Open npm run dev with ?lfPerf=1 once. Console records ONLY route names and timing.
  */
-import type {Router} from 'vue-router'
+import type {Router,RouteLocationNormalized} from 'vue-router'
 type AuditSample={from:string;to:string;navigationMs:number;frameMs:number;when:number}
 const MAX_SAMPLES=80
 let history:AuditSample[]=[]
@@ -18,17 +18,20 @@ export function installMotionAudit(router:Router):()=>void{
   active=sessionStorage.getItem('lionfit-motion-audit')==='1'
  }catch{/* optional diagnostic storage */}
  if(!active)return ()=>{}
- let pending:{from:string;to:string;started:number}|null=null
+ const pending=new WeakMap<RouteLocationNormalized,{from:string;to:string;started:number}>()
+ const frames=new Set<number>()
  let alive=true
+ function frame(callback:()=>void){const id=requestAnimationFrame(()=>{frames.delete(id);if(alive)callback()});frames.add(id)}
  const removeBefore=router.beforeEach((to,from)=>{
-  if(to.path!==from.path)pending={from:from.path,to:to.path,started:performance.now()}
+  if(to.path!==from.path&&!document.hidden)pending.set(to,{from:from.path,to:to.path,started:performance.now()})
  })
  const removeAfter=router.afterEach((to,from,failure)=>{
-  const current=pending;pending=null
-  if(failure||!current||current.to!==to.path)return
+  const current=pending.get(to);pending.delete(to)
+  if(failure||!current||document.hidden)return
   const navigated=performance.now()
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-   if(!alive)return
+  // Two rAF callbacks are a render opportunity, not a GPU paint or data-ready measurement.
+  frame(()=>frame(()=>{
+   if(document.hidden||router.currentRoute.value!==to)return
    const sample={from:current.from,to:current.to,navigationMs:Math.round(navigated-current.started),frameMs:Math.round(performance.now()-navigated),when:Date.now()}
    history.push(sample);if(history.length>MAX_SAMPLES)history.shift()
    console.debug('[LionFit Motion Audit]',sample,diagnosticSummary())
@@ -46,5 +49,5 @@ export function installMotionAudit(router:Router):()=>void{
   }
  }catch{observer?.disconnect();observer=null}
  console.info('[LionFit Motion Audit] Attivo solo in sviluppo. Disattiva con sessionStorage.removeItem("lionfit-motion-audit") e ricarica. Nessun dato viene inviato.')
- return ()=>{alive=false;removeBefore();removeAfter();observer?.disconnect()}
+ return ()=>{alive=false;for(const id of frames)cancelAnimationFrame(id);frames.clear();removeBefore();removeAfter();observer?.disconnect()}
 }

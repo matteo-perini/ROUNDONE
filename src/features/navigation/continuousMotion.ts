@@ -9,6 +9,14 @@ export function previewPosition(offset:number,span:number,direction:number):numb
  return offset-Math.sign(direction)*span
 }
 const leaving=new WeakMap<HTMLElement,{inert:boolean}>()
+const oldLayout=new WeakMap<HTMLElement,{offsetTop:number;offsetLeft:number;offsetWidth:number;at:number}>()
+/** Capture the outgoing geometry before Vue mounts the destination and its
+ * route-dependent layout CSS. Never read animated getBoundingClientRect here. */
+export function rememberSectionLayout(root:HTMLElement|null):void{
+ if(!root?.isConnected)return
+ const elements=[root,...root.querySelectorAll<HTMLElement>('.lf-r22b5-page:not(.lf-motion-leaving)')]
+ for(const el of elements){const {offsetTop,offsetLeft,offsetWidth}=el;oldLayout.set(el,{offsetTop,offsetLeft,offsetWidth,at:performance.now()})}
+}
 const motionValues=['--lf-motion-span','--lf-swipe-commit-offset','--lf-swipe-commit-duration'] as const
 const pinned=new WeakMap<HTMLElement,Array<{name:string;value:string;priority:string}>>()
 /** Freeze geometry/duration per participating page. A new swipe must not change
@@ -36,7 +44,8 @@ export function prepareSectionLeave(element:Element,name:string,enabled:boolean)
  // Capture layout coordinates, not animated transforms. The old page keeps its
  // actual padding/width instead of jumping to the containing block's origin.
  prepareSectionMotion(element,element.closest<HTMLElement>('.main-layout')||element.parentElement)
- const {offsetTop,offsetLeft,offsetWidth}=element
+ const saved=oldLayout.get(element);oldLayout.delete(element)
+ const {offsetTop,offsetLeft,offsetWidth}=saved&&performance.now()-saved.at<150?saved:element
  leaving.set(element,{inert:element.inert})
  element.style.setProperty('--lf-leave-top',`${offsetTop}px`)
  element.style.setProperty('--lf-leave-left',`${offsetLeft}px`)

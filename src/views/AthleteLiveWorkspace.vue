@@ -13,6 +13,8 @@ import SheetDetail from '../components/SheetDetail.vue'
 import AthleteHomeContent from '../components/AthleteHomeContent.vue'
 import { useAthleteLive } from '../features/athletes/useAthleteLive'
 import {useRomeDayClock} from '../features/performance/useRomeDayClock'
+import type {MotionSummary} from '../features/navigation/universalMotion'
+import {accountKey} from '../features/platform/platformModel'
 import { sectionTransition } from '../features/navigation/sectionSwipe'
 import {prepareSectionMotion,releaseSectionMotion,prepareSectionLeave,finishSectionLeave} from '../features/navigation/continuousMotion'
 import {isStagingMode,isLiveMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
@@ -84,6 +86,17 @@ const archivePersonal=computed(()=>{
 const counts=computed(()=>archiveCounts(shownArchive.value,archivePersonal.value))
 const archiveGroups=computed(()=>groupSemanticCopies(visibleArchives(shownArchive.value,archivePersonal.value,archiveView.value,search.value)))
 const archiveDistinctCount=computed(()=>groupSemanticCopies(shownArchive.value).length)
+// Read-only visual projection from the already authorized workspace. No retained
+// snapshot, extra listener, private messages or new route instance.
+function motionSummary(path:string,scope:string):MotionSummary|null{
+ if(status.value!=='ready'||!data.value||!scope||accountKey(session.value)!==scope)return null
+ if(path==='/piano')return {heading:currentWeekLabel.value||'Il mio piano',lines:currentWeek.value?['La tua programmazione',`${currentWeek.value.days.length} giorni nel calendario`]:['Le tue schede personali']}
+ if(path==='/home')return {heading:'Allenamento di oggi',lines:[...(todayDay.value?.activities||[]).slice(0,2),`${todaySheets.value.length} schede collegate`]}
+ if(path==='/archivio'&&archiveReady.value)return {heading:'Le mie schede',lines:[`${archiveDistinctCount.value} schede nello storico`]}
+ return null
+}
+defineExpose({motionSummary})
+watch([status,()=>accountKey(session.value)],([next,key],[previous,oldKey])=>{if((previous==='ready'&&next!=='ready')||(oldKey&&key!==oldKey))window.dispatchEvent(new Event('lionfit:motion-scope-invalidated'))},{flush:'sync'})
 const retryWorkspace=()=>window.location.reload()
 const livePath=(path:string)=>isStagingMode()?path:`${path}?source=emulator`
 const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${encodeURIComponent(currentWeek.value.id)}&day=${todayIndex.value}`:`/piano?source=emulator&week=${encodeURIComponent(currentWeek.value.id)}&day=${todayIndex.value}`):livePath('/piano'))

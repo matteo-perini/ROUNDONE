@@ -15,7 +15,8 @@ test('chat loading uses the same workspace as real conversations, inert skeleton
  assert.match(chat,/v-else-if="!verified&&!hintVisible"/)
 })
 test('chat revalidation never enables contacts before verification, even on warm hint',()=>{
- assert.equal((chat.match(/:disabled="!verified\|\|busy\|\|sending"/g)||[]).length,3)
+ assert.equal((chat.match(/:disabled="!verified\|\|busy\|\|sending"/g)||[]).length,2)
+ assert.match(chat, /<textarea[^>]+:disabled="!verified"/)
  assert.match(chat,/:disabled="!verified\|\|!draft.trim\(\)\|\|busy\|\|sending"/)
  assert.match(chat,/hintVisible\?'Conversazione':\(t.lastText/)
  assert.match(chat,/await Promise.all\(\[chatContacts\(uid.value\),chatList\(uid.value\)\]\)/)

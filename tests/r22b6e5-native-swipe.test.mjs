@@ -70,17 +70,17 @@ test('routes remain directional and are determined by the authorized existing or
  assert.equal(swipeNeighbor('/assistenza',-90,pages),null)
  assert.match(app,/swipePages.value.includes\(destination\)/)
 })
-test('only real pages are used, no generic preview or user-data snapshots',()=>{
+test('no cloned page snapshots; E.5.1 cue is temporary and commits on release',()=>{
  assert.doesNotMatch(app,/createSectionPreview|dragPreview|returningPreview/)
  assert.doesNotMatch(motion,/createSectionPreview|cloneNode|innerHTML|fetch\(|localStorage|sessionStorage/)
  assert.doesNotMatch(css,/lf-motion-preview/)
- assert.match(app,/earlySwipeCommit\(/);assert.match(app,/releaseSwipeCommit\(/);assert.match(app,/router.push\(/)
+ assert.doesNotMatch(app,/earlySwipeCommit\(/);assert.match(app,/releaseSwipeCommit\(/);assert.match(app,/router.push\(/)
 })
 test('route commits are single-shot and queued against a still-moving page; failed routes restore drag',()=>{
  assert.match(app,/if\(pendingSwipe\|\|start.path!==route.path/)
  assert.match(app,/armSwipeClickGuard\(start\);touchStart=null/)
  assert.match(app,/if\(pendingSwipe!==commit\|\|route.path!==commit.from\)return/)
- assert.match(app,/now-commit.at<380.*isSectionMoving\(swipeRouteRoot\)/)
+ assert.match(app,/isSectionMoving\(swipeRouteRoot\)/);assert.match(app,/now-commit.at<500/);assert.match(app,/settle\(\);return/)
  assert.match(app,/commit.issued=true/)
  assert.match(app,/\.then\(settle,settle\)/)
  assert.match(app,/restoreDrag\(route.path!==commit.to\)/)
