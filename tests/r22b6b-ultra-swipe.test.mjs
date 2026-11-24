@@ -32,7 +32,7 @@ test('app keeps safe fallbacks and prefers reduced motion',()=>{
  assert.match(app,/chatTouchMove/)
  assert.match(app,/prefers-reduced-motion: reduce/)
  assert.match(app,/skipSectionSwipe/)
- assert.match(app,/touchmove\.passive/)
+ assert.match(app,/@touchmove="chatTouchMove"/)
  assert.match(app,/chatSwipeDestination/)
  assert.match(app,/sectionSwipeDestination/)
 })

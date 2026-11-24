@@ -1,0 +1,19 @@
+{
+  "patch": "R22B.6C.1",
+  "base": "R22B.6B",
+  "scope": "frontend gesture arbitration only",
+  "files": {
+    "src/App.vue": "ea0a92cfeb91fb7ceb2f21178573a4fbb6aee14c469b4ca00430c4e20c9d336c",
+    "src/features/navigation/swipeIntent.ts": "f04582d18d6964a3010479e331c7eda06bc94a79ea6b6110b9db2be4454223c1",
+    "tests/r22b4-section-swipe.test.mjs": "4f79260270cfe35c7b630861647f17bfd2001b153ee3c799cbd61e4ac6775990",
+    "tests/r22b6b-ultra-swipe.test.mjs": "14c8caa409d6aeacc87838f2d0195268d68bd2572708a7b758917d50c831ef8c",
+    "tests/r22b6c-swipe-intent.test.mjs": "38404a4bd2b6ea9904fd9d3843cb9cae83e01e8df25ba6dd7b30e3bc694dcf64",
+    "LEGGIMI_R22B6C1_SMART_SWIPE.md": "e0807f4a476e0778df1e0e32edca629dfcaf85fd20240c306f9798377dd52780"
+  },
+  "validation": {
+    "vue-tsc": "passed",
+    "r22_tests": "51/51",
+    "vite_build": "blocked by missing Linux Rollup native module",
+    "device": "not tested"
+  }
+}

@@ -54,7 +54,7 @@ test('both roles keep chat unread badge and header icon',()=>{
 })
 test('swipe only on main content, handles edge, nested controls and reduced motion',()=>{
  assert.match(app,/@touchstart.passive="chatTouchStart"/)
- assert.match(app,/if\(touch.clientX<32\|\|touch.clientX>window.innerWidth-32/)
- assert.match(app,/\[data-lf-no-section-swipe\]/)
+ assert.match(app,/insideSystemEdge\(touch.clientX,window.innerWidth\)/)
+ assert.match(readFileSync('src/features/navigation/swipeIntent.ts','utf8'),/\[data-lf-no-section-swipe\]/)
  assert.match(app,/@media\(prefers-reduced-motion:reduce\)/)
 })
