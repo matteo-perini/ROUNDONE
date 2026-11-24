@@ -90,9 +90,9 @@ const archiveDistinctCount=computed(()=>groupSemanticCopies(shownArchive.value).
 // snapshot, extra listener, private messages or new route instance.
 function motionSummary(path:string,scope:string):MotionSummary|null{
  if(status.value!=='ready'||!data.value||!scope||accountKey(session.value)!==scope)return null
- if(path==='/piano')return {heading:currentWeekLabel.value||'Il mio piano',lines:currentWeek.value?['La tua programmazione',`${currentWeek.value.days.length} giorni nel calendario`]:['Le tue schede personali']}
- if(path==='/home')return {heading:'Allenamento di oggi',lines:[...(todayDay.value?.activities||[]).slice(0,2),`${todaySheets.value.length} schede collegate`]}
- if(path==='/archivio'&&archiveReady.value)return {heading:'Le mie schede',lines:[`${archiveDistinctCount.value} schede nello storico`]}
+ if(path==='/piano')return {heading:currentWeekLabel.value||'Il mio piano',lines:currentWeek.value?['La tua programmazione',`${currentWeek.value.days.length} giorni nel calendario`]:['Le tue schede personali'],sections:currentWeek.value?[{heading:'Programma e settimane',lines:[currentWeekLabel.value||currentWeek.value.name]},{heading:'La tua settimana',lines:currentWeek.value.days.slice(0,4).map(d=>d.name)}]:[{heading:'Schede personali',lines:[`${homeFreeSheets.value.length} schede disponibili`]}]}
+ if(path==='/home')return {heading:'Allenamento di oggi',lines:[...(todayDay.value?.activities||[]).slice(0,2),`${todaySheets.value.length} schede collegate`],sections:[{heading:'La tua settimana',lines:currentWeekLabel.value?[currentWeekLabel.value]:[]},{heading:'Schede personali',lines:[`${homeFreeSheets.value.length} schede disponibili`]}]}
+ if(path==='/archivio'&&archiveReady.value)return {heading:'Le mie schede',lines:[`${archiveDistinctCount.value} schede nello storico`],sections:[{heading:'Schede personali',lines:[`${archivePersonal.value.length} schede`]},{heading:'Archivio programmazioni',lines:[]}]}
  return null
 }
 defineExpose({motionSummary})

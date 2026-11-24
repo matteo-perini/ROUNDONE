@@ -1,5 +1,28 @@
 /** E.5.1 — continuous gesture geometry. No routing, persistence or data loading. */
-export type MotionSummary={heading:string;lines:readonly string[]}
+export type MotionSummary={heading:string;lines:readonly string[];sections?:readonly {heading:string;lines:readonly string[]}[]}
+/** Route-specific structure only. No invented entries, private chat text,
+ * cached DOM or unverified account data. A real scoped summary takes priority. */
+export function motionOutline(path:string):MotionSummary|null{
+ const labels:Record<string,readonly string[]>={
+  '/home':['Allenamento di oggi','Il tuo percorso','Agenda'],
+  '/piano':['Il tuo allenamento','Programma e settimane','Calendario del piano'],
+  '/archivio':['Le mie schede','Archivio programmazioni'],
+  '/progressi':['Allenamenti','Storico allenamenti','Andamento'],
+  '/prenotazioni':['Agenda','Lezioni ed eventi'],
+  '/profilo':['Profilo','Impostazioni'],
+  '/messaggi':['Conversazioni','Nuovo messaggio'],
+  '/coach':['Dashboard','Atleti','Agenda'],
+  '/coach/atleti':['Gestione atleti','Elenco atleti'],
+  '/coach/archivio':['Archivio schede','Programmazioni'],
+  '/coach/libreria':['Libreria esercizi','Esercizi'],
+  '/coach/prenotazioni':['Agenda','Lezioni ed eventi'],
+  '/coach/progressi':['Allenamenti','Progressi'],
+  '/coach/profilo':['Profilo','Palestra'],
+  '/coach/messaggi':['Conversazioni','Nuovo messaggio']
+ }
+ const headings=Object.hasOwn(labels,path)?labels[path]:undefined
+ return headings?.length?{heading:headings[0],lines:[],sections:headings.slice(1).map(heading=>({heading,lines:[]}))}:null
+}
 export function continuousDragOffset(dx:number,width:number,neighbor:boolean):number{
  if(!Number.isFinite(dx)||!Number.isFinite(width)||width<=0)return 0
  const distance=Math.abs(dx)
@@ -20,10 +43,19 @@ export type MotionCue={paint:(offset:number,direction:number,label:string,summar
  * from the currently mounted authorized workspace; no new Vue components. */
 export function createMotionCue(stage:HTMLElement,root:HTMLElement,paintedOffset=0):MotionCue{
  const rect=root.getBoundingClientRect(),outer=stage.getBoundingClientRect()
- const span=Math.max(1,stage.clientWidth),left=rect.left-paintedOffset-outer.left-stage.clientLeft+stage.scrollLeft
- const top=Math.max(rect.top-outer.top-stage.clientTop+stage.scrollTop,stage.scrollTop,stage.scrollTop+Math.max(0,-outer.top-stage.clientTop))
+ const span=Math.max(1,stage.clientWidth)
+ // The cue is one complete viewport surface, not a narrow content card.
+ // The origin must match the stage's clipping edge and the transition span.
+ const left=stage.scrollLeft
+ const viewport=typeof window!=='undefined'?window.visualViewport:null
+ const viewTop=Math.max(outer.top+stage.clientTop,viewport?.offsetTop||0)
+ const top=stage.scrollTop+Math.max(0,viewTop-outer.top-stage.clientTop)
+ const available=(viewport?.height??(typeof window!=='undefined'?window.innerHeight:0))+(viewport?.offsetTop||0)-viewTop
+ const height=Math.max(1,Math.min(Math.max(1,stage.clientHeight||available||rect.height||240),available>0?available:stage.clientHeight||rect.height||240))
+ const inset=Math.max(8,Math.min(32,rect.left-paintedOffset-outer.left-stage.clientLeft+stage.scrollLeft))
  const panel=document.createElement('div');panel.className='lf-motion-cue';panel.setAttribute('aria-hidden','true');panel.inert=true;panel.hidden=true
- panel.style.left=`${left}px`;panel.style.top=`${top}px`;panel.style.width=`${rect.width}px`
+ panel.style.left=`${left}px`;panel.style.top=`${top}px`;panel.style.width=`${span}px`;panel.style.height=`${height}px`
+ panel.style.paddingInline=`${inset}px`;panel.style.paddingTop=`${Math.max(12,Math.min(80,rect.top-viewTop))}px`
  const title=document.createElement('strong');title.className='lf-motion-cue-title';panel.append(title)
  const content=document.createElement('div');content.className='lf-motion-cue-content';panel.append(content)
  let last=0,side=0,animation:Animation|null=null,disposed=false,renderedLabel:string|null=null,renderedSummary:MotionSummary|null=null,visible=false,lastTransform=''
@@ -37,8 +69,11 @@ export function createMotionCue(stage:HTMLElement,root:HTMLElement,paintedOffset
   // Rebuild only when the projection changes, not on each animation frame.
   if(!visible){if(renderedLabel!==null){content.replaceChildren();title.textContent='';renderedLabel=null;renderedSummary=null}return}
   if(renderedLabel!==label||renderedSummary!==summary){renderedLabel=label;renderedSummary=summary;title.textContent=label;content.replaceChildren()
-   if(summary){const card=document.createElement('div');card.className='lf-motion-cue-card';const heading=document.createElement('strong');heading.textContent=summary.heading;card.append(heading)
-    for(const line of summary.lines.slice(0,3)){const p=document.createElement('p');p.textContent=line;card.append(p)}content.append(card)
+   if(summary){
+    const sections=[summary,...(summary.sections||[])].slice(0,3)
+    for(const section of sections){const card=document.createElement('div');card.className='lf-motion-cue-card';const heading=document.createElement('strong');heading.textContent=section.heading;card.append(heading)
+     for(const line of section.lines.slice(0,4)){const p=document.createElement('p');p.textContent=line;card.append(p)}
+     if(!section.lines.length){const shape=document.createElement('div');shape.className='lf-motion-cue-shape';card.append(shape)}content.append(card)}
    }else{const block=document.createElement('div');block.className='lf-motion-cue-neutral';content.append(block)}
   }
   const transform=`translate3d(${pairedPosition(offset,span,side)}px,0,0)`

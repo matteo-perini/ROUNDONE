@@ -321,7 +321,7 @@ onUnmounted(()=>{alive=false;viewport?.dispose();logObserver?.disconnect();if(an
 @media(prefers-reduced-motion:reduce){.lf-chat-page *{scroll-behavior:auto!important}}
 /* E.6: one viewport-sized mobile workspace; only messages/list scroll. */
 @media(max-width:799px){
- .lf-chat-page.lf-chat-native-active{height:var(--lf-chat-visible-height,calc(100dvh - 180px));min-height:0;max-height:none;display:flex;flex-direction:column;gap:8px;padding:4px 3px 0;overflow:hidden}
+ .lf-chat-page.lf-chat-native-active{height:var(--lf-chat-visible-height,max(220px,calc(100dvh - 180px)));min-height:112px;max-height:none;display:flex;flex-direction:column;gap:8px;padding:4px 3px 0;overflow:hidden}
  .lf-chat-native-active .lf-chat-head{flex:none;margin:0;gap:9px}
  .lf-chat-native-thread .lf-chat-head,.lf-chat-keyboard-open .lf-chat-head{display:none}
  .lf-chat-native-active .lf-chat-workspace{flex:1 1 0;height:auto;min-height:0;max-height:none;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
@@ -342,7 +342,7 @@ onUnmounted(()=>{alive=false;viewport?.dispose();logObserver?.disconnect();if(an
 }
 /* Coach dock remains mobile up to 900px (athlete up to 799px). */
 @media(min-width:800px) and (max-width:900px){
- .lf-chat-page.lf-chat-native-coach.lf-chat-native-active{height:var(--lf-chat-visible-height,calc(100dvh - 180px));min-height:0;max-height:none;display:flex;flex-direction:column;gap:8px;padding:4px 3px 0;overflow:hidden}
+ .lf-chat-page.lf-chat-native-coach.lf-chat-native-active{height:var(--lf-chat-visible-height,max(220px,calc(100dvh - 180px)));min-height:112px;max-height:none;display:flex;flex-direction:column;gap:8px;padding:4px 3px 0;overflow:hidden}
  .lf-chat-native-coach .lf-chat-head{flex:none;margin:0}
  .lf-chat-native-coach.lf-chat-keyboard-open .lf-chat-head{display:none}
  .lf-chat-native-coach .lf-chat-workspace{flex:1 1 0;height:auto;min-height:0;max-height:none}

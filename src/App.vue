@@ -30,7 +30,7 @@ import {sectionTransition} from './features/navigation/sectionSwipe'
 import {prepareSectionMotion,releaseSectionMotion,prepareSectionLeave,finishSectionLeave,isSectionMoving,rememberSectionLayout} from './features/navigation/continuousMotion'
 import {swipeNeighbor,snapBackDuration} from './features/navigation/fluidSwipe'
 import {appendSwipeSample,recentSwipeVelocity,releaseSwipeCommit,type SwipeSample} from './features/navigation/nativeSwipe'
-import {continuousDragOffset,continuousCommitMotion,createMotionCue,type MotionCue,type MotionSummary} from './features/navigation/universalMotion'
+import {continuousDragOffset,continuousCommitMotion,createMotionCue,motionOutline,type MotionCue,type MotionSummary} from './features/navigation/universalMotion'
 import {vLfSwipeRails} from './features/navigation/swipeRails'
 import {reportSwipeTiming} from './features/performance/swipeAudit'
 import {resolveSwipeIntent,protectedSwipeSelector,hasNativeHorizontalScroll,insideSystemEdge,suppressSwipeClick,type SwipeIntent} from './features/navigation/swipeIntent'
@@ -167,7 +167,7 @@ window.addEventListener('lionfit:chat-updated',chatEvent)
 if(CHAT_PILOT_ENABLED)chatUnreadTimer=setInterval(()=>{void refreshChatUnread()},30000)
 onUnmounted(()=>{++chatRequest;if(chatUnreadTimer)clearInterval(chatUnreadTimer);document.removeEventListener('visibilitychange',chatVisibility);window.removeEventListener('lionfit:chat-updated',chatEvent)})
 watch(()=>route.path,(now,before)=>{
- touchStart=null;transferSwipeMotion(before,now);if(swipeViewport())rememberSectionLayout(swipeRouteRoot);restoreDrag(false)
+ touchStart=null;const retainCue=!!motionCue&&pendingSwipe?.from===before&&pendingSwipe?.to===now;transferSwipeMotion(before,now);if(swipeViewport())rememberSectionLayout(swipeRouteRoot);restoreDrag(false,retainCue)
  // Preserve the R22A premium Chat gesture on athlete Home; extend the same direction logic
  // to the other top-level sections, including taps on the existing navbar.
  if (chatPreviewEnabled.value && before==='/home' && now==='/messaggi') chatMotion.value='lf-chat-open'
@@ -191,6 +191,8 @@ let swipeClickGuard:{at:number;target:Element;path:string}|null=null
 let swipeRouteRoot:HTMLElement|null=null
 let swipeRouteInstance:{motionSummary?:(path:string,scope:string)=>MotionSummary|null}|null=null
 let motionCue:MotionCue|null=null,snapCue:MotionCue|null=null
+let handoffCue:MotionCue|null=null,handoffFrame=0
+function clearHandoffCue(){if(handoffFrame){cancelAnimationFrame(handoffFrame);handoffFrame=0}handoffCue?.dispose();handoffCue=null}
 let cueTarget:string|null=null,cueDirection=0,cueLabel="",cueSummary:MotionSummary|null=null
 let dragFrame=0,swipeWaitFrame=0,externalTapUntil=0,dragOffset=0,dragPaintedOffset=0,dragRoot:HTMLElement|null=null
 let snapAnimation:Animation|null=null,snapStage:HTMLElement|null=null
@@ -230,7 +232,8 @@ function transferSwipeMotion(from:string,to:string){
  stage.style.setProperty('--lf-swipe-commit-offset',`${motion.offset}px`)
  stage.style.setProperty('--lf-swipe-commit-duration',`${motion.duration}ms`)
 }
-function restoreDrag(animateBack:boolean){
+function restoreDrag(animateBack:boolean,retainCue=false){
+ clearHandoffCue()
  if(dragFrame){cancelAnimationFrame(dragFrame);dragFrame=0}
  if(swipeWaitFrame){cancelAnimationFrame(swipeWaitFrame);swipeWaitFrame=0}
  externalTapUntil=0
@@ -254,6 +257,10 @@ function restoreDrag(animateBack:boolean){
   snapCue=cue;cue?.returnToEdge(duration)
   const clean=()=>{if(snapAnimation===animation){snapAnimation=null;snapStage=null;snapCue?.dispose();snapCue=null;if(stage)delete stage.dataset.lfMotionDragging}}
   animation.onfinish=clean;animation.oncancel=clean
+ }else if(retainCue&&cue&&stage&&stage.dataset.lfMotionPaired==='true'){
+  // Route watcher runs before the destination DOM patch. Keep the cue through
+  // that patch, remove before the next paint (the real enter shares its offset).
+  handoffCue=cue;handoffFrame=requestAnimationFrame(()=>{handoffFrame=0;clearHandoffCue()})
  }else cue?.dispose()
 }
 function paintNativeDrag(start:GestureStart){
@@ -367,7 +374,7 @@ function moveGesture(event:Event,point:SwipePoint){
    dragOffset=offset
    cueDirection=next?Math.sign(dx):0
    if(cueTarget!==next){cueTarget=next;cueLabel=next?uiText(next===chatRoute.value.split('?')[0]?'Messaggi':mobileNav.value.find(item=>item.to.split('?')[0]===next)?.label||''):''
-    const scope=accountKey(stagingSession.value);cueSummary=next&&scope?swipeRouteInstance?.motionSummary?.(next,scope)||null:null
+    const scope=accountKey(stagingSession.value);cueSummary=next?((scope?swipeRouteInstance?.motionSummary?.(next,scope):null)||motionOutline(next)):null
    }
    if(!dragFrame)dragFrame=requestAnimationFrame(()=>paintNativeDrag(start))
   }

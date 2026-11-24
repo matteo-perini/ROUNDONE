@@ -15,7 +15,7 @@ test('never continue a tiny, invalid or reversed drag',()=>{
  for(const args of [[0,390,1],[2,390,1],[120,390,-1],[120,0,1],[NaN,390,1],[120,390,0]])assert.equal(swipeCommitMotion(...args),null)
 })
 test('freeze until real route change, use painted offset rather than queued frame, snap back on failure',()=>{
- assert.match(app,/transferSwipeMotion\(before,now\);[^\n]*restoreDrag\(false\)/)
+ assert.match(app,/transferSwipeMotion\(before,now\);[^\n]*restoreDrag\(false,retainCue\)/)
  assert.match(app,/continuousCommitMotion\(dragRoot\?\.isConnected\?dragPaintedOffset:0,stage.clientWidth,pending.direction,pending.velocity\)/)
  assert.match(app,/pendingSwipe=commit/)
  assert.match(app,/\.then\(settle,settle\)/)

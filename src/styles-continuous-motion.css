@@ -9,10 +9,10 @@
 @media(max-width:900px){.main-layout.coach-container.lf-swipe-surface [data-lf-rail-fits]{overflow-x:visible!important;overflow-x:clip!important;overflow-y:visible!important;scroll-snap-type:none!important;touch-action:pan-y pinch-zoom}}
 /* Gesture-only, inert cue. Never holds a Vue page or receives a click. */
 .main-layout:is([data-lf-motion-dragging],[data-lf-motion-paired]){position:relative}
-.lf-motion-cue{position:absolute;z-index:0;pointer-events:none;user-select:none;box-sizing:border-box;background:var(--bg);color:var(--text);min-height:240px;padding:12px 0 20px;will-change:transform}
+.lf-motion-cue{position:absolute;z-index:2;pointer-events:none;user-select:none;box-sizing:border-box;background:var(--bg,#101720);color:var(--text);overflow:hidden;contain:layout paint;min-height:0;padding:12px 12px 20px;will-change:transform}
 .lf-motion-cue[hidden]{display:none!important}
 .lf-motion-cue-title{display:block;font-size:clamp(20px,5.4vw,27px);font-weight:850;margin:0 0 12px}
-.lf-motion-cue-card{padding:16px;min-height:95px;border:1px solid var(--border);border-radius:14px;background:var(--card);color:var(--text)}
-.lf-motion-cue-card p{margin:8px 0 0;color:var(--muted);font-size:13px}
-.lf-motion-cue-neutral{height:90px;border:1px solid var(--border);border-radius:14px;background:var(--card);opacity:.7}
+.lf-motion-cue-content{display:grid;gap:12px}.lf-motion-cue-card{padding:16px;min-height:95px;border:1px solid var(--border);border-radius:14px;background:var(--card);color:var(--text);overflow-wrap:anywhere}.lf-motion-cue-card:first-child{background:var(--green-bg,var(--card));min-height:115px}
+.lf-motion-cue-shape{height:9px;width:58%;border-radius:6px;background:var(--border);opacity:.55;margin-top:14px}.lf-motion-cue-card p{margin:8px 0 0;color:var(--muted);font-size:13px}
+.lf-motion-cue-neutral{height:clamp(110px,28dvh,220px);border:1px solid var(--border);border-radius:14px;background:var(--card);opacity:.7}
 @media(prefers-reduced-motion:reduce){.lf-motion-cue{display:none!important}}
