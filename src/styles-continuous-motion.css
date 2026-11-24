@@ -3,7 +3,7 @@
 /* Known vertical scrollports may otherwise take possession of a horizontal
    gesture before it reaches the shell. Do not apply this to horizontal rails. */
 @media(max-width:799px){.main-layout.athlete-container.lf-swipe-surface :is(.athlete-live-screen,.lf-r22b5-page,.lf-chat-sidebar,.lf-chat-messages){touch-action:pan-y pinch-zoom}}
-@media(max-width:900px){.main-layout.coach-container.lf-swipe-surface :is(.lf-chat-sidebar,.lf-chat-messages,.lf-appointments-list,.lf-recent-events,.lf-legacy-coach-list){touch-action:pan-y pinch-zoom}}
+@media(max-width:900px){.main-layout.coach-container.lf-swipe-surface :is(.lf-chat-sidebar,.lf-chat-messages,.lf-appointments-list,.lf-recent-events,.lf-legacy-coach-list,.assignment-scroll,.lf-r8b-invite-roster-list){touch-action:pan-y pinch-zoom}}
 /* E.5.1 — fit-only rails must not become horizontal native scroll containers. */
 @media(max-width:799px){.main-layout.athlete-container.lf-swipe-surface [data-lf-rail-fits]{overflow-x:visible!important;overflow-x:clip!important;overflow-y:visible!important;scroll-snap-type:none!important;touch-action:pan-y pinch-zoom}}
 @media(max-width:900px){.main-layout.coach-container.lf-swipe-surface [data-lf-rail-fits]{overflow-x:visible!important;overflow-x:clip!important;overflow-y:visible!important;scroll-snap-type:none!important;touch-action:pan-y pinch-zoom}}
@@ -16,3 +16,42 @@
 .lf-motion-cue-shape{height:9px;width:58%;border-radius:6px;background:var(--border);opacity:.55;margin-top:14px}.lf-motion-cue-card p{margin:8px 0 0;color:var(--muted);font-size:13px}
 .lf-motion-cue-neutral{height:clamp(110px,28dvh,220px);border:1px solid var(--border);border-radius:14px;background:var(--card);opacity:.7}
 @media(prefers-reduced-motion:reduce){.lf-motion-cue{display:none!important}}
+/* E.7.2: real bounded page rail, only in the verified mobile athlete workspace.
+   The dock/header remain outside. Inactive real panes have independent vertical
+   scroll positions and are inert; only the two participating panes are painted. */
+@media(max-width:799px){
+ .app.as-athlete:has(>.main-layout.lf-native-track-shell){padding-bottom:0!important}
+ .app.as-athlete main.main-layout.athlete-container.lf-native-track-shell{
+  display:block!important;overflow-x:clip!important;overflow-y:visible!important;
+  height:auto!important;min-height:0!important;max-height:none!important;
+  padding-bottom:0!important
+ }
+ .app.as-athlete main.main-layout.athlete-container.lf-native-track-shell>.athlete-live-screen{
+  height:auto!important;min-height:0!important;overflow:visible!important;gap:0
+ }
+ .lf-native-track-viewport{position:relative;width:100%;min-width:0;height:var(--lf-native-track-height,max(220px,calc(100dvh - 160px)));overflow:hidden;overflow:clip;touch-action:pan-y pinch-zoom}
+ .lf-native-track-rail{position:absolute;inset:0;width:100%;height:100%;touch-action:pan-y pinch-zoom}
+ .lf-native-track-page.lf-r22b5-page{position:absolute;inset:0 auto 0 0;width:100%;height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;touch-action:pan-y pinch-zoom;scrollbar-width:none;visibility:hidden;background:var(--bg);padding-bottom:12px}
+ .lf-native-track-page[data-lf-track-active],.lf-native-track-page[data-lf-track-shown]{visibility:visible}
+ .lf-native-track-page::-webkit-scrollbar{display:none}
+ .lf-native-track-page[data-lf-track-inactive]{pointer-events:none}
+ .lf-native-track-rail[data-lf-track-moving='settle']>.lf-native-track-page{pointer-events:none}
+ .athlete-live-screen .lf-native-track-back{position:static!important;display:inline-flex!important;align-self:flex-start;justify-content:center;min-width:44px;min-height:44px;margin:0 0 6px;padding:6px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);box-shadow:none!important;flex:none}
+ .athlete-live-screen .lf-native-track-back svg{width:17px;height:17px;color:var(--mint)}
+ /* Ordinary main layout rules must not depend on an offscreen Home pane. */
+ .lf-native-track-page>*{flex-shrink:0}
+ .lf-native-track-page>.lf-r14-home{flex:none}
+}
+
+/* The desktop route retains the normal flow of the original workspace. */
+.lf-native-track-pass{display:contents}
+
+/* E.7.4: real outgoing RouterView DOM is only held for the paired settlement.
+   Preserve direct-child shell rules, keyboard layout and viewport scroll. */
+@media(max-width:900px){
+ .main-layout[data-lf-external-pair] [data-lf-external-moving='leave']{
+  position:absolute!important;top:var(--lf-leave-top,0px)!important;left:var(--lf-leave-left,0px)!important;
+  width:var(--lf-leave-width,100%)!important;pointer-events:none!important;
+ }
+ .main-layout[data-lf-external-pair] [data-lf-external-moving]{transition:none!important}
+}

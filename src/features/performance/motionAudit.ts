@@ -2,6 +2,7 @@
  * Open npm run dev with ?lfPerf=1 once. Console records ONLY route names and timing.
  */
 import type {Router,RouteLocationNormalized} from 'vue-router'
+import {summarizeFrameCadence} from './frameCadence'
 type AuditSample={from:string;to:string;navigationMs:number;frameMs:number;when:number}
 const MAX_SAMPLES=80
 let history:AuditSample[]=[]
@@ -20,15 +21,25 @@ export function installMotionAudit(router:Router):()=>void{
  if(!active)return ()=>{}
  const pending=new WeakMap<RouteLocationNormalized,{from:string;to:string;started:number}>()
  const frames=new Set<number>()
- let alive=true
+ let alive=true,cadenceGeneration=0
+ // Route records contain patterns, never concrete route parameters.
+ const routeLabel=(r:RouteLocationNormalized)=>r.matched.at(-1)?.path||'unmatched'
  function frame(callback:()=>void){const id=requestAnimationFrame(()=>{frames.delete(id);if(alive)callback()});frames.add(id)}
  const removeBefore=router.beforeEach((to,from)=>{
-  if(to.path!==from.path&&!document.hidden)pending.set(to,{from:from.path,to:to.path,started:performance.now()})
+  if(to.path!==from.path&&!document.hidden)pending.set(to,{from:routeLabel(from),to:routeLabel(to),started:performance.now()})
  })
  const removeAfter=router.afterEach((to,from,failure)=>{
   const current=pending.get(to);pending.delete(to)
   if(failure||!current||document.hidden)return
-  const navigated=performance.now()
+  const navigated=performance.now(),generation=++cadenceGeneration
+  const stamps:number[]=[]
+  function cadence(){
+   if(!alive||generation!==cadenceGeneration||document.hidden||router.currentRoute.value!==to)return
+   stamps.push(performance.now())
+   if(stamps.length<120&&stamps[stamps.length-1]-navigated<550){frame(cadence);return}
+   console.debug('[LionFit Frame Cadence]',{from:current!.from,to:current!.to,...summarizeFrameCadence(stamps)})
+  }
+  frame(cadence)
   // Two rAF callbacks are a render opportunity, not a GPU paint or data-ready measurement.
   frame(()=>frame(()=>{
    if(document.hidden||router.currentRoute.value!==to)return

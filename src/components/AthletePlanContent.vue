@@ -5,7 +5,7 @@ import {uiText} from '../features/i18n/interfaceLanguage'
  * La stessa vista usa il Lab locale oppure gli snapshot Firestore Emulator.
  * Nessuna scrittura, nessuna deduplicazione di documenti, solo raggruppamento visivo.
  */
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import {useRomeDayClock} from '../features/performance/useRomeDayClock'
 import {useRoute,useRouter} from 'vue-router'
 import {romeDayIndex,isDateInStoredWeek} from '../features/athletes/romeWeekProgress'
@@ -24,13 +24,17 @@ const props = withDefaults(defineProps<{
   weekId?: string
   initialDay?: number
   archiveExpired?: boolean
-}>(), { weekId: '' })
+  pageActive?: boolean
+}>(), { weekId: '',pageActive:true })
 const emit = defineEmits<{ 'update:weekId': [id: string] }>()
 const route=useRoute(),router=useRouter()
 
 const opened = ref<Personal | null>(null)
 const showSheetChoices=ref(false)
-const selectedDay = ref<number | null>(Number.isInteger(props.initialDay) && props.initialDay! >= 0 && props.initialDay! <= 6 ? props.initialDay! : null)
+const programMenuOpen=ref(false)
+const programMenu=ref<HTMLElement|null>(null)
+const programToggle=ref<HTMLButtonElement|null>(null)
+const selectedDay = ref<number | null>(props.pageActive && Number.isInteger(props.initialDay) && props.initialDay! >= 0 && props.initialDay! <= 6 ? props.initialDay! : null)
 const allWeeks = computed(() => props.weeks.filter(w => !w.deletedAt))
 const todayClock=useRomeDayClock()
 const programs=computed(()=>props.archiveExpired?partitionPrograms(allWeeks.value,romeDate(todayClock.value)):groupActivePrograms(allWeeks.value))
@@ -41,6 +45,14 @@ const selectedFamily=computed(()=>{
  const date=todayIso()
  return programs.value.find(p=>!!activeWeekOn(p.weeks,date))||programs.value.find(p=>p.startDate>=date)||programs.value.at(-1)
 })
+const programDisplayLabel=computed(()=>{const index=programs.value.findIndex(p=>p.id===selectedFamily.value?.id);return index>=0?`Programma ${index+1} · ${programs.value[index].title}`:'Programma'})
+function closeProgramMenu(restoreFocus=false){
+ if(!programMenuOpen.value)return
+ programMenuOpen.value=false
+ if(restoreFocus)void nextTick(()=>{if(props.pageActive)programToggle.value?.focus({preventScroll:true})})
+}
+function outsideProgramMenu(event:MouseEvent){if(programMenuOpen.value&&event.target instanceof Node&&!programMenu.value?.contains(event.target))closeProgramMenu()}
+function pickMobileProgram(id:string){closeProgramMenu(true);chooseProgram(id)}
 const activeWeeks=computed(()=>selectedFamily.value?.weeks||[])
 const week = computed(() => activeWeeks.value.find(w => w.id === props.weekId) ?? activeWeekOn(activeWeeks.value,todayIso())??activeWeeks.value[0])
 const weekPosition=computed(()=>week.value?weekOrdinal(week.value,activeWeeks.value):0)
@@ -135,15 +147,18 @@ function openDayTraining(){
 }
 function openWeekDay(index:number){showSheetChoices.value=false;selectedDay.value=index;void router.push({query:{...route.query,week:week.value?.id,day:String(index)}})}
 function closeWeekDay(){showSheetChoices.value=false;selectedDay.value=null;if(route.query.day!==undefined)void router.replace({query:{...route.query,day:undefined}})}
-function onEscape(event:KeyboardEvent){if(event.key==='Escape'&&!opened.value&&selectedDay.value!==null)closeWeekDay()}
+function onEscape(event:KeyboardEvent){if(!props.pageActive||event.key!=='Escape')return;if(programMenuOpen.value){closeProgramMenu(true);return}if(!opened.value&&selectedDay.value!==null)closeWeekDay()}
 onMounted(()=>{
  window.addEventListener('keydown',onEscape)
+ document.addEventListener('click',outsideProgramMenu)
 })
 onUnmounted(()=>{
  window.removeEventListener('keydown',onEscape)
+ document.removeEventListener('click',outsideProgramMenu)
 })
-watch(()=>route.query.day,day=>{selectedDay.value=typeof day==='string'&&/^[0-6]$/.test(day)&&(!props.archiveExpired||!route.query.week||route.query.week===week.value?.id)?Number(day):null})
-watch(() => props.athleteKey, () => { selectedDay.value = null; opened.value = null })
+watch([()=>props.pageActive,()=>route.query.day],([active,day])=>{if(!active){selectedDay.value=null;opened.value=null;showSheetChoices.value=false;closeProgramMenu();return}selectedDay.value=typeof day==='string'&&/^[0-6]$/.test(day)&&(!props.archiveExpired||!route.query.week||route.query.week===week.value?.id)?Number(day):null})
+watch(() => props.athleteKey, () => { selectedDay.value = null; opened.value = null;closeProgramMenu() })
+watch(()=>programs.value.length,length=>{if(length<2)closeProgramMenu()})
 watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) selectedDay.value = null; opened.value = null })
 </script>
 
@@ -173,12 +188,22 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
 
     <section v-if="activeWeeks.length" id="lf-r13-plan-explore" class="panel athlete-week-picker lf-r13-program">
       <div class="lf-r13-block-head"><div><span class="lf-r13-kicker">LA TUA PROGRAMMAZIONE</span><h2>Programma e settimane</h2></div><span class="lf-r13-meta">{{activeWeeks.length}} {{activeWeeks.length===1?'settimana':'settimane'}}</span></div>
-      <label class="lf-p11-athlete-select-label" for="lf-p11-athlete-program">Programma selezionato</label>
-      <select id="lf-p11-athlete-program" class="lf-p11-athlete-program-select" :value="selectedFamily?.id||''" @change="chooseProgram(($event.target as HTMLSelectElement).value)">
+      <label class="lf-p11-athlete-select-label lf-program-desktop" for="lf-p11-athlete-program">Programma selezionato</label>
+      <select id="lf-p11-athlete-program" class="lf-p11-athlete-program-select lf-program-desktop" :value="selectedFamily?.id||''" @change="chooseProgram(($event.target as HTMLSelectElement).value)">
         <option v-for="(p,i) in programs" :key="p.id" :value="p.id">Programma {{i+1}} · {{p.title}}</option>
       </select>
+      <div ref="programMenu" class="lf-program-mobile">
+        <span class="lf-p11-athlete-select-label" id="lf-mobile-program-label">Programma selezionato</span>
+        <div v-if="programs.length===1" class="lf-p11-athlete-program-select lf-program-static">{{programDisplayLabel}}</div>
+        <template v-else>
+          <button ref="programToggle" type="button" class="lf-p11-athlete-program-select lf-program-toggle" :aria-expanded="programMenuOpen" aria-controls="lf-mobile-program-options" aria-labelledby="lf-mobile-program-label lf-mobile-program-value" @click="programMenuOpen=!programMenuOpen"><span id="lf-mobile-program-value">{{programDisplayLabel}}</span><span aria-hidden="true">{{programMenuOpen?'▴':'▾'}}</span></button>
+          <div v-show="programMenuOpen" id="lf-mobile-program-options" class="lf-program-options" role="group" aria-label="Scegli programma">
+            <button v-for="(p,i) in programs" :key="p.id" type="button" :aria-pressed="p.id===selectedFamily?.id" @click="pickMobileProgram(p.id)">Programma {{i+1}} · {{p.title}}</button>
+          </div>
+        </template>
+      </div>
       <p class="lf-p11-program-dates"><span v-if="selectedFamily?.startDate">{{shortDate(selectedFamily.startDate)}} – {{shortDate(selectedFamily.endDate)}}</span><span v-else>Periodo non specificato</span><span class="lf-r13-program-separator"> · </span><strong>Settimana {{weekPosition}}</strong></p>
-      <div class="lf-r13-week-header"><strong>Vai alla settimana</strong><span>Scorri per scegliere</span></div>
+      <div class="lf-r13-week-header"><strong>Vai alla settimana</strong><span v-if="activeWeeks.length>1">Scorri per scegliere</span></div>
       <div class="week-pills lf-r13-week-scroll" aria-label="Seleziona la settimana del piano">
         <button v-for="w in activeWeeks" :key="w.id" type="button" class="week-pill lf-r13-week-pill" :aria-label="`Settimana ${weekOrdinal(w,activeWeeks)}: ${w.name}`" :class="{ selected: week?.id === w.id }" :aria-pressed="week?.id === w.id" @click="chooseWeek(w.id)"><span>SETTIMANA</span><strong>{{weekOrdinal(w,activeWeeks)}}</strong></button>
       </div>
@@ -239,6 +264,20 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
 
 
 <style scoped>
+/* E.7.3: native desktop select remains available; mobile uses an accessible
+   disclosure with ordinary buttons, so a horizontal gesture is not a picker. */
+.lf-program-mobile{display:none}
+@media(max-width:799px){
+ .lf-program-desktop{display:none!important}
+ .lf-program-mobile{display:block;min-width:0}
+ .lf-program-static,.lf-program-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;box-sizing:border-box;white-space:normal;overflow-wrap:anywhere}
+ .lf-program-static{cursor:default}
+ .lf-program-options{display:grid;gap:5px;margin:0 0 8px;min-width:0}
+ .lf-program-options button{width:100%;min-height:44px;padding:9px 12px;text-align:left;white-space:normal;overflow-wrap:anywhere;background:var(--field);border:1px solid var(--outline);border-radius:8px;color:var(--text)}
+ .lf-program-options button[aria-pressed="true"]{border-color:var(--mint)}
+ .lf-program-options button:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+}
+
 /* STEP 3L — Il carosello riguarda solo le schede personali non programmate.
    Non modifica la griglia delle schede associate alle settimane. */
 .athlete-plan .athlete-unscheduled-sheets {

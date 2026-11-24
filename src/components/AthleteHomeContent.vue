@@ -14,7 +14,7 @@ const props=defineProps<{
  activities:readonly string[];sheets:readonly HomeSheet[];freeSheets?:readonly HomeSheet[];hasCurrentWeek?:boolean
  days?:readonly ProgramDay[];gymId?:string;uid?:string
  planLink:string;archiveLink:string;progressLink:string;bookingLink:string;profileLink:string;dayLink:string
- trainingLink?:string;avatarUrl?:string
+ trainingLink?:string;avatarUrl?:string;pageActive?:boolean
 }>()
 const activeSheet=ref<HomeSheet|null>(null)
 const videoOpen=ref(false)
@@ -55,7 +55,8 @@ const actionLabel=computed(()=>directSheet.value?'Apri scheda':hasTodayPlan.valu
 const hasTrainingAction=computed(()=>!!directSheet.value||props.sheets.length>1)
 function openSheet(){if(directSheet.value)activeSheet.value=directSheet.value}
 function openTutorial(){videoOpen.value=true}
-function onKey(e:KeyboardEvent){if(e.key==='Escape')videoOpen.value=false}
+function onKey(e:KeyboardEvent){if(props.pageActive!==false&&e.key==='Escape')videoOpen.value=false}
+watch(()=>props.pageActive,active=>{if(active===false){activeSheet.value=null;videoOpen.value=false}})
 watch(videoOpen,async opened=>{if(opened){await nextTick();videoCloseRef.value?.focus()}})
 if(typeof window!=='undefined')window.addEventListener('keydown',onKey)
 onUnmounted(()=>{if(typeof window!=='undefined')window.removeEventListener('keydown',onKey)})

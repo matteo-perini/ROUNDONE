@@ -1,0 +1,84 @@
+{
+  "patch": "R22B.6E.7.2",
+  "base": "R22B.6E.7.1",
+  "files": [
+    {
+      "path": "src/App.vue",
+      "sha256": "99b43ad75ab0acf4e9ba107b9e8762745c94cc228db0ff4913a47bec961e31de",
+      "base_sha256": "8fd6f2bb10193d833f48b9771602992c73298763735d97368f4e8d83707cfcdd",
+      "action": "replace"
+    },
+    {
+      "path": "src/components/AthleteHomeContent.vue",
+      "sha256": "a4565cc2f9fe9d77189715a52502489b4937c5c1e8272bc05fc58f56eb28d189",
+      "base_sha256": "ab0208fb78cf713897a6c3be2662edae6f1b68457bcf85903297b4f91b8c0496",
+      "action": "replace"
+    },
+    {
+      "path": "src/components/AthletePlanContent.vue",
+      "sha256": "d902e6449bf32d472b024dca81dd434b754a5984ecf61acbad65fae7dfd9eac3",
+      "base_sha256": "61ac1b66183057b79440086fc9e3c1c840435305f5fe76fc8203f31416fc0aa4",
+      "action": "replace"
+    },
+    {
+      "path": "src/components/ProgramHistory.vue",
+      "sha256": "939e3541a719520386d948df74b8155a5dd43e6bdc859ec30f7c379817a39b21",
+      "base_sha256": "7e9e3802ee023c233a3055b500db4513277197f0b58961054c08adb293949db1",
+      "action": "replace"
+    },
+    {
+      "path": "src/features/motion/roundOneMotion.ts",
+      "sha256": "08e446215cc773341a50ac42e96899e58ed9cecca3e055dabbbd6c72cf39794b",
+      "base_sha256": "778b7aabf1d7a265ae5687b192ea5c5b6bb8ab59261ed581028a4f9fa2dd9a7a",
+      "action": "replace"
+    },
+    {
+      "path": "src/styles-continuous-motion.css",
+      "sha256": "49b0ebc563780740bf80263ed2963c6474d8c32a7f3b96d3d17f00fabc42c227",
+      "base_sha256": "43b2e30a870a25361747f13a1486ede13c1b8f523ea828a7b86cc291cccb6244",
+      "action": "replace"
+    },
+    {
+      "path": "src/views/AthleteLiveWorkspace.vue",
+      "sha256": "2f2098ac09ac8f03afe1c825333a88e9eab6571693289ba21fb68f26114df37b",
+      "base_sha256": "a0dc3d9c2132370734c8a35a25b05f0e86564fb7a37809586af80733d769c2dc",
+      "action": "replace"
+    },
+    {
+      "path": "tests/r22b5-athlete-shared-screen-motion.test.mjs",
+      "sha256": "447290302b7a03c2e70b7372ae6f543f8623635aafe1577baf63f1b622acd03f",
+      "base_sha256": "4220244e86f8a3c8a6e4f713ba376f89fb518ccb9aecbc6a3aaffb62b800e2f4",
+      "action": "replace"
+    },
+    {
+      "path": "tests/r22b6d-motion-continuity.test.mjs",
+      "sha256": "e6880d91fece7637b22319c56b00453a75da518a4c97c4569312dfba4613558a",
+      "base_sha256": "8bc1c554f517b90d8fbae2ab2aaaa1a302d07059c6b52d66f7aae1df3369ff92",
+      "action": "replace"
+    },
+    {
+      "path": "tests/r22b6e2-continuous-motion.test.mjs",
+      "sha256": "012547a131ed9a7d84436a174692bd917a9c1d9fdaa9ba0e706fe0b6f7cc831e",
+      "base_sha256": "5e60b715aa4c68e6617a449a4dfa6018c1a12cdd273ccb032d236f6ad9bdcfa9",
+      "action": "replace"
+    },
+    {
+      "path": "tests/r22b6e5-native-swipe.test.mjs",
+      "sha256": "d9029bf55287296a011be3a3df29c53d60387718724c3744e92014b1d1014763",
+      "base_sha256": "698917f29c29fa7b63e577aa999e0bf39883ed76af3a1c96af90bdff280de51c",
+      "action": "replace"
+    },
+    {
+      "path": "src/features/navigation/nativePageTrack.ts",
+      "sha256": "7424718686739ea9f6efa637dd45788c034d01abdbf03857a39b64b505775cfa",
+      "base_sha256": null,
+      "action": "add"
+    },
+    {
+      "path": "tests/r22b6e72-native-page-track.test.mjs",
+      "sha256": "e0ccff3cfb7ab4de1e8c6af64060d6e85f7a39d86fe47a849e3c7c3a73510975",
+      "base_sha256": null,
+      "action": "add"
+    }
+  ]
+}

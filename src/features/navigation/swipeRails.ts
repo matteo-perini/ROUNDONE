@@ -1,7 +1,7 @@
 /** E.5.1 — a fitting rail is not a native horizontal scrollport. Measure only
  * known rails, on actual layout changes; never scan all elements per touch. */
 import type {Directive} from 'vue'
-export const knownSwipeRails='.lf-r13-week-scroll,.athlete-sheet-carousel,.lf-p360-picker-filters,.booking-period,.week-pills'
+export const knownSwipeRails='.lf-r13-week-scroll,.athlete-sheet-carousel,.lf-p360-picker-filters,.booking-period,.week-pills,.lf-compact-week-days'
 export function railFits(scrollWidth:number,clientWidth:number){return clientWidth>0&&scrollWidth<=clientWidth+2}
 const cleanup=new WeakMap<HTMLElement,()=>void>()
 export const vLfSwipeRails:Directive<HTMLElement>={mounted(stage){

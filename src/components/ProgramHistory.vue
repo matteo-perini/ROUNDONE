@@ -5,7 +5,7 @@ import type {Personal,ExerciseRecord} from '../features/sheets/domain'
 import type {HistoricalArchive} from '../features/athletes/labArchive'
 import {weekEnd} from '../features/sheets/assignmentPolicy'
 import SheetDetail from './SheetDetail.vue'
-const props=defineProps<{programs:ProgramFamily[];personal:Personal[];archive:HistoricalArchive[];ready:boolean}>()
+const props=defineProps<{programs:ProgramFamily[];personal:Personal[];archive:HistoricalArchive[];ready:boolean;pageActive?:boolean}>()
 const selected=ref(''),weekId=ref(''),opened=ref<{title:string;exercises:readonly ExerciseRecord[]}|null>(null)
 const program=computed(()=>props.programs.find(p=>p.id===selected.value))
 const week=computed(()=>program.value?.weeks.find(w=>w.id===weekId.value))
@@ -16,6 +16,7 @@ function prettyDate(input?:string){
  const date=new Date(input+'T12:00:00Z')
  return Number.isFinite(date.getTime())?new Intl.DateTimeFormat('it-IT',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(date):input
 }
+watch(()=>props.pageActive,active=>{if(active===false)opened.value=null})
 watch(()=>props.programs,()=>{if(selected.value&&!program.value)choose('');else if(weekId.value&&!week.value)weekId.value=''})
 </script>
 <template>

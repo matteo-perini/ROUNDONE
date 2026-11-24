@@ -18,8 +18,9 @@ test('E.5.1 uses a gesture-only cue; only the authorized real route enters',()=>
  assert.match(app,/continuousDragOffset\(dx,width,!!next\)/);assert.match(app,/router\.push\(/)
 })
 test('outgoing pages retain their measured geometry, are inert while leaving, and release state on cancellation',()=>{
+ assert.match(workspace,/:inert="page!==props.screen"/);assert.match(workspace,/cancelTrack/);
  assert.match(helper,/offsetTop,offsetLeft,offsetWidth/);assert.match(helper,/element\.inert=true/);assert.match(helper,/element\.inert=previous\.inert/)
- for(const src of [app,workspace]){assert.match(src,/@leave-cancelled="finishSectionLeave"/);assert.match(src,/left:var\(--lf-leave-left,0px\)/);assert.match(src,/width:var\(--lf-leave-width,100%\)/);assert.match(src,/transition:transform 340ms cubic-bezier\(\.22,1,\.36,1\);/)}
+ for(const src of [app]){assert.match(src,/@leave-cancelled="cancelChatLeave"/);assert.match(src,/left:var\(--lf-leave-left,0px\)/);assert.match(src,/width:var\(--lf-leave-width,100%\)/);assert.match(src,/transition:transform 340ms cubic-bezier\(\.22,1,\.36,1\);/)}
 })
 test('one physical span shared by both real pages and cleanup on route changes; no repeated Vue mounting key',()=>{
  assert.match(app,/setProperty\('--lf-motion-span',`\$\{stage.clientWidth\}px`\)/);assert.match(app,/removeProperty\('--lf-motion-span'\)/);assert.match(app,/enteringPaths.get\(el\)===route.path/);assert.doesNotMatch(app,/:key="route.path"/)

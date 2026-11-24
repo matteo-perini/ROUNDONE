@@ -1,9 +1,0 @@
-R22B.6E.7.1 — Critical Recovery & Continuous Preview Fix
-BASE: E.7
-1. Backup dei file indicati nel manifest.
-2. Estrarre nella cartella principale del progetto. SOSTITUIRE tutti i file.
-3. npm.cmd run typecheck
-4. npm.cmd run build
-5. node --experimental-strip-types --test tests/r22*.test.mjs
-6. Provare Chat e swipe su smartphone, poi WebDocs e Commit/Push.
-Nessun deploy Firebase. Leggere il report tecnico per limiti e rollback.

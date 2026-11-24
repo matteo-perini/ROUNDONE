@@ -55,7 +55,7 @@ export function installRoundOneMotion(router:Router,app:App):void{
   const isFirst=firstFrame;firstFrame=false
   // Map contains only explicitly registered groups, not individual cards or the entire DOM.
   for(const [el,group] of groups){
-   if(!el.isConnected||group.ready===false||seen.has(group.id)||(!PREMIUM_MOTION_ENABLED&&group.premiumOnly))continue
+   if(!el.isConnected||el.closest?.('[data-lf-track-inactive],.lf-native-track-rail[data-lf-track-moving]')||group.ready===false||seen.has(group.id)||(!PREMIUM_MOTION_ENABLED&&group.premiumOnly))continue
    seen.add(group.id) // even an empty first snapshot is consumed; filters do not replay the entrance
    for(const target of entranceTargets(el,group,ROUNDONE_MOTION.maxPanels-used)){
     // Branding remains independent of route animations. Skip fixed/modal-containing wrappers.

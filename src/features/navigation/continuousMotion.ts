@@ -37,7 +37,7 @@ export function releaseSectionMotion(element:Element):void{
 }
 export const activeSectionSelector='.lf-chat-open-enter-active,.lf-chat-open-leave-active,.lf-chat-close-enter-active,.lf-chat-close-leave-active,.lf-section-next-enter-active,.lf-section-prev-enter-active,.lf-section-next-leave-active,.lf-section-prev-leave-active'
 export function isSectionMoving(element:HTMLElement):boolean{
- return element.matches(activeSectionSelector)||!!element.querySelector(activeSectionSelector)
+ return element.matches(activeSectionSelector+', [data-lf-external-moving]')||!!element.querySelector(activeSectionSelector+', [data-lf-external-moving]')
 }
 export function prepareSectionLeave(element:Element,name:string,enabled:boolean):void{
  if(!enabled||!name||!(element instanceof HTMLElement)||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return

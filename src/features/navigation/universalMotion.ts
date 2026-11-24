@@ -60,7 +60,7 @@ export function createMotionCue(stage:HTMLElement,root:HTMLElement,paintedOffset
  const content=document.createElement('div');content.className='lf-motion-cue-content';panel.append(content)
  let last=0,side=0,animation:Animation|null=null,disposed=false,renderedLabel:string|null=null,renderedSummary:MotionSummary|null=null,visible=false,lastTransform=''
  stage.append(panel)
- function dispose(){if(disposed)return;disposed=true;animation?.cancel();animation=null;panel.remove()}
+ function dispose(){if(disposed)return;disposed=true;const old=animation;animation=null;if(old){old.onfinish=null;old.oncancel=null;old.cancel()}panel.remove()}
  return {paint(offset,direction,label,summary){
   if(disposed)return;last=offset;side=Math.sign(direction)
   const nextVisible=!!side&&!!label
@@ -79,7 +79,9 @@ export function createMotionCue(stage:HTMLElement,root:HTMLElement,paintedOffset
   const transform=`translate3d(${pairedPosition(offset,span,side)}px,0,0)`
   if(lastTransform!==transform){lastTransform=transform;panel.style.transform=transform}
  },returnToEdge(duration){if(disposed)return;if(!side||panel.hidden||typeof panel.animate!=='function'){dispose();return}
-  animation=panel.animate([{transform:`translate3d(${pairedPosition(last,span,side)}px,0,0)`},{transform:`translate3d(${pairedPosition(0,span,side)}px,0,0)`}],{duration,easing:'cubic-bezier(.18,1,.35,1)',fill:'forwards'})
-  animation.onfinish=dispose;animation.oncancel=dispose
+  try{
+   animation=panel.animate([{transform:`translate3d(${pairedPosition(last,span,side)}px,0,0)`},{transform:`translate3d(${pairedPosition(0,span,side)}px,0,0)`}],{duration,easing:'cubic-bezier(.18,1,.35,1)',fill:'forwards'})
+   animation.onfinish=dispose;animation.oncancel=dispose
+  }catch{dispose()}
  },dispose}
 }

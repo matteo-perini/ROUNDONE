@@ -102,8 +102,8 @@ test('motion variables are frozen per participating real page and released after
  assert.match(motion,/releaseSectionMotion\(element\)/)
  assert.match(app,/prepareSectionMotion\(el,swipeStage.value\)/)
  assert.match(app,/@enter-cancelled="cancelChatEnter"/)
- assert.match(live,/@enter-cancelled="releaseSectionMotion"/)
- for(const s of [app,live])assert.match(s,/var\(--lf-swipe-commit-duration,340ms\)/)
+ assert.match(live,/createNativePageTrack/);assert.match(live,/dropEngine\(\)/)
+ assert.match(app,/var\(--lf-swipe-commit-duration,340ms\)/)
 })
 test('visibility, identity, width and permission changes clean up local gestures; no data-layer changes needed',()=>{
  assert.match(app,/watch\(\[\(\)=>stagingSession.value\?\.uid,\(\)=>stagingSession.value\?\.gymId,\(\)=>stagingSession.value\?\.role\],resetSwipeSession/)
