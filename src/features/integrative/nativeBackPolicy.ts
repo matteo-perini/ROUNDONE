@@ -1,8 +1,8 @@
 /** Pure routing rules; Android hardware Back is never allowed to exit on a single press. */
 export const EXIT_DOUBLE_BACK_MS = 2300
 export const INTERNAL_ROUTES = new Set([
-  '/home','/piano','/archivio','/team','/profilo','/impostazioni','/prenotazioni',
-  '/coach','/coach/atleti','/coach/programmi','/coach/archivio','/coach/libreria',
+  '/home','/messaggi','/piano','/archivio','/team','/profilo','/impostazioni','/prenotazioni',
+  '/coach','/coach/messaggi','/coach/atleti','/coach/programmi','/coach/archivio','/coach/libreria',
   '/coach/cestino','/coach/staff','/coach/profilo','/coach/prenotazioni',
   '/dev/accesso','/staging',
 ])

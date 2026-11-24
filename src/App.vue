@@ -25,9 +25,18 @@ import {stagingSession,signOutStaging} from './integrations/firebase/stagingSess
 import {connectPushSession,pushNotice} from './integrations/firebase/pushNotifications'
 import {demoProfiles} from './features/profile/localProfile'
 import {uiText} from './features/i18n/interfaceLanguage'
+import {CHAT_PREVIEW_ENABLED} from './features/chat/chatPreview'
+import {sectionSwipeDestination,sectionTransition} from './features/navigation/sectionSwipe'
+import {swipeNeighbor,swipePreviewOffset,shouldNavigateOnRelease,snapBackDuration} from './features/navigation/fluidSwipe'
+import {installMotionAudit} from './features/performance/motionAudit'
+import {chatSwipeDestination} from './features/chat/chatNavigation'
+import {CHAT_PILOT_ENABLED,chatUnread,chatPilotStatus,chatPilotAllowed} from './features/chat/chatClient'
 // Chunk di avviso STAGING caricato solo in `vite build --mode staging`, mai in LIVE.
 const StagingBanner=import.meta.env.MODE==='staging' ? defineAsyncComponent(()=>import('./components/StagingBanner.vue')) : null
 const lab=useLabStore();const route=useRoute();const router=useRouter()
+// Opt-in diagnostics only in local development. No content or identifiers are recorded.
+const stopMotionAudit=installMotionAudit(router)
+onUnmounted(stopMotionAudit)
 // Match the actual shell breakpoints. Render exactly one inbox at a stable location.
 const athleteHeaderMedia=window.matchMedia('(max-width: 799px)')
 const coachHeaderMedia=window.matchMedia('(max-width: 900px)')
@@ -78,8 +87,8 @@ const platformPage=computed(()=>route.path==='/lionfit-control')
 const isBooking=computed(()=>route.path.includes('prenotazioni'))
 // Le schermate di laboratorio DEV non devono ereditare la shell demo anche se lab.role rimane valorizzato.
 const isDevLab = computed(() => import.meta.env.DEV && route.path.startsWith('/dev/'))
-const coachEmulatorPreview = computed(() => import.meta.env.DEV && (['/coach','/coach/atleti','/coach/archivio','/coach/progressi','/coach/profilo'].includes(route.path) || (route.path === '/impostazioni' && verifiedSettingsRole.value === 'coach')) && route.query.source === 'emulator')
-const athleteEmulatorPreview = computed(() => import.meta.env.DEV && (['/home','/piano','/archivio','/progressi','/profilo'].includes(route.path) || (route.path === '/impostazioni' && verifiedSettingsRole.value === 'atleta')) && route.query.source === 'emulator')
+const coachEmulatorPreview = computed(() => import.meta.env.DEV && (['/coach','/coach/messaggi','/coach/atleti','/coach/archivio','/coach/progressi','/coach/profilo'].includes(route.path) || (route.path === '/impostazioni' && verifiedSettingsRole.value === 'coach')) && route.query.source === 'emulator')
+const athleteEmulatorPreview = computed(() => import.meta.env.DEV && (['/home','/messaggi','/piano','/archivio','/progressi','/profilo'].includes(route.path) || (route.path === '/impostazioni' && verifiedSettingsRole.value === 'atleta')) && route.query.source === 'emulator')
 const bookingEmulatorPreview = computed(() => import.meta.env.DEV && ['/prenotazioni','/coach/prenotazioni'].includes(route.path) && route.query.source === 'emulator')
 const bookingIsCoach = computed(()=>bookingEmulatorPreview.value && route.path==='/coach/prenotazioni')
 const coachDevShell = computed(()=>coachEmulatorPreview.value || bookingIsCoach.value)
@@ -106,6 +115,159 @@ const coachEmulatorNav=[{to:'/coach?source=emulator',label:'HOME',icon:'home'},{
 const stagingAthleteNav=[{to:'/home',label:'HOME',icon:'home'},{to:'/piano',label:'PIANO',icon:'calendar'},{to:'/archivio',label:'ARCHIVIO',icon:'archive'},{to:'/progressi',label:'ALLENAMENTI',icon:'progress'},{to:'/prenotazioni',label:'AGENDA',icon:'calendar-plus'},{to:'/profilo',label:'PROFILO',icon:'user'}]
 const stagingCoachNav=[{to:'/coach',label:'HOME',icon:'home'},{to:'/coach/atleti',label:'ATLETI',icon:'users'},{to:'/coach/archivio',label:'ARCHIVIO',icon:'book'},{to:'/coach/prenotazioni',label:'AGENDA',icon:'calendar'},{to:'/coach/progressi',label:'ALLENAMENTI',icon:'progress'},{to:'/coach/profilo',label:'PROFILO',icon:'user'}]
 const mobileNav=computed(()=>isStagingMode()?(shownRole.value==='coach'?stagingCoachNav:stagingAthleteNav):coachDevShell.value?coachEmulatorNav:athleteDevShell.value?athleteEmulatorNav:shownRole.value==='coach'?coachNav:athleteNav)
+// R22A: an opt-in navigation preview; does not read/write chat data.
+// The LIVE pilot icon is visible only after backend authorization of the chosen pair.
+const chatPreviewEnabled=computed(()=>CHAT_PREVIEW_ENABLED&&(!CHAT_PILOT_ENABLED||chatPilotAllowed.value))
+// Same left-to-right order as the visible mobile dock; Chat is a page to the LEFT of Home.
+const swipePages=computed(()=>[...(chatPreviewEnabled.value?[shownRole.value==='coach'?'/coach/messaggi':'/messaggi']:[]),...mobileNav.value.map(item=>item.to.split('?')[0])])
+function swipeViewport(){return window.innerWidth<(shownRole.value==='coach'?901:800)}
+let chatPilotVisibilityRequest=0
+watch(()=>stagingSession.value?.uid,async uid=>{
+ const request=++chatPilotVisibilityRequest
+ chatPilotAllowed.value=false
+ if(!CHAT_PILOT_ENABLED||!uid||!isStagingMode())return
+ try{
+  const allowed=await chatPilotStatus(uid)
+  if(request===chatPilotVisibilityRequest&&stagingSession.value?.uid===uid)chatPilotAllowed.value=allowed
+ }catch{if(request===chatPilotVisibilityRequest)chatPilotAllowed.value=false}
+},{immediate:true})
+const chatRoute=computed(()=>{const target=shownRole.value==='coach'?'/coach/messaggi':'/messaggi';return route.query.source==='emulator'?target+'?source=emulator':target})
+const chatMotion=ref('')
+function finishChatMotion(){chatMotion.value=''}
+// R22B will populate this from authorized unread metadata; 0 means no invented notifications.
+const chatUnreadCount=ref(0)
+let chatUnreadTimer:ReturnType<typeof setInterval>|null=null,chatRequest=0
+async function refreshChatUnread(){
+ const uid=stagingSession.value?.uid,request=++chatRequest
+ if(!CHAT_PILOT_ENABLED||!chatPilotAllowed.value||!isStagingMode()||!uid||document.hidden){chatUnreadCount.value=0;return}
+ try{
+  const result=await chatUnread(uid)
+  if(request===chatRequest&&stagingSession.value?.uid===uid)chatUnreadCount.value=Math.max(0,Math.min(999,result.unread))
+ }catch{if(request===chatRequest)chatUnreadCount.value=0}
+}
+watch(()=>[stagingSession.value?.uid,chatPilotAllowed.value],()=>{void refreshChatUnread()},{immediate:true})
+function chatVisibility(){if(!document.hidden)void refreshChatUnread()}
+function chatEvent(){void refreshChatUnread()}
+document.addEventListener('visibilitychange',chatVisibility)
+window.addEventListener('lionfit:chat-updated',chatEvent)
+if(CHAT_PILOT_ENABLED)chatUnreadTimer=setInterval(()=>{void refreshChatUnread()},30000)
+onUnmounted(()=>{++chatRequest;if(chatUnreadTimer)clearInterval(chatUnreadTimer);document.removeEventListener('visibilitychange',chatVisibility);window.removeEventListener('lionfit:chat-updated',chatEvent)})
+watch(()=>route.path,(now,before)=>{
+ touchStart=null;restoreDrag(false)
+ // Preserve the R22A premium Chat gesture on athlete Home; extend the same direction logic
+ // to the other top-level sections, including taps on the existing navbar.
+ if (chatPreviewEnabled.value && before==='/home' && now==='/messaggi') chatMotion.value='lf-chat-open'
+ else if (chatPreviewEnabled.value && before==='/messaggi' && now==='/home') chatMotion.value='lf-chat-close'
+ // Home/Piano/Archivio share AthleteLiveWorkspace. Vue Router reuses that instance,
+ // so RouterView cannot animate these two transitions. Their content is animated
+ // internally without tearing down the existing live Firestore subscriptions.
+ else if (shownRole.value==='atleta' && isStagingMode() &&
+  ['/home','/piano','/archivio'].includes(before) && ['/home','/piano','/archivio'].includes(now)) chatMotion.value=''
+ else chatMotion.value=shownRole.value && swipeViewport() ? sectionTransition(before,now,swipePages.value) : ''
+})
+// R22B.6B — finger-follow navigation preview. This never replaces Vue Router.
+// The native section transitions still own the final page switch.
+type GestureStart={x:number;y:number;at:number;path:string;root:HTMLElement|null}
+let touchStart:GestureStart|null=null
+let swipeRouteRoot:HTMLElement|null=null
+let dragFrame=0,dragOffset=0,dragRoot:HTMLElement|null=null
+let dragOriginal:{transform:string;transition:string;willChange:string}|null=null
+function setSwipeRouteRoot(instance:unknown){
+ const element=(instance as {$el?:unknown}|null)?.$el
+ swipeRouteRoot=element instanceof HTMLElement?element:null
+}
+function restoreDrag(animateBack:boolean){
+ if(dragFrame){cancelAnimationFrame(dragFrame);dragFrame=0}
+ const el=dragRoot,original=dragOriginal,offset=dragOffset
+ dragRoot=null;dragOriginal=null;dragOffset=0
+ if(!el||!original)return
+ el.style.transform=original.transform
+ el.style.transition=original.transition
+ el.style.willChange=original.willChange
+ if(animateBack&&Math.abs(offset)>3&&el.isConnected&&typeof el.animate==='function'){
+  el.animate([{transform:`translate3d(${offset}px,0,0)`},{transform:original.transform||'translate3d(0,0,0)'}],
+   {duration:snapBackDuration(offset,window.innerWidth),easing:'cubic-bezier(.18,1,.35,1)'})
+ }
+}
+function skipSectionSwipe(target:EventTarget|null,root:EventTarget|null):boolean {
+ let node=target instanceof Element?target:null
+ while(node && node!==root){
+  if(node.matches('a,button,input,textarea,select,img,picture,video,iframe,canvas,svg,table,td,th,[contenteditable], [role="dialog"],[role="slider"],[role="tab"],[role="tablist"],[role="listbox"],[data-lf-no-chat-swipe],[data-lf-no-section-swipe],.modal-overlay,.lf15-video-backdrop,.swiper,.carousel,.recharts-wrapper,.apexcharts-canvas'))return true
+  if(node instanceof HTMLElement){
+   if(node.isContentEditable)return true
+   if(node.scrollWidth>node.clientWidth+14){
+    const overflow=window.getComputedStyle(node).overflowX
+    if(overflow==='auto'||overflow==='scroll')return true
+   }
+  }
+  node=node.parentElement
+ }
+ return false
+}
+function chatTouchStart(event:TouchEvent){
+ touchStart=null;restoreDrag(false)
+ if(!shownRole.value||!swipeViewport()||!swipePages.value.includes(route.path)||event.touches.length!==1)return
+ const touch=event.touches[0]
+ if(touch.clientX<32||touch.clientX>window.innerWidth-32||skipSectionSwipe(event.target,event.currentTarget))return
+ if(window.getSelection()?.toString())return
+ const el=swipeRouteRoot
+ const moving=el&&el.isConnected&&getComputedStyle(el).transform!=='none'
+ touchStart={x:touch.clientX,y:touch.clientY,at:Date.now(),path:route.path,root:moving?null:el}
+}
+function chatTouchMove(event:TouchEvent){
+ const start=touchStart
+ if(!start||start.path!==route.path||event.touches.length!==1||!swipeViewport())return
+ if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return
+ const touch=event.touches[0],dx=touch.clientX-start.x,dy=touch.clientY-start.y
+ const next=swipeNeighbor(start.path,dx,swipePages.value)
+ const offset=swipePreviewOffset(dx,dy,window.innerWidth,!!next)
+ if(!offset){if(dragRoot)restoreDrag(true);return}
+ const el=start.root
+ if(!el||!el.isConnected)return // Route fragments fall back to the original safe end-of-swipe navigation.
+ if(!dragRoot){
+  dragRoot=el
+  dragOriginal={transform:el.style.transform,transition:el.style.transition,willChange:el.style.willChange}
+ }
+ dragOffset=offset
+ if(dragFrame)return
+ dragFrame=requestAnimationFrame(()=>{
+  dragFrame=0
+  if(!dragRoot||!dragRoot.isConnected)return
+  dragRoot.style.transition='none'
+  dragRoot.style.willChange='transform'
+  dragRoot.style.transform=`translate3d(${dragOffset}px,0,0)`
+ })
+}
+function chatTouchEnd(event:TouchEvent){
+ const start=touchStart;touchStart=null
+ if(!start||start.path!==route.path||event.changedTouches.length!==1||event.touches.length>0){restoreDrag(true);return}
+ const end=event.changedTouches[0]
+ const dx=end.clientX-start.x,dy=end.clientY-start.y,elapsed=Date.now()-start.at
+ const candidate=swipeNeighbor(start.path,dx,swipePages.value)
+ const shouldMove=shouldNavigateOnRelease(dx,dy,elapsed,window.innerWidth,!!candidate)
+ // Preserve the original chat special-case and section destination checks.
+ const chatDestination=chatPreviewEnabled.value&&shownRole.value==='atleta' ? chatSwipeDestination(route.path,dx,dy,elapsed) : null
+ const classicDestination=sectionSwipeDestination(route.path,dx,dy,elapsed,swipePages.value)
+ const destination=shouldMove?candidate:(chatDestination??classicDestination)
+ restoreDrag(!destination)
+ if(destination){
+  if(destination==='/messaggi'||route.path==='/messaggi')chatHintClose()
+  void router.push(route.query.source==='emulator'?{path:destination,query:{source:'emulator'}}:destination)
+ }
+}
+function chatTouchCancel(){touchStart=null;restoreDrag(true)}
+onUnmounted(()=>{touchStart=null;restoreDrag(false)})
+
+const showChatHint=ref(false)
+const chatHintKey='lionfit-r22a-chat-hint-seen'
+function chatHintClose(){
+ showChatHint.value=false
+ try{localStorage.setItem(chatHintKey,'1')}catch{/* ephemeral browsers */}
+}
+if(chatPreviewEnabled.value){
+ try{showChatHint.value=localStorage.getItem(chatHintKey)!=='1'}catch{showChatHint.value=true}
+}
+watch(()=>route.path,path=>{if(chatPreviewEnabled.value&&path==='/messaggi')chatHintClose()})
 async function goOut(){
  if(isStagingMode()){if(await signOutStaging())await router.replace('/accesso');return}
  if(coachEmulatorPreview.value || athleteEmulatorPreview.value || bookingEmulatorPreview.value){
@@ -134,6 +296,7 @@ async function goOut(){
   <template v-else-if="route.path==='/assistenza' && shownRole && isStagingMode()"><RouterView/></template>
   <template v-else-if="shownRole && route.path!=='/accesso'">
     <AthleteDesktopSidebar v-if="shownRole==='atleta'" :items="mobileNav" :expanded="athleteSidebarExpanded" @toggle="toggleAthleteSidebar" @logout="goOut"/>
+    <RouterLink v-if="chatPreviewEnabled && shownRole==='atleta' && !athleteHeaderVisible" :to="chatRoute" class="lf-chat-desktop-shortcut" aria-label="Apri Messaggi" title="Apri Messaggi"><LionIcon name="messages" :size="24"/><span>Messaggi</span><span v-if="chatUnreadCount>0" class="lf-chat-unread">{{chatUnreadCount>99?'99+':chatUnreadCount}}</span></RouterLink>
     <aside v-if="shownRole==='coach'" class="desktop-sidebar">
       <div class="sidebar-head"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><strong>LION <em>FIT</em></strong><small>{{uiText("AREA COACH / ADMIN")}}</small></div></div>
       <nav class="sidebar-nav">
@@ -143,10 +306,10 @@ async function goOut(){
       </nav>
       <div class="sidebar-foot"><QuickProfileSwitch/><button class="ghost wide" @click="goOut">{{uiText(isStagingMode()?'Esci da Lion Fit':coachEmulatorPreview ? 'Esci dal laboratorio' : 'Esci')}}</button><RouterLink v-if="shownRole==='coach' && !coachDevShell" class="invite-shortcut" to="/coach/staff">{{uiText('INVITI DELLA PALESTRA')}} <strong>{{uiText('Inviti via email →')}}</strong></RouterLink></div>
     </aside>
-    <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><QuickProfileSwitch compact/><InboxBell v-if="inboxInHeader&&inboxVisibleOnRoute&&coachInboxEnabled()&&stagingSession" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
+    <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><QuickProfileSwitch compact/><RouterLink v-if="chatPreviewEnabled && shownRole" :to="chatRoute" class="lf-chat-header-link" :aria-label="uiText('Apri messaggi Coach-Atleta')" title="Messaggi"><LionIcon name="messages" :size="24"/><span v-if="chatUnreadCount>0" class="lf-chat-unread">{{chatUnreadCount>99?'99+':chatUnreadCount}}</span></RouterLink><InboxBell v-if="inboxInHeader&&inboxVisibleOnRoute&&coachInboxEnabled()&&stagingSession" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
 
     <!-- Navigazione Atleta esclusiva: sidebar a sinistra su desktop, dock inferiore su mobile. -->
-    <main class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking}]"><button v-if="route.path!=='/home' && route.path!=='/coach' && (shownRole!=='coach' || coachHeaderVisible)" type="button" class="lf-route-back" :class="{'lf-r8-route-back':workoutRoute}" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> </button><template v-if="coachInboxEnabled()&&stagingSession"><InboxBell v-if="!inboxInHeader&&inboxVisibleOnRoute" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><PushWelcome :key="stagingSession.uid" :uid="stagingSession.uid" :open-agenda="openPushAgenda" :open-support="openPushSupport"/></template><p v-if="linkedNotice" class="notice" role="alert">{{linkedNotice}} <button type="button" class="bare" @click="linkedNotice=''">Chiudi</button></p><RouterView/><CheckUploadNotice v-if="shownRole==='atleta'&&stagingSession?.role==='atleta'" :session="stagingSession"/></main>
+    <main class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking,'lf-chat-stage':!!chatMotion}]" @touchstart.passive="chatTouchStart" @touchmove.passive="chatTouchMove" @touchend.passive="chatTouchEnd" @touchcancel.passive="chatTouchCancel"><RouterLink v-if="chatPreviewEnabled && shownRole==='coach' && !coachHeaderVisible" :to="chatRoute" class="lf-chat-coach-top" :class="{'lf-chat-coach-with-bell':route.path==='/coach'&&coachInboxEnabled()}" aria-label="Apri Messaggi Coach–Atleta" title="Apri Messaggi"><LionIcon name="messages" :size="23"/><span>Messaggi</span><span v-if="chatUnreadCount>0" class="lf-chat-unread">{{chatUnreadCount>99?'99+':chatUnreadCount}}</span></RouterLink><button v-if="route.path!=='/home' && route.path!=='/coach' && (shownRole!=='coach' || coachHeaderVisible)" type="button" class="lf-route-back" :class="{'lf-r8-route-back':workoutRoute}" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> </button><template v-if="coachInboxEnabled()&&stagingSession"><InboxBell v-if="!inboxInHeader&&inboxVisibleOnRoute" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><PushWelcome :key="stagingSession.uid" :uid="stagingSession.uid" :open-agenda="openPushAgenda" :open-support="openPushSupport"/></template><p v-if="linkedNotice" class="notice" role="alert">{{linkedNotice}} <button type="button" class="bare" @click="linkedNotice=''">Chiudi</button></p><aside v-if="chatPreviewEnabled && shownRole==='atleta' && route.path==='/home' && showChatHint" class="lf-chat-discovery" role="status"><LionIcon name="messages" :size="19"/><span>I messaggi sono a sinistra: scorri verso destra oppure tocca l'icona.</span><button type="button" aria-label="Chiudi suggerimento messaggi" @click="chatHintClose">×</button></aside><RouterView v-slot="{ Component }"><Transition :name="chatMotion" @after-enter="finishChatMotion"><component :is="Component" :ref="setSwipeRouteRoot"/></Transition></RouterView><CheckUploadNotice v-if="shownRole==='atleta'&&stagingSession?.role==='atleta'" :session="stagingSession"/></main>
     <!-- La navbar Atleta vive fuori dal contenitore .app: nessun CSS / overflow legacy può coprirla. -->
     <AthleteBottomNavigation v-if="shownRole==='atleta'" :items="mobileNav" :theme="lab.theme"/>
     <nav v-if="shownRole==='coach'" class="bottom-nav coach-bottom" :aria-label="uiText('Navigazione Coach')"><RouterLink v-for="item in mobileNav" :key="item.to" :to="item.to"><LionIcon :name="item.icon" :size="24"/><span>{{uiText(item.label)}}</span></RouterLink></nav>
@@ -203,4 +366,49 @@ async function goOut(){
  .app.as-athlete > .mobile-topbar .top-actions :is(.theme-square,.header-avatar){width:40px;height:40px;min-width:40px;min-height:40px;flex-basis:40px}
  .app.as-athlete > .mobile-topbar .brand img{width:28px;height:28px}
 }
+</style>
+
+<style scoped>
+/* R22B.4: premium Chat icon + swipe motion; athlete/coach docks remain unchanged. */
+.lf-chat-header-link{position:relative;display:inline-grid;place-items:center;width:43px;height:43px;flex:none;border-radius:14px;border:1px solid rgba(88,238,155,.44);background:linear-gradient(145deg,#1d7050 0%,#113c30 55%,#132b2d 100%);color:#b7ffdc;text-decoration:none;box-shadow:inset 0 1px rgba(255,255,255,.15),0 4px 14px rgba(0,0,0,.22)}
+.lf-chat-header-link svg{filter:drop-shadow(0 1px 3px rgba(74,234,138,.25))}
+.lf-chat-header-link:hover{border-color:#91ffc1;background:linear-gradient(145deg,#23865d,#144435);transform:translateY(-1px)}
+.lf-chat-header-link:focus-visible,.lf-chat-desktop-shortcut:focus-visible,.lf-chat-coach-top:focus-visible{outline:2px solid var(--mint,#3bcb83);outline-offset:2px}
+.lf-chat-unread{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;padding:0 3px;border-radius:999px;background:#c53546;color:#fff;font-size:10px;font-weight:900;display:grid;place-items:center;box-shadow:0 0 0 2px var(--nav,#101820)}
+.lf-chat-header-link.router-link-active{background:linear-gradient(145deg,#248559,#124a39);border-color:#8cf8b6}
+.lf-chat-discovery{display:flex;align-items:center;gap:9px;max-width:880px;margin:0 auto 12px;padding:10px 12px;border:1px solid rgba(51,170,100,.27);border-radius:12px;background:var(--card2,rgba(22,60,41,.9));color:var(--text,#e3f5e9);font-size:12px;line-height:1.4}
+.lf-chat-discovery svg{flex:none;color:var(--mint,#42cb80)}
+.lf-chat-discovery span{flex:1}
+.lf-chat-discovery button{border:0;background:transparent;color:inherit;font-size:22px;min-width:32px;min-height:32px;line-height:1;cursor:pointer}
+.lf-chat-desktop-shortcut{position:fixed;top:18px;right:18px;display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(88,238,155,.43);border-radius:14px;padding:10px 15px;background:linear-gradient(145deg,#1b6149,#112e2b);color:#e4ffef;text-decoration:none;font-size:13px;font-weight:800;z-index:10;box-shadow:0 6px 18px #0004}
+.lf-chat-desktop-shortcut svg{color:#b7ffdc}
+/* Desktop Coach: no Messages link in sidebar footer. One floating top-right action. */
+.lf-chat-coach-top{position:absolute;top:16px;right:24px;z-index:8;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:8px 15px;border:1px solid rgba(87,234,149,.46);border-radius:14px;background:linear-gradient(145deg,#1c7251,#113d34 65%,#132d30);color:#e8fff1;text-decoration:none;font-size:13px;font-weight:850;letter-spacing:.01em;box-shadow:inset 0 1px #ffffff1d,0 7px 20px #0004}
+.lf-chat-coach-top svg{color:#baffd8}
+.lf-chat-coach-top:hover{transform:translateY(-1px);border-color:#a3ffd0;box-shadow:0 9px 22px #0005}
+.lf-chat-coach-top.router-link-active{border-color:#a3ffd0;background:linear-gradient(145deg,#24875b,#11503c)}
+.lf-chat-coach-top.lf-chat-coach-with-bell{right:86px}
+.lf-chat-coach-top .lf-chat-unread,.lf-chat-desktop-shortcut .lf-chat-unread{top:-6px;right:-7px}
+/* Chat lies to the LEFT of Home: opening moves the Home right; returning reverses. */
+.main-layout.lf-chat-stage{position:relative;overflow-x:clip}
+@media(prefers-reduced-motion:no-preference){
+ .lf-chat-open-enter-active,.lf-chat-open-leave-active,.lf-chat-close-enter-active,.lf-chat-close-leave-active{transition:transform 340ms cubic-bezier(.22,1,.36,1),opacity 340ms ease;will-change:transform}
+ .lf-chat-open-enter-from,.lf-chat-close-leave-to{transform:translate3d(-101%,0,0);opacity:.88}
+ .lf-chat-open-leave-to,.lf-chat-close-enter-from{transform:translate3d(101%,0,0);opacity:.88}
+ .lf-chat-open-leave-active,.lf-chat-close-leave-active{position:absolute;top:0;left:0;width:100%;pointer-events:none}
+}
+/* Navigate horizontally between existing mobile section tabs (no extra navbar items). */
+@media(max-width:900px) and (prefers-reduced-motion:no-preference){
+ .lf-section-next-enter-active,.lf-section-next-leave-active,.lf-section-prev-enter-active,.lf-section-prev-leave-active{transition:transform 340ms cubic-bezier(.22,1,.36,1),opacity 300ms ease;will-change:transform}
+ .lf-section-next-enter-from,.lf-section-prev-leave-to{transform:translate3d(100%,0,0);opacity:.9}
+ .lf-section-next-leave-to,.lf-section-prev-enter-from{transform:translate3d(-100%,0,0);opacity:.9}
+ .lf-section-next-leave-active,.lf-section-prev-leave-active{position:absolute;top:0;left:0;width:100%;pointer-events:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .lf-chat-open-enter-active,.lf-chat-open-leave-active,.lf-chat-close-enter-active,.lf-chat-close-leave-active,.lf-section-next-enter-active,.lf-section-next-leave-active,.lf-section-prev-enter-active,.lf-section-prev-leave-active{transition:none!important;animation:none!important}
+}
+@media(min-width:800px){.lf-chat-discovery{display:none}}
+@media(max-width:799px){.lf-chat-desktop-shortcut{display:none}}
+@media(max-width:380px){.app .top-actions .lf-chat-header-link{width:36px;height:36px;min-width:36px;border-radius:12px}.app .top-actions{gap:4px}}
+@media(max-width:900px){.lf-chat-coach-top{display:none!important}}
 </style>

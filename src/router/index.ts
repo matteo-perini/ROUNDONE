@@ -4,7 +4,9 @@ import {isStagingMode,isOperationalMode} from '../integrations/firebase/stagingC
 import {readNavigationSession,stagingSession} from '../integrations/firebase/stagingSession'
 import { useLabStore } from '../stores/lab'
 import Access from '../views/Access.vue'
+import {CHAT_PREVIEW_ENABLED} from '../features/chat/chatPreview'
 const PlatformAdmin=()=>import('../views/PlatformAdmin.vue')
+const ChatPreview=()=>import('../views/AthleteChatPreview.vue')
 const LiveAthlete = () => import('../views/AthleteLiveWorkspace.vue')
 const Home = () => import('../views/Home.vue')
 const Program = () => import('../views/Program.vue')
@@ -28,6 +30,7 @@ const CoachStaff = () => import('../views/CoachStaff.vue')
 const router=createRouter({history:createWebHistory(),routes:[
  {path:'/',redirect:'/accesso'},{path:'/accesso',component:Access,meta:{title:'Accesso'}},
  {path:'/home',component:isStagingMode()?LiveAthlete:Home,props:isStagingMode()?{screen:'home'}:false,meta:{title:'Home Atleta'}},
+ {path:'/messaggi',component:ChatPreview,meta:{title:'Messaggi Atleta'}},
  {path:'/piano',component:isStagingMode()?LiveAthlete:Program,props:isStagingMode()?{screen:'plan'}:false,meta:{title:'Piano Atleta'}},
  {path:'/schede',redirect:'/piano'},
  {path:'/archivio',component:isStagingMode()?LiveAthlete:Archive,props:isStagingMode()?{screen:'archive'}:false,meta:{title:'Archivio Atleta'}},
@@ -41,6 +44,7 @@ const router=createRouter({history:createWebHistory(),routes:[
  {path:'/lionfit-control',component:PlatformAdmin,meta:{title:'LionFit Control Center'}},
  {path:'/prenotazioni',component:Bookings,meta:{title:'Prenotazioni'}},
  {path:'/coach',component:isOperationalMode()?LiveCoach:Coach,meta:{title:'Dashboard Coach',coachOnly:true}},
+ {path:'/coach/messaggi',component:ChatPreview,meta:{title:'Messaggi Coach',coachOnly:true}},
  {path:'/coach/atleti',component:isOperationalMode()?LiveRoster:CoachAthletes,meta:{title:'Gestione Atleti',coachOnly:true}},
  {path:'/coach/programmi',component:CoachProgram,meta:{title:'Programmazione',coachOnly:true}},
  {path:'/coach/archivio',component:isOperationalMode()?LiveCoachArchive:CoachSheets,meta:{title:'Archivio Coach',coachOnly:true}},
@@ -68,6 +72,8 @@ const router=createRouter({history:createWebHistory(),routes:[
 ]})
 installNavigationTiming(router)
 router.beforeEach(async to=>{
+ // R22A: no public chat entry until messaging and restrictive rules are deployed.
+ if(!CHAT_PREVIEW_ENABLED && ['/messaggi','/coach/messaggi'].includes(to.path)) return '/accesso'
  // La build Android normale non deve mai usare lo store fittizio.
  if(import.meta.env.PROD || isStagingMode()){
   if(!isStagingMode())return to.path==='/accesso'?true:'/accesso'
@@ -91,8 +97,8 @@ router.beforeEach(async to=>{
   try{s=await readNavigationSession()}
   catch{stagingSession.value=null;return '/accesso'}
   if(to.path==='/lionfit-control'){return await verifyPlatformAccess()?true:'/impostazioni'}
-  const athletes=['/home','/piano','/archivio','/progressi','/profilo']
-  const coaches=['/coach','/coach/profilo']
+  const athletes=['/home',...(CHAT_PREVIEW_ENABLED?['/messaggi']:[]),'/piano','/archivio','/progressi','/profilo']
+  const coaches=['/coach',...(CHAT_PREVIEW_ENABLED?['/coach/messaggi']:[]),'/coach/profilo']
   if(isOperationalMode()) {
    if(to.path==='/impostazioni'&&to.query.inboxSupport==='1')return {path:'/assistenza',replace:true}
    const liveAthletes=[...athletes,'/prenotazioni','/impostazioni','/installazione','/assistenza']
@@ -127,7 +133,7 @@ router.beforeEach(async to=>{
  }
  // 2M/K: Home/Piano/Archivio Atleta nella shell originale, esclusivamente emulator.
  // Il parametro non autorizza nessuna lettura; la pagina verifica anche users/{uid}.
- if (import.meta.env.DEV && (['/home','/piano','/archivio'].includes(to.path) || ['/progressi','/profilo','/impostazioni'].includes(to.path)) && to.query.source === 'emulator') {
+ if (import.meta.env.DEV && (['/home','/messaggi','/piano','/archivio'].includes(to.path) || ['/progressi','/profilo','/impostazioni'].includes(to.path)) && to.query.source === 'emulator') {
   try {
    const {readVerifiedDevSession}=await import('../integrations/firebase/devSession')
    const verified=await readVerifiedDevSession()
@@ -137,7 +143,7 @@ router.beforeEach(async to=>{
  }
  // 2M/C: la UI Coach originale puo' mostrare le fixture dell'emulatore in DEV.
  // Nessun parametro URL concede autorizzazioni: serve la sessione Firebase verificata.
- if (import.meta.env.DEV && ((to.path === '/coach/atleti' && to.query.source === 'emulator') || (to.path === '/coach/archivio' && to.query.source === 'emulator') || (to.path === '/coach/progressi' && to.query.source === 'emulator') || (['/coach','/coach/profilo'].includes(to.path) && to.query.source === 'emulator'))) {
+ if (import.meta.env.DEV && ((to.path === '/coach/atleti' && to.query.source === 'emulator') || (to.path === '/coach/archivio' && to.query.source === 'emulator') || (to.path === '/coach/progressi' && to.query.source === 'emulator') || (['/coach','/coach/messaggi','/coach/profilo'].includes(to.path) && to.query.source === 'emulator'))) {
   try {
    const { readVerifiedDevSession } = await import('../integrations/firebase/devSession')
    const verified = await readVerifiedDevSession()

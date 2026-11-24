@@ -12,6 +12,7 @@ import {activeAssignmentGroups,partitionPrograms,romeDate,weekOrdinal,weekExpire
 import SheetDetail from '../components/SheetDetail.vue'
 import AthleteHomeContent from '../components/AthleteHomeContent.vue'
 import { useAthleteLive } from '../features/athletes/useAthleteLive'
+import { sectionTransition } from '../features/navigation/sectionSwipe'
 import {isStagingMode,isLiveMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
 import { linkedSheetsForDay,liveWeekForDate } from '../features/athletes/athleteOperationalPolicy'
 import { romeDayIndex,romeWeekDayNumber } from '../features/athletes/romeWeekProgress'
@@ -22,6 +23,14 @@ import {joinArchivesWithLegacy,isArchiveCopyLinkedOrEquivalent} from '../feature
 import type { ExerciseRecord } from '../features/sheets/domain'
 const props=defineProps<{screen:'home'|'plan'|'archive'}>()
 const route=useRoute()
+// R22B.5: Vue Router intentionally reuses this component for Home/Piano/Archivio.
+// Animate only the screen content; keep the parent instance and Firebase listeners alive.
+const workspaceMotion=ref('')
+const screenOrder=['home','plan','archive'] as const
+watch(()=>props.screen,(next,previous)=>{
+ workspaceMotion.value=window.innerWidth<800?sectionTransition(previous,next,screenOrder):''
+},{flush:'sync'})
+function finishWorkspaceMotion(){workspaceMotion.value=''}
 const programArchiveOpen=ref(route.query.view==='programmi')
 watch(()=>route.query.view,v=>{programArchiveOpen.value=v==='programmi'})
 const {status,message,session,data,avatarUrl,archive,archiveReady,hiddenArchiveIds,snapshots,updatedAt,hideArchiveCopy}=useAthleteLive(()=>props.screen==='archive')
@@ -91,6 +100,8 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
   <div v-lf-quiet-loading v-if="status==='loading'" class="panel lf-quiet-status" role="status">{{uiText("Caricamento schede e settimane…")}}</div>
   <div v-else-if="status==='error'" class="notice" role="alert">{{message}} <button type="button" class="secondary" @click="retryWorkspace">{{uiText("Riprova")}}</button> <RouterLink :to="isStagingMode()?'/accesso':'/dev/accesso'">{{uiText("Torna all'accesso")}}</RouterLink></div>
   <template v-else-if="data">
+   <Transition :name="workspaceMotion" @after-enter="finishWorkspaceMotion">
+    <div :key="props.screen" class="lf-r22b5-page">
    <template v-if="props.screen==='plan'">
     <AthletePlanContent archive-expired :athlete-key="session?.uid||''" :personal="data.personal" :weeks="data.weeks" :groups="data.groups" :week-id="selectedWeek||currentWeek?.id||''" :initial-day="requestedDay" @update:week-id="id => { selectedWeek=id }" />
     <nav class="lf-r13-plan-archives" aria-label="Archivi del piano"><span>CONSULTA LO STORICO</span><div class="lf-r13-plan-archive-links"><RouterLink :to="livePath('/archivio')" class="secondary">Archivio schede <span aria-hidden="true">›</span></RouterLink><RouterLink :to="{path:'/archivio',query:{...(isStagingMode()?{}:{source:'emulator'}),view:'programmi'}}" class="secondary">Archivio programmazioni <span aria-hidden="true">›</span></RouterLink></div></nav>
@@ -112,12 +123,27 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
      
     </section>
    </template>
+    </div>
+   </Transition>
   </template>
   <SheetDetail v-if="opened" :sheet="opened" @close="opened=null" @finish="opened=null"/>
  </div>
 </template>
 
 <style scoped>
+/* R22B.5: retain a single Firebase-connected workspace while the visible
+   Home/Plan/Archive content slides. The wrapper replaces only the screen subtree. */
+.athlete-live-screen{position:relative}
+.lf-r22b5-page{display:flex;flex:1 0 auto;flex-direction:column;gap:13px;min-width:0;width:100%;min-height:0}
+@media(max-width:799px) and (prefers-reduced-motion:no-preference){
+ .lf-section-next-enter-active,.lf-section-next-leave-active,.lf-section-prev-enter-active,.lf-section-prev-leave-active{transition:transform 340ms cubic-bezier(.22,1,.36,1),opacity 300ms ease;will-change:transform}
+ .lf-section-next-enter-from,.lf-section-prev-leave-to{transform:translate3d(100%,0,0);opacity:.9}
+ .lf-section-next-leave-to,.lf-section-prev-enter-from{transform:translate3d(-100%,0,0);opacity:.9}
+ .lf-section-next-leave-active,.lf-section-prev-leave-active{position:absolute;top:0;left:0;width:100%;pointer-events:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .lf-section-next-enter-active,.lf-section-next-leave-active,.lf-section-prev-enter-active,.lf-section-prev-leave-active{transition:none!important;animation:none!important}
+}
 /* R13: Secondary history navigation only on the athlete plan. */
 .lf-r13-plan-archives{width:100%;max-width:100%;padding:4px 2px 10px;display:grid;gap:10px}
 .lf-r13-plan-archives>span{font-size:10px;letter-spacing:.1em;font-weight:850;color:var(--muted)}

@@ -1,0 +1,63 @@
+{
+  "patch": "R22B.6B",
+  "base": "R22B.5, cumulative with R22B.6A",
+  "status": "prepared-not-deployed",
+  "files": [
+    {
+      "path": "src/App.vue",
+      "sha256": "55e0cb2da2754a3008218822ab01f541fb799704db5725d4792b44f8e37d9a4e"
+    },
+    {
+      "path": "src/views/AthleteChatPreview.vue",
+      "sha256": "67043f894411362574652340f55e624baf8e41932f11538f897cf545bc4c3d24"
+    },
+    {
+      "path": "src/features/navigation/fluidSwipe.ts",
+      "sha256": "e07d71637ed69152ca3604859daaaa2adeeb3efd4d4e2487b60ce3477cf878fe"
+    },
+    {
+      "path": "src/features/performance/motionAudit.ts",
+      "sha256": "5f5fb303d2771bc081761af089108c48faa0e80c3114904b94242b85e23d483b"
+    },
+    {
+      "path": "chat-backend/functions/index.mjs",
+      "sha256": "9866ec977bec2c90688cca13c0f16951b57e6a16ff4d4c22558c7c7d9c8a98f3"
+    },
+    {
+      "path": "chat-backend/functions/rolloutPolicy.mjs",
+      "sha256": "c10a92fd7698f93a753bb3831b4b55355eefdaa93618596601e48ecec514bfa7"
+    },
+    {
+      "path": "chat-backend/functions/tests/hardening.test.mjs",
+      "sha256": "a41f030210b6d0a2d4ab76a5d10c4682faa907fb19fc738ffd5dae0af507a3c9"
+    },
+    {
+      "path": "chat-backend/functions/tests/rolloutPolicy.test.mjs",
+      "sha256": "c4b89625c5fa98b0c024ccb13bf6acb7a5db3ea745fb688896eb99be8c5d6f76"
+    },
+    {
+      "path": "tests/r22b-chat-contract.test.mjs",
+      "sha256": "2dce217e0814ed2f2e172693b382b61752ef778d7156a7f44c8e178434fbc511"
+    },
+    {
+      "path": "tests/r22b2-live-pilot-visibility.test.mjs",
+      "sha256": "fabf9e87aafb09f8a2fab9ae14cc6026998fc3ab46d9cc6d9323c7daf548a9e1"
+    },
+    {
+      "path": "tests/r22b3-live-chat-visibility.test.mjs",
+      "sha256": "2d7c06304dd0c9a5d4fb271948f0a4b208c785af36001015f5b72cd000b7fc92"
+    },
+    {
+      "path": "tests/r22b6a-perf-security.test.mjs",
+      "sha256": "593bb1dceb33619cf2e2c768770a4f0b1cd01717623749326ef72f9f11e56287"
+    },
+    {
+      "path": "tests/r22b6b-ultra-swipe.test.mjs",
+      "sha256": "de2c24394f7c54eed147a95afcb703eeb67e08127e03c8e35fc95c26f2689516"
+    },
+    {
+      "path": "LEGGIMI_R22B6B_CHAT_ALL_ULTRA_SWIPE.md",
+      "sha256": "ddf6cbe164828428abcc6af1a1d7397e275b60676f6bbcf592f99861e24ea00d"
+    }
+  ]
+}

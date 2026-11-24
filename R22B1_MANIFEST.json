@@ -1,0 +1,48 @@
+{
+  "patch": "R22B.1",
+  "baseline": "R22A + R22B + ZIP 1/2",
+  "type": "incrementale-backend",
+  "noDeploy": true,
+  "files": [
+    {
+      "path": "chat-backend/functions/index.mjs",
+      "size": 11850,
+      "sha256": "3287bdd264853d7b8927c9a4d3d626e3bc7954a6558248b2c93a74979292a7c4"
+    },
+    {
+      "path": "chat-backend/functions/package.json",
+      "size": 420,
+      "sha256": "0f19a5c932ccee5bb840c950b9ed9baebcbf4e07e066f786653c20997df69044"
+    },
+    {
+      "path": "chat-backend/functions/tests/hardening.test.mjs",
+      "size": 1676,
+      "sha256": "71f341de2f99e3c1f00fb9220413d7c0d929f86f10cf0a919a7d10355bbfcc7d"
+    },
+    {
+      "path": "chat-backend/functions/tests/emulator.e2e.mjs",
+      "size": 6341,
+      "sha256": "93992a2f719e74e4bb03182b5fec71e5f60887b06d49e39d3f941a3415e2f49e"
+    },
+    {
+      "path": "chat-backend/firebase.emulator.json",
+      "size": 457,
+      "sha256": "4cbe34ae5d11a7f5c286bdd7378caf4f7643a9b93f02fc2b7e1604c0226df4b9"
+    },
+    {
+      "path": "chat-backend/emulator/firestore.rules",
+      "size": 70655,
+      "sha256": "b22defd77e02b671a9d429681b8fa5aef1b01c610a65711a6d1ebedfe1a8e690"
+    },
+    {
+      "path": "RUN_R22B1_EMULATOR.cmd",
+      "size": 1364,
+      "sha256": "3bd05fd929c16f76b0af568df7e515e5f4b86344345c0ab8db8336c34077c814"
+    },
+    {
+      "path": "LEGGIMI_R22B1_COLLAUDO_BACKEND.md",
+      "size": 5526,
+      "sha256": "af1925a96391f79f547ed20abbcf2f518cfbb28c9508ba88ddff7c532de61d33"
+    }
+  ]
+}

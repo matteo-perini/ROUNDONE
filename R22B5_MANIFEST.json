@@ -1,0 +1,13 @@
+{
+  "patch": "R22B.5",
+  "based_on": "R22B.4",
+  "purpose": "Transizione Premium Motion nelle tre schermate Atleta che condividono componente Vue",
+  "backend_changes": false,
+  "rules_changes": false,
+  "files": {
+    "src/App.vue": "cacf46b692f21174b363729e450f253d1a361d465d3117a0e99c91fadc7db383",
+    "src/views/AthleteLiveWorkspace.vue": "41d1d009ca0d23f7d29e0df9fe6e20acf829e84455f7f726758fa746bca618e5",
+    "tests/r22b5-athlete-shared-screen-motion.test.mjs": "f35f65e9eea5d98e7142534f72dd1da9f09d15e07556f5ff972b8b52653fa5ab",
+    "LEGGIMI_R22B5_TRANSIZIONI_ATLETA.md": "8296f6ab32075ec2bed050344f5d1d145efbed1d9216ecb61c2dec5ea3b6e5a2"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "patch": "R22B",
+  "product": "LionFit 1.0",
+  "requires": "R22A installed",
+  "version": "pilot-disabled-by-default",
+  "date": "2026-11-23",
+  "tested": {
+    "typecheck": "passed",
+    "focused": "16/16",
+    "front_regression": "581/599, 17 baseline failures + 1 emulator-only failure",
+    "vite_build": "not possible in Linux environment",
+    "backend_integration": "not run"
+  },
+  "rollout": "NO production deployments; no Firestore Rules changes",
+  "files": [
+    {
+      "path": "src/App.vue",
+      "sha256": "84ed1d1f56592fa59a841b97ea5784fa776e68f863db1db5daeb22d2d3de0281",
+      "bytes": 32419
+    },
+    {
+      "path": "src/features/chat/chatPreview.ts",
+      "sha256": "0ee89d305f18ac2531e220593090fd4fa8436cc535ea97ee01ad572535099a09",
+      "bytes": 457
+    },
+    {
+      "path": "src/views/AthleteChatPreview.vue",
+      "sha256": "83f4ca5de797df9e782dc6317268250eca7d3def8324bd1f965c67847eec6dec",
+      "bytes": 18507
+    },
+    {
+      "path": "src/features/chat/chatClient.ts",
+      "sha256": "d68f0e8644c284a4b68810d170c1a4f98b0fe9ea8b7bfa3c0e5ea108303e815d",
+      "bytes": 3010
+    },
+    {
+      "path": "chat-backend/firebase.json",
+      "sha256": "8779526da61bd3ee4e3b4b312ed5362b627af059de1cfa3b250703fcd7f9ba40",
+      "bytes": 195
+    },
+    {
+      "path": "chat-backend/functions/package.json",
+      "sha256": "ab075cf3b66f5a178bf5c734a8c5c64000e91562979bc9dbf18e53eb0c744a5d",
+      "bytes": 286
+    },
+    {
+      "path": "chat-backend/functions/index.mjs",
+      "sha256": "1fc74ea7076291013e485e4db27ca539ced22bd9be1da0f9252d044bd9cf17dd",
+      "bytes": 10893
+    },
+    {
+      "path": "chat-backend/functions/model.mjs",
+      "sha256": "97af4fc6c2b9800385b6a5128747c65f1b00528854b3b6b90ce3a4bb75a0aec0",
+      "bytes": 3866
+    },
+    {
+      "path": "chat-backend/functions/tests/model.test.mjs",
+      "sha256": "b5a3d0b9ea3e51a914622660620b4ff2c814ad3312140a8e6404406dab753c8a",
+      "bytes": 2851
+    },
+    {
+      "path": "tests/r22b-chat-contract.test.mjs",
+      "sha256": "724ab47ef18d0484b2b0374fdb7938e731cf4ed93957ca14614ea393e86e6c1f",
+      "bytes": 1521
+    },
+    {
+      "path": "LEGGIMI_R22B_CHAT_REALE_PILOTA.md",
+      "sha256": "92df3b908b4b68d4c0c53113f4be7bb12d372d0030f6ac7a1b0005ac43ed7d27",
+      "bytes": 9085
+    }
+  ]
+}

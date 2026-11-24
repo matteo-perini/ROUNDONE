@@ -1,0 +1,21 @@
+{
+  "name": "lionfit-chat-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22"
+  },
+  "main": "index.mjs",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "test:emulator": "node tests/emulator.e2e.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.1",
+    "firebase-functions": "^7.0.0"
+  },
+  "devDependencies": {
+    "firebase": "^12.4.0"
+  }
+}
