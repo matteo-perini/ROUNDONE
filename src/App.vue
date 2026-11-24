@@ -27,8 +27,10 @@ import {demoProfiles} from './features/profile/localProfile'
 import {uiText} from './features/i18n/interfaceLanguage'
 import {CHAT_PREVIEW_ENABLED} from './features/chat/chatPreview'
 import {sectionTransition} from './features/navigation/sectionSwipe'
-import {createSectionPreview,prepareSectionLeave,finishSectionLeave,type SectionPreview} from './features/navigation/continuousMotion'
-import {swipeNeighbor,swipePreviewOffset,shouldNavigateOnRelease,snapBackDuration,swipeCommitMotion} from './features/navigation/fluidSwipe'
+import {prepareSectionMotion,releaseSectionMotion,prepareSectionLeave,finishSectionLeave,isSectionMoving} from './features/navigation/continuousMotion'
+import {swipeNeighbor,snapBackDuration} from './features/navigation/fluidSwipe'
+import {appendSwipeSample,recentSwipeVelocity,earlySwipeCommit,releaseSwipeCommit,nativeDragOffset,nativeCommitMotion,type SwipeSample} from './features/navigation/nativeSwipe'
+import {reportSwipeTiming} from './features/performance/swipeAudit'
 import {resolveSwipeIntent,protectedSwipeSelector,hasNativeHorizontalScroll,insideSystemEdge,suppressSwipeClick,type SwipeIntent} from './features/navigation/swipeIntent'
 import {installMotionAudit} from './features/performance/motionAudit'
 import {accountKey} from './features/platform/platformModel'
@@ -137,9 +139,11 @@ watch(()=>accountKey(stagingSession.value),async key=>{
 },{immediate:true,flush:'sync'})
 const chatRoute=computed(()=>{const target=shownRole.value==='coach'?'/coach/messaggi':'/messaggi';return route.query.source==='emulator'?target+'?source=emulator':target})
 const chatMotion=ref('')
+const swipeStage=ref<HTMLElement|null>(null)
 const enteringPaths=new WeakMap<Element,string>()
-function beforeChatEnter(el:Element){enteringPaths.set(el,route.path)}
-function finishChatMotion(el:Element){if(enteringPaths.get(el)===route.path&&el===swipeRouteRoot)chatMotion.value='';enteringPaths.delete(el)}
+function beforeChatEnter(el:Element){enteringPaths.set(el,route.path);if(chatMotion.value&&swipeViewport())prepareSectionMotion(el,swipeStage.value)}
+function finishChatMotion(el:Element){releaseSectionMotion(el);if(enteringPaths.get(el)===route.path&&el===swipeRouteRoot)chatMotion.value='';enteringPaths.delete(el)}
+function cancelChatEnter(el:Element){releaseSectionMotion(el);enteringPaths.delete(el)}
 function beforeChatLeave(el:Element){prepareSectionLeave(el,chatMotion.value,swipeViewport())}
 // R22B will populate this from authorized unread metadata; 0 means no invented notifications.
 const chatUnreadCount=ref(0)
@@ -173,17 +177,20 @@ watch(()=>route.path,(now,before)=>{
   ['/home','/piano','/archivio'].includes(before) && ['/home','/piano','/archivio'].includes(now)) chatMotion.value=''
  else chatMotion.value=shownRole.value && swipeViewport() ? sectionTransition(before,now,swipePages.value) : ''
 })
-// R22B.6B — finger-follow navigation preview. This never replaces Vue Router.
+// E.5 — native touch feedback with real-page navigation. This never replaces Vue Router.
 // The native section transitions still own the final page switch.
-type GestureStart={x:number;y:number;at:number;path:string;root:HTMLElement|null;intent:SwipeIntent;target:Element|null;identifier:number}
+type GestureStart={x:number;y:number;at:number;path:string;root:HTMLElement|null;intent:SwipeIntent;target:Element|null;identifier:number;samples:SwipeSample[];lockedAt:number;paintReported:boolean;width:number;reducedMotion:boolean}
 let touchStart:GestureStart|null=null
-let swipeClickGuard:{at:number;target:Element}|null=null
+let consumedContact:GestureStart|null=null
+// Pointer Events deliver continuous coordinates without the legacy TouchEvent
+// slop on modern engines. Use exactly one input path, never both.
+const pointerSwipeEnabled=typeof window.PointerEvent==='function'&&typeof CSS!=='undefined'&&CSS.supports('touch-action','pan-y pinch-zoom')
+let swipeClickGuard:{at:number;target:Element;path:string}|null=null
 let swipeRouteRoot:HTMLElement|null=null
-let dragFrame=0,dragOffset=0,dragPaintedOffset=0,dragRoot:HTMLElement|null=null
-let snapAnimation:Animation|null=null
-let dragPreview:SectionPreview|null=null,returningPreview:SectionPreview|null=null
-let dragPreviewDirection=0,dragPreviewLabel='',dragPreviewTarget:string|null=null
-let pendingSwipe:{from:string;to:string;direction:number}|null=null
+let dragFrame=0,swipeWaitFrame=0,externalTapUntil=0,dragOffset=0,dragPaintedOffset=0,dragRoot:HTMLElement|null=null
+let snapAnimation:Animation|null=null,snapStage:HTMLElement|null=null
+let dragStage:HTMLElement|null=null
+let pendingSwipe:{from:string;to:string;direction:number;velocity:number;at:number;issued:boolean}|null=null
 let motionStage:HTMLElement|null=null,motionTimer:ReturnType<typeof setTimeout>|null=null
 let dragOriginal:{transform:string;transition:string;willChange:string}|null=null
 function setSwipeRouteRoot(instance:unknown){
@@ -202,14 +209,15 @@ function transferSwipeMotion(from:string,to:string){
  clearSwipeMotion()
  const pending=pendingSwipe;pendingSwipe=null
  if(!swipeViewport()||!sectionTransition(from,to,swipePages.value)||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return
- const stage=(dragRoot||swipeRouteRoot)?.closest<HTMLElement>('.main-layout')
+ const stage=swipeStage.value||(dragRoot||swipeRouteRoot)?.closest<HTMLElement>('.main-layout')
  if(!stage)return
  motionStage=stage
  stage.dataset.lfMotionPaired='true'
  stage.style.setProperty('--lf-motion-span',`${stage.clientWidth}px`)
  motionTimer=setTimeout(clearSwipeMotion,1200)
- if(!pending||pending.from!==from||pending.to!==to||!dragRoot?.isConnected)return
- const motion=swipeCommitMotion(dragPaintedOffset,window.innerWidth,pending.direction)
+ if(!pending||pending.from!==from||pending.to!==to)return
+ reportSwipeTiming('route',pending.at)
+ const motion=nativeCommitMotion(dragRoot?.isConnected?dragPaintedOffset:0,stage.clientWidth,pending.direction,pending.velocity)
  if(!motion)return
  // Both the outer RouterView and the reused athlete workspace inherit these
  // variables. Vue's leave-from starts at the last visible drag offset.
@@ -218,21 +226,35 @@ function transferSwipeMotion(from:string,to:string){
 }
 function restoreDrag(animateBack:boolean){
  if(dragFrame){cancelAnimationFrame(dragFrame);dragFrame=0}
+ if(swipeWaitFrame){cancelAnimationFrame(swipeWaitFrame);swipeWaitFrame=0}
+ externalTapUntil=0
  snapAnimation?.cancel();snapAnimation=null
- returningPreview?.dispose();returningPreview=null
- const preview=dragPreview;dragPreview=null
- const el=dragRoot,original=dragOriginal,offset=dragPaintedOffset
- dragRoot=null;dragOriginal=null;dragOffset=0;dragPaintedOffset=0;dragPreviewTarget=null;dragPreviewLabel='';dragPreviewDirection=0
- if(!el||!original){preview?.dispose();return}
+ if(snapStage)delete snapStage.dataset.lfMotionDragging;snapStage=null
+ const el=dragRoot,original=dragOriginal,offset=dragPaintedOffset,stage=dragStage
+ dragRoot=null;dragOriginal=null;dragStage=null;dragOffset=0;dragPaintedOffset=0
+ if(stage)delete stage.dataset.lfMotionDragging
+ if(!el||!original)return
  el.style.transform=original.transform
  el.style.transition=original.transition
  el.style.willChange=original.willChange
- if(animateBack&&Math.abs(offset)>3&&el.isConnected&&typeof el.animate==='function'){
-  const duration=snapBackDuration(offset,window.innerWidth)
-  snapAnimation=el.animate([{transform:`translate3d(${offset}px,0,0)`},{transform:original.transform||'translate3d(0,0,0)'}],
+ if(animateBack&&Math.abs(offset)>3&&el.isConnected&&typeof el.animate==='function'&&!isSectionMoving(el)){
+  const duration=snapBackDuration(offset,stage?.clientWidth||window.innerWidth)
+  if(stage)stage.dataset.lfMotionDragging='true'
+  const animation=el.animate([{transform:`translate3d(${offset}px,0,0)`},{transform:original.transform||'translate3d(0,0,0)'}],
    {duration,easing:'cubic-bezier(.18,1,.35,1)'})
-  returningPreview=preview;preview?.returnToEdge(duration)
- }else preview?.dispose()
+  snapAnimation=animation;snapStage=stage
+  const clean=()=>{if(snapAnimation===animation){snapAnimation=null;snapStage=null;if(stage)delete stage.dataset.lfMotionDragging}}
+  animation.onfinish=clean;animation.oncancel=clean
+ }
+}
+function paintNativeDrag(start:GestureStart){
+ if(dragFrame){cancelAnimationFrame(dragFrame);dragFrame=0}
+ if(!dragRoot?.isConnected)return
+ dragRoot.style.transition='none'
+ dragRoot.style.willChange='transform'
+ dragRoot.style.transform=`translate3d(${dragOffset}px,0,0)`
+ dragPaintedOffset=dragOffset
+ if(!start.paintReported){start.paintReported=true;reportSwipeTiming('paint',start.lockedAt||start.at)}
 }
 function skipSectionSwipe(target:EventTarget|null,root:EventTarget|null):boolean {
  let node=target instanceof Element?target:null
@@ -246,8 +268,17 @@ function skipSectionSwipe(target:EventTarget|null,root:EventTarget|null):boolean
  }
  return false
 }
+function selectedTouchTarget(target:EventTarget|null):boolean{
+ const selection=window.getSelection()
+ if(!selection||selection.isCollapsed||!selection.rangeCount||!(target instanceof Node))return false
+ try{return selection.getRangeAt(0).intersectsNode(target)}catch{return false}
+}
+function visibleSwipeModal(stage:HTMLElement|null):boolean{
+ if(!stage)return false
+ return Array.from(stage.querySelectorAll<HTMLElement>('[aria-modal="true"],dialog[open],.modal-overlay,.lf15-video-backdrop')).some(el=>el.getClientRects().length>0&&getComputedStyle(el).visibility!=='hidden'&&!el.closest('[aria-hidden="true"]'))
+}
 function armSwipeClickGuard(start:GestureStart){
- if(start.target)swipeClickGuard={at:Date.now(),target:start.target}
+ if(start.target)swipeClickGuard={at:Date.now(),target:start.target,path:start.path}
 }
 function chatClickCapture(event:MouseEvent){
  const guard=swipeClickGuard
@@ -255,99 +286,159 @@ function chatClickCapture(event:MouseEvent){
  const target=event.target instanceof Element?event.target:null
  const related=!!target&&(guard.target===target||guard.target.contains(target)||target.contains(guard.target))
  const source=(event as MouseEvent & {sourceCapabilities?:{firesTouchEvents?:boolean}}).sourceCapabilities
- if(suppressSwipeClick(Date.now()-guard.at,event.detail,related,source?.firesTouchEvents)){
+ if(suppressSwipeClick(Date.now()-guard.at,event.detail,related||(guard.path!==route.path&&source?.firesTouchEvents!==false),source?.firesTouchEvents)){
   swipeClickGuard=null
   event.preventDefault();event.stopImmediatePropagation()
  }else if(Date.now()-guard.at>450)swipeClickGuard=null
 }
-function chatTouchStart(event:TouchEvent){
- if(pendingSwipe)return // Keep the last painted position until the router settles.
- touchStart=null;swipeClickGuard=null;restoreDrag(false)
- if(!swipeSurfaceEnabled.value||!swipeViewport()||event.touches.length!==1)return
- const touch=event.touches[0]
- if(insideSystemEdge(touch.clientX,window.innerWidth)||skipSectionSwipe(event.target,event.currentTarget))return
- if(window.getSelection()?.toString())return
- const el=swipeRouteRoot
- const moving=el&&el.isConnected&&(getComputedStyle(el).transform!=='none'||!!el.querySelector('.lf-section-next-enter-active,.lf-section-prev-enter-active'))
- touchStart={x:touch.clientX,y:touch.clientY,at:Date.now(),path:route.path,root:moving?null:el,intent:'pending',target:event.target instanceof Element?event.target:null,identifier:touch.identifier}
+type SwipePoint={clientX:number;clientY:number;identifier:number}
+function beginGesture(event:Event,point:SwipePoint){
+ if(pendingSwipe)return // only one navigation for a committed gesture
+ touchStart=null;consumedContact=null;swipeClickGuard=null;restoreDrag(false)
+ if(!swipeSurfaceEnabled.value||!swipeViewport())return
+ const stage=swipeStage.value
+ if(insideSystemEdge(point.clientX,window.innerWidth)||skipSectionSwipe(event.target,event.currentTarget))return
+ if(selectedTouchTarget(event.target)||visibleSwipeModal(stage))return
+ const at=performance.now(),el=swipeRouteRoot
+ touchStart={x:point.clientX,y:point.clientY,at,path:route.path,root:el,intent:'pending',target:event.target instanceof Element?event.target:null,identifier:point.identifier,samples:[{x:point.clientX,at}],lockedAt:0,paintReported:false,width:stage?.clientWidth||window.innerWidth,reducedMotion:window.matchMedia('(prefers-reduced-motion: reduce)').matches}
 }
-function chatTouchMove(event:TouchEvent){
- const start=touchStart
- if(!start)return
- if(start.path!==route.path||event.touches.length!==1||!swipeViewport()||event.touches[0].identifier!==start.identifier){chatTouchCancel();return}
- const touch=event.touches[0],dx=touch.clientX-start.x,dy=touch.clientY-start.y
- if(window.getSelection()?.toString()){chatTouchCancel();return}
+function lockGesture(start:GestureStart,dx:number,dy:number){
  start.intent=resolveSwipeIntent(start.intent,dx,dy)
- if(start.intent!=='horizontal')return // leave taps and vertical scroll entirely native
- // A browser that already owns the gesture must not compete with navigation.
- if(!event.cancelable){chatTouchCancel();return}
- event.preventDefault()
- if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return
- const next=swipeNeighbor(start.path,dx,swipePages.value)
- const offset=swipePreviewOffset(dx,0,window.innerWidth,!!next) // axis already locked
- // While the finger is still down, crossing the origin must not start a
- // competing snap-back animation. Paint zero and keep following the finger.
- if(!offset&&!dragRoot)return
- const el=start.root
- if(!el||!el.isConnected)return // Route fragments fall back to the original safe end-of-swipe navigation.
- if(!dragRoot){
-  dragRoot=el
-  dragOriginal={transform:el.style.transform,transition:el.style.transition,willChange:el.style.willChange}
- }
- dragOffset=offset
- dragPreviewDirection=next?Math.sign(dx):0
- if(next!==dragPreviewTarget){
-  dragPreviewTarget=next
-  dragPreviewLabel=next?(next===chatRoute.value.split('?')[0]?uiText('Messaggi'):uiText(mobileNav.value.find(item=>item.to.split('?')[0]===next)?.label||'')):''
- }
- if(dragFrame)return
- dragFrame=requestAnimationFrame(()=>{
-  dragFrame=0
-  if(!dragRoot||!dragRoot.isConnected)return
-  if(!dragPreview&&dragPreviewDirection){const stage=dragRoot.closest<HTMLElement>('.main-layout');if(stage)dragPreview=createSectionPreview(stage,dragRoot,dragPaintedOffset)}
-  dragPreview?.paint(dragOffset,dragPreviewDirection,dragPreviewLabel)
-  dragRoot.style.transition='none'
-  dragRoot.style.willChange='transform'
-  dragRoot.style.transform=`translate3d(${dragOffset}px,0,0)`
-  dragPaintedOffset=dragOffset
- })
+ if(start.intent==='horizontal'&&!start.lockedAt){start.lockedAt=performance.now();reportSwipeTiming('lock',start.at)}
 }
-function chatTouchEnd(event:TouchEvent){
- if(pendingSwipe)return
- const start=touchStart;touchStart=null
- if(!start||start.path!==route.path||!swipeViewport()||event.changedTouches.length!==1||event.touches.length>0||event.changedTouches[0].identifier!==start.identifier){restoreDrag(true);return}
- const end=event.changedTouches[0]
- const dx=end.clientX-start.x,dy=end.clientY-start.y,elapsed=Date.now()-start.at
- // A very fast flick may deliver no intermediate move above the lock threshold.
- // A vertical lock is irreversible; a pending gesture can be classified once here.
- start.intent=resolveSwipeIntent(start.intent,dx,dy)
- if(start.intent!=='horizontal'){restoreDrag(true);return}
- // An intentional horizontal drag, including a cancelled swipe, must never
- // activate the button/card underneath the finger.
- if(event.cancelable)event.preventDefault()
- armSwipeClickGuard(start)
- const candidate=swipeNeighbor(start.path,dx,swipePages.value)
- const shouldMove=shouldNavigateOnRelease(dx,dy,elapsed,window.innerWidth,!!candidate)
- // One policy for all top-level pages (including authorized Chat), no
- // competing legacy fallback or separate release threshold for Chat.
- const destination=shouldMove?candidate:null
- if(!destination){restoreDrag(true);return}
- if(destination){
-  if(destination==='/messaggi'||route.path==='/messaggi')chatHintClose()
-  const commit={from:route.path,to:destination,direction:dx}
-  pendingSwipe=commit
-  // Freeze the preview until the route actually changes. Failed/aborted
-  // navigation returns the existing page to rest; no stale inline styles.
-  const settle=()=>{if(pendingSwipe===commit&&route.path!==commit.to){pendingSwipe=null;restoreDrag(true)}}
+function commitSwipe(start:GestureStart,destination:string,dx:number,velocity:number,held:boolean){
+ if(pendingSwipe||start.path!==route.path||!swipePages.value.includes(destination))return
+ // Preserve the exact last *painted* frame. The actual Vue page enters after
+ // router guards resolve; never synthesize or mount an unauthorized preview.
+ if(dragFrame)paintNativeDrag(start)
+ armSwipeClickGuard(start);touchStart=null
+ if(held)consumedContact=start
+ if(destination==='/messaggi'||route.path==='/messaggi')chatHintClose()
+ const commit={from:route.path,to:destination,direction:dx,velocity,at:performance.now(),issued:false}
+ pendingSwipe=commit
+ const settle=()=>{if(pendingSwipe===commit){pendingSwipe=null;restoreDrag(route.path!==commit.to);if(route.path!==commit.to)reportSwipeTiming('cancel',commit.at,'navigation-failed')}}
+ const push=()=>{
+  swipeWaitFrame=0
+  if(pendingSwipe!==commit||route.path!==commit.from)return
+  // A second deliberate swipe can be accepted while the preceding page is
+  // moving. Queue one destination until that transition rests, rather than
+  // restarting an already-moving page from transform:0. Navbar taps remain
+  // independent and a route change invalidates this pending intent.
+  const now=performance.now()
+  if(now-commit.at<380&&(now<externalTapUntil||(swipeRouteRoot?.isConnected&&isSectionMoving(swipeRouteRoot)))){swipeWaitFrame=requestAnimationFrame(push);return}
+  commit.issued=true
   void router.push(route.query.source==='emulator'?{path:destination,query:{source:'emulator'}}:destination).then(settle,settle)
  }
+ push()
 }
-function chatTouchCancel(){
+function moveGesture(event:Event,point:SwipePoint){
+ const start=touchStart
+ if(!start)return
+ if(start.path!==route.path||!swipeViewport()||point.identifier!==start.identifier){cancelGesture();return}
+ const dx=point.clientX-start.x,dy=point.clientY-start.y,now=performance.now()
+ if(selectedTouchTarget(start.target)){cancelGesture();return}
+ appendSwipeSample(start.samples,point.clientX,now)
+ lockGesture(start,dx,dy)
+ if(start.intent!=='horizontal')return // native taps and vertical scroll remain native
+ if(!event.cancelable){cancelGesture();return}
+ if(!pointerSwipeEnabled)event.preventDefault()
+ const next=swipeNeighbor(start.path,dx,swipePages.value)
+ const stage=swipeStage.value,el=start.root,width=start.width
+ const velocity=recentSwipeVelocity(start.samples)
+ const moving=!dragRoot&&!!el&&isSectionMoving(el)
+ // If a prior real transition is still active, accept a new gesture without
+ // overwriting its transform. Once stable, the drag can attach normally.
+ if(el?.isConnected&&!moving&&!start.reducedMotion){
+  const offset=nativeDragOffset(dx,width,!!next)
+  if(offset||dragRoot){
+   if(!dragRoot){dragRoot=el;dragStage=stage;dragOriginal={transform:el.style.transform,transition:el.style.transition,willChange:el.style.willChange};if(stage)stage.dataset.lfMotionDragging='true'}
+   dragOffset=offset
+   if(!dragFrame)dragFrame=requestAnimationFrame(()=>paintNativeDrag(start))
+  }
+ }
+ // A clear gesture can start the real navigation before release. A short
+ // uncertain drag still cancels; never move twice on one contact.
+ if(next&&earlySwipeCommit({dx,dy,elapsed:now-start.at,width,velocity,hasNeighbor:true}))commitSwipe(start,next,dx,velocity,true)
+}
+function finishConsumedContact(identifier:number){
+ if(consumedContact?.identifier!==identifier)return false
+ armSwipeClickGuard(consumedContact);consumedContact=null;return true
+}
+function endGesture(event:Event,point:SwipePoint){
+ if(finishConsumedContact(point.identifier)){if(!pointerSwipeEnabled&&event.cancelable)event.preventDefault();return}
  if(pendingSwipe)return
- if(touchStart?.intent==='horizontal')armSwipeClickGuard(touchStart)
+ const start=touchStart;touchStart=null
+ if(!start)return
+ if(start.path!==route.path||!swipeViewport()||point.identifier!==start.identifier){restoreDrag(true);return}
+ const dx=point.clientX-start.x,dy=point.clientY-start.y,now=performance.now()
+ appendSwipeSample(start.samples,point.clientX,now)
+ lockGesture(start,dx,dy)
+ if(start.intent!=='horizontal'){restoreDrag(true);return}
+ if(!pointerSwipeEnabled&&event.cancelable)event.preventDefault()
+ armSwipeClickGuard(start)
+ const candidate=swipeNeighbor(start.path,dx,swipePages.value),velocity=recentSwipeVelocity(start.samples)
+ const shouldMove=releaseSwipeCommit({dx,dy,elapsed:now-start.at,width:start.width,velocity,hasNeighbor:!!candidate})
+ const destination=shouldMove?candidate:null
+ if(!destination){reportSwipeTiming('cancel',start.at,'release');restoreDrag(true);return}
+ commitSwipe(start,destination,dx,velocity,false)
+}
+function cancelGesture(){
+ if(pendingSwipe)return
+ if(touchStart?.intent==='horizontal'){armSwipeClickGuard(touchStart);reportSwipeTiming('cancel',touchStart.at,'input-cancel')}
  touchStart=null;restoreDrag(true)
 }
-onUnmounted(()=>{touchStart=null;pendingSwipe=null;swipeClickGuard=null;restoreDrag(false);clearSwipeMotion()})
+function pointerPoint(event:PointerEvent):SwipePoint{return {clientX:event.clientX,clientY:event.clientY,identifier:event.pointerId}}
+function chatPointerDown(event:PointerEvent){
+ if(event.pointerType!=='touch')return
+ if(!event.isPrimary){cancelGesture();return} // second finger belongs to pinch zoom
+ beginGesture(event,pointerPoint(event))
+}
+function chatPointerMove(event:PointerEvent){if(event.pointerType==='touch'&&event.isPrimary)moveGesture(event,pointerPoint(event))}
+function chatPointerUp(event:PointerEvent){if(event.pointerType==='touch'&&event.isPrimary)endGesture(event,pointerPoint(event))}
+function chatPointerCancel(event:PointerEvent){if(event.pointerType==='touch'&&(event.pointerId===touchStart?.identifier||event.pointerId===consumedContact?.identifier)){finishConsumedContact(event.pointerId);cancelGesture()}}
+function chatPointerLostCapture(event:PointerEvent){if(event.pointerType==='touch'&&event.pointerId===touchStart?.identifier)cancelGesture()}
+// Compatibility path for browsers without Pointer Events / touch-action support.
+function chatTouchStart(event:TouchEvent){if(event.touches.length!==1){cancelGesture();return}beginGesture(event,event.touches[0])}
+function chatTouchMove(event:TouchEvent){if(event.touches.length!==1){cancelGesture();return}moveGesture(event,event.touches[0])}
+function chatTouchEnd(event:TouchEvent){if(event.changedTouches.length!==1||event.touches.length>0){cancelGesture();return}endGesture(event,event.changedTouches[0])}
+function chatTouchCancel(){cancelGesture()}
+// v-on object keeps the inactive input path unregistered, including its
+// non-passive touchmove. Pointer input uses implicit touch capture only.
+const swipeInputEvents=pointerSwipeEnabled?{
+ pointerdownCapture:chatPointerDown,pointermoveCapture:chatPointerMove,pointerupCapture:chatPointerUp,pointercancelCapture:chatPointerCancel,lostpointercaptureCapture:chatPointerLostCapture
+}:{touchstartCapturePassive:chatTouchStart,touchmoveCapture:chatTouchMove,touchendCapture:chatTouchEnd,touchcancelCapturePassive:chatTouchCancel}
+// An early commit may detach the original target before release. Refresh the
+// short click guard at release even if the event no longer reaches the shell.
+function committedPointerRelease(event:PointerEvent){if(event.pointerType==='touch')finishConsumedContact(event.pointerId)}
+function committedTouchRelease(event:TouchEvent){for(const point of Array.from(event.changedTouches))finishConsumedContact(point.identifier)}
+function resetSwipeSession(){touchStart=null;consumedContact=null;pendingSwipe=null;swipeClickGuard=null;restoreDrag(false);clearSwipeMotion()}
+// Changing identity or hiding the app must not leave a drag or scheduled frame.
+watch([()=>stagingSession.value?.uid,()=>stagingSession.value?.gymId,()=>stagingSession.value?.role],resetSwipeSession,{flush:'sync'})
+watch(chatPreviewEnabled,()=>{if(touchStart||pendingSwipe&&!pendingSwipe.issued)resetSwipeSession()},{flush:'sync'})
+function swipeVisibility(){if(document.hidden)resetSwipeSession()}
+let lastSwipeWidth=window.innerWidth
+function swipeResize(){if(lastSwipeWidth!==window.innerWidth){lastSwipeWidth=window.innerWidth;resetSwipeSession()}}
+function outsideSwipeStage(event:Event){return event.target instanceof Node&&!swipeStage.value?.contains(event.target)}
+function pauseQueuedSwipeForExternalTouch(event:Event){
+ // Pointerdown alone is not a click. Some browsers suppress compatibility
+ // clicks immediately after a drag. Do not lose the already accepted swipe.
+ if(pendingSwipe&&!pendingSwipe.issued&&outsideSwipeStage(event))externalTapUntil=performance.now()+180
+}
+function cancelQueuedSwipeForExternalClick(event:Event){if(pendingSwipe&&!pendingSwipe.issued&&outsideSwipeStage(event))resetSwipeSession()}
+
+if(pointerSwipeEnabled){
+ document.addEventListener('pointerdown',pauseQueuedSwipeForExternalTouch,{capture:true,passive:true})
+ document.addEventListener('pointerup',committedPointerRelease,true)
+ document.addEventListener('pointercancel',committedPointerRelease,true)
+}else{
+ document.addEventListener('touchstart',pauseQueuedSwipeForExternalTouch,{capture:true,passive:true})
+ document.addEventListener('touchend',committedTouchRelease,{capture:true,passive:true})
+ document.addEventListener('touchcancel',committedTouchRelease,{capture:true,passive:true})
+}
+document.addEventListener('click',cancelQueuedSwipeForExternalClick,true)
+document.addEventListener('visibilitychange',swipeVisibility)
+window.addEventListener('resize',swipeResize,{passive:true})
+onUnmounted(()=>{resetSwipeSession();document.removeEventListener('pointerdown',pauseQueuedSwipeForExternalTouch,true);document.removeEventListener('pointerup',committedPointerRelease,true);document.removeEventListener('pointercancel',committedPointerRelease,true);document.removeEventListener('touchstart',pauseQueuedSwipeForExternalTouch,true);document.removeEventListener('touchend',committedTouchRelease,true);document.removeEventListener('touchcancel',committedTouchRelease,true);document.removeEventListener('click',cancelQueuedSwipeForExternalClick,true);document.removeEventListener('visibilitychange',swipeVisibility);window.removeEventListener('resize',swipeResize)})
 
 const showChatHint=ref(false)
 const chatHintKey='lionfit-r22a-chat-hint-seen'
@@ -400,7 +491,7 @@ async function goOut(){
     <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><QuickProfileSwitch compact/><RouterLink v-if="chatPreviewEnabled && shownRole" :to="chatRoute" class="lf-chat-header-link" :aria-label="uiText('Apri messaggi Coach-Atleta')" title="Messaggi"><LionIcon name="messages" :size="24"/><span v-if="chatUnreadCount>0" class="lf-chat-unread">{{chatUnreadCount>99?'99+':chatUnreadCount}}</span></RouterLink><InboxBell v-if="inboxInHeader&&inboxVisibleOnRoute&&coachInboxEnabled()&&stagingSession" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
 
     <!-- Navigazione Atleta esclusiva: sidebar a sinistra su desktop, dock inferiore su mobile. -->
-    <main class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking,'lf-chat-stage':!!chatMotion,'lf-swipe-surface':swipeSurfaceEnabled}]" @touchstart.passive="chatTouchStart" @touchmove="chatTouchMove" @touchend="chatTouchEnd" @touchcancel.passive="chatTouchCancel" @click.capture="chatClickCapture" @contextmenu.capture="chatTouchCancel"><RouterLink v-if="chatPreviewEnabled && shownRole==='coach' && !coachHeaderVisible" :to="chatRoute" class="lf-chat-coach-top" :class="{'lf-chat-coach-with-bell':route.path==='/coach'&&coachInboxEnabled()}" aria-label="Apri Messaggi Coach–Atleta" title="Apri Messaggi"><LionIcon name="messages" :size="23"/><span>Messaggi</span><span v-if="chatUnreadCount>0" class="lf-chat-unread">{{chatUnreadCount>99?'99+':chatUnreadCount}}</span></RouterLink><button v-if="route.path!=='/home' && route.path!=='/coach' && (shownRole!=='coach' || coachHeaderVisible)" type="button" class="lf-route-back" :class="{'lf-r8-route-back':workoutRoute}" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> </button><template v-if="coachInboxEnabled()&&stagingSession"><InboxBell v-if="!inboxInHeader&&inboxVisibleOnRoute" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><PushWelcome :key="stagingSession.uid" :uid="stagingSession.uid" :open-agenda="openPushAgenda" :open-support="openPushSupport"/></template><p v-if="linkedNotice" class="notice" role="alert">{{linkedNotice}} <button type="button" class="bare" @click="linkedNotice=''">Chiudi</button></p><aside v-if="chatPreviewEnabled && shownRole==='atleta' && route.path==='/home' && showChatHint" class="lf-chat-discovery" role="status"><LionIcon name="messages" :size="19"/><span>I messaggi sono a sinistra: scorri verso destra oppure tocca l'icona.</span><button type="button" aria-label="Chiudi suggerimento messaggi" @click="chatHintClose">×</button></aside><RouterView v-slot="{ Component }"><Transition :name="chatMotion" @before-enter="beforeChatEnter" @after-enter="finishChatMotion" @before-leave="beforeChatLeave" @after-leave="finishSectionLeave" @leave-cancelled="finishSectionLeave"><component :is="Component" :ref="setSwipeRouteRoot"/></Transition></RouterView><CheckUploadNotice v-if="shownRole==='atleta'&&stagingSession?.role==='atleta'" :session="stagingSession"/></main>
+    <main ref="swipeStage" class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking,'lf-chat-stage':!!chatMotion,'lf-swipe-surface':swipeSurfaceEnabled}]" v-on="swipeInputEvents" @click.capture="chatClickCapture" @contextmenu.capture="chatTouchCancel"><RouterLink v-if="chatPreviewEnabled && shownRole==='coach' && !coachHeaderVisible" :to="chatRoute" class="lf-chat-coach-top" :class="{'lf-chat-coach-with-bell':route.path==='/coach'&&coachInboxEnabled()}" aria-label="Apri Messaggi Coach–Atleta" title="Apri Messaggi"><LionIcon name="messages" :size="23"/><span>Messaggi</span><span v-if="chatUnreadCount>0" class="lf-chat-unread">{{chatUnreadCount>99?'99+':chatUnreadCount}}</span></RouterLink><button v-if="route.path!=='/home' && route.path!=='/coach' && (shownRole!=='coach' || coachHeaderVisible)" type="button" class="lf-route-back" :class="{'lf-r8-route-back':workoutRoute}" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> </button><template v-if="coachInboxEnabled()&&stagingSession"><InboxBell v-if="!inboxInHeader&&inboxVisibleOnRoute" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><PushWelcome :key="stagingSession.uid" :uid="stagingSession.uid" :open-agenda="openPushAgenda" :open-support="openPushSupport"/></template><p v-if="linkedNotice" class="notice" role="alert">{{linkedNotice}} <button type="button" class="bare" @click="linkedNotice=''">Chiudi</button></p><aside v-if="chatPreviewEnabled && shownRole==='atleta' && route.path==='/home' && showChatHint" class="lf-chat-discovery" role="status"><LionIcon name="messages" :size="19"/><span>I messaggi sono a sinistra: scorri verso destra oppure tocca l'icona.</span><button type="button" aria-label="Chiudi suggerimento messaggi" @click="chatHintClose">×</button></aside><RouterView v-slot="{ Component }"><Transition :name="chatMotion" @before-enter="beforeChatEnter" @after-enter="finishChatMotion" @enter-cancelled="cancelChatEnter" @before-leave="beforeChatLeave" @after-leave="finishSectionLeave" @leave-cancelled="finishSectionLeave"><component :is="Component" :ref="setSwipeRouteRoot"/></Transition></RouterView><CheckUploadNotice v-if="shownRole==='atleta'&&stagingSession?.role==='atleta'" :session="stagingSession"/></main>
     <!-- La navbar Atleta vive fuori dal contenitore .app: nessun CSS / overflow legacy può coprirla. -->
     <AthleteBottomNavigation v-if="shownRole==='atleta'" :items="mobileNav" :theme="lab.theme"/>
     <nav v-if="shownRole==='coach'" class="bottom-nav coach-bottom" :aria-label="uiText('Navigazione Coach')"><RouterLink v-for="item in mobileNav" :key="item.to" :to="item.to"><LionIcon :name="item.icon" :size="24"/><span>{{uiText(item.label)}}</span></RouterLink></nav>

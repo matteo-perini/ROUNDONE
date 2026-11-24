@@ -23,7 +23,7 @@ test('Piano -> Home and Archivio -> Piano reverse direction', () => {
   assert.equal(sectionTransition('archive','plan',order),'lf-section-prev')
 })
 test('screen-level Transition has a stable, distinct key', () => {
-  assert.match(live, /<Transition :name="workspaceMotion" @after-enter="finishWorkspaceMotion"/)
+  assert.match(live, /<Transition :name="workspaceMotion" @before-enter="beforeWorkspaceEnter" @after-enter="finishWorkspaceMotion"/)
   assert.match(live, /<div :key="props\.screen" class="lf-r22b5-page" :data-lf-screen="props.screen">/)
   assert.match(live, /window\.innerWidth<800\?sectionTransition\(previous,next,screenOrder\)/)
   assert.match(live, /@media\(max-width:799px\) and \(prefers-reduced-motion:no-preference\)/)
@@ -43,5 +43,5 @@ test('chat and other navbar transitions remain in App', () => {
   assert.match(app, /lf-chat-open/)
   assert.match(app, /lf-chat-close/)
   assert.match(app, /sectionTransition\(before,now,swipePages.value\)/)
-  assert.match(app, /@touchstart.passive="chatTouchStart"/)
+  assert.match(app, /touchstartCapturePassive:chatTouchStart/)
 })

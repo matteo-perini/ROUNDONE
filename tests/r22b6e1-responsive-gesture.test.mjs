@@ -43,15 +43,15 @@ test('touch-action is scoped to mobile top-level sections and vertical chat scro
  assert.match(app,/hasNativeHorizontalScroll\(node.scrollWidth,node.clientWidth/)
 })
 test('fast release can classify pending intent, while cancellation and tap guard survive',()=>{
- const end=app.slice(app.indexOf('function chatTouchEnd'),app.indexOf('function chatTouchCancel'))
- assert.match(end,/start.intent=resolveSwipeIntent\(start.intent,dx,dy\)/)
+ const end=app.slice(app.indexOf('function endGesture'),app.indexOf('function cancelGesture'))
+ assert.match(end,/lockGesture\(start,dx,dy\)/);assert.match(app,/start.intent=resolveSwipeIntent\(start.intent,dx,dy\)/)
  assert.match(end,/if\(start.intent!=='horizontal'\)\{restoreDrag\(true\);return\}/)
  assert.match(end,/armSwipeClickGuard\(start\)/)
- assert.match(app,/if\(!event.cancelable\)\{chatTouchCancel\(\);return\}/)
+ assert.match(app,/if\(!event.cancelable\)\{cancelGesture\(\);return\}/)
 })
 
 test('crossing the origin during a drag does not start a snap-back animation',()=>{
- const move=app.slice(app.indexOf('function chatTouchMove'),app.indexOf('function chatTouchEnd'))
- assert.match(move,/if\(!offset&&!dragRoot\)return/)
+ const move=app.slice(app.indexOf('function moveGesture'),app.indexOf('function finishConsumedContact'))
+ assert.match(move,/if\(offset\|\|dragRoot\)/)
  assert.doesNotMatch(move,/restoreDrag\(true\)/)
 })

@@ -1,0 +1,19 @@
+LIONFIT — R22B.6E.5 NATIVE SWIPE ENGINE
+Prerequisito: R22B.6E.4 installata.
+
+1. Chiudi il dev server; fai backup della cartella progetto o commit locale Git.
+2. Controlla i file in MANIFEST_R22B6E5.json (SHA-256 pre/post). Se un file ha modifiche locali, salva e confronta prima di sovrascrivere.
+3. Estrai nella radice del progetto, mantenendo src/ e tests/. Conferma sovrascrittura dei soli file previsti. I tre file documentali sono facoltativi.
+4. Da PowerShell nella radice:
+   npm.cmd run typecheck
+   node --experimental-strip-types --test tests/r22b6e5-native-swipe.test.mjs
+   npm.cmd run build
+5. Prima di pubblicare, prova su telefono collegato alla stessa rete:
+   npm.cmd run dev -- --host 0.0.0.0
+   Usa l'URL Network fornito da Vite. Per diagnostica locale aggiungi ?lfPerf=1.
+6. Se il collaudo è positivo, usa LIONFIT_PREPARA_WEB_E_DOCS.cmd e GitHub Desktop come di consueto.
+NESSUN deploy Firebase. Nessuna modifica a .env o dipendenze.
+
+ROLLBACK: ripristina tutti i file con status modified nel manifest dal backup E.4; elimina i file status new e i tre documenti E.5. Ripeti typecheck/build. Se avevi già pubblicato, rigenera WebDocs e pubblica il ripristino. Nessuna migrazione database.
+
+LIMITI: build Linux bloccata dal Rollup nativo mancante; test Chromium isolati e non su telefono fisico. Leggi il report per dettagli e 30 fallimenti storici della suite estesa.

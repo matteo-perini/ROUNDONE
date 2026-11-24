@@ -8,8 +8,8 @@ export function resolveSwipeIntent(previous:SwipeIntent,dx:number,dy:number):Swi
  if(!Number.isFinite(dx)||!Number.isFinite(dy))return 'pending'
  const x=Math.abs(dx),y=Math.abs(dy)
  if(Math.max(x,y)<7)return 'pending'
- if(x>=y*1.25)return 'horizontal'
- if(y>=x*1.12)return 'vertical'
+ if(x>=y*1.18)return 'horizontal'
+ if(y>=x*1.10)return 'vertical'
  // Resolve ambiguous diagonals conservatively, in favour of native scrolling.
  return Math.max(x,y)>=20?'vertical':'pending'
 }

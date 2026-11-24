@@ -12,9 +12,10 @@ test('scope to real mobile sections of the same role, preserve desktop and non-t
  for(const pair of [['/home','/coach'],['/home','/home'],['/piano','/impostazioni'],['/home','/allenamento/1']])assert.ok(!isMobileSectionSlide(...pair,390))
  assert.equal(isMobileSectionSlide('/home','/piano',800),false);assert.equal(isMobileSectionSlide('/coach','/coach/atleti',900),true);assert.equal(isMobileSectionSlide('/coach','/coach/atleti',901),false)
 })
-test('destination cue is inert, only static label and skeleton, no user data, Firebase or DOM cloning',()=>{
- assert.match(helper,/setAttribute\('aria-hidden','true'\)/);assert.match(helper,/panel\.inert=true/);assert.match(helper,/title\.textContent=label/);assert.doesNotMatch(helper,/cloneNode|innerHTML|localStorage|sessionStorage|firebase|fetch\(/i)
- assert.match(app,/dragPreview\?\.paint\(dragOffset,dragPreviewDirection,dragPreviewLabel\)/);assert.match(app,/returnToEdge\(duration\)/);assert.match(app,/returningPreview\?\.dispose\(\)/)
+test('E.5 removes the synthetic destination cue; only the authorized real route enters',()=>{
+ assert.doesNotMatch(helper,/createSectionPreview|cloneNode|innerHTML|localStorage|sessionStorage|firebase|fetch\(/i)
+ assert.doesNotMatch(app,/dragPreview|returningPreview|createSectionPreview/)
+ assert.match(app,/nativeDragOffset\(dx,width,!!next\)/);assert.match(app,/router\.push\(/)
 })
 test('outgoing pages retain their measured geometry, are inert while leaving, and release state on cancellation',()=>{
  assert.match(helper,/offsetTop,offsetLeft,offsetWidth/);assert.match(helper,/element\.inert=true/);assert.match(helper,/element\.inert=previous\.inert/)

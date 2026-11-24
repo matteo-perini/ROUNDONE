@@ -1,8 +1,6 @@
-/* R22B.6E.2 — neutral, inert destination cue, not fabricated/cached user content. */
+/* E.5 — real pages only; clip the small pre-commit feedback and transitions. */
 .app.as-athlete main.main-layout.athlete-container:is([data-lf-motion-dragging],[data-lf-motion-paired]),.app.as-coach main.main-layout.coach-container:is([data-lf-motion-dragging],[data-lf-motion-paired]){overflow-x:clip!important}
-.lf-motion-preview{position:absolute;z-index:0;pointer-events:none;user-select:none;box-sizing:border-box;background:var(--bg);color:var(--muted);min-height:240px;padding:12px 0 20px;will-change:transform}
-.lf-motion-preview[hidden]{display:none!important}
-.lf-motion-preview-title{display:block;font-size:clamp(20px,5.4vw,27px);font-weight:850;color:var(--text);margin:0 0 12px}
-.lf-motion-preview-block{height:76px;margin:0 0 11px;border:1px solid var(--border);border-radius:14px;background:var(--card);opacity:.75}
-.lf-motion-preview-block:nth-child(3){height:108px}
-@media(prefers-reduced-motion:reduce){.lf-motion-preview{display:none!important}}
+/* Known vertical scrollports may otherwise take possession of a horizontal
+   gesture before it reaches the shell. Do not apply this to horizontal rails. */
+@media(max-width:799px){.main-layout.athlete-container.lf-swipe-surface :is(.athlete-live-screen,.lf-r22b5-page,.lf-chat-sidebar,.lf-chat-messages){touch-action:pan-y pinch-zoom}}
+@media(max-width:900px){.main-layout.coach-container.lf-swipe-surface :is(.lf-chat-sidebar,.lf-chat-messages,.lf-appointments-list,.lf-recent-events,.lf-legacy-coach-list){touch-action:pan-y pinch-zoom}}

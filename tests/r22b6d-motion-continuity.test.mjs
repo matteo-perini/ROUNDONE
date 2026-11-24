@@ -16,12 +16,12 @@ test('never continue a tiny, invalid or reversed drag',()=>{
 })
 test('freeze until real route change, use painted offset rather than queued frame, snap back on failure',()=>{
  assert.match(app,/transferSwipeMotion\(before,now\);restoreDrag\(false\)/)
- assert.match(app,/swipeCommitMotion\(dragPaintedOffset,window.innerWidth,pending.direction\)/)
+ assert.match(app,/nativeCommitMotion\(dragRoot\?\.isConnected\?dragPaintedOffset:0,stage.clientWidth,pending.direction,pending.velocity\)/)
  assert.match(app,/pendingSwipe=commit/)
  assert.match(app,/\.then\(settle,settle\)/)
  assert.match(app,/route\.path!==commit\.to/)
  assert.match(app,/dragPaintedOffset=dragOffset/)
- assert.match(app,/if\(!destination\)\{restoreDrag\(true\);return\}/)
+ assert.match(app,/if\(!destination\)\{[^\n]*restoreDrag\(true\);return\}/)
  assert.match(app,/snapAnimation\?\.cancel\(\)/)
 })
 test('both Vue transition layers inherit the start offset and duration; normal taps retain 340ms',()=>{

@@ -1,0 +1,141 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {readFileSync} from 'node:fs'
+import {parse,compileScript,compileTemplate} from '@vue/compiler-sfc'
+import {appendSwipeSample,recentSwipeVelocity,earlySwipeCommit,releaseSwipeCommit,nativeDragOffset,nativeCommitMotion} from '../src/features/navigation/nativeSwipe.ts'
+import {resolveSwipeIntent} from '../src/features/navigation/swipeIntent.ts'
+import {swipeNeighbor} from '../src/features/navigation/fluidSwipe.ts'
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8')
+const app=read('src/App.vue'),live=read('src/views/AthleteLiveWorkspace.vue'),motion=read('src/features/navigation/continuousMotion.ts'),css=read('src/styles-continuous-motion.css'),audit=read('src/features/performance/swipeAudit.ts')
+const decision=(overrides={})=>({dx:90,dy:10,elapsed:220,width:390,velocity:.4,hasNeighbor:true,...overrides})
+test('axis locks early, allows moderate diagonals, does not steal native vertical scroll or tap jitter',()=>{
+ assert.equal(resolveSwipeIntent('pending',6,1),'pending')
+ assert.equal(resolveSwipeIntent('pending',13,11),'horizontal')
+ assert.equal(resolveSwipeIntent('pending',10,13),'vertical')
+ assert.equal(resolveSwipeIntent('pending',20,19),'vertical')
+ assert.equal(resolveSwipeIntent('vertical',100,0),'vertical')
+ assert.equal(resolveSwipeIntent('horizontal',0,100),'horizontal')
+})
+test('small uncertain movement never commits before release; a clear deliberate gesture can commit early',()=>{
+ for(const d of [7,20,35,63,88])assert.equal(earlySwipeCommit(decision({dx:d,velocity:.3})),false)
+ assert.equal(earlySwipeCommit(decision({dx:105})),true)
+ assert.equal(earlySwipeCommit(decision({dx:-105,velocity:-.4})),true)
+ assert.equal(earlySwipeCommit(decision({dx:65,velocity:.95})),true)
+ assert.equal(earlySwipeCommit(decision({dx:105,dy:90})),false)
+})
+test('release accepts short flicks or deliberate slow drags in either direction',()=>{
+ assert.equal(releaseSwipeCommit(decision({dx:28,dy:4,elapsed:55,velocity:.6})),true)
+ assert.equal(releaseSwipeCommit(decision({dx:-28,dy:-4,elapsed:55,velocity:-.6})),true)
+ assert.equal(releaseSwipeCommit(decision({dx:57,dy:32,elapsed:3000,velocity:0})),true)
+ for(const o of [{dx:25,velocity:2},{dx:40,velocity:.1},{dx:56,dy:75},{dx:100,velocity:-.5},{dx:100,hasNeighbor:false},{elapsed:0},{width:0},{dx:NaN}])assert.equal(releaseSwipeCommit(decision(o)),false)
+})
+test('recent velocity responds to flick after a long pause and decays after stopping',()=>{
+ const samples=[];for(const [x,at] of [[0,0],[5,700],[12,730],[38,765],[65,800]])appendSwipeSample(samples,x,at)
+ assert.ok(recentSwipeVelocity(samples)>.55)
+ appendSwipeSample(samples,65,1000);assert.equal(recentSwipeVelocity(samples),0)
+ for(let i=0;i<100;i++)appendSwipeSample(samples,i,1100+i*10)
+ assert.ok(samples.length<=12)
+ const n=samples.length;appendSwipeSample(samples,NaN,9000);appendSwipeSample(samples,0,-1);assert.equal(samples.length,n)
+})
+test('recent velocity handles reversal, direction changes and outliers',()=>{
+ assert.ok(recentSwipeVelocity([{x:100,at:0},{x:80,at:40},{x:60,at:80}])<0)
+ assert.equal(recentSwipeVelocity([{x:0,at:0},{x:10000,at:20}]),4)
+ assert.equal(recentSwipeVelocity([{x:0,at:0},{x:10,at:2}]),0)
+ assert.equal(earlySwipeCommit(decision({dx:105,velocity:-.4})),false)
+})
+test('precommit feedback is immediate and directionally correct, but never reveals a large empty screen',()=>{
+ assert.ok(nativeDragOffset(7,390,true)>6)
+ assert.equal(nativeDragOffset(0,390,true),0)
+ assert.equal(nativeDragOffset(999,390,true),28)
+ assert.equal(nativeDragOffset(-999,390,true),-28)
+ assert.ok(nativeDragOffset(999,390,false)<=14)
+ assert.equal(nativeDragOffset(99,0,true),0)
+ assert.equal(nativeDragOffset(NaN,390,true),0)
+})
+test('real transition duration is adaptive and bounded, even on a fast release with no painted drag',()=>{
+ const a=nativeCommitMotion(20,390,1,.5),b=nativeCommitMotion(-20,390,-1,-.5)
+ assert.equal(a.offset,20);assert.equal(b.offset,-20);assert.equal(a.duration,b.duration)
+ assert.ok(nativeCommitMotion(20,390,1,2).duration<a.duration)
+ assert.ok(nativeCommitMotion(20,390,1,4).duration>=190)
+ assert.equal(nativeCommitMotion(20,390,-1,-1).offset,0)
+ assert.ok(nativeCommitMotion(0,390,1,0).duration<=285)
+ assert.equal(nativeCommitMotion(0,0,1,0),null)
+})
+test('routes remain directional and are determined by the authorized existing order',()=>{
+ const pages=['/messaggi','/home','/piano','/archivio','/progressi','/prenotazioni','/profilo']
+ assert.equal(swipeNeighbor('/home',60,pages),'/messaggi')
+ assert.equal(swipeNeighbor('/home',60,pages.slice(1)),null)
+ assert.equal(swipeNeighbor('/profilo',-90,pages),null)
+ assert.equal(swipeNeighbor('/messaggi',-90,pages),'/home')
+ assert.equal(swipeNeighbor('/assistenza',-90,pages),null)
+ assert.match(app,/swipePages.value.includes\(destination\)/)
+})
+test('only real pages are used, no generic preview or user-data snapshots',()=>{
+ assert.doesNotMatch(app,/createSectionPreview|dragPreview|returningPreview/)
+ assert.doesNotMatch(motion,/createSectionPreview|cloneNode|innerHTML|fetch\(|localStorage|sessionStorage/)
+ assert.doesNotMatch(css,/lf-motion-preview/)
+ assert.match(app,/earlySwipeCommit\(/);assert.match(app,/releaseSwipeCommit\(/);assert.match(app,/router.push\(/)
+})
+test('route commits are single-shot and queued against a still-moving page; failed routes restore drag',()=>{
+ assert.match(app,/if\(pendingSwipe\|\|start.path!==route.path/)
+ assert.match(app,/armSwipeClickGuard\(start\);touchStart=null/)
+ assert.match(app,/if\(pendingSwipe!==commit\|\|route.path!==commit.from\)return/)
+ assert.match(app,/now-commit.at<380.*isSectionMoving\(swipeRouteRoot\)/)
+ assert.match(app,/commit.issued=true/)
+ assert.match(app,/\.then\(settle,settle\)/)
+ assert.match(app,/restoreDrag\(route.path!==commit.to\)/)
+ assert.match(app,/cancelQueuedSwipeForExternalClick/)
+})
+test('horizontal ownership remains scoped; capture sees nested handlers, protected controls remain native',()=>{
+ assert.match(app,/touchstartCapturePassive:chatTouchStart/)
+ assert.match(app,/touchmoveCapture:chatTouchMove/)
+ assert.match(app,/touchendCapture:chatTouchEnd/)
+ assert.match(app,/if\(start.intent!=='horizontal'\)return/)
+ assert.match(app,/if\(!event.cancelable\)\{cancelGesture\(\);return\}/)
+ assert.match(app,/hasNativeHorizontalScroll/)
+ assert.match(app,/visibleSwipeModal\(stage\)/)
+ assert.match(app,/selectedTouchTarget\(start.target\)/)
+})
+test('motion variables are frozen per participating real page and released after enter, leave or cancellation',()=>{
+ assert.match(motion,/const pinned=new WeakMap/)
+ assert.match(motion,/prepareSectionMotion\(element,element.closest/)
+ assert.match(motion,/releaseSectionMotion\(element\)/)
+ assert.match(app,/prepareSectionMotion\(el,swipeStage.value\)/)
+ assert.match(app,/@enter-cancelled="cancelChatEnter"/)
+ assert.match(live,/@enter-cancelled="releaseSectionMotion"/)
+ for(const s of [app,live])assert.match(s,/var\(--lf-swipe-commit-duration,340ms\)/)
+})
+test('visibility, identity, width and permission changes clean up local gestures; no data-layer changes needed',()=>{
+ assert.match(app,/watch\(\[\(\)=>stagingSession.value\?\.uid,\(\)=>stagingSession.value\?\.gymId,\(\)=>stagingSession.value\?\.role\],resetSwipeSession/)
+ assert.match(app,/watch\(chatPreviewEnabled/)
+ assert.match(app,/if\(document.hidden\)resetSwipeSession\(\)/)
+ assert.match(app,/lastSwipeWidth!==window.innerWidth/)
+ assert.match(app,/cancelAnimationFrame\(swipeWaitFrame\)/)
+ assert.match(app,/removeEventListener\('visibilitychange',swipeVisibility\)/)
+})
+test('DEV diagnostics record only timing/status, with no network or content logging',()=>{
+ assert.match(audit,/import.meta.env.DEV/);assert.match(audit,/lionfit-motion-audit/)
+ assert.doesNotMatch(audit,/fetch\(|navigator.sendBeacon|firebase|\.uid|gymId|clientX|clientY/)
+ assert.match(audit,/samples.length>100/)
+})
+test('updated App and reused workspace compile as Vue SFCs',()=>{
+ for(const [name,source] of [['App.vue',app],['AthleteLiveWorkspace.vue',live]]){
+  const p=parse(source,{filename:name});assert.deepEqual(p.errors,[])
+  const script=compileScript(p.descriptor,{id:'e5'})
+  const result=compileTemplate({source:p.descriptor.template.content,filename:name,id:'e5',compilerOptions:{bindingMetadata:script.bindings}})
+  assert.deepEqual(result.errors,[])
+ }
+})
+
+test('one modern pointer path or legacy touch path; capture, multitouch and consumed-contact guards',()=>{
+ assert.match(app,/pointerSwipeEnabled=typeof window.PointerEvent/)
+ assert.match(app,/const swipeInputEvents=pointerSwipeEnabled\?/)
+ assert.match(app,/pointerdownCapture:chatPointerDown/)
+ assert.match(app,/pointermoveCapture:chatPointerMove/)
+ assert.match(app,/lostpointercaptureCapture:chatPointerLostCapture/)
+ assert.match(app,/v-on="swipeInputEvents"/)
+ assert.match(app,/if\(!event.isPrimary\)\{cancelGesture\(\);return\}/)
+ assert.match(app,/if\(held\)consumedContact=start/)
+ assert.match(app,/finishConsumedContact\(event.pointerId\)/)
+ assert.match(app,/document.removeEventListener\('pointerup',committedPointerRelease,true\)/)
+})

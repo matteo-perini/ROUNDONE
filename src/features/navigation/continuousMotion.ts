@@ -1,4 +1,4 @@
-/** R22B.6E.2 — mobile transition geometry and non-interactive destination preview.
+/** R22B.6E.2 — mobile transition geometry; E.5 pins motion values to each real page.
  * No component mounting, account data, storage, or network requests here. */
 const athleteSections=['/messaggi','/home','/piano','/archivio','/progressi','/prenotazioni','/profilo']
 const coachSections=['/coach/messaggi','/coach','/coach/atleti','/coach/archivio','/coach/libreria','/coach/prenotazioni','/coach/progressi','/coach/profilo']
@@ -9,10 +9,33 @@ export function previewPosition(offset:number,span:number,direction:number):numb
  return offset-Math.sign(direction)*span
 }
 const leaving=new WeakMap<HTMLElement,{inert:boolean}>()
+const motionValues=['--lf-motion-span','--lf-swipe-commit-offset','--lf-swipe-commit-duration'] as const
+const pinned=new WeakMap<HTMLElement,Array<{name:string;value:string;priority:string}>>()
+/** Freeze geometry/duration per participating page. A new swipe must not change
+ * the inherited variables of an earlier transition still finishing. */
+export function prepareSectionMotion(element:Element,stage:HTMLElement|null):void{
+ if(!(element instanceof HTMLElement)||!stage)return
+ releaseSectionMotion(element)
+ const saved=motionValues.map(name=>({name,value:element.style.getPropertyValue(name),priority:element.style.getPropertyPriority(name)}))
+ pinned.set(element,saved)
+ const defaults=[`${Math.max(1,stage.clientWidth)}px`,'0px','340ms']
+ motionValues.forEach((name,i)=>element.style.setProperty(name,stage.style.getPropertyValue(name)||defaults[i]))
+}
+export function releaseSectionMotion(element:Element):void{
+ if(!(element instanceof HTMLElement))return
+ const saved=pinned.get(element);if(!saved)return
+ pinned.delete(element)
+ for(const {name,value,priority} of saved){if(value)element.style.setProperty(name,value,priority);else element.style.removeProperty(name)}
+}
+export const activeSectionSelector='.lf-chat-open-enter-active,.lf-chat-open-leave-active,.lf-chat-close-enter-active,.lf-chat-close-leave-active,.lf-section-next-enter-active,.lf-section-prev-enter-active,.lf-section-next-leave-active,.lf-section-prev-leave-active'
+export function isSectionMoving(element:HTMLElement):boolean{
+ return element.matches(activeSectionSelector)||!!element.querySelector(activeSectionSelector)
+}
 export function prepareSectionLeave(element:Element,name:string,enabled:boolean):void{
  if(!enabled||!name||!(element instanceof HTMLElement)||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return
  // Capture layout coordinates, not animated transforms. The old page keeps its
  // actual padding/width instead of jumping to the containing block's origin.
+ prepareSectionMotion(element,element.closest<HTMLElement>('.main-layout')||element.parentElement)
  const {offsetTop,offsetLeft,offsetWidth}=element
  leaving.set(element,{inert:element.inert})
  element.style.setProperty('--lf-leave-top',`${offsetTop}px`)
@@ -23,29 +46,10 @@ export function prepareSectionLeave(element:Element,name:string,enabled:boolean)
 }
 export function finishSectionLeave(element:Element):void{
  if(!(element instanceof HTMLElement))return
+ releaseSectionMotion(element)
  const previous=leaving.get(element);if(!previous)return
  leaving.delete(element)
  element.inert=previous.inert
  element.classList.remove('lf-motion-leaving')
  for(const name of ['--lf-leave-top','--lf-leave-left','--lf-leave-width'])element.style.removeProperty(name)
-}
-export type SectionPreview={paint:(offset:number,direction:number,label:string)=>void;returnToEdge:(duration:number)=>void;dispose:()=>void}
-export function createSectionPreview(stage:HTMLElement,root:HTMLElement,paintedOffset=0):SectionPreview{
- const rect=root.getBoundingClientRect(),outer=stage.getBoundingClientRect()
- const span=Math.max(1,stage.clientWidth),left=rect.left-paintedOffset-outer.left-stage.clientLeft+stage.scrollLeft
- const top=rect.top-outer.top-stage.clientTop+stage.scrollTop
- const panel=document.createElement('div');panel.className='lf-motion-preview';panel.setAttribute('aria-hidden','true');panel.inert=true;panel.hidden=true
- panel.style.left=`${left}px`;panel.style.top=`${Math.max(top,stage.scrollTop,stage.scrollTop+Math.max(0,-outer.top-stage.clientTop))}px`;panel.style.width=`${rect.width}px`
- const title=document.createElement('strong');title.className='lf-motion-preview-title';panel.append(title)
- for(let i=0;i<3;i++){const block=document.createElement('div');block.className='lf-motion-preview-block';panel.append(block)}
- let last=0,side=0,animation:Animation|null=null,disposed=false
- stage.append(panel);stage.dataset.lfMotionDragging='true'
- function dispose(){if(disposed)return;disposed=true;animation?.cancel();animation=null;panel.remove();delete stage.dataset.lfMotionDragging}
- return {
-  paint(offset,direction,label){if(disposed)return;last=offset;side=Math.sign(direction);panel.hidden=!side||!label;if(panel.hidden)return;if(title.textContent!==label)title.textContent=label;panel.style.transform=`translate3d(${previewPosition(offset,span,side)}px,0,0)`},
-  returnToEdge(duration){if(disposed)return;if(!side||panel.hidden||typeof panel.animate!=='function'){dispose();return}
-   animation=panel.animate([{transform:`translate3d(${previewPosition(last,span,side)}px,0,0)`},{transform:`translate3d(${previewPosition(0,span,side)}px,0,0)`}],{duration,easing:'cubic-bezier(.18,1,.35,1)',fill:'forwards'})
-   animation.onfinish=dispose;animation.oncancel=dispose
-  },dispose
- }
 }

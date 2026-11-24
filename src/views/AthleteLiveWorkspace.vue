@@ -14,7 +14,7 @@ import AthleteHomeContent from '../components/AthleteHomeContent.vue'
 import { useAthleteLive } from '../features/athletes/useAthleteLive'
 import {useRomeDayClock} from '../features/performance/useRomeDayClock'
 import { sectionTransition } from '../features/navigation/sectionSwipe'
-import {prepareSectionLeave,finishSectionLeave} from '../features/navigation/continuousMotion'
+import {prepareSectionMotion,releaseSectionMotion,prepareSectionLeave,finishSectionLeave} from '../features/navigation/continuousMotion'
 import {isStagingMode,isLiveMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
 import { linkedSheetsForDay,liveWeekForDate } from '../features/athletes/athleteOperationalPolicy'
 import { romeDayIndex,romeWeekDayNumber } from '../features/athletes/romeWeekProgress'
@@ -28,11 +28,13 @@ const route=useRoute()
 // R22B.5: Vue Router intentionally reuses this component for Home/Piano/Archivio.
 // Animate only the screen content; keep the parent instance and Firebase listeners alive.
 const workspaceMotion=ref('')
+const workspaceRoot=ref<HTMLElement|null>(null)
 const screenOrder=['home','plan','archive'] as const
 watch(()=>props.screen,(next,previous)=>{
  workspaceMotion.value=window.innerWidth<800?sectionTransition(previous,next,screenOrder):''
 },{flush:'sync'})
-function finishWorkspaceMotion(el:Element){if(el.getAttribute('data-lf-screen')===props.screen)workspaceMotion.value=''}
+function beforeWorkspaceEnter(el:Element){if(workspaceMotion.value&&window.innerWidth<800)prepareSectionMotion(el,workspaceRoot.value?.closest<HTMLElement>('.main-layout')||null)}
+function finishWorkspaceMotion(el:Element){releaseSectionMotion(el);if(el.getAttribute('data-lf-screen')===props.screen)workspaceMotion.value=''}
 function beforeWorkspaceLeave(el:Element){prepareSectionLeave(el,workspaceMotion.value,window.innerWidth<800)}
 const programArchiveOpen=ref(route.query.view==='programmi')
 watch(()=>route.query.view,v=>{programArchiveOpen.value=v==='programmi'})
@@ -87,11 +89,11 @@ const livePath=(path:string)=>isStagingMode()?path:`${path}?source=emulator`
 const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${encodeURIComponent(currentWeek.value.id)}&day=${todayIndex.value}`:`/piano?source=emulator&week=${encodeURIComponent(currentWeek.value.id)}&day=${todayIndex.value}`):livePath('/piano'))
 </script>
 <template>
- <div class="stack athlete-live-screen" :aria-label="'Area Atleta'">
+ <div ref="workspaceRoot" class="stack athlete-live-screen" :aria-label="'Area Atleta'">
   <div v-lf-quiet-loading v-if="status==='loading'" class="panel lf-quiet-status" role="status">{{uiText("Caricamento schede e settimane…")}}</div>
   <div v-else-if="status==='error'" class="notice" role="alert">{{message}} <button type="button" class="secondary" @click="retryWorkspace">{{uiText("Riprova")}}</button> <RouterLink :to="isStagingMode()?'/accesso':'/dev/accesso'">{{uiText("Torna all'accesso")}}</RouterLink></div>
   <template v-else-if="data">
-   <Transition :name="workspaceMotion" @after-enter="finishWorkspaceMotion" @before-leave="beforeWorkspaceLeave" @after-leave="finishSectionLeave" @leave-cancelled="finishSectionLeave">
+   <Transition :name="workspaceMotion" @before-enter="beforeWorkspaceEnter" @after-enter="finishWorkspaceMotion" @enter-cancelled="releaseSectionMotion" @before-leave="beforeWorkspaceLeave" @after-leave="finishSectionLeave" @leave-cancelled="finishSectionLeave">
     <div :key="props.screen" class="lf-r22b5-page" :data-lf-screen="props.screen">
    <template v-if="props.screen==='plan'">
     <AthletePlanContent archive-expired :athlete-key="session?.uid||''" :personal="data.personal" :weeks="data.weeks" :groups="data.groups" :week-id="selectedWeek||currentWeek?.id||''" :initial-day="requestedDay" @update:week-id="id => { selectedWeek=id }" />
