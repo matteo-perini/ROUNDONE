@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import {adjacentRouteLoader,canWarmRoute,type RouteLoader,type WarmupConnection} from '../features/performance/routeWarmup'
 import {installNavigationTiming} from '../features/motion/navigationTiming'
 import {isStagingMode,isOperationalMode} from '../integrations/firebase/stagingConfig'
 import {readNavigationSession,stagingSession} from '../integrations/firebase/stagingSession'
@@ -162,4 +163,44 @@ router.beforeEach(async to=>{
  }
  const store=useLabStore();if(to.path!=='/accesso'&&!store.role)return '/accesso';if(to.meta.coachOnly&&store.role!=='coach')return '/home';if(to.path==='/accesso'&&store.role)return store.role==='coach'?'/coach':'/home';return true})
 router.afterEach(to=>{document.title=`Lion Fit · ${String(to.meta.title??'V1')}`})
+// R22B.6C.2: opportunistic, one code chunk at a time, only after a successful
+// operational navigation. Never prefetch Firestore data or bypass route guards.
+const warmAthleteOrder=['/home','/piano','/archivio','/progressi','/prenotazioni','/profilo']
+const warmCoachOrder=['/coach','/coach/atleti','/coach/archivio','/coach/prenotazioni','/coach/progressi','/coach/profilo']
+const warmLoaders:Record<string,RouteLoader>={
+ '/home':LiveAthlete,'/piano':LiveAthlete,'/archivio':LiveAthlete,
+ '/progressi':AthleteProgress,'/prenotazioni':Bookings,'/profilo':Profile,
+ '/coach':LiveCoach,'/coach/atleti':LiveRoster,'/coach/archivio':LiveCoachArchive,
+ '/coach/prenotazioni':Bookings,'/coach/progressi':CoachProgress,'/coach/profilo':Profile
+}
+const warmLoaded=new Set<RouteLoader>()
+let warmTimer:ReturnType<typeof setTimeout>|null=null,warmIdle:number|null=null,warmBusy=false
+function cancelRouteWarmup(){
+ if(warmTimer!==null){clearTimeout(warmTimer);warmTimer=null}
+ if(warmIdle!==null){window.cancelIdleCallback?.(warmIdle);warmIdle=null}
+}
+router.beforeEach(()=>{cancelRouteWarmup()})
+router.afterEach((to,_from,failure)=>{
+ if(failure||!isOperationalMode()||!stagingSession.value||typeof window==='undefined')return
+ const session=stagingSession.value
+ const order=session.role==='atleta'?warmAthleteOrder:warmCoachOrder
+ if(!order.includes(to.path))return
+ const current=warmLoaders[to.path];if(current)warmLoaded.add(current)
+ const permitted=()=>router.currentRoute.value.path===to.path&&stagingSession.value?.uid===session.uid&&stagingSession.value?.gymId===session.gymId&&stagingSession.value?.role===session.role&&canWarmRoute(!document.hidden,navigator.onLine,(navigator as Navigator&{connection?:WarmupConnection}).connection)
+ if(!permitted()||warmBusy)return
+ const run=()=>{
+  warmIdle=null
+  if(!permitted()||warmBusy)return
+  const loader=adjacentRouteLoader(to.path,order,warmLoaders,warmLoaded)
+  if(!loader)return
+  warmBusy=true
+  void loader().then(()=>warmLoaded.add(loader)).catch(()=>{/* Normal navigation can retry. */}).finally(()=>{warmBusy=false})
+ }
+ warmTimer=setTimeout(()=>{
+  warmTimer=null
+  if(!permitted()||warmBusy)return
+  if(typeof window.requestIdleCallback==='function')warmIdle=window.requestIdleCallback(run)
+  else run() // delayed fallback for WebViews without idle callbacks
+ },1500)
+})
 export default router

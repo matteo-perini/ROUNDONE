@@ -6,6 +6,7 @@ import {uiText} from '../features/i18n/interfaceLanguage'
  * Nessuna scrittura, nessuna deduplicazione di documenti, solo raggruppamento visivo.
  */
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
+import {useRomeDayClock} from '../features/performance/useRomeDayClock'
 import {useRoute,useRouter} from 'vue-router'
 import {romeDayIndex,isDateInStoredWeek} from '../features/athletes/romeWeekProgress'
 import {forWeekRepresentative,weekDayLinkedSheetNames,exactWeekDaySlots} from '../features/sheets/athleteWeekVisual.ts'
@@ -31,7 +32,7 @@ const opened = ref<Personal | null>(null)
 const showSheetChoices=ref(false)
 const selectedDay = ref<number | null>(Number.isInteger(props.initialDay) && props.initialDay! >= 0 && props.initialDay! <= 6 ? props.initialDay! : null)
 const allWeeks = computed(() => props.weeks.filter(w => !w.deletedAt))
-const todayClock=ref(Date.now())
+const todayClock=useRomeDayClock()
 const programs=computed(()=>props.archiveExpired?partitionPrograms(allWeeks.value,romeDate(todayClock.value)):groupActivePrograms(allWeeks.value))
 const todayIso=()=>romeDate(todayClock.value)
 const selectedFamily=computed(()=>{
@@ -50,8 +51,6 @@ const programmed = computed(() => visual.value.programmed.filter(group => group.
 const unprogrammed = computed(() => visual.value.unprogrammed)
 const sheetCount = computed(() => props.archiveExpired ? visual.value.programmed.length+visual.value.unprogrammed.length : uniqueSemanticSheets(props.personal.filter(s => !s.deletedAt)).length)
 const weekDays = computed(() => week.value?.days ?? [])
-let clockTimer:ReturnType<typeof setInterval>|null=null
-const refreshClock=()=>{todayClock.value=Date.now()}
 const currentDayIndex = computed(() =>
   isDateInStoredWeek(week.value?.startDate,todayClock.value) ? romeDayIndex(todayClock.value) : -1
 )
@@ -62,7 +61,7 @@ const todayDayIndex = computed(() => romeDayIndex(todayClock.value))
 const todayWeek = computed(() => activeWeekOn(selectedFamily.value?.weeks||[],todayIso())
   ?? programs.value.map(p=>activeWeekOn(p.weeks,todayIso())).find((w): w is ProgramWeek => Boolean(w)))
 const todayLinks = computed(() => exactWeekDaySlots(liveGroups.value,todayWeek.value,todayDayIndex.value))
-const todayActivities = computed(() => activitiesFor(todayWeek.value,todayDayIndex.value))
+const todayActivities = computed(() => activitiesFor(todayWeek.value,todayDayIndex.value,todayLinks.value.length>0))
 const todayProgramTitle = computed(() => programs.value.find(p=>p.weeks.some(w=>w.id===todayWeek.value?.id))?.title||'')
 const firstFreeSheet = computed(() => unprogrammed.value[0]?.sheet)
 const todayHasPlan = computed(() => Boolean(todayWeek.value))
@@ -83,9 +82,8 @@ function shortDate(iso?:string):string {
  const value=Date.parse(`${iso}T12:00:00Z`)
  return Number.isFinite(value)?new Intl.DateTimeFormat('it-IT',{day:'numeric',month:'short',timeZone:'UTC'}).format(value):iso
 }
-function activitiesFor(sourceWeek:ProgramWeek|undefined,index:number):string[]{
+function activitiesFor(sourceWeek:ProgramWeek|undefined,index:number,linked=exactWeekDaySlots(liveGroups.value,sourceWeek,index).length>0):string[]{
  const values=sourceWeek?.days[index]?.activities||[]
- const linked=exactWeekDaySlots(liveGroups.value,sourceWeek,index).length>0
  return values.filter(value=>value.trim()&&(!linked||!/^(OFF|RIPOSO)$/i.test(value.trim())))
 }
 function openToday(){
@@ -105,12 +103,14 @@ function openToday(){
 }
 
 
-function displayActivities(index:number){return activitiesFor(week.value,index)}
-function linksForDay(index: number) {
- // The two assignments in the selected day are authoritative; never use the
- // representative sheet of a group of visually equivalent documents.
- return exactWeekDaySlots(liveGroups.value,week.value,index)
-}
+// Cache the projection for the selected week, never the Firestore documents.
+// Recompute when the real week or assignment groups change, not on every render.
+const weekDayProjection=computed(()=>weekDays.value.map((_day,index)=>{
+ const links=exactWeekDaySlots(liveGroups.value,week.value,index)
+ return {links,activities:activitiesFor(week.value,index,links.length>0)}
+}))
+function displayActivities(index:number){return weekDayProjection.value[index]?.activities??[]}
+function linksForDay(index:number){return weekDayProjection.value[index]?.links??[]}
 function uniqueDaysForSheet(group: { links: { weekId: string; dayIndex: number; dayName: string }[] }) {
   const seen = new Set<number>()
   return group.links.filter(link => link.weekId === week.value?.id).filter(link => {
@@ -138,15 +138,9 @@ function closeWeekDay(){showSheetChoices.value=false;selectedDay.value=null;if(r
 function onEscape(event:KeyboardEvent){if(event.key==='Escape'&&!opened.value&&selectedDay.value!==null)closeWeekDay()}
 onMounted(()=>{
  window.addEventListener('keydown',onEscape)
- window.addEventListener('focus',refreshClock)
- document.addEventListener('visibilitychange',refreshClock)
- clockTimer=setInterval(refreshClock,30_000)
 })
 onUnmounted(()=>{
  window.removeEventListener('keydown',onEscape)
- window.removeEventListener('focus',refreshClock)
- document.removeEventListener('visibilitychange',refreshClock)
- if(clockTimer!==null)clearInterval(clockTimer)
 })
 watch(()=>route.query.day,day=>{selectedDay.value=typeof day==='string'&&/^[0-6]$/.test(day)&&(!props.archiveExpired||!route.query.week||route.query.week===week.value?.id)?Number(day):null})
 watch(() => props.athleteKey, () => { selectedDay.value = null; opened.value = null })

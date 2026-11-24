@@ -2,8 +2,9 @@
 import {groupSheets,linksBySheet,type Personal,type ProgramWeek} from './domain.ts'
 import {groupActivePrograms,type ProgramFamily} from './programFamilies.ts'
 import {semanticSheetSignature,type TemplateLike} from './semanticDedup.ts'
+const romeCalendarFormatter=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'})
 export function romeDate(now=Date.now()):string{
- const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now)
+ const p=romeCalendarFormatter.formatToParts(now)
  const v=(k:string)=>p.find(x=>x.type===k)?.value||''
  return `${v('year')}-${v('month')}-${v('day')}`
 }

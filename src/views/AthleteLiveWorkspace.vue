@@ -3,7 +3,7 @@ import {uiText} from '../features/i18n/interfaceLanguage'
 /** Atleta operativo 2M/K: Home/Piano/Archivio originali, SOLO emulator e sola lettura.
  * Il catalogo esercizi e la modale SheetDetail sono gli stessi della versione demo.
  */
-import { computed,ref,watch,onMounted,onUnmounted } from 'vue'
+import { computed,ref,watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import AthletePlanContent from '../components/AthletePlanContent.vue'
@@ -12,6 +12,7 @@ import {activeAssignmentGroups,partitionPrograms,romeDate,weekOrdinal,weekExpire
 import SheetDetail from '../components/SheetDetail.vue'
 import AthleteHomeContent from '../components/AthleteHomeContent.vue'
 import { useAthleteLive } from '../features/athletes/useAthleteLive'
+import {useRomeDayClock} from '../features/performance/useRomeDayClock'
 import { sectionTransition } from '../features/navigation/sectionSwipe'
 import {isStagingMode,isLiveMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
 import { linkedSheetsForDay,liveWeekForDate } from '../features/athletes/athleteOperationalPolicy'
@@ -34,8 +35,9 @@ function finishWorkspaceMotion(){workspaceMotion.value=''}
 const programArchiveOpen=ref(route.query.view==='programmi')
 watch(()=>route.query.view,v=>{programArchiveOpen.value=v==='programmi'})
 const {status,message,session,data,avatarUrl,archive,archiveReady,hiddenArchiveIds,snapshots,updatedAt,hideArchiveCopy}=useAthleteLive(()=>props.screen==='archive')
+const clock=useRomeDayClock()
 const selectedWeek=ref(typeof route.query.week==='string'?route.query.week:'')
-const requestedDay=computed(()=>typeof route.query.day==='string'&&/^[0-6]$/.test(route.query.day)&&(!selectedWeek.value||data.value?.weeks.some(w=>w.id===selectedWeek.value&&!w.deletedAt&&!weekExpired(w,romeDate())))?Number(route.query.day):undefined)
+const requestedDay=computed(()=>typeof route.query.day==='string'&&/^[0-6]$/.test(route.query.day)&&(!selectedWeek.value||data.value?.weeks.some(w=>w.id===selectedWeek.value&&!w.deletedAt&&!weekExpired(w,romeDate(clock.value))))?Number(route.query.day):undefined)
 watch(()=>route.query.week,next=>{selectedWeek.value=typeof next==='string'?next:''})
 const opened=ref<{title:string;exercises:readonly ExerciseRecord[]}|null>(null)
 const search=ref(''), archiveView=ref<ArchiveView>('all')
@@ -51,19 +53,6 @@ async function hideCopy(id:string){
  catch(e){hideMessage.value=e instanceof Error?e.message:String(e)}
  finally{hideBusy.value=false}
 }
-const clock=ref(Date.now())
-let clockTimer:ReturnType<typeof setInterval>|null=null
-const refreshClock=()=>{clock.value=Date.now()}
-onMounted(()=>{
- clockTimer=setInterval(refreshClock,30_000)
- if(typeof document!=='undefined')document.addEventListener('visibilitychange',refreshClock)
- if(typeof window!=='undefined')window.addEventListener('focus',refreshClock)
-})
-onUnmounted(()=>{
- if(clockTimer!==null)clearInterval(clockTimer)
- if(typeof document!=='undefined')document.removeEventListener('visibilitychange',refreshClock)
- if(typeof window!=='undefined')window.removeEventListener('focus',refreshClock)
-})
 const currentWeek=computed(()=>data.value?liveWeekForDate(data.value.weeks,new Date(clock.value)):null)
 const currentWeekLabel=computed(()=>{
  const w=currentWeek.value
