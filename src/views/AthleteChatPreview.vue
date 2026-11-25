@@ -2,7 +2,7 @@
 /** E.3: short same-session list hint, fresh authorization on each entry.
  * All private message reads/writes still use the callable backend. */
 import {computed,ref,watch,onMounted,onUnmounted,nextTick} from 'vue'
-import {RouterLink,useRoute} from 'vue-router'
+import {RouterLink,useRoute,useRouter} from 'vue-router'
 import LionIcon from '../components/LionIcon.vue'
 import {isStagingMode} from '../integrations/firebase/stagingConfig'
 import {readNavigationSession,stagingSession} from '../integrations/firebase/stagingSession'
@@ -13,9 +13,10 @@ import {attachChatViewport,chatNearBottom} from '../features/chat/chatViewport'
 import {chatListHint} from '../features/chat/chatSessionSnapshot'
 import {CHAT_PILOT_ENABLED,chatPilotAllowed,chatContacts,chatList,chatOpen,chatHistory,chatSend,chatMarkRead,signalChatUpdated,
  type ChatContact,type ChatThread,type ChatMessage} from '../features/chat/chatClient'
+const props=withDefaults(defineProps<{embedded?:boolean;pageActive?:boolean}>(),{embedded:false,pageActive:true})
 const route=useRoute()
-const coach=ref(route.path==='/coach/messaggi')
-const inChatRoute=computed(()=>route.path==='/coach/messaggi'||route.path==='/messaggi')
+const coach=ref(!props.embedded&&route.path==='/coach/messaggi')
+const inChatRoute=computed(()=>props.embedded?(props.pageActive&&route.path==='/messaggi'):(route.path==='/coach/messaggi'||route.path==='/messaggi'))
 const dashboard=computed(()=>{const path=coach.value?'/coach':'/home';return route.query.source==='emulator'?path+'?source=emulator':path})
 const enabled=computed(()=>CHAT_PILOT_ENABLED&&chatPilotAllowed.value&&isStagingMode()&&route.query.source!=='emulator')
 const uid=ref(''),contacts=ref<ChatContact[]>([]),threads=ref<ChatThread[]>([])
@@ -36,6 +37,8 @@ onMounted(()=>{if(pageEl.value&&typeof window!=='undefined')viewport=attachChatV
 watch(logEl,(el)=>{logObserver?.disconnect();logObserver=undefined;stickToBottom=true;if(el&&typeof ResizeObserver!=='undefined'){logObserver=new ResizeObserver(keepBottom);logObserver.observe(el)}},{flush:'post'})
 watch([currentId,error],()=>viewport?.schedule(),{flush:'post'})
 let poll:ReturnType<typeof setInterval>|null=null,hintTimer:ReturnType<typeof setTimeout>|undefined,alive=true,refreshing=false,generation=0,scopeKey='',lastContacts=0,lastList=0,actionVersion=0
+let inactiveCleanup:ReturnType<typeof setTimeout>|null=null
+function stopInactiveCleanup(){if(inactiveCleanup!==null){clearTimeout(inactiveCleanup);inactiveCleanup=null}}
 let pendingSend:{threadId:string;text:string;key:string}|null=null
 const keyNow=()=>stagingSession.value?currentVerifiedScope(stagingSession.value):''
 const active=(n:number)=>alive&&n===generation&&enabled.value&&inChatRoute.value&&!!scopeKey&&keyNow()===scopeKey
@@ -177,7 +180,8 @@ async function initializeChat(){
  }catch(e){if(active(n))audit('error');fail(e,n)}finally{if(active(n))busy.value=false}
 }
 function retry(){error.value='';if(verified.value)void refresh();else void initializeChat()}
-watch([enabled,()=>accountKey(stagingSession.value),()=>route.path],()=>{
+watch([enabled,()=>accountKey(stagingSession.value),()=>props.embedded?inChatRoute.value:route.path],()=>{
+ stopInactiveCleanup()
  const previousScope=scopeKey
  // On ordinary navigation, preserve the rendered outgoing page until Vue has
  // finished its leave animation. Invalidate callbacks and stop all polling now.
@@ -186,11 +190,26 @@ watch([enabled,()=>accountKey(stagingSession.value),()=>route.path],()=>{
   resetChatLayout();chatListHint.clear();clearView()
   if(!enabled.value||!inChatRoute.value)return
  }
- if(!inChatRoute.value){resetChatLayout(true);generation++;actionVersion++;stopPoll();refreshing=false;return}
- clearView();coach.value=route.path==='/coach/messaggi';viewport?.schedule()
+ if(!inChatRoute.value){resetChatLayout(true);generation++;actionVersion++;stopPoll();refreshing=false;
+  // A real outgoing pane can remain for the bounded rail settlement only.
+  // Never poll, fetch history, mark read or send from an inactive pane.
+  if(props.embedded)inactiveCleanup=setTimeout(()=>{inactiveCleanup=null;if(!inChatRoute.value){resetChatLayout();clearView()}},560)
+  return}
+ clearView();coach.value=!props.embedded&&route.path==='/coach/messaggi';viewport?.schedule()
  document.addEventListener('visibilitychange',onVisibilityChange);void initializeChat()
 },{immediate:true,flush:'sync'})
-onUnmounted(()=>{alive=false;viewport?.dispose();logObserver?.disconnect();if(anchorFrame)cancelAnimationFrame(anchorFrame);clearView()})
+// The shared route component stays mounted while navigating Chat -> Home.
+// Retain the normal authorization checks and block accidental draft loss/sends.
+if(props.embedded){
+ const router=useRouter(),initialKey=accountKey(stagingSession.value)
+ const unregister=router.beforeEach((to,from)=>{
+  if(!initialKey||accountKey(stagingSession.value)!==initialKey||!enabled.value||from.path!=='/messaggi'||to.path==='/messaggi'||to.path==='/accesso')return true
+  if(sending.value)return false
+  return !draft.value.trim()||window.confirm('Il messaggio non è ancora inviato. Vuoi uscire dalla chat?')
+ })
+ onUnmounted(unregister)
+}
+onUnmounted(()=>{alive=false;stopInactiveCleanup();viewport?.dispose();logObserver?.disconnect();if(anchorFrame)cancelAnimationFrame(anchorFrame);clearView()})
 </script>
 
 <template>
@@ -255,7 +274,7 @@ onUnmounted(()=>{alive=false;viewport?.dispose();logObserver?.disconnect();if(an
    </div>
   </div>
   <p v-if="error" class="lf-chat-error" role="alert">{{error}} <button type="button" @click="retry">Riprova</button></p>
-  <p v-if="!coach" class="lf-chat-gesture"><LionIcon name="back" :size="15"/> Dalla chat, scorri a sinistra per tornare alla Dashboard.</p>
+  <p v-if="!coach" class="lf-chat-gesture"><LionIcon name="back" :size="15"/> Dalla chat, scorri verso la Home per tornare alla Dashboard.</p>
  </section>
 </template>
 <style scoped>

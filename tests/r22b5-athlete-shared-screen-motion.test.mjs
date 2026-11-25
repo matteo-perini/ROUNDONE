@@ -26,7 +26,7 @@ test('mobile real panes have stable per-screen keys and inactive panes are inert
   assert.match(live, /v-for="page in pageScreens" :key="page"/)
   assert.match(live, /:data-lf-screen="page"/)
   assert.match(live, /:inert="page!==props.screen"/)
-  assert.match(live, /trackMobile.value\?screenOrder:\[props.screen\]/)
+  assert.match(live, /trackMobile.value\?screenOrder.value:\[props.screen\]/)
   assert.doesNotMatch(live, /<Transition :name="workspaceMotion"/)
 })
 test('live workspace subscriptions remain at parent instance level', () => {

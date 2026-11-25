@@ -11,12 +11,14 @@ import ProgramHistory from '../components/ProgramHistory.vue'
 import {activeAssignmentGroups,partitionPrograms,romeDate,weekOrdinal,weekExpired} from '../features/sheets/assignmentPolicy'
 import SheetDetail from '../components/SheetDetail.vue'
 import AthleteHomeContent from '../components/AthleteHomeContent.vue'
+import {CHAT_PREVIEW_ENABLED} from '../features/chat/chatPreview'
+import {CHAT_PILOT_ENABLED,chatPilotAllowed} from '../features/chat/chatClient'
 import { useAthleteLive } from '../features/athletes/useAthleteLive'
 import {useRomeDayClock} from '../features/performance/useRomeDayClock'
 import type {MotionSummary} from '../features/navigation/universalMotion'
 import {accountKey} from '../features/platform/platformModel'
 import {createNativePageTrack,nativeTrackHeight,isNativePagePath,type NativePageTrack} from '../features/navigation/nativePageTrack'
-import {athleteScreenOrder,athleteScreenPath,coreAthleteScreen,athletePageWindow,athletePageUnion,type AthleteScreen} from '../features/navigation/athletePageWindow'
+import {availableAthleteScreens,athleteScreenPath,coreAthleteScreen,athletePageWindow,athletePageUnion,type AthleteScreen} from '../features/navigation/athletePageWindow'
 import {stagingSession} from '../integrations/firebase/stagingSession'
 import LionIcon from '../components/LionIcon.vue'
 import LocalLoadingSkeleton from '../components/LocalLoadingSkeleton.vue'
@@ -33,29 +35,31 @@ const props=defineProps<{screen:AthleteScreen}>()
 const PaneLoading=defineComponent({setup:()=>()=>h(LocalLoadingSkeleton,{variant:'cards',label:'Caricamento sezione…'})})
 const PaneError=defineComponent({setup:()=>()=>h('div',{class:'notice',role:'alert'},['Sezione non disponibile. ',h('button',{type:'button',class:'secondary',onClick:()=>window.location.reload()},'Riprova')])})
 function realPane(loader:()=>Promise<{default:Component}>){return defineAsyncComponent({loader,delay:0,loadingComponent:PaneLoading,errorComponent:PaneError,suspensible:false})}
+const ChatPane=realPane(()=>import('./AthleteChatPreview.vue'))
 const ProgressPane=realPane(()=>import('../components/ProgressWorkspace.vue'))
 const AgendaPane=realPane(()=>import('./LiveBookingWorkspace.vue'))
 const ProfilePane=realPane(()=>import('./DevProfileWorkspace.vue'))
 const route=useRoute()
 // One authorized workspace; six real visual panes, no duplicated workspace.
 const workspaceRoot=ref<HTMLElement|null>(null),trackViewport=ref<HTMLElement|null>(null),trackRail=ref<HTMLElement|null>(null)
-const screenOrder=athleteScreenOrder
+const chatAllowed=computed(()=>CHAT_PREVIEW_ENABLED&&(!CHAT_PILOT_ENABLED||chatPilotAllowed.value))
+const screenOrder=computed(()=>availableAthleteScreens(chatAllowed.value,props.screen))
 const screenPath=athleteScreenPath
 const media=window.matchMedia('(max-width: 799px)'),mobile=ref(media.matches)
 const trackMobile=computed(()=>isStagingMode()&&mobile.value)
-const pageScreens=computed(()=>trackMobile.value?screenOrder:[props.screen])
+const pageScreens=computed(()=>trackMobile.value?screenOrder.value:[props.screen])
 const initialScope=accountKey(stagingSession.value)
 const shellScopeValid=computed(()=>!isStagingMode()||!!initialScope&&stagingSession.value?.role==='atleta'&&accountKey(stagingSession.value)===initialScope)
-const resident=ref<AthleteScreen[]>(athletePageWindow(props.screen,trackMobile.value))
+const resident=ref<AthleteScreen[]>(athletePageWindow(props.screen,trackMobile.value,chatAllowed.value))
 let trimTimer:ReturnType<typeof setTimeout>|null=null
 function updateWindow(){
  if(trimTimer!==null)clearTimeout(trimTimer)
- const wanted=athletePageWindow(props.screen,trackMobile.value)
+ const wanted=athletePageWindow(props.screen,trackMobile.value,chatAllowed.value)
  resident.value=trackMobile.value?athletePageUnion(resident.value,wanted):wanted
  // Keep outgoing instances until WAAPI settlement/watchdog has finished.
- trimTimer=setTimeout(()=>{trimTimer=null;resident.value=athletePageWindow(props.screen,trackMobile.value)},560)
+ trimTimer=setTimeout(()=>{trimTimer=null;resident.value=athletePageWindow(props.screen,trackMobile.value,chatAllowed.value)},560)
 }
-watch([()=>props.screen,trackMobile],updateWindow,{flush:'sync'})
+watch([()=>props.screen,trackMobile,chatAllowed],updateWindow,{flush:'sync'})
 onUnmounted(()=>{if(trimTimer!==null)clearTimeout(trimTimer)})
 const coreRequested=computed(()=>resident.value.some(coreAthleteScreen))
 const archiveRequested=computed(()=>props.screen==='archive'||trackMobile.value&&resident.value.includes('archive'))
@@ -164,11 +168,12 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
   <template v-else>
    <div ref="trackViewport" :class="trackMobile?'lf-native-track-viewport':'lf-native-track-pass'">
     <div ref="trackRail" :class="trackMobile?'lf-native-track-rail':'lf-native-track-pass'">
-     <div v-for="page in pageScreens" :key="page" class="lf-r22b5-page" :class="{'lf-native-track-page':trackMobile,'booking-in-shell bookings-mode':trackMobile&&page==='agenda','lf-native-external-desktop':!trackMobile&&!coreAthleteScreen(page)}" :data-lf-screen="page" :data-lf-track-path="screenPath[page]" :data-lf-track-active="page===props.screen?'true':undefined" :data-lf-track-inactive="page!==props.screen?'true':undefined" :inert="page!==props.screen" :aria-hidden="page!==props.screen?'true':undefined">
-      <button v-if="trackMobile&&page!=='home'" type="button" class="lf-route-back lf-native-track-back" :aria-label="uiText('Torna indietro')" @click="workspaceBack"><LionIcon name="back" :size="17"/></button>
+     <div v-for="page in pageScreens" :key="page" class="lf-r22b5-page" :class="{'lf-native-track-page':trackMobile,'booking-in-shell bookings-mode':trackMobile&&page==='agenda','lf-native-chat-pane':trackMobile&&page==='chat','lf-native-external-desktop':!trackMobile&&!coreAthleteScreen(page)}" :data-lf-screen="page" :data-lf-track-path="screenPath[page]" :data-lf-track-active="page===props.screen?'true':undefined" :data-lf-track-inactive="page!==props.screen?'true':undefined" :inert="page!==props.screen" :aria-hidden="page!==props.screen?'true':undefined">
+      <button v-if="trackMobile&&page!=='home'&&page!=='chat'" type="button" class="lf-route-back lf-native-track-back" :aria-label="uiText('Torna indietro')" @click="workspaceBack"><LionIcon name="back" :size="17"/></button>
    <template v-if="!coreAthleteScreen(page)">
     <template v-if="resident.includes(page)">
-      <ProgressPane v-if="page==='progress'" role="athlete" embedded :page-active="page===props.screen"/>
+      <ChatPane v-if="page==='chat'" embedded :page-active="page===props.screen"/>
+      <ProgressPane v-else-if="page==='progress'" role="athlete" embedded :page-active="page===props.screen"/>
       <AgendaPane v-else-if="page==='agenda'" embedded :page-active="page===props.screen"/>
       <ProfilePane v-else embedded :page-active="page===props.screen"/>
     </template>

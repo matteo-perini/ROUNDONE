@@ -2,7 +2,7 @@ import {createPremiumSeam,premiumSeamOpacity,type PremiumSeam} from './premiumPa
 /** E.7.2: one moving rail of actual, already-authorized Vue page elements.
  * The shell remains responsible for gesture arbitration and guarded routing.
  * No router, Firebase, persistence, DOM clones or page content in this module. */
-export const nativePagePaths=['/home','/piano','/archivio','/progressi','/prenotazioni','/profilo'] as const
+export const nativePagePaths=['/messaggi','/home','/piano','/archivio','/progressi','/prenotazioni','/profilo'] as const
 export type NativePagePath=typeof nativePagePaths[number]
 export const isNativePagePath=(path:string):path is NativePagePath=>(nativePagePaths as readonly string[]).includes(path)
 export function nativeTrackSide(from:string,to:string):number{

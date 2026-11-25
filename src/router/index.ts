@@ -32,7 +32,7 @@ const CoachStaff = () => import('../views/CoachStaff.vue')
 const router=createRouter({history:createWebHistory(),routes:[
  {path:'/',redirect:'/accesso'},{path:'/accesso',component:Access,meta:{title:'Accesso'}},
  {path:'/home',component:isStagingMode()?LiveAthlete:Home,props:isStagingMode()?{screen:'home'}:false,meta:{title:'Home Atleta'}},
- {path:'/messaggi',component:ChatPreview,meta:{title:'Messaggi Atleta'}},
+ {path:'/messaggi',component:isStagingMode()?LiveAthlete:ChatPreview,props:isStagingMode()?{screen:'chat'}:false,meta:{title:'Messaggi Atleta'}},
  {path:'/piano',component:isStagingMode()?LiveAthlete:Program,props:isStagingMode()?{screen:'plan'}:false,meta:{title:'Piano Atleta'}},
  {path:'/schede',redirect:'/piano'},
  {path:'/archivio',component:isStagingMode()?LiveAthlete:Archive,props:isStagingMode()?{screen:'archive'}:false,meta:{title:'Archivio Atleta'}},

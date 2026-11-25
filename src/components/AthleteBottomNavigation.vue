@@ -3,16 +3,37 @@
  * Il Teleport impedisce che overflow/stacking context dell'app nascondano la barra.
  * Sorgenti e link sono quelli della shell (DEMO, Emulator o Live) e non creano accessi.
  */
-import { RouterLink } from 'vue-router'
+import { RouterLink,useRoute } from 'vue-router'
+import {computed,ref,onMounted,onUnmounted,watch,nextTick} from 'vue'
+import {dockIndicatorGeometry} from '../features/navigation/dockIndicator.ts'
 import LionIcon from './LionIcon.vue'
 import {uiText} from '../features/i18n/interfaceLanguage'
 
 type NavigationItem = {to:string;label:string;icon:string}
 const props=defineProps<{items:readonly NavigationItem[];theme:string}>()
+const route=useRoute(),dock=ref<HTMLElement|null>(null)
+const currentIndex=computed(()=>props.items.findIndex(item=>item.to.split('?')[0]===route.path))
+const position=ref<{x:number;y:number;width:number;height:number}|null>(null)
+let observer:ResizeObserver|null=null,frame=0,alive=true
+function measure(){
+ frame=0;const el=dock.value;if(!alive||!el||currentIndex.value<0||!el.getClientRects().length)return
+ const link=el.querySelectorAll<HTMLElement>('.lionfit-dock-item')[currentIndex.value]
+ if(!link)return
+ const next=dockIndicatorGeometry(el.getBoundingClientRect(),link.getBoundingClientRect(),el.clientLeft,el.clientTop)
+ if(next)position.value=next
+}
+function schedule(){if(alive&&!frame)frame=requestAnimationFrame(measure)}
+function observe(){observer?.disconnect();if(dock.value&&typeof ResizeObserver!=='undefined'){observer=new ResizeObserver(schedule);observer.observe(dock.value);for(const el of dock.value.querySelectorAll('.lionfit-dock-item'))observer.observe(el)}}
+onMounted(()=>{observe();measure();window.addEventListener('resize',schedule,{passive:true})})
+watch(currentIndex,()=>{if(currentIndex.value>=0){measure();schedule()}else position.value=null},{flush:'post'})
+watch(()=>props.items,async()=>{await nextTick();if(alive){observe();schedule()}},{flush:'post'})
+onUnmounted(()=>{alive=false;observer?.disconnect();if(frame)cancelAnimationFrame(frame);window.removeEventListener('resize',schedule)})
+const indicatorStyle=computed(()=>position.value?{width:position.value.width+'px',height:position.value.height+'px',transform:`translate3d(${position.value.x}px,${position.value.y}px,0)`}:undefined)
 </script>
 <template>
  <Teleport to="body">
-  <nav class="lionfit-athlete-dock" :class="props.theme==='light'?'dock-light':'dock-dark'" :aria-label="uiText('Navigazione inferiore Atleta')" data-lionfit-dock="athlete">
+  <nav ref="dock" class="lionfit-athlete-dock" :class="[props.theme==='light'?'dock-light':'dock-dark',{'dock-indicator-ready':!!position}]" :aria-label="uiText('Navigazione inferiore Atleta')" data-lionfit-dock="athlete">
+   <span v-if="position" class="lionfit-dock-indicator" :class="{'is-visible':currentIndex>=0}" :style="indicatorStyle" aria-hidden="true"/>
    <RouterLink v-for="item in props.items" :key="item.to" :to="item.to" class="lionfit-dock-item" :aria-label="uiText(item.label)">
     <LionIcon :name="item.icon" :size="21"/>
     <span>{{uiText(item.label)}}</span>
@@ -40,7 +61,7 @@ const props=defineProps<{items:readonly NavigationItem[];theme:string}>()
  box-shadow:0 -5px 17px rgba(20,75,47,.08)!important;
 }
 .lionfit-dock-item {
- display:flex!important;flex-direction:column;align-items:center;justify-content:center;
+ position:relative;z-index:1;display:flex!important;flex-direction:column;align-items:center;justify-content:center;
  min-width:0;min-height:53px;padding:6px 1px 5px;border-radius:9px;
  gap:4px;color:#d8e3ee!important;font-size:clamp(8px,1.72vw,11px);
  font-weight:850;line-height:1.15;letter-spacing:0;text-decoration:none!important;
@@ -62,5 +83,11 @@ const props=defineProps<{items:readonly NavigationItem[];theme:string}>()
 .lionfit-dock-item:focus-visible{outline:2px solid #40ee8a;outline-offset:-2px}
 @media(min-width:800px){.lionfit-athlete-dock{display:none!important}}
 @media(max-width:390px){.lionfit-athlete-dock{gap:1px;padding-left:2px;padding-right:2px}.lionfit-dock-item{font-size:7.5px;gap:3px}.lionfit-dock-item :deep(svg){height:19px!important;width:19px!important;flex-basis:19px!important}}
-@media(prefers-reduced-motion:no-preference){.lionfit-dock-item{transition:background .18s ease,color .18s ease}}
+/* One shared non-interactive highlight; only the real links are tappable. */
+.lionfit-dock-indicator{position:absolute;top:0;left:0;z-index:0;border-radius:9px;pointer-events:none;opacity:0;background:linear-gradient(150deg,#16643f,#15422f);box-shadow:inset 0 0 0 1px rgba(73,244,136,.24)}
+.lionfit-dock-indicator.is-visible{opacity:1}
+.dock-light .lionfit-dock-indicator{background:linear-gradient(135deg,#e2faea,#c8f4d6);box-shadow:inset 0 0 0 1px #a7dfb9}
+.dock-indicator-ready .lionfit-dock-item.router-link-active{background:transparent!important;box-shadow:none!important}
+@media(prefers-reduced-motion:no-preference){.lionfit-dock-item{transition:color .18s ease}.lionfit-dock-indicator{transition:transform 260ms cubic-bezier(.22,1,.36,1),width 180ms ease,height 180ms ease,opacity 120ms ease}}
+@media(prefers-reduced-motion:reduce){.lionfit-dock-indicator,.lionfit-dock-item{transition:none!important}}
 </style>

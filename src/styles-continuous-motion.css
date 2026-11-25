@@ -74,3 +74,10 @@
  .lf-native-track-page.bookings-mode{padding-bottom:12px;min-height:0}
  .lf-native-track-page[data-lf-screen="agenda"]{background:var(--bg)}
 }
+
+/* R22B6E86: the real Chat owns its viewport/keyboard geometry. No extra scrollport. */
+@media(max-width:799px){
+ .lf-native-track-page.lf-native-chat-pane{padding-bottom:0;overflow:hidden}
+ .lf-native-chat-pane>.lf-chat-page{width:100%;max-width:100%;min-width:0}
+ .lf-native-chat-pane>.lf-chat-page.lf-chat-native-active{max-height:100%}
+}

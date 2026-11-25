@@ -1,0 +1,31 @@
+# LionFit R22B.6E.8.6 — Chat Native Bridge & Dynamic Navbar SAFE
+
+Base obbligatoria: R22B.6E.8.5 Real Page Expansion Atleta. Ricostruiti i sorgenti dai due ZIP originali e dalla sequenza delle patch recuperate in Libreria. Verificati 19/19 hash del manifest E85 prima di intervenire e 13/13 hash dei file sostituiti rispetto ai relativi ZIP di provenienza. Patch incrementale: 13 sostituzioni, 2 aggiunte (inclusi test). Non include chiavi, configurazioni, dati personali, nuovi SDK o dipendenze, build Android o modifiche server.
+
+## Chat Native Bridge
+
+- In modalità operativa Atleta, `/messaggi` condivide lo stesso componente AthleteLiveWorkspace di Home, Piano, Archivio, Allenamenti, Agenda e Profilo. La Chat è la pagina reale a sinistra della Home, non un settimo pulsante della navbar. Demo e Coach conservano le route Chat separate. La guardia router e il flag esistente rimangono invariati; nessuna modifica a Firebase Rules, Storage Rules, Cloud Functions, account e autorizzazioni.
+- Il rail usa lo stesso spostamento, span, separatore 14 px e durata di assestamento della E85, anche fra Chat e Home. A partire dalla Chat la Home è montata nella finestra adiacente e può caricare i propri dati autorizzati prima del gesto; a freddo resta possibile un segnaposto locale mentre il server risponde. Niente anteprima finta, né attese decorative delle card. La lettura anticipata dei dati Home in caso di accesso diretto alla Chat può comportare letture Firebase anticipate, non promessa di costo zero.
+- Il componente reale Chat viene montato come vicino solo quando la funzione è abilitata/ammessa. Non inizia letture o polling dei messaggi da inattivo, non segna come letti i messaggi durante lo swipe e non consente azioni. All'ingresso conserva la verifica server e l'eventuale hint temporaneo di soli metadati già esistente. La lista a freddo può mostrare il caricamento reale. Dopo il normale cambio pagina si interrompono polling e callback immediatamente; si mantiene l'uscente soltanto durante la finestra di assestamento (560 ms) e poi si puliscono messaggi, bozze e dati privati. Revoca o cambio identità puliscono subito. Le guardie dei callable restano il confine di sicurezza. Il nuovo guard embedded impedisce uscita con invio in corso e chiede conferma per un testo non inviato; non blocca il logout. Il layout della tastiera resta gestito dal modulo Chat originale.
+- Compatibilità desktop: singola pagina come E85; nessuna espansione del rail Coach. Il difetto segnalato riguarda Chat Atleta → Home. Non dichiarare la fluidità del telefono verificata fino al collaudo reale.
+
+## Dynamic Navbar
+
+- Solo navbar inferiore Atleta: riquadro verde unico sotto i sei link originali, colori, label e disposizione esistenti. Movimento CSS transform 260 ms; indicatore misurato sulla posizione del link reale dopo cambio rotta o layout. ResizeObserver disconnesso allo smontaggio. Nessuna lettura per frame del gesto, nessuna animazione delle card, nessuna azione intercettata. Il selettore segue la rotta confermata, non un gesto annullato. Nessuna selezione quando la Chat (o altra route senza tab) è attiva. Fallback: highlight statico esistente se geometria non disponibile; nessuna transizione in reduced motion. Nessuna modifica alla navbar Coach.
+- Anteprima HTML standalone separata: componente AthleteBottomNavigation e LionIcon compilati dai sorgenti effettivi, Vue/Vue Router vendorizzati dal progetto e motore nativePageTrack effettivo, contenuti e shell dimostrativi. Non contiene dati LIVE o Firebase. Aprire il file con browser sul PC; provare tab, trascinamenti, Chat e tema. Le schermate demo non sono il design delle pagine reali.
+
+## Test eseguiti
+
+- TypeScript: exit 0 con `node node_modules/vue-tsc/bin/vue-tsc.js --noEmit`.
+- R22: 223/223 con `node --experimental-strip-types --test tests/r22*.test.mjs`. Sei nuovi test (cinque nel nuovo file, uno nel test sessione esistente). Aggiornati quattro test file che assumevano Chat esclusa dall'ordine delle pagine o precedente struttura del workspace; aggiornato il fixture Chat per testare effettivamente il ciclo di vita embedded, guard bozza/invio, assenza letture inattive e pulizia. Nessuna rimozione di test delle autorizzazioni.
+- Chromium: 212 asserzioni superate con l'anteprima effettiva, quattro larghezze (320, 390, 430, 760 px), con/senza reduced motion. Verifica allineamento del selettore su tutti i sei tab, tema, assenza selettore in Chat, due pane presenti durante drag e movimento >24 px, inert prima del commit, ritorno Home e cleanup. La shell demo utilizza contenuti fittizi e gesti dimostrativi; non è un collaudo end-to-end del router e delle viste Firebase LIVE né un test della tastiera sul dispositivo fisico.
+- Suite estesa: tentata ma interrotta per timeout; ricostruzione di lavoro limitata a sorgenti, dipendenze e test con fixture/script accessori non tutti presenti. I fallimenti di quel run non sono confrontabili con i 15 storici della E85. Nessuna dichiarazione di superamento della suite completa.
+- Build Vite: tentata ma bloccata per dipendenza Rollup Linux mancante nell'archivio Windows. Build obbligatoria sul PC Windows prima di generare l'APK.
+
+## Installazione
+
+1. Backup dei 13 file replace elencati nel manifest. Estrai nella root del progetto E85 sostituendo i file.
+2. `npm.cmd run typecheck`, `npm.cmd run build`, `node --experimental-strip-types --test tests/r22*.test.mjs`.
+3. Test reale Atleta nella palestra di prova: Chat → Home e Home → Chat, trascinamento lento/veloce, inversione e annullamento, click navbar, cambio tema, apertura conversazione/tastiera, bozza (annulla/accetta), invio reale di prova e verifica notifica, ritorno, cambio account, Android e desktop. Verificare che l'indicatore non appaia nella Chat e nessuna linea verde o entrata tardiva. Ripetere i passaggi fra le altre sei sezioni; controllare Coach separatamente.
+4. Se tutto funziona, rigenera WebDocs con il comando esistente e pubblica APK secondo procedura già collaudata. Non è necessario deploy Firebase. Non cambiare applicationId, signing key, versionCode o versionName all'interno di questa patch. Verificare firma e versione prima della build APK/AAB successiva.
+5. Rollback: ripristinare i 13 file replace dal backup, eliminare le due aggiunte e rigenerare WebDocs/APK.

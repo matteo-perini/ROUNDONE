@@ -194,13 +194,12 @@ watch(()=>route.path,(now,before)=>{
  // Preserve the R22A premium Chat gesture on athlete Home; extend the same direction logic
  // to the other top-level sections, including taps on the existing navbar.
  if(!sectionMotionAllowed())chatMotion.value=''
- else if (chatPreviewEnabled.value && before==='/home' && now==='/messaggi') chatMotion.value='lf-chat-open'
- else if (chatPreviewEnabled.value && before==='/messaggi' && now==='/home') chatMotion.value='lf-chat-close'
- // Home/Piano/Archivio share AthleteLiveWorkspace. Vue Router reuses that instance,
- // so RouterView cannot animate these two transitions. Their content is animated
- // internally without tearing down the existing live Firestore subscriptions.
+ // Operational Atleta shares the real rail, including Chat. The old Chat
+ // RouterView animation is retained only for the non-shared route variants.
  else if (shownRole.value==='atleta' && isStagingMode() &&
   isNativePagePath(before) && isNativePagePath(now)) chatMotion.value=''
+ else if (chatPreviewEnabled.value && before==='/home' && now==='/messaggi') chatMotion.value='lf-chat-open'
+ else if (chatPreviewEnabled.value && before==='/messaggi' && now==='/home') chatMotion.value='lf-chat-close'
  else chatMotion.value=shownRole.value && swipeViewport() ? sectionTransition(before,now,swipePages.value) : ''
 })
 // E.5 — native touch feedback with real-page navigation. This never replaces Vue Router.

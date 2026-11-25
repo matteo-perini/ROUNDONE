@@ -13,7 +13,7 @@ function fixture(){
  return {panes,rail,track,animations,counts:()=>({reads,queries})}
 }
 test('the six athlete dock paths participate, geometry is finite and direction is stable',()=>{
- assert.equal(nativeTrackSide('/home','/piano'),1);assert.equal(nativeTrackSide('/archivio','/piano'),-1);assert.equal(nativeTrackSide('/home','/messaggi'),0)
+ assert.equal(nativeTrackSide('/home','/piano'),1);assert.equal(nativeTrackSide('/archivio','/piano'),-1);assert.equal(nativeTrackSide('/home','/messaggi'),-1)
  assert.equal(nativeTrackOffset(-150,366,1),-150);assert.equal(nativeTrackOffset(150,366,1),0);assert.equal(nativeTrackOffset(-900,366,1),-366*.88);assert.equal(nativeTrackOffset(NaN,366,1),0)
  assert.equal(nativeTrackHeight(95,776),681);assert.equal(nativeTrackHeight(900,776),null);assert.equal(nativeTrackHeight(100,NaN),null)
 })
