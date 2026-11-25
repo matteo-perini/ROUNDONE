@@ -18,7 +18,7 @@ import {beginSessionDataAudit} from '../performance/sessionDataAudit'
 import {subscribeAthleteSheets} from './athleteSheetStream'
 import { hideOneArchiveCopy } from './archiveExclusions'
 export type AthleteLiveData={personal:Personal[];weeks:ProgramWeek[];groups:Groups}
-export function useAthleteLive(archiveRequested:()=>boolean=()=>true){
+export function useAthleteLive(archiveRequested:()=>boolean=()=>true,enabled:()=>boolean=()=>true){
  const router=useRouter()
  const status=ref<'loading'|'ready'|'error'>('loading')
  const message=ref(isStagingMode()?'Connessione a Firebase staging…':'Connessione a Firebase Emulator…')
@@ -26,7 +26,7 @@ export function useAthleteLive(archiveRequested:()=>boolean=()=>true){
  const avatarUrl=ref('')
  const data=shallowRef<AthleteLiveData|null>(null)
  const archive=ref<HistoricalArchive[]>([])
- const archiveReady=ref(false)
+ const archiveReady=ref(false),archiveError=ref('')
  const hiddenArchiveIds=ref(new Set<string>())
  const snapshots=ref(0)
  const updatedAt=ref('')
@@ -35,8 +35,10 @@ export function useAthleteLive(archiveRequested:()=>boolean=()=>true){
  let archiveStarted=false,scopeClosed=false
  let stopSheets:Unsubscribe|null=null,stopArchive:Unsubscribe|null=null,stopExclusions:Unsubscribe|null=null,stopAuth:Unsubscribe|null=null
  function close(){scopeClosed=true;startArchive=null;archiveReady.value=false;stopSheets?.();stopSheets=null;stopArchive?.();stopArchive=null;stopExclusions?.();stopExclusions=null;stopAuth?.();stopAuth=null}
- watch(archiveRequested,on=>{if(on)startArchive?.()})
- onMounted(async()=>{
+ let started=false,mounted=false
+ async function start(){
+  if(started||!alive||!mounted||!enabled())return
+  started=true
   const audit=beginSessionDataAudit('athlete-workspace')
   try{
    const staged=isStagingMode()
@@ -79,21 +81,21 @@ export function useAthleteLive(archiveRequested:()=>boolean=()=>true){
    if(scopeClosed){stopSheets?.();stopSheets=null;return}
    startArchive=()=>{
     if(!alive||scopeClosed||archiveStarted||auth.currentUser?.uid!==verified.uid)return
-    archiveStarted=true
+    archiveStarted=true;archiveError.value=''
+    let archiveFailed=false
+    const failArchive=(error:Error)=>{if(!alive||scopeClosed||archiveFailed)return;archiveFailed=true;archiveReady.value=false;archiveError.value=error.message;stopArchive?.();stopArchive=null;stopExclusions?.();stopExclusions=null}
     let exclusionsReady=false,templatesReady=false
-    const updateReady=()=>{archiveReady.value=exclusionsReady&&templatesReady}
+    const updateReady=()=>{archiveReady.value=!archiveFailed&&exclusionsReady&&templatesReady}
     stopExclusions=onSnapshot(collection(db,'gyms',target.gymId,'athlete_programs',target.athleteId,'archive_exclusions'),snap=>{
-    if(alive&&!scopeClosed){hiddenArchiveIds.value=new Set(snap.docs.map(d=>d.id));exclusionsReady=true;updateReady()}
-   },error=>{if(alive&&!scopeClosed){status.value='error';message.value=`Impossibile leggere le esclusioni dell'archivio: ${error.message}`;close()}})
+    if(alive&&!scopeClosed&&!archiveFailed){hiddenArchiveIds.value=new Set(snap.docs.map(d=>d.id));exclusionsReady=true;updateReady()}
+   },error=>{failArchive(error)})
    stopArchive=onSnapshot(collection(db,'gyms',target.gymId,'athlete_programs',target.athleteId,'archive_templates'),snap=>{
     if(!alive||scopeClosed)return
     archive.value=snap.docs.map(d=>archiveItemFromRaw(d.id,d.data())).sort((a,b)=>a.title.localeCompare(b.title,'it'))
     templatesReady=true;updateReady()
    },error=>{
     if(!alive||scopeClosed)return
-    archiveReady.value=false
-    message.value=`Archivio storico non leggibile: ${error.message}`
-    status.value='error';data.value=null;close()
+    failArchive(error)
    })
    }
    if(archiveRequested())startArchive()
@@ -103,7 +105,10 @@ export function useAthleteLive(archiveRequested:()=>boolean=()=>true){
    message.value=error instanceof Error?error.message:'Sessione Atleta non verificata.'
    close()
   }
- })
+ }
+ watch(enabled,on=>{if(on)void start()})
+ watch(archiveRequested,on=>{if(on)startArchive?.()})
+ onMounted(()=>{mounted=true;return start()})
  onUnmounted(()=>{alive=false;close();data.value=null;archive.value=[]})
  async function hideArchiveCopy(id:string){
   const s=session.value
@@ -113,5 +118,5 @@ export function useAthleteLive(archiveRequested:()=>boolean=()=>true){
   const {db}=isStagingMode()?getStagingClients():getLocalEmulatorClients()
   await hideOneArchiveCopy(db,s,id)
  }
- return {status,message,session,data,avatarUrl,archive,archiveReady,hiddenArchiveIds,hideArchiveCopy,snapshots,updatedAt}
+ return {status,message,session,data,avatarUrl,archive,archiveReady,archiveError,hiddenArchiveIds,hideArchiveCopy,snapshots,updatedAt}
 }

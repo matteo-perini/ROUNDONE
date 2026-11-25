@@ -168,8 +168,8 @@ html:root .as-athlete .brand img{border-radius:8px !important;}
 html:root .as-athlete .top-actions .header-avatar{border-radius:50% !important;}
 html:root .as-athlete .header-avatar img{border-radius:50% !important;}
 html:root .as-athlete .bottom-nav a{border-radius:8px !important;}
-html:root .as-athlete:not(.bookings-mode) .panel{border-radius:12px !important;}
-html:root .as-athlete:not(.bookings-mode) .pill{border-radius:9px !important;}
+html:root .as-athlete:not(.bookings-mode) .panel:not(:where(.lf-native-track-page[data-lf-screen="agenda"] *)){border-radius:12px !important;}
+html:root .as-athlete:not(.bookings-mode) .pill:not(:where(.lf-native-track-page[data-lf-screen="agenda"] *)){border-radius:9px !important;}
 html:root .as-athlete .athlete-home-quick-link{border-radius:8px !important;}
 html:root .as-athlete .athlete-quick-icon{border-radius:8px !important;}
 html:root .as-athlete .athlete-welcome-icon{border-radius:12px !important;}

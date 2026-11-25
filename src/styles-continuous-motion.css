@@ -68,3 +68,9 @@
  background:linear-gradient(90deg,rgba(31,49,65,.13),var(--bg,#F9FAFB) 27%,var(--bg,#F9FAFB) 73%,rgba(31,49,65,.13));
 }
 @media(prefers-reduced-motion:reduce){.lf-premium-page-seam{display:none!important}}
+
+/* E.8.5: booking palette belongs to its own real pane, never the moving shell. */
+@media(max-width:799px){
+ .lf-native-track-page.bookings-mode{padding-bottom:12px;min-height:0}
+ .lf-native-track-page[data-lf-screen="agenda"]{background:var(--bg)}
+}

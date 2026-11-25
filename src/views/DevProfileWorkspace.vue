@@ -1,21 +1,26 @@
 <script setup lang="ts">
+import {accountKey} from '../features/platform/platformModel'
 import LocalLoadingSkeleton from '../components/LocalLoadingSkeleton.vue'
 /** Profilo V1, utente Auth verificato, lettura realtime. Scritture live protette. */
 import {ref,onMounted,onUnmounted,computed,watch} from 'vue'
 import {doc,getDocFromServer,onSnapshot,updateDoc,setDoc,type Unsubscribe} from 'firebase/firestore'
 import {readVerifiedDevSession,type VerifiedDevSession} from '../integrations/firebase/devSession'
 import {isStagingMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
-import {readStagingDetails} from '../integrations/firebase/stagingSession'
+import {readStagingDetails,stagingSession} from '../integrations/firebase/stagingSession'
 import {getStagingClients} from '../integrations/firebase/stagingClient'
 import {getLocalEmulatorClients} from '../integrations/firebase/emulatorClient'
-import {RouterLink,useRoute} from 'vue-router'
+import {RouterLink,useRoute,useRouter} from 'vue-router'
 import {compressedAvatar,photoFileSupported} from '../features/profile/imageProcessing'
 import LionIcon from '../components/LionIcon.vue'
 import ProfileOverview from '../components/ProfileOverview.vue'
 import {readCoachMetrics,type CoachMetrics} from '../features/profile/coachMetrics'
 import {normalizeMeasurement,validMeasurement} from '../features/profile/profileMeasurements'
-const route=useRoute()
+const props=withDefaults(defineProps<{embedded?:boolean;pageActive?:boolean}>(),{embedded:false,pageActive:true})
+const route=useRoute(),router=useRouter()
+const activePage=computed(()=>!props.embedded||props.pageActive&&route.path==='/profilo')
 const session=ref<VerifiedDevSession|null>(null),busy=ref(false),notice=ref('Caricamento profilo…')
+const embeddedScope=accountKey(stagingSession.value)
+if(props.embedded){const unregister=router.beforeEach((to,from)=>!embeddedScope||accountKey(stagingSession.value)!==embeddedScope?true:from.path==='/profilo'&&to.path!=='/profilo'&&busy.value?false:true);onUnmounted(unregister)}
 const editing=ref(false),photo=ref(''),newPhoto=ref(''),fileInput=ref<HTMLInputElement|null>(null)
 const gymName=ref('Lion Fit')
 const metrics=ref<CoachMetrics>({})
@@ -25,7 +30,7 @@ const displayLocation=computed(()=>{
  const value=location.value.trim().replace(/^IT(?=[\s·,/-]|$)[\s·,/-]*/i,'').trim()
  return /^italia$/i.test(value)||!value?'Italia':value
 })
-const canSave=computed(()=>!isStagingMode()||mayWriteLive())
+const canSave=computed(()=>activePage.value&&(!isStagingMode()||mayWriteLive()))
 const profileLoaded=ref(false)
 let alive=true,stop:Unsubscribe|null=null
 const safePhoto=(value:unknown)=>typeof value==='string' && value.length<870000 && (/^data:image\/(jpeg|png|webp);base64,/.test(value)||/^https:\/\//.test(value))?value:''
@@ -38,6 +43,7 @@ onMounted(async()=>{try{
  const details=isStagingMode()?await readStagingDetails():null
  const s=details?.session??await readVerifiedDevSession()
  if(!alive)return
+ if(props.embedded&&s.role!=='atleta')throw new Error('Sessione Atleta non valida.')
  if(!isStagingMode()&&s.gymId!=='gym_lab2c_a')throw new Error('Palestra non autorizzata')
  session.value=s;email.value=s.email||''
  try{const gym=details?.gym??await getDocFromServer(doc((isStagingMode()?getStagingClients():getLocalEmulatorClients()).db,'gyms',s.gymId));if(gym.exists())gymName.value=String(gym.data().name||gym.data().gymName||'Lion Fit')}catch{}
@@ -54,10 +60,10 @@ onMounted(async()=>{try{
   // First snapshot hydrates the form even when /profilo?edit=1 opened directly.
   if(!profileLoaded.value||!editing.value)readProfile(snap.data());profileLoaded.value=true;notice.value=''
  },e=>{if(alive){profileLoaded.value=false;notice.value=e.message}})
- if(route.query.edit==='1')editing.value=true
+ if(activePage.value&&route.query.edit==='1')editing.value=true
  }catch(e){profileLoaded.value=false;notice.value=e instanceof Error?e.message:String(e)}
 })
-watch(()=>route.query.edit,val=>{if(val==='1')editing.value=true})
+watch([()=>route.query.edit,activePage],([val,active])=>{if(active&&val==='1')editing.value=true})
 onUnmounted(()=>{alive=false;stop?.()})
 async function choosePhoto(ev:Event){const input=ev.target as HTMLInputElement;const file=input.files?.[0];input.value='';if(!file)return
  if(!photoFileSupported(file)){notice.value='Foto non supportata o oltre 40 MB prima della compressione.';return}

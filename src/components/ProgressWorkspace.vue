@@ -1,14 +1,17 @@
 <script setup lang="ts">
+import {accountKey} from '../features/platform/platformModel'
 import LocalLoadingSkeleton from './LocalLoadingSkeleton.vue'
 /** LionFit Progressi 360 — dedicated, tenant-scoped records, no legacy sheet mutations. */
 import {computed,onMounted,onUnmounted,ref,shallowRef,watch,nextTick} from 'vue'
-import {useRoute,RouterLink,onBeforeRouteLeave} from 'vue-router'
+import {useRoute,useRouter,RouterLink,onBeforeRouteLeave} from 'vue-router'
 import {collection,doc,onSnapshot,query,where,type Unsubscribe} from 'firebase/firestore'
 import {onAuthStateChanged} from 'firebase/auth'
 import {getStagingClients} from '../integrations/firebase/stagingClient'
-import {readStagingSession,readNavigationSession,type StagingSession} from '../integrations/firebase/stagingSession'
+import {readStagingSession,readNavigationSession,stagingSession,type StagingSession} from '../integrations/firebase/stagingSession'
 import {isOperationalMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
 import {watchAthleteSheets} from '../integrations/firestore/sheets'
+import {subscribeAthleteSheets} from '../features/athletes/athleteSheetStream'
+import type {AthleteLiveData} from '../features/athletes/useAthleteLive'
 import {watchProgress,watchChecks,watchGoals,addGoal,setGoalStatus,recordSession,loadPhoto,checkCollection,correctWorkout,watchCorrectionHeads,deleteWorkout,watchRevisions,requestRevision,changeRevisionStatus,syncPendingWorkout,checkSharingEnabled,watchCheckShares,changeCheckShare,type ProgramRevision,type RevisionStatus} from '../integrations/firestore/progress'
 import {uniqueProgressSheets,emptyEntries,normalizeEntries,exerciseSeries,sheetSummary,progressMetrics,sheetPerformanceTimeline,setLabel,historySheets,historyExercises,matchesHistoryExercise,lastSet,applyCorrectionHeads,availableWorkoutSlots,type CorrectionHead,type WorkoutSet,type ProgressSheet,type RecordedExercise,type ProgressSession,type ProgressCheck,type CheckPhoto} from '../features/progress/progressModel'
 import {archiveItemFromRaw,type HistoricalArchive} from '../features/athletes/labArchive'
@@ -33,8 +36,9 @@ import {readLegacyExerciseCatalog} from '../integrations/firestore/legacyExercis
 import {uiText} from '../features/i18n/interfaceLanguage'
 import {activeAssignmentGroups,romeDate} from '../features/sheets/assignmentPolicy'
 import type {Personal,ProgramWeek,Groups,ExerciseRecord} from '../features/sheets/domain'
-const props=defineProps<{role:'athlete'|'coach'}>()
-const route=useRoute()
+const props=withDefaults(defineProps<{role:'athlete'|'coach';embedded?:boolean;pageActive?:boolean}>(),{embedded:false,pageActive:true})
+const route=useRoute(),router=useRouter()
+const activePage=computed(()=>!props.embedded||props.pageActive&&route.path==='/progressi')
 const context=shallowRef<StagingSession|null>(null)
 const athleteId=ref(''),athletes=ref<Array<{id:string;name:string}>>([]),loading=ref(true),error=ref(''),writeError=ref(''),notice=ref('')
 const sheetData=shallowRef<{personal:Personal[];weeks:ProgramWeek[];groups:Groups}|null>(null)
@@ -76,7 +80,7 @@ const focusProgress=computed(()=>selectedSummary.value.total?Math.round(100*edit
 watch(stepIndex,()=>{if(focusMode.value)void nextTick(()=>focusScroll.value?.scrollTo({top:0}))})
 const focusCatalogIndex=computed(()=>new Map(focusCatalog.value.map(e=>[e.id,e])))
 function focusExercise(i:number){const ex=activePrescription.value[i];if(!ex)return null;const id=ex.exerciseId||ex.catalogId;if(id)return focusCatalogIndex.value.get(id)||null;const matches=exactCatalogMatches(focusCatalog.value,ex.name);return matches.length===1?matches[0]:null}
-async function enterFocus(){if(!selectedSheet.value||tab.value!=='record'||props.role!=='athlete'||focusMode.value)return;focusOpener=document.activeElement instanceof HTMLElement?document.activeElement:null;focusTarget.value=focusRoot.value?.closest<HTMLElement>('.app')||null;if(!focusTarget.value){focusOpener=null;return}guided.value=true;showSummary.value=false;focusMode.value=true;const request=++focusLoad;await nextTick();if(!focusMode.value)return;const root=focusRoot.value;if(root){const inert:HTMLElement[]=[];for(const el of Array.from(root.parentElement?.children||[])){if(el instanceof HTMLElement&&el!==root&&!el.inert){el.inert=true;inert.push(el)}}focusLock={overflow:document.body.style.overflow,inert};document.body.style.overflow='hidden';root.focus();if(nativeFullscreenAvailable&&!document.fullscreenElement)void nativeFullscreen()}
+async function enterFocus(){if(!activePage.value||!selectedSheet.value||tab.value!=='record'||props.role!=='athlete'||focusMode.value)return;focusOpener=document.activeElement instanceof HTMLElement?document.activeElement:null;focusTarget.value=focusRoot.value?.closest<HTMLElement>('.app')||null;if(!focusTarget.value){focusOpener=null;return}guided.value=true;showSummary.value=false;focusMode.value=true;const request=++focusLoad;await nextTick();if(!focusMode.value)return;const root=focusRoot.value;if(root){const inert:HTMLElement[]=[];for(const el of Array.from(root.parentElement?.children||[])){if(el instanceof HTMLElement&&el!==root&&!el.inert){el.inert=true;inert.push(el)}}focusLock={overflow:document.body.style.overflow,inert};document.body.style.overflow='hidden';root.focus();if(nativeFullscreenAvailable&&!document.fullscreenElement)void nativeFullscreen()}
  try{const rows=await loadCatalog(readLegacyExerciseCatalog);if(focusMode.value&&request===focusLoad)focusCatalog.value=rows}catch{/* The workout stays usable without illustrations. */}}
 function releaseFocus(){focusLoad++;focusCatalog.value=[];const root=focusRoot.value;if(root&&document.fullscreenElement===root)void document.exitFullscreen?.().catch(()=>{});if(focusLock){for(const el of focusLock.inert)el.inert=false;document.body.style.overflow=focusLock.overflow;focusLock=null}const opener=focusOpener;focusOpener=null;focusMode.value=false;void nextTick(()=>{if(opener?.isConnected)opener.focus()})}
 async function nativeFullscreen(){const root=focusRoot.value;if(!root)return;try{if(!document.fullscreenElement&&root.requestFullscreen){await root.requestFullscreen();if(!focusMode.value&&document.fullscreenElement===root)await document.exitFullscreen()}}catch{/* Immersive in-app fullscreen remains active. */}}
@@ -100,11 +104,16 @@ const localConflict=ref(false)
 const checkScope=computed(()=>({gymId:context.value?.gymId||'',athleteId:athleteId.value,actorId:context.value?.uid||''}))
 const sharedChecks=computed(()=>permittedChecks(checks.value,props.role,checkScope.value,shareIds.value,shareEnabled&&shareReady.value,online.value))
 const photoScope=computed(()=>`${context.value?.gymId||''}:${athleteId.value}`)
-const canWrite=computed(()=>props.role==='athlete'&&mayWriteLive()&&context.value?.uid===athleteId.value)
+const canWrite=computed(()=>activePage.value&&props.role==='athlete'&&mayWriteLive()&&context.value?.uid===athleteId.value)
 const canEditHistory=computed(()=>canWrite.value&&online.value&&correctionReady.value)
 const canDeleteWorkout=computed(()=>canWrite.value&&online.value)
 const hasDraft=computed(()=>editor.value.some(e=>e.skipped||e.sets.some(s=>s.kg!==null||s.reps!==null)))
-onBeforeRouteLeave(()=>!hasDraft.value||(!!offlineState.value?.draft&&!offlineError.value)||window.confirm('L’allenamento non è ancora salvato. Vuoi uscire?'))
+function canLeaveWorkout(){return !hasDraft.value||(!!offlineState.value?.draft&&!offlineError.value)||window.confirm('L’allenamento non è ancora salvato. Vuoi uscire?')}
+// In the shared route the component may have mounted under /archivio. A per-record
+// leave hook would be registered against the wrong record. Scope this guard to /progressi.
+const embeddedScope=accountKey(stagingSession.value)
+if(props.embedded){const unregister=router.beforeEach((to,from)=>!embeddedScope||accountKey(stagingSession.value)!==embeddedScope?true:from.path==='/progressi'&&to.path!=='/progressi'?(!busy.value&&!syncing.value&&!reportBusy.value&&canLeaveWorkout()):true);onUnmounted(unregister)}
+else onBeforeRouteLeave(canLeaveWorkout)
 const canManageGoals=computed(()=>props.role==='coach'&&mayWriteLive()&&!!context.value&&!!athleteId.value&&context.value.uid!==athleteId.value)
 const goalTitle=ref(''),goalNotes=ref(''),goalDate=ref(''),goalBusy=ref(false),goalError=ref(''),showArchivedGoals=ref(false)
 const visibleGoals=computed(()=>shownGoals(goals.value,showArchivedGoals.value))
@@ -153,11 +162,18 @@ function recordedAt(value:unknown){try{const d=(value as {toDate?:()=>Date}|null
 const formatKg=(n:number)=>n.toLocaleString('it-IT',{maximumFractionDigits:1})
 const cleanFile=(file?:File)=>file?`${file.name.slice(0,22)} · ${(file.size/1024/1024).toFixed(1)} MB origine`:''
 let shortcutConsumed=false
+let refreshActiveCache:(()=>void)|null=null
+function consumeShortcut(){
+ if(!activePage.value||props.role!=='athlete'||shortcutConsumed||chosenSheetId.value)return
+ const requested=typeof route.query.sheetId==='string'?route.query.sheetId:''
+ const found=requested?sheets.value.find(x=>x.id===requested||x.sourceId===requested):undefined
+ if(found){shortcutConsumed=true;tab.value='record';openSheet(found)}
+}
 let stops:Unsubscribe[]=[],stopChild:Unsubscribe[]=[],alive=true,stopProgress:Unsubscribe|null=null,stopDirect:Unsubscribe|null=null
 function localDate(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
 function withinPeriod(value:string,p:string){if(p==='all')return true;const n=Number(p);if(!Number.isInteger(n))return true;const after=new Date();after.setUTCMonth(after.getUTCMonth()-n);return value>=after.toISOString().slice(0,10)}
 function exerciseKeyLocal(ex:{exerciseId?:string;catalogId?:string;id?:string},i:number){return String(ex.exerciseId||ex.catalogId||ex.id||`position:${i}`)}
-function stopCurrent(){if(focusMode.value)releaseFocus();childEpoch++;checksStarted=false;shareStarted=false;goalsStarted=false;checksState.value='idle';goalsState.value='idle';restoring=true;onlineWorkoutRequest.value='';offlineScope.value=null;offlineState.value=null;offlineError.value='';localConflict.value=false;downloadedMode.value=false;shareIds.value=[];shareReady.value=false;selectedPhotos.value={};stopProgress?.();stopProgress=null;stopDirect?.();stopDirect=null;clearTimer();pageSize.value=250;detailId.value='';directSession.value=null;savedSessionId.value='';correction.value=null;revisions.value=[];revisionError.value='';historyListFilter.value='';activePrescription.value=[];tab.value='home';photoStatus.value='';for(const f of stopChild)f();stopChild=[];sheetData.value=null;archived.value=[];rawSessions.value=[];revisionSheet.value='';revisionNotes.value='';reportNotes.value='';correctionHeads.value=[];correctionReady.value=false;correctionError.value='';workoutConfirm.value=null;checks.value=[];goals.value=[];goalError.value='';goalTitle.value='';goalNotes.value='';goalDate.value='';chosenSheetId.value='';selectedSheet.value=null;editor.value=[];historySheetId.value='';historyKey.value='';restoring=false}
+function stopCurrent(){refreshActiveCache=null;if(focusMode.value)releaseFocus();childEpoch++;checksStarted=false;shareStarted=false;goalsStarted=false;checksState.value='idle';goalsState.value='idle';restoring=true;onlineWorkoutRequest.value='';offlineScope.value=null;offlineState.value=null;offlineError.value='';localConflict.value=false;downloadedMode.value=false;shareIds.value=[];shareReady.value=false;selectedPhotos.value={};stopProgress?.();stopProgress=null;stopDirect?.();stopDirect=null;clearTimer();pageSize.value=250;detailId.value='';directSession.value=null;savedSessionId.value='';correction.value=null;revisions.value=[];revisionError.value='';historyListFilter.value='';activePrescription.value=[];tab.value='home';photoStatus.value='';for(const f of stopChild)f();stopChild=[];sheetData.value=null;archived.value=[];rawSessions.value=[];revisionSheet.value='';revisionNotes.value='';reportNotes.value='';correctionHeads.value=[];correctionReady.value=false;correctionError.value='';workoutConfirm.value=null;checks.value=[];goals.value=[];goalError.value='';goalTitle.value='';goalNotes.value='';goalDate.value='';chosenSheetId.value='';selectedSheet.value=null;editor.value=[];historySheetId.value='';historyKey.value='';restoring=false}
 function bindAthlete(id:string){
  stopCurrent();athleteId.value=id
  const s=context.value;if(!s||!id)return
@@ -166,13 +182,18 @@ function bindAthlete(id:string){
  let confirmedSheets=false,confirmedArchive=false
  const epoch=childEpoch,validCache=()=>alive&&epoch===childEpoch&&context.value?.uid===s.uid&&context.value?.gymId===s.gymId&&athleteId.value===id
  const refreshCachedSheets=()=>{if(!validCache()||!confirmedSheets||!confirmedArchive||!online.value||!canWrite.value||!offlineScope.value||!sheetData.value||localConflict.value)return;if(!offlineState.value&&!commitLocal(blankOffline()))return;cacheAutomatically(liveProgressSheets.value)}
- stopChild.push(watchAthleteSheets(db,s.gymId,id,(result,confirmed)=>{
+ refreshActiveCache=refreshCachedSheets
+ const acceptSheets=(result:AthleteLiveData,confirmed?:boolean)=>{
   if(!validCache())return
-  sheetData.value=result;loadedSheets=true;loading.value=false;confirmedSheets=confirmed===true;refreshCachedSheets()
-  const requested=typeof route.query.sheetId==='string'?route.query.sheetId:'';if(props.role==='athlete'&&requested&&!shortcutConsumed&&!chosenSheetId.value){const found=sheets.value.find(x=>x.id===requested||x.sourceId===requested);if(found){shortcutConsumed=true;tab.value='record';openSheet(found)}}
- },e=>{if(validCache()){confirmedSheets=false;error.value='Schede non disponibili: '+e.message;loading.value=false}},props.role==='athlete'))
+  sheetData.value=result;loadedSheets=true;loading.value=false;confirmedSheets=confirmed===true;refreshCachedSheets();consumeShortcut()
+ }
+ const failSheets=(e:Error)=>{if(validCache()){confirmedSheets=false;error.value='Schede non disponibili: '+e.message;loading.value=false}}
+ // A warm embedded Athlete pane shares the existing verified sheet source.
+ // Standalone Coach and offline activation retain their original read path.
+ if(props.embedded&&props.role==='athlete'&&navigator.onLine)stopChild.push(subscribeAthleteSheets(db,s,{next:update=>{if(update.kind==='data')acceptSheets(update.value,update.confirmed);else failSheets(update.error)},reset:()=>{if(validCache()){sheetData.value=null;confirmedSheets=false;loading.value=false;error.value='Sessione cambiata. Riapri LionFit.'}}}))
+ else stopChild.push(watchAthleteSheets(db,s.gymId,id,acceptSheets,failSheets,props.role==='athlete'))
  stopChild.push(onSnapshot(collection(db,'gyms',s.gymId,'athlete_programs',id,'archive_templates'),{includeMetadataChanges:props.role==='athlete'},snap=>{
-  if(validCache()){archived.value=snap.docs.map(d=>archiveItemFromRaw(d.id,d.data()));confirmedArchive=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshCachedSheets();const requested=typeof route.query.sheetId==='string'?route.query.sheetId:'';if(props.role==='athlete'&&requested&&!shortcutConsumed&&!chosenSheetId.value){const found=sheets.value.find(x=>x.id===requested||x.sourceId===requested);if(found){shortcutConsumed=true;tab.value='record';openSheet(found)}}}
+  if(validCache()){archived.value=snap.docs.map(d=>archiveItemFromRaw(d.id,d.data()));confirmedArchive=!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites;refreshCachedSheets();consumeShortcut()}
  },e=>{if(validCache()){confirmedArchive=false;notice.value='Alcune schede storiche non sono leggibili: '+e.message}}))
  bindProgress()
  stopChild.push(watchCorrectionHeads(db,s.gymId,id,v=>{if(alive&&athleteId.value===id){correctionHeads.value=v;correctionReady.value=true;correctionError.value=''}},e=>{if(alive&&athleteId.value===id){correctionReady.value=false;correctionError.value='Correzioni non attive: verificare le nuove Rules Firestore.'}}))
@@ -184,7 +205,7 @@ function bindAthlete(id:string){
 }
 function bindSecondaryTabs(){
  const s=context.value,id=athleteId.value,epoch=childEpoch
- if(!s||!id||!alive)return
+ if(!s||!id||!alive||!activePage.value)return
  const {db}=getStagingClients(),valid=()=>alive&&epoch===childEpoch&&context.value?.uid===s.uid&&context.value?.gymId===s.gymId&&athleteId.value===id
  if((tab.value==='check'||(tab.value==='report'&&props.role==='athlete'))&&!checksStarted){
   checksStarted=true;checksState.value='loading'
@@ -200,6 +221,8 @@ function bindSecondaryTabs(){
  }
 }
 watch(tab,bindSecondaryTabs)
+watch(activePage,active=>{if(!active){shortcutConsumed=false;if(focusMode.value)releaseFocus();clearTimer();return}refreshActiveCache?.();consumeShortcut();bindSecondaryTabs();if(online.value)void flushOffline()})
+watch(()=>route.query.sheetId,()=>{if(activePage.value){shortcutConsumed=false;consumeShortcut()}})
 onMounted(async()=>{assignmentTimer=setInterval(()=>{assignmentClock.value=Date.now()},30_000);window.addEventListener('lionfit:local-back',focusBack);window.addEventListener('online',networkChanged);window.addEventListener('offline',networkChanged);window.addEventListener('storage',externalStorage); 
  if(!isOperationalMode()){loading.value=false;error.value='Progressi LIVE disponibile solo con accesso Firebase configurato.';return}
  try{
@@ -269,7 +292,7 @@ function changeAlternative(i:number,choice:number){const base=selectedSheet.valu
 function closeWorkout(){if(hasDraft.value&&!window.confirm('Abbandonare questa registrazione non salvata?'))return;if(offlineState.value&&!commitLocal({...offlineState.value,draft:null}))return;if(focusMode.value)releaseFocus();chosenSheetId.value='';selectedSheet.value=null;editor.value=[];clearTimer()}
 function clearTimer(){timerReset.value++}
 function step(delta:number){clearTimer();if(focusMode.value)focusRoot.value?.scrollTo({top:0});if(stepIndex.value+delta>=exerciseGroups.value.length){showSummary.value=true;return}showSummary.value=false;stepIndex.value=Math.max(0,stepIndex.value+delta)}
-watch(tab,()=>{if(typeof window!=='undefined')window.scrollTo({top:0,behavior:'auto'})})
+watch(tab,()=>{if(!activePage.value||typeof window==='undefined')return;const pane=props.embedded?document.querySelector<HTMLElement>('[data-lf-track-path="/progressi"].lf-native-track-page'):null;if(pane)pane.scrollTop=0;else window.scrollTo({top:0,behavior:'auto'})})
 const revisionLabels:Record<RevisionStatus,string>={pending:'Da valutare',working:'In lavorazione',completed:'Completata'}
 async function sendRevision(){const s=context.value,sh=sheets.value.find(x=>x.id===revisionSheet.value);if(!s||!sh||!canWrite.value||busy.value)return;busy.value=true;revisionError.value='';try{await requestRevision(getStagingClients().db,s.gymId,s.uid,sh,revisionReason.value,revisionNotes.value,s.uid);revisionNotes.value='';notice.value='Richiesta inviata al Coach.'}catch(e){revisionError.value=e instanceof Error?e.message:String(e)}finally{busy.value=false}}
 async function updateRevision(r:ProgramRevision,status:RevisionStatus){const s=context.value;if(!s||!canManageGoals.value||busy.value)return;busy.value=true;revisionError.value='';try{await changeRevisionStatus(getStagingClients().db,s.gymId,athleteId.value,r.id,status,s.uid);notice.value='Richiesta aggiornata.'}catch(e){revisionError.value=e instanceof Error?e.message:String(e)}finally{busy.value=false}}
@@ -297,7 +320,7 @@ function networkChanged(){online.value=navigator.onLine;if(!online.value&&offlin
 function externalStorage(e:StorageEvent){const scope=offlineScope.value;if(!scope||e.key!=='lionfit.offline.v1:'+JSON.stringify([scope.project,scope.gym,scope.uid]))return;localConflict.value=true;offlineScope.value=null;offlineState.value=null;offlineError.value='Dati offline modificati in un’altra scheda. Ricarica questa pagina prima di continuare.'}
 async function flushOffline(){const scope=offlineScope.value,s=context.value;if(!scope||!s||!canWrite.value||!online.value||syncing.value||!offlineState.value?.queue.length)return;syncing.value=true;offlineError.value='';try{
  const verified=await readStagingSession();if(verified.uid!==scope.uid||verified.gymId!==scope.gym||verified.role!=='atleta')throw new Error('Account non corrispondente alla coda offline.')
- while(offlineState.value?.queue.length){const pending=offlineState.value.queue[0];if(!alive||offlineScope.value!==scope||!online.value)break;const result=await syncPendingWorkout(getStagingClients().db,scope.gym,scope.uid,pending,verified.uid);if(!alive||offlineScope.value!==scope||!offlineState.value)break;if(!commitLocal(acknowledgeWorkout(offlineState.value,pending.id)))break;savedSessionId.value=result==='deleted'?'':pending.id;lastSaved.value=result!=='deleted';notice.value=result==='deleted'?'Registrazione già eliminata, non ricaricata.':'Allenamento salvato.'}
+ while(offlineState.value?.queue.length){const pending=offlineState.value.queue[0];if(!alive||!activePage.value||offlineScope.value!==scope||!online.value)break;const result=await syncPendingWorkout(getStagingClients().db,scope.gym,scope.uid,pending,verified.uid);if(!alive||offlineScope.value!==scope||!offlineState.value)break;if(!commitLocal(acknowledgeWorkout(offlineState.value,pending.id)))break;savedSessionId.value=result==='deleted'?'':pending.id;lastSaved.value=result!=='deleted';notice.value=result==='deleted'?'Registrazione già eliminata, non ricaricata.':'Allenamento salvato.'}
  }catch(e){if(alive)offlineError.value='Sincronizzazione non riuscita: '+String(e)+'. I dati restano sul dispositivo.'}finally{syncing.value=false}}
 async function saveWorkout(){
  if(!selectedSheet.value||!context.value||!canWrite.value||busy.value)return

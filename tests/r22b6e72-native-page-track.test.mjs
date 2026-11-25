@@ -12,7 +12,7 @@ function fixture(){
  const track=createNativePageTrack(rail,'/home')
  return {panes,rail,track,animations,counts:()=>({reads,queries})}
 }
-test('only the three pilot paths participate, geometry is finite and direction is stable',()=>{
+test('the six athlete dock paths participate, geometry is finite and direction is stable',()=>{
  assert.equal(nativeTrackSide('/home','/piano'),1);assert.equal(nativeTrackSide('/archivio','/piano'),-1);assert.equal(nativeTrackSide('/home','/messaggi'),0)
  assert.equal(nativeTrackOffset(-150,366,1),-150);assert.equal(nativeTrackOffset(150,366,1),0);assert.equal(nativeTrackOffset(-900,366,1),-366*.88);assert.equal(nativeTrackOffset(NaN,366,1),0)
  assert.equal(nativeTrackHeight(95,776),681);assert.equal(nativeTrackHeight(900,776),null);assert.equal(nativeTrackHeight(100,NaN),null)
@@ -40,5 +40,5 @@ test('reduced motion and missing WAAPI never leave a moving rail or blank pane',
 })
 test('verified scope, one workspace, lazy archive loading and safe inactive pages',()=>{
  const view=read('src/views/AthleteLiveWorkspace.vue'),app=read('src/App.vue'),plan=read('src/components/AthletePlanContent.vue'),home=read('src/components/AthleteHomeContent.vue'),css=read('src/styles-continuous-motion.css')
- assert.match(view,/accountKey\(session.value\)===accountKey\(stagingSession.value\)/);assert.match(view,/data&&scopeValid/);assert.match(view,/trackViewport.value.inert=!valid/);assert.equal((view.match(/=useAthleteLive\(/g)||[]).length,1);assert.match(view,/useAthleteLive\(\(\)=>props.screen==='archive'\)/);assert.match(view,/:inert="page!==props.screen"/);assert.match(view,/:page-active="page===props.screen"/);assert.match(plan,/if\(!active\)\{selectedDay.value=null;opened.value=null/);assert.match(home,/activeSheet.value=null;videoOpen.value=false/);assert.match(css,/overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain/);assert.match(app,/nativeHandled=swipeRouteInstance\?\.commitTrack/);assert.match(app,/if\(typeof trackOffset==='number'\)/);assert.match(app,/swipeRouteInstance\?\.cancelTrack\?\.\(false\)/)
+ assert.match(view,/accountKey\(session.value\)===accountKey\(stagingSession.value\)/);assert.match(view,/data&&scopeValid/);assert.match(view,/trackViewport.value.inert=!valid/);assert.equal((view.match(/=useAthleteLive\(/g)||[]).length,1);assert.match(view,/useAthleteLive\(\(\)=>archiveRequested.value,\(\)=>coreRequested.value&&shellScopeValid.value\)/);assert.match(view,/:inert="page!==props.screen"/);assert.match(view,/:page-active="page===props.screen"/);assert.match(plan,/if\(!active\)\{selectedDay.value=null;opened.value=null/);assert.match(home,/activeSheet.value=null;videoOpen.value=false/);assert.match(css,/overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain/);assert.match(app,/nativeHandled=swipeRouteInstance\?\.commitTrack/);assert.match(app,/if\(typeof trackOffset==='number'\)/);assert.match(app,/swipeRouteInstance\?\.cancelTrack\?\.\(false\)/)
 })

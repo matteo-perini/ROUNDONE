@@ -786,15 +786,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .as-athlete .bottom-nav a[href*="prenotazioni"]:not(.router-link-active){color:#79eeb5}
 .theme-light.as-athlete .bottom-nav a{color:#6b7880}
 .theme-light.as-athlete .bottom-nav a.router-link-active{background:#dcf5e8;color:#147943}
-.as-athlete:not(.bookings-mode) .panel{background:var(--athlete-panel);color:var(--athlete-ink);border-color:var(--athlete-border);border-radius:15px;padding:15px}
-.as-athlete:not(.bookings-mode) .stack{gap:14px}
-.as-athlete:not(.bookings-mode) .panel+.panel{margin-top:0}
-.as-athlete:not(.bookings-mode) .card-heading{font-size:14px;letter-spacing:.05em;font-weight:950}
-.as-athlete:not(.bookings-mode) .pill{border-radius:9px;padding:5px 8px;font-size:9px;line-height:1.25;white-space:normal;overflow-wrap:anywhere}
+.as-athlete:not(.bookings-mode) .panel:not(:where(.lf-native-track-page[data-lf-screen="agenda"] *)){background:var(--athlete-panel);color:var(--athlete-ink);border-color:var(--athlete-border);border-radius:15px;padding:15px}
+.as-athlete:not(.bookings-mode) .stack:not(:where(.lf-native-track-page[data-lf-screen="agenda"] *)){gap:14px}
+.as-athlete:not(.bookings-mode) .panel+.panel:not(:where(.lf-native-track-page[data-lf-screen="agenda"] *)){margin-top:0}
+.as-athlete:not(.bookings-mode) .card-heading:not(:where(.lf-native-track-page[data-lf-screen="agenda"] *)){font-size:14px;letter-spacing:.05em;font-weight:950}
+.as-athlete:not(.bookings-mode) .pill:not(:where(.lf-native-track-page[data-lf-screen="agenda"] *)){border-radius:9px;padding:5px 8px;font-size:9px;line-height:1.25;white-space:normal;overflow-wrap:anywhere}
 .as-athlete .row.between{align-items:center}
-.as-athlete:not(.bookings-mode) .eyebrow{font-size:9px;letter-spacing:.085em;color:var(--mint)}
-.as-athlete:not(.bookings-mode) .muted-head{font-size:10px;font-weight:900;letter-spacing:.075em}
-.as-athlete:not(.bookings-mode) .small{font-size:10px}
+.as-athlete:not(.bookings-mode) .eyebrow:not(:where(.lf-native-track-page[data-lf-screen="agenda"] *)){font-size:9px;letter-spacing:.085em;color:var(--mint)}
+.as-athlete:not(.bookings-mode) .muted-head:not(:where(.lf-native-track-page[data-lf-screen="agenda"] *)){font-size:10px;font-weight:900;letter-spacing:.075em}
+.as-athlete:not(.bookings-mode) .small:not(:where(.lf-native-track-page[data-lf-screen="agenda"] *)){font-size:10px}
 .as-athlete :is(button,a,input,select,textarea):focus-visible{outline:2px solid var(--mint);outline-offset:2px}
 
 /* Home V1: accessi rapidi 2x2, saluto compatto e allenamento scuro del giorno. */

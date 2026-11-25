@@ -37,8 +37,8 @@ test('live workspace subscriptions remain at parent instance level', () => {
   assert.ok(!live.includes('<component :is="Component" :key="route.path"'))
 })
 test('the shell never stacks a competing RouterView transition for reused live screens', () => {
-  assert.match(app, /\['\/home','\/piano','\/archivio'\]\.includes\(before\)/)
-  assert.match(app, /\['\/home','\/piano','\/archivio'\]\.includes\(now\)\) chatMotion.value=''/)
+  assert.match(app, /isNativePagePath\(before\)/)
+  assert.match(app, /isNativePagePath\(now\)\) chatMotion.value=''/)
 })
 test('chat and other navbar transitions remain in App', () => {
   assert.match(app, /lf-chat-open/)

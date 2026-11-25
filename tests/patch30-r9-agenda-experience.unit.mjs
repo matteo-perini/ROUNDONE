@@ -63,7 +63,7 @@ test('competition and results are grouped without removing athlete permissions o
 
 test('R9 style only affects athlete agenda, preserves global light theme and reduced motion',()=>{
  assert.match(booking,/:data-r9-athlete="!isCoach"/)
- assert.match(booking,/\.app\.as-athlete \.main-layout\.booking-in-shell \.lf-agenda13\[data-r9-athlete="true"\] \.booking-intro/)
+ assert.match(booking,/\.lf-agenda13\[data-r9-athlete="true"\] \.booking-intro/)
  assert.match(booking,/min-height:0!important/)
  assert.match(booking,/prefers-reduced-motion:reduce/)
  assert.match(booking,/color:var\(--text\)/)

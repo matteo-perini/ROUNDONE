@@ -3,7 +3,7 @@ import {uiText} from '../features/i18n/interfaceLanguage'
 /** Atleta operativo 2M/K: Home/Piano/Archivio originali, SOLO emulator e sola lettura.
  * Il catalogo esercizi e la modale SheetDetail sono gli stessi della versione demo.
  */
-import { computed,ref,watch,onMounted,onUnmounted } from 'vue'
+import { computed,ref,watch,onMounted,onUnmounted,defineAsyncComponent,defineComponent,h,type Component } from 'vue'
 import { useRoute } from 'vue-router'
 import { RouterLink } from 'vue-router'
 import AthletePlanContent from '../components/AthletePlanContent.vue'
@@ -16,6 +16,7 @@ import {useRomeDayClock} from '../features/performance/useRomeDayClock'
 import type {MotionSummary} from '../features/navigation/universalMotion'
 import {accountKey} from '../features/platform/platformModel'
 import {createNativePageTrack,nativeTrackHeight,isNativePagePath,type NativePageTrack} from '../features/navigation/nativePageTrack'
+import {athleteScreenOrder,athleteScreenPath,coreAthleteScreen,athletePageWindow,athletePageUnion,type AthleteScreen} from '../features/navigation/athletePageWindow'
 import {stagingSession} from '../integrations/firebase/stagingSession'
 import LionIcon from '../components/LionIcon.vue'
 import LocalLoadingSkeleton from '../components/LocalLoadingSkeleton.vue'
@@ -27,15 +28,37 @@ import { groupSemanticCopies } from '../features/sheets/semanticDedup'
 import {groupActivePrograms,programForWeek} from '../features/sheets/programFamilies'
 import {joinArchivesWithLegacy,isArchiveCopyLinkedOrEquivalent} from '../features/athletes/legacyArchiveProjection'
 import type { ExerciseRecord } from '../features/sheets/domain'
-const props=defineProps<{screen:'home'|'plan'|'archive'}>()
+const props=defineProps<{screen:AthleteScreen}>()
+// Actual operational components, not cloned DOM or simulated cards.
+const PaneLoading=defineComponent({setup:()=>()=>h(LocalLoadingSkeleton,{variant:'cards',label:'Caricamento sezione…'})})
+const PaneError=defineComponent({setup:()=>()=>h('div',{class:'notice',role:'alert'},['Sezione non disponibile. ',h('button',{type:'button',class:'secondary',onClick:()=>window.location.reload()},'Riprova')])})
+function realPane(loader:()=>Promise<{default:Component}>){return defineAsyncComponent({loader,delay:0,loadingComponent:PaneLoading,errorComponent:PaneError,suspensible:false})}
+const ProgressPane=realPane(()=>import('../components/ProgressWorkspace.vue'))
+const AgendaPane=realPane(()=>import('./LiveBookingWorkspace.vue'))
+const ProfilePane=realPane(()=>import('./DevProfileWorkspace.vue'))
 const route=useRoute()
-// One authorized workspace; three real visual panes, no duplicated workspace.
+// One authorized workspace; six real visual panes, no duplicated workspace.
 const workspaceRoot=ref<HTMLElement|null>(null),trackViewport=ref<HTMLElement|null>(null),trackRail=ref<HTMLElement|null>(null)
-const screenOrder=['home','plan','archive'] as const
-const screenPath={home:'/home',plan:'/piano',archive:'/archivio'} as const
+const screenOrder=athleteScreenOrder
+const screenPath=athleteScreenPath
 const media=window.matchMedia('(max-width: 799px)'),mobile=ref(media.matches)
 const trackMobile=computed(()=>isStagingMode()&&mobile.value)
 const pageScreens=computed(()=>trackMobile.value?screenOrder:[props.screen])
+const initialScope=accountKey(stagingSession.value)
+const shellScopeValid=computed(()=>!isStagingMode()||!!initialScope&&stagingSession.value?.role==='atleta'&&accountKey(stagingSession.value)===initialScope)
+const resident=ref<AthleteScreen[]>(athletePageWindow(props.screen,trackMobile.value))
+let trimTimer:ReturnType<typeof setTimeout>|null=null
+function updateWindow(){
+ if(trimTimer!==null)clearTimeout(trimTimer)
+ const wanted=athletePageWindow(props.screen,trackMobile.value)
+ resident.value=trackMobile.value?athletePageUnion(resident.value,wanted):wanted
+ // Keep outgoing instances until WAAPI settlement/watchdog has finished.
+ trimTimer=setTimeout(()=>{trimTimer=null;resident.value=athletePageWindow(props.screen,trackMobile.value)},560)
+}
+watch([()=>props.screen,trackMobile],updateWindow,{flush:'sync'})
+onUnmounted(()=>{if(trimTimer!==null)clearTimeout(trimTimer)})
+const coreRequested=computed(()=>resident.value.some(coreAthleteScreen))
+const archiveRequested=computed(()=>props.screen==='archive'||trackMobile.value&&resident.value.includes('archive'))
 function syncMobile(){mobile.value=media.matches}
 media.addEventListener('change',syncMobile)
 let engine:NativePageTrack|null=null,engineRail:HTMLElement|null=null,layoutFrame=0,layoutTimer:ReturnType<typeof setTimeout>|null=null,layoutObserver:ResizeObserver|null=null
@@ -58,11 +81,11 @@ onUnmounted(()=>{media.removeEventListener('change',syncMobile);window.removeEve
 function workspaceBack(){window.dispatchEvent(new Event('lionfit:ui-back'))}
 const programArchiveOpen=ref(route.query.view==='programmi')
 watch([()=>props.screen,()=>route.query.view],([screen,v])=>{if(screen==='archive')programArchiveOpen.value=v==='programmi'})
-const {status,message,session,data,avatarUrl,archive,archiveReady,hiddenArchiveIds,snapshots,updatedAt,hideArchiveCopy}=useAthleteLive(()=>props.screen==='archive')
+const {status,message,session,data,avatarUrl,archive,archiveReady,archiveError,hiddenArchiveIds,snapshots,updatedAt,hideArchiveCopy}=useAthleteLive(()=>archiveRequested.value,()=>coreRequested.value&&shellScopeValid.value)
 // The shell and the verified workspace must still agree on the same identity.
 const scopeValid=computed(()=>!isStagingMode()||!!accountKey(session.value)&&accountKey(session.value)===accountKey(stagingSession.value))
 function trackFor(scope:string){
- if(!trackMobile.value||!scopeValid.value||status.value!=='ready'||!data.value||!scope||accountKey(session.value)!==scope||!trackRail.value?.isConnected)return null
+ if(!trackMobile.value||!shellScopeValid.value||!scope||initialScope!==scope||!trackRail.value?.isConnected)return null
  if(engineRail!==trackRail.value){dropEngine();engineRail=trackRail.value;engine=createNativePageTrack(engineRail,screenPath[props.screen])}
  return engine
 }
@@ -70,8 +93,8 @@ function paintTrack(from:string,to:string,offset:number,scope:string){if(!isNati
 function commitTrack(from:string,to:string,duration:number,scope:string){if(!isNativePagePath(from)||!isNativePagePath(to))return false;return trackFor(scope)?.navigate(from,to,duration)??false}
 function cancelTrack(animate:boolean){engine?.cancel(animate)}
 function trackMoving(){return engine?.moving()??false}
-watch([scopeValid,trackMobile,status],()=>{
- const valid=scopeValid.value&&status.value==='ready'
+watch([shellScopeValid,trackMobile],()=>{
+ const valid=shellScopeValid.value
  if(!valid||!trackMobile.value)dropEngine()
  if(trackViewport.value){trackViewport.value.inert=!valid;trackViewport.value.style.visibility=valid?'':'hidden'}
 },{flush:'sync'})
@@ -136,15 +159,24 @@ const livePath=(path:string)=>isStagingMode()?path:`${path}?source=emulator`
 const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${encodeURIComponent(currentWeek.value.id)}&day=${todayIndex.value}`:`/piano?source=emulator&week=${encodeURIComponent(currentWeek.value.id)}&day=${todayIndex.value}`):livePath('/piano'))
 </script>
 <template>
- <div ref="workspaceRoot" class="stack athlete-live-screen" :aria-label="'Area Atleta'">
-  <button v-if="trackMobile&&props.screen!=='home'&&(status!=='ready'||!scopeValid)" type="button" class="lf-route-back lf-native-track-back" :aria-label="uiText('Torna indietro')" @click="workspaceBack"><LionIcon name="back" :size="17"/></button>
-  <LocalLoadingSkeleton v-if="status==='loading'||(status==='ready'&&!scopeValid)" variant="cards" :label="uiText('Caricamento schede e settimane…')"/>
-  <div v-else-if="status==='error'" class="notice" role="alert">{{message}} <button type="button" class="secondary" @click="retryWorkspace">{{uiText("Riprova")}}</button> <RouterLink :to="isStagingMode()?'/accesso':'/dev/accesso'">{{uiText("Torna all'accesso")}}</RouterLink></div>
-  <template v-else-if="data&&scopeValid">
+ <div ref="workspaceRoot" class="stack athlete-live-screen" :class="{'lf-native-external-desktop':!trackMobile&&!coreAthleteScreen(props.screen)}" :aria-label="'Area Atleta'">
+  <div v-if="!shellScopeValid" class="notice" role="alert">Sessione Atleta non valida. <button type="button" class="secondary" @click="retryWorkspace">Riapri LionFit</button></div>
+  <template v-else>
    <div ref="trackViewport" :class="trackMobile?'lf-native-track-viewport':'lf-native-track-pass'">
     <div ref="trackRail" :class="trackMobile?'lf-native-track-rail':'lf-native-track-pass'">
-     <div v-for="page in pageScreens" :key="page" class="lf-r22b5-page" :class="{'lf-native-track-page':trackMobile}" :data-lf-screen="page" :data-lf-track-path="screenPath[page]" :data-lf-track-active="page===props.screen?'true':undefined" :data-lf-track-inactive="page!==props.screen?'true':undefined" :inert="page!==props.screen" :aria-hidden="page!==props.screen?'true':undefined">
+     <div v-for="page in pageScreens" :key="page" class="lf-r22b5-page" :class="{'lf-native-track-page':trackMobile,'booking-in-shell bookings-mode':trackMobile&&page==='agenda','lf-native-external-desktop':!trackMobile&&!coreAthleteScreen(page)}" :data-lf-screen="page" :data-lf-track-path="screenPath[page]" :data-lf-track-active="page===props.screen?'true':undefined" :data-lf-track-inactive="page!==props.screen?'true':undefined" :inert="page!==props.screen" :aria-hidden="page!==props.screen?'true':undefined">
       <button v-if="trackMobile&&page!=='home'" type="button" class="lf-route-back lf-native-track-back" :aria-label="uiText('Torna indietro')" @click="workspaceBack"><LionIcon name="back" :size="17"/></button>
+   <template v-if="!coreAthleteScreen(page)">
+    <template v-if="resident.includes(page)">
+      <ProgressPane v-if="page==='progress'" role="athlete" embedded :page-active="page===props.screen"/>
+      <AgendaPane v-else-if="page==='agenda'" embedded :page-active="page===props.screen"/>
+      <ProfilePane v-else embedded :page-active="page===props.screen"/>
+    </template>
+    <LocalLoadingSkeleton v-else variant="cards" label="Caricamento sezione…"/>
+   </template>
+   <LocalLoadingSkeleton v-else-if="status==='loading'||(status==='ready'&&!scopeValid)" variant="cards" :label="uiText('Caricamento schede e settimane…')"/>
+   <div v-else-if="status==='error'" class="notice" role="alert">{{message}} <button type="button" class="secondary" @click="retryWorkspace">{{uiText("Riprova")}}</button></div>
+   <template v-else-if="data&&scopeValid">
    <template v-if="page==='plan'">
     <AthletePlanContent :page-active="page===props.screen" archive-expired :athlete-key="session?.uid||''" :personal="data.personal" :weeks="data.weeks" :groups="data.groups" :week-id="selectedWeek||currentWeek?.id||''" :initial-day="requestedDay" @update:week-id="id => { selectedWeek=id }" />
     <nav class="lf-r13-plan-archives" aria-label="Archivi del piano"><span>CONSULTA LO STORICO</span><div class="lf-r13-plan-archive-links"><RouterLink :to="livePath('/archivio')" class="secondary">Archivio schede <span aria-hidden="true">›</span></RouterLink><RouterLink :to="{path:'/archivio',query:{...(isStagingMode()?{}:{source:'emulator'}),view:'programmi'}}" class="secondary">Archivio programmazioni <span aria-hidden="true">›</span></RouterLink></div></nav>
@@ -155,7 +187,8 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
    <template v-else-if="page==='archive'">
     <header class="lf-r15-archive-header"><div><span class="lf-r15-eyebrow">IL TUO STORICO</span><h1>Archivio</h1><p>Ritrova le tue schede e le programmazioni concluse.</p></div><span class="lf-r15-count">{{programArchiveOpen?pastPrograms.length:(archiveReady?archiveDistinctCount:'—')}} {{programArchiveOpen?'programmi':'schede'}}</span></header>
     <div class="lf-r15-archive-tabs" role="group" aria-label="Seleziona sezione archivio"><button type="button" :class="!programArchiveOpen?'is-active':''" :aria-pressed="!programArchiveOpen" @click="programArchiveOpen=false">Schede</button><button type="button" :class="programArchiveOpen?'is-active':''" :aria-pressed="programArchiveOpen" @click="programArchiveOpen=true">Programmazioni</button></div>
-    <ProgramHistory v-if="programArchiveOpen" :page-active="page===props.screen" :key="session?.uid" :programs="pastPrograms" :personal="data.personal" :archive="archive" :ready="archiveReady"/>
+    <div v-if="archiveError" class="notice" role="alert">Archivio non disponibile: {{archiveError}} <button type="button" class="secondary" @click="retryWorkspace">Riprova</button></div>
+    <ProgramHistory v-else-if="programArchiveOpen" :page-active="page===props.screen" :key="session?.uid" :programs="pastPrograms" :personal="data.personal" :archive="archive" :ready="archiveReady"/>
     <section v-else v-lf-entrance="{id:'athlete-archive',ready:archiveReady,rows:[{within:'.lf-r15-archive-rows',match:'.lf-archive-v4-item'}]}" class="panel athlete-archive-list lf-r15-archive-list"><div class="lf-r15-archive-list-head"><h2>Le mie schede</h2><span>{{archiveReady?archiveGroups.length:'—'}} visualizzate</span></div>
      <div class="lf-r15-archive-tools"><label class="lf-r15-search"><span class="lf-r15-glass" aria-hidden="true">⌕</span><input v-model="search" type="search" aria-label="Cerca archivio personale" placeholder="Cerca una scheda..."/></label>
       <select v-model="archiveView" aria-label="Filtra archivio personale"><option value="all">Tutte le schede</option><option value="active">Schede assegnate</option><option value="historical">Schede storiche</option><option value="trashed">Schede ritirate</option></select>
@@ -165,6 +198,7 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
      <div v-if="archiveReady" class="lf-r15-archive-rows"><article v-for="g in archiveGroups" :key="g.sheet.id" class="line-card athlete-archive-item lf-archive-v4-item lf-r15-archive-item"><button class="wide athlete-archive-open" type="button" @click="opened=g.sheet" :aria-label="'Apri scheda '+g.sheet.title"><span class="lf-archive-v4-icon" aria-hidden="true">▤</span><span class="lf-r15-archive-item-main"><b>{{g.sheet.title}}</b><small>{{g.sheet.exercises.length}} {{g.sheet.exercises.length===1?'esercizio':'esercizi'}}</small></span><span class="lf-archive-v4-action" aria-hidden="true">Apri <span>›</span></span></button></article></div>
      
     </section>
+   </template>
    </template>
      </div>
     </div>
@@ -176,6 +210,7 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
 
 <style scoped>
 .athlete-live-screen{position:relative}
+.athlete-live-screen.lf-native-external-desktop,.lf-r22b5-page.lf-native-external-desktop{display:contents}
 .lf-r22b5-page{display:flex;flex:1 0 auto;flex-direction:column;gap:13px;min-width:0;width:100%;min-height:0}
 /* R13: Secondary history navigation only on the athlete plan. */
 .lf-r13-plan-archives{width:100%;max-width:100%;padding:4px 2px 10px;display:grid;gap:10px}

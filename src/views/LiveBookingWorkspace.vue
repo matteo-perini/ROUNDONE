@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import {accountKey} from '../features/platform/platformModel'
 import LocalLoadingSkeleton from '../components/LocalLoadingSkeleton.vue'
 import {uiText} from '../features/i18n/interfaceLanguage'
 import CompetitionCover from '../components/CompetitionCover.vue'
@@ -17,7 +18,7 @@ import { computed,onMounted,onUnmounted,ref,watch,nextTick } from 'vue'
 import { RouterLink, useRouter,useRoute } from 'vue-router'
 import { onAuthStateChanged } from 'firebase/auth'
 import { collection, doc, documentId, getDocFromServer, onSnapshot, query, where, Timestamp, type Unsubscribe }  from 'firebase/firestore'
-import { readStagingSession, type StagingSession } from '../integrations/firebase/stagingSession'
+import { readStagingSession, stagingSession, type StagingSession } from '../integrations/firebase/stagingSession'
 import { getStagingClients } from '../integrations/firebase/stagingClient'
 import { useLabStore } from '../stores/lab'
 import {
@@ -33,7 +34,9 @@ import {mayWriteLive} from '../integrations/firebase/stagingConfig'
 import {reservationQueryPredicates,canListPrivateCoachProfiles} from '../features/security/phase1QueryScope'
 import {athleteSlotMonthWindow} from '../features/bookings/monthQueryWindow'
 import {createBoundedLookup} from '../features/bookings/boundedLookup'
+const props=withDefaults(defineProps<{embedded?:boolean;pageActive?:boolean}>(),{embedded:false,pageActive:true})
 const router=useRouter(),route=useRoute(),lab=useLabStore()
+const activePage=computed(()=>!props.embedded||props.pageActive&&route.path==='/prenotazioni')
 const status=ref<'loading'|'ready'|'error'>('loading'),message=ref('Verifica account reale…')
 const session=ref<StagingSession|null>(null)
 const configs=ref<LiveCoachConfig[]>([]),slots=ref<Slot[]>([]),allRows=ref<LiveReservation[]>([])
@@ -59,10 +62,13 @@ const view=ref<CalendarView>('day'),busy=ref(false)
 const upcomingMode=ref(true),filtersOpen=ref(false),rowsLoading=ref(true),expandedBooking=ref('')
 const moving=ref<LiveReservation|null>(null)
 const coachAppointmentOpen=ref(false)
+const embeddedScope=accountKey(stagingSession.value)
+if(props.embedded){const unregister=router.beforeEach((to,from)=>!embeddedScope||accountKey(stagingSession.value)!==embeddedScope?true:from.path==='/prenotazioni'&&to.path!=='/prenotazioni'&&busy.value?false:true);onUnmounted(unregister)}
 const athleteTrail=new AgendaBackTrail()
 let restoringAthleteTab=false
-function agendaPosition():AgendaPosition{return {windowTop:window.scrollY,mainTop:document.querySelector<HTMLElement>('.main-layout')?.scrollTop||0}}
-function restoreAgendaPosition(position:AgendaPosition){void nextTick(()=>{if(route.path!=='/prenotazioni')return;window.scrollTo({top:position.windowTop,behavior:'instant'});const main=document.querySelector<HTMLElement>('.main-layout');if(main)main.scrollTop=position.mainTop})}
+function agendaScrollPort(){return props.embedded?document.querySelector<HTMLElement>('[data-lf-track-path="/prenotazioni"].lf-native-track-page')||document.querySelector<HTMLElement>('.main-layout'):document.querySelector<HTMLElement>('.main-layout')}
+function agendaPosition():AgendaPosition{return {windowTop:window.scrollY,mainTop:agendaScrollPort()?.scrollTop||0}}
+function restoreAgendaPosition(position:AgendaPosition){void nextTick(()=>{if(route.path!=='/prenotazioni')return;window.scrollTo({top:position.windowTop,behavior:'instant'});const main=agendaScrollPort();if(main)main.scrollTop=position.mainTop})}
 watch(athleteTab,(next)=>{if(!restoringAthleteTab)athleteTrail.visit(next,agendaPosition())},{flush:'sync'})
 function replaceAthleteTab(next:AthleteAgendaScreen){athleteTrail.replace(next);restoringAthleteTab=true;try{athleteTab.value=next}finally{restoringAthleteTab=false}}
 function backWithinAthleteAgenda():boolean{
@@ -81,7 +87,7 @@ onMounted(()=>window.addEventListener('lionfit:local-back',handleLocalAgendaBack
 onUnmounted(()=>window.removeEventListener('lionfit:local-back',handleLocalAgendaBack))
 
 function coachAppointmentCreated(id:string,date:string){coachAppointmentOpen.value=false;coachFilter.value='all';serviceFilter.value='all';history.value='all';chooseDate(date);openUpcoming();expandedBooking.value=id;message.value='Appuntamento confermato.'}
-watch(()=>route.query.inbox,v=>{if(typeof v==='string'&&v&&route.path==='/prenotazioni')athleteTab.value='mie'},{immediate:true})
+watch([()=>route.query.inbox,activePage,()=>route.path],([v,active,path])=>{if(active&&typeof v==='string'&&v&&path==='/prenotazioni')athleteTab.value='mie'},{immediate:true})
 
 const competitionEnabled=ref(false),competitionLoading=ref(false),competitionEvents=ref<CompetitionEvent[]>([]),competitionEntries=ref<CompetitionEntry[]>([]),competitionWarning=ref('')
 let competitionStops:Unsubscribe[]=[]
@@ -91,8 +97,8 @@ const myCalendarRows=computed(()=>[...myRows.value.filter(b=>b.status==='confirm
 const calendarPersonalPeriod=ref<'next'|'past'>('next'),selectedCompetitionId=ref('')
 function openCompetition(id=''){selectedCompetitionId.value=id;if(isCoach.value)coachTab.value='competizioni';else athleteTab.value='competizioni'}
 function showAthleteCompetitionMode(mode:'events'|'results'){selectedCompetitionId.value='';athleteTab.value=mode==='results'?'risultati':'competizioni'}
-watch([()=>route.query.competitionId,competitionEnabled],([id,enabled])=>{
- if(!enabled||typeof id!=='string'||!/^[A-Za-z0-9]{20}$/.test(id))return
+watch([()=>route.query.competitionId,competitionEnabled,activePage,()=>route.path],([id,enabled,active])=>{
+ if(!active||!enabled||typeof id!=='string'||!/^[A-Za-z0-9]{20}$/.test(id))return
  if(route.path==='/prenotazioni'||route.path==='/coach/prenotazioni')openCompetition(id)
 },{immediate:true})
 const calendarPersonalRows=computed(()=>myCalendarRows.value.filter(r=>calendarPersonalPeriod.value==='next'?r.startMs>=nowMs.value:r.startMs<nowMs.value))
@@ -249,7 +255,7 @@ function listenReservations(){
 function listenSlots(){
  slotStop?.();slotStop=null;slots.value=[]
  const s=session.value,c=chosenCoach.value
- if(!alive||!s||s.role!=='atleta'||athleteTab.value!=='prenota'||!c)return
+ if(!alive||!activePage.value||!s||s.role!=='atleta'||athleteTab.value!=='prenota'||!c)return
  // Gli slot servono al calendario mensile dell'Atleta, non alla finestra
  // Coach (mese + 8 giorni). Riduce la lettura iniziale senza perdere i giorni
  // locali ai confini del mese e senza cambiare i controlli di prenotazione.
@@ -270,6 +276,7 @@ onMounted(async()=>{
  clockTimer=setInterval(()=>{nowMs.value=Date.now()},60_000)
  try{
   const s=await readStagingSession();if(!alive)return
+  if(props.embedded&&s.role!=='atleta')throw new Error('Sessione Atleta non valida.')
   bookingGym=s.gymId
   const {db,auth}=getStagingClients()
   const profile=await assertBookingLiveUser(db,s);if(!alive)return
@@ -300,7 +307,7 @@ function fail(e:unknown){
  status.value='error';message.value=e instanceof Error?e.message:'Errore Firebase Lion Fit.';close()
 }
 watch([session,()=>upcomingMode.value?'upcoming:'+romeParts(nowMs.value).date:month.value],()=>{if(session.value&&alive)listenReservations()})
-watch([session,month,chosenCoach,athleteTab],()=>{if(session.value&&alive)listenSlots()})
+watch([session,month,chosenCoach,athleteTab,activePage],()=>{if(session.value&&alive)listenSlots()})
 onUnmounted(()=>{alive=false;close();if(clockTimer)clearInterval(clockTimer)})
 watch([selectedDate,service,chosenCoach],()=>{chosenStart.value=null})
 watch(service,(next)=>{
@@ -308,6 +315,7 @@ watch(service,(next)=>{
  if(chosenCoach.value&&!configs.value.some(c=>c.coachId===chosenCoach.value&&c.active&&c.services[next]))chosenCoach.value=''
 })
 async function runWrite(fn:()=>Promise<void|string>){
+ if(!activePage.value)return
  if(!mayWriteLive()){message.value='Scritture Firebase non abilitate per questa build.';return}
  if(busy.value)return
  busy.value=true
@@ -817,7 +825,7 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
 
 <style>
 /* R9 targeted override: supersedes the legacy mobile 120px intro spacer. */
-.app.as-athlete .main-layout.booking-in-shell .lf-agenda13[data-r9-athlete="true"] .booking-intro{min-height:0!important;padding:0!important;margin:0!important}
+.app.as-athlete :is(.main-layout.booking-in-shell,.lf-native-track-page.booking-in-shell) .lf-agenda13[data-r9-athlete="true"] .booking-intro{min-height:0!important;padding:0!important;margin:0!important}
 </style>
 
 <style scoped>

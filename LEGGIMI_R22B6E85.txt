@@ -1,0 +1,8 @@
+LionFit R22B6E85 - Real Page Expansion Atleta
+Base obbligatoria: R22B6E84.
+1. Backup del progetto.
+2. Estrarre i file nella radice del progetto sostituendo quelli esistenti. MANIFEST elenca hash originali e nuovi.
+3. Eseguire npm.cmd run typecheck e npm.cmd run build.
+4. Eseguire node --experimental-strip-types --test tests/r22*.test.mjs.
+5. Collaudo sul telefono (vedi report).
+Nessun deploy Firebase. Dopo verifica positiva usare LIONFIT_PREPARA_WEB_E_DOCS.cmd e GitHub Desktop come da procedura abituale.

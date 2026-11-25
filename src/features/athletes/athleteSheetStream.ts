@@ -4,7 +4,7 @@ import {watchAthleteSheets} from '../../integrations/firestore/sheets'
 import type {AthleteLiveData} from './useAthleteLive'
 import {createVerifiedSessionStream} from '../performance/verifiedSessionStreams'
 import type {StreamSubscriber} from '../performance/warmSessionStream'
-type SheetUpdate={kind:'data';value:AthleteLiveData}|{kind:'error';error:Error}
+type SheetUpdate={kind:'data';value:AthleteLiveData;confirmed:boolean}|{kind:'error';error:Error}
 const stream=createVerifiedSessionStream<SheetUpdate>()
 /** A fresh verified profile is still required before calling this function.
  * Only server-confirmed projections may survive a screen unmount. */
@@ -19,7 +19,7 @@ export function subscribeAthleteSheets(db:Firestore,s:StagingSession,subscriber:
    if(!same)last=value
    lastConfirmed=verified
    // Metadata-only events update replay eligibility without replacing the projection.
-   publish({kind:'data',value:last!},verified)
+   publish({kind:'data',value:last!,confirmed:verified},verified)
   },error=>publish({kind:'error',error},false),true)
  },subscriber)
 }

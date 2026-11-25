@@ -143,6 +143,8 @@ watch(()=>accountKey(stagingSession.value),async key=>{
 },{immediate:true,flush:'sync'})
 const chatRoute=computed(()=>{const target=shownRole.value==='coach'?'/coach/messaggi':'/messaggi';return route.query.source==='emulator'?target+'?source=emulator':target})
 const chatMotion=ref('')
+const sectionReducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)')
+function sectionMotionAllowed(){return !sectionReducedMotion.matches&&!document.hidden}
 const swipeStage=ref<HTMLElement|null>(null)
 const enteringPaths=new WeakMap<Element,string>()
 // E.7.4: actual RouterView roots, only after the existing navigation guard.
@@ -179,7 +181,7 @@ watch(()=>route.path,(now,before)=>{
  // The guarded route has committed. If both real panes already belong to the
  // verified workspace, finish the very same rail; no cue/Vue inner transition.
  const scope=accountKey(stagingSession.value),pending=pendingSwipe
- const nativeDuration=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:pending?.from===before&&pending?.to===now?(continuousCommitMotion(dragPaintedOffset,swipeStage.value?.clientWidth||window.innerWidth,pending.direction,pending.velocity)?.duration??260):340
+ const nativeDuration=!sectionMotionAllowed()?0:pending?.from===before&&pending?.to===now?(continuousCommitMotion(dragPaintedOffset,swipeStage.value?.clientWidth||window.innerWidth,pending.direction,pending.velocity)?.duration??260):340
  const nativeHandled=swipeRouteInstance?.commitTrack?.(before,now,nativeDuration,scope)===true
  if(nativeHandled)nativeDragging=false
  else swipeRouteInstance?.cancelTrack?.(false)
@@ -191,13 +193,14 @@ watch(()=>route.path,(now,before)=>{
  restoreDrag(false)
  // Preserve the R22A premium Chat gesture on athlete Home; extend the same direction logic
  // to the other top-level sections, including taps on the existing navbar.
- if (chatPreviewEnabled.value && before==='/home' && now==='/messaggi') chatMotion.value='lf-chat-open'
+ if(!sectionMotionAllowed())chatMotion.value=''
+ else if (chatPreviewEnabled.value && before==='/home' && now==='/messaggi') chatMotion.value='lf-chat-open'
  else if (chatPreviewEnabled.value && before==='/messaggi' && now==='/home') chatMotion.value='lf-chat-close'
  // Home/Piano/Archivio share AthleteLiveWorkspace. Vue Router reuses that instance,
  // so RouterView cannot animate these two transitions. Their content is animated
  // internally without tearing down the existing live Firestore subscriptions.
  else if (shownRole.value==='atleta' && isStagingMode() &&
-  ['/home','/piano','/archivio'].includes(before) && ['/home','/piano','/archivio'].includes(now)) chatMotion.value=''
+  isNativePagePath(before) && isNativePagePath(now)) chatMotion.value=''
  else chatMotion.value=shownRole.value && swipeViewport() ? sectionTransition(before,now,swipePages.value) : ''
 })
 // E.5 — native touch feedback with real-page navigation. This never replaces Vue Router.
@@ -247,7 +250,7 @@ function clearSwipeMotion(){
 function transferSwipeMotion(from:string,to:string){
  clearSwipeMotion()
  const pending=pendingSwipe;pendingSwipe=null
- if(!swipeViewport()||!sectionTransition(from,to,swipePages.value)||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return
+ if(!swipeViewport()||!sectionTransition(from,to,swipePages.value)||!sectionMotionAllowed())return
  const stage=swipeStage.value||(dragRoot||swipeRouteRoot)?.closest<HTMLElement>('.main-layout')
  if(!stage)return
  motionStage=stage
@@ -279,7 +282,7 @@ function restoreDrag(animateBack:boolean){
  el.style.transform=original.transform
  el.style.transition=original.transition
  el.style.willChange=original.willChange
- if(!wasNative&&animateBack&&Math.abs(offset)>3&&el.isConnected&&typeof el.animate==='function'&&!isSectionMoving(el)){
+ if(!wasNative&&animateBack&&sectionMotionAllowed()&&Math.abs(offset)>3&&el.isConnected&&typeof el.animate==='function'&&!isSectionMoving(el)){
   const duration=snapBackDuration(offset,stage?.clientWidth||window.innerWidth)
   if(stage)stage.dataset.lfMotionDragging='true'
   snapStage=stage
@@ -358,7 +361,7 @@ function beginGesture(event:Event,point:SwipePoint){
  if(insideSystemEdge(point.clientX,window.innerWidth)||skipSectionSwipe(event.target,event.currentTarget))return
  if(selectedTouchTarget(event.target)||visibleSwipeModal(stage))return
  const at=performance.now(),el=resolveSwipeRouteRoot()
- touchStart={x:point.clientX,y:point.clientY,at,path:route.path,root:el,intent:'pending',target:event.target instanceof Element?event.target:null,identifier:point.identifier,samples:[{x:point.clientX,at}],lockedAt:0,paintReported:false,width:stage?.clientWidth||window.innerWidth,reducedMotion:window.matchMedia('(prefers-reduced-motion: reduce)').matches}
+ touchStart={x:point.clientX,y:point.clientY,at,path:route.path,root:el,intent:'pending',target:event.target instanceof Element?event.target:null,identifier:point.identifier,samples:[{x:point.clientX,at}],lockedAt:0,paintReported:false,width:stage?.clientWidth||window.innerWidth,reducedMotion:!sectionMotionAllowed()}
 }
 function lockGesture(start:GestureStart,dx:number,dy:number){
  start.intent=resolveSwipeIntent(start.intent,dx,dy)
@@ -491,7 +494,16 @@ const swipeInputEvents=pointerSwipeEnabled?{
 // short click guard at release even if the event no longer reaches the shell.
 function committedPointerRelease(event:PointerEvent){if(event.pointerType==='touch')finishConsumedContact(event.pointerId)}
 function committedTouchRelease(event:TouchEvent){for(const point of Array.from(event.changedTouches))finishConsumedContact(point.identifier)}
-function resetSwipeSession(){outerMotion.abort();touchStart=null;consumedContact=null;pendingSwipe=null;swipeClickGuard=null;restoreDrag(false);swipeRouteInstance?.cancelTrack?.(false);clearSwipeMotion()}
+function resetSwipeSession(){outerMotion.abort();const pointer=touchStart?.identifier??consumedContact?.identifier;touchStart=null;consumedContact=null;pendingSwipe=null;swipeClickGuard=null;restoreDrag(false);swipeRouteInstance?.cancelTrack?.(false);chatMotion.value=''
+ const stage=swipeStage.value
+ if(stage)delete stage.dataset.lfExternalPair
+ // Invalidate state before releasing capture: lostpointercapture can dispatch synchronously.
+ if(pointerSwipeEnabled&&pointer!==undefined&&stage?.hasPointerCapture(pointer)){try{stage.releasePointerCapture(pointer)}catch{/* pointer may have ended */}}
+ clearSwipeMotion()}
+function sectionMotionPreferenceChanged(){if(sectionReducedMotion.matches)resetSwipeSession()}
+if(typeof sectionReducedMotion.addEventListener==='function')sectionReducedMotion.addEventListener('change',sectionMotionPreferenceChanged)
+else sectionReducedMotion.addListener?.(sectionMotionPreferenceChanged)
+
 // Changing identity or hiding the app must not leave a drag or scheduled frame.
 watch([()=>stagingSession.value?.uid,()=>stagingSession.value?.gymId,()=>stagingSession.value?.role],resetSwipeSession,{flush:'sync'})
 watch(()=>accountKey(stagingSession.value),()=>window.dispatchEvent(new Event('lionfit:content-scope-invalidated')),{flush:'sync'})
@@ -520,7 +532,7 @@ document.addEventListener('click',cancelQueuedSwipeForExternalClick,true)
 document.addEventListener('visibilitychange',swipeVisibility)
 window.addEventListener('lionfit:motion-scope-invalidated',resetSwipeSession)
 window.addEventListener('resize',swipeResize,{passive:true})
-onUnmounted(()=>{resetSwipeSession();document.removeEventListener('pointerdown',pauseQueuedSwipeForExternalTouch,true);document.removeEventListener('pointerup',committedPointerRelease,true);document.removeEventListener('pointercancel',committedPointerRelease,true);document.removeEventListener('touchstart',pauseQueuedSwipeForExternalTouch,true);document.removeEventListener('touchend',committedTouchRelease,true);document.removeEventListener('touchcancel',committedTouchRelease,true);document.removeEventListener('click',cancelQueuedSwipeForExternalClick,true);document.removeEventListener('visibilitychange',swipeVisibility);window.removeEventListener('lionfit:motion-scope-invalidated',resetSwipeSession);window.removeEventListener('resize',swipeResize)})
+onUnmounted(()=>{if(typeof sectionReducedMotion.removeEventListener==='function')sectionReducedMotion.removeEventListener('change',sectionMotionPreferenceChanged);else sectionReducedMotion.removeListener?.(sectionMotionPreferenceChanged);resetSwipeSession();document.removeEventListener('pointerdown',pauseQueuedSwipeForExternalTouch,true);document.removeEventListener('pointerup',committedPointerRelease,true);document.removeEventListener('pointercancel',committedPointerRelease,true);document.removeEventListener('touchstart',pauseQueuedSwipeForExternalTouch,true);document.removeEventListener('touchend',committedTouchRelease,true);document.removeEventListener('touchcancel',committedTouchRelease,true);document.removeEventListener('click',cancelQueuedSwipeForExternalClick,true);document.removeEventListener('visibilitychange',swipeVisibility);window.removeEventListener('lionfit:motion-scope-invalidated',resetSwipeSession);window.removeEventListener('resize',swipeResize)})
 
 const showChatHint=ref(false)
 const chatHintKey='lionfit-r22a-chat-hint-seen'
@@ -547,7 +559,7 @@ async function goOut(){
 <template>
   <Teleport to="body"><aside v-if="navigationFailure" class="lf21-nav-recovery" role="alert"><strong>{{navigationFailure.kind==='assets'?'Pagina non caricata':'Navigazione non riuscita'}}</strong><p>{{navigationFailure.kind==='assets'?'Potrebbe essere disponibile una nuova versione. Ricarica per riprovare.':'Riprova a cambiare pagina o ricarica LionFit.'}}</p><button type="button" @click="reloadNavigation">Ricarica</button><button type="button" @click="navigationFailure=null">Chiudi</button></aside></Teleport>
   <Teleport to="body"><aside v-if="pushNotice" role="status" style="position:fixed;inset:auto 12px max(85px,env(safe-area-inset-bottom)) 12px;z-index:9999;max-width:440px;margin:auto;padding:14px;border-radius:12px;background:#162720;color:#fff;box-shadow:0 6px 24px #0008"><strong>{{pushNotice.title}}</strong><p>{{pushNotice.body}}</p><button type="button" class="secondary" @click="openPushNotice">{{pushNotice.open==='support'?'Apri assistenza':pushNotice.open==='competition'?'Apri gara':'Apri Agenda'}}</button> <button type="button" class="bare" style="color:#fff" @click="pushNotice=null">Chiudi</button></aside></Teleport>
- <div class="app" :class="['theme-'+lab.theme,shownRole==='coach'?'as-coach':'as-athlete',{'bookings-mode':isBooking,'lf-support-shell':route.path==='/assistenza'&&!!shownRole&&isStagingMode(),'athlete-sidebar-collapsed':!athleteSidebarExpanded}]">
+ <div class="app" :class="['theme-'+lab.theme,shownRole==='coach'?'as-coach':'as-athlete',{'bookings-mode':isBooking&&!nativeTrackShell,'lf-support-shell':route.path==='/assistenza'&&!!shownRole&&isStagingMode(),'athlete-sidebar-collapsed':!athleteSidebarExpanded}]">
   <div v-if="isLocalProdDev()" class="lab-banner" role="status">⚠ SVILUPPO LOCALE · FIREBASE PRODUZIONE · LE SCRITTURE POSSONO CAMBIARE DATI REALI</div>
   <component v-if="StagingBanner" :is="StagingBanner"/>
   <div v-else-if="coachEmulatorPreview || athleteEmulatorPreview || bookingEmulatorPreview" class="lab-banner">{{uiText("FIREBASE EMULATOR · DATI FITTIZI · SCRITTURE SOLO CON CONFERMA · NON È L'APP PUBBLICATA")}}</div>
@@ -572,7 +584,7 @@ async function goOut(){
     <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><QuickProfileSwitch compact/><RouterLink v-if="chatPreviewEnabled && shownRole" :to="chatRoute" class="lf-chat-header-link" :aria-label="uiText('Apri messaggi Coach-Atleta')" title="Messaggi"><LionIcon name="messages" :size="24"/><span v-if="chatUnreadCount>0" class="lf-chat-unread">{{chatUnreadCount>99?'99+':chatUnreadCount}}</span></RouterLink><InboxBell v-if="inboxInHeader&&inboxVisibleOnRoute&&coachInboxEnabled()&&stagingSession" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
 
     <!-- Navigazione Atleta esclusiva: sidebar a sinistra su desktop, dock inferiore su mobile. -->
-    <main ref="swipeStage" v-lf-swipe-rails class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking,'lf-chat-stage':!!chatMotion,'lf-swipe-surface':swipeSurfaceEnabled,'lf-native-track-shell':nativeTrackShell}]" v-on="swipeInputEvents" @click.capture="chatClickCapture" @contextmenu.capture="chatTouchCancel"><RouterLink v-if="chatPreviewEnabled && shownRole==='coach' && !coachHeaderVisible" :to="chatRoute" class="lf-chat-coach-top" :class="{'lf-chat-coach-with-bell':route.path==='/coach'&&coachInboxEnabled()}" aria-label="Apri Messaggi Coach–Atleta" title="Apri Messaggi"><LionIcon name="messages" :size="23"/><span>Messaggi</span><span v-if="chatUnreadCount>0" class="lf-chat-unread">{{chatUnreadCount>99?'99+':chatUnreadCount}}</span></RouterLink><button v-if="!nativeTrackShell && route.path!=='/home' && route.path!=='/coach' && (shownRole!=='coach' || coachHeaderVisible)" type="button" class="lf-route-back" :class="{'lf-r8-route-back':workoutRoute}" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> </button><template v-if="coachInboxEnabled()&&stagingSession"><InboxBell v-if="!inboxInHeader&&inboxVisibleOnRoute" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><PushWelcome :key="stagingSession.uid" :uid="stagingSession.uid" :open-agenda="openPushAgenda" :open-support="openPushSupport"/></template><p v-if="linkedNotice" class="notice" role="alert">{{linkedNotice}} <button type="button" class="bare" @click="linkedNotice=''">Chiudi</button></p><aside v-if="chatPreviewEnabled && shownRole==='atleta' && route.path==='/home' && showChatHint" class="lf-chat-discovery" role="status"><LionIcon name="messages" :size="19"/><span>I messaggi sono a sinistra: scorri verso destra oppure tocca l'icona.</span><button type="button" aria-label="Chiudi suggerimento messaggi" @click="chatHintClose">×</button></aside><RouterView v-slot="{ Component }"><Transition :name="chatMotion" :css="!externalMotionEnabled" v-on="externalMotionEvents" @before-enter="beforeChatEnter" @after-enter="finishChatMotion" @enter-cancelled="cancelChatEnter" @before-leave="beforeChatLeave" @after-leave="finishSectionLeave" @leave-cancelled="cancelChatLeave"><component :is="Component" :ref="setSwipeRouteRoot"/></Transition></RouterView><CheckUploadNotice v-if="shownRole==='atleta'&&stagingSession?.role==='atleta'" :session="stagingSession"/></main>
+    <main ref="swipeStage" v-lf-swipe-rails class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking&&!nativeTrackShell,'lf-chat-stage':!!chatMotion,'lf-swipe-surface':swipeSurfaceEnabled,'lf-native-track-shell':nativeTrackShell}]" v-on="swipeInputEvents" @click.capture="chatClickCapture" @contextmenu.capture="chatTouchCancel"><RouterLink v-if="chatPreviewEnabled && shownRole==='coach' && !coachHeaderVisible" :to="chatRoute" class="lf-chat-coach-top" :class="{'lf-chat-coach-with-bell':route.path==='/coach'&&coachInboxEnabled()}" aria-label="Apri Messaggi Coach–Atleta" title="Apri Messaggi"><LionIcon name="messages" :size="23"/><span>Messaggi</span><span v-if="chatUnreadCount>0" class="lf-chat-unread">{{chatUnreadCount>99?'99+':chatUnreadCount}}</span></RouterLink><button v-if="!nativeTrackShell && route.path!=='/home' && route.path!=='/coach' && (shownRole!=='coach' || coachHeaderVisible)" type="button" class="lf-route-back" :class="{'lf-r8-route-back':workoutRoute}" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> </button><template v-if="coachInboxEnabled()&&stagingSession"><InboxBell v-if="!inboxInHeader&&inboxVisibleOnRoute" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><PushWelcome :key="stagingSession.uid" :uid="stagingSession.uid" :open-agenda="openPushAgenda" :open-support="openPushSupport"/></template><p v-if="linkedNotice" class="notice" role="alert">{{linkedNotice}} <button type="button" class="bare" @click="linkedNotice=''">Chiudi</button></p><aside v-if="chatPreviewEnabled && shownRole==='atleta' && route.path==='/home' && showChatHint" class="lf-chat-discovery" role="status"><LionIcon name="messages" :size="19"/><span>I messaggi sono a sinistra: scorri verso destra oppure tocca l'icona.</span><button type="button" aria-label="Chiudi suggerimento messaggi" @click="chatHintClose">×</button></aside><RouterView v-slot="{ Component }"><Transition :name="chatMotion" :css="!externalMotionEnabled" v-on="externalMotionEvents" @before-enter="beforeChatEnter" @after-enter="finishChatMotion" @enter-cancelled="cancelChatEnter" @before-leave="beforeChatLeave" @after-leave="finishSectionLeave" @leave-cancelled="cancelChatLeave"><component :is="Component" :ref="setSwipeRouteRoot"/></Transition></RouterView><CheckUploadNotice v-if="shownRole==='atleta'&&stagingSession?.role==='atleta'" :session="stagingSession"/></main>
     <!-- La navbar Atleta vive fuori dal contenitore .app: nessun CSS / overflow legacy può coprirla. -->
     <AthleteBottomNavigation v-if="shownRole==='atleta'" :items="mobileNav" :theme="lab.theme"/>
     <nav v-if="shownRole==='coach'" class="bottom-nav coach-bottom" :aria-label="uiText('Navigazione Coach')"><RouterLink v-for="item in mobileNav" :key="item.to" :to="item.to"><LionIcon :name="item.icon" :size="24"/><span>{{uiText(item.label)}}</span></RouterLink></nav>
