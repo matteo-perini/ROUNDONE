@@ -207,7 +207,7 @@ onUnmounted(()=>{alive=false;viewport?.dispose();logObserver?.disconnect();if(an
    <RouterLink :to="dashboard" class="lf-chat-back"><LionIcon name="back" :size="16"/> Torna alla Dashboard</RouterLink>
   </div>
   <div v-else class="lf-chat-workspace" :class="{'lf-chat-compact-open':!!currentId}">
-   <aside class="lf-chat-sidebar" aria-label="Elenco conversazioni">
+   <aside class="lf-chat-sidebar" aria-label="Elenco conversazioni" v-lf-entrance="{id:'chat-contacts',ready:verified&&!loading&&!hintVisible&&!currentId,rows:[{within:'.lf-chat-list',match:'.lf-chat-person'}]}">
     <label class="lf-chat-search-label" for="lf-chat-search">Cerca un contatto</label>
     <div class="lf-chat-search-field"><LionIcon name="search" :size="18"/><input id="lf-chat-search" v-model="query" type="search" maxlength="80" :placeholder="coach?'Cerca atleta':'Cerca Coach'" autocomplete="off" :disabled="loading||(!verified&&!hintVisible)"/></div>
     <div v-if="loading" class="lf-chat-initial" role="status">

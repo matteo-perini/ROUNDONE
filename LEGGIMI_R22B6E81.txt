@@ -1,0 +1,10 @@
+LionFit R22B.6E.8.1 — Premium Page Motion
+Base obbligatoria E.7.5. Backup e Sostituisci tutti i file.
+1. npm.cmd run typecheck
+2. npm.cmd run build
+3. node --experimental-strip-types --test tests/r22*.test.mjs
+Attesi 190 test R22 superati. Smoke test su palestra di prova, poi WebDocs e GitHub Desktop.
+Nessun deploy Firebase. Nessuna nuova dipendenza. Navbar/touch invariati.
+Separazione visiva 14px + ombra durante swipe; nessun ridimensionamento reale delle pagine.
+550ms per contenuti sarà E.8.2. Report incluso.
+Rollback: ripristinare replace e rimuovere add del manifest; rigenerare WebDocs.

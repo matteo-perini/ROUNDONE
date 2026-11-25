@@ -1,3 +1,4 @@
+import {createPremiumSeam,premiumSeamOpacity,premiumSeamX} from './premiumPageSeam.ts'
 /** E.5.1 — continuous gesture geometry. No routing, persistence or data loading. */
 export type MotionSummary={heading:string;lines:readonly string[];sections?:readonly {heading:string;lines:readonly string[]}[]}
 /** Route-specific structure only. No invented entries, private chat text,
@@ -60,14 +61,15 @@ export function createMotionCue(stage:HTMLElement,root:HTMLElement,paintedOffset
  const content=document.createElement('div');content.className='lf-motion-cue-content';panel.append(content)
  let last=0,side=0,animation:Animation|null=null,disposed=false,renderedLabel:string|null=null,renderedSummary:MotionSummary|null=null,visible=false,lastTransform=''
  stage.append(panel)
- function dispose(){if(disposed)return;disposed=true;const old=animation;animation=null;if(old){old.onfinish=null;old.oncancel=null;old.cancel()}panel.remove()}
+ const seam=createPremiumSeam(stage,{left,top,height})
+ function dispose(){if(disposed)return;disposed=true;const old=animation;animation=null;if(old){old.onfinish=null;old.oncancel=null;old.cancel()}seam?.dispose();panel.remove()}
  return {paint(offset,direction,label,summary){
   if(disposed)return;last=offset;side=Math.sign(direction)
   const nextVisible=!!side&&!!label
   if(nextVisible!==visible){visible=nextVisible;panel.hidden=!visible}
   // The caller retains the same summary object for this gesture/destination.
   // Rebuild only when the projection changes, not on each animation frame.
-  if(!visible){if(renderedLabel!==null){content.replaceChildren();title.textContent='';renderedLabel=null;renderedSummary=null}return}
+  if(!visible){seam?.paint(0,0);if(renderedLabel!==null){content.replaceChildren();title.textContent='';renderedLabel=null;renderedSummary=null}return}
   if(renderedLabel!==label||renderedSummary!==summary){renderedLabel=label;renderedSummary=summary;title.textContent=label;content.replaceChildren()
    if(summary){
     const sections=[summary,...(summary.sections||[])].slice(0,3)
@@ -78,9 +80,11 @@ export function createMotionCue(stage:HTMLElement,root:HTMLElement,paintedOffset
   }
   const transform=`translate3d(${pairedPosition(offset,span,side)}px,0,0)`
   if(lastTransform!==transform){lastTransform=transform;panel.style.transform=transform}
+  seam?.paint(premiumSeamX(offset,span,side),premiumSeamOpacity(offset,span))
  },returnToEdge(duration){if(disposed)return;if(!side||panel.hidden||typeof panel.animate!=='function'){dispose();return}
   try{
    animation=panel.animate([{transform:`translate3d(${pairedPosition(last,span,side)}px,0,0)`},{transform:`translate3d(${pairedPosition(0,span,side)}px,0,0)`}],{duration,easing:'cubic-bezier(.18,1,.35,1)',fill:'forwards'})
+   seam?.settle(premiumSeamX(last,span,side),premiumSeamOpacity(last,span),premiumSeamX(0,span,side),duration,'cubic-bezier(.18,1,.35,1)',typeof animation.startTime==='number'?animation.startTime:undefined)
    animation.onfinish=dispose;animation.oncancel=dispose
   }catch{dispose()}
  },dispose}

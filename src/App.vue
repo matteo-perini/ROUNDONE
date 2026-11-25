@@ -371,7 +371,7 @@ function beginGesture(event:Event,point:SwipePoint){
 }
 function lockGesture(start:GestureStart,dx:number,dy:number){
  start.intent=resolveSwipeIntent(start.intent,dx,dy)
- if(start.intent==='horizontal'&&!start.lockedAt){start.lockedAt=performance.now();reportSwipeTiming('lock',start.at)}
+ if(start.intent==='horizontal'&&!start.lockedAt){start.lockedAt=performance.now();reportSwipeTiming('lock',start.at);window.dispatchEvent(new Event('lionfit:content-gesture-start'))}
 }
 function commitSwipe(start:GestureStart,destination:string,dx:number,velocity:number,held:boolean){
  if(pendingSwipe||start.path!==route.path||!swipePages.value.includes(destination))return
@@ -506,6 +506,7 @@ function committedTouchRelease(event:TouchEvent){for(const point of Array.from(e
 function resetSwipeSession(){outerMotion.abort();touchStart=null;consumedContact=null;pendingSwipe=null;swipeClickGuard=null;restoreDrag(false);swipeRouteInstance?.cancelTrack?.(false);clearSwipeMotion()}
 // Changing identity or hiding the app must not leave a drag or scheduled frame.
 watch([()=>stagingSession.value?.uid,()=>stagingSession.value?.gymId,()=>stagingSession.value?.role],resetSwipeSession,{flush:'sync'})
+watch(()=>accountKey(stagingSession.value),()=>window.dispatchEvent(new Event('lionfit:content-scope-invalidated')),{flush:'sync'})
 watch(chatPreviewEnabled,()=>{if(outerMotion.moving()||touchStart||pendingSwipe&&!pendingSwipe.issued)resetSwipeSession()},{flush:'sync'})
 function swipeVisibility(){if(document.hidden)resetSwipeSession()}
 let lastSwipeWidth=window.innerWidth

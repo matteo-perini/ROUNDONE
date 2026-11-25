@@ -1,3 +1,4 @@
+import {createPremiumSeam,premiumSeamOpacity,type PremiumSeam} from './premiumPageSeam.ts'
 /** E.7.2: one moving rail of actual, already-authorized Vue page elements.
  * The shell remains responsible for gesture arbitration and guarded routing.
  * No router, Firebase, persistence, DOM clones or page content in this module. */
@@ -17,10 +18,11 @@ export function createNativePageTrack(rail:HTMLElement,initial:NativePagePath):N
  let active=initial,from:NativePagePath|null=null,to:NativePagePath|null=null,offset=0,span=0,side=0
  let animation:Animation|null=null,watchdog:ReturnType<typeof setTimeout>|null=null,disposed=false
  let shown:HTMLElement[]=[]
+ let seam:PremiumSeam|null=null,seamAttempted=false
  const pane=(path:string)=>rail.querySelector<HTMLElement>(`[data-lf-track-path="${path}"]`)
  function clearAnimation(){if(watchdog!==null){clearTimeout(watchdog);watchdog=null}const old=animation;animation=null;if(old){old.onfinish=null;old.oncancel=null;old.cancel()}}
  function rest(){
-  clearAnimation();from=null;to=null;offset=0;span=0;side=0
+  clearAnimation();seam?.dispose();seam=null;seamAttempted=false;from=null;to=null;offset=0;span=0;side=0
   rail.style.removeProperty('transform');rail.style.removeProperty('will-change');delete rail.dataset.lfTrackMoving
   for(const el of shown){el.style.removeProperty('left');delete el.dataset.lfTrackShown}shown=[]
  }
@@ -44,6 +46,9 @@ export function createNativePageTrack(rail:HTMLElement,initial:NativePagePath):N
   let a:Animation
   try{a=rail.animate([{transform:translate(offset)},{transform:translate(end)}],{duration,easing:'cubic-bezier(.22,1,.36,1)',fill:'forwards'})}catch{settle(destination);return}
   animation=a
+  // Rail carries the seam; only its opacity changes during the settlement.
+  const time=a.startTime
+  seam?.settle(0,premiumSeamOpacity(offset,span),0,duration,'cubic-bezier(.22,1,.36,1)',typeof time==='number'?time:undefined)
   // The routed target is the only active pane once the real transition ends.
   a.onfinish=()=>{if(animation===a)settle(destination)}
   a.oncancel=()=>{if(animation===a)settle(destination)}
@@ -54,7 +59,9 @@ export function createNativePageTrack(rail:HTMLElement,initial:NativePagePath):N
  return {
   paint(a,b,x){
    if(disposed||animation||!isNativePagePath(a)||!isNativePagePath(b)||!pair(a,b))return null
-   const next=nativeTrackOffset(x,span,side);if(next!==offset||!rail.style.transform){offset=next;rail.style.transform=translate(offset)}return offset
+   const next=nativeTrackOffset(x,span,side);if(next!==offset||!rail.style.transform){offset=next;rail.style.transform=translate(offset)}
+   if(!seamAttempted&&Math.abs(next)>0){seamAttempted=true;seam=createPremiumSeam(rail,{left:side>0?span:0,top:0,height:'100%'})}
+   seam?.paint(0,premiumSeamOpacity(next,span));return offset
   },
   navigate(a,b,duration){
    if(disposed||!isNativePagePath(a)||!isNativePagePath(b)||!nativeTrackSide(a,b))return false

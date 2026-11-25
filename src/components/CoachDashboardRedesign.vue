@@ -56,7 +56,7 @@ const eventUrl=(url:string)=>props.source==='Firebase Emulator'?`${url}?source=e
 const formatDate=(ms:number)=>new Intl.DateTimeFormat('it-IT',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'}).format(ms)
 </script>
 <template>
- <div v-lf-entrance="{id:'coach-dashboard',rows:[{match:'.lf-coach-greeting'},{within:'.lf-kpi-grid',match:'.lf-kpi-card'},{within:'.lf-coach-hero-row',match:'.lf14-brand-container,.lf-coach-actions'},{within:'.lf-coach-detail-grid',match:'.lf-dashboard-panel'},{within:'.lf-coach-bottom-grid',match:'.lf-dashboard-panel'}]}" class="lf-coach-dashboard">
+ <div v-lf-entrance="{id:'coach-dashboard',ready:!loading&&!error,rows:[{match:'.lf-coach-greeting'},{within:'.lf-kpi-grid',match:'.lf-kpi-card'},{within:'.lf-coach-hero-row',match:'.lf14-brand-container,.lf-coach-actions'},{within:'.lf-coach-detail-grid',match:'.lf-dashboard-panel'},{within:'.lf-coach-bottom-grid',match:'.lf-dashboard-panel'}]}" class="lf-coach-dashboard">
   <WorkAttendanceBadge v-if="badgeSession" :key="`${badgeSession.uid}:${badgeSession.gymId}`" :uid="badgeSession.uid" :gym-id="badgeSession.gymId"/>
   <header class="lf-coach-greeting"><div><h1>Bentornato, {{name}}! 👊</h1></div><div class="lf14-header-actions"><DashboardSearch v-if="searchItems" :items="searchItems" :partial="searchPartial" :emulator="source==='Firebase Emulator'"/><RouterLink class="lf-dashboard-customize" :to="{path:'/impostazioni',query:source==='Firebase Emulator'?{source:'emulator',dashboard:'1'}:{dashboard:'1'}}" aria-label="Personalizza i riquadri della dashboard"><LionIcon name="settings" :size="16"/><span>Personalizza</span></RouterLink><span v-if="source!=='Firebase Lion Fit'" class="lf-source-tag">{{source}}</span></div></header>
 

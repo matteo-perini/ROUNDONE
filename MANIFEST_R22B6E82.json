@@ -1,0 +1,91 @@
+{
+  "patch": "R22B6E82",
+  "base": "R22B6E81",
+  "scope": "550 ms horizontal content entrance; bounded stagger, explicit ready groups, no replay during mobile swipe",
+  "files": [
+    {
+      "path": "src/App.vue",
+      "sha256": "89c1f8bcb162495bd062dcc754bf0017403db7d99780894e544b216fe0fc9926",
+      "base_sha256": "e14060a8cc7e93794107ee5dda7f1f10d04f696a66a13557572015876c827664",
+      "action": "replace"
+    },
+    {
+      "path": "src/components/AthleteHomeContent.vue",
+      "sha256": "4ad04b09b4848c0c6b73095a1efae501630d9f47eaec5719eb7bcb8e88847bdd",
+      "base_sha256": "a4565cc2f9fe9d77189715a52502489b4937c5c1e8272bc05fc58f56eb28d189",
+      "action": "replace"
+    },
+    {
+      "path": "src/components/AthletePlanContent.vue",
+      "sha256": "f872d2c783f8cc9e49458d955722e680dd30b51c21411edfda908f996c2b63bc",
+      "base_sha256": "925b1a95f84d46eca45f5ea066e496848bdaada3110c34d4bf19d90f8be1877b",
+      "action": "replace"
+    },
+    {
+      "path": "src/components/CoachDashboardRedesign.vue",
+      "sha256": "9dfe6578581f222c8f7fe97b6fa725311bb8ee5b4b1ab50f6e8b2cb988c32672",
+      "base_sha256": "118303729a44a580bda9904e160bb37ba322f848f5c32d3388bb971595e31f9b",
+      "action": "replace"
+    },
+    {
+      "path": "src/components/ProgramHistory.vue",
+      "sha256": "ba320c967faa8428883cb67a40dd3da948b3eee920d0767032f9d7805a4c62c1",
+      "base_sha256": "939e3541a719520386d948df74b8155a5dd43e6bdc859ec30f7c379817a39b21",
+      "action": "replace"
+    },
+    {
+      "path": "src/features/motion/roundOneMotion.ts",
+      "sha256": "69f1da77600a633760141c7da8def388c10a18419a21c780e4c56e466621903e",
+      "base_sha256": "08e446215cc773341a50ac42e96899e58ed9cecca3e055dabbbd6c72cf39794b",
+      "action": "replace"
+    },
+    {
+      "path": "src/views/AthleteChatPreview.vue",
+      "sha256": "8b22e87f3dec1a47b289dad1dd361dc6680d0c9a89991f549decc4c646df02f0",
+      "base_sha256": "a2ab1834be5d4db9ca0ef366d151737ac054e2f3a00d88de275503205f9a57e1",
+      "action": "replace"
+    },
+    {
+      "path": "src/views/AthleteLiveWorkspace.vue",
+      "sha256": "94c27e3b9f9551adc4c6c8ec930fc7435446832e71f54067a40b92b08ff4d8c8",
+      "base_sha256": "2f2098ac09ac8f03afe1c825333a88e9eab6571693289ba21fb68f26114df37b",
+      "action": "replace"
+    },
+    {
+      "path": "src/views/Library.vue",
+      "sha256": "235ac6cd67df2ada3d44372d0aec0777a54ee1bd1b4f7ee8e06d29d542d4eab0",
+      "base_sha256": "407b7a065022e75535dc27b8705e051ade2dd75099e64cf30c2774e67be33e4c",
+      "action": "replace"
+    },
+    {
+      "path": "src/views/LiveCoachTemplates.vue",
+      "sha256": "16643de57953efcf73c2569806cd959a3a08360e7642236d9def6e22c8615501",
+      "base_sha256": "bc694ed26171debd045b7969ab3e8f5c0728123a1323c5bcdf8e2aecff6a8c42",
+      "action": "replace"
+    },
+    {
+      "path": "tests/patch27-performance.unit.mjs",
+      "sha256": "bbefcc043c80bcf26fe51ffc870a1af57a8a6b265b11ec412494c7e9d817537e",
+      "base_sha256": "0f277ac0e359d79cbfebbf1c3bea67ff89cf1fee52047fdc756d7f6f365c7378",
+      "action": "replace"
+    },
+    {
+      "path": "tests/patch27-r2-motion.unit.mjs",
+      "sha256": "b37758dbac3de5df086320af3a2d45f3f9ae711ad88978c5b1b6ec1a0cab3fe7",
+      "base_sha256": "cb2a5e190a45468c19bcdc0685957e657da18c63c6db9fe508a70037ca226409",
+      "action": "replace"
+    },
+    {
+      "path": "tests/patch30-r23-coach-top-and-archive.unit.mjs",
+      "sha256": "11d536fe0bedc3fcdff6f66a757a3e86e1b356c250ad390edc2dfd6ca4f71b7b",
+      "base_sha256": "27dc0badd3707a3ca4858ecc70352b74d73f1ba48dfdd2c6a0d09304f1a59130",
+      "action": "replace"
+    },
+    {
+      "path": "tests/r22b6e82-horizontal-content.test.mjs",
+      "sha256": "0ed4a3452a6b0e1b699e42bc6de8f57779d19e5a4c43be40f04d902224043b89",
+      "base_sha256": null,
+      "action": "add"
+    }
+  ]
+}

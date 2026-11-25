@@ -62,7 +62,7 @@ if(typeof window!=='undefined')window.addEventListener('keydown',onKey)
 onUnmounted(()=>{if(typeof window!=='undefined')window.removeEventListener('keydown',onKey)})
 </script>
 <template>
- <div v-lf-entrance="{id:'athlete-home-r14c',rows:[{match:'.lf14-gym-hero,.lf15-today,.lf15-route,.lf15-event-card,.lf15-progress-link,.lf15-quick-tile'}]}" class="lf-r14-home lf-r14-home-v3 lf15-home" aria-label="Dashboard Atleta">
+ <div v-lf-entrance="{id:'athlete-home-r14c',rows:[{match:'.lf15-today,.lf15-route,.lf15-events,.lf15-progress-link,.lf15-quick-grid'}]}" class="lf-r14-home lf-r14-home-v3 lf15-home" aria-label="Dashboard Atleta">
   <GymIdentity hero>
    <div class="lf15-hero-greeting"><span class="lf15-kicker">BENVENUTO IN LIONFIT</span><h1>{{uiText('Ciao,')}} {{firstName}}! <span aria-hidden="true">👋</span></h1><p>Pronto per il tuo prossimo allenamento?</p></div>
   </GymIdentity>

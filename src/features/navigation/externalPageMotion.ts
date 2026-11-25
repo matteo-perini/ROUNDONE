@@ -1,3 +1,4 @@
+import {createPremiumSeam,premiumSeamOpacity,premiumSeamX,type PremiumSeam} from './premiumPageSeam.ts'
 /** E.7.4 — guarded outer page pair. The incoming and outgoing elements are
  * the real RouterView roots; no route pre-mount, retained component, clone,
  * persistent storage or additional subscriptions. One shared animation clock.
@@ -16,7 +17,7 @@ export function externalPairPositions(plan:ExternalPairPlan,progress:number){
  return {leave,enter:leave-plan.direction*plan.span}
 }
 type Surface={element:HTMLElement;originalTransform:string;originalWillChange:string;done?:()=>void;animation?:Animation}
-type Pair={plan:ExternalPairPlan;origin:HTMLElement;enter?:Surface;leave?:Surface;timer?:ReturnType<typeof setTimeout>;started:boolean;finishing:boolean}
+type Pair={plan:ExternalPairPlan;origin:HTMLElement;enter?:Surface;leave?:Surface;timer?:ReturnType<typeof setTimeout>;started:boolean;finishing:boolean;seam?:PremiumSeam|null}
 const translate=(x:number)=>`translate3d(${x}px,0,0)`
 export function createExternalPageMotion(options:{scope:()=>string;path:()=>string;onHandoff:()=>void;onSettled:()=>void;waitMs?:number}){
  let pair:Pair|null=null
@@ -24,6 +25,7 @@ export function createExternalPageMotion(options:{scope:()=>string;path:()=>stri
   if(!p||p.finishing)return
   p.finishing=true;if(pair===p)pair=null
   if(p.timer!==undefined)clearTimeout(p.timer)
+  p.seam?.dispose();p.seam=null
   const surfaces=[p.leave,p.enter].filter((x):x is Surface=>!!x)
   // Cancel effects before restoring styles. The Vue leave callback removes
   // the old DOM immediately; never keep a disconnected account surface.
@@ -41,6 +43,22 @@ export function createExternalPageMotion(options:{scope:()=>string;path:()=>stri
    const timing:KeyframeAnimationOptions={duration:p.plan.duration,easing:'cubic-bezier(.22,1,.36,1)',fill:'both'}
    const time=p.enter.element.ownerDocument.timeline?.currentTime
    for(const kind of ['leave','enter'] as const){const s=p[kind]!;s.animation=s.element.animate([{transform:translate(first[kind])},{transform:translate(last[kind])}],timing);if(typeof time==='number')s.animation.startTime=time}
+   // Only a real swipe receives a separator; navbar remains unchanged.
+   // Stage measurements occur once at handoff, never during drag frames.
+   if(p.plan.offset!==0){
+    const stage=p.origin.closest?.<HTMLElement>('.main-layout')
+    if(stage){
+     const rect=stage.getBoundingClientRect(),v=stage.ownerDocument.defaultView?.visualViewport
+     const viewTop=Math.max(rect.top+stage.clientTop,v?.offsetTop||0)
+     const available=(v?.height??stage.ownerDocument.defaultView?.innerHeight??stage.clientHeight)+(v?.offsetTop||0)-viewTop
+     const top=stage.scrollTop+Math.max(0,viewTop-rect.top-stage.clientTop)
+     const height=Math.min(stage.clientHeight,available>0?available:stage.clientHeight)
+     p.seam=createPremiumSeam(stage,{left:stage.scrollLeft,top,height})
+     const x=premiumSeamX(first.leave,p.plan.span,p.plan.direction),end=premiumSeamX(last.leave,p.plan.span,p.plan.direction)
+     p.seam?.paint(x,premiumSeamOpacity(p.plan.offset,p.plan.span))
+     p.seam?.settle(x,premiumSeamOpacity(p.plan.offset,p.plan.span),end,p.plan.duration,'cubic-bezier(.22,1,.36,1)',typeof time==='number'?time:undefined)
+    }
+   }
    // Replace a temporary visual cue only once both actual surfaces have their
    // initial transforms and animations, in this very same DOM update.
    options.onHandoff()

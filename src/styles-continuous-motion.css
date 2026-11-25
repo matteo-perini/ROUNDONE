@@ -55,3 +55,16 @@
  }
  .main-layout[data-lf-external-pair] [data-lf-external-moving]{transition:none!important}
 }
+
+/* E.8.1 — premium visual separator. Its 14px band is painted over the seam,
+   not added to the track span: no page resize, no transform on the content,
+   no new scrollport, no backdrop blur or hit-test interference. */
+.lf-premium-page-seam{
+ position:absolute;z-index:4;pointer-events:none;user-select:none;
+ background:linear-gradient(90deg,rgba(0,0,0,.24),var(--bg,#090D14) 27%,var(--bg,#090D14) 73%,rgba(0,0,0,.24));
+ contain:strict;will-change:transform,opacity;
+}
+.theme-light .lf-premium-page-seam{
+ background:linear-gradient(90deg,rgba(31,49,65,.13),var(--bg,#F9FAFB) 27%,var(--bg,#F9FAFB) 73%,rgba(31,49,65,.13));
+}
+@media(prefers-reduced-motion:reduce){.lf-premium-page-seam{display:none!important}}

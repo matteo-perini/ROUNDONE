@@ -29,7 +29,7 @@ test('Desktop dashboard bell positioned off layout flow with search clearance',(
 
 test('Live Coach archive has one archive title and one top right create action',()=>{
  assert.equal((live.match(/uiText\("ARCHIVIO SCHEDE"\)/g)||[]).length,1)
- assert.match(live, /<section v-else-if="!loading && session" class="panel lf-mobile-archive">/)
+ assert.match(live, /<section v-else-if="!loading && session" class="panel lf-mobile-archive"(?:\s+v-lf-entrance="[^"]*")?>/)
  assert.match(live,/class="lf30-archive-head"/)
  assert.match(live,/class="lf30-archive-actions"/)
  assert.match(live,/@click="beginModel">\{\{uiText\("\+ Crea nuova scheda dall'archivio"\)\}\}/)

@@ -20,7 +20,7 @@ watch(()=>props.pageActive,active=>{if(active===false)opened.value=null})
 watch(()=>props.programs,()=>{if(selected.value&&!program.value)choose('');else if(weekId.value&&!week.value)weekId.value=''})
 </script>
 <template>
- <section class="panel lf-r3-history lf-r15-history">
+ <section class="panel lf-r3-history lf-r15-history" v-lf-entrance="{id:'athlete-program-history',ready:ready,rows:[{match:'.lf-r15-history-program'}]}">
   <div class="lf-r15-history-head"><div><h2>Programmazioni concluse</h2><p>Consulta le settimane e le schede del tuo storico.</p></div><button v-if="program" type="button" class="secondary lf-r15-history-back" @click="choose('')">‹ Tutti i programmi</button></div>
   <p v-if="!ready" class="muted" role="status">Caricamento…</p>
   <template v-else-if="!program"><button v-for="p in [...programs].reverse()" :key="p.id" class="secondary lf-r3-history-row lf-r15-history-program" type="button" @click="choose(p.id)"><span class="lf-r15-history-symbol" aria-hidden="true">▦</span><b>{{p.title}}</b><small>{{p.weeks.length}} {{p.weeks.length===1?'settimana conclusa':'settimane concluse'}} · {{prettyDate(p.weeks[0]?.startDate)}} – {{prettyDate(weekEnd(p.weeks.at(-1)?.startDate))}}</small><span class="lf-r15-history-arrow" aria-hidden="true">›</span></button><p v-if="!programs.length" class="lf-r15-history-empty muted">Nessuna programmazione conclusa.</p></template>

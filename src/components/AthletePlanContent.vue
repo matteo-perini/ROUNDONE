@@ -163,7 +163,7 @@ watch(() => week.value?.id, (_id, previous) => { if (previous !== undefined) sel
 </script>
 
 <template>
-  <div v-lf-entrance="{id:'athlete-plan-r13',rows:[{match:'.lf-r13-today,.lf-r13-program'},{within:'.athlete-sheet-grid',match:'.scheme-item'},{within:'.lf-athlete-v4-days',match:'.lf-athlete-v4-day'}]}" class="stack athlete-plan lf-r13-plan" style="gap:14px">
+  <div v-lf-entrance="{id:'athlete-plan-r13',rows:[{match:'.lf-r13-heading,.lf-r13-today,.lf-r13-program,.lf-r13-schedule'},{within:'.athlete-sheet-grid',match:'.scheme-item'}]}" class="stack athlete-plan lf-r13-plan" style="gap:14px">
     <section class="lf-r13-heading" aria-label="Riepilogo piano atleta">
       <div>
         <span class="lf-r13-kicker">IL TUO PERCORSO</span>
