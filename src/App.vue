@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch, onUnmounted, defineAsyncComponent } from 'vue'
-import {quietLoadingVisible} from './features/motion/quietLoading'
 import {onAuthStateChanged} from 'firebase/auth'
 import {doc,onSnapshot,type Unsubscribe} from 'firebase/firestore'
 import {getStagingClients} from './integrations/firebase/stagingClient'
@@ -557,7 +556,6 @@ async function goOut(){
 }
 </script>
 <template>
-  <Teleport to="body"><div v-if="quietLoadingVisible" class="lf-quiet-indicator" role="status"><span class="lf-quiet-status">{{uiText("Caricamento in corso…")}}</span><span class="lf-quiet-track" aria-hidden="true"></span></div></Teleport>
   <Teleport to="body"><aside v-if="navigationFailure" class="lf21-nav-recovery" role="alert"><strong>{{navigationFailure.kind==='assets'?'Pagina non caricata':'Navigazione non riuscita'}}</strong><p>{{navigationFailure.kind==='assets'?'Potrebbe essere disponibile una nuova versione. Ricarica per riprovare.':'Riprova a cambiare pagina o ricarica LionFit.'}}</p><button type="button" @click="reloadNavigation">Ricarica</button><button type="button" @click="navigationFailure=null">Chiudi</button></aside></Teleport>
   <Teleport to="body"><aside v-if="pushNotice" role="status" style="position:fixed;inset:auto 12px max(85px,env(safe-area-inset-bottom)) 12px;z-index:9999;max-width:440px;margin:auto;padding:14px;border-radius:12px;background:#162720;color:#fff;box-shadow:0 6px 24px #0008"><strong>{{pushNotice.title}}</strong><p>{{pushNotice.body}}</p><button type="button" class="secondary" @click="openPushNotice">{{pushNotice.open==='support'?'Apri assistenza':pushNotice.open==='competition'?'Apri gara':'Apri Agenda'}}</button> <button type="button" class="bare" style="color:#fff" @click="pushNotice=null">Chiudi</button></aside></Teleport>
  <div class="app" :class="['theme-'+lab.theme,shownRole==='coach'?'as-coach':'as-athlete',{'bookings-mode':isBooking,'lf-support-shell':route.path==='/assistenza'&&!!shownRole&&isStagingMode(),'athlete-sidebar-collapsed':!athleteSidebarExpanded}]">

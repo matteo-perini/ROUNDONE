@@ -4,10 +4,12 @@
 .lf-quiet-boot img{width:76px;height:76px;object-fit:contain}
 .lf-quiet-status{position:absolute!important;width:1px!important;height:1px!important;min-height:0!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;animation:none!important;pointer-events:none!important}
 .lf-quiet-status::before,.lf-quiet-status::after{display:none!important;content:none!important}
-.lf-quiet-indicator{position:fixed;inset:env(safe-area-inset-top,0px) 0 auto;height:3px;z-index:9990;pointer-events:none;overflow:hidden;background:#299c6122}
-.lf-quiet-track{display:block;width:35%;height:100%;background:#32b67b;border-radius:999px;transform:translateX(95%)}
+/* Local status: only explicit pending reads, never a fixed global bar.
+   Keep the existing text for assistive technology and reserve a small area.
+   Fast reads finish before the subtle visual feedback is shown. */
+.lf-quiet-status[data-lf-local-loading]{position:static!important;width:auto!important;height:auto!important;min-height:22px!important;min-width:0!important;padding:4px 0!important;margin:4px 0!important;border:0!important;overflow:visible!important;clip:auto!important;clip-path:none!important;white-space:normal!important;font-size:.75rem;line-height:1.4;opacity:.8;animation:lf-local-loading-in 160ms ease-out 350ms both!important}
+@keyframes lf-local-loading-in{from{opacity:0}to{opacity:.8}}
+@media(prefers-reduced-motion:reduce){.lf-quiet-status[data-lf-local-loading]{animation:none!important}}
 .lf-quiet-roster-placeholder{display:grid;gap:5px;min-height:26px;align-content:center;max-width:110px;width:100%}
 .lf-quiet-roster-placeholder i{display:block;height:7px;width:85%;border-radius:3px;background:currentColor;opacity:.13}
 .lf-quiet-roster-placeholder i+i{width:58%;opacity:.09}
-@media(prefers-reduced-motion:no-preference){.lf-quiet-track{animation:lf-quiet-travel 1200ms ease-in-out infinite alternate}}
-@keyframes lf-quiet-travel{from{transform:translateX(-100%)}to{transform:translateX(285%)}}

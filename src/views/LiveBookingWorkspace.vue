@@ -432,7 +432,7 @@ const bandTo=(r:Range)=>Array.isArray(r)?r[1]:(r as {from:string;to:string}).to
 const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
 </script>
 <template>
- <div class="stack lf-agenda13" :class="{'lf-agenda-coach':isCoach}" :data-r9-athlete="!isCoach" aria-label="Agenda Lion Fit">
+ <div v-lf-entrance="{id:'agenda-heading',premiumOnly:true,rows:[{match:'.booking-intro'}]}" class="stack lf-agenda13" :class="{'lf-agenda-coach':isCoach}" :data-r9-athlete="!isCoach" aria-label="Agenda Lion Fit">
   <div v-if="isCoach||athleteTab==='agenda'" class="booking-intro">
    <h1 style="margin:4px 0">{{uiText("Agenda")}}</h1>
    <p v-if="isCoach" class="lf-agenda-subtitle">Prenotazioni, disponibilità e appuntamenti della tua palestra.</p>
@@ -445,7 +445,7 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
    <p v-if="availabilityFeedback" class="notice" role="status" aria-live="polite">{{availabilityFeedback}}</p>
    <p v-if="message&&message!=='Calendario sincronizzato.'" class="small muted" role="status">{{message}}</p>
    <template v-if="!isCoach">
-    <div v-if="athleteTab==='agenda'" class="lf-agenda-athlete-home">
+    <div v-if="athleteTab==='agenda'" v-lf-entrance="{id:'agenda-athlete-home',premiumOnly:true,rows:[{match:'.lf-agenda-hero,.lf-agenda-tiles,.lf-r9-upcoming'}]}" class="lf-agenda-athlete-home">
       <div class="lf-agenda-hero lf-r9-hero">
        <div class="lf-agenda-hero-cover"><CompetitionCover :gym="session?.gymId||''" :event-id="heroEvent?.id" :cover-id="heroEvent?.coverId"/></div>
        <span class="eyebrow">{{heroEvent?'PROSSIMO EVENTO':'LA TUA AGENDA'}}</span>

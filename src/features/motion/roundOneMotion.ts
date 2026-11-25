@@ -1,4 +1,4 @@
-/** E.8.2: bounded horizontal content reveal on explicit page groups.
+/** E.8.2.1: bounded horizontal reveal after actual page motion settles.
  * No subtree observer, synchronous layout reads, or animation-dependent data flow. */
 import {nextTick,type App,type Directive} from 'vue'
 import type {Router} from 'vue-router'
@@ -38,16 +38,16 @@ export function installRoundOneMotion(router:Router,app:App):void{
  if(typeof window==='undefined'||typeof document==='undefined')return
  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)')
  const active=new Map<Animation,HTMLElement>(),groups=new Map<HTMLElement,EntranceGroup>(),seen=new Set<string>()
- // Only explicit IDs, never account data or DOM snapshots. Suppress warm returns
- // within the same session, including remounts of a group already presented.
- const presented=new Set<string>(),readyEdges=new Set<HTMLElement>()
+ // IDs are scoped to a committed navigation. Re-entry may reveal once;
+ // updates and remounts within that navigation do not replay.
  const explicitRoutes=new Set(['/home','/piano','/archivio','/coach','/coach/atleti','/coach/archivio','/messaggi','/coach/messaggi'])
  const blockedSelector='[inert],[hidden],[aria-hidden="true"],.lf-motion-leaving,[data-lf-track-inactive],[role="dialog"],[role="alertdialog"],.modal-overlay'
- const movingSelector='[data-lf-motion-dragging],[data-lf-motion-paired],[data-lf-external-pair],[data-lf-external-moving],.lf-native-track-rail[data-lf-track-moving],.lf-section-next-enter-active,.lf-section-prev-enter-active,.lf-chat-open-enter-active,.lf-chat-close-enter-active'
- let generation=0,frame=0,queued=false,deadline=0,used=0,firstFrame=false,routeFramePassed=false,sectionSlide=false,path=router.currentRoute.value.path
+ const movingSelector='[data-lf-motion-dragging],[data-lf-external-pair],[data-lf-external-moving],.lf-native-track-rail[data-lf-track-moving],.lf-section-next-enter-active,.lf-section-prev-enter-active,.lf-chat-open-enter-active,.lf-chat-close-enter-active'
+ let generation=0,frame=0,queued=false,deadline=0,used=0,firstFrame=false,sectionSlide=false,path=router.currentRoute.value.path
+ let retryAfter=0
  const allowed=()=>!document.hidden&&!reduce.matches&&deadline>0&&performance.now()<=deadline
  function cancelActive(root?:HTMLElement){for(const [a,el] of active){if(root&&root!==el&&!root.contains?.(el))continue;active.delete(a);try{a.cancel()}catch{/* optional visual enhancement */}}}
- function stop(){generation++;queued=false;deadline=0;firstFrame=false;readyEdges.clear();if(frame){cancelAnimationFrame(frame);frame=0}cancelActive()}
+ function stop(){generation++;queued=false;deadline=0;firstFrame=false;retryAfter=0;if(frame){cancelAnimationFrame(frame);frame=0}cancelActive()}
  function animate(el:HTMLElement,role:MotionRole,index:number,fadeOnly=false,late=false){
   if(typeof el.animate!=='function')return
   try{
@@ -60,38 +60,41 @@ export function installRoundOneMotion(router:Router,app:App):void{
  }
  function flush(){
   if(!allowed())return
-  const isFirst=firstFrame;firstFrame=false;routeFramePassed=true
-  let hasExplicit=false
-  // Explicit direct-child groups only. No observer, layout measurements, or timer polling.
+  // The shell's paired marker can outlive the real native rail by 1.2s.
+  // Observe only actual active motion. Retry within the existing bounded
+  // entrance window, at most one DOM check every 40ms while moving.
+  if(PREMIUM_MOTION_ENABLED&&sectionSlide){
+   if(performance.now()<retryAfter){schedule();return}
+   if(document.querySelector(movingSelector)){retryAfter=performance.now()+40;schedule();return}
+  }
+  const isFirst=firstFrame;firstFrame=false
+  let hasExplicit=false,retry=false
   for(const [el,group] of groups){
    if(!el.isConnected||el.closest?.(blockedSelector)||(!PREMIUM_MOTION_ENABLED&&group.premiumOnly))continue
    hasExplicit=true
    if(group.ready===false||seen.has(group.id))continue
-   const edge=readyEdges.delete(el)
+   if(!PREMIUM_MOTION_ENABLED&&sectionSlide)continue
+   if(el.closest?.(movingSelector)){retry=true;continue}
+   // Mark only after motion has settled. The same group can now enter again
+   // on a real route change, but cannot replay on filter/realtime updates.
    seen.add(group.id)
-   if(PREMIUM_MOTION_ENABLED){
-    const already=presented.has(group.id)
-    presented.add(group.id) // empty first snapshot, warm returns and moving pages never replay
-    if(already||(sectionSlide&&!edge)||el.closest?.(movingSelector))continue
-   }else if(sectionSlide)continue
    for(const target of entranceTargets(el,group,ROUNDONE_MOTION.maxPanels-used)){
     if(target.closest?.(blockedSelector)||(PREMIUM_MOTION_ENABLED&&target.matches('.lf14-gym-identity,.lf14-brand-container'))||target.querySelector('[role="dialog"],.modal-overlay,.lf-p24-confirm-layer'))continue
     const role:MotionRole=target.matches('h1,h2,h3,header,.lf-v3-intro,.lf-coach-greeting,.lf-p360-head,.lfsettings-header,.wr-head,.lf-r13-heading')?'title':PREMIUM_MOTION_ENABLED&&target.matches('.lf-roster-card,.archive-card,.lf-archive-v4-item,.lf-p360-sheet,.lf-p360-history-row,.wr-day,.lf-agenda-group,.lf-ms-row,.lf19c-gym,.lf-chat-person,.lf-r15-history-program')?'row':'panel'
-    animate(target,role,used++,false,!isFirst)
+    // Already visible real pages should not disappear again. Use the gentle
+    // opacity floor for their 550ms reveal; cold entries retain the full effect.
+    animate(target,role,used++,false,sectionSlide||!isFirst)
    }
   }
-  if(isFirst&&!sectionSlide&&!hasExplicit&&used===0&&!explicitRoutes.has(path)){
+  if(isFirst&&(!sectionSlide||PREMIUM_MOTION_ENABLED)&&!hasExplicit&&used===0&&!explicitRoutes.has(path)){
    const main=document.querySelector(PREMIUM_MOTION_ENABLED?'main.main-layout,main.booking-main,main.login-main':'main.main-layout,main.booking-main')
-   const target=main&&Array.from(main.children).find(e=>!e.matches('.lf-route-back,.version,.lf17-bell-wrap,.notice,.modal-overlay,.lf27-delayed-loading,[role="alert"],[role="status"],button,aside')&&!e.querySelector('.modal-overlay'))
+   const target=main&&Array.from(main.children).find(e=>!e.matches('.lf-route-back,.version,.lf17-bell-wrap,.notice,.modal-overlay,.lf27-delayed-loading,[role="alert"],[role="status"],button,aside')&&!e.closest?.(blockedSelector)&&!e.querySelector('.modal-overlay'))
    if(target instanceof HTMLElement&&!target.closest?.(movingSelector)){
-    // Generic routes: never animate the persistent shell or a root containing a dialog/branding.
-    // A title is sufficient when there is no explicitly registered content group.
     const title=target.matches('h1,h2')?target:target.querySelector('h1')
-    if(PREMIUM_MOTION_ENABLED&&title instanceof HTMLElement){
-     animate(title,'page',0)
-    }else if(!PREMIUM_MOTION_ENABLED)animate(target,'panel',0,true)
+    if(PREMIUM_MOTION_ENABLED&&title instanceof HTMLElement){animate(title,'page',used++,false,sectionSlide)}else if(!PREMIUM_MOTION_ENABLED)animate(target,'panel',used++,true)
    }
   }
+  if(retry&&used<ROUNDONE_MOTION.maxPanels)schedule()
  }
  function schedule(){
   if(queued||!allowed())return
@@ -102,29 +105,29 @@ export function installRoundOneMotion(router:Router,app:App):void{
   })
  }
  const directive:Directive<HTMLElement,EntranceGroup>={
-  mounted(el,b){groups.set(el,b.value);if(b.value.ready!==false&&!seen.has(b.value.id)){if(sectionSlide&&routeFramePassed)readyEdges.add(el);schedule()}},
+  mounted(el,b){groups.set(el,b.value);if(b.value.ready!==false&&!seen.has(b.value.id))schedule()},
   updated(el,b){
    groups.set(el,b.value)
-   if(b.value.ready===false){readyEdges.delete(el);cancelActive(el);return}
-   if(b.oldValue?.ready===false&&!seen.has(b.value.id)){readyEdges.add(el);schedule()}
+   if(b.value.ready===false){cancelActive(el);return}
+   if(b.oldValue?.ready===false&&!seen.has(b.value.id))schedule()
   },
-  beforeUnmount(el){groups.delete(el);readyEdges.delete(el);cancelActive(el)}
+  beforeUnmount(el){groups.delete(el);cancelActive(el)}
  }
  app.directive('lf-entrance',directive)
- function enter(nextPath:string,slide=false){stop();path=nextPath;seen.clear();used=0;routeFramePassed=false;sectionSlide=slide;if(slide&&!PREMIUM_MOTION_ENABLED)return;deadline=performance.now()+ROUNDONE_MOTION.entryWindowMs;firstFrame=!slide;schedule()}
- router.afterEach((to,from,failure)=>{if(failure)return;if(to.path!==from.path)enter(to.path,isMobileSectionSlide(from.path,to.path,window.innerWidth));else if(to.fullPath!==from.fullPath){deadline=0;readyEdges.clear()}})
+ function enter(nextPath:string,slide=false){stop();path=nextPath;seen.clear();used=0;sectionSlide=slide;if(slide&&!PREMIUM_MOTION_ENABLED)return;deadline=performance.now()+ROUNDONE_MOTION.entryWindowMs;firstFrame=true;schedule()}
+ router.afterEach((to,from,failure)=>{if(failure)return;if(to.path!==from.path)enter(to.path,isMobileSectionSlide(from.path,to.path,window.innerWidth));else if(to.fullPath!==from.fullPath){deadline=0}})
  const changed=()=>{if(reduce.matches)stop()}
  if(typeof reduce.addEventListener==='function')reduce.addEventListener('change',changed);else reduce.addListener?.(changed)
  document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()})
  // A normal tap must not jump a card away from its finger. Only confirmed
  // horizontal intent cancels running reveals; all input closes future reveals.
- function finishEntrance(){deadline=0;firstFrame=false;readyEdges.clear()}
+ function finishEntrance(){deadline=0;firstFrame=false}
  document.addEventListener('pointerdown',finishEntrance,{passive:true,capture:true})
  document.addEventListener('touchstart',finishEntrance,{passive:true,capture:true})
  document.addEventListener('wheel',finishEntrance,{passive:true,capture:true})
  document.addEventListener('keydown',finishEntrance,{capture:true})
  window.addEventListener?.('lionfit:content-gesture-start',()=>{if(PREMIUM_MOTION_ENABLED){finishEntrance();cancelActive()}})
- const resetScope=()=>{stop();seen.clear();presented.clear()}
+ const resetScope=()=>{stop();seen.clear()}
  window.addEventListener?.('lionfit:motion-scope-invalidated',resetScope)
  window.addEventListener?.('lionfit:content-scope-invalidated',resetScope)
  enter(path)

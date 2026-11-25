@@ -1,0 +1,61 @@
+{
+  "patch": "R22B6E821",
+  "base": "R22B6E82",
+  "scope": "local loading feedback; horizontal reveal once per committed navigation after real motion settles",
+  "files": [
+    {
+      "path": "src/App.vue",
+      "sha256": "84edee37b065d68ed53e04b215c4e567500eb4035e6cbd92cc9362e58aa04221",
+      "base_sha256": "89c1f8bcb162495bd062dcc754bf0017403db7d99780894e544b216fe0fc9926",
+      "action": "replace"
+    },
+    {
+      "path": "src/components/ProfileOverview.vue",
+      "sha256": "84348893172c49027ba46b7d4c0bd4aebd52245528249a38d16ada141b11bc52",
+      "base_sha256": "a98498b320c9a1d4dd98469d0f24835d3dae633e5700497abed65da2c0849330",
+      "action": "replace"
+    },
+    {
+      "path": "src/features/motion/quietLoading.ts",
+      "sha256": "4dafc93c8b1459275e9da8394032781350db1af3e011325d51c6c561efa8e104",
+      "base_sha256": "ee372599adf8b63514ad8be18b4e626937d1a807dd0bf72e40aa2996f3bf6302",
+      "action": "replace"
+    },
+    {
+      "path": "src/features/motion/roundOneMotion.ts",
+      "sha256": "68c12b81039185192fe5b7d761d9fac964e73cd29a76fb2ecadfd06c444f3bc5",
+      "base_sha256": "69f1da77600a633760141c7da8def388c10a18419a21c780e4c56e466621903e",
+      "action": "replace"
+    },
+    {
+      "path": "src/styles-quiet-loading.css",
+      "sha256": "a5d9204560ab658a5431cbd8b516f2a6e7802f47a2ac669cab710e2be5bee2b4",
+      "base_sha256": "d1efd4d0cf933aa0f1114d400a95003478c5dd9144769fc55e36c0117669fbbd",
+      "action": "replace"
+    },
+    {
+      "path": "src/views/LiveBookingWorkspace.vue",
+      "sha256": "0fad585fec937cd74a83e11138d8643f3bb871ca0a115f9a8f33c8330a79c733",
+      "base_sha256": "58e613ac751a12b39a5dcac77cd194735826d8dcef82d1f0507f672a78b89116",
+      "action": "replace"
+    },
+    {
+      "path": "tests/patch27-r2-motion.unit.mjs",
+      "sha256": "f83d08f8da27a13d7a1aa4bfd9a7d7a019d3e262c3402305f2b47ccd365e3571",
+      "base_sha256": "b37758dbac3de5df086320af3a2d45f3f9ae711ad88978c5b1b6ec1a0cab3fe7",
+      "action": "replace"
+    },
+    {
+      "path": "tests/patch28-r3-quiet-loading.unit.mjs",
+      "sha256": "a34cb833d36b46ca2556993bbe183df425636d7db2f1511f1bd5388266992a00",
+      "base_sha256": "643938b6d53efdbdc7eb2cefff466bdc372d82ee50b01fb1930486c341d37525",
+      "action": "replace"
+    },
+    {
+      "path": "tests/r22b6e82-horizontal-content.test.mjs",
+      "sha256": "dc810e778d0a5f410d98197f7399c08da74a988806eaa366402a3ae1b2a79779",
+      "base_sha256": "0ed4a3452a6b0e1b699e42bc6de8f57779d19e5a4c43be40f04d902224043b89",
+      "action": "replace"
+    }
+  ]
+}

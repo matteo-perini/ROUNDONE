@@ -1,4 +1,4 @@
-import {ref,type Directive} from 'vue'
+import type {Directive} from 'vue'
 
 // Only explicit pending reads register here. No global observer, no data cache.
 export function createQuietLoadingTracker(notify:(visible:boolean)=>void,delay=350){
@@ -19,10 +19,9 @@ export function createQuietLoadingTracker(notify:(visible:boolean)=>void,delay=3
   }
  }
 }
-export const quietLoadingVisible=ref(false)
-const tracker=createQuietLoadingTracker(value=>{quietLoadingVisible.value=value})
-// The existing v-if owns the lifetime. Unmount cancels pending feedback immediately.
+// E.8.2.1: pending feedback belongs to the actual section, not the shell.
+// Offscreen/inert panes cannot trigger a global indicator. Existing status
+// labels remain accessible; no timers or subscriptions are registered here.
 export const quietLoading:Directive<HTMLElement>={
- mounted(el){el.setAttribute('aria-hidden','true');tracker.begin(el)},
- beforeUnmount(el){tracker.end(el)}
+ mounted(el){el.setAttribute('data-lf-local-loading','true');if(!el.hasAttribute('role'))el.setAttribute('role','status')}
 }

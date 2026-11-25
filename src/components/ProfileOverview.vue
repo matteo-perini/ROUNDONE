@@ -24,7 +24,7 @@ const menu=computed(()=>athlete.value?[
 function show(id:string){active.value=active.value===id?'':id}
 </script>
 <template>
- <section class="lfp-profile" :class="athlete?'lfp-athlete':'lfp-coach'" :aria-label="uiText('Il mio profilo')">
+ <section v-lf-entrance="{id:'profile-overview',premiumOnly:true,rows:[{match:'.lfp-heading,.lfp-hero,.lfp-facts,.lfp-actions'},{within:'.lfp-sections',match:'.lfp-section'}]}" class="lfp-profile" :class="athlete?'lfp-athlete':'lfp-coach'" :aria-label="uiText('Il mio profilo')">
   <div class="lfp-heading"><div><h1>{{uiText(athlete?'Il mio profilo':'Profilo & Palestra')}}</h1></div></div>
   <div class="lfp-hero">
    <button class="lfp-avatar" type="button" aria-label="Modifica foto profilo" @click="emit('photo')"><span class="lfp-avatar-crop"><img v-if="photo" :src="photo" alt="Foto del profilo"/><img v-else src="/v1-preview/LOGO-APP.png" alt="Logo Lion Fit"/></span><span class="lfp-camera"><LionIcon name="camera" :size="15"/></span></button>
