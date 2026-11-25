@@ -1,9 +1,0 @@
-LionFit R22B.6E.8.2 — Horizontal Content Experience
-Base obbligatoria E.8.1. Backup e Sostituisci tutti i file.
-1. npm.cmd run typecheck
-2. npm.cmd run build
-3. node --experimental-strip-types --test tests/r22*.test.mjs
-Attesi 198 test R22 superati. Verifica nella palestra di prova prima di WebDocs/GitHub Desktop.
-550 ms, 28 px orizzontali, 55 ms stagger (cap 165). La pagina in movimento ha priorità.
-Nessun deploy Firebase. Nessuna nuova dipendenza. Report incluso.
-Rollback: ripristinare i replace e rimuovere gli add del manifest; rigenerare WebDocs.

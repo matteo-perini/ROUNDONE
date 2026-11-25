@@ -1,1 +1,0 @@
-Base: E85. Backup dei 13 file replace. Estrai nella root e sostituisci. npm.cmd run typecheck; npm.cmd run build; test R22. Nessun deploy Firebase. Vedi report.

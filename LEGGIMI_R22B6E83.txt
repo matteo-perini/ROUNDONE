@@ -1,5 +1,0 @@
-LIONFIT R22B.6E.8.3 — Pure Native Experience SAFE
-Base: R22B.6E.8.2.1.
-Backup dei 17 file replace nel manifest. Estrai nella root del progetto e sostituisci tutti i file.
-Esegui npm.cmd run typecheck e npm.cmd run build, poi node --experimental-strip-types --test tests/r22*.test.mjs.
-Nessun deploy Firebase. Testa nella palestra di prova prima del push. Vedi report per il limite delle pagine esterne e il rollback.

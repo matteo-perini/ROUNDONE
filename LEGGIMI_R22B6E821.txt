@@ -1,7 +1,0 @@
-LIONFIT R22B.6E.8.2.1 — PREMIUM MOTION RECOVERY
-Base obbligatoria: E.8.2. Backup dei 9 file del manifest; estrai nella radice e scegli SOSTITUISCI TUTTI I FILE.
-PowerShell: npm.cmd run typecheck ; npm.cmd run build
-Test: node --experimental-strip-types --test tests/r22*.test.mjs
-Prova su palestra di test: barra verde assente, reveal dopo transizioni e ritorni, Chat, swipe e navbar. Poi LIONFIT_PREPARA_WEB_E_DOCS.cmd e GitHub Desktop.
-Nessun deploy Firebase. Rollback: ripristina i file originali e rigenera WebDocs.
-Vedi report per limiti e collaudo.
