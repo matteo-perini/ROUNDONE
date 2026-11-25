@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LocalLoadingSkeleton from '../components/LocalLoadingSkeleton.vue'
 /** Profilo V1, utente Auth verificato, lettura realtime. Scritture live protette. */
 import {ref,onMounted,onUnmounted,computed,watch} from 'vue'
 import {doc,getDocFromServer,onSnapshot,updateDoc,setDoc,type Unsubscribe} from 'firebase/firestore'
@@ -25,7 +26,8 @@ const displayLocation=computed(()=>{
  return /^italia$/i.test(value)||!value?'Italia':value
 })
 const canSave=computed(()=>!isStagingMode()||mayWriteLive())
-let alive=true,stop:Unsubscribe|null=null,profileLoaded=false
+const profileLoaded=ref(false)
+let alive=true,stop:Unsubscribe|null=null
 const safePhoto=(value:unknown)=>typeof value==='string' && value.length<870000 && (/^data:image\/(jpeg|png|webp);base64,/.test(value)||/^https:\/\//.test(value))?value:''
 function readProfile(p:Record<string,unknown>){
  first.value=String(p.name||'');surname.value=String(p.surname||'');gender.value=String(p.gender||'Non specificare')
@@ -39,16 +41,21 @@ onMounted(async()=>{try{
  if(!isStagingMode()&&s.gymId!=='gym_lab2c_a')throw new Error('Palestra non autorizzata')
  session.value=s;email.value=s.email||''
  try{const gym=details?.gym??await getDocFromServer(doc((isStagingMode()?getStagingClients():getLocalEmulatorClients()).db,'gyms',s.gymId));if(gym.exists())gymName.value=String(gym.data().name||gym.data().gymName||'Lion Fit')}catch{}
- const {db}=isStagingMode()?getStagingClients():getLocalEmulatorClients()
+ if(!alive)return
+ const {db,auth}=isStagingMode()?getStagingClients():getLocalEmulatorClients()
+ if(auth.currentUser?.uid!==s.uid)throw new Error('Account cambiato durante il caricamento.')
+ // Reuse the server-verified document already returned by the identity check.
+ if(details?.profile.exists()){readProfile(details.profile.data());profileLoaded.value=true;notice.value=''}
  if(s.role!=='atleta')void readCoachMetrics(db,s.gymId,s.uid,s.role==='titolare').then(values=>{if(alive)metrics.value=values}).catch(()=>{})
- stop=onSnapshot(doc(db,'users',s.uid),snap=>{
-  if(!alive)return
-  if(!snap.exists()||snap.data().gymId!==s.gymId){notice.value='Profilo non verificato';return}
+ stop=onSnapshot(doc(db,'users',s.uid),{includeMetadataChanges:true},snap=>{
+  if(!alive||auth.currentUser?.uid!==s.uid)return
+  if(details&&snap.metadata.fromCache)return // never replace the verified initial document with an older cache
+  if(!snap.exists()||snap.data().gymId!==s.gymId){profileLoaded.value=false;notice.value='Profilo non verificato';return}
   // First snapshot hydrates the form even when /profilo?edit=1 opened directly.
-  if(!profileLoaded||!editing.value)readProfile(snap.data());profileLoaded=true;notice.value=''
- },e=>{if(alive)notice.value=e.message})
+  if(!profileLoaded.value||!editing.value)readProfile(snap.data());profileLoaded.value=true;notice.value=''
+ },e=>{if(alive){profileLoaded.value=false;notice.value=e.message}})
  if(route.query.edit==='1')editing.value=true
- }catch(e){notice.value=e instanceof Error?e.message:String(e)}
+ }catch(e){profileLoaded.value=false;notice.value=e instanceof Error?e.message:String(e)}
 })
 watch(()=>route.query.edit,val=>{if(val==='1')editing.value=true})
 onUnmounted(()=>{alive=false;stop?.()})
@@ -78,7 +85,9 @@ function link(route:string){return isStagingMode()?route:route+'?source=emulator
 </script>
 <template>
 <div class="lfp-container" :class="session?.role==='atleta'?'athlete-profile':'coach-profile'">
- <ProfileOverview v-if="!editing" :role="session?.role||'atleta'" :name="fullName" :gym-name="gymName" :email="email" :photo="photo" :bio="bio" :location="displayLocation" :height="height" :weight="weight" :settings-to="link('/impostazioni')" :athlete-to="link('/coach/atleti')" :coach-staff-to="link('/coach/staff')" :staff-enabled="isStagingMode()" :workouts-enabled="isStagingMode()" :bookings-to="link('/coach/prenotazioni')" :coach-metrics="metrics" @edit="editing=true" @photo="editing=true"/>
+ <LocalLoadingSkeleton v-if="!profileLoaded&&notice==='Caricamento profilo…'" variant="profile" label="Caricamento profilo…"/>
+ <p v-else-if="!profileLoaded" class="notice" role="alert">{{notice}}</p>
+ <ProfileOverview v-else-if="!editing" :role="session?.role||'atleta'" :name="fullName" :gym-name="gymName" :email="email" :photo="photo" :bio="bio" :location="displayLocation" :height="height" :weight="weight" :settings-to="link('/impostazioni')" :athlete-to="link('/coach/atleti')" :coach-staff-to="link('/coach/staff')" :staff-enabled="isStagingMode()" :workouts-enabled="isStagingMode()" :bookings-to="link('/coach/prenotazioni')" :coach-metrics="metrics" @edit="editing=true" @photo="editing=true"/>
  <section v-else class="panel profile-edit-screen lfp-form-wrap"><header class="row between"><button class="bare" type="button" aria-label="Chiudi modifica profilo" @click="editing=false">✕</button><h2>MODIFICA PROFILO</h2></header>
   <button class="profile-photo-editor" type="button" @click="fileInput?.click()" :disabled="busy" aria-label="Carica o modifica foto"><img v-if="newPhoto||photo" :src="newPhoto||photo" alt="Anteprima foto"/><span v-else>🦁</span><small>CAMBIA FOTO</small></button>
   <input ref="fileInput" type="file" accept="image/*,.heic,.heif" class="visually-hidden" @change="choosePhoto"/>
@@ -90,6 +99,6 @@ function link(route:string){return isStagingMode()?route:route+'?source=emulator
    <label>PESO (KG)<input v-model="weight" inputmode="decimal" type="text" autocomplete="off" placeholder="Es. 70,5" aria-label="Peso in chilogrammi"/></label>
   </div><button class="primary wide" :disabled="busy||!canSave" @click="save">{{busy?'SALVATAGGIO…':'SALVA PROFILO'}}</button><p class="small muted">Formati: JPG, PNG, WebP, HEIC/HEIF.</p>
  </section>
- <p v-if="notice==='Caricamento profilo…'" v-lf-quiet-loading class="lf-quiet-status" role="status">{{notice}}</p><p v-else-if="notice" class="small muted lfp-notice" role="status">{{notice}}</p>
+ <p v-if="profileLoaded&&notice" class="small muted lfp-notice" role="status">{{notice}}</p>
 </div>
 </template>

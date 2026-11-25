@@ -1,43 +1,39 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
-import {roundOneMotionOptions,ROUNDONE_MOTION,ROUNDONE_TITLE_FRAMES,ROUNDONE_PANEL_FRAMES} from '../src/features/motion/roundOneMotion.ts'
-import ts from 'typescript'
-import vm from 'node:vm'
-import {isMobileSectionSlide} from '../src/features/navigation/continuousMotion.ts'
+import {DATA_REVEAL_MS,installRoundOneMotion,entranceTargets} from '../src/features/motion/roundOneMotion.ts'
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8')
-const compiled=ts.transpileModule(read('src/features/motion/roundOneMotion.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText
 function harness(){
- let clock=10,id=0,nav,dir,mediaChange
- const calls=[],ticks=[],frames=new Map(),events=new Map(),winEvents=new Map()
+ const previous={window:globalThis.window,document:globalThis.document,HTMLElement:globalThis.HTMLElement}
+ const calls=[],events=new Map(),winEvents=new Map();let dir,nav,change,moving=false
  class El{
-  constructor(tag='div',classes=[],children=[]){this.tag=tag;this.classes=classes;this.children=children;this.isConnected=true;this.blocked=false;this.moving=false;this.queries=new Map();for(const e of children)e.parent=this}
-  matches(s){return s.split(',').some(x=>x.startsWith('.')?this.classes.includes(x.slice(1)):x===this.tag)}
-  closest(s){return (s.includes('[inert]')&&this.blocked||s.includes('[data-lf-motion-dragging]')&&this.moving)?this:this.parent?.closest(s)||null}
+  constructor(classes=[],children=[]){this.classes=classes;this.children=children;this.isConnected=true;this.blocked=false;this.queries=new Map();for(const e of children)e.parent=this}
+  matches(s){return s.split(',').some(x=>x.startsWith('.')&&this.classes.includes(x.slice(1)))}
+  closest(s){return s.includes('[inert]')&&this.blocked?this:this.parent?.closest(s)||null}
   contains(el){return this.children.some(e=>e===el||e.contains(el))}
   querySelector(s){return this.queries.get(s)||null}
   animate(frames,options){const a={el:this,frames,options,cancelled:false,cancel(){this.cancelled=true;this.oncancel?.()}};calls.push(a);return a}
  }
- let stageMoving=false
- const doc={hidden:false,querySelector:s=>stageMoving&&s.includes('[data-lf-motion-dragging]')?{}:null,addEventListener:(e,f)=>events.set(e,f)},media={matches:false,addEventListener:(_,f)=>mediaChange=f}
- const router={currentRoute:{value:{path:'/home',fullPath:'/home'}},afterEach:f=>nav=f},app={directive:(_,v)=>dir=v}
- const mod={exports:{}}
- vm.runInNewContext(compiled,{exports:mod.exports,module:mod,require:id=>id==='vue'?{nextTick:f=>{ticks.push(f);return Promise.resolve()}}:id.includes('continuousMotion')?{isMobileSectionSlide}:{PREMIUM_MOTION_ENABLED:true},HTMLElement:El,window:{matchMedia:()=>media,innerWidth:390,addEventListener:(e,f)=>winEvents.set(e,f)},document:doc,CSS:{supports:()=>true},performance:{now:()=>clock},requestAnimationFrame:f=>{frames.set(++id,f);return id},cancelAnimationFrame:i=>frames.delete(i)})
- mod.exports.installRoundOneMotion(router,app)
- const group=(id,ready=true)=>({id,ready,rows:[{match:'.card'}]})
- const list=n=>new El('div',[],Array.from({length:n},()=>new El('article',['card'])))
- return {El,calls,group,list,stageMoving:v=>stageMoving=v,mount:(el,value)=>dir.mounted(el,{value}),update:(el,oldValue,value)=>dir.updated(el,{oldValue,value}),unmount:el=>dir.beforeUnmount(el),flush(){while(ticks.length)ticks.shift()();for(const [i,f] of [...frames]){frames.delete(i);f(clock)}},nav(path){const from=router.currentRoute.value,to={path,fullPath:path};router.currentRoute.value=to;nav(to,from)},advance:n=>clock+=n,emit:e=>winEvents.get(e)(),input:e=>events.get(e)(),reduce(){media.matches=true;mediaChange()}}
+ const media={matches:false,addEventListener:(_,fn)=>change=fn}
+ globalThis.HTMLElement=El;globalThis.window={matchMedia:()=>media,addEventListener:(e,f)=>winEvents.set(e,f)}
+ globalThis.document={hidden:false,querySelector:()=>moving?{}:null,addEventListener:(e,f)=>events.set(e,f)}
+ const router={afterEach:f=>nav=f},app={directive:(name,v)=>{assert.equal(name,'lf-entrance');dir=v}}
+ installRoundOneMotion(router,app)
+ const group=(id='g',ready=true)=>({id,ready,rows:[{match:'.card'}]})
+ const list=n=>new El([],Array.from({length:n},()=>new El(['card'])))
+ const mount=(el,value)=>dir.mounted(el,{value}),update=(el,oldValue,value)=>dir.updated(el,{oldValue,value})
+ const add=(root,n)=>{const nodes=list(n).children;for(const e of nodes)e.parent=root;root.children.push(...nodes);return nodes}
+ return {calls,group,list,El,mount,update,add,unmount:el=>dir.beforeUnmount(el),stageMoving:v=>moving=v,nav:()=>nav({path:'/piano'},{path:'/home'}),emit:e=>winEvents.get(e)(),reduce(){media.matches=true;change()},hide(){document.hidden=true;events.get('visibilitychange')()},dispose:()=>Object.assign(globalThis,previous)}
 }
-test('approved motion parameters: 550ms, 28px, 55ms stagger bounded to 165ms; no scale',()=>{for(const role of ['title','panel','row','page']){assert.equal(roundOneMotionOptions(role,0).duration,550);assert.equal(roundOneMotionOptions(role,1).delay,55);assert.equal(roundOneMotionOptions(role,50).delay,165);assert.equal(roundOneMotionOptions(role,0).easing,'cubic-bezier(.16,1,.3,1)')}assert.equal(ROUNDONE_MOTION.maxPanels,8);for(const frames of [ROUNDONE_TITLE_FRAMES,ROUNDONE_PANEL_FRAMES]){assert.equal(frames[0].translate,'28px 0');assert.equal(frames[0].opacity,.12);assert.equal(frames[0].scale,undefined)}})
-test('mobile already mounted data reveals once after actual motion; late data can reveal in remaining budget',()=>{const h=harness();h.flush();h.nav('/piano');const warm=h.list(3),cold=h.list(3),a=h.group('warm'),b=h.group('cold',false);h.stageMoving(true);h.mount(warm,a);h.mount(cold,b);h.flush();assert.equal(h.calls.length,0);h.stageMoving(false);h.advance(400);h.flush();assert.equal(h.calls.length,3);h.update(cold,b,h.group('cold'));h.flush();assert.equal(h.calls.length,6);assert.ok(h.calls.every(a=>a.options.duration===550&&a.frames[0].opacity===.72));h.update(cold,h.group('cold'),h.group('cold'));h.flush();assert.equal(h.calls.length,6)})
-test('late data during active slide remains visible and reveals once after track settles',()=>{const h=harness();h.nav('/piano');const root=h.list(3),g=h.group('cold',false);h.mount(root,g);h.flush();root.moving=true;h.update(root,g,h.group('cold'));h.flush();assert.equal(h.calls.length,0);root.moving=false;h.advance(400);h.update(root,h.group('cold'),h.group('cold'));h.flush();assert.equal(h.calls.length,3)})
-test('inactive real pane never animates, and a confirmed swipe cancels running content animation',()=>{const h=harness();const a=h.list(2),b=h.list(2);b.blocked=true;h.mount(a,h.group('active'));h.mount(b,h.group('inactive'));h.flush();assert.equal(h.calls.length,2);h.input('pointerdown');assert.ok(h.calls.every(a=>!a.cancelled));h.emit('lionfit:content-gesture-start');assert.ok(h.calls.every(a=>a.cancelled));h.nav('/piano');a.blocked=true;b.blocked=false;h.flush();assert.equal(h.calls.length,4)})
-test('warm returns reveal once per navigation, scope invalidation clears pending effects',()=>{const h=harness();const a=h.list(2);h.mount(a,h.group('same'));h.flush();assert.equal(h.calls.length,2);h.nav('/piano');h.unmount(a);h.flush();h.nav('/home');const returning=h.list(2);h.mount(returning,h.group('same'));h.flush();assert.equal(h.calls.length,4);h.emit('lionfit:content-scope-invalidated');h.unmount(returning);h.nav('/impostazioni');h.mount(h.list(1),h.group('same'));h.flush();assert.equal(h.calls.length,5);h.reduce();assert.ok(h.calls.every(a=>a.cancelled))})
+const run=fn=>{const h=harness();try{fn(h)}finally{h.dispose()}}
+test('ready pages, warm returns and ready remounts never replay navigation effects',()=>run(h=>{h.mount(h.list(5),h.group());h.nav();h.mount(h.list(5),h.group());assert.equal(h.calls.length,0)}))
+test('only newly inserted children on first explicit ready transition fade immediately, never existing header or updates',()=>run(h=>{const r=h.list(1),a=h.group('g',false),b=h.group();h.mount(r,a);const added=h.add(r,3);h.update(r,a,b);assert.equal(h.calls.length,3);assert.deepEqual(h.calls.map(x=>x.el),added);for(const x of h.calls){assert.equal(x.options.duration,160);assert.equal(x.options.delay,0);assert.deepEqual(x.frames,[{opacity:.94},{opacity:1}])}h.add(r,2);h.update(r,b,b);h.update(r,b,a);h.update(r,a,b);assert.equal(h.calls.length,3)}))
+test('moving page permanently skips reveal rather than waiting to settle',()=>run(h=>{const r=h.list(0),a=h.group('g',false),b=h.group();h.mount(r,a);h.add(r,3);h.stageMoving(true);h.update(r,a,b);h.stageMoving(false);h.update(r,b,b);assert.equal(h.calls.length,0)}))
+test('inactive, hidden and reduced-motion groups never animate',()=>{for(const block of [h=>h.reduce(),h=>h.hide(),(h,r)=>{r.blocked=true}])run(h=>{const r=h.list(0),a=h.group('g',false);h.mount(r,a);h.add(r,2);block(h,r);h.update(r,a,h.group());assert.equal(h.calls.length,0)})})
+test('real data fade is capped to six and cancelled by a new swipe, navigation, or identity reset',()=>{for(const stop of [h=>h.emit('lionfit:content-gesture-start'),h=>h.nav(),h=>h.emit('lionfit:content-scope-invalidated')])run(h=>{const r=h.list(0),a=h.group('g',false);h.mount(r,a);h.add(r,20);h.update(r,a,h.group());assert.equal(h.calls.length,6);stop(h);assert.ok(h.calls.every(a=>a.cancelled))})})
+test('nested target excluded; brand and status excluded; no animation of shell',()=>run(h=>{const child=h.list(1);child.classes=['card'];const brand=new h.El(['card','lf14-gym-identity']);const r=new h.El([],[child,brand]);r.queries.set('.inner',child);assert.deepEqual(entranceTargets(r,{id:'nested',rows:[{match:'.card'},{within:'.inner',match:'.card'}]}),[child])}))
+test('a group first mounted ready then refetched does not animate',()=>run(h=>{const r=h.list(1),b=h.group(),a=h.group('g',false);h.mount(r,b);h.update(r,b,a);h.add(r,3);h.update(r,a,b);assert.equal(h.calls.length,0)}))
+test('identity change or missing explicit ready flag cannot trigger a reveal',()=>run(h=>{for(const next of [{id:'other',ready:true,rows:[{match:'.card'}]},{id:'g',rows:[{match:'.card'}]}]){const r=h.list(0),a=h.group('g',false);h.mount(r,a);h.add(r,3);h.update(r,a,next)}assert.equal(h.calls.length,0)}))
+test('unmount cancels an active data fade; duration is 160ms',()=>run(h=>{const r=h.list(0),a=h.group('g',false);h.mount(r,a);h.add(r,2);h.update(r,a,h.group());h.unmount(r);assert.equal(DATA_REVEAL_MS,160);assert.ok(h.calls.every(a=>a.cancelled))}))
+test('children already present while loading remain visually stable',()=>run(h=>{const r=h.list(0),a=h.group('g',false);h.mount(r,a);h.add(r,2);h.update(r,a,a);h.update(r,a,h.group());assert.equal(h.calls.length,0)}))
 test('explicit archive row containers and verified chat contacts are targeted; no shell or editor animation',()=>{assert.match(read('src/views/AthleteLiveWorkspace.vue'),/within:'.lf-r15-archive-rows',match:'.lf-archive-v4-item'/);assert.match(read('src/views/LiveCoachTemplates.vue'),/ready:modelsReady,rows:\[\{within:'.lf-mobile-archive-grid'/);assert.match(read('src/views/AthleteChatPreview.vue'),/ready:verified&&!loading&&!hintVisible&&!currentId/);assert.match(read('src/views/Library.vue'),/ready:!selectionMode&&!loading&&!failed/);assert.match(read('src/App.vue'),/lionfit:content-gesture-start/);assert.doesNotMatch(read('src/features/motion/roundOneMotion.ts'),/MutationObserver|getBoundingClientRect|getComputedStyle|offsetWidth|offsetHeight|setTimeout\(/)})
-
-test('a late mounted group can reveal once after a stable mobile route; unmount cancels its effects',()=>{const h=harness();h.flush();h.nav('/piano');h.flush();h.advance(500);const root=h.list(2);h.mount(root,h.group('fresh'));h.flush();assert.equal(h.calls.length,2);h.unmount(root);assert.ok(h.calls.every(a=>a.cancelled))})
-test('nested candidate inside a selected panel is not independently animated',()=>{const h=harness();const nested=h.list(2);nested.classes=['card'];const root=new h.El('div',[],[nested]);root.queries.set('.inner',nested);h.mount(root,{id:'nested',rows:[{match:'.card'},{within:'.inner',match:'.card'}]});h.flush();assert.equal(h.calls.length,1);assert.equal(h.calls[0].el,nested)})
-
-test('E.8.2.1 active rail settles before reveal; stale paired shell marker is not a gate',()=>{const h=harness();h.nav('/piano');h.stageMoving(true);h.mount(h.list(2),h.group('plan'));h.flush();assert.equal(h.calls.length,0);h.advance(40);h.flush();assert.equal(h.calls.length,0);h.stageMoving(false);h.advance(40);h.flush();assert.equal(h.calls.length,2);assert.ok(h.calls.every(a=>a.options.duration===550));assert.doesNotMatch(read('src/features/motion/roundOneMotion.ts'),/\[data-lf-motion-paired\]/)})
-test('E.8.2.1 bounded wait aborts if user starts another interaction or motion never settles',()=>{for(const stop of [h=>h.input('pointerdown'),h=>h.advance(1601),h=>h.emit('lionfit:content-scope-invalidated')]){const h=harness();h.nav('/piano');h.stageMoving(true);h.mount(h.list(2),h.group('plan'));h.flush();stop(h);h.stageMoving(false);h.advance(50);h.flush();assert.equal(h.calls.length,0)}})
-test('E.8.2.1 another navigation replaces a queued reveal, not the currently inactive pane',()=>{const h=harness();h.nav('/piano');h.stageMoving(true);const plan=h.list(2);h.mount(plan,h.group('plan'));h.flush();h.nav('/archivio');plan.blocked=true;h.mount(h.list(3),h.group('archive'));h.stageMoving(false);h.advance(50);h.flush();assert.equal(h.calls.length,3)})

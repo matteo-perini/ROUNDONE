@@ -31,7 +31,7 @@ test('labels and ordinary click surfaces no longer excluded; native controls rem
 test('cue is inert, uses only text nodes, is destroyed, and cannot clone or persist account data',()=>{
  assert.match(motion,/panel.inert=true/);assert.match(motion,/aria-hidden/);assert.match(motion,/panel.remove\(\)/);assert.match(motion,/textContent=/)
  assert.doesNotMatch(motion,/innerHTML|cloneNode|localStorage|sessionStorage|fetch\(|onSnapshot/)
- assert.match(app,/snapCue\?\.dispose\(\)/);assert.match(app,/cue\?\.dispose\(\)/)
+ assert.doesNotMatch(app,/createMotionCue|motionOutline|motionCue|snapCue/);assert.match(app,/realOnlyDragOffset\(dragOffset,!!dragTarget\)/)
 })
 test('read-only projection is scoped, ready-only, and never used for Chat or coach',()=>{
  const part=live.slice(live.indexOf('function motionSummary'),live.indexOf('const retryWorkspace'))

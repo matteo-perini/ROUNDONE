@@ -29,7 +29,7 @@ import {sectionTransition} from './features/navigation/sectionSwipe'
 import {prepareSectionMotion,releaseSectionMotion,prepareSectionLeave,finishSectionLeave,isSectionMoving,rememberSectionLayout} from './features/navigation/continuousMotion'
 import {swipeNeighbor,snapBackDuration} from './features/navigation/fluidSwipe'
 import {appendSwipeSample,recentSwipeVelocity,releaseSwipeCommit,type SwipeSample} from './features/navigation/nativeSwipe'
-import {continuousDragOffset,continuousCommitMotion,createMotionCue,motionOutline,type MotionCue,type MotionSummary} from './features/navigation/universalMotion'
+import {continuousDragOffset,continuousCommitMotion,realOnlyDragOffset} from './features/navigation/universalMotion'
 import {isNativePagePath} from './features/navigation/nativePageTrack'
 import {createExternalPageMotion,externalPairPlan} from './features/navigation/externalPageMotion'
 import {vLfSwipeRails} from './features/navigation/swipeRails'
@@ -148,7 +148,7 @@ const enteringPaths=new WeakMap<Element,string>()
 // E.7.4: actual RouterView roots, only after the existing navigation guard.
 // On older WebViews retain the original Vue/CSS transition path.
 const externalMotionEnabled=computed(()=>isStagingMode()&&!!shownRole.value&&(shownRole.value==='coach'?coachHeaderVisible.value:athleteHeaderVisible.value)&&typeof HTMLElement.prototype.animate==='function')
-const outerMotion=createExternalPageMotion({scope:()=>accountKey(stagingSession.value),path:()=>route.path,onHandoff:()=>clearHandoffCue(),onSettled:()=>{const stage=swipeStage.value;if(stage?.dataset.lfExternalPair){delete stage.dataset.lfExternalPair;clearSwipeMotion();chatMotion.value=''}}})
+const outerMotion=createExternalPageMotion({scope:()=>accountKey(stagingSession.value),path:()=>route.path,onHandoff:()=>{},onSettled:()=>{const stage=swipeStage.value;if(stage?.dataset.lfExternalPair){delete stage.dataset.lfExternalPair;clearSwipeMotion();chatMotion.value=''}}})
 const externalMotionEvents=computed(()=>externalMotionEnabled.value?{enter:(el:Element,done:()=>void)=>outerMotion.attach('enter',el,done),leave:(el:Element,done:()=>void)=>outerMotion.attach('leave',el,done)}:{})
 function beforeChatEnter(el:Element){enteringPaths.set(el,route.path);if(chatMotion.value&&swipeViewport())prepareSectionMotion(el,swipeStage.value);if(externalMotionEnabled.value)outerMotion.prime('enter',el)}
 function finishChatMotion(el:Element){releaseSectionMotion(el);if(enteringPaths.get(el)===route.path&&el===resolveSwipeRouteRoot())chatMotion.value='';enteringPaths.delete(el)}
@@ -183,12 +183,12 @@ watch(()=>route.path,(now,before)=>{
  const nativeHandled=swipeRouteInstance?.commitTrack?.(before,now,nativeDuration,scope)===true
  if(nativeHandled)nativeDragging=false
  else swipeRouteInstance?.cancelTrack?.(false)
- const retainCue=!nativeHandled&&!!motionCue&&pendingSwipe?.from===before&&pendingSwipe?.to===now;transferSwipeMotion(before,now);if(swipeViewport())rememberSectionLayout(swipeRouteRoot)
+ transferSwipeMotion(before,now);if(swipeViewport())rememberSectionLayout(swipeRouteRoot)
  const stage=swipeStage.value
  const sharedWorkspace=shownRole.value==='atleta'&&isStagingMode()&&isNativePagePath(before)&&isNativePagePath(now)
  const paired=!nativeHandled&&!sharedWorkspace&&externalMotionEnabled.value&&stage&&stage.dataset.lfMotionPaired==='true'&&outerMotion.begin(externalPairPlan(before,now,swipePages.value,scope,stage.clientWidth,Number.parseFloat(stage.style.getPropertyValue('--lf-swipe-commit-offset'))||0,Number.parseFloat(stage.style.getPropertyValue('--lf-swipe-commit-duration'))||340),swipeRouteRoot)
  if(paired&&stage)stage.dataset.lfExternalPair='true'
- restoreDrag(false,retainCue)
+ restoreDrag(false)
  // Preserve the R22A premium Chat gesture on athlete Home; extend the same direction logic
  // to the other top-level sections, including taps on the existing navbar.
  if (chatPreviewEnabled.value && before==='/home' && now==='/messaggi') chatMotion.value='lf-chat-open'
@@ -210,19 +210,15 @@ let consumedContact:GestureStart|null=null
 const pointerSwipeEnabled=typeof window.PointerEvent==='function'&&typeof CSS!=='undefined'&&CSS.supports('touch-action','pan-y pinch-zoom')
 let swipeClickGuard:{at:number;target:Element;path:string}|null=null
 let swipeRouteRoot:HTMLElement|null=null
-let swipeRouteInstance:{$el?:unknown;motionSummary?:(path:string,scope:string)=>MotionSummary|null;paintTrack?:(from:string,to:string,offset:number,scope:string)=>number|null;commitTrack?:(from:string,to:string,duration:number,scope:string)=>boolean;cancelTrack?:(animate:boolean)=>void;trackMoving?:()=>boolean}|null=null
+let swipeRouteInstance:{$el?:unknown;paintTrack?:(from:string,to:string,offset:number,scope:string)=>number|null;commitTrack?:(from:string,to:string,duration:number,scope:string)=>boolean;cancelTrack?:(animate:boolean)=>void;trackMoving?:()=>boolean}|null=null
 let nativeDragging=false
-let motionCue:MotionCue|null=null,snapCue:MotionCue|null=null
-let handoffCue:MotionCue|null=null,handoffFrame=0
-function clearHandoffCue(){if(handoffFrame){cancelAnimationFrame(handoffFrame);handoffFrame=0}handoffCue?.dispose();handoffCue=null}
-let cueTarget:string|null=null,cueDirection=0,cueLabel="",cueSummary:MotionSummary|null=null
+let dragTarget:string|null=null
 let dragFrame=0,gestureRetryFrame=0,swipeWaitFrame=0,externalTapUntil=0,dragOffset=0,dragPaintedOffset=0,dragRoot:HTMLElement|null=null
 let snapAnimation:Animation|null=null,snapStage:HTMLElement|null=null,snapTimer:ReturnType<typeof setTimeout>|null=null
 function clearSnapBack(){
  if(snapTimer!==null){clearTimeout(snapTimer);snapTimer=null}
  if(snapAnimation){snapAnimation.onfinish=null;snapAnimation.oncancel=null}
  snapAnimation?.cancel();snapAnimation=null
- snapCue?.dispose();snapCue=null
  if(snapStage)delete snapStage.dataset.lfMotionDragging;snapStage=null
 }
 let dragStage:HTMLElement|null=null
@@ -268,58 +264,54 @@ function transferSwipeMotion(from:string,to:string){
  stage.style.setProperty('--lf-swipe-commit-duration',`${motion.duration}ms`)
 }
 function clearGestureRetry(){if(gestureRetryFrame){cancelAnimationFrame(gestureRetryFrame);gestureRetryFrame=0}}
-function restoreDrag(animateBack:boolean,retainCue=false){
- if(!outerMotion.waiting())clearHandoffCue();clearGestureRetry()
+function restoreDrag(animateBack:boolean){
+ clearGestureRetry()
  if(dragFrame){cancelAnimationFrame(dragFrame);dragFrame=0}
  if(swipeWaitFrame){cancelAnimationFrame(swipeWaitFrame);swipeWaitFrame=0}
  externalTapUntil=0
  clearSnapBack()
  const wasNative=nativeDragging;nativeDragging=false;if(wasNative)swipeRouteInstance?.cancelTrack?.(animateBack)
- const cue=motionCue;motionCue=null;cueTarget=null;cueDirection=0;cueLabel="";cueSummary=null
+ dragTarget=null
  const el=dragRoot,original=dragOriginal,offset=dragPaintedOffset,stage=dragStage
  dragRoot=null;dragOriginal=null;dragStage=null;dragOffset=0;dragPaintedOffset=0
  if(stage)delete stage.dataset.lfMotionDragging
- if(!el||!original){cue?.dispose();return}
+ if(!el||!original)return
  el.style.transform=original.transform
  el.style.transition=original.transition
  el.style.willChange=original.willChange
  if(!wasNative&&animateBack&&Math.abs(offset)>3&&el.isConnected&&typeof el.animate==='function'&&!isSectionMoving(el)){
   const duration=snapBackDuration(offset,stage?.clientWidth||window.innerWidth)
   if(stage)stage.dataset.lfMotionDragging='true'
-  snapStage=stage;snapCue=cue
+  snapStage=stage
   try{
    const animation=el.animate([{transform:`translate3d(${offset}px,0,0)`},{transform:original.transform||'translate3d(0,0,0)'}],
     {duration,easing:'cubic-bezier(.18,1,.35,1)'})
-   snapAnimation=animation;cue?.returnToEdge(duration)
+   snapAnimation=animation
    const clean=()=>{if(snapAnimation===animation)clearSnapBack()}
    animation.onfinish=clean;animation.oncancel=clean
    snapTimer=setTimeout(clean,duration+120)
   }catch{clearSnapBack()}
- }else if(retainCue&&cue&&stage&&stage.dataset.lfMotionPaired==='true'){
-  // Keep the cue until both actual external roots have been primed.
-  // Legacy CSS/internal fallback still removes it on the next frame.
-  handoffCue=cue;handoffFrame=requestAnimationFrame(()=>{handoffFrame=0;if(!outerMotion.waiting())clearHandoffCue()})
- }else cue?.dispose()
+ }
 }
 function paintNativeDrag(start:GestureStart){
  if(dragFrame){cancelAnimationFrame(dragFrame);dragFrame=0}
  if(!dragRoot?.isConnected)return
- const trackOffset=cueTarget?swipeRouteInstance?.paintTrack?.(start.path,cueTarget,dragOffset,accountKey(stagingSession.value)):null
+ const trackOffset=dragTarget?swipeRouteInstance?.paintTrack?.(start.path,dragTarget,dragOffset,accountKey(stagingSession.value)):null
  if(typeof trackOffset==='number'){
   // Clear legacy transform only when changing engine, not on every frame.
   if(!nativeDragging&&dragOriginal){dragRoot.style.transform=dragOriginal.transform;dragRoot.style.transition=dragOriginal.transition;dragRoot.style.willChange=dragOriginal.willChange}
-  nativeDragging=true;motionCue?.dispose();motionCue=null
+  nativeDragging=true
   dragPaintedOffset=trackOffset
   if(!start.paintReported){start.paintReported=true;reportSwipeTiming('paint',start.lockedAt||start.at)}
   return
  }
  if(nativeDragging){swipeRouteInstance?.cancelTrack?.(false);nativeDragging=false}
- if(cueDirection&&dragStage&&!motionCue)motionCue=createMotionCue(dragStage,dragRoot,dragPaintedOffset)
- motionCue?.paint(dragOffset,cueDirection,cueLabel,cueSummary)
+ // No simulated destination: only the current real surface responds until routing commits.
+ const painted=realOnlyDragOffset(dragOffset,!!dragTarget)
  dragRoot.style.transition='none'
  dragRoot.style.willChange='transform'
- dragRoot.style.transform=`translate3d(${dragOffset}px,0,0)`
- dragPaintedOffset=dragOffset
+ dragRoot.style.transform=`translate3d(${painted}px,0,0)`
+ dragPaintedOffset=painted
  if(!start.paintReported){start.paintReported=true;reportSwipeTiming('paint',start.lockedAt||start.at)}
 }
 function skipSectionSwipe(target:EventTarget|null,root:EventTarget|null):boolean {
@@ -436,10 +428,7 @@ function renderGestureAt(start:GestureStart,dx:number,waitStarted:number){
   if(offset||dragRoot){
    if(!dragRoot){dragRoot=el;dragStage=stage;dragOriginal={transform:el.style.transform,transition:el.style.transition,willChange:el.style.willChange};if(stage)stage.dataset.lfMotionDragging='true'}
    dragOffset=offset
-   cueDirection=next?Math.sign(dx):0
-   if(cueTarget!==next){cueTarget=next;cueLabel=next?uiText(next===chatRoute.value.split('?')[0]?'Messaggi':mobileNav.value.find(item=>item.to.split('?')[0]===next)?.label||''):''
-    const scope=accountKey(stagingSession.value);cueSummary=next?((scope?swipeRouteInstance?.motionSummary?.(next,scope):null)||motionOutline(next)):null
-   }
+   dragTarget=next
    if(!dragFrame)dragFrame=requestAnimationFrame(()=>paintNativeDrag(start))
   }
  }

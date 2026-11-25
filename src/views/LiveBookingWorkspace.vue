@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LocalLoadingSkeleton from '../components/LocalLoadingSkeleton.vue'
 import {uiText} from '../features/i18n/interfaceLanguage'
 import CompetitionCover from '../components/CompetitionCover.vue'
 import AgendaCompetitions from '../components/AgendaCompetitions.vue'
@@ -438,7 +439,7 @@ const displayService=(s:Service)=>s==='fighter'?'FIGHTER':'PESI'
    <p v-if="isCoach" class="lf-agenda-subtitle">Prenotazioni, disponibilità e appuntamenti della tua palestra.</p>
    <p v-else class="lf-r9-home-intro">Lezioni private, appuntamenti e competizioni</p>
   </div>
-  <div v-lf-quiet-loading v-if="status==='loading'" class="panel lf-quiet-status" role="status">{{uiText("Caricamento agenda…")}}</div>
+  <LocalLoadingSkeleton v-if="status==='loading'" variant="cards" :label="uiText('Caricamento agenda…')"/>
   <div v-else-if="status==='error'" class="panel" role="alert">{{message}} <RouterLink to="/accesso">{{uiText("Torna all'accesso")}}</RouterLink></div>
   <template v-else>
    <p v-if="calendarWarning" class="notice" role="alert">{{calendarWarning}}</p><p v-if="competitionWarning" class="notice" role="alert">{{competitionWarning}}</p><p v-if="availabilityWarning&&!isCoach" class="notice" role="alert">{{availabilityWarning}}</p>

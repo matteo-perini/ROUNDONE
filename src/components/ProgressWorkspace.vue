@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LocalLoadingSkeleton from './LocalLoadingSkeleton.vue'
 /** LionFit Progressi 360 — dedicated, tenant-scoped records, no legacy sheet mutations. */
 import {computed,onMounted,onUnmounted,ref,shallowRef,watch,nextTick} from 'vue'
 import {useRoute,RouterLink,onBeforeRouteLeave} from 'vue-router'
@@ -387,7 +388,7 @@ function openRevisionForSheet(sheet:ProgressSheet|null){
   <p v-if="error" class="notice lf-p360-error" role="alert">{{error}}</p>
   <p v-if="writeError" class="notice lf-p360-error" role="alert">{{writeError}}</p>
   <p v-if="notice" class="notice" role="status" :class="{'lf-premium-confirmed':lastSaved&&notice==='Allenamento salvato.'}"><svg v-if="lastSaved&&notice==='Allenamento salvato.'" class="lf-premium-success-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12 L9 17 L20 6" pathLength="100"/></svg>{{notice}}</p>
-  <p v-lf-quiet-loading v-if="loading" class="muted lf-quiet-status" role="status">Caricamento allenamenti…</p>
+  <LocalLoadingSkeleton v-if="loading" variant="cards" label="Caricamento allenamenti…"/>
   <div v-if="role==='coach'" class="panel lf-p360-coach-selector lf-r21d-selector">
    <div class="lf-r21d-selector-heading"><label for="lf-p360-athlete">Atleta selezionato</label><small v-if="athletes.length" class="muted">{{athletes.length}} {{athletes.length===1?'atleta disponibile':'atleti disponibili'}}</small></div>
    <select id="lf-p360-athlete" :value="athleteId" @change="bindAthlete(($event.target as HTMLSelectElement).value)"><option v-for="a in athletes" :key="a.id" :value="a.id">{{a.name}}</option></select>

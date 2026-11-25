@@ -18,6 +18,7 @@ import {accountKey} from '../features/platform/platformModel'
 import {createNativePageTrack,nativeTrackHeight,isNativePagePath,type NativePageTrack} from '../features/navigation/nativePageTrack'
 import {stagingSession} from '../integrations/firebase/stagingSession'
 import LionIcon from '../components/LionIcon.vue'
+import LocalLoadingSkeleton from '../components/LocalLoadingSkeleton.vue'
 import {isStagingMode,isLiveMode,mayWriteLive} from '../integrations/firebase/stagingConfig'
 import { linkedSheetsForDay,liveWeekForDate } from '../features/athletes/athleteOperationalPolicy'
 import { romeDayIndex,romeWeekDayNumber } from '../features/athletes/romeWeekProgress'
@@ -137,7 +138,7 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
 <template>
  <div ref="workspaceRoot" class="stack athlete-live-screen" :aria-label="'Area Atleta'">
   <button v-if="trackMobile&&props.screen!=='home'&&(status!=='ready'||!scopeValid)" type="button" class="lf-route-back lf-native-track-back" :aria-label="uiText('Torna indietro')" @click="workspaceBack"><LionIcon name="back" :size="17"/></button>
-  <div v-lf-quiet-loading v-if="status==='loading'||(status==='ready'&&!scopeValid)" class="panel lf-quiet-status" role="status">{{uiText("Caricamento schede e settimane…")}}</div>
+  <LocalLoadingSkeleton v-if="status==='loading'||(status==='ready'&&!scopeValid)" variant="cards" :label="uiText('Caricamento schede e settimane…')"/>
   <div v-else-if="status==='error'" class="notice" role="alert">{{message}} <button type="button" class="secondary" @click="retryWorkspace">{{uiText("Riprova")}}</button> <RouterLink :to="isStagingMode()?'/accesso':'/dev/accesso'">{{uiText("Torna all'accesso")}}</RouterLink></div>
   <template v-else-if="data&&scopeValid">
    <div ref="trackViewport" :class="trackMobile?'lf-native-track-viewport':'lf-native-track-pass'">
@@ -159,7 +160,7 @@ const dayLink=computed(()=>currentWeek.value?(isStagingMode()?`/piano?week=${enc
      <div class="lf-r15-archive-tools"><label class="lf-r15-search"><span class="lf-r15-glass" aria-hidden="true">⌕</span><input v-model="search" type="search" aria-label="Cerca archivio personale" placeholder="Cerca una scheda..."/></label>
       <select v-model="archiveView" aria-label="Filtra archivio personale"><option value="all">Tutte le schede</option><option value="active">Schede assegnate</option><option value="historical">Schede storiche</option><option value="trashed">Schede ritirate</option></select>
      </div><button v-if="search.trim()||archiveView!=='all'" type="button" class="lf-r15-clear" @click="search='';archiveView='all'">Azzera filtri</button>
-     <p v-lf-quiet-loading v-if="!archiveReady" class="muted lf-quiet-status" role="status">{{uiText("Caricamento archivio storico…")}}</p>
+     <LocalLoadingSkeleton v-if="!archiveReady" :label="uiText('Caricamento archivio storico…')"/>
      <p v-else-if="!archiveGroups.length" class="notice lf-r15-empty" role="status">{{uiText("Nessuna scheda corrisponde al filtro selezionato.")}}</p>
      <div v-if="archiveReady" class="lf-r15-archive-rows"><article v-for="g in archiveGroups" :key="g.sheet.id" class="line-card athlete-archive-item lf-archive-v4-item lf-r15-archive-item"><button class="wide athlete-archive-open" type="button" @click="opened=g.sheet" :aria-label="'Apri scheda '+g.sheet.title"><span class="lf-archive-v4-icon" aria-hidden="true">▤</span><span class="lf-r15-archive-item-main"><b>{{g.sheet.title}}</b><small>{{g.sheet.exercises.length}} {{g.sheet.exercises.length===1?'esercizio':'esercizi'}}</small></span><span class="lf-archive-v4-action" aria-hidden="true">Apri <span>›</span></span></button></article></div>
      

@@ -24,6 +24,14 @@ export function motionOutline(path:string):MotionSummary|null{
  const headings=Object.hasOwn(labels,path)?labels[path]:undefined
  return headings?.length?{heading:headings[0],lines:[],sections:headings.slice(1).map(heading=>({heading,lines:[]}))}:null
 }
+/** When the destination is not a real mounted pane, keep the current page
+ * nearly in place. No fabricated cards, no large blank viewport. The raw
+ * finger displacement still decides the guarded commit on release. */
+export function realOnlyDragOffset(offset:number,hasDestination:boolean):number{
+ if(!Number.isFinite(offset))return 0
+ const limit=hasDestination?24:18
+ return Math.sign(offset)*Math.min(Math.abs(offset)*(hasDestination ? .30 : 1),limit)
+}
 export function continuousDragOffset(dx:number,width:number,neighbor:boolean):number{
  if(!Number.isFinite(dx)||!Number.isFinite(width)||width<=0)return 0
  const distance=Math.abs(dx)

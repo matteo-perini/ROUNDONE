@@ -1,0 +1,37 @@
+# LionFit R22B.6E.8.3 — Pure Native Experience SAFE
+
+Base obbligatoria: R22B.6E.8.2.1. Patch incrementale frontend, 19 file di progetto (17 sostituzioni, 2 aggiunte). Verificati 9/9 hash del manifest E.8.2.1 e 17/17 hash delle basi dei file sostituiti, risalendo agli ZIP originali e alle patch successive. Nessuna modifica a Firebase Rules, Functions, configurazioni .env, soglie touch, struttura navbar o backend.
+
+## 1. Una sola animazione di navigazione
+Il reveal orizzontale da 550 ms della E.8.2.1 era attivato al termine della navigazione, risultando visivamente in un secondo caricamento. Rimosso questo meccanismo dalla direttiva `lf-entrance`: niente ingresso di titoli/card al mount, nessuno stagger, nessun rAF di attesa, nessun replay al ritorno su una sezione già pronta. La direttiva è conservata per compatibilità con i template.
+
+Soltanto il primo passaggio esplicito `ready:false -> true` dello stesso gruppo può animare i nuovi elementi realmente inseriti, con opacità .94 -> 1 in 160 ms, senza traslazione né ritardo. Sono esclusi elementi già presenti, branding, dialoghi, pane inattivi, documenti nascosti e preferenza reduced motion; massimo sei elementi per gruppo. Se la navigazione o uno swipe è in corso l'effetto viene saltato definitivamente, non posticipato. Nuovo swipe, cambio di rotta o identità annullano eventuali effetti attivi. Il caricamento effettivo dei dati non attende la grafica. Le microinterazioni esistenti (pulsanti, conferme, grafici, tab e modali) non sono state rimosse.
+
+## 2. Nessuna anteprima artificiale durante lo swipe
+Eliminato dalla shell App il percorso che invocava `createMotionCue`, raccoglieva riassunti ed eseguiva il passaggio da card simulate alla pagina reale. I vecchi helper puri rimangono nel repository per compatibilità con i test storici, ma non vengono più chiamati dalla navigazione.
+
+- Home, Piano e Archivio Atleta: conservato integralmente il Page Track reale, lo scorrimento continuo a due pagine e il separatore/ombra E.8.1 da 14 px.
+- Se il vicino non è già un pane reale, la pagina corrente risponde con movimento resistente fino a 24 px (18 px al bordo senza destinazione). Non si costruisce alcuna pagina fittizia. La decisione di navigare usa ancora lo spostamento reale del dito e le soglie precedenti, non l'offset visivo ridotto. Un gesto annullato torna alla posizione iniziale.
+- Dopo il rilascio: la guardia router autorizza la destinazione e l'engine E.7.4 anima i due elementi RouterView reali con geometria e clock condivisi, preservando l'offset effettivamente mostrato; mantenuto il separatore nel movimento effettivo quando applicabile. Per tap navbar rimane la durata 340 ms.
+- Agenda e Profilo operativi vengono ora risolti direttamente come LiveBookingWorkspace e DevProfileWorkspace dalle route lazy esistenti. Niente doppio componente asincrono con radice commento vuota. Le route demo/emulator non operative mantengono i wrapper originali. La precache esistente carica soltanto codice, ora anche il modulo effettivo di questi due schermi. Guardie di ruolo, sessione, route di destinazione e verifica della pagina restano invariate.
+
+**Limite / decisione SAFE:** questa patch non estende il rail a due pagine montate durante il trascinamento alle altre sezioni. ProgressWorkspace ha draft e guardia `onBeforeRouteLeave`; LiveBookingWorkspace avvia timer e listener all'apertura; DevProfileWorkspace e Chat hanno gestione identità e richieste proprie. Montarle tutte in anticipo richiederebbe un audit separato dei lifecycle e del carico Firebase. Per ora i passaggi esterni seguono il dito con corsa limitata e mostrano la pagina reale dopo il rilascio. È una soluzione diversa dal rail Home/Piano/Archivio, scelta per non rischiare letture/azioni concorrenti, non un completamento di quella architettura. Coach usa il passaggio esterno. Il fallback di animazione resta quello esistente quando WAAPI o l'accoppiamento dei due elementi non sono disponibili.
+
+## 3. Caricamento locale effettivo
+Nuovo componente LocalLoadingSkeleton: segnaposto statici di lista, card e profilo; nessuno shimmer, nessuna forma interattiva, label accessibile, niente barra globale. Integrato solo negli stati di attesa reali del workspace Atleta, Archivio storico, Allenamenti, Agenda e Profilo. I dati già disponibili rimangono immediati, i messaggi di errore e gli empty-state reali rimangono distinti dai caricamenti. Non si forza la richiesta dello storico prima dell'apertura.
+
+Il Profilo non presenta più il nome di fallback e i controlli di modifica prima che il documento sia verificato. In modalità operativa usa il documento già restituito da readStagingDetails, solo dopo il controllo UID Auth; non attende una seconda copia per il primo rendering. Il listener esistente rimane uno solo, con callback metadata-only abilitate per non confondere la cache locale con il server. Le copie cache successive non sovrascrivono il documento iniziale verificato; la verifica palestra/UID rimane e gli errori terminali nascondono il form. Nessuna nuova lettura server o listener. Il comportamento operativo va collaudato su account di test, incluso edit=1 e salvataggio.
+
+## 4. Verifiche effettive
+- TypeScript: `node node_modules/vue-tsc/bin/vue-tsc.js --noEmit`, exit 0.
+- Suite R22: 206/206 (prima 201/201).
+- Suite estesa: 786/801; gli stessi 15 fallimenti per nome della base E.8.2.1 (787/802), nessuno nuovo. Otto file di test esistenti aggiornati per sostituire le aspettative intenzionalmente dismesse (anteprime, animazioni 550 ms, replay); un nuovo file con cinque test di regressione. Il conteggio totale è variato perché i test delle vecchie animazioni sono stati sostituiti, non perché i 15 fallimenti siano stati rimossi.
+- Chromium: 156 verifiche su 320, 390, 850 e 1280 px, con e senza reduced motion. Vue reale, template effettivo di LocalLoadingSkeleton, direttiva reale e moduli effettivi di geometria/transizione esterna con DOM dimostrativo. Verificati: nessun ingresso iniziale, nessun replay a navigazione calda, comparsa locale delle nuove righe, fade 160 ms senza ritardo/traslazione, header non animato, annullamento su swipe, nessun effetto post-swipe, segnaposto non interattivi e assenza di cue, offset limitato, due radici animate con lo stesso clock e cleanup. Non è un collaudo end-to-end del router LIVE/Firebase né una misurazione FPS su telefono.
+- Build Vite tentata con `node node_modules/vite/bin/vite.js build`, bloccata dalla dipendenza nativa Rollup per Linux mancante nell'archivio Windows. Verifica obbligatoria su Windows prima del commit/push.
+
+## 5. Installazione e test pratico
+1. Backup dei 17 file `replace` del manifest; estrarre lo ZIP nella radice E.8.2.1 sostituendo i file esistenti.
+2. `npm.cmd run typecheck`, `npm.cmd run build`, `node --experimental-strip-types --test tests/r22*.test.mjs`.
+3. Palestra di prova: Atleta e Coach; tap navbar e swipe lento/rapido in entrambe le direzioni, gesto annullato e inversione, entrata in Archivio freddo/caldo, Agenda e Profilo, modifica profilo e ritorno, Chat e tastiera, Allenamenti con bozza non salvata (rispettare avviso), cambio account. Controllare assenza linea verde, assenza di card simulate durante il gesto e assenza della seconda presentazione ritardata.
+4. Solo dopo il collaudo: LIONFIT_PREPARA_WEB_E_DOCS.cmd, commit/push GitHub Desktop. Nessun deploy Firebase.
+5. Rollback: ripristinare i 17 file dal backup, eliminare le 2 aggiunte e rigenerare WebDocs. Non applicare patch su una versione diversa senza verifica hash.

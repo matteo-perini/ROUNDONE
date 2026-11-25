@@ -13,3 +13,16 @@
 .lf-quiet-roster-placeholder{display:grid;gap:5px;min-height:26px;align-content:center;max-width:110px;width:100%}
 .lf-quiet-roster-placeholder i{display:block;height:7px;width:85%;border-radius:3px;background:currentColor;opacity:.13}
 .lf-quiet-roster-placeholder i+i{width:58%;opacity:.09}
+
+/* E.8.3: static placeholders only in the actual section with a pending read.
+   No shimmer, hidden data, imaginary page or delayed entrance. */
+.lf-local-skeleton{min-width:0;width:100%;pointer-events:none;user-select:none;box-sizing:border-box}
+.lf-local-skeleton-shapes{display:grid;gap:9px}
+.lf-local-skeleton-item{display:flex;align-items:center;gap:12px;min-height:62px;padding:12px;border:1px solid var(--border);background:var(--card);border-radius:12px;box-sizing:border-box}
+.lf-local-skeleton-item i{flex:none;width:40px;height:40px;border-radius:9px;background:currentColor;opacity:.09}
+.lf-local-skeleton-item span{display:grid;gap:9px;flex:1;min-width:0}
+.lf-local-skeleton-item b{display:block;width:72%;height:9px;border-radius:5px;background:currentColor;opacity:.11}
+.lf-local-skeleton-item b+b{width:45%;height:7px;opacity:.08}
+.lf-local-skeleton-cards .lf-local-skeleton-item:first-child{min-height:126px}
+.lf-local-skeleton-profile .lf-local-skeleton-item:first-child{min-height:124px}
+.lf-local-skeleton-profile .lf-local-skeleton-item:first-child i{width:64px;height:64px;border-radius:50%}
