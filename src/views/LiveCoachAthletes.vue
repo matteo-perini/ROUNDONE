@@ -570,6 +570,13 @@ function onAssignmentMoreToggle(event: Event){
  host?.querySelectorAll('details.lf-assignment-more[open]').forEach(item=>{
   if(item!==current && item instanceof HTMLDetailsElement)item.open=false
  })
+ // Desktop only: the expanded menu is part of the list. Reveal it without
+ // scrolling the entire page or altering the mobile gesture/scroll behavior.
+ if(window.matchMedia('(min-width:901px)').matches){
+  const list=current.closest<HTMLElement>('.assignment-scroll')
+  const menu=current.querySelector<HTMLElement>('.lf-assignment-more-menu')
+  if(list&&menu){const delta=menu.getBoundingClientRect().bottom-list.getBoundingClientRect().bottom+8;if(delta>0)list.scrollTop+=delta}
+ }
 }
 function editPersonal(sheet:Personal){
  if(!athlete.value)return
@@ -670,7 +677,7 @@ function copyToArchive(sheet:Personal){
  <div v-if="data" class="grid2 assignment-columns">
   <section class="panel assignment-panel">
    <h3>{{uiText("📄 SCHEDE SINGOLE SENZA PROGRAMMA")}}</h3>
-   <div class="assignment-scroll">
+   <div class="assignment-scroll" role="region" :aria-label="uiText('Schede singole senza programma')">
     <div v-if="!groups?.unprogrammed.length" class="line-card">{{uiText("Nessuna scheda singola senza programma.")}}</div>
     <div v-for="g in groups?.unprogrammed||[]" :key="g.sheet.id" class="line-card coach-v1-assignment-card">
      <b>🏋️ {{g.sheet.title}}</b>
@@ -690,7 +697,7 @@ function copyToArchive(sheet:Personal){
   </section>
   <section class="panel assignment-panel">
    <h3>{{uiText("🗓️ SCHEDE IN PROGRAMMA")}}</h3>
-   <div class="assignment-scroll">
+   <div class="assignment-scroll" role="region" :aria-label="uiText('Schede in programma')">
     <div v-if="!groups?.programmed.length" class="line-card">{{uiText("Nessuna scheda in programma.")}}</div>
     <div v-for="g in groups?.programmed||[]" :key="g.sheet.id" class="line-card coach-v1-assignment-card">
      <b>🏋️ {{g.sheet.title}}</b>
@@ -916,7 +923,7 @@ function copyToArchive(sheet:Personal){
 .lf-p11-date-label input[type=date]:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
 @media(max-width:550px){.lf-p11-program-row{padding:7px}.lf-p11-program-header strong{font-size:11px}}
 
-/* R21B — Schede atleta: altezza naturale e azioni essenziali in vista. */
+/* R21B — Schede atleta: altezza naturale su mobile e azioni essenziali in vista. */
 .coach-athletes-screen .assignment-columns{align-items:start!important}
 .coach-athletes-screen .assignment-columns>.assignment-panel{
  align-self:start!important;height:auto!important;min-height:0;overflow:visible!important;
@@ -964,6 +971,18 @@ function copyToArchive(sheet:Personal){
 }
 .coach-athletes-screen .lf-assignment-more-menu .lf-more-danger{color:#e9777f!important}
 :global(.theme-light) .coach-athletes-screen .lf-assignment-more-menu .lf-more-danger{color:#ac263d!important}
+@media(min-width:901px){
+ .coach-athletes-screen .assignment-columns{align-items:start!important}
+ .coach-athletes-screen .assignment-columns .assignment-scroll{
+  max-height:min(500px,60vh)!important;overflow-x:hidden!important;overflow-y:auto!important;
+  overscroll-behavior-y:contain!important;scrollbar-width:thin;scrollbar-color:var(--outline) transparent;
+  padding:2px 6px 2px 2px;scroll-padding-block:6px;
+ }
+ .coach-athletes-screen .assignment-scroll .lf-assignment-more-menu{
+  position:relative;top:auto;right:auto;margin-top:5px;margin-left:calc(100% - 220px);
+  width:220px;max-width:none;box-shadow:none;
+ }
+}
 @media(max-width:520px){
  .coach-athletes-screen .coach-v1-assignment-card .assignment-actions{
   grid-template-columns:minmax(0,1fr) minmax(0,1fr) 36px!important;

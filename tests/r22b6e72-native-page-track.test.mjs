@@ -25,7 +25,7 @@ test('real panes move on one rail; successive frames do not read layout',()=>{
 })
 test('router confirmation settles from the actual painted position without swapping DOM',()=>{
  const f=fixture(),home=f.panes['/home'],plan=f.panes['/piano'];f.track.paint('/home','/piano',-147)
- assert.equal(f.track.navigate('/home','/piano',210),true);const a=f.animations[0];assert.deepEqual(a.frames,[{transform:'translate3d(-147px,0,0)'},{transform:'translate3d(-366px,0,0)'}]);assert.equal(a.options.duration,210);assert.ok(f.track.moving());a.onfinish()
+ assert.equal(f.track.navigate('/home','/piano',210),true);const a=f.animations[0];assert.deepEqual(a.frames,[{transform:'translate3d(-147px,0,0)'},{transform:'translate3d(-366px,0,0)'}]);assert.equal(a.options.duration,189);assert.ok(f.track.moving());a.onfinish()
  assert.equal(f.rail.style.transform,undefined);assert.equal(f.track.moving(),false);assert.equal(plan.dataset.lfTrackShown,undefined);assert.equal(f.panes['/home'],home);assert.equal(f.panes['/piano'],plan)
 })
 test('router rejection and reversal return to the real origin and remove shown markers',()=>{

@@ -7,6 +7,7 @@ import {badgeEnabled} from '../features/work/devicePreference'
 import WorkAttendanceBadge from './WorkAttendanceBadge.vue'
 import GymIdentity from './GymIdentity.vue'
 import DashboardSearch from './DashboardSearch.vue'
+import DesktopShellActions from './DesktopShellActions.vue'
 import {stagingSession} from '../integrations/firebase/stagingSession'
 import {isStagingMode} from '../integrations/firebase/stagingConfig'
 import {watchDashboard} from '../integrations/firestore/platform'
@@ -58,7 +59,7 @@ const formatDate=(ms:number)=>new Intl.DateTimeFormat('it-IT',{day:'2-digit',mon
 <template>
  <div v-lf-entrance="{id:'coach-dashboard',ready:!loading&&!error,rows:[{match:'.lf-coach-greeting'},{within:'.lf-kpi-grid',match:'.lf-kpi-card'},{within:'.lf-coach-hero-row',match:'.lf14-brand-container,.lf-coach-actions'},{within:'.lf-coach-detail-grid',match:'.lf-dashboard-panel'},{within:'.lf-coach-bottom-grid',match:'.lf-dashboard-panel'}]}" class="lf-coach-dashboard">
   <WorkAttendanceBadge v-if="badgeSession" :key="`${badgeSession.uid}:${badgeSession.gymId}`" :uid="badgeSession.uid" :gym-id="badgeSession.gymId"/>
-  <header class="lf-coach-greeting"><div><h1>Bentornato, {{name}}! 👊</h1></div><div class="lf14-header-actions"><DashboardSearch v-if="searchItems" :items="searchItems" :partial="searchPartial" :emulator="source==='Firebase Emulator'"/><RouterLink class="lf-dashboard-customize" :to="{path:'/impostazioni',query:source==='Firebase Emulator'?{source:'emulator',dashboard:'1'}:{dashboard:'1'}}" aria-label="Personalizza i riquadri della dashboard"><LionIcon name="settings" :size="16"/><span>Personalizza</span></RouterLink><span v-if="source!=='Firebase Lion Fit'" class="lf-source-tag">{{source}}</span></div></header>
+  <header class="lf-coach-greeting"><div><h1>Bentornato, {{name}}! 👊</h1></div><div class="lf14-header-actions"><DashboardSearch v-if="searchItems" :items="searchItems" :partial="searchPartial" :emulator="source==='Firebase Emulator'"/><RouterLink class="lf-dashboard-customize" :to="{path:'/impostazioni',query:source==='Firebase Emulator'?{source:'emulator',dashboard:'1'}:{dashboard:'1'}}" aria-label="Personalizza i riquadri della dashboard"><LionIcon name="settings" :size="16"/><span>Personalizza</span></RouterLink><DesktopShellActions/><span v-if="source!=='Firebase Lion Fit'" class="lf-source-tag">{{source}}</span></div></header>
 
   <p v-lf-quiet-loading v-if="loading" role="status" class="muted lf-quiet-status">Caricamento dati della palestra…</p>
   <p v-if="error" role="alert" class="notice">{{error}}</p>
@@ -116,4 +117,10 @@ const formatDate=(ms:number)=>new Intl.DateTimeFormat('it-IT',{day:'2-digit',mon
 .lf-dashboard-customize:hover{border-color:var(--lf-accent);color:var(--lf-accent)}
 .lf-dashboard-customize:focus-visible{outline:2px solid var(--lf-accent);outline-offset:2px}
 @media(max-width:600px){.lf-dashboard-customize{margin-top:8px;min-height:38px}}
+@media(min-width:901px){
+ .lf-coach-dashboard .lf-coach-greeting{min-height:44px;padding-right:0;flex-wrap:wrap;align-items:center}
+ .lf-coach-dashboard .lf-coach-greeting>div:first-child{min-width:0;flex:1 1 220px;overflow-wrap:anywhere}
+ .lf-coach-dashboard .lf14-header-actions{width:auto;max-width:100%;margin-left:auto;justify-content:flex-end;gap:8px;flex:0 1 auto;flex-wrap:wrap}
+ .lf-coach-dashboard .lf14-header-actions :deep(.lf-search-desktop>button),.lf-coach-dashboard .lf-dashboard-customize{height:44px;min-height:44px;box-sizing:border-box}
+}
 </style>

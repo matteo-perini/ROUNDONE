@@ -42,6 +42,8 @@ export function createNativePageTrack(rail:HTMLElement,initial:NativePagePath):N
  function settle(destination:NativePagePath){active=destination;rest()}
  function animateTo(end:number,duration:number,destination:NativePagePath){
   clearAnimation();rail.dataset.lfTrackMoving='settle'
+  // E.8.8: shorten settlement only, not finger tracking or gesture intent.
+  duration=Math.round(duration*.90)
   if(!duration||typeof rail.animate!=='function'||Math.abs(end-offset)<.5){settle(destination);return}
   let a:Animation
   try{a=rail.animate([{transform:translate(offset)},{transform:translate(end)}],{duration,easing:'cubic-bezier(.22,1,.36,1)',fill:'forwards'})}catch{settle(destination);return}

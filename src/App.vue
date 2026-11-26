@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onUnmounted, defineAsyncComponent } from 'vue'
+import { computed, ref, watch, onUnmounted, defineAsyncComponent, provide } from 'vue'
 import {onAuthStateChanged} from 'firebase/auth'
 import {doc,onSnapshot,type Unsubscribe} from 'firebase/firestore'
 import {getStagingClients} from './integrations/firebase/stagingClient'
@@ -14,6 +14,8 @@ let stopIdentity: (()=>void)|undefined
 if(isLiveMode()){try{stopIdentity=onAuthStateChanged(getStagingClients().auth,u=>{const old=stagingSession.value;if(old&&u?.uid!==old.uid){const mount=document.getElementById('app');if(mount)mount.style.display='none';window.location.replace('/')}})}catch{/* auth configuration already handled by router */}}
 onUnmounted(()=>stopIdentity?.())
 import InboxBell from './components/InboxBell.vue'
+import DesktopShellActions from './components/DesktopShellActions.vue'
+import {desktopActionsKey,type DesktopActions} from './features/navigation/desktopActions'
 import PushWelcome from './components/PushWelcome.vue'
 import CheckUploadNotice from './components/CheckUploadNotice.vue'
 import {coachInboxEnabled} from './integrations/firebase/coachInbox'
@@ -34,6 +36,7 @@ import {isNativePagePath} from './features/navigation/nativePageTrack'
 import {createExternalPageMotion,externalPairPlan} from './features/navigation/externalPageMotion'
 import {vLfSwipeRails} from './features/navigation/swipeRails'
 import {reportSwipeTiming} from './features/performance/swipeAudit'
+import {appleStandaloneWindow,iosStandaloneSwipeIntent,iosSoftwareKeyboard,isViewportEditor} from './features/navigation/iosStandaloneScroll'
 import {resolveSwipeIntent,protectedSwipeSelector,hasNativeHorizontalScroll,insideSystemEdge,suppressSwipeClick,type SwipeIntent} from './features/navigation/swipeIntent'
 import {installMotionAudit} from './features/performance/motionAudit'
 import {accountKey} from './features/platform/platformModel'
@@ -131,6 +134,8 @@ const swipePages=computed(()=>[...(chatPreviewEnabled.value?[shownRole.value==='
 function swipeViewport(){return window.innerWidth<(shownRole.value==='coach'?901:800)}
 const swipeSurfaceEnabled=computed(()=>!!shownRole.value&&swipePages.value.includes(route.path))
 const nativeTrackShell=computed(()=>shownRole.value==='atleta'&&isStagingMode()&&athleteHeaderVisible.value&&isNativePagePath(route.path))
+const iosStandalone=appleStandaloneWindow()
+const iosStandaloneTrack=computed(()=>iosStandalone&&nativeTrackShell.value)
 let chatPilotVisibilityRequest=0
 watch(()=>accountKey(stagingSession.value),async key=>{
  const uid=stagingSession.value?.uid,request=++chatPilotVisibilityRequest
@@ -159,6 +164,13 @@ function beforeChatLeave(el:Element){prepareSectionLeave(el,chatMotion.value,swi
 function cancelChatLeave(el:Element){outerMotion.cancelled(el);finishSectionLeave(el)}
 // R22B will populate this from authorized unread metadata; 0 means no invented notifications.
 const chatUnreadCount=ref(0)
+// Desktop actions share the shell's existing authorization, route and unread state.
+provide(desktopActionsKey,computed<DesktopActions>(()=>({
+ visible:!!shownRole.value&&!inboxInHeader.value,
+ chatTo:chatPreviewEnabled.value&&shownRole.value?chatRoute.value:null,
+ unread:chatUnreadCount.value,
+ inboxSession:inboxVisibleOnRoute.value&&coachInboxEnabled()?stagingSession.value:null
+})))
 let chatUnreadTimer:ReturnType<typeof setInterval>|null=null,chatRequest=0
 async function refreshChatUnread(){
  const uid=stagingSession.value?.uid,request=++chatRequest,key=accountKey(stagingSession.value)
@@ -204,7 +216,7 @@ watch(()=>route.path,(now,before)=>{
 })
 // E.5 — native touch feedback with real-page navigation. This never replaces Vue Router.
 // The native section transitions still own the final page switch.
-type GestureStart={x:number;y:number;at:number;path:string;root:HTMLElement|null;intent:SwipeIntent;target:Element|null;identifier:number;samples:SwipeSample[];lockedAt:number;paintReported:boolean;width:number;reducedMotion:boolean}
+type GestureStart={x:number;y:number;at:number;path:string;root:HTMLElement|null;intent:SwipeIntent;target:Element|null;identifier:number;samples:SwipeSample[];lockedAt:number;paintReported:boolean;width:number;reducedMotion:boolean;iosScroll:boolean}
 let touchStart:GestureStart|null=null
 let consumedContact:GestureStart|null=null
 // Pointer Events deliver continuous coordinates without the legacy TouchEvent
@@ -354,16 +366,21 @@ function chatClickCapture(event:MouseEvent){
 type SwipePoint={clientX:number;clientY:number;identifier:number}
 function beginGesture(event:Event,point:SwipePoint){
  if(pendingSwipe)return // only one navigation for a committed gesture
- touchStart=null;consumedContact=null;swipeClickGuard=null;restoreDrag(false)
+ const iosScroll=iosStandaloneTrack.value
+ const staleDrag=!!touchStart||!!dragRoot
+ touchStart=null;consumedContact=null;swipeClickGuard=null;if(!iosScroll||staleDrag)restoreDrag(false)
  if(!swipeSurfaceEnabled.value||!swipeViewport())return
  const stage=swipeStage.value
  if(insideSystemEdge(point.clientX,window.innerWidth)||skipSectionSwipe(event.target,event.currentTarget))return
  if(selectedTouchTarget(event.target)||visibleSwipeModal(stage))return
+ // Leave an open software keyboard and native text controls to WebKit.
+ if(iosScroll&&(document.body.hasAttribute('data-lf-chat-keyboard')||iosSoftwareKeyboard(isViewportEditor(document.activeElement),window.innerHeight,window.visualViewport?.height??window.innerHeight,document.documentElement.clientHeight)))return
  const at=performance.now(),el=resolveSwipeRouteRoot()
- touchStart={x:point.clientX,y:point.clientY,at,path:route.path,root:el,intent:'pending',target:event.target instanceof Element?event.target:null,identifier:point.identifier,samples:[{x:point.clientX,at}],lockedAt:0,paintReported:false,width:stage?.clientWidth||window.innerWidth,reducedMotion:!sectionMotionAllowed()}
+ touchStart={x:point.clientX,y:point.clientY,at,path:route.path,root:el,intent:'pending',target:event.target instanceof Element?event.target:null,identifier:point.identifier,samples:[{x:point.clientX,at}],lockedAt:0,paintReported:false,width:stage?.clientWidth||window.innerWidth,reducedMotion:!sectionMotionAllowed(),iosScroll}
 }
 function lockGesture(start:GestureStart,dx:number,dy:number){
- start.intent=resolveSwipeIntent(start.intent,dx,dy)
+ if(start.iosScroll)start.intent=iosStandaloneSwipeIntent(start.intent,dx,dy)
+ else start.intent=resolveSwipeIntent(start.intent,dx,dy)
  if(start.intent==='horizontal'&&!start.lockedAt){start.lockedAt=performance.now();reportSwipeTiming('lock',start.at);window.dispatchEvent(new Event('lionfit:content-gesture-start'))}
 }
 function commitSwipe(start:GestureStart,destination:string,dx:number,velocity:number,held:boolean){
@@ -448,6 +465,8 @@ function endGesture(event:Event,point:SwipePoint){
  if(start.path!==route.path||!swipeViewport()||point.identifier!==start.identifier){restoreDrag(true);return}
  const dx=point.clientX-start.x,dy=point.clientY-start.y,now=performance.now()
  appendSwipeSample(start.samples,point.clientX,now)
+ // On installed iOS a pan must have locked during movement, never on release.
+ if(start.iosScroll&&start.intent!=='horizontal')return
  lockGesture(start,dx,dy)
  if(start.intent!=='horizontal'){restoreDrag(true);return}
  if(!pointerSwipeEnabled&&event.cancelable)event.preventDefault()
@@ -462,6 +481,7 @@ function endGesture(event:Event,point:SwipePoint){
 }
 function cancelGesture(){
  if(pendingSwipe)return
+ if(iosStandaloneTrack.value&&!dragRoot&&touchStart?.intent!=='horizontal'){touchStart=null;clearGestureRetry();return}
  if(touchStart?.intent==='horizontal'){armSwipeClickGuard(touchStart);reportSwipeTiming('cancel',touchStart.at,'input-cancel')}
  touchStart=null;restoreDrag(true)
 }
@@ -558,7 +578,7 @@ async function goOut(){
 <template>
   <Teleport to="body"><aside v-if="navigationFailure" class="lf21-nav-recovery" role="alert"><strong>{{navigationFailure.kind==='assets'?'Pagina non caricata':'Navigazione non riuscita'}}</strong><p>{{navigationFailure.kind==='assets'?'Potrebbe essere disponibile una nuova versione. Ricarica per riprovare.':'Riprova a cambiare pagina o ricarica LionFit.'}}</p><button type="button" @click="reloadNavigation">Ricarica</button><button type="button" @click="navigationFailure=null">Chiudi</button></aside></Teleport>
   <Teleport to="body"><aside v-if="pushNotice" role="status" style="position:fixed;inset:auto 12px max(85px,env(safe-area-inset-bottom)) 12px;z-index:9999;max-width:440px;margin:auto;padding:14px;border-radius:12px;background:#162720;color:#fff;box-shadow:0 6px 24px #0008"><strong>{{pushNotice.title}}</strong><p>{{pushNotice.body}}</p><button type="button" class="secondary" @click="openPushNotice">{{pushNotice.open==='support'?'Apri assistenza':pushNotice.open==='competition'?'Apri gara':'Apri Agenda'}}</button> <button type="button" class="bare" style="color:#fff" @click="pushNotice=null">Chiudi</button></aside></Teleport>
- <div class="app" :class="['theme-'+lab.theme,shownRole==='coach'?'as-coach':'as-athlete',{'bookings-mode':isBooking&&!nativeTrackShell,'lf-support-shell':route.path==='/assistenza'&&!!shownRole&&isStagingMode(),'athlete-sidebar-collapsed':!athleteSidebarExpanded}]">
+ <div class="app" :class="['theme-'+lab.theme,shownRole==='coach'?'as-coach':'as-athlete',{'bookings-mode':isBooking&&!nativeTrackShell,'lf-support-shell':route.path==='/assistenza'&&!!shownRole&&isStagingMode(),'athlete-sidebar-collapsed':!athleteSidebarExpanded,'lf-ios-standalone-track':iosStandaloneTrack}]">
   <div v-if="isLocalProdDev()" class="lab-banner" role="status">⚠ SVILUPPO LOCALE · FIREBASE PRODUZIONE · LE SCRITTURE POSSONO CAMBIARE DATI REALI</div>
   <component v-if="StagingBanner" :is="StagingBanner"/>
   <div v-else-if="coachEmulatorPreview || athleteEmulatorPreview || bookingEmulatorPreview" class="lab-banner">{{uiText("FIREBASE EMULATOR · DATI FITTIZI · SCRITTURE SOLO CON CONFERMA · NON È L'APP PUBBLICATA")}}</div>
@@ -570,7 +590,6 @@ async function goOut(){
   <template v-else-if="route.path==='/assistenza' && shownRole && isStagingMode()"><RouterView/></template>
   <template v-else-if="shownRole && route.path!=='/accesso'">
     <AthleteDesktopSidebar v-if="shownRole==='atleta'" :items="mobileNav" :expanded="athleteSidebarExpanded" @toggle="toggleAthleteSidebar" @logout="goOut"/>
-    <RouterLink v-if="chatPreviewEnabled && shownRole==='atleta' && !athleteHeaderVisible" :to="chatRoute" class="lf-chat-desktop-shortcut" aria-label="Apri Messaggi" title="Apri Messaggi"><LionIcon name="messages" :size="24"/><span>Messaggi</span><span v-if="chatUnreadCount>0" class="lf-chat-unread">{{chatUnreadCount>99?'99+':chatUnreadCount}}</span></RouterLink>
     <aside v-if="shownRole==='coach'" class="desktop-sidebar">
       <div class="sidebar-head"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><strong>LION <em>FIT</em></strong><small>{{uiText("AREA COACH / ADMIN")}}</small></div></div>
       <nav class="sidebar-nav">
@@ -583,7 +602,7 @@ async function goOut(){
     <header class="mobile-topbar"><div class="brand"><img src="/v1-preview/LOGO-APP.png" alt="Lion Fit"/><div><div class="brand-name">LION <span>FIT</span><small v-if="shownRole==='coach'">COACH</small></div><div class="brand-subtitle">{{uiText(shownRole==='coach'?'PANNELLO ADMIN':'AREA ATLETA')}}</div></div></div><div class="top-actions"><QuickProfileSwitch compact/><RouterLink v-if="chatPreviewEnabled && shownRole" :to="chatRoute" class="lf-chat-header-link" :aria-label="uiText('Apri messaggi Coach-Atleta')" title="Messaggi"><LionIcon name="messages" :size="24"/><span v-if="chatUnreadCount>0" class="lf-chat-unread">{{chatUnreadCount>99?'99+':chatUnreadCount}}</span></RouterLink><InboxBell v-if="inboxInHeader&&inboxVisibleOnRoute&&coachInboxEnabled()&&stagingSession" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><RouterLink v-if="shownRole==='atleta'" :to="athleteDevShell?'/profilo?source=emulator':'/profilo'" class="header-avatar" :aria-label="uiText('Apri il profilo')"><img v-if="isStagingMode() && currentAvatar" :src="currentAvatar" :alt="uiText('Foto profilo')"/><img v-else-if="!isStagingMode() && !athleteDevShell && demoProfiles.atleta.photo" :src="demoProfiles.atleta.photo" alt="" /><span v-else>🦁</span></RouterLink></div></header>
 
     <!-- Navigazione Atleta esclusiva: sidebar a sinistra su desktop, dock inferiore su mobile. -->
-    <main ref="swipeStage" v-lf-swipe-rails class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking&&!nativeTrackShell,'lf-chat-stage':!!chatMotion,'lf-swipe-surface':swipeSurfaceEnabled,'lf-native-track-shell':nativeTrackShell}]" v-on="swipeInputEvents" @click.capture="chatClickCapture" @contextmenu.capture="chatTouchCancel"><RouterLink v-if="chatPreviewEnabled && shownRole==='coach' && !coachHeaderVisible" :to="chatRoute" class="lf-chat-coach-top" :class="{'lf-chat-coach-with-bell':route.path==='/coach'&&coachInboxEnabled()}" aria-label="Apri Messaggi Coach–Atleta" title="Apri Messaggi"><LionIcon name="messages" :size="23"/><span>Messaggi</span><span v-if="chatUnreadCount>0" class="lf-chat-unread">{{chatUnreadCount>99?'99+':chatUnreadCount}}</span></RouterLink><button v-if="!nativeTrackShell && route.path!=='/home' && route.path!=='/coach' && (shownRole!=='coach' || coachHeaderVisible)" type="button" class="lf-route-back" :class="{'lf-r8-route-back':workoutRoute}" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> </button><template v-if="coachInboxEnabled()&&stagingSession"><InboxBell v-if="!inboxInHeader&&inboxVisibleOnRoute" :key="stagingSession.uid+':'+stagingSession.gymId" :session="stagingSession"/><PushWelcome :key="stagingSession.uid" :uid="stagingSession.uid" :open-agenda="openPushAgenda" :open-support="openPushSupport"/></template><p v-if="linkedNotice" class="notice" role="alert">{{linkedNotice}} <button type="button" class="bare" @click="linkedNotice=''">Chiudi</button></p><aside v-if="chatPreviewEnabled && shownRole==='atleta' && route.path==='/home' && showChatHint" class="lf-chat-discovery" role="status"><LionIcon name="messages" :size="19"/><span>I messaggi sono a sinistra: scorri verso destra oppure tocca l'icona.</span><button type="button" aria-label="Chiudi suggerimento messaggi" @click="chatHintClose">×</button></aside><RouterView v-slot="{ Component }"><Transition :name="chatMotion" :css="!externalMotionEnabled" v-on="externalMotionEvents" @before-enter="beforeChatEnter" @after-enter="finishChatMotion" @enter-cancelled="cancelChatEnter" @before-leave="beforeChatLeave" @after-leave="finishSectionLeave" @leave-cancelled="cancelChatLeave"><component :is="Component" :ref="setSwipeRouteRoot"/></Transition></RouterView><CheckUploadNotice v-if="shownRole==='atleta'&&stagingSession?.role==='atleta'" :session="stagingSession"/></main>
+    <main ref="swipeStage" v-lf-swipe-rails class="main-layout" :class="[shownRole==='coach'?'coach-container':'athlete-container', {'booking-in-shell':isBooking&&!nativeTrackShell,'lf-chat-stage':!!chatMotion,'lf-swipe-surface':swipeSurfaceEnabled,'lf-native-track-shell':nativeTrackShell}]" v-on="swipeInputEvents" @click.capture="chatClickCapture" @contextmenu.capture="chatTouchCancel"><DesktopShellActions v-if="shownRole!=='coach'||route.path!=='/coach'" class="lf-desktop-page-actions"/><button v-if="!nativeTrackShell && route.path!=='/home' && route.path!=='/coach' && (shownRole!=='coach' || coachHeaderVisible)" type="button" class="lf-route-back" :class="{'lf-r8-route-back':workoutRoute}" :aria-label="uiText('Torna indietro')" @click="requestBackFromUi"><LionIcon name="back" :size="17"/> </button><template v-if="coachInboxEnabled()&&stagingSession"><PushWelcome :key="stagingSession.uid" :uid="stagingSession.uid" :open-agenda="openPushAgenda" :open-support="openPushSupport"/></template><p v-if="linkedNotice" class="notice" role="alert">{{linkedNotice}} <button type="button" class="bare" @click="linkedNotice=''">Chiudi</button></p><aside v-if="chatPreviewEnabled && shownRole==='atleta' && route.path==='/home' && showChatHint" class="lf-chat-discovery" role="status"><LionIcon name="messages" :size="19"/><span>I messaggi sono a sinistra: scorri verso destra oppure tocca l'icona.</span><button type="button" aria-label="Chiudi suggerimento messaggi" @click="chatHintClose">×</button></aside><RouterView v-slot="{ Component }"><Transition :name="chatMotion" :css="!externalMotionEnabled" v-on="externalMotionEvents" @before-enter="beforeChatEnter" @after-enter="finishChatMotion" @enter-cancelled="cancelChatEnter" @before-leave="beforeChatLeave" @after-leave="finishSectionLeave" @leave-cancelled="cancelChatLeave"><component :is="Component" :ref="setSwipeRouteRoot"/></Transition></RouterView><CheckUploadNotice v-if="shownRole==='atleta'&&stagingSession?.role==='atleta'" :session="stagingSession"/></main>
     <!-- La navbar Atleta vive fuori dal contenitore .app: nessun CSS / overflow legacy può coprirla. -->
     <AthleteBottomNavigation v-if="shownRole==='atleta'" :items="mobileNav" :theme="lab.theme"/>
     <nav v-if="shownRole==='coach'" class="bottom-nav coach-bottom" :aria-label="uiText('Navigazione Coach')"><RouterLink v-for="item in mobileNav" :key="item.to" :to="item.to"><LionIcon :name="item.icon" :size="24"/><span>{{uiText(item.label)}}</span></RouterLink></nav>
@@ -601,17 +620,10 @@ async function goOut(){
 .app.lf-support-shell{display:flex!important;flex-direction:column;width:100%;height:100vh;height:100dvh;min-height:0!important;padding:0!important;margin:0!important;overflow:hidden}
 /* R8: a single back control in normal flow when the technical version label is absent. */
 .app .main-layout > .lf-route-back{position:static!important;display:inline-flex!important;align-self:flex-start;justify-content:center;min-width:44px;min-height:44px;margin:0 0 6px;padding:6px;border-radius:10px;box-shadow:none!important}
-/* PATCH 30 R2.3: the Coach inbox lives only in Dashboard; the header does
-   not reserve a separate row. Athletes and Coach mobile keep their original shell. */
+/* Desktop booking shell; communications now use normal-flow actions. */
 @media (min-width:901px) {
  .app.as-coach .main-layout.booking-in-shell{position:relative;width:calc(100% - 256px);margin-left:256px;max-width:none;padding-top:16px!important}
  .app.as-coach .main-layout.coach-container{position:relative}
- .app.as-coach .main-layout.coach-container > .lf17-bell-wrap{
-  position:absolute;top:15px;right:clamp(12px,1.65vw,27px);z-index:6;
-  width:44px;height:44px;margin:0;
- }
- .app.as-coach .main-layout.coach-container > .lf17-bell-wrap .lf17-bell{width:44px;height:44px}
- .app.as-coach .lf-coach-dashboard .lf-coach-greeting{padding-right:54px;min-height:44px}
 }
 /* Single archive heading: title, counts, and primary action share one panel. */
 .app.as-coach .lf30-archive-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -647,22 +659,13 @@ async function goOut(){
 .lf-chat-header-link{position:relative;display:inline-grid;place-items:center;width:43px;height:43px;flex:none;border-radius:14px;border:1px solid rgba(88,238,155,.44);background:linear-gradient(145deg,#1d7050 0%,#113c30 55%,#132b2d 100%);color:#b7ffdc;text-decoration:none;box-shadow:inset 0 1px rgba(255,255,255,.15),0 4px 14px rgba(0,0,0,.22)}
 .lf-chat-header-link svg{filter:drop-shadow(0 1px 3px rgba(74,234,138,.25))}
 .lf-chat-header-link:hover{border-color:#91ffc1;background:linear-gradient(145deg,#23865d,#144435);transform:translateY(-1px)}
-.lf-chat-header-link:focus-visible,.lf-chat-desktop-shortcut:focus-visible,.lf-chat-coach-top:focus-visible{outline:2px solid var(--mint,#3bcb83);outline-offset:2px}
+.lf-chat-header-link:focus-visible{outline:2px solid var(--mint,#3bcb83);outline-offset:2px}
 .lf-chat-unread{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;padding:0 3px;border-radius:999px;background:#c53546;color:#fff;font-size:10px;font-weight:900;display:grid;place-items:center;box-shadow:0 0 0 2px var(--nav,#101820)}
 .lf-chat-header-link.router-link-active{background:linear-gradient(145deg,#248559,#124a39);border-color:#8cf8b6}
 .lf-chat-discovery{display:flex;align-items:center;gap:9px;max-width:880px;margin:0 auto 12px;padding:10px 12px;border:1px solid rgba(51,170,100,.27);border-radius:12px;background:var(--card2,rgba(22,60,41,.9));color:var(--text,#e3f5e9);font-size:12px;line-height:1.4}
 .lf-chat-discovery svg{flex:none;color:var(--mint,#42cb80)}
 .lf-chat-discovery span{flex:1}
 .lf-chat-discovery button{border:0;background:transparent;color:inherit;font-size:22px;min-width:32px;min-height:32px;line-height:1;cursor:pointer}
-.lf-chat-desktop-shortcut{position:fixed;top:18px;right:18px;display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(88,238,155,.43);border-radius:14px;padding:10px 15px;background:linear-gradient(145deg,#1b6149,#112e2b);color:#e4ffef;text-decoration:none;font-size:13px;font-weight:800;z-index:10;box-shadow:0 6px 18px #0004}
-.lf-chat-desktop-shortcut svg{color:#b7ffdc}
-/* Desktop Coach: no Messages link in sidebar footer. One floating top-right action. */
-.lf-chat-coach-top{position:absolute;top:16px;right:24px;z-index:8;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:8px 15px;border:1px solid rgba(87,234,149,.46);border-radius:14px;background:linear-gradient(145deg,#1c7251,#113d34 65%,#132d30);color:#e8fff1;text-decoration:none;font-size:13px;font-weight:850;letter-spacing:.01em;box-shadow:inset 0 1px #ffffff1d,0 7px 20px #0004}
-.lf-chat-coach-top svg{color:#baffd8}
-.lf-chat-coach-top:hover{transform:translateY(-1px);border-color:#a3ffd0;box-shadow:0 9px 22px #0005}
-.lf-chat-coach-top.router-link-active{border-color:#a3ffd0;background:linear-gradient(145deg,#24875b,#11503c)}
-.lf-chat-coach-top.lf-chat-coach-with-bell{right:86px}
-.lf-chat-coach-top .lf-chat-unread,.lf-chat-desktop-shortcut .lf-chat-unread{top:-6px;right:-7px}
 /* Chat lies to the LEFT of Home: opening moves the Home right; returning reverses. */
 .main-layout.lf-chat-stage{position:relative;overflow-x:clip}
 @media(prefers-reduced-motion:no-preference){
@@ -697,7 +700,5 @@ async function goOut(){
  .lf-chat-open-enter-active,.lf-chat-open-leave-active,.lf-chat-close-enter-active,.lf-chat-close-leave-active,.lf-section-next-enter-active,.lf-section-next-leave-active,.lf-section-prev-enter-active,.lf-section-prev-leave-active{transition:none!important;animation:none!important}
 }
 @media(min-width:800px){.lf-chat-discovery{display:none}}
-@media(max-width:799px){.lf-chat-desktop-shortcut{display:none}}
 @media(max-width:380px){.app .top-actions .lf-chat-header-link{width:36px;height:36px;min-width:36px;border-radius:12px}.app .top-actions{gap:4px}}
-@media(max-width:900px){.lf-chat-coach-top{display:none!important}}
 </style>

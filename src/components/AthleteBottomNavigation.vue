@@ -88,6 +88,11 @@ const indicatorStyle=computed(()=>position.value?{width:position.value.width+'px
 .lionfit-dock-indicator.is-visible{opacity:1}
 .dock-light .lionfit-dock-indicator{background:linear-gradient(135deg,#e2faea,#c8f4d6);box-shadow:inset 0 0 0 1px #a7dfb9}
 .dock-indicator-ready .lionfit-dock-item.router-link-active{background:transparent!important;box-shadow:none!important}
-@media(prefers-reduced-motion:no-preference){.lionfit-dock-item{transition:color .18s ease}.lionfit-dock-indicator{transition:transform 260ms cubic-bezier(.22,1,.36,1),width 180ms ease,height 180ms ease,opacity 120ms ease}}
+@media(prefers-reduced-motion:no-preference){
+ .lionfit-dock-item{transition:color 160ms ease}
+ .lionfit-dock-indicator{transition:transform 234ms cubic-bezier(.22,1,.36,1),width 162ms ease,height 162ms ease,opacity 108ms ease}
+ .lionfit-dock-item span,.lionfit-dock-item :deep(svg){transition:opacity 140ms ease-out}
+ .lionfit-dock-item:active:not([aria-disabled="true"]) span,.lionfit-dock-item:active:not([aria-disabled="true"]) :deep(svg){opacity:.82;transition-duration:90ms}
+}
 @media(prefers-reduced-motion:reduce){.lionfit-dock-indicator,.lionfit-dock-item{transition:none!important}}
 </style>

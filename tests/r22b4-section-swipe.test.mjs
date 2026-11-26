@@ -44,8 +44,8 @@ const app=readFileSync('src/App.vue','utf8')
 test('Coach desktop no longer renders Chat inside sidebar foot',()=>{
  const foot=app.match(/<div class="sidebar-foot">([\s\S]*?)<\/div>/)?.[1]??''
  assert.doesNotMatch(foot,/lf-chat-coach-shortcut|Messaggi/)
- assert.match(app,/class="lf-chat-coach-top"/)
- assert.match(app,/!coachHeaderVisible/)
+ assert.match(app,/<DesktopShellActions v-if="shownRole!=='coach'\|\|route.path!=='\/coach'" class="lf-desktop-page-actions"\/>/)
+ assert.match(app,/visible:!!shownRole.value&&!inboxInHeader.value/)
 })
 test('both roles keep chat unread badge and header icon',()=>{
  assert.match(app,/class="lf-chat-header-link"/)

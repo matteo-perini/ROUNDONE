@@ -81,3 +81,12 @@
  .lf-native-chat-pane>.lf-chat-page{width:100%;max-width:100%;min-width:0}
  .lf-native-chat-pane>.lf-chat-page.lf-chat-native-active{max-height:100%}
 }
+
+/* E.8.7: installed Apple PWA only. Stop document rubber-band/chaining without
+   locking body overflow, disabling pinch zoom or creating another scrollport.
+   The ordinary active pane and the two native Chat scrollports keep inertia. */
+@media(max-width:799px){
+ html:has(.app.lf-ios-standalone-track),body:has(.app.lf-ios-standalone-track){overscroll-behavior-y:none}
+ .app.lf-ios-standalone-track .lf-native-track-page:not(.lf-native-chat-pane),
+ .app.lf-ios-standalone-track .lf-native-chat-pane :is(.lf-chat-sidebar,.lf-chat-messages){overscroll-behavior-y:contain}
+}

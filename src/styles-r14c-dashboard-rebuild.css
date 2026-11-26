@@ -87,8 +87,10 @@
  .lf15-quick-tile>span{font-size:9px}
 }
 @media(prefers-reduced-motion:no-preference){
- .lf15-home :is(.lf15-main-cta,.lf15-route,.lf15-event-card,.lf15-progress-link,.lf15-quick-tile){transition:transform .4s cubic-bezier(.2,.7,.2,1),border-color .35s ease,filter .35s ease}
+ .lf15-home :is(.lf15-main-cta,.lf15-route,.lf15-event-card,.lf15-progress-link,.lf15-quick-tile){transition:transform 360ms cubic-bezier(.2,.7,.2,1),border-color 315ms ease,filter 315ms ease,opacity 144ms ease-out}
  .lf15-home :is(.lf15-main-cta,.lf15-route,.lf15-quick-tile):hover{transform:translateY(-2px)}
+ /* Fast visual press feedback only on the real action, never on a scrollport. */
+ .lf15-home :is(button,a):is(.lf15-main-cta,.lf15-route,.lf15-event-card,.lf15-progress-link,.lf15-quick-tile):active:not(:disabled):not([aria-disabled="true"]){opacity:.94;transition-duration:360ms,315ms,315ms,90ms}
 }
 @media(prefers-reduced-motion:reduce){.lf15-home *, .lf15-video-backdrop *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 

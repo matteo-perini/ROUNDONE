@@ -3,6 +3,8 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 const read = (p)=>readFileSync(new URL('../'+p,import.meta.url),'utf8')
 const app=read('src/App.vue')
+const desktop=read('src/components/DesktopShellActions.vue')
+const dashboard=read('src/components/CoachDashboardRedesign.vue')
 const live=read('src/views/LiveCoachTemplates.vue')
 const demo=read('src/views/CoachSheets.vue')
 const emulator=read('src/views/DevCoachTemplates.vue')
@@ -10,7 +12,7 @@ const emulator=read('src/views/DevCoachTemplates.vue')
 test('Coach inbox appears only on dashboard route; Athlete scope unaffected',()=>{
  assert.match(app,/const inboxVisibleOnRoute=computed\(\(\)=>shownRole\.value!=='coach'\|\|route\.path==='\/coach'\)/)
  assert.match(app,/<InboxBell v-if="inboxInHeader&&inboxVisibleOnRoute&&coachInboxEnabled\(\)&&stagingSession"/)
- assert.match(app,/<InboxBell v-if="!inboxInHeader&&inboxVisibleOnRoute"/)
+ assert.match(desktop,/<InboxBell v-if="actions.inboxSession"/)
  assert.match(app,/const inboxInHeader=computed\(\(\)=>shownRole\.value==='atleta'\?athleteHeaderVisible\.value:coachHeaderVisible\.value\)/)
 })
 
@@ -18,12 +20,13 @@ test('Notification push listeners and support integration retained',()=>{
  assert.match(app,/<PushWelcome :key="stagingSession\.uid"/)
  assert.match(app,/function openPushSupport\(/)
  assert.match(app,/connectPushSession\(/)
- assert.equal((app.match(/<InboxBell /g)||[]).length,2)
+ assert.equal(((app+desktop).match(/<InboxBell /g)||[]).length,2)
 })
 
-test('Desktop dashboard bell positioned off layout flow with search clearance',()=>{
- assert.match(app,/\.app\.as-coach \.main-layout\.coach-container > \.lf17-bell-wrap\{\s*position:absolute/)
- assert.match(app,/\.app\.as-coach \.lf-coach-dashboard \.lf-coach-greeting\{padding-right:54px;min-height:44px\}/)
+test('Desktop dashboard bell uses shared in-flow actions alongside search',()=>{
+ assert.match(dashboard,/<DashboardSearch[^>]+\/>.*<DesktopShellActions\/>/)
+ assert.match(desktop,/\.lf-desktop-shell-actions :deep\(\.lf17-bell-wrap\)\{position:relative/)
+ assert.match(app,/inboxSession:inboxVisibleOnRoute.value&&coachInboxEnabled\(\)\?stagingSession.value:null/)
  assert.match(app,/@media \(min-width:901px\)/)
 })
 

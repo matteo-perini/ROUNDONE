@@ -5,6 +5,8 @@ import {createRequire} from 'node:module'
 
 const read = p => readFileSync(new URL('../'+p,import.meta.url),'utf8')
 const app = read('src/App.vue')
+const desktop = read('src/components/DesktopShellActions.vue')
+const dashboard = read('src/components/CoachDashboardRedesign.vue')
 const agenda = read('src/views/LiveBookingWorkspace.vue')
 
 test('Desktop Coach hides redundant back while keeping mobile and athlete back',()=>{
@@ -15,11 +17,11 @@ test('Desktop Coach hides redundant back while keeping mobile and athlete back',
 // R2.3 refines the scope: notifications are opened from the Coach dashboard,
 // while the Athlete bell and all PushWelcome listeners remain available.
 test('The original InboxBell remains unique, visible in Coach dashboard and never in other Coach screens',()=>{
- assert.match(app,/<InboxBell v-if="!inboxInHeader&&inboxVisibleOnRoute"/)
+ assert.match(desktop,/<InboxBell v-if="actions.inboxSession"/)
  assert.match(app,/const inboxVisibleOnRoute=computed\(\(\)=>shownRole\.value!=='coach'\|\|route\.path==='\/coach'\)/)
- assert.match(app,/\.app\.as-coach \.main-layout\.coach-container > \.lf17-bell-wrap/)
- assert.match(app,/position:absolute;top:15px/)
- assert.equal((app.match(/<InboxBell /g)||[]).length,2) // mutually exclusive responsive placements
+ assert.match(dashboard,/<DesktopShellActions\/>/)
+ assert.match(app,/visible:!!shownRole.value&&!inboxInHeader.value/)
+ assert.equal(((app+desktop).match(/<InboxBell /g)||[]).length,2) // mutually exclusive responsive placements
  assert.doesNotMatch(app,/display:none[^\n]*\.lf17-bell/)
 })
 test('Desktop agenda header contains explanatory subtitle without removing page heading',()=>{

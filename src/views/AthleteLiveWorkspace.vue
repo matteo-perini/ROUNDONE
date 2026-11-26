@@ -17,6 +17,7 @@ import { useAthleteLive } from '../features/athletes/useAthleteLive'
 import {useRomeDayClock} from '../features/performance/useRomeDayClock'
 import type {MotionSummary} from '../features/navigation/universalMotion'
 import {accountKey} from '../features/platform/platformModel'
+import {appleStandaloneWindow,iosStandaloneTrackHeight,isViewportEditor} from '../features/navigation/iosStandaloneScroll'
 import {createNativePageTrack,nativeTrackHeight,isNativePagePath,type NativePageTrack} from '../features/navigation/nativePageTrack'
 import {availableAthleteScreens,athleteScreenPath,coreAthleteScreen,athletePageWindow,athletePageUnion,type AthleteScreen} from '../features/navigation/athletePageWindow'
 import {stagingSession} from '../integrations/firebase/stagingSession'
@@ -66,10 +67,26 @@ const archiveRequested=computed(()=>props.screen==='archive'||trackMobile.value&
 function syncMobile(){mobile.value=media.matches}
 media.addEventListener('change',syncMobile)
 let engine:NativePageTrack|null=null,engineRail:HTMLElement|null=null,layoutFrame=0,layoutTimer:ReturnType<typeof setTimeout>|null=null,layoutObserver:ResizeObserver|null=null
+const iosStandalone=appleStandaloneWindow()
+let iosBaseline=0,iosWidth=0,iosLastHeight:number|null=null
 function dropEngine(){engine?.dispose();engine=null;engineRail=null}
 function measureTrack(){
  layoutFrame=0;const el=trackViewport.value;if(!trackMobile.value||!el?.isConnected)return
  const vv=window.visualViewport,dock=document.querySelector<HTMLElement>('[data-lionfit-dock="athlete"]')
+ if(iosStandalone){
+  const width=window.innerWidth,layoutHeight=window.innerHeight,visibleHeight=vv?.height??layoutHeight
+  const focused=isViewportEditor(document.activeElement)
+  if(width!==iosWidth){iosWidth=width;iosBaseline=0;iosLastHeight=null}
+  const scale=vv?.scale??1
+  if(Math.abs(scale-1)<=.03&&Number.isFinite(visibleHeight)&&visibleHeight>0){
+   if(!focused||!iosBaseline)iosBaseline=Math.max(layoutHeight,visibleHeight)
+   else iosBaseline=Math.max(iosBaseline,layoutHeight,visibleHeight)
+  }
+  const height=iosStandaloneTrackHeight({top:el.getBoundingClientRect().top,documentScrollY:window.scrollY,layoutHeight,visibleHeight,visibleTop:vv?.offsetTop??0,scale,dockTop:dock?.getClientRects().length?dock.getBoundingClientRect().top:null,focused,baselineHeight:iosBaseline,previousHeight:iosLastHeight})
+  if(height!==null){const value=`${height}px`;if(el.style.getPropertyValue('--lf-native-track-height')!==value)el.style.setProperty('--lf-native-track-height',value);iosLastHeight=height}
+  else if(iosLastHeight===null)el.style.removeProperty('--lf-native-track-height')
+  return
+ }
  const bottom=Math.min((vv?.offsetTop||0)+(vv?.height||window.innerHeight),dock?.getBoundingClientRect().top||window.innerHeight)
  const height=nativeTrackHeight(el.getBoundingClientRect().top,bottom)
  if(height!==null){const value=`${height}px`;if(el.style.getPropertyValue('--lf-native-track-height')!==value)el.style.setProperty('--lf-native-track-height',value)}
@@ -77,11 +94,14 @@ function measureTrack(){
 }
 function scheduleTrackLayout(){if(!layoutFrame)layoutFrame=requestAnimationFrame(measureTrack)}
 function refreshTrackLayout(){scheduleTrackLayout();if(layoutTimer!==null)clearTimeout(layoutTimer);layoutTimer=setTimeout(()=>{layoutTimer=null;scheduleTrackLayout()},360)}
+// Visual viewport bursts from WebKit should not restart the delayed layout pass.
+function visualTrackResize(){if(iosStandalone)scheduleTrackLayout();else refreshTrackLayout()}
+function iosViewportScroll(){if(isViewportEditor(document.activeElement))scheduleTrackLayout()}
 function observeTrackLayout(){layoutObserver?.disconnect();if(typeof ResizeObserver!=='undefined'){layoutObserver=new ResizeObserver(scheduleTrackLayout);for(const el of [document.querySelector('.mobile-topbar'),document.querySelector('[data-lionfit-dock="athlete"]'),trackViewport.value?.closest('.main-layout')])if(el)layoutObserver.observe(el)}refreshTrackLayout()}
-onMounted(()=>{window.addEventListener('resize',refreshTrackLayout);window.visualViewport?.addEventListener('resize',refreshTrackLayout);observeTrackLayout()})
-watch(trackViewport,()=>{dropEngine();if(trackViewport.value){if(trackMobile.value){window.scrollTo(0,0);const stage=trackViewport.value.closest<HTMLElement>('.main-layout');if(stage)stage.scrollTop=0}observeTrackLayout()}},{flush:'post'})
+onMounted(()=>{window.addEventListener('resize',refreshTrackLayout);window.visualViewport?.addEventListener('resize',visualTrackResize);if(iosStandalone){window.visualViewport?.addEventListener('scroll',iosViewportScroll,{passive:true});document.addEventListener('focusin',scheduleTrackLayout);document.addEventListener('focusout',scheduleTrackLayout)}observeTrackLayout()})
+watch(trackViewport,()=>{dropEngine();iosLastHeight=null;iosBaseline=0;iosWidth=0;if(trackViewport.value){if(trackMobile.value){window.scrollTo(0,0);const stage=trackViewport.value.closest<HTMLElement>('.main-layout');if(stage)stage.scrollTop=0}observeTrackLayout()}},{flush:'post'})
 watch(()=>props.screen,refreshTrackLayout,{flush:'post'})
-onUnmounted(()=>{media.removeEventListener('change',syncMobile);window.removeEventListener('resize',refreshTrackLayout);window.visualViewport?.removeEventListener('resize',refreshTrackLayout);layoutObserver?.disconnect();if(layoutFrame)cancelAnimationFrame(layoutFrame);if(layoutTimer!==null)clearTimeout(layoutTimer);dropEngine()})
+onUnmounted(()=>{media.removeEventListener('change',syncMobile);window.removeEventListener('resize',refreshTrackLayout);window.visualViewport?.removeEventListener('resize',visualTrackResize);if(iosStandalone){window.visualViewport?.removeEventListener('scroll',iosViewportScroll);document.removeEventListener('focusin',scheduleTrackLayout);document.removeEventListener('focusout',scheduleTrackLayout)}layoutObserver?.disconnect();if(layoutFrame)cancelAnimationFrame(layoutFrame);if(layoutTimer!==null)clearTimeout(layoutTimer);dropEngine()})
 function workspaceBack(){window.dispatchEvent(new Event('lionfit:ui-back'))}
 const programArchiveOpen=ref(route.query.view==='programmi')
 watch([()=>props.screen,()=>route.query.view],([screen,v])=>{if(screen==='archive')programArchiveOpen.value=v==='programmi'})
